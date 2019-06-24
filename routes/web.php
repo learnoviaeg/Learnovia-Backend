@@ -14,3 +14,5 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('exportroleswithper', 'SpatieController@Export_Role_with_Permission')->name('exportroleswithper');
