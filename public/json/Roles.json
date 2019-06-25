@@ -1,0 +1,19 @@
+[
+    
+    {
+        "roleName": "Student",
+        "permission": [
+            "Add Role With Permissions",
+            "Export Roles with Permissions",
+            "Import Roles with Permissions"
+        ]
+    },
+    {
+        "roleName": "teacher",
+        "permission": [
+            
+            "Export Roles with Permissions",
+            "Import Roles with Permissions"        
+        ]
+    }
+]

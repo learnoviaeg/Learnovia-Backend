@@ -16,13 +16,26 @@ class SpatieController extends Controller
         // create permissions
         
         //Permission::create(['name' => 'Add Permission To User']);
-        /*
-        Permission::create(['name' => 'Delete Role']);
-        Permission::create(['name' => 'Assign Role to User']);
-        Permission::create(['name' => 'Assign Permission To Role']);
-        Permission::create(['name' => 'Revoke Role from User']);
-        Permission::create(['name' => 'Revoke Permission from role']);
-        Permission::create(['name' => 'Add Bulk of Users']);*/
+        
+        // $permission1=Permission::findById(1);
+        // $permission2=Permission::findById(2);
+        // $permission3=Permission::findById(3);
+        // $permission4=Permission::findById(4);
+        // $permission5=Permission::findById(5);
+        // $permission6=Permission::findById(6);
+        // $permission7=Permission::findById(7);
+        // $permission8=Permission::findById(8);
+        // $permission9=Permission::findById(9);
+        // $permission10=Permission::findById(10);
+        // $permission11=Permission::findById(11);
+        // $permission12=Permission::findById(12);
+        // $permission13=Permission::findById(13);
+        // $permission14=Permission::findById(14);
+
+        // $role = Role::findById(1);
+        
+        // $role->syncPermissions([$permission1, $permission2,$permission3,$permission4,$permission5,$permission6,$permission7,$permission8,$permission9,$permission10,$permission11,$permission12,$permission13,$permission14]);
+       // Permission::create(['name' => 'Add Bulk of Users']);
        
 
         // create roles and assign created permissions
@@ -305,29 +318,47 @@ class SpatieController extends Controller
         }
 
         $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
-        file_put_contents(public_path('json\E.json'), stripslashes($newJsonString));
+        file_put_contents(public_path('json\Roles.json'), stripslashes($newJsonString));
 
-        return response()->download(public_path('json\E.json'));
+        return response()->download(public_path('json\Roles.json'));
     }
     
-    // public function Import_Role_with_Permission(Request $request)
-    // {
-    //     //dd(json_decode(file_get_contents($request->Imported_file)));
-    //     try{
-    //         $extension = $request->Imported_file->getClientOriginalExtension();
-    //         if($extension == 'json' || $extension == 'Json' || $extension == 'JSON'){
-    //             $content = json_decode(file_get_contents($request->Imported_file));
-    //               //  $data = json_decode($file, true);
-    //             return response()->json($content,200);
-                
-    //         }
-    //         return response()->json(['msg'=>'Invalid file type'],400);
+    public function Import_Role_with_Permission(Request $request)
+    {
+        //dd(json_decode(file_get_contents($request->Imported_file)));
+        try{
+            $extension = $request->Imported_file->getClientOriginalExtension();
+            if($extension == 'json' || $extension == 'Json' || $extension == 'JSON'){
+                $content = json_decode(file_get_contents($request->Imported_file));
+                  //  $data = json_decode($file, true);
+                foreach($content as $con){
+                    $role = Role::where('name',$con->roleName)->count();
+                    if($role != 0){
+                        return response()->json(['msg'=>'Role '.$con->roleName.' duplicated'],400);
+                    }
+                    foreach($con->permission as $pere)
+                    {
+                        $per = Permission::where('name',$pere)->count();
+                        if($per == 0){
+                            return response()->json(['msg'=>'Permission '.$pere.' is not exist'],400);
+                        }
+                    }
+                }
 
-    //     }catch (Exception $ex){
-    //         return response()->json(['msg'=>'Please Try again'],400);
-    //     }    
+                foreach($content as $con){
+                    $role= Role::create(['name' => $con->roleName]);
+                    
+                    $role->syncPermissions($con->permission);
+                }
+                return response()->json(['msg'=>'added succes'],200);
+            }
+            return response()->json(['msg'=>'Invalid file type'],400);
+
+        }catch (Exception $ex){
+            return response()->json(['msg'=>'Please Try again'],400);
+        }    
     
-    // } 
+    } 
 
     
 

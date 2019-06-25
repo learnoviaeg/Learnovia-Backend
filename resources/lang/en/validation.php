@@ -146,7 +146,10 @@ return [
     */
 
     'attributes' => [
-        'userid'=>'user'
+        'userid'=>'user',
+        'permissionid' =>'permission',
+        'roleid'=>'role'
+        
     ],
 
 ];
