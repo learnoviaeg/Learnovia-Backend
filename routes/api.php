@@ -27,4 +27,15 @@ Route::group([
     });
 });
 
+
+Route::post('create' , 'CourseController@store');
+Route::get('courses' , 'CourseController@index');
+Route::get('course/{id}' , 'CourseController@show');
+Route::put('course/update/{id}' , 'CourseController@update');
+Route::delete('course/delete/{id}' , 'CourseController@destroy');
+
+
+Route::post('import', 'ExcelController@import')->name('import');
+// Route::get('export', 'ExcelController@export')->name('export');
+
 ?>
