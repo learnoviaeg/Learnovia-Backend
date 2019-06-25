@@ -12,7 +12,8 @@ class SpatieController extends Controller
 {
     public function index()
     {
-        
+       // Permission::create(['name' => 'Show RealPassword']);
+
         // create permissions
         /*
         Permission::create(['name' => 'Add Role']);

@@ -1,8 +1,8 @@
 [
   {
     "id": 1,
-    "name": "Rotha",
-    "email": "rotha@gmail.com",
+    "name": "Rota",
+    "email": "rtha@gmail.com",
     "password":"12340",
     "email_verified_at": null,
     "created_at": "2019-06-23 07:11:08",
@@ -10,8 +10,8 @@
   },
   {
     "id": 2,
-    "name": "hudhud",
-    "email": "hudhud@gmail.com",
+    "name": "hudud",
+    "email": "hdhud@gmail.com",
     "password":"12340",
     "email_verified_at": null,
     "created_at": "2019-06-23 08:24:03",
@@ -19,8 +19,8 @@
   },
   {
     "id": 3,
-    "name": "salwa",
-    "email": "salwa@gmail.com",
+    "name": "slwa",
+    "email": "slwa@gmail.com",
     "password":"12340",
 
     "email_verified_at": null,

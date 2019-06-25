@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-
+//Route::Post('InsertBulkofUsers','UserController@insert_users');
 Route::group([
     'prefix' => 'auth'
 ], function () {
@@ -22,7 +22,8 @@ Route::group([
         Route::post('revokepermissionfromrole', 'SpatieController@Revoke_Permission_from_Role')->name('revokepermissionfromrole')->middleware('permission:Revoke Permission from role');
         Route::get('listrandp', 'SpatieController@List_Roles_Permissions')->name('listpermissionandrole')->middleware('permission:List Permissions and Roles');
         Route::Post('InsertBulkofUsers','UserController@insert_users')->name('AddBulkofUsers')->middleware('permission:Add Bulk of Users');;
-       
+        Route::Post('Show RealPassword','UserController@showRealPass')->name('Show RealPassword')->middleware('permission:Show RealPassword');;
+        Route::Post('getAllUser','UserController@getAllUser')->name('get all users');
         
     });
 });
