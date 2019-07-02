@@ -16,9 +16,9 @@ class CreateAcademicYearTypesTable extends Migration
         Schema::create('academic_year_types', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('academic_year_id');
-            $table->foreign('academic_year_id')->references('id')->on('academic_years')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('academic_year_id')->references('id')->on('academic_years')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('academic_type_id');
-            $table->foreign('academic_type_id')->references('id')->on('academic_types')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('academic_type_id')->references('id')->on('academic_types')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

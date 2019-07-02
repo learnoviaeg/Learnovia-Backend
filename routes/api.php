@@ -1,7 +1,15 @@
 <?php
 
 use Illuminate\Http\Request;
-
+Route::post ('delete','AC_year_type@deleteType');
+Route::post ('Add','AC_year_type@Add_type_to_Year');
+Route::get ('YWT','AC_year_type@List_Years_with_types');
+Route::post ('update','AC_year_type@updateType');
+Route::post ('assign','AC_year_type@Assign_to_anther_year');
+Route::post('AddSegment',"segment_class_Controller@Add_Segment_with_class");
+Route::post('deleteSegment',"segment_class_Controller@deleteSegment");
+Route::post('AssignSegment',"segment_class_Controller@Assign_to_anther_Class");
+Route::get('listClasses',"segment_class_Controller@List_Classes_with_all_segment");
 Route::group([
     'prefix' => 'auth'
 ], function () {
