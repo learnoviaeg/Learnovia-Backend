@@ -12,7 +12,7 @@ class SpatieController extends Controller
 {
     public function index()
     {
-        
+
         // create permissions
         /*
         Permission::create(['name' => 'Add Role']);
