@@ -27,4 +27,26 @@ Route::group([
     });
 });
 
+                 // Academic Year //
+Route::post('/createyear', 'AcademicYearController@store');
+Route::get('/yearshowall', 'AcademicYearController@index');
+Route::get('/yearshow/{id}', 'AcademicYearController@show');
+Route::put('/year/update/{id}', 'AcademicYearController@update');
+Route::delete('/yeardelete/{id}', 'AcademicYearController@destroy');
+
+                 // Academic Type //
+Route::post('/createyeartype', 'AcademicTypeController@store');
+Route::get('/yearstypehowall', 'AcademicTypeController@index');
+Route::get('/yeartypeshow/{id}', 'AcademicTypeController@show');
+Route::put('/yeartype/update/{id}', 'AcademicTypeController@update');
+Route::delete('/yeartypedelete/{id}', 'AcademicTypeController@destroy');
+
+                 // Class //
+Route::post('/createclass', 'ClassController@AddClassWithYear');
+Route::get('/showallclasses', 'ClassController@index');
+Route::get('/classshow/{id}', 'ClassController@show');
+Route::put('/class/update/{id}', 'ClassController@update');
+Route::delete('/classdelete/{id}', 'ClassController@destroy');
+
+
 ?>
