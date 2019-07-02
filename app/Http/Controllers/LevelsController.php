@@ -10,7 +10,6 @@ class LevelsController extends Controller
 {
     public function AddLevelWithYear(Request $request)
     {
-        dd(Level::GetAllLevelsInYear($request->year));
         if(Level::Validate($request->all()) == true){
             $level = Level::create([
                 'name'=> $request->name,
