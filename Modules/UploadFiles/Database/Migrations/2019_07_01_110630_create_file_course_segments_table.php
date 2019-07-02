@@ -16,10 +16,10 @@ class CreateFileCourseSegmentsTable extends Migration
         Schema::create('file_course_segments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('course_segment_id');
-            $table->foreign('course_segment_id')->references('id')->on('course_segments')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('course_segment_id')->references('id')->on('course_segments')->onDelete('cascade')->onUpdate('cascade');
 
             $table->unsignedBigInteger('file_id');
-            $table->foreign('file_id')->references('id')->on('files')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

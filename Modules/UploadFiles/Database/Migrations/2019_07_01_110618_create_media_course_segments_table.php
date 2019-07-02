@@ -16,10 +16,10 @@ class CreateMediaCourseSegmentsTable extends Migration
         Schema::create('media_course_segments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('course_segment_id');
-            $table->foreign('course_segment_id')->references('id')->on('course_segments')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('course_segment_id')->references('id')->on('course_segments')->onDelete('cascade')->onUpdate('cascade');
 
             $table->unsignedBigInteger('media_id');
-            $table->foreign('media_id')->references('id')->on('media')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('media_id')->references('id')->on('media')->onDelete('cascade')->onUpdate('cascade');
 
             $table->timestamps();
         });

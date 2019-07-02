@@ -19,6 +19,9 @@ class CreateFilesTable extends Migration
             $table->text('description');
             $table->string('size');
             $table->string('type');
+            $table->boolean('visibility')->default(1);
+            $table->date('from');
+            $table->date('to');
 
             $table->timestamps();
         });
