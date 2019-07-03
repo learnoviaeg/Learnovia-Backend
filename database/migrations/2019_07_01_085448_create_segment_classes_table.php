@@ -16,9 +16,9 @@ class CreateSegmentClassesTable extends Migration
         Schema::create('segment_classes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('segment_id');
-            $table->foreign('segment_id')->references('id')->on('segments')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('segment_id')->references('id')->on('segments')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('class_level_id');
-            $table->foreign('class_level_id')->references('id')->on('class_levels')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('class_level_id')->references('id')->on('class_levels')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

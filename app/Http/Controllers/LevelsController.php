@@ -6,44 +6,49 @@ use App\YearLevel;
 use Illuminate\Http\Request;
 
 use App\Level;
+
 class LevelsController extends Controller
 {
     public function AddLevelWithYear(Request $request)
     {
-        dd(Level::GetAllLevelsInYear($request->year));
-        if(Level::Validate($request->all()) == true){
-            $level = Level::create([
-                'name'=> $request->name,
-            ]);
-            YearLevel::create([
-                'academic_year_type_id' => $request->year,
-                'level_id' => $level->id
-            ]);
-            return 'Level Created in Year ' . $request->year;
-        }
-        return Level::Validate($request->all());
+        $request->validate([
+            'name' => 'required',
+            'year' => 'required|exists:academic_year_types,id'
+        ]);
+
+        $level = Level::create([
+            'name' => $request->name,
+        ]);
+        YearLevel::create([
+            'academic_year_type_id' => $request->year,
+            'level_id' => $level->id
+        ]);
+        return HelperController::api_response_format(201, $level, 'Level Created Successfully');
     }
 
-    public function Delete(Request $request){
-        $assign = YearLevel::whereLevel_id($request->level)->get();
-        if($assign){
-            foreach ($assign as $tmp){
-                $tmp->delete();
-            }
-        }
+    public function Delete(Request $request)
+    {
+        $request->validate([
+            'level' => 'required|exists:levels,id',
+        ]);
+
         $level = Level::find($request->level);
-        if($level)
+        if ($level)
             $level->delete();
-        return response()->json(['msg' => 'Level Deleted Successfully'],200);
-
+        return HelperController::api_response_format(203, $level, 'Level Deleted Successfully');
     }
 
 
-    public function UpdateLevel(Request $request){
+    public function UpdateLevel(Request $request)
+    {
 
     }
 
-    public function GetAllLevelsInYear(Request $request){
-        return response()->json(['body'=> Level::whereIn('id' , Level::GetAllLevelsInYear($request->year))->get() ],200);
+    public function GetAllLevelsInYear(Request $request)
+    {
+        $request->validate([
+            'year' => 'required|exists:academic_year_types,id'
+        ]);
+        return HelperController::api_response_format(200, Level::whereIn('id', Level::GetAllLevelsInYear($request->year))->get());
     }
 }
