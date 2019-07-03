@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 Route::post ('delete','AC_year_type@deleteType');
+
+Route::post ('insert_users','UserController@insert_users');
 Route::post ('Add','AC_year_type@Add_type_to_Year');
 Route::get ('YWT','AC_year_type@List_Years_with_types');
 Route::post ('update','AC_year_type@updateType');
@@ -10,6 +12,20 @@ Route::post('AddSegment',"segment_class_Controller@Add_Segment_with_class");
 Route::post('deleteSegment',"segment_class_Controller@deleteSegment");
 Route::post('AssignSegment',"segment_class_Controller@Assign_to_anther_Class");
 Route::get('listClasses',"segment_class_Controller@List_Classes_with_all_segment");
+#########################Message##################################
+Route::post('Send_message_of_users',"MessageController@Send_message_of_all_user");
+Route::post('deleteMessage',"MessageController@deleteMessage");
+Route::get('List_All_Message',"MessageController@List_All_Message");
+Route::get('SeenMessage',"MessageController@SeenMessage");
+#########################Contacts##################################
+Route::post('addContact',"ContactController@addContact");
+Route::get('ViewMyContact',"ContactController@ViewMyContact");
+#########################Message_Role##################################
+Route::post('add_send_Permission_for_role',"RolePermissionController@add_send_Permission_for_role");
+
+
+
+
 Route::group([
     'prefix' => 'auth'
 ], function () {
