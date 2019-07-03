@@ -25,7 +25,8 @@ class MediaController extends Controller
         try{
             $validater=Validator::make($request->all(),[
                 'description' => 'required|string|min:1',
-                'Imported_file' => 'required|file|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
+                'Imported_file' => 'required|array',
+                'Imported_file.*' => 'required|file|distinct|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
                 'course_segment_id'=>'required|integer|exists:course_segments,id',
                 'from' => 'required|date',
                 'to' => 'required|date|after:from',
@@ -36,34 +37,37 @@ class MediaController extends Controller
                 return response()->json($errors,400);
             }
 
-            $extension = $request->Imported_file->getClientOriginalExtension();
+            foreach ($request->Imported_file as $singlefile) {
+                $extension = $singlefile->getClientOriginalExtension();
 
-            $fileName = $request->Imported_file->getClientOriginalName();
-            $size = $request->Imported_file->getSize();
-            $description = $request->description;
+                $fileName = $singlefile->getClientOriginalName();
+                $size = $singlefile->getSize();
+                $description = $request->description;
 
-            $file = new media;
-            $file->type = $extension;
-            $file->name = $fileName;
-            $file->description = $description;
-            $file->size = $size;
-            $file->from = $request->from;
-            $file->to = $request->to;
-            $check = $file->save();
-            if($check){
+                $file = new media;
+                $file->type = $extension;
+                $file->name = $fileName;
+                $file->description = $description;
+                $file->size = $size;
+                $file->from = $request->from;
+                $file->to = $request->to;
+                $check = $file->save();
+                if($check){
 
-                $filesegment = new MediaCourseSegment;
-                $filesegment->course_segment_id = $request->course_segment_id;
-                $filesegment->media_id = $file->id;
-                $filesegment->save();
+                    $filesegment = new MediaCourseSegment;
+                    $filesegment->course_segment_id = $request->course_segment_id;
+                    $filesegment->media_id = $file->id;
+                    $filesegment->save();
 
 
-                Storage::disk('public')->putFileAs(
-                    'media/'.$file->id,
-                    $request->Imported_file,
-                    $request->Imported_file->getClientOriginalName()
-                );
+                    Storage::disk('public')->putFileAs(
+                        'media/'.$file->id,
+                        $singlefile,
+                        $singlefile->getClientOriginalName()
+                    );
+                }
             }
+
             return response()->json(['msg'=>'Upload Successfully'],200);
         }catch (Exception $ex){
             return response()->json(['msg'=>'Please Try again'],400);
