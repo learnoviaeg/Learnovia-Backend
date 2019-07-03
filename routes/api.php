@@ -3,7 +3,8 @@
 use App\User;
 
 Route::get('install', function () {
-    if(file_exists('config.json')){
+    $user = User::whereEmail('admin@learnovia.com')->first();
+    if($user){
         return "This Site is Installed befpre go and ask admin";
     }else{
         \Spatie\Permission\Models\Permission::create(['name' => 'Add Role']);
@@ -63,10 +64,6 @@ Route::get('install', function () {
         ]);
         $user->save();
         $user->assignRole($super);
-        $my_file = 'config.json';
-        $handle = fopen($my_file, 'w') or die('Cannot open file:  '.$my_file); //implicitly creates file
-        $data = ['installed' => 'true'];
-        fwrite($handle, json_encode($data));
         return "System Installed Your User is $user->email and Password is LeaRnovia_H_M_A";
     }
 
