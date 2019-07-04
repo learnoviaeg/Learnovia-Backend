@@ -26,5 +26,15 @@ Route::group([
         
     });
 });
+                  //Notification Api`s
+Route::get('notify', 'NotificationController@notify');
+Route::get('getall', 'NotificationController@getallnotifications');
+Route::get('unread', 'NotificationController@unreadnotifications');
+Route::get('read', 'NotificationController@markasread');
+
+
+
+
+
 
 ?>
