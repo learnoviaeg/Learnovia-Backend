@@ -95,10 +95,19 @@ Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
+    //if you want to delete an Academic year type please,write deletetype in yours
     Route::post('delete', 'AC_year_type@deleteType')->name('deletetype')->middleware('permission:Delete type');
+
+    //if you want to add an Academic year type to year please,write addtype in yours
     Route::post('add', 'AC_year_type@Add_type_to_Year')->name('addtype')->middleware('permission:Add Type');
+
+    //if you want to get all Academic year with all types please,write getyearswithtype in yours
     Route::get('get', 'AC_year_type@List_Years_with_types')->name('getyearswithtype')->middleware('permission:Get all Types');
+
+    //if you want to update type please,write updatetype in yours
     Route::post('update', 'AC_year_type@updateType')->name('updatetype')->middleware('permission:Update Type');
+
+    //if you want to assign type to another year please,write assigntype in yours
     Route::post('assign', 'AC_year_type@Assign_to_anther_year')->name('assigntype')->middleware('permission:Assign Type');
 });
 
@@ -117,9 +126,16 @@ Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
+    //if you want to add segment to class please,write addsegment in yours
     Route::post('add', "segment_class_Controller@Add_Segment_with_class")->name('addsegment')->middleware('permission:Add Segment');
+
+    //if you want to delete segment please,write deletesegment in yours
     Route::post('delete', "segment_class_Controller@deleteSegment")->name('deletesegment')->middleware('permission:Delete Segment');
+
+    //if you want to assign segment to another class please,write assignsegment in yours
     Route::post('assign', "segment_class_Controller@Assign_to_anther_Class")->name('assignsegment')->middleware('permission:Assign Segment');
+
+    //if you want to get classes with all segments please,write getclasses in yours
     Route::get('get', "segment_class_Controller@List_Classes_with_all_segment")->name('getclasses')->middleware('permission:Get All Segments');
 });
 
