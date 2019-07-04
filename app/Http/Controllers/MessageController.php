@@ -12,7 +12,17 @@ use Illuminate\Support\Facades\Storage;
 
 class MessageController extends Controller
 {
-        /* please before  excute this fun  run  php artisan Storage:link */
+    /**
+     * => Function send_message_of_all_user sends message for all ids which get from request
+     * @param: => from request
+     *         - text of message
+     *         - file and it's optional
+     *         - id/s of users as an array
+     *         - about what this mssage
+     *         - from who for now \\next will be with session
+     * @return: => Successfully Sent Message! if will success
+     */
+     // please before  excute this fun  run  php artisan Storage:link
     public function Send_message_of_all_user(Request $req)
     {
         //$session_id = session()->getId() /* unComment please when you use session*/
@@ -50,6 +60,12 @@ class MessageController extends Controller
         ], 201);
     }
 
+    /**
+     * // delete message
+     * @param Request $req => id of message that you want to delete
+     * @return deleted if message was deleted
+     */
+
     public function deleteMessage(Request $req)
     {
         $valid = Validator::make($req->all(), [
@@ -67,16 +83,26 @@ class MessageController extends Controller
                 'deleted' => true
             ));
             $message->save();
-            return $this->List_All_Message();
+            return response()->json([
+                'message' => 'message was deleted'
+            ], 201);
         }
     }
 
+    /**
+     * Function list all messages take no parameter
+     * @return all messages
+     */
     public function List_All_Message()
     {
         $Message = Messageresource::collection(Message::get());
         return ($Message);
     }
 
+    /**
+     * @param Request $req --> id for message that you want see it.
+     * @return message was seen
+     */
     public function SeenMessage(Request $req)
     {
         $valid = Validator::make($req->all(), [
@@ -94,7 +120,9 @@ class MessageController extends Controller
                 'seen' => true
             ));
             $message->save();
-            return $this->List_All_Message();
+            return response()->json([
+                'message' => 'message was seen'
+            ], 201);
         }
     }
 

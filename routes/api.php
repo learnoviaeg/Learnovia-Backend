@@ -13,12 +13,22 @@ Route::post('deleteSegment',"segment_class_Controller@deleteSegment");
 Route::post('AssignSegment',"segment_class_Controller@Assign_to_anther_Class");
 Route::get('listClasses',"segment_class_Controller@List_Classes_with_all_segment");
 #########################Message##################################
+//if you want to send message please,write Send_message_of_users in yours
 Route::post('Send_message_of_users',"MessageController@Send_message_of_all_user");
+
+//if you want to delete message please,write deletemessage in yours
 Route::post('deleteMessage',"MessageController@deleteMessage");
+
+//if you want to all messages please,write List_All_Message in yours
 Route::get('List_All_Message',"MessageController@List_All_Message");
-Route::get('SeenMessage',"MessageController@SeenMessage");
+
+//if you want to see messages please,write SeenMessage in yours
+Route::get('SeeMessage',"MessageController@SeenMessage");
 #########################Contacts##################################
+//if you want to add friend in you contacts please,write addContact in yours
 Route::post('addContact',"ContactController@addContact");
+
+//if you want to see contatcs in you contacts please,write ViewMyContact in yours
 Route::get('ViewMyContact',"ContactController@ViewMyContact");
 #########################Message_Role##################################
 Route::post('add_send_Permission_for_role',"RolePermissionController@add_send_Permission_for_role");

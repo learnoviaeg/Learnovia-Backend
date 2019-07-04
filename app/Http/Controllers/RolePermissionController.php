@@ -8,6 +8,13 @@ use Validator;
 
 class RolePermissionController extends Controller
 {
+    /**
+     * @Description: add Roles to send Message Permission
+     *@param: Request  to access From_Role and To_Role
+     *@return : if succss -> return MSG -> 'Message Role insertion sucess'
+     *          IF NOT ->   return MSG -> 'Message Role insertion Fail'
+     *
+     */
     public function add_send_Permission_for_role(Request $req)
     {
 
@@ -26,7 +33,7 @@ class RolePermissionController extends Controller
                 return response()->json(['msg' => 'Message Role insertion sucess'], 200);
             }
 
-        return response()->json(['msg' => 'MessageRole insertion Fail'], 404);
+        return response()->json(['msg' => 'Message Role insertion Fail'], 404);
 
     }
 }

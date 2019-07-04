@@ -9,11 +9,20 @@ use App\Http\Resources\Contactresource;
 
 
 class ContactController extends Controller
+
 {
+    /**
+     *
+     * @Description : add Contact
+     * @param : Request to Access his id ("Person_id") and ("Friend_id")
+     * @return : if addition succeeded ->  return MSG : 'Contact insertion sucess'
+     *           if not -> return MSG: 'Contact insertion Fail'
+     *
+    ``
+     */
     public function addContact(Request $req)
     {
         /*$session_id = session()->getId()*//*when you used session please   uncomment this Line*/
-
         $valid = Validator::make($req->all(), [
             'Friend_id' => 'required | exists:users,id',
             'Person_id' => 'exists:users,id' ///*when you used session please  comment this Line
@@ -37,6 +46,12 @@ class ContactController extends Controller
 
     }
 
+    /*
+     * @Description: Get All MY Friends
+     * @param: no take parameter
+     * @return: List of my friends
+     *
+     * */
     public function ViewMyContact(Request $req)
     {
         /*$session_id = session()->getId()*//*when you used session please   uncomment this Line*/
