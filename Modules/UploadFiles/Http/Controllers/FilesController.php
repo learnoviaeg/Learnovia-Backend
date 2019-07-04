@@ -19,9 +19,15 @@ class FilesController extends Controller
 {
 
     /**
-     * Store a newly created resource in storage.
+     * Store a array of files to specific course segment.
      * @param Request $request
-     * @return Response
+     * Following sending in the request
+     * @param description of the file
+     * @param Imported_file of the array of files
+     * @param course_segment_id id of the course segment
+     * @param from as the start date of showing this file.
+     * @param to as the end date of showing this file
+     * @return Response as success Message
      */
     public function store(Request $request)
     {
@@ -78,9 +84,11 @@ class FilesController extends Controller
     }
 
     /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Response
+     * Get All files and Media assigned to specific course segment.
+     * @param Request $request
+     * Following sending in the request
+     * @param course_segment_id id of the course segment
+     * @return Response as all files and media that are avaliable and between the from and to date
      */
     public function show(Request $request)
     {
@@ -161,6 +169,17 @@ class FilesController extends Controller
         ],200);
     }
 
+    /**
+     * Update data of specific file
+     * @param Request $request
+     * Following sending in the request
+     * @param fileID ID of the file that wanted to update
+     * @param description of the file
+     * @param Imported_file (optional) to change the file itself
+     * @param from as the start date of showing this file.
+     * @param to as the end date of showing this file
+     * @return Response as success Message
+     */
     public function update(Request $request)
     {
         try{
@@ -217,6 +236,13 @@ class FilesController extends Controller
         }
     }
 
+    /**
+     * Delete Specifc File
+     * @param Request $request
+     * Following sending in the request
+     * @param fileID ID of the file that wanted to update
+     * @return Response as success Message
+     */
     public function destroy(Request $request)
     {
         try{
@@ -246,6 +272,13 @@ class FilesController extends Controller
         }
     }
 
+    /**
+     * Toggle Visibility of specific File
+     * @param Request $request
+     * Following sending in the request
+     * @param fileID ID of the file that wanted to toggle its visibility
+     * @return Response as success Message
+     */
     public function toggleVisibility(Request $request)
     {
         try{

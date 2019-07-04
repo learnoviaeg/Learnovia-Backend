@@ -16,9 +16,15 @@ class MediaController extends Controller
 {
 
     /**
-     * Store a newly created resource in storage.
+     * Store a array of Media to specific course segment.
      * @param Request $request
-     * @return Response
+     * Following sending in the request
+     * @param description of the Media
+     * @param Imported_file of the array of Media
+     * @param course_segment_id id of the course segment
+     * @param from as the start date of showing this Media.
+     * @param to as the end date of showing this Media
+     * @return Response as success Message
      */
     public function store(Request $request)
     {
@@ -74,6 +80,17 @@ class MediaController extends Controller
         }
     }
 
+    /**
+     * Update data of specific Media
+     * @param Request $request
+     * Following sending in the request
+     * @param mediaId ID of the file that wanted to update
+     * @param description of the Media
+     * @param Imported_file (optional) to change the Media itself
+     * @param from as the start date of showing this Media.
+     * @param to as the end date of showing this Media
+     * @return Response as success Message
+     */
     public function update(Request $request)
     {
         try{
@@ -130,6 +147,13 @@ class MediaController extends Controller
         }
     }
 
+    /**
+     * Delete Specifc Media
+     * @param Request $request
+     * Following sending in the request
+     * @param mediaId ID of the media that wanted to update
+     * @return Response as success Message
+     */
     public function destroy(Request $request)
     {
         try{
@@ -159,6 +183,13 @@ class MediaController extends Controller
         }
     }
 
+    /**
+     * Toggle Visibility of specific Media
+     * @param Request $request
+     * Following sending in the request
+     * @param mediaId ID of the media that wanted to toggle its visibility
+     * @return Response as success Message
+     */
     public function toggleVisibility(Request $request)
     {
         try{
