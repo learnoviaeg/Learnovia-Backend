@@ -36,9 +36,19 @@ class PageController extends Controller
       
     }
 
+    /*
+      This function is to Add a new Page
+      @param: name[requierd],page_content[optional],attached_file[optional][can be multiple],
+      visability[true,false || 1,0],class_id[can be multiple][class should be exist],segment_id[requierd][should be exist],start_date[requierd],
+      due_date[requierd].
+      @output: 'all conditions pass' -> page added successfully
+               'else' -> Error
+    */
+
 
     public function Page(Request $request )
     {
+        //Validation
         $time=Carbon::now();
         $validater=Validator::make($request->all(),[
             'name'=>'required',
@@ -55,6 +65,7 @@ class PageController extends Controller
                 return response()->json($errors,400);
             }
 
+         //To upload a file or files   
         if (Input::hasFile('attached_file'))
         {
 
@@ -86,9 +97,10 @@ class PageController extends Controller
             }
 
         }
-
+        //concatenate classes assigned
         $classlist=Implode(',',$request->class_id);
 
+        //create the page
         Page::create([
             'name'=> $request->name,
             'page_content'=> $request->page_content,
@@ -102,7 +114,13 @@ class PageController extends Controller
 
   
  } 
-
+ 
+    /*
+      This function is to get every page with the classes assigned 
+      @param: pageid
+      @output: 'if page exist' -> Page with classes assigned,
+               'else' -> Page not found
+    */
     public function Pages_with_classes(Request $request)
     {
 
@@ -124,11 +142,21 @@ class PageController extends Controller
      
     }
 
+    /*
+      This function is to get all classes
+      @output: all classes registerd in system.
+    */
+
     public function get_classes()
     {
         $class=Classes::get();
          return($class);
     }
+
+    /*
+      This function is to get all segments
+      @output: all segments registerd in system.
+    */
 
     public function get_segments()
     {
@@ -147,11 +175,11 @@ class PageController extends Controller
         //
     }
 
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Response
-     */
+  /*
+      This function is to show all pages
+      @output: get all pages in system.
+    */
+
     public function show_Page()
     {
          $page=Page::get();
