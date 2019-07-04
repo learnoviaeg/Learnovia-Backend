@@ -11,12 +11,25 @@ use Validator;
 
 class AC_year_type extends Controller
 {
+    /**
+    * @Description: Get all Years with its types
+    *@param: no take parameters
+    *@return : response of all Years with its Typs
+    *
+    */
     public function List_Years_with_types()
     {
         $cat = Year_type_resource::collection(AcademicYear::with("AC_type")->get());
         return HelperController::api_response_format(200, $cat);
     }
 
+    /**
+     *@Description:Remove type
+     *@param: request to access id of the type
+     *@return : MSG 'Type Deleted Successfully' if deleted
+     *          if not : return 'Type Deleted Fail'
+     *
+     **/
     public function deleteType(Request $req)
     {
         $req->validate([
@@ -30,6 +43,15 @@ class AC_year_type extends Controller
         return HelperController::api_response_format(400, [], 'Type Deleted Fail');
     }
 
+        /**
+         *
+         @Description : add type "Like National and its NUM of terms " to specific year
+         * @param : Request to Access id of Year , name of Type and its segment no
+         * @return : if addition succeeded ->  return all Years with its Type
+         *           if not -> return MSG: 'Type insertion Fail'
+         *
+``
+         */
     public function Add_type_to_Year(Request $req)
     {
         $valid = Validator::make($req->all(), [
@@ -51,13 +73,20 @@ class AC_year_type extends Controller
         }
         return HelperController::api_response_format(404, [], 'Type insertion Fail');
     }
-
+    /**
+     *
+     * @Description : update specific Type
+     * @param : Request to access  id ,  new name or new segment_no of this Type
+     * @return :  if modify succeeded ->  return all Years with its Type
+     *            if not -> return MSG: 'Something went worng'
+     *
+     */
     public function updateType(Request $req)
     {
         $valid = Validator::make($req->all(), [
             'name' => 'required',
             'segment_no' => 'required'
-            , 'id' => 'required'
+            , 'id' => 'required||exists:academic_types,id'
         ]);
 
         if ($valid->fails()) {
@@ -70,11 +99,18 @@ class AC_year_type extends Controller
 
         $AC->update($req->all());
         if ($AC) {
-            return HelperController::api_response_format(404, $this->List_Years_with_types());
+            return HelperController::api_response_format(200, $this->List_Years_with_types());
         }
         return HelperController::api_response_format(400, [], 'Something went worng');
     }
 
+    /**
+     *@Description :assign specific Type to specific Year
+     * @param : request to access id_type of Type and id_year of year
+     * @return : if Assignment succeeded ->  return all Years with its Type
+     *           if not -> return MSG 'Assignment Fail'
+     *
+     */
     public function Assign_to_anther_year(Request $req)
     {
         $valid = Validator::make($req->all(), [
@@ -91,7 +127,7 @@ class AC_year_type extends Controller
                 'academic_type_id' => $req->id_type
 
             ]);
-            return HelperController::api_response_format(400, $this->List_Years_with_types());
+            return HelperController::api_response_format(200, $this->List_Years_with_types());
         }
         return HelperController::api_response_format(400, [], 'Assignment Fail');
     }

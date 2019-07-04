@@ -10,13 +10,29 @@ use App\Segment;
 use App\Http\Resources\Segment_class_resource;
 
 class segment_class_Controller extends Controller
+
 {
+
+    /**
+     * @Description: Get all Classes with its Segments
+     *@param: no take parameters
+     *@return : response of all Classes with its Segments
+     *
+     */
     public function List_Classes_with_all_segment()
     {
         $cat = Segment_class_resource::collection(ClassLevel::with("Segment_class")->get());
         return HelperController::api_response_format(200, $cat);
     }
-
+    /**
+     *
+    @Description : add segment to specific Class
+     * @param : Request to Access name of Segment  and class_level_id of class
+     * @return : if addition succeeded ->  return MSG : 'Type insertion sucess'
+     *           if not -> return MSG: 'NOTFOUND Error '
+     *
+    ``
+     */
     public function Add_Segment_with_class(Request $req)
     {
         $valid = Validator::make($req->all(), [
@@ -27,7 +43,6 @@ class segment_class_Controller extends Controller
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors());
         }
-        //check here
 
         $segment = Segment::create([
             'name' => $req->name
@@ -43,6 +58,13 @@ class segment_class_Controller extends Controller
         return HelperController::NOTFOUND();
 
     }
+    /**
+     *@Description:Remove Segment
+     *@param: request to access id of the Segment
+     *@return : MSG 'Segment Deleted Successfully' if deleted
+     *          if not : return 'NotFound Error'
+     *
+     **/
 
     public function deleteSegment(Request $req)
     {
@@ -57,6 +79,13 @@ class segment_class_Controller extends Controller
         return HelperController::NOTFOUND();
     }
 
+    /**
+     *@Description :assign specific Segment to specific Class
+     * @param : request to access id_segment of Segment and class_level_id
+     * @return : if Assignment succeeded ->  return MSG -> 'Assignment sucess'
+     *           if not -> return "NOTFOUND Error"
+     *
+     */
     public function Assign_to_anther_Class(Request $req)
     {
 
@@ -65,7 +94,7 @@ class segment_class_Controller extends Controller
             'class_level_id' => 'required|exists:class_levels,id'
         ]);
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Segment Deleted Successfully');
+            return HelperController::api_response_format(400, $valid->errors());
         }
         $ac = Segment::Find($req->id_segment);
         if ($ac) {
