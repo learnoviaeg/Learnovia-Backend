@@ -56,6 +56,11 @@ class SpatieController extends Controller
        // return User::role('Admin')->get();
     }
     
+    /*
+      This function is to add new Role
+      @param: name
+      @output: Role Added! 
+    */
     
     public function Add_Role(Request $request)
     {
@@ -63,6 +68,13 @@ class SpatieController extends Controller
         
         return response()->json(['msg'=>'Role Added!'],200);
     }
+    
+     /*
+      This function is to delete Role
+      @param: id
+      @output: 'if role exist' -> Role Deleted!
+               'else' -> Error
+    */
     
      public function Delete_Role(Request $request)
     {
@@ -77,6 +89,13 @@ class SpatieController extends Controller
         
         
     }
+    
+     /*
+      This function is to assign role to specific user
+      @param: userid,roleid
+      @output: 'if role assigned' -> Role Assigned Successfully,
+               'else' -> 'please try again,
+    */
     
      public function Assign_Role_to_user(Request $request)
     {
@@ -103,6 +122,13 @@ class SpatieController extends Controller
             return response()->json(['msg'=>'Please Try again'],400);
         }
     }
+    
+     /*
+      This function is to Assign Permission to role
+      @param: permissionid,roleid
+      @output: 'if permission assigned' -> Permission Assigned Successfully,
+               'else' -> Please Try again
+    */
     
      public function Assign_Permission_Role(Request $request)
     {
@@ -133,6 +159,13 @@ class SpatieController extends Controller
        
         
     }
+    
+    /*
+      This function is to Revoke Role from user
+      @param: userif,roleid
+      @output: 'if role revoked' -> Role Revoked Successfully,
+               'else' -> Please Try again
+    */
 
      public function Revoke_Role_from_user(Request $request)
     {
@@ -160,6 +193,13 @@ class SpatieController extends Controller
         }  
     }
     
+    /*
+      This function is to Revoke Permission from role
+      @param: permissionid,roleid
+      @output: 'if permission assigned' -> Permission Revoked Successfully,
+               'else' -> Please Try again
+    */
+    
      public function Revoke_Permission_from_Role(Request $request)
     {
           try{
@@ -186,6 +226,11 @@ class SpatieController extends Controller
         }
     }
     
+    /*
+      This function is to List All Roles and Permissions
+      @output: List of all Roles and permissions
+    */
+    
     public function List_Roles_Permissions ()
     {
         $roles=Role::all();
@@ -196,6 +241,14 @@ class SpatieController extends Controller
            'permissions'=> $permissions]
            ,200);
     }
+    
+    /*
+      This function is to Assign Permission to user
+      @param: permissionid,userid
+      @output: 'if permission assigned' -> Permission Assigned Successfully,
+               'else' -> Please Try again
+    */
+    
     public function Assign_Permission_User(Request $request)
     {
         
@@ -223,6 +276,12 @@ class SpatieController extends Controller
         }
         
     }
+    
+    /*
+      This function is to List all roles and permissions assigned to it.
+      @output: A list of all Roles with thier Permissions
+               
+    */
 
     public function List_Roles_With_Permission ()
     {
@@ -242,6 +301,13 @@ class SpatieController extends Controller
         }
         
     }
+
+    /*
+      This function is to get Spicific Role with it's permission
+      @param: roleid
+      @output: 'if Role Exist' -> A list of all permissions to that role,
+               'else' -> Role doesn't exist.
+    */
 
     public function Get_Individual_Role (Request $request)
     {
@@ -266,6 +332,13 @@ class SpatieController extends Controller
         }
         
     }
+    
+    /*
+      This function is to Add roles with it's permissions
+      @param: Rolename,array of permissions id
+      @output: 'if added' -> Done Successfully,
+               'else' -> Error.
+    */
 
     public function Add_Role_With_Permissions (Request $request)
     {
@@ -303,6 +376,11 @@ class SpatieController extends Controller
         
     }
     
+    /*
+      This function is to Export all roles with it's permissions
+      @output: A json file with all roles and thier permissions.
+    */
+    
     public function Export_Role_with_Permission()
     {
         $roles = Role::all();
@@ -322,6 +400,13 @@ class SpatieController extends Controller
 
         return response()->download(public_path('json\Roles.json'));
     }
+    
+    /*
+      This function is to Import Roles and thier permissions
+      @param:Json file with Every role and it's permissons,
+      @output: 'if all conditions applied' -> Done Successfully,
+               'else' -> Please Try again
+    */
     
     public function Import_Role_with_Permission(Request $request)
     {
