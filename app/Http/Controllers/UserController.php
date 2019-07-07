@@ -13,13 +13,8 @@ use App\User;
 use Validator;
 use File;
 
-
-
 class UserController extends Controller
-
 {
-
-
     public function insert_users()
     {
         file_get_contents(__DIR__ . '/data/users.json');

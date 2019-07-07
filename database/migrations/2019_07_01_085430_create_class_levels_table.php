@@ -16,9 +16,9 @@ class CreateClassLevelsTable extends Migration
         Schema::create('class_levels', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('class_id');
-            $table->foreign('class_id')->references('id')->on('classes')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('class_id')->references('id')->on('classes')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('year_level_id');
-            $table->foreign('year_level_id')->references('id')->on('year_levels')->inDelete('cascade')->onUpdate('cascade');
+            $table->foreign('year_level_id')->references('id')->on('year_levels')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
