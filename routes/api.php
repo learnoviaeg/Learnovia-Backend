@@ -64,9 +64,12 @@ Route::get('install', function () {
         $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
 
         $user = new User([
-            'name' => 'Learnovia Company',
+            'firstname' => 'Learnovia',
+            'lastname' => 'Company',
+            'username'=> 'Admin',
             'email' => 'admin@learnovia.com',
-            'password' => bcrypt('LeaRnovia_H_M_A')
+            'password' => bcrypt('LeaRnovia_H_M_A'),
+            'real_password' =>'LeaRnovia_H_M_A'
         ]);
         $user->save();
         $user->assignRole($super);

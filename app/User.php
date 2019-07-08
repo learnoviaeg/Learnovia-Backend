@@ -21,7 +21,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'firstname', 'email', 'password','real_password','lastname','username',
     ];
 
     /**
@@ -41,4 +41,21 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    private static function getUserCounter($lastid){
+        if ($lastid < 10){
+            return "000" . $lastid;
+        }elseif ($lastid < 100 && $lastid >= 10){
+            return "00" . $lastid;
+        }elseif ($lastid < 1000 && $lastid >= 100){
+            return "0" . $lastid;
+        }
+    }
+
+    public static function generateUsername(){
+        $last_user = User::latest('id')->first();
+        if ($last_user)
+            return env('PREFIX') . self::getUserCounter($last_user->id);
+        return env('PREFIX') . "0001";
+    }
 }

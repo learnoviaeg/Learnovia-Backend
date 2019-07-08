@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\User;
+
 class AuthController extends Controller
 {
     /**
@@ -19,19 +22,20 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
+            'email' => 'required|string|unique:users',
             'password' => 'required|string'
         ]);
         $user = new User([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
+            'real_password' => $request->password
         ]);
         $user->save();
-        return HelperController::api_response_format(200 , $user , 'User Created Successfully');
+        return HelperController::api_response_format(200, $user, 'User Created Successfully');
 
     }
-  
+
     /**
      * Login user and create token
      *
@@ -45,30 +49,30 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
+            'username' => 'required|string',
             'password' => 'required|string',
             'remember_me' => 'boolean'
         ]);
-        $credentials = request(['email', 'password']);
-        if(!Auth::attempt($credentials))
-            return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
+        $credentials = request(['username', 'password']);
+        if (!Auth::attempt($credentials))
+            return HelperController::api_response_format(401 , [] , 'Unauthorized');
         $user = $request->user();
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         if ($request->remember_me)
             $token->expires_at = Carbon::now()->addWeeks(1);
+        else
+            $token->expires_at = Carbon::now()->addWeeks(6);
         $token->save();
-        return HelperController::api_response_format(200 , [
+        return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString()
-        ] , 'User Login Successfully , Don`t share this token with any one they are hackers.');
+        ], 'User Login Successfully , Don`t share this token with any one they are hackers.');
     }
-  
+
     /**
      * Logout user (Revoke the token)
      *
@@ -77,9 +81,9 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->token()->revoke();
-        return HelperController::api_response_format(200 , [] , 'Successfully logged out');
+        return HelperController::api_response_format(200, [], 'Successfully logged out');
     }
-  
+
     /**
      * Get the authenticated User
      *
@@ -87,6 +91,6 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        return HelperController::api_response_format(200 , $request->user());
+        return HelperController::api_response_format(200, $request->user());
     }
 }

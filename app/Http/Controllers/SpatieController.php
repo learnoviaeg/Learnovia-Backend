@@ -110,7 +110,7 @@ class SpatieController extends Controller
             ]);
             if ($validater->fails()) {
                 $errors = $validater->errors();
-                return response()->json($errors, 400);
+                return HelperController::api_response_format(400 , $errors);
             }
 
             $finduser = User::find($request->userid);
