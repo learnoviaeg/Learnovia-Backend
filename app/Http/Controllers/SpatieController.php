@@ -27,7 +27,7 @@ class SpatieController extends Controller
         // create roles and assign created permissions
 
         // this can be done as separate statements
-        /*$role = Role::create(['name' => 'Admin']);
+       /* $role = Role::create(['name' => 'Admin']);
         $role->givePermissionTo('Add Role');
         $role->givePermissionTo('Delete Role');
         $role->givePermissionTo('Assign Role to User');
@@ -40,6 +40,7 @@ class SpatieController extends Controller
         
        // auth()->user()->assignRole('Admin');
        // return User::role('Admin')->get();
+
     }
     
     

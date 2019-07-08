@@ -47,6 +47,11 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Update Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Get Courses']);
+
+        \Spatie\Permission\Models\Permission::create(['name' => 'Enroll User to single Course']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'View Enrolled Courses']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Enroll Mandatory Courses']);
+        
         $super = \Spatie\Permission\Models\Role::create(['name' => 'Super Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'System Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'Student']);
@@ -152,3 +157,10 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:Delete Course');
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:Get Courses');
 });
+
+// start  ... Enrollment of user to courses
+Route::post('enroll', 'EnrollUserToCourseController@EnrollSingleCourse')->name('EnrollSingle')->middleware('permission:Enroll User Single Course');;
+Route::post('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserErollment')->name('EnrolledCourse')->middleware('permission:View Enrolled Courses');;
+Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:Enroll Mandatory Courses');;
+
+
