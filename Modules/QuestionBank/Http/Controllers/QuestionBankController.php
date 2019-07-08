@@ -123,25 +123,116 @@ class QuestionBankController extends Controller
         return HelperController::api_response_format(200, $questions);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
     /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Response
+     * @Description: create  multi Questions
+     * @param : Request to access Question[0][text] and type if type 1 (True/False)
+     *          access Question[0][answers][0] , Question[0][Is_True][0] and so on
+     * @return: MSG => Question Created Successfully
      */
-    public function show($id)
-    {
-        return view('questionbank::show');
-    }
+
+     public function store(Request $request)
+     {
+         $r = $request->validate([
+             'Question' => 'required|array',
+             'Question.*.text' => 'required',
+             'Question.*.mark' => 'required|integer',
+             'Question.*.Question_Category_id' => 'required|exists:questions_categories,id',
+             'Question.*.Category_id' => 'required|exists:categories,id',
+             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+             'Question.*.Course_ID' => 'required|exists:courses,id',
+
+         ]);
+         foreach ($request->Question as $question) {
+             switch ($question['Question_Type_id']) {
+                 case 1:
+                     $request->validate([
+                         'Question.*answers' => 'required|array',
+                         'Question.answers.' => 'required|boolean',
+                         'Question.*Is_True' => 'required|array',
+                         'Question.Is_True.' => 'required|boolean',
+                     ]);
+                     break;
+                 case 2 :
+                     $request->validate([
+                         'Question.*contents' => 'required|array',
+                         'Question.contents.' => 'required|string|min:1',
+                         'Question.*Is_True' => 'required|array',
+                         'Question.Is_True.' => 'required|boolean',
+                     ]);
+                     break;
+                 case 3 :
+                     $request->validate([
+                         'Question.*match_A' => 'required|array',
+                         'Question.match_A.' => 'required',
+                         'Question.*match_B' => 'required|array',
+                         'Question.match_B.' => 'required'
+                     ]);
+                     break;
+             }
+             $cat = Questions::firstOrCreate([
+                 'text' => $question['text'],
+                 'mark' => $question['mark'],
+                 'category_id' => $question['Category_id'],
+                 'question_type_id' => $question['Question_Type_id'],
+                 'question_category_id' => $question['Question_Category_id'],
+                 'course_id' => $question['Course_ID'],
+             ]);
+             Switch ($question['Question_Type_id']) {
+                 case 1 :
+                     $is_true = 0;
+                     foreach ($question['answers'] as $answer) {
+                         QuestionsAnswer::firstOrCreate([
+                             'question_id' => $cat->id,
+                             'true_false' => $answer,
+                             'match_a' => null,
+                             'match_b' => null,
+                             'is_true' => $question['Is_True'][$is_true]
+                         ]);
+                         $is_true += 1;
+                     }
+                     break;
+                 case 2 :
+                     $is_true = 0;
+                     foreach ($question['contents'] as $con) {
+
+                         $answer = QuestionsAnswer::firstOrCreate([
+                             'question_id' => $cat->id,
+                             'true_false' => null,
+                             'content' => $con,
+                             'match_a' => null,
+                             'match_b' => null,
+                             'is_true' => $question['Is_True'][$is_true]
+                         ]);
+                         $is_true += 1;
+
+                     }
+                     break;
+
+                 case 3:
+                     $is_true = 0;
+
+                     foreach ($question['match_A'] as $index => $MA) {
+                         foreach ($question['match_B'] as $Secindex => $MP) {
+                             $answer = QuestionsAnswer::firstOrCreate([
+                                 'question_id' => $cat->id,
+                                 'true_false' => null,
+                                 'content' => null,
+                                 'match_a' => $MA,
+                                 'match_b' => $MP,
+                                 'is_true' => ($index == $Secindex) ? 1 : 0
+                             ]);
+                             $is_true += 1;
+                         }
+                     }
+
+                     break;
+
+
+             }
+         }
+         return HelperController::api_response_format(201, $cat, 'Question Created Successfully');
+     }
 
     /**
      * Update the specified resource in storage.

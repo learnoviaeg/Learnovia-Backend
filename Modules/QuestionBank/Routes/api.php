@@ -9,6 +9,7 @@ Route::get('installQuestionBank', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Update Question']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Question Answer']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Add New Answer']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Add New Questions']);
 });
 
 Route::group([
@@ -24,6 +25,7 @@ Route::group([
         Route::post('updateQuestion', 'QuestionBankController@update')->middleware('Update Question');
         Route::post('deleteAnswer', 'QuestionBankController@deleteAnswer')->middleware('Delete Question Answer');
         Route::post('addAnswer', 'QuestionBankController@addAnswer')->middleware('Add New Answer');
+        Route::post('storeQuestions', 'QuestionBankController@store')->middleware('Add New Questions');
 
     });
 });
