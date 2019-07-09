@@ -13,6 +13,8 @@ class CreateMessagesTable extends Migration
      */
     public function up()
     {
+
+
         Schema::create('messages', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->text('text');
@@ -21,10 +23,9 @@ class CreateMessagesTable extends Migration
             $table->foreign('From')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('To');
             $table->foreign('To')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-
             $table->boolean('seen');
-            $table->boolean('deleted');
-            $table->string('file');
+            $table->integer('deleted');
+            $table->string('file')->nullable();
 
             $table->timestamps();
         });

@@ -16,11 +16,17 @@ Route::get('listClasses',"segment_class_Controller@List_Classes_with_all_segment
 //if you want to send message please,write Send_message_of_users in yours
 Route::post('Send_message_of_users',"MessageController@Send_message_of_all_user");
 
-//if you want to delete message please,write deletemessage in yours
-Route::post('deleteMessage',"MessageController@deleteMessage");
+//if you want to delete message please,write deleteMessageforAll in yours
+Route::post('deleteMessageforAll',"MessageController@deleteMessageForAll");
 
-//if you want to all messages please,write List_All_Message in yours
+//if you want to delete message please,write deletemessage in yours
+Route::get('deleteMessageForMe',"MessageController@deleteMessageforMe");
+
+//if you want to all messages please,write deleteMessageForMe in yours
 Route::get('List_All_Message',"MessageController@List_All_Message");
+
+//if you want to view all messages  from .. to .. please,write ViewAllMSG_from_to in yours
+Route::post('ViewAllMSG_from_to',"MessageController@ViewAllMSG_from_to");
 
 //if you want to see messages please,write SeenMessage in yours
 Route::get('SeeMessage',"MessageController@SeenMessage");
