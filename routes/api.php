@@ -53,6 +53,14 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Update Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Get Courses']);
+        //USER CRUD Permissions
+        \Spatie\Permission\Models\Permission::create(['name' => 'Add User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Update User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Delete User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'List All Users']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Suspend User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Un Suspend User']);
+
         $super = \Spatie\Permission\Models\Role::create(['name' => 'Super Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'System Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'Student']);
@@ -80,6 +88,8 @@ Route::post('import', 'ExcelController@import')->name('import');
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
+    Route::post('forgetpassword', 'PasswordResetController@create');
+    Route::post('resetpassword', 'PasswordResetController@reset');
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
@@ -100,6 +110,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('addRolewithPer', 'SpatieController@Add_Role_With_Permissions')->name('addRolewithPer')->middleware('permission:Add Role With Permissions');
     Route::get('exportroleswithper', 'SpatieController@Export_Role_with_Permission')->name('exportroleswithper')->middleware('permission:Export Roles with Permissions');
     Route::post('importroleswithper', 'SpatieController@Import_Role_with_Permission')->name('importroleswithper')->middleware('permission:Import Roles with Permissions');
+    //USER CRUD ROUTES
+    Route::post('adduser','UserCRUDController@create')->name('adduser')->middleware('permission:Add User');
+    Route::post('updateuser','UserCRUDController@update')->name('updateuser')->middleware('permission:Update User');
+    Route::post('deleteuser','UserCRUDController@delete')->name('deleteuser')->middleware('permission:Delete User');
+    Route::get('listAll','UserCRUDController@list')->name('listAll')->middleware('permission:List All Users');
+    Route::post('suspenduser','UserCRUDController@suspend_user')->name('suspenduser')->middleware('permission:Suspend User');
+    Route::post('unsuspenduser','UserCRUDController@unsuspend_user')->name('unsuspenduser')->middleware('permission:Un Suspend User');
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
@@ -168,3 +185,10 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:Delete Course');
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:Get Courses');
 });
+
+
+
+
+
+
+

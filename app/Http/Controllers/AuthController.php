@@ -31,7 +31,7 @@ class AuthController extends Controller
         return HelperController::api_response_format(200 , $user , 'User Created Successfully');
 
     }
-  
+
     /**
      * Login user and create token
      *
@@ -54,6 +54,11 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Unauthorized'
             ], 401);
+        $checkUser = User::whereEmail($request->email)->first();
+        if($checkUser->suspend == 1){
+            return HelperController::api_response_format(200 ,null , 'Your Account is Blocked!');
+        }
+
         $user = $request->user();
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
@@ -68,7 +73,7 @@ class AuthController extends Controller
             )->toDateTimeString()
         ] , 'User Login Successfully , Don`t share this token with any one they are hackers.');
     }
-  
+
     /**
      * Logout user (Revoke the token)
      *
@@ -79,7 +84,7 @@ class AuthController extends Controller
         $request->user()->token()->revoke();
         return HelperController::api_response_format(200 , [] , 'Successfully logged out');
     }
-  
+
     /**
      * Get the authenticated User
      *
