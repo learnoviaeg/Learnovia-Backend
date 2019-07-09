@@ -53,6 +53,20 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Update Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Get Courses']);
+       
+       
+        //notificatons premssions
+
+        \Spatie\Permission\Models\Permission::create(['name' => 'notify']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'get all notifications']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'unread notifications']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'mark as read notification']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Get user Notifcations']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Delete notification with Time']);
+        //end notificatons premssions
+
+
+
         $super = \Spatie\Permission\Models\Role::create(['name' => 'Super Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'System Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'Student']);
@@ -168,3 +182,12 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:Delete Course');
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:Get Courses');
 });
+//notifications
+Route::post('notify','NotifactionController@notify')->name('notify')->middleware('permission:notify');
+Route::post('getallnotifications','NotifactionController@getallnotifications')->name('all notifications')->middleware('permission:get all notifications');
+Route::post('unreadnotifications','NotifactionController@unreadnotifications')->name('unreaded notifications')->middleware('permission:unread notifications');
+Route::post('markasread','NotifactionController@markasread')->name('mark as read notify')->middleware('permission:mark as read notification');
+Route::post('GetNotifcations','NotifactionController@GetNotifcations')->name('get user notifications')->middleware('permission:Get user Notifcations');
+Route::post('DeletewithTime','NotifactionController@DeletewithTime')->name('delete notifications with time')->middleware('permission:Delete notification with Time');
+
+
