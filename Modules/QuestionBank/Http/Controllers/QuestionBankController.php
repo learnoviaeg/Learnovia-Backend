@@ -31,71 +31,20 @@ class QuestionBankController extends Controller
         if($type == 0){
             foreach ($questions as $question) {
                 $question->category;
-                unset($question->category->created_at);
-                unset($question->category->updated_at);
-
                 $question->question_type;
-                unset($question->question_type->created_at);
-                unset($question->question_type->updated_at);
-
                 $question->question_category;
-                unset($question->question_category->created_at);
-                unset($question->question_category->updated_at);
-
                 $question->question_course;
-                unset($question->question_course->created_at);
-                unset($question->question_course->updated_at);
-
                 $question->question_answer;
-
-                foreach ($question->question_answer as $answer) {
-                    unset($answer->created_at);
-                    unset($answer->updated_at);
-                    unset($answer->question_id);
-                }
-
-                unset($question->category_id);
-                unset($question->question_type_id);
-                unset($question->question_category_id);
-                unset($question->course_id);
-                unset($question->created_at);
-                unset($question->updated_at);
             }
             $data = $questions;
         }
         else{
             $question = $questions;
-
             $question->category;
-            unset($question->category->created_at);
-            unset($question->category->updated_at);
-
             $question->question_type;
-            unset($question->question_type->created_at);
-            unset($question->question_type->updated_at);
-
             $question->question_category;
-            unset($question->question_category->created_at);
-            unset($question->question_category->updated_at);
-
             $question->question_course;
-            unset($question->question_course->created_at);
-            unset($question->question_course->updated_at);
-
             $question->question_answer;
-
-            foreach ($question->question_answer as $answer) {
-                unset($answer->created_at);
-                unset($answer->updated_at);
-                unset($answer->question_id);
-            }
-
-            unset($question->category_id);
-            unset($question->question_type_id);
-            unset($question->question_category_id);
-            unset($question->course_id);
-            unset($question->created_at);
-            unset($question->updated_at);
 
             $data = $question;
         }
