@@ -18,18 +18,23 @@ class UserCRUDController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|min:3|max:50',
-            'email'=>'required|email|unique:users,email',
-            'password'=>'required|string|min:8|max:191'
+            'name'=>'required|array',
+            'name.*' => 'required|string|min:3|max:50',
+            'email'=>'required|array',
+            'email.*'=>'required|email|unique:users,email',
+            'password'=>'required|array',
+            'password.*'=>'required|string|min:8|max:191'
         ]);
-
-        $user=User::create([
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'password'=>bcrypt($request->password)
-        ]);
-
-        return HelperController::api_response_format(201, $user, 'User Created Successfully');
+        $users=collect([]);
+        foreach ($request->name as $key => $name) {
+            $user=User::create([
+                'name'=>$name,
+                'email'=>$request->email[$key],
+                'password'=>bcrypt($request->password[$key])
+            ]);
+            $users->push($user);
+        }
+        return HelperController::api_response_format(201, $users, 'User Created Successfully');
 
     }
 

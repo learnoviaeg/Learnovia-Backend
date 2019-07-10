@@ -24,9 +24,7 @@ class PasswordResetController extends Controller
         ]);
         $user = User::where('email', $request->email)->first();
         if (!$user)
-            return response()->json([
-                'message' => 'We can\'t find a user with that e-mail address.'
-            ], 404);
+            return HelperController::api_response_format(404, null, 'We can\'t find a user with that e-mail address.');
         $passwordReset = PasswordReset::updateOrCreate(
             ['email' => $user->email],
             [
@@ -38,11 +36,10 @@ class PasswordResetController extends Controller
             $user->notify(
                 new PasswordResetRequest($passwordReset->token)
             );
-        return response()->json([
-            'message' => 'We have e-mailed your password reset link!'
-        ]);
+        return HelperController::api_response_format(200, null, 'We have e-mailed your password reset link!');
+
     }
-    
+
      /**
      * Reset password
      *
@@ -71,18 +68,17 @@ class PasswordResetController extends Controller
             ['email', $request->email]
         ])->first();
         if (!$passwordReset)
-            return response()->json([
-                'message' => 'This password reset recovery code is invalid.'
-            ], 404);
+            return HelperController::api_response_format(404, null, 'This password reset recovery code is invalid.');
+
         $user = User::where('email', $passwordReset->email)->first();
         if (!$user)
-            return response()->json([
-                'message' => 'We can\'t find a user with that e-mail address.'
-            ], 404);
+            return HelperController::api_response_format(404, null, 'We can\'t find a user with that e-mail address.');
+
             $user->password = bcrypt($request->password);
             $user->save();
             $passwordReset->delete();
             $user->notify(new PasswordResetSuccess($passwordReset));
-            return response()->json($user);
+            return HelperController::api_response_format(200, $user);
+
     }
 }
