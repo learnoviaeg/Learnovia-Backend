@@ -1,12 +1,24 @@
 <?php
 
+header("Access-Control-Allow-Origin:http://localhost:4200");
+header("Access-Control-Allow-Methods:*");
+header("Access-Control-Allow-Headers:*");
 use App\User;
+Route::get('notify', 'NotificationController@notify')->name('notify')->middleware('permission:Notify');
+Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
+Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
+Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:mark as Read');
 
 Route::get('install', function () {
     $user = User::whereEmail('admin@learnovia.com')->first();
     if($user){
         return "This Site is Installed befpre go and ask admin";
     }else{
+        \Spatie\Permission\Models\Permission::create(['name' => 'Notify']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Get All Notifications']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Get Unread']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Mark as read']);
+
         \Spatie\Permission\Models\Permission::create(['name' => 'Add Role']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Role']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Assign Role to User']);
@@ -103,6 +115,10 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('addRolewithPer', 'SpatieController@Add_Role_With_Permissions')->name('addRolewithPer')->middleware('permission:Add Role With Permissions');
     Route::get('exportroleswithper', 'SpatieController@Export_Role_with_Permission')->name('exportroleswithper')->middleware('permission:Export Roles with Permissions');
     Route::post('importroleswithper', 'SpatieController@Import_Role_with_Permission')->name('importroleswithper')->middleware('permission:Import Roles with Permissions');
+    Route::get('notify', 'NotificationController@notify')->name('notify')->middleware('permission:Notify');
+    Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
+    Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
+    Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
@@ -142,7 +158,7 @@ Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::get('get/{id}', 'ClassController@show')->name('getclassbyid')->middleware('permission:Get Class By id');
     Route::put('update', 'ClassController@update')->name('updateclass')->middleware('permission:Update Class');
     Route::delete('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:Delete Class');
-});
+}); 
 
 Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
     //if you want to add segment to class please,write addsegment in yours
