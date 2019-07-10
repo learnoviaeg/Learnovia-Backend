@@ -4,10 +4,6 @@ header("Access-Control-Allow-Origin:http://localhost:4200");
 header("Access-Control-Allow-Methods:*");
 header("Access-Control-Allow-Headers:*");
 use App\User;
-Route::get('notify', 'NotificationController@notify')->name('notify')->middleware('permission:Notify');
-Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
-Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
-Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:mark as Read');
 
 Route::get('install', function () {
     $user = User::whereEmail('admin@learnovia.com')->first();
