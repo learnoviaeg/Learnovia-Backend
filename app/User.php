@@ -46,24 +46,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
     
-    public static function notify($data)
+
+    public static function notify($request)
     {
-        $myRequest = new Request([
-            'message' => $data[0],
-             'from'=>$data[1],
-             'to'=>$data[2],
-             'course_id'=>$data[3],
-             'type'=>$data[4]
-        ]);;
-
-        return user::notifyhelper($myRequest);
-
-    }
-
-    public static function notifyhelper(Request $request)
-    {
- 
-      $validater=Validator::make($request->all(),[
+      $validater=Validator::make($request,[
         'message'=>'required',
         'from'=>'required|integer|exists:users,id',
         'to'=>'required|integer|exists:users,id',
@@ -77,7 +63,7 @@ class User extends Authenticatable
         return response()->json($errors,400);
     }
     
-      $touserid=$request->to;
+      $touserid=$request['to'];
       $toUser = User::find($touserid);
       Notification::send($toUser, new Notificationlearnovia($request));
     }

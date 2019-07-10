@@ -16,7 +16,13 @@ class NotifactionController extends Controller
 {
     public function index()
     {
-        return user::notify(['hay',1,2,2,'test']);
+        return user::notify([
+            'message' => 'two',
+            'from'=>1,
+            'to'=>2,
+            'course_id'=>2,
+            'type'=>'annoucn'
+        ]);
         
     }
     //

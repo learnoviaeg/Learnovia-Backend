@@ -20,7 +20,7 @@ class Notificationlearnovia extends Notification
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct($request)
     {
         //
         $this->mess = $request;
@@ -63,13 +63,11 @@ class Notificationlearnovia extends Notification
     public function toDatabase($notifiable)
     {
         return ([
-            'message' =>$this->mess->message,
-            'from'=>$this->mess->from,
-            'to'=>$this->mess->to,
-            'type'=>$this->mess->type,
-            'course_id'=>$this->mess->course_id,
-    
-    
+            'message' =>$this->mess['message'],
+            'from'=>$this->mess['from'],
+            'to'=>$this->mess['to'],
+            'type'=>$this->mess['type'],
+            'course_id'=>$this->mess['course_id'],
             ]);
     }
 }
