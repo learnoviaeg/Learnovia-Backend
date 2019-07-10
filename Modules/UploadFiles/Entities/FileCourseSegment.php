@@ -8,6 +8,8 @@ class FileCourseSegment extends Model
 {
     protected $table = 'file_course_segments';
     protected $fillable = [];
+    protected $hidden = ['updated_at','created_at'];
+
 
     public function File()
     {
