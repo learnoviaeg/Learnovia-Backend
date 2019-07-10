@@ -159,8 +159,8 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
 });
 
 // start  ... Enrollment of user to courses
-Route::post('enroll', 'EnrollUserToCourseController@EnrollSingleCourse')->name('EnrollSingle')->middleware('permission:Enroll User Single Course');;
-Route::post('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserErollment')->name('EnrolledCourse')->middleware('permission:View Enrolled Courses');;
-Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:Enroll Mandatory Courses');;
-
+Route::post('enroll', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses');//->middleware('permission:Enroll User Single Course');;
+Route::post('unenroll', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers');//->middleware('permission:Enroll User Single Course');;
+Route::post('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserErollment')->name('EnrolledCourse');//->middleware('permission:View Enrolled Courses');;
+Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory');//->middleware('permission:Enroll Mandatory Courses');;
 

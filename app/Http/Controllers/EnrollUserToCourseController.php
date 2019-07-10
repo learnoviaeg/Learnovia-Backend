@@ -11,35 +11,61 @@ use App\CourseSegment;
 use DB;
 class EnrollUserToCourseController extends Controller
 {
-    public function EnrollSingleCourse(Request $request)
+    // Enroll one\more users to one\more course_segements
+    public function EnrollCourses(Request $request)
     {
 
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            //'user_id' => 'required|exists:users,id',
             'course_segment' => 'required|exists:course_segments,id',
             'start_date' => 'required|before:end_date|after:'.Carbon::now(),
+            'users'=> 'required|array',
+            'users.*'=>'required|integer|exists:users,id',
             'end_date' => 'required|after:'.Carbon::now()
         ]);
-        $users_role= user::find($request->user_id);
-        $roles = $users_role->getRoleNames();
-        $rolesid = DB::table('roles')->where('name',$roles)->pluck('id')->first();
 
-        $check = DB::table('enrolls')->where('course_segment', $request->course_segment)->where('user_id',$request->user_id)->pluck('id')->first();
-        if($check==NULL){
+        foreach($request->course_segment as $courses){
 
-        $eroll = new Enroll;
-        $eroll->setAttribute('user_id', $request->user_id);
-        $eroll->setAttribute('course_segment', $request->course_segment);
-        $eroll->setAttribute('start_date', $request->start_date);
-        $eroll->setAttribute('end_date', $request->end_date);
-        $eroll->setAttribute('role_id', $rolesid);
+            foreach($request->users as $user_id)
+            {
+             
+        
+                $users_role= user::find($user_id);
+                $roles = $users_role->getRoleNames();
+                
+                $rolesid = DB::table('roles')->where('name',$roles)->pluck('id')->first();
 
-        $eroll->save();
-    }
+                $check = DB::table('enrolls')->where('course_segment', $request->course_segment)->where('user_id',$user_id)->pluck('id')->first();
+                if($check==NULL){
+
+                    $enroll = new Enroll;
+                    // $eroll->setAttribute('user_id', $request->user_id);
+                
+                    $enroll->setAttribute('user_id', $user_id);
+                    $enroll->setAttribute('course_segment', $courses);
+                    $enroll->setAttribute('start_date',$request->start_date);
+                    $enroll->setAttribute('end_date',$request->end_date);
+                    $enroll->setAttribute('role_id', $rolesid);
+                    
+                    $enroll->save();  
+                }   
+            }
+        }
+
     return HelperController::api_response_format(200, [], 'added successfully');
 }
+// unEnroll a user to a coursor more courses
+    public function UnEnroll(Request $request){
 
-
+        $request->validate([
+            'user_id' => 'required|exists:enrolls,user_id',
+            'course_segment' => 'required|exists:enrolls,course_segment'
+        ]);
+        $users_enroll= DB::table('enrolls')->where('user_id',$request->user_id)->where('course_segment',$request->course_segment);
+        $users_enroll->delete();
+    
+        return HelperController::api_response_format(200 ,$users_enroll , 'users UnEnrolled Successfully');
+    }
 
 
     public function ViewAllCoursesThatUserErollment(Request $request)
@@ -72,16 +98,16 @@ class EnrollUserToCourseController extends Controller
 
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'class_id' => 'required|exists:classes,id',
+            //'class_id' => 'required|exists:classes,id',
             'start_date' => 'required|before:end_date|after:'.Carbon::now(),
             'end_date' => 'required|after:'.Carbon::now()
         ]);
 
-        $ClassLevelId = DB::table('class_levels')->where('class_id', $request->class_id)->pluck('id')->first();
+      //  $ClassLevelId = DB::table('class_levels')->where('class_id', $request->class_id)->pluck('id')->first();
 
-        $SegmentClassId = DB::table('segment_classes')->where('class_level_id', $ClassLevelId)->pluck('id')->first();
+      //  $SegmentClassId = DB::table('segment_classes')->where('class_level_id',  $request->segment_class_id)->pluck('id')->first();
 
-        $CourseId = DB::table('course_segments')->where('segment_class_id', $SegmentClassId)->pluck('course_id');
+        $CourseId = DB::table('course_segments')->where('segment_class_id', $request->SegmentClassId)->pluck('course_id');
        
        
         $courseID=array();
