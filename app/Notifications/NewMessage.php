@@ -20,10 +20,9 @@ class NewMessage extends Notification
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct($request)
     {
-        //  dd($request->message);
-
+        //
         $this->mess = $request;
 
     }
@@ -40,29 +39,21 @@ class NewMessage extends Notification
     }
 
     /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
-
-    /**
      * Get the array representation of the notification.
      *
      * @param  mixed  $notifiable
      * @return array
      */
-    // the data that i will send in  the messege inn data table
-    public function toDatabase()
+
+
+    public function toDatabase($notifiable)
     {
         return ([
-            'message' =>$this->mess->message,
-            'from'=>$this->mess->from,
-            'to'=>$this->mess->to,
-            'type'=>$this->mess->type,
-            'course_id'=>$this->mess->course_id,
-
-
+            'message' =>$this->mess['message'],
+            'from'=>$this->mess['from'],
+            'to'=>$this->mess['to'],
+            'type'=>$this->mess['type'],
+            'course_id'=>$this->mess['course_id'],
         ]);
     }
 }

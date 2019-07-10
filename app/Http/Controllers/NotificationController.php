@@ -3,68 +3,86 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Message;
+use App\Http\Controllers\HelperController;
 use App\User;
-use App\Notifications\NewMessage;
+use App\Notifications\Notificationlearnovia;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Http\Request;
 use Validator;
-use  DB;
+use DB;
 use Carbon\Carbon;
 
-class NotificationController extends Controller
+class NotifactionController extends Controller
 {
-    // Sending Notification
-    public function notify(Request $request)
+    public function index()
     {
-
-        $validater = Validator::make($request->all(), [
-            'message' => 'required',
-            'from' => 'required|integer|exists:users,id',
-            'to' => 'required|integer|exists:users,id',
-            'course_id' => 'required|integer|exists:courses,id',
-            'type' => 'required|string'
+        return user::notify([
+            'message' => 'two',
+            'from' => 1,
+            'to' => 2,
+            'course_id' => 2,
+            'type' => 'annoucn'
         ]);
-
-        if ($validater->fails()) {
-            return HelperController::api_response_format(400, $validater->errors());
-        }
-        $touserid = $request->to;
-        $toUser = User::find($touserid);
-        Notification::send($toUser, new NewMessage($request));
-        return HelperController::api_response_format(200, [], 'Sent');
     }
-
 
     //  get all Notification From data base From Notifcation Table
     public function getallnotifications(Request $request)
     {
-        $request->validate([
-            'id' => 'required|exists:notifications,notifiable_id'
-        ]);
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->id)->get();
-        return HelperController::api_response_format(200, $noti);
+        $data = array();
+        foreach ($noti as $not) {
+            $data[] = json_decode($not, true);
+
+        }
+        return HelperController::api_response_format(200, $body = $data, $message = 'all user Unread notifications');
     }
 
     //  the unread Notification From data base From Notifcation Table
     public function unreadnotifications(Request $request)
     {
-        $request->validate([
-            'id' => 'required|exists:notifications,notifiable_id'
-        ]);
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->id)->where('read_at', null)->get();
-        return HelperController::api_response_format(200, $noti);
+        $data = array();
+        foreach ($noti as $not) {
+            $data[] = json_decode($not, true);
+
+        }
+        return HelperController::api_response_format(200, $body = $data, $message = 'all user Unread notifications');
 
     }
 
     //  make alll the Notification Readto the user id
     public function markasread(Request $request)
     {
-        $request->validate([
-            'id' => 'required|exists:notifications,notifiable_id'
-        ]);
         $noti = DB::table('notifications')->where('notifiable_id', $request->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
-        return HelperController::api_response_format(200, $noti , 'Marked as read');
+        return HelperController::api_response_format(200, null, 'Read');
+    }
+
+    public function GetNotifcations(Request $request)
+    {
+        $request->validate([
+            'userid' => 'required|exists:users,id'
+
+        ]);
+        $noti = DB::table('notifications')->where('notifiable_id', $request->userid)->pluck('data');
+        $data = array();
+        foreach ($noti as $not) {
+            $data[] = json_decode($not, true);
+
+        }
+        return HelperController::api_response_format(200, $body = $data, $message = 'all user notifications');
+    }
+
+    public function DeletewithTime(Request $request)
+    {
+        $request->validate([
+            'startdate' => 'required|before:enddate|before:' . Carbon::now(),
+            'enddate' => 'required'
+        ]);
+        $check = DB::table('notifications')->where('created_at', '>', $request->startdate)
+            ->where('created_at', '<', $request->enddate)
+            ->delete();
+        return HelperController::api_response_format(200, $body = [], $message = 'notifications deleted');
+
     }
 }

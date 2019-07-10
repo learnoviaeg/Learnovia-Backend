@@ -7,6 +7,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\Notificationlearnovia;
+use Illuminate\Support\Facades\Notification;
 
 
 class User extends Authenticatable
@@ -58,4 +60,26 @@ class User extends Authenticatable
             return env('PREFIX') . self::getUserCounter($last_user->id);
         return env('PREFIX') . "0001";
     }
+
+    public static function notify($request)
+    {
+        $validater=Validator::make($request,[
+            'message'=>'required',
+            'from'=>'required|integer|exists:users,id',
+            'to'=>'required|integer|exists:users,id',
+            'course_id'=>'required|integer|exists:courses,id',
+            'type'=>'required|string'
+        ]);
+
+        if ($validater->fails())
+        {
+            $errors=$validater->errors();
+            return response()->json($errors,400);
+        }
+        $touserid=$request['to'];
+        $toUser = User::find($touserid);
+        Notification::send($toUser, new Notificationlearnovia($request));
+        return 1 ;
+    }
+
 }
