@@ -14,28 +14,33 @@ use Carbon\Carbon;
 use App\Http\Controllers\HelperController;
 class NotifactionController extends Controller
 {
+    public function index()
+    {
+        return user::notify(['hay',1,2,2,'test']);
+        
+    }
     //
-    public function notify(Request $request)
-  {
+//     public function notify(Request $request)
+//   {
 
-    $validater=Validator::make($request->all(),[
-      'message'=>'required',
-      'from'=>'required|integer|exists:users,id',
-      'to'=>'required|integer|exists:users,id',
-      'course_id'=>'required|integer|exists:courses,id',
-      'type'=>'required|string'
-      ]);
+//     $validater=Validator::make($request->all(),[
+//       'message'=>'required',
+//       'from'=>'required|integer|exists:users,id',
+//       'to'=>'required|integer|exists:users,id',
+//       'course_id'=>'required|integer|exists:courses,id',
+//       'type'=>'required|string'
+//       ]);
   
-  if ($validater->fails())
-  {
-      $errors=$validater->errors();
-      return response()->json($errors,400);
-  }
+//   if ($validater->fails())
+//   {
+//       $errors=$validater->errors();
+//       return response()->json($errors,400);
+//   }
   
-    $touserid=$request->to;
-    $toUser = User::find($touserid);
-    Notification::send($toUser, new Notificationlearnovia($request));
-  }
+//     $touserid=$request->to;
+//     $toUser = User::find($touserid);
+//     Notification::send($toUser, new Notificationlearnovia($request));
+//   }
 
 
                       //  get all Notification From data base From Notifcation Table

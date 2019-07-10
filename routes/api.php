@@ -191,3 +191,4 @@ Route::post('GetNotifcations','NotifactionController@GetNotifcations')->name('ge
 Route::post('DeletewithTime','NotifactionController@DeletewithTime')->name('delete notifications with time')->middleware('permission:Delete notification with Time');
 
 
+Route::post('index','NotifactionController@index');
