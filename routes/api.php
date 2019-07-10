@@ -1,7 +1,11 @@
 <?php
 
 use App\User;
-
+Route::get('View_types_with_specific_year','AC_year_type@View_types_with_specific_year');
+Route::get('View_Levels_with_specific_Type','AC_year_type@View_Levels_with_specific_Type');
+Route::get('View_Classes_with_specific_Level','AC_year_type@View_Classes_with_specific_Level');
+Route::get('View_Segments_with_specific_Class','AC_year_type@View_Segments_with_specific_Class');
+Route::get('View_Courses_with_specific_segment','AC_year_type@View_Courses_with_specific_segment');
 Route::get('install', function () {
     $user = User::whereEmail('admin@learnovia.com')->first();
     if($user){

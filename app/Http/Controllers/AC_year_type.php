@@ -5,9 +5,18 @@ namespace App\Http\Controllers;
 use App\AcademicType;
 use App\AcademicYear;
 use App\AcademicYearType;
+use App\Classes;
+use App\Course;
+use App\CourseSegment;
+use App\Segment;
+use App\YearLevel;
 use Illuminate\Http\Request;
 use App\Http\Resources\Year_type_resource;
 use Validator;
+use App\SegmentClass;
+use App\ClassLevel;
+use App\Level;
+use DB;
 
 class AC_year_type extends Controller
 {
@@ -22,7 +31,35 @@ class AC_year_type extends Controller
         $cat = Year_type_resource::collection(AcademicYear::with("AC_type")->get());
         return HelperController::api_response_format(200, $cat);
     }
+    /**
+     *@Description:Get all Types with specific year
+     *@param: request to access id of the Year
+     *@return :  all Types with specific year
+     *
+     **/
+    public function View_types_with_specific_year(Request $request)
+    {
+        return AcademicYear::Get_types_with_specific_year($request->id);
+    }
+    public function View_Levels_with_specific_Type(Request $request)
+    {
+        return AcademicType::Get_Levels_with_specific_Type($request->id);
+    }
+    public function View_Classes_with_specific_Level(Request $request)
+    {
+        return Level::Get_Classes_with_specific_Level($request->id);
+    }
 
+    public function View_Segments_with_specific_Class(Request $request)
+    {
+        return Course::Get_Segments_with_specific_Class($request->id);
+    }
+
+    public function View_Courses_with_specific_segment(Request $request)
+    {
+
+    return Segment::Get_Courses_with_specific_segment($request->id);
+    }
     /**
      *@Description:Remove type
      *@param: request to access id of the type
