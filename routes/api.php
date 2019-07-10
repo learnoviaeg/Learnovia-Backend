@@ -61,6 +61,15 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Update Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Get Courses']);
+
+        //USER CRUD Permissions
+        \Spatie\Permission\Models\Permission::create(['name' => 'Add User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Update User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Delete User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'List All Users']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Suspend User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Un Suspend User']);
+
         $super = \Spatie\Permission\Models\Role::create(['name' => 'Super Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'System Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'Student']);
@@ -182,4 +191,14 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'CourseController@update')->name('editcourse')->middleware('permission:Update Course');
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:Delete Course');
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:Get Courses');
+});
+
+Route::group(['prefix' => 'user' , 'middleware' => 'auth:api'] , function (){
+    //USER CRUD ROUTES
+    Route::post('add','UserController@create')->name('adduser')->middleware('permission:Add User');
+    Route::post('update','UserController@update')->name('updateuser')->middleware('permission:Update User');
+    Route::post('delete','UserController@delete')->name('deleteuser')->middleware('permission:Delete User');
+    Route::get('get','UserController@list')->name('listAll')->middleware('permission:List All Users');
+    Route::post('suspend','UserController@suspend_user')->name('suspenduser')->middleware('permission:Suspend User');
+    Route::post('unsuspend','UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:Un Suspend User');
 });
