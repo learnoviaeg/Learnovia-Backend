@@ -21,13 +21,14 @@ class AuthController extends Controller
     public function signup(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|unique:users',
-            'password' => 'required|string'
+            'firstname' => 'required|string|',
+            'password' => 'required|string',
+            'lastname' => 'required|string'
         ]);
         $user = new User([
-            'name' => $request->name,
-            'email' => $request->email,
+            'username' => User::generateUsername(),
+            'firstname' => $request->firstname,
+            'lastname' => $request->firstname,
             'password' => bcrypt($request->password),
             'real_password' => $request->password
         ]);
