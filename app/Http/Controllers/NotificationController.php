@@ -45,16 +45,14 @@ class NotifactionController extends Controller
         $data = array();
         foreach ($noti as $not) {
             $data[] = json_decode($not, true);
-
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all user Unread notifications');
-
     }
 
-    //  make alll the Notification Readto the user id
+    //  make all the Notification Readto the user id
     public function markasread(Request $request)
     {
-        $noti = DB::table('notifications')->where('notifiable_id', $request->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+        $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
         return HelperController::api_response_format(200, null, 'Read');
     }
 
