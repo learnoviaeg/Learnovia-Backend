@@ -14,16 +14,17 @@ class MessageFromToResource extends JsonResource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
+
     public function toArray($request)
     {
-        $from = User::find($this->From);
+        $from =User::find($this->From);
         $To = User::find($this->To);
         return [
             'id' => $this->id,
             'Message' => $this->text,
             'Child' => $this->about,
-            'From' => $from->name,
-            "To" => $To->name
+            'From' => $from->firstname,
+            'To' => $To->firstname
         ];
     }
 }
