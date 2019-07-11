@@ -90,9 +90,12 @@ class QuestionBankController extends Controller
             'Question.*.Course_ID' => 'required|exists:courses,id',
 
         ]);
+
+        $categoryies = collect([]);
+
         foreach ($request->Question as $question) {
             switch ($question['Question_Type_id']) {
-                case 1:
+                case 1: // True/false
                     $request->validate([
                         'Question.*.answers' => 'required|array',
                         'Question.*.answers.*' => 'required|boolean',
@@ -125,13 +128,17 @@ class QuestionBankController extends Controller
                 'question_category_id' => $question['Question_Category_id'],
                 'course_id' => $question['Course_ID'],
             ]);
-            Switch ($question['Question_Type_id']) {
+
+            $categoryies->push($cat);
+
+            switch ($question['Question_Type_id']) {
                 case 1 :
                     $is_true = 0;
                     foreach ($question['answers'] as $answer) {
                         QuestionsAnswer::firstOrCreate([
                             'question_id' => $cat->id,
                             'true_false' => $answer,
+                            'content' => null,
                             'match_a' => null,
                             'match_b' => null,
                             'is_true' => $question['Is_True'][$is_true]
@@ -142,7 +149,6 @@ class QuestionBankController extends Controller
                 case 2 :
                     $is_true = 0;
                     foreach ($question['contents'] as $con) {
-
                         $answer = QuestionsAnswer::firstOrCreate([
                             'question_id' => $cat->id,
                             'true_false' => null,
@@ -152,13 +158,11 @@ class QuestionBankController extends Controller
                             'is_true' => $question['Is_True'][$is_true]
                         ]);
                         $is_true += 1;
-
                     }
                     break;
 
                 case 3:
                     $is_true = 0;
-
                     foreach ($question['match_A'] as $index => $MA) {
                         foreach ($question['match_B'] as $Secindex => $MP) {
                             $answer = QuestionsAnswer::firstOrCreate([
@@ -172,14 +176,10 @@ class QuestionBankController extends Controller
                             $is_true += 1;
                         }
                     }
-
                     break;
-
-
             }
-
         }
-        return HelperController::api_response_format(201, $cat, 'Question Created Successfully');
+        return HelperController::api_response_format(201, $categoryies, 'Question Created Successfully');
     }
 
     /**
