@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+use DB;
 
 class User extends Authenticatable
 {
@@ -58,4 +59,14 @@ class User extends Authenticatable
             return env('PREFIX') . self::getUserCounter($last_user->id);
         return env('PREFIX') . "0001";
     }
+    public function roles() {
+        return $this->belongsToMany('Spatie\Permission\Models\Role', 'model_has_roles', 'model_id', 'role_id');
+    }
+    
+    public static function FindByName($username)
+    {
+        return self::where('username', $username)->first();
+    }
+
+
 }
