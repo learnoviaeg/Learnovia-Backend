@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AcademicYearType;
 use App\YearLevel;
 use Illuminate\Http\Request;
 
@@ -13,15 +14,17 @@ class LevelsController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'year' => 'required|exists:academic_year_types,id'
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
         ]);
 
         $level = Level::create([
             'name' => $request->name,
         ]);
+        $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
         YearLevel::create([
-            'academic_year_type_id' => $request->year,
-            'level_id' => $level->id
+            'academic_year_type_id' => $yeartype->id,
+            'level_id' => $level->id,
         ]);
         return HelperController::api_response_format(201, $level, 'Level Created Successfully');
     }
