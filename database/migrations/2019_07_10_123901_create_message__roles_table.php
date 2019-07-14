@@ -14,11 +14,11 @@ class CreateMessageRolesTable extends Migration
     public function up()
     {
         Schema::create('message__roles', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('From_Role');
-            //$table->foreign('From_Role')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
-            $table->unsignedBigInteger('To_Role');
-            //$table->foreign('To_Role')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
+            $table->increments('id');
+            $table->unsignedInteger('From_Role')->unsigned()->index();
+            $table->foreign('From_Role')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedInteger('To_Role')->unsigned()->index();
+            $table->foreign('To_Role')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
