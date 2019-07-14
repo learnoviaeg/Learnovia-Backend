@@ -14,7 +14,7 @@ class SpatieController extends Controller
     {
        // $permission1=Permission::findById(1);
        // $p=Permission::create(['name' => 'Send Message to users']);
-        $findPer = Permission::find(5);
+        $findPer = Permission::find(2);
         $findrole = Role::find(1);
 
         $findrole->givePermissionTo($findPer);

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Contacts;
+use App\User;
 use Illuminate\Http\Request;
 use File;
+use Spatie\Permission\Traits\HasRoles;
 use Validator;
 use Session;
 use App\Http\Resources\Messageresource;
@@ -45,34 +47,43 @@ class MessageController extends Controller
         }
         foreach ($req->users as $userId) {
             if ($session_id != $userId) {
-                $to_Role_id = DB::table('model_has_roles')->where('model_id', $userId)->first();
-                $From_Role_id = DB::table('model_has_roles')->where('model_id', $session_id)->first();
-                $permission = Message_Role::where('From_Role', $From_Role_id->role_id)->where('To_Role', $to_Role_id->role_id)->first();
-                if ($permission) {
-                    Message::Create(array(
-                        'text' => $req->text,
-                        'about' => ($req->about == null) ? $req->From : $req->about, /*replace  $req->From  to $session_id when you session  */
-                        'From' => $session_id,
-                        'seen' => false,
-                        'deleted' => 0,
-                        'To' => $userId,
-                        'file' => $req->file->getClientOriginalName(),
-                    ));
-                } else {
-                    return HelperController::api_response_format(404, null, 'Fail ,  you do not have a permission to send message to this user!');
+                $user = User::find($userId);
+                $to_Role_ids = $user->roles->pluck('id');
+                $loged_user = User::find($session_id);
+                $From_Role_ids = $loged_user->roles->pluck('id');
+                $is_send = false;
+                foreach ($to_Role_ids as $to_Role_id) {
+                    foreach ($From_Role_ids as $From_Role_id) {
+                        $permission = Message_Role::where('From_Role', $From_Role_id)->where('To_Role', $to_Role_id)->first();
+                        if ($permission) {
+                            Message::Create(array(
+                                'text' => $req->text,
+                                'about' => ($req->about == null) ? $req->From : $req->about, /*replace  $req->From  to $session_id when you session  */
+                                'From' => $session_id,
+                                'seen' => false,
+                                'deleted' => 0,
+                                'To' => $userId,
+                                'file' => uniqid() . File::extension($req->file->getClientOriginalName()),
 
+                            ));
+                            $is_send = true;
+                            break;
+
+                        }
+                    }
+                    if ($is_send) {
+                        break;
+                    }
+                }
+                if ($is_send == false) {
+                    return HelperController::api_response_format(404, null, 'Fail ,  you do not have a permission to send message to this user!');
                 }
             } else {
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
-
-
-                /*   return response()->json([
-                       'message' => 'Fail , you can not send message for yourself!'
-                   ], 404);*/
             }
         }
         Storage::disk('public')->put(
-            $req->file->getClientOriginalName(),
+            uniqid() . $req->file->getClientOriginalName(),
             $req->file
         );
         return HelperController::api_response_format(201, null, 'Successfully Sent Message!');
@@ -80,20 +91,22 @@ class MessageController extends Controller
 
     }
 
+
     /**
      * @description:  delete message for all
      * @param Request $req => id of message that you want to delete
      * @return deleted if message was deleted  for all
      */
 
-    public function deleteMessageForAll(Request $req)
+    public
+    function deleteMessageForAll(Request $req)
     {
         $session_id = Auth::User()->id;
         $valid = Validator::make($req->all(), [
             'id' => 'required|exists:messages,id',
         ]);
         if ($valid->fails()) {
-            return HelperController::api_response_format(404, null,  $valid->errors());
+            return HelperController::api_response_format(404, null, $valid->errors());
         }
         $message = Message::find($req->id);
         if ($message->From == $session_id || $message->To == $session_id) {
@@ -108,6 +121,7 @@ class MessageController extends Controller
             return HelperController::api_response_format(404, null, 'You do not have permission delete this message');
         }
     }
+
     /*
     @Description: delete Message for user
                            0=default
@@ -119,7 +133,8 @@ class MessageController extends Controller
 
 
     */
-    public function deleteMessageforMe(Request $req)
+    public
+    function deleteMessageforMe(Request $req)
     {
         $session_id = Auth::User()->id;
 
@@ -175,7 +190,8 @@ class MessageController extends Controller
      * Function list all messages take no parameter
      * @return all messages
      */
-    public function List_All_Message()
+    public
+    function List_All_Message()
     {
         $Message = Messageresource::collection(Message::get());
         return HelperController::api_response_format(201, $Message, 'All messages');
@@ -186,7 +202,8 @@ class MessageController extends Controller
      * @param Request $req --> id for message that you want see it.
      * @return message was seen
      */
-    public function SeenMessage(Request $req)
+    public
+    function SeenMessage(Request $req)
     {
         $session_id = Auth::User()->id;
 
@@ -208,43 +225,55 @@ class MessageController extends Controller
         }
     }
 
-    public function ViewAllMSG_from_to(Request $req)
+    public
+    function ViewAllMSG_from_to(Request $req)
     {
         $session_id = Auth::User()->id;
-        $check = Message::where('From',$req->id)->orWhere('To',$req->id)->first();
-        if($check) {
+        $check = Message::where('From', $req->id)->orWhere('To', $req->id)->first();
+        if ($check) {
             $req->validate([
                 'id' => 'required|integer',
             ]);
-            $msg = array();
 
             $messages = Message::where(function ($query) use ($req, $session_id) {
                 $query->where('From', $req->id)->orWhere('To', $req->id);
             })->where(function ($query) use ($session_id) {
                 $query->where('From', $session_id)->orWhere('To', $session_id);
             })->get();
+            $msg = MessageFromToResource::collection($messages);
 
 
-            foreach ($messages as $message) {
-                if ($message->deleted == 0) {
-                    array_push($msg, new MessageFromToResource ($message));
-                } elseif ($message->deleted == Message::$DELETE_FROM_ALL) {
-                    $message->text = "this message was Deleted for All";
-                    array_push($msg, new MessageFromToResource ($message));
-                } elseif ($message->deleted == Message::$DELETE_FOR_RECEIVER && $session_id == $message->To) {
-                    $message->text = "this message was Deleted";
-                    array_push($msg, new MessageFromToResource ($message));
-                } elseif ($message->deleted == Message::$DELETE_FOR_RECEIVER && $session_id == $message->From) {
-                    array_push($msg, new MessageFromToResource ($message));
-                } elseif ($message->deleted == Message::$DELETE_FOR_SENDER && $session_id == $message->From) {
-                    $message->text = "this message was Deleted";
-                    array_push($msg, new MessageFromToResource ($message));
-
-                } elseif ($message->deleted == Message::$DELETE_FOR_SENDER && $session_id == $message->To) {
-                    array_push($msg, new MessageFromToResource ($message));
-                }
-            }
             return HelperController::api_response_format(201, $msg);
         }
+    }
+
+    /**
+     * @Description: add Roles to send Message Permission
+     * @param: Request  to access From_Role and To_Role
+     * @return : if succss -> return MSG -> 'Message Role insertion sucess'
+     *          IF NOT ->   return MSG -> 'Message Role insertion Fail'
+     *
+     */
+    public
+    function add_send_Permission_for_role(Request $req)
+    {
+
+        $valid = Validator::make($req->all(), [
+            'From_Role' => 'required | exists:roles,id',
+            'To_Role' => 'required | exists:roles,id'
+        ]);
+        if ($valid->fails()) {
+            return response()->json(['msg' => $valid->errors()], 404);
+        }
+        $Message_Role = Message_Role::firstOrCreate([
+            'From_Role' => $req->From_Role,
+            'To_Role' => $req->To_Role,
+        ]);
+        if ($Message_Role) {
+            return HelperController::api_response_format(200, null, 'Message Role insertion sucess');
+
+        }
+        return HelperController::api_response_format(404, null, 'Message Role insertion Fail');
+
     }
 }

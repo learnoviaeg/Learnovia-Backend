@@ -217,5 +217,5 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
 });
 
 
-Route::post('Messageadd_send_Permission_for_role', 'RolePermissionController@Messageadd_send_Permission_for_role');
+Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role');
 Route::get('test', 'SpatieController@index');
