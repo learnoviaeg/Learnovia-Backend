@@ -100,7 +100,7 @@ class SpatieController extends Controller
               'else' -> 'please try again,
    */
 
-    public function Assign_Role_to_user(Request $request)
+    public static function Assign_Role_to_user(Request $request)
     {
         try {
             $validater = Validator::make($request->all(), [

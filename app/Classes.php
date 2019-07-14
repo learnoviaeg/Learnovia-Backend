@@ -10,9 +10,14 @@ class Classes extends Model
     protected $fillable = ['name'];
     public $primaryKey = 'id';
 
-    public function classes()
+    public function classlevel()
     {
-        return $this->belongsToMany('App\ClassLevel');
+        return $this->belongsTo('App\ClassLevel');
+    }
+
+    public function Segment_class()
+    {
+        return $this->belongsToMany('App\SegmentClass', 'ClassLevel', 'class_id','id');
     }
 
     public static function Validate($data)

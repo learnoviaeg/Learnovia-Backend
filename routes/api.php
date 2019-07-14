@@ -190,3 +190,6 @@ Route::post('enroll', 'EnrollUserToCourseController@EnrollCourses')->name('Enrol
 Route::post('unenroll', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers');//->middleware('permission:Enroll User Single Course');;
 Route::post('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserErollment')->name('EnrolledCourse');//->middleware('permission:View Enrolled Courses');;
 Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory');//->middleware('permission:Enroll Mandatory Courses');;
+Route::post('enrollexcel','EnrollUserToCourseController@EnrollExistUsersFromExcel');
+Route::post('enrollusertech','EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers');
+

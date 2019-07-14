@@ -8,6 +8,7 @@ use DB;
 class Enroll extends Model
 {
     protected $fillable = ['user_id' , 'username' , 'course_segment' , 'role_id' ,  'start_date' ,  'end_date'];
+    
 
    public static function IsExist ($course_segment_id ,$user_id)
    {

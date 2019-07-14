@@ -25,4 +25,10 @@ class CourseSegment extends Model
     {
         return $this->hasMany('App\Course','id','course_id');
     } 
+
+    public static function getidfromcourse($course_id)
+    {
+        return self::where('course_id', $course_id)->pluck('id')->first();
+    
+    }
 }

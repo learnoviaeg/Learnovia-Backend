@@ -11,11 +11,13 @@ class ClassLevel extends Model
 
     public function Segment_class()
     {
-        return $this->belongsToMany('App\Segment', 'segment_classes', 'class_level_id','segment_id');
+        return $this->belongsTo('App\SegmentClass');
     }
 
-    public function classlevel()
+    public function classes()
     {
-        return $this->belongsToMany('App\Classes');
+        return $this->hasMany('App\Classes');
     }
+
+
 }

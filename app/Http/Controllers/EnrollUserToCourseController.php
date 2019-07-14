@@ -5,22 +5,23 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\HelperController;
 use Illuminate\Http\Request;
 use App\User;
+use Excel;
+use App\Imports\EnrollImport;
 use App\Enroll;
 use Carbon\Carbon;
 use App\CourseSegment;
 use App\SegmentClass;
 use DB;
+use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
-
 class EnrollUserToCourseController extends Controller
 {
     // Enroll one\more users to one\more course_segements
-    public function EnrollCourses(Request $request)
+    public static function EnrollCourses(Request $request)
     {
 
         $request->validate([
             'course_segment' => 'required|array|exists:course_segments,id',
-
             'start_date' => 'required|before:end_date|after:'.Carbon::now(),
             'users'=> 'required|array',
             'users.*'=>'required|string|exists:users,username',
@@ -107,7 +108,7 @@ class EnrollUserToCourseController extends Controller
 
 
 
-    public function EnrollInAllMandatoryCourses(Request $request)
+    public static function EnrollInAllMandatoryCourses(Request $request)
     {
 
         $request->validate([
@@ -143,8 +144,26 @@ class EnrollUserToCourseController extends Controller
                 'role_id'=>$role,
             ]);
         }
-   
+    // dd('done');
     return HelperController::api_response_format(200, [], 'added successfully');
                 
+    }
+
+    public function EnrollExistUsersFromExcel(Request $request){
+
+        $request->validate(['file' => 'required|mimes:xls,xlsx,csv']);
+
+         Excel::import(new EnrollImport, request()->file('file'));  
+        
+
+    }
+
+    public function AddAndEnrollBulkOfNewUsers(Request $request){
+
+        $request->validate(['file' => 'required|mimes:xls,xlsx,csv']);
+
+         Excel::import(new UsersImport, request()->file('file'));  
+        
+
     }
 }

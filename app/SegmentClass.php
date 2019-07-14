@@ -13,5 +13,12 @@ class SegmentClass extends Model
     {
         return $this->hasMany('App\CourseSegment','segment_class_id','id');
     } 
- 
+
+    public function classes(){
+        return $this->belongsToMany('App\Classes', 'class_level','class_id','id');
+    }
+    public function classelevel(){
+        return $this->hasMany('App\ClassLevel');
+    }
+
 }
