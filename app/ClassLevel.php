@@ -7,16 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class ClassLevel extends Model
 {
     protected $fillable = ['year_level_id' , 'class_id'];
-    public $primaryKey = 'id';
 
-    public function Segment_class()
+    public static function GetClass($row)
     {
-        return $this->belongsTo('App\SegmentClass');
-    }
-
-    public function classes()
-    {
-        return $this->hasMany('App\Classes');
+        $check = self::where('class_id',$row['class_id'])->pluck('id')->first();
+        return $check;
     }
 
 

@@ -14,6 +14,8 @@ use App\SegmentClass;
 use DB;
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
+use App\Http\Controllers\ExcelController;
+
 class EnrollUserToCourseController extends Controller
 {
     // Enroll one\more users to one\more course_segements
@@ -88,7 +90,6 @@ class EnrollUserToCourseController extends Controller
 
     public function ViewAllCoursesThatUserErollment(Request $request)
     {
-
         $request->validate([
             'username' => 'required|exists:users,username'
         ]);
@@ -151,19 +152,15 @@ class EnrollUserToCourseController extends Controller
 
     public function EnrollExistUsersFromExcel(Request $request){
 
-        $request->validate(['file' => 'required|mimes:xls,xlsx,csv']);
-
-         Excel::import(new EnrollImport, request()->file('file'));  
-        
+        $ExcelCntrlVar = new ExcelController();
+        $ExcelCntrlVar->import($request);
 
     }
 
     public function AddAndEnrollBulkOfNewUsers(Request $request){
 
-        $request->validate(['file' => 'required|mimes:xls,xlsx,csv']);
-
-         Excel::import(new UsersImport, request()->file('file'));  
+        $ExcelCntrlVar = new ExcelController();
+        $ExcelCntrlVar->import($request);
         
-
     }
 }
