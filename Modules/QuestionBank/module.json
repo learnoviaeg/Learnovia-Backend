@@ -1,0 +1,14 @@
+{
+    "name": "QuestionBank",
+    "alias": "questionbank",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\QuestionBank\\Providers\\QuestionBankServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

@@ -1,0 +1,25 @@
+{
+    "name": "nwidart/questionbank",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\QuestionBank\\Providers\\QuestionBankServiceProvider"
+            ],
+            "aliases": {
+                
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\QuestionBank\\": ""
+        }
+    }
+}
