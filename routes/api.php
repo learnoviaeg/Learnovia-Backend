@@ -10,6 +10,7 @@ Route::get('install', function () {
     if($user){
         return "This Site is Installed befpre go and ask admin";
     }else{
+        \Spatie\Permission\Models\Permission::create(['name' => 'Send Message to users ']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Notify']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Get All Notifications']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Get Unread']);
@@ -101,16 +102,18 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
-Route::get('userRole' , 'AuthController@userRole');
+
+
 Route::group(['middleware' => 'auth:api'], function () {
+    Route::get('userRole' , 'AuthController@userRole');
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('user', 'AuthController@user')->name('user');
     Route::get('userRole' , 'AuthController@userRole')->name('userRole');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('addrole', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:Add Role');
     Route::post('deleterole', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:Delete Role');
-    Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser')->middleware('permission:Assign Role to User');
-    Route::post('assigpertorole', 'SpatieController@Assign_Permission_Role')->name('assignpertorole')->middleware('permission:Assign Permission To Role');
+    Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser');//->middleware('permission:Assign Role to User');
+    Route::post('assigpertorole', 'SpatieController@Assign_Permission_Role')->name('assignpertorole');//->middleware('permission:Assign Permission To Role');
     Route::post('revokerole', 'SpatieController@Revoke_Role_from_user')->name('revokerolefromuser')->middleware('permission:Revoke Role from User');
     Route::post('revokepermissionfromrole', 'SpatieController@Revoke_Permission_from_Role')->name('revokepermissionfromrole')->middleware('permission:Revoke Permission from role');
     Route::get('listrandp', 'SpatieController@List_Roles_Permissions')->name('listpermissionandrole')->middleware('permission:List Permissions and Roles');
@@ -204,6 +207,7 @@ Route::group(['prefix' => 'user' , 'middleware' => 'auth:api'] , function (){
     Route::post('suspend','UserController@suspend_user')->name('suspenduser')->middleware('permission:Suspend User');
     Route::post('unsuspend','UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:Un Suspend User');
 });
+<<<<<<< HEAD
 
 Route::group(['prefix' => 'enroll'] , function (){
     // start  ... Enrollment of user to courses
@@ -214,3 +218,21 @@ Route::group(['prefix' => 'enroll'] , function (){
     Route::post('enrollexcel','EnrollUserToCourseController@EnrollExistUsersFromExcel');
     Route::post('usertech','EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers');
 });
+=======
+Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
+    Route::post('send', 'MessageController@Send_message_of_all_user')->name('sendMessage')->middleware('permission:Send Message to users');
+    Route::post('deleteForall', 'MessageController@deleteMessageForAll')->name('deleteMessageforall')->middleware('permission:Delete message for all');
+    Route::post('deleteForMe', 'MessageController@deleteMessageforMe')->name('deleteMessageforMe')->middleware('permission:delete Message for Me');
+    Route::post('Seen', 'MessageController@SeenMessage')->name('SeenMessage')->middleware('permission:Seen Message');
+    Route::post('ViewFromTo', 'MessageController@ViewAllMSG_from_to')->name('ViewFromTo')->middleware('permission:View all Messages From To');
+//    Route::post('update', 'MessageController@edit')->name('editcategory')->middleware('permission:Update Category');
+//    Route::post('delete', 'MessageController@delete')->name('deletecategory')->middleware('permission:Delete Category');
+//    Route::get('get', 'MessageController@get')->name('getcategory')->middleware('permission:Get Categories');
+    Route::post('addContact', 'ContactController@addContact')->name('addContact')->middleware('permission:Get Categories');
+
+});
+
+
+Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role');
+Route::get('test', 'SpatieController@index');
+>>>>>>> a65664371e6745db9d5e25606476acca2fd923e4

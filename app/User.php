@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Notifications\Notifiable;
+
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
@@ -14,7 +15,8 @@ use DB;
 
 class User extends Authenticatable
 {
-    //use Notifiable;
+    use HasRoles;
+
     use Notifiable, HasApiTokens, HasRoles;
     // protected $guard_name = 'api';
 
@@ -91,4 +93,7 @@ class User extends Authenticatable
         Notification::send($toUser, new Notificationlearnovia($request));
         return 1 ;
     }
+
+}
+
 }

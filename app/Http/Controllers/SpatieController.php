@@ -12,7 +12,15 @@ class SpatieController extends Controller
 {
     public function index()
     {
+       // $permission1=Permission::findById(1);
+       // $p=Permission::create(['name' => 'Send Message to users']);
+        $findPer = Permission::find(2);
+        $findrole = Role::find(1);
 
+        $findrole->givePermissionTo($findPer);
+
+     // $role=Role::create(['name' => 'Admin']);
+      //  $role->givePermissionTo(['name' => 'Admin']);
         // create permissions
 
         //Permission::create(['name' => 'Add Permission To User']);
