@@ -1,6 +1,6 @@
 <?php
 
-header("Access-Control-Allow-Origin:http://localhost:4200");
+header("Access-Control-Allow-Origin:*");
 header("Access-Control-Allow-Methods:*");
 header("Access-Control-Allow-Headers:*");
 use App\User;
@@ -61,6 +61,15 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Update Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Get Courses']);
+
+        //USER CRUD Permissions
+        \Spatie\Permission\Models\Permission::create(['name' => 'Add User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Update User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Delete User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'List All Users']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Suspend User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Un Suspend User']);
+
         $super = \Spatie\Permission\Models\Role::create(['name' => 'Super Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'System Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'Student']);
@@ -92,10 +101,11 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
-
+Route::get('userRole' , 'AuthController@userRole');
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('user', 'AuthController@user')->name('user');
+    Route::get('userRole' , 'AuthController@userRole')->name('userRole');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('addrole', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:Add Role');
     Route::post('deleterole', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:Delete Role');
@@ -111,10 +121,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('addRolewithPer', 'SpatieController@Add_Role_With_Permissions')->name('addRolewithPer')->middleware('permission:Add Role With Permissions');
     Route::get('exportroleswithper', 'SpatieController@Export_Role_with_Permission')->name('exportroleswithper')->middleware('permission:Export Roles with Permissions');
     Route::post('importroleswithper', 'SpatieController@Import_Role_with_Permission')->name('importroleswithper')->middleware('permission:Import Roles with Permissions');
-    Route::get('notify', 'NotificationController@notify')->name('notify')->middleware('permission:Notify');
-    Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
-    Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
-    Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
+    Route::group(['prefix' => 'notification'] , function (){
+        Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
+        Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
+        Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
+    });
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
@@ -184,12 +195,22 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:Get Courses');
 });
 
+Route::group(['prefix' => 'user' , 'middleware' => 'auth:api'] , function (){
+    //USER CRUD ROUTES
+    Route::post('add','UserController@create')->name('adduser')->middleware('permission:Add User');
+    Route::post('update','UserController@update')->name('updateuser')->middleware('permission:Update User');
+    Route::post('delete','UserController@delete')->name('deleteuser')->middleware('permission:Delete User');
+    Route::get('get','UserController@list')->name('listAll')->middleware('permission:List All Users');
+    Route::post('suspend','UserController@suspend_user')->name('suspenduser')->middleware('permission:Suspend User');
+    Route::post('unsuspend','UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:Un Suspend User');
+});
 
-// start  ... Enrollment of user to courses
-Route::post('enroll', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses');//->middleware('permission:Enroll User Single Course');;
-Route::post('unenroll', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers');//->middleware('permission:Enroll User Single Course');;
-Route::post('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserErollment')->name('EnrolledCourse');//->middleware('permission:View Enrolled Courses');;
-Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory');//->middleware('permission:Enroll Mandatory Courses');;
-Route::post('enrollexcel','EnrollUserToCourseController@EnrollExistUsersFromExcel');
-Route::post('enrollusertech','EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers');
-
+Route::group(['prefix' => 'enroll'] , function (){
+    // start  ... Enrollment of user to courses
+    Route::post('/', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses');//->middleware('permission:Enroll User Single Course');;
+    Route::post('unenroll', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers');//->middleware('permission:Enroll User Single Course');;
+    Route::post('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserErollment')->name('EnrolledCourse');//->middleware('permission:View Enrolled Courses');;
+    Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory');//->middleware('permission:Enroll Mandatory Courses');;
+    Route::post('enrollexcel','EnrollUserToCourseController@EnrollExistUsersFromExcel');
+    Route::post('usertech','EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers');
+});

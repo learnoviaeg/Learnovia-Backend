@@ -14,5 +14,27 @@ class ClassLevel extends Model
         return $check;
     }
 
+    public function classes(){
+        return $this->hasMany('App\Classes' , 'id' , 'class_id');
+    }
 
+    public function yearLevels(){
+        return $this->hasMany('App\YearLevel' , 'id' , 'year_level_id');
+    }
+
+    public function segmentClass()
+    {
+        return $this->hasMany('App\SegmentClass');
+    }
+
+    public static function checkRelation($class , $yearlevel){
+        $classlevel = self::whereClass_id($class)->whereYear_level_id($yearlevel)->first();
+        if($classlevel == null){
+            $classlevel = self::create([
+                'class_id'      => $class,
+                'year_level_id' => $yearlevel,
+            ]);
+        }
+        return $classlevel;
+    }
 }

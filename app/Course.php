@@ -12,5 +12,12 @@ class Course extends Model
     {
         return self::where('name',$course_name)->pluck('id')->first();
     }
-    
+
+    public function category(){
+        return $this->belongsTo('App\Category');
+    }
+
+    public function courseSegments(){
+        return $this->hasMany('App\CourseSegment');
+    }
 }

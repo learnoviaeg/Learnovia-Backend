@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\AcademicYearType;
 use App\ClassLevel;
+use App\YearLevel;
 use Illuminate\Http\Request;
 use Validator;
 use App\SegmentClass;
@@ -15,8 +17,8 @@ class segment_class_Controller extends Controller
 
     /**
      * @Description: Get all Classes with its Segments
-     *@param: no take parameters
-     *@return : response of all Classes with its Segments
+     * @param: no take parameters
+     * @return : response of all Classes with its Segments
      *
      */
     public function List_Classes_with_all_segment()
@@ -24,20 +26,24 @@ class segment_class_Controller extends Controller
         $cat = Segment_class_resource::collection(ClassLevel::with("Segment_class")->get());
         return HelperController::api_response_format(200, $cat);
     }
+
     /**
      *
-    @Description : add segment to specific Class
+     * @Description : add segment to specific Class
      * @param : Request to Access name of Segment  and class_level_id of class
      * @return : if addition succeeded ->  return MSG : 'Type insertion sucess'
      *           if not -> return MSG: 'NOTFOUND Error '
      *
-    ``
+     * ``
      */
     public function Add_Segment_with_class(Request $req)
     {
         $valid = Validator::make($req->all(), [
             'name' => 'required',
-            'class_level_id' => 'required|exists:class_levels,id'
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
         ]);
 
         if ($valid->fails()) {
@@ -47,8 +53,11 @@ class segment_class_Controller extends Controller
         $segment = Segment::create([
             'name' => $req->name
         ]);
+        $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
+        $yearlevel = YearLevel::checkRelation($yeartype->id, $req->level);
+        $classLevel = ClassLevel::checkRelation($req->class, $yearlevel->id);
         SegmentClass::create([
-            'class_level_id' => $req->class_level_id,
+            'class_level_id' => $classLevel->id,
             'segment_id' => $segment->id
         ]);
 
@@ -58,10 +67,11 @@ class segment_class_Controller extends Controller
         return HelperController::NOTFOUND();
 
     }
+
     /**
-     *@Description:Remove Segment
-     *@param: request to access id of the Segment
-     *@return : MSG 'Segment Deleted Successfully' if deleted
+     * @Description:Remove Segment
+     * @param: request to access id of the Segment
+     * @return : MSG 'Segment Deleted Successfully' if deleted
      *          if not : return 'NotFound Error'
      *
      **/
@@ -80,7 +90,7 @@ class segment_class_Controller extends Controller
     }
 
     /**
-     *@Description :assign specific Segment to specific Class
+     * @Description :assign specific Segment to specific Class
      * @param : request to access id_segment of Segment and class_level_id
      * @return : if Assignment succeeded ->  return MSG -> 'Assignment sucess'
      *           if not -> return "NOTFOUND Error"
