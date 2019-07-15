@@ -120,10 +120,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('addRolewithPer', 'SpatieController@Add_Role_With_Permissions')->name('addRolewithPer')->middleware('permission:Add Role With Permissions');
     Route::get('exportroleswithper', 'SpatieController@Export_Role_with_Permission')->name('exportroleswithper')->middleware('permission:Export Roles with Permissions');
     Route::post('importroleswithper', 'SpatieController@Import_Role_with_Permission')->name('importroleswithper')->middleware('permission:Import Roles with Permissions');
-    Route::get('notify', 'NotificationController@notify')->name('notify')->middleware('permission:Notify');
-    Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
-    Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
-    Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
+    Route::group(['prefix' => 'notification'] , function (){
+        Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
+        Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
+        Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
+    });
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {

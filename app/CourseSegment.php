@@ -16,4 +16,9 @@ class CourseSegment extends Model
     {
         return $this->hasMany('App\SegmentClass' , 'id' , 'segment_class_id');
     }
+
+    public function lessons()
+    {
+        return $this->hasMany('App\Lesson');
+    }
 }
