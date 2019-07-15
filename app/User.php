@@ -84,10 +84,4 @@ class User extends Authenticatable
         Notification::send($toUser, new Notificationlearnovia($request));
         return 1 ;
     }
-
-
-<<<<<<< HEAD
-=======
-
->>>>>>> master
 }

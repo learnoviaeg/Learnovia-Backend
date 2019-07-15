@@ -102,22 +102,14 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
-<<<<<<< HEAD
-//Route::get('spatie', 'SpatieController@index')->name('spatie');
 
 
 Route::group(['middleware' => 'auth:api'], function () {
-    Route::get('logout', 'AuthController@logout')->name('logout');
-    Route::get('user', 'AuthController@user')->name('user');
-   Route::get('spatie', 'SpatieController@index')->name('spatie');
-=======
-Route::get('userRole' , 'AuthController@userRole');
-Route::group(['middleware' => 'auth:api'], function () {
+    Route::get('userRole' , 'AuthController@userRole');
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('user', 'AuthController@user')->name('user');
     Route::get('userRole' , 'AuthController@userRole')->name('userRole');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
->>>>>>> master
     Route::post('addrole', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:Add Role');
     Route::post('deleterole', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:Delete Role');
     Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser');//->middleware('permission:Assign Role to User');
