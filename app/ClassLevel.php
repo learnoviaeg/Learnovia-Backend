@@ -9,13 +9,32 @@ class ClassLevel extends Model
     protected $fillable = ['year_level_id' , 'class_id'];
     public $primaryKey = 'id';
 
-    public function Segment_class()
+    public function segments()
     {
         return $this->belongsToMany('App\Segment', 'segment_classes', 'class_level_id','segment_id');
     }
 
-    public function classlevel()
+    public function classes(){
+        return $this->hasMany('App\Classes' , 'id' , 'class_id');
+    }
+
+    public function yearLevels(){
+        return $this->hasMany('App\YearLevel' , 'id' , 'year_level_id');
+    }
+
+    public function segmentClass()
     {
-        return $this->belongsToMany('App\Classes');
+        return $this->hasMany('App\SegmentClass');
+    }
+
+    public static function checkRelation($class , $yearlevel){
+        $classlevel = self::whereClass_id($class)->whereYear_level_id($yearlevel)->first();
+        if($classlevel == null){
+            $classlevel = self::create([
+                'class_id'      => $class,
+                'year_level_id' => $yearlevel,
+            ]);
+        }
+        return $classlevel;
     }
 }

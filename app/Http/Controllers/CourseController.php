@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\AcademicYearType;
+use App\ClassLevel;
 use App\Course;
 use App\CourseSegment;
 use App\SegmentClass;
+use App\YearLevel;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
@@ -12,18 +15,26 @@ class CourseController extends Controller
     public function add(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'category' => 'required|exists:categories,id',
-            'segment_class_id' => 'required|exists:segment_classes,id'
+            'name'      => 'required',
+            'category'  => 'required|exists:categories,id',
+            'year'      => 'required|exists:academic_years,id',
+            'type'      => 'required|exists:academic_types,id',
+            'level'     => 'required|exists:levels,id',
+            'class'     => 'required|exists:classes,id',
+            'segment'   => 'required|exists:segments,id',
         ]);
 
         $course = Course::create([
             'name' => $request->name,
             'category_id' => $request->category,
         ]);
+        $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
+        $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
+        $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
+        $segmentClass = SegmentClass::checkRelation($classLevel->id , $request->segment);
         CourseSegment::create([
             'course_id' => $course->id,
-            'segment_class_id' => $request->segment_class_id
+            'segment_class_id' => $segmentClass->id
         ]);
         return HelperController::api_response_format(201, $course, 'Course Created Successfully');
     }

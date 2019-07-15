@@ -102,6 +102,7 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
+<<<<<<< HEAD
 //Route::get('spatie', 'SpatieController@index')->name('spatie');
 
 
@@ -109,6 +110,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('user', 'AuthController@user')->name('user');
    Route::get('spatie', 'SpatieController@index')->name('spatie');
+=======
+Route::get('userRole' , 'AuthController@userRole');
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::get('logout', 'AuthController@logout')->name('logout');
+    Route::get('user', 'AuthController@user')->name('user');
+    Route::get('userRole' , 'AuthController@userRole')->name('userRole');
+    Route::get('spatie', 'SpatieController@index')->name('spatie');
+>>>>>>> master
     Route::post('addrole', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:Add Role');
     Route::post('deleterole', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:Delete Role');
     Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser');//->middleware('permission:Assign Role to User');
@@ -123,10 +132,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('addRolewithPer', 'SpatieController@Add_Role_With_Permissions')->name('addRolewithPer')->middleware('permission:Add Role With Permissions');
     Route::get('exportroleswithper', 'SpatieController@Export_Role_with_Permission')->name('exportroleswithper')->middleware('permission:Export Roles with Permissions');
     Route::post('importroleswithper', 'SpatieController@Import_Role_with_Permission')->name('importroleswithper')->middleware('permission:Import Roles with Permissions');
-    Route::get('notify', 'NotificationController@notify')->name('notify')->middleware('permission:Notify');
-    Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
-    Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
-    Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
+    Route::group(['prefix' => 'notification'] , function (){
+        Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
+        Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
+        Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
+    });
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {

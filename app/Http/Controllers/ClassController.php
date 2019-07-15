@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\AcademicYearType;
+use App\YearLevel;
 use Illuminate\Http\Request;
 use App\Classes;
 use App\ClassLevel;
@@ -41,15 +43,19 @@ class ClassController extends Controller
     public function AddClassWithYear(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'year' => 'required|exists:year_levels,id'
+            'name'  => 'required',
+            'year'  => 'required|exists:academic_years,id',
+            'type'  => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
         ]);
 
         $class = Classes::create([
             'name' => $request->name,
         ]);
+        $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
+        $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
         ClassLevel::create([
-            'year_level_id' => $request->year,
+            'year_level_id' => $yearlevel->id,
             'class_id' => $class->id
         ]);
         return HelperController::api_response_format(200, new  Classs($class), 'Class Created Successfully');
