@@ -56,7 +56,7 @@ class AuthController extends Controller
         ]);
         $credentials = request(['username', 'password']);
         if (!Auth::attempt($credentials))
-            return HelperController::api_response_format(401, [], 'Unauthorized');
+            return HelperController::api_response_format(401, [], 'Invalid username or password');
 
         if ($request->user()->suspend == 1) {
             return HelperController::api_response_format(200, null, 'Your Account is Blocked!');
