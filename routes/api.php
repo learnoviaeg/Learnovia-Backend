@@ -207,7 +207,6 @@ Route::group(['prefix' => 'user' , 'middleware' => 'auth:api'] , function (){
     Route::post('suspend','UserController@suspend_user')->name('suspenduser')->middleware('permission:Suspend User');
     Route::post('unsuspend','UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:Un Suspend User');
 });
-<<<<<<< HEAD
 
 Route::group(['prefix' => 'enroll'] , function (){
     // start  ... Enrollment of user to courses
@@ -218,7 +217,7 @@ Route::group(['prefix' => 'enroll'] , function (){
     Route::post('enrollexcel','EnrollUserToCourseController@EnrollExistUsersFromExcel');
     Route::post('usertech','EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers');
 });
-=======
+
 Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     Route::post('send', 'MessageController@Send_message_of_all_user')->name('sendMessage')->middleware('permission:Send Message to users');
     Route::post('deleteForall', 'MessageController@deleteMessageForAll')->name('deleteMessageforall')->middleware('permission:Delete message for all');
@@ -229,10 +228,6 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
 //    Route::post('delete', 'MessageController@delete')->name('deletecategory')->middleware('permission:Delete Category');
 //    Route::get('get', 'MessageController@get')->name('getcategory')->middleware('permission:Get Categories');
     Route::post('addContact', 'ContactController@addContact')->name('addContact')->middleware('permission:Get Categories');
-
+    Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role');
+    Route::get('test', 'SpatieController@index');
 });
-
-
-Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role');
-Route::get('test', 'SpatieController@index');
->>>>>>> a65664371e6745db9d5e25606476acca2fd923e4
