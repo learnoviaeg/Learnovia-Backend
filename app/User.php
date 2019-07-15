@@ -7,6 +7,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\Notificationlearnovia;
+use Illuminate\Support\Facades\Notification;
 
 
 class User extends Authenticatable
@@ -21,7 +23,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'firstname', 'email', 'password','real_password','lastname','username',
     ];
 
     /**
@@ -30,7 +32,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token','real_password'
     ];
 
     /**
@@ -41,4 +43,45 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    private static function getUserCounter($lastid){
+        if ($lastid < 10){
+            return "000" . $lastid;
+        }elseif ($lastid < 100 && $lastid >= 10){
+            return "00" . $lastid;
+        }elseif ($lastid < 1000 && $lastid >= 100){
+            return "0" . $lastid;
+        }
+    }
+
+    public static function generateUsername(){
+        $last_user = User::latest('id')->first();
+        if ($last_user)
+            return env('PREFIX') . self::getUserCounter($last_user->id);
+        return env('PREFIX') . "0001";
+    }
+
+    public static function notify($request)
+    {
+        $validater=Validator::make($request,[
+            'message'=>'required',
+            'from'=>'required|integer|exists:users,id',
+            'to'=>'required|integer|exists:users,id',
+            'course_id'=>'required|integer|exists:courses,id',
+            'type'=>'required|string'
+        ]);
+
+        if ($validater->fails())
+        {
+            $errors=$validater->errors();
+            return response()->json($errors,400);
+        }
+        $touserid=$request['to'];
+        $toUser = User::find($touserid);
+        Notification::send($toUser, new Notificationlearnovia($request));
+        return 1 ;
+    }
+
+
+
 }

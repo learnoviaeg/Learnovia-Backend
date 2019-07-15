@@ -16,7 +16,7 @@ class AcademicYearController extends Controller
      */
     public function index()
     {
-        $year = AcademicYear::paginate(10);
+        $year = AcademicYear::with('AC_Type')->paginate(10);
         //$tmp = Academic_YearResource::collection($year);
         return HelperController::api_response_format(201, $year, 'Year Created Successfully');
     }

@@ -1,5 +1,8 @@
 <?php
 
+header("Access-Control-Allow-Origin:http://localhost:4200");
+header("Access-Control-Allow-Methods:*");
+header("Access-Control-Allow-Headers:*");
 use App\User;
 
 Route::get('install', function () {
@@ -7,15 +10,26 @@ Route::get('install', function () {
     if($user){
         return "This Site is Installed befpre go and ask admin";
     }else{
+        \Spatie\Permission\Models\Permission::create(['name' => 'Notify']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Get All Notifications']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Get Unread']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Mark as read']);
+
         \Spatie\Permission\Models\Permission::create(['name' => 'Add Role']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Role']);
-
         \Spatie\Permission\Models\Permission::create(['name' => 'Assign Role to User']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Assign Permission To Role']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Revoke Role from User']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Revoke Permission from role']);
         \Spatie\Permission\Models\Permission::create(['name' => 'List Permissions and Roles']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Add Bulk of Users']);
+
+        \Spatie\Permission\Models\Permission::create(['name' => 'Add Permission To User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'List Role with Permissions']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Get Individual Role with Permissions']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Add Role With Permissions']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Export Roles with Permissions']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Import Roles with Permissions']);
 
         \Spatie\Permission\Models\Permission::create(['name' => 'Add year']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Get all years']);
@@ -47,6 +61,15 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Update Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Course']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Get Courses']);
+
+        //USER CRUD Permissions
+        \Spatie\Permission\Models\Permission::create(['name' => 'Add User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Update User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Delete User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'List All Users']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Suspend User']);
+        \Spatie\Permission\Models\Permission::create(['name' => 'Un Suspend User']);
+
         $super = \Spatie\Permission\Models\Role::create(['name' => 'Super Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'System Admin']);
         \Spatie\Permission\Models\Role::create(['name' => 'Student']);
@@ -58,9 +81,12 @@ Route::get('install', function () {
         $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
 
         $user = new User([
-            'name' => 'Learnovia Company',
+            'firstname' => 'Learnovia',
+            'lastname' => 'Company',
+            'username'=> 'Admin',
             'email' => 'admin@learnovia.com',
-            'password' => bcrypt('LeaRnovia_H_M_A')
+            'password' => bcrypt('LeaRnovia_H_M_A'),
+            'real_password' =>'LeaRnovia_H_M_A'
         ]);
         $user->save();
         $user->assignRole($super);
@@ -68,22 +94,38 @@ Route::get('install', function () {
     }
 
 });
+
+Route::post('import', 'ExcelController@import')->name('import');
+
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
-
+Route::get('userRole' , 'AuthController@userRole');
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('user', 'AuthController@user')->name('user');
-    Route::post('addrole/{name}', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:Add Role');
-    Route::post('deleterole/{id}', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:Delete Role');
+    Route::get('userRole' , 'AuthController@userRole')->name('userRole');
+    Route::get('spatie', 'SpatieController@index')->name('spatie');
+    Route::post('addrole', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:Add Role');
+    Route::post('deleterole', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:Delete Role');
     Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser')->middleware('permission:Assign Role to User');
     Route::post('assigpertorole', 'SpatieController@Assign_Permission_Role')->name('assignpertorole')->middleware('permission:Assign Permission To Role');
     Route::post('revokerole', 'SpatieController@Revoke_Role_from_user')->name('revokerolefromuser')->middleware('permission:Revoke Role from User');
     Route::post('revokepermissionfromrole', 'SpatieController@Revoke_Permission_from_Role')->name('revokepermissionfromrole')->middleware('permission:Revoke Permission from role');
     Route::get('listrandp', 'SpatieController@List_Roles_Permissions')->name('listpermissionandrole')->middleware('permission:List Permissions and Roles');
-    Route::Post('InsertBulkofUsers', 'UserController@insert_users')->name('AddBulkofUsers')->middleware('permission:Add Bulk of Users');
+    Route::Post('InsertBulkofUsers','UserController@insert_users')->name('AddBulkofUsers')->middleware('permission:Add Bulk of Users');;
+    Route::post('addpertouser', 'SpatieController@Assign_Permission_User')->name('addpertouser')->middleware('permission:Add Permission To User');
+    Route::get('listrolewithper', 'SpatieController@List_Roles_With_Permission')->name('listRolewithPer')->middleware('permission:List Role with Permissions');
+    Route::post('getRoleWithPermission', 'SpatieController@Get_Individual_Role')->name('getRoleWithPermission')->middleware('permission:Get Individual Role with Permissions');
+    Route::post('addRolewithPer', 'SpatieController@Add_Role_With_Permissions')->name('addRolewithPer')->middleware('permission:Add Role With Permissions');
+    Route::get('exportroleswithper', 'SpatieController@Export_Role_with_Permission')->name('exportroleswithper')->middleware('permission:Export Roles with Permissions');
+    Route::post('importroleswithper', 'SpatieController@Import_Role_with_Permission')->name('importroleswithper')->middleware('permission:Import Roles with Permissions');
+    Route::group(['prefix' => 'notification'] , function (){
+        Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
+        Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
+        Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
+    });
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
@@ -123,7 +165,7 @@ Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::get('get/{id}', 'ClassController@show')->name('getclassbyid')->middleware('permission:Get Class By id');
     Route::put('update', 'ClassController@update')->name('updateclass')->middleware('permission:Update Class');
     Route::delete('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:Delete Class');
-});
+}); 
 
 Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
     //if you want to add segment to class please,write addsegment in yours
@@ -151,4 +193,14 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'CourseController@update')->name('editcourse')->middleware('permission:Update Course');
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:Delete Course');
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:Get Courses');
+});
+
+Route::group(['prefix' => 'user' , 'middleware' => 'auth:api'] , function (){
+    //USER CRUD ROUTES
+    Route::post('add','UserController@create')->name('adduser')->middleware('permission:Add User');
+    Route::post('update','UserController@update')->name('updateuser')->middleware('permission:Update User');
+    Route::post('delete','UserController@delete')->name('deleteuser')->middleware('permission:Delete User');
+    Route::get('get','UserController@list')->name('listAll')->middleware('permission:List All Users');
+    Route::post('suspend','UserController@suspend_user')->name('suspenduser')->middleware('permission:Suspend User');
+    Route::post('unsuspend','UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:Un Suspend User');
 });

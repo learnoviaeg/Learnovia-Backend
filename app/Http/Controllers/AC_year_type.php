@@ -63,7 +63,10 @@ class AC_year_type extends Controller
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
         }
-        $Ac = AcademicType::create($req->all());
+        $Ac = AcademicType::create([
+            'name' => $req->name,
+            'segment_no' => $req->segment_no
+        ]);
         AcademicYearType::create([
             'academic_year_id' => $req->year,
             'academic_type_id' => $Ac->id
