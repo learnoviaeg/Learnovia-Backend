@@ -8,7 +8,7 @@ use App\User;
 Route::get('install', function () {
     $user = User::whereEmail('admin@learnovia.com')->first();
     if($user){
-        return "This Site is Installed befpre go and ask admin";
+        return "This Site is Installed before go and ask admin";
     }else{
         \Spatie\Permission\Models\Permission::create(['name' => 'Send Message to users ']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Notify']);
@@ -112,12 +112,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('addrole', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:Add Role');
     Route::post('deleterole', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:Delete Role');
-    Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser');//->middleware('permission:Assign Role to User');
-    Route::post('assigpertorole', 'SpatieController@Assign_Permission_Role')->name('assignpertorole');//->middleware('permission:Assign Permission To Role');
+    Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser')->middleware('permission:Assign Role to User');
+    Route::post('assigpertorole', 'SpatieController@Assign_Permission_Role')->name('assignpertorole')->middleware('permission:Assign Permission To Role');
     Route::post('revokerole', 'SpatieController@Revoke_Role_from_user')->name('revokerolefromuser')->middleware('permission:Revoke Role from User');
     Route::post('revokepermissionfromrole', 'SpatieController@Revoke_Permission_from_Role')->name('revokepermissionfromrole')->middleware('permission:Revoke Permission from role');
     Route::get('listrandp', 'SpatieController@List_Roles_Permissions')->name('listpermissionandrole')->middleware('permission:List Permissions and Roles');
-    Route::Post('InsertBulkofUsers','UserController@insert_users')->name('AddBulkofUsers')->middleware('permission:Add Bulk of Users');;
+    //this function not Found
+    Route::Post('InsertBulkofUsers','UserController@insert_users')->name('AddBulkofUsers')->middleware('permission:Add Bulk of Users');
     Route::post('addpertouser', 'SpatieController@Assign_Permission_User')->name('addpertouser')->middleware('permission:Add Permission To User');
     Route::get('listrolewithper', 'SpatieController@List_Roles_With_Permission')->name('listRolewithPer')->middleware('permission:List Role with Permissions');
     Route::post('getRoleWithPermission', 'SpatieController@Get_Individual_Role')->name('getRoleWithPermission')->middleware('permission:Get Individual Role with Permissions');
@@ -127,14 +128,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'notification'] , function (){
         Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
         Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
-        Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
+        Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Mark as read');
     });
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'AcademicYearController@store')->name('addyear')->middleware('permission:Add year');
     Route::get('get', 'AcademicYearController@index')->name('getallyears')->middleware('permission:Get all years');
-    Route::get('get/{id}', 'AcademicYearController@show')->name('getyearbyid')->middleware('permission:Get Year');
+    Route::post('getById', 'AcademicYearController@show')->name('getyearbyid')->middleware('permission:Get Year');
     Route::put('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:Update year');
     Route::delete('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:Delete Year');
 });
@@ -168,7 +169,7 @@ Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::get('get/{id}', 'ClassController@show')->name('getclassbyid')->middleware('permission:Get Class By id');
     Route::put('update', 'ClassController@update')->name('updateclass')->middleware('permission:Update Class');
     Route::delete('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:Delete Class');
-}); 
+});
 
 Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
     //if you want to add segment to class please,write addsegment in yours
@@ -231,3 +232,4 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role');
     Route::get('test', 'SpatieController@index');
 });
+//Route::post('userimport','ExcelController@EnrollExistUsersFromExcel');

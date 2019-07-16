@@ -10,7 +10,7 @@ class ClassLevel extends Model
 
     public static function GetClass($row)
     {
-        $check = self::where('class_id',$row['class_id'])->pluck('id')->first();
+        $check = self::where('class_id',$row)->pluck('id')->first();
         return $check;
     }
 

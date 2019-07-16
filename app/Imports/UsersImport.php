@@ -15,6 +15,8 @@ use App\Http\Controllers\EnrollUserToCourseController;
 use App\Classes;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Maatwebsite\Excel\Facades\Excel;
+use App\ClassLevel;
+use App\SegmentClass;
 
 class UsersImport implements ToModel, WithHeadingRow
 {
@@ -40,7 +42,7 @@ class UsersImport implements ToModel, WithHeadingRow
             'password' => bcrypt($password),
             'real_password' => $password
         ]);
-        
+
         foreach ($optionals as $optional) {
             if (isset($row[$optional]))
                 $user->$optional = $row[$optional];
@@ -52,13 +54,14 @@ class UsersImport implements ToModel, WithHeadingRow
         if ($row['role_id'] == 3) {
 
             $classLevID=ClassLevel::GetClass($row['class_id']);
+
             $classSegID=SegmentClass::GetClasseLevel($classLevID);
-            
+
             //$classLevID=DB::table('class_levels')->where('class_id',$row['class_id'])->pluck('id')->first();
             //$classSegID=DB::table('segment_classes')->where('class_level_id',$classLevID)->pluck('id')->first();
 
             $request = new Request([
-                'username' => $user->username, 
+                'username' => $user->username,
                 'start_date' => Date::excelToDateTimeObject($row['start_date']),
                 'end_date' => Date::excelToDateTimeObject($row['end_date']),
                 'SegmentClassId' => $classSegID
@@ -66,19 +69,19 @@ class UsersImport implements ToModel, WithHeadingRow
             EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
             foreach($enrollOptional as $seg) {
                 if (isset($row[$seg])){
+
                     $course_id=Course::findByName($row[$seg]);
                     $segmentid= CourseSegment::getidfromcourse($course_id);
-
                     $option = new Request([
                                 'course_segment' => array($segmentid),
                                 'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                                'users'=> array($user->username), 
+                                'users'=> array($user->username),
                                 'end_date' => Date::excelToDateTimeObject($row['end_date']),
                                 'role_id'=>array(3)
-                    ]);  
+                    ]);
                 EnrollUserToCourseController::EnrollCourses($option);
                 }
-            }   
+            }
         }
         else{
             foreach($teacheroptional as $sege){
@@ -88,10 +91,10 @@ class UsersImport implements ToModel, WithHeadingRow
                     $option = new Request([
                         'course_segment' => array($segmentid),
                         'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                        'users'=> array($user->username), 
+                        'users'=> array($user->username),
                         'end_date' => Date::excelToDateTimeObject($row['end_date']),
                         'role_id'=>array($role->id)
-                    ]);  
+                    ]);
                     EnrollUserToCourseController::EnrollCourses($option);
                 }
             }
