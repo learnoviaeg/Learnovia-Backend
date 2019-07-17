@@ -422,4 +422,9 @@ class SpatieController extends Controller
         }
     }
 
+    public function checkUserHavePermession(Request $request){
+        $request->validate(['permission' => 'required|exists:permissions,name']);
+        return HelperController::api_response_format(200 , $request->user()->hasPermissionTo($request->permission));
+    }
+
 }
