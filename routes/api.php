@@ -18,6 +18,10 @@ Route::get('install', function () {
 
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Role']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Role']);
+        //get and update Role
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get Role By ID']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Role By ID']);
+
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Role to User']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Permission To Role']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Revoke Role from User']);
@@ -132,6 +136,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Mark as read');
     });
     Route::get('haspermession' , 'SpatieController@checkUserHavePermession');
+    Route::post('getrolebyid','SpatieController@Get_Role')->name('getrolebyid')->middleware('permission:Get Role By ID');
+    Route::post('updaterolebyid','SpatieController@Update_Role')->name('updaterolebyid')->middleware('permission:Update Role By ID');
+
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
