@@ -16,6 +16,10 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Get Unread']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Mark as read']);
 
+        //Announcemenet
+        \Spatie\Permission\Models\Permission::create(['name' => 'Send Announcements']);
+
+
         \Spatie\Permission\Models\Permission::create(['name' => 'Add Role']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Role']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Assign Role to User']);
@@ -129,6 +133,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
         Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
     });
+    Route::post('announce','AnnouncementController@announcement')->name('announce')->middleware('permission:Send Announcements');;
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
@@ -168,7 +173,7 @@ Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::get('get/{id}', 'ClassController@show')->name('getclassbyid')->middleware('permission:Get Class By id');
     Route::put('update', 'ClassController@update')->name('updateclass')->middleware('permission:Update Class');
     Route::delete('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:Delete Class');
-}); 
+});
 
 Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
     //if you want to add segment to class please,write addsegment in yours

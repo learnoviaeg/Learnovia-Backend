@@ -14,6 +14,18 @@ class ClassLevel extends Model
         return $check;
     }
 
+    public static function GetClassLevel($class_id)
+    {
+        $check = self::where('class_id',$class_id)->pluck('id')->first();
+        return $check;
+    }
+
+    public static function GetClassLevelid($yaer_level_id)
+    {
+        $check = self::where('year_level_id',$yaer_level_id)->pluck('id')->first();
+        return $check;
+    }
+
     public function classes(){
         return $this->hasMany('App\Classes' , 'id' , 'class_id');
     }

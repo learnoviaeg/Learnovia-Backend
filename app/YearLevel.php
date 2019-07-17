@@ -28,4 +28,10 @@ class YearLevel extends Model
         }
         return $yearlevel;
     }
+
+    public static function GetYearLevelId($LevelID){
+        $check = self::where('level_id',$LevelID)->pluck('id')->first();
+        return $check;
+    }
+
 }
