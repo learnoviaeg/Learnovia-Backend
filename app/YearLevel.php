@@ -28,4 +28,7 @@ class YearLevel extends Model
         }
         return $yearlevel;
     }
+    protected $hidden = [
+        'created_at','updated_at'
+    ];
 }

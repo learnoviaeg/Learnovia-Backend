@@ -25,4 +25,5 @@ class Course extends Model
     public function courseSegments(){
         return $this->hasMany('App\CourseSegment');
     }
+
 }

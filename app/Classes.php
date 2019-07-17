@@ -10,9 +10,12 @@ class Classes extends Model
     protected $fillable = ['name'];
     public $primaryKey = 'id';
 
+    protected $hidden = [
+       'created_at','updated_at'
+    ];
     public function classlevel()
     {
-        return $this->belongsTo('App\ClassLevel');
+        return $this->belongsTo('App\ClassLevel' , 'id' , 'class_id');
     }
 
     public function Segment_class()

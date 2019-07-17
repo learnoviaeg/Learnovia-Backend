@@ -15,4 +15,8 @@ class AcademicType extends Model
     public function yearType(){
         return $this->hasMany('App\AcademicYearType');
     }
+
+    protected $hidden = [
+        'created_at','updated_at'
+    ];
 }

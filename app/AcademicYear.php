@@ -11,4 +11,7 @@ class AcademicYear extends Model
     {
         return $this->belongsToMany('App\AcademicType', 'academic_year_types', 'academic_year_id','academic_type_id');
     }
+    protected $hidden = [
+        'created_at','updated_at'
+    ];
 }

@@ -4,7 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Parent extends Model
+class Parents extends Model
 {
-    //
+    protected $hidden = [
+        'created_at','updated_at'
+    ];
 }
