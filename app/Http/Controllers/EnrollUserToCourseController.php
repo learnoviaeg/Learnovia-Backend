@@ -124,8 +124,8 @@ class EnrollUserToCourseController extends Controller
      
         $x = SegmentClass::find($request->SegmentClassId);
         $segments = collect([]);
-            $x->course_segment;
-            foreach ($x->course_segment as $key => $segment) {
+            $x->coursesegment;
+            foreach ($x->coursesegment as $key => $segment) {
                 $segment->courses;
                 foreach ($segment->courses as $key => $course) {
                     if ($course->mandatory == 1) {

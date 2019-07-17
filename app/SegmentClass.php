@@ -8,7 +8,7 @@ class SegmentClass extends Model
 {
     protected $fillable = ['class_level_id','segment_id'];
 
-    public function GetClasseLevel($classLevID){
+    public static function GetClasseLevel($classLevID){
         $check = self::where('class_level_id',$classLevID)->pluck('id')->first();
         return $check;
     }
