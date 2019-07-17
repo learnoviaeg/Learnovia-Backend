@@ -43,6 +43,7 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Type']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Type']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Level']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Level']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get all Levels']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Level']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Class']);
@@ -162,6 +163,7 @@ Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'LevelsController@AddLevelWithYear')->name('addlevel')->middleware('permission:Add Level');
     Route::get('get', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:Get all Levels');
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:Delete Level');
+    Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:Update Level');
 });
 
 Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
@@ -184,6 +186,8 @@ Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
 
     //if you want to get classes with all segments please,write getclasses in yours
     Route::get('get', "segment_class_Controller@List_Classes_with_all_segment")->name('getclasses')->middleware('permission:Get All Segments');
+
+    Route::post('update', "segment_class_Controller@update")->name('updatesegment');//->middleware('permission:Update Segments');
 });
 
 Route::group(['prefix' => 'category', 'middleware' => 'auth:api'], function () {

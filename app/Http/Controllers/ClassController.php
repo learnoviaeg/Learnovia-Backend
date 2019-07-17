@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Classes;
 use App\ClassLevel;
 use App\Http\Resources\Classes as Classs;
-
+use Validator;
 class ClassController extends Controller
 {
     /**
@@ -84,13 +84,31 @@ class ClassController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
+        $valid = Validator::make($request->all(), [
             'name' => 'required',
-            'id' => 'required|exists:classes,id'
+            'id' => 'required|exists:levels,id',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
+            'level' => 'exists:levels,id|required_with:year',
         ]);
+
+        if ($valid->fails())
+            return HelperController::api_response_format(400 , $valid->errors() , 'Something went wrong');
+
         $class = Classes::find($request->id);
+
         $class->update($request->all());
-        return HelperController::api_response_format(200, new Classs($class));
+        if ($request->filled('year')){
+            $oldyearType = AcademicYearType::checkRelation($class->classlevel->yearLevels[0]->yearType[0]->academictype[0]->id , $class->classlevel->yearLevels[0]->yearType[0]->academicyear[0]->id);
+            $newyearType = AcademicYearType::checkRelation($request->year , $request->type);
+            $oldyearLevel = YearLevel::checkRelation($oldyearType->id , $class->classlevel->yearLevels[0]->levels[0]->id);
+            $newyearLevel = YearLevel::checkRelation($newyearType->id , $request->level);
+            $oldClassLevel = ClassLevel::checkRelation($oldyearLevel->id , $class->id);
+            $oldClassLevel->delete();
+            ClassLevel::checkRelation($newyearLevel->id , $class->id);
+        }
+        $class->classlevel->yearLevels[0]->levels;
+        return HelperController::api_response_format(200, $class);
     }
 
     /**
