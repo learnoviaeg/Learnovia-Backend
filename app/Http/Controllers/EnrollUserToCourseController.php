@@ -39,10 +39,10 @@ class EnrollUserToCourseController extends Controller
 
             foreach($request->users as $username)
             {
-             
+
                 $user_id=User::FindByName($username)->id;
 
-   
+
                 $check =Enroll::IsExist($courses,$user_id);
                 if(!$check){
                     $enroll = new Enroll;
@@ -53,8 +53,8 @@ class EnrollUserToCourseController extends Controller
                     $enroll->setAttribute('role_id',$request->role_id[$rolecount]);
                     $enroll->setAttribute('username', $username);
 
-                    $enroll->save();  
-                }   
+                    $enroll->save();
+                }
                 else
                 {
                     $count++;
@@ -68,7 +68,7 @@ class EnrollUserToCourseController extends Controller
     {
         return HelperController::api_response_format(200, $data, 'those users already enrolled');
 
-    }        
+    }
 
     return HelperController::api_response_format(200, [], 'added successfully');
 }
@@ -83,7 +83,7 @@ class EnrollUserToCourseController extends Controller
         $user_id=User::FindByName($request->username)->id;
         $users_enroll= Enroll::FindUserbyID($user_id,$request->course_segment);
         $users_enroll->delete();
-    
+
         return HelperController::api_response_format(200 ,$users_enroll , 'users UnEnrolled Successfully');
     }
 
@@ -94,15 +94,15 @@ class EnrollUserToCourseController extends Controller
             'username' => 'required|exists:users,username'
         ]);
 
-        $user_id=User::FindByName($request->username)->id;    
+        $user_id=User::FindByName($request->username)->id;
         $users =Enroll::GetCourseSegment($user_id);
         $courseID=array();
              foreach($users as $test){
                 $courseID[] = CourseSegment::GetCoursesByCourseSegment($test)->pluck('course_id')->first();
             };
-    
+
         return HelperController::api_response_format(200, $courseID, 'The Courses Registerd is');
-        
+
     }
 
 
@@ -116,16 +116,16 @@ class EnrollUserToCourseController extends Controller
             'username' => 'required|exists:users,username',
             'start_date' => 'required|before:end_date|after:'.Carbon::now(),
             'end_date' => 'required|after:'.Carbon::now(),
-            'SegmentClassId' => 'required|exists:course_segments,id' 
+            'SegmentClassId' => 'required|exists:course_segments,id'
         ]);
 
 
         $userId =User::FindByName($request->username)->id;
-     
+
         $x = SegmentClass::find($request->SegmentClassId);
         $segments = collect([]);
-            $x->course_segment;
-            foreach ($x->course_segment as $key => $segment) {
+            $x->courseSegment;
+            foreach ($x->courseSegment as $key => $segment) {
                 $segment->courses;
                 foreach ($segment->courses as $key => $course) {
                     if ($course->mandatory == 1) {
@@ -133,7 +133,7 @@ class EnrollUserToCourseController extends Controller
                     }
                 }
             }
-      
+
         $role=Role::findByName('Student')->id;
         foreach($segments as $segment){
             Enroll::create([
@@ -147,7 +147,7 @@ class EnrollUserToCourseController extends Controller
         }
     // dd('done');
     return HelperController::api_response_format(200, [], 'added successfully');
-                
+
     }
 
     public function EnrollExistUsersFromExcel(Request $request){
@@ -161,6 +161,6 @@ class EnrollUserToCourseController extends Controller
 
         $ExcelCntrlVar = new ExcelController();
         $ExcelCntrlVar->import($request);
-        
+
     }
 }

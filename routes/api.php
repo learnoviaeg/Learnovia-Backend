@@ -8,76 +8,76 @@ use App\User;
 Route::get('install', function () {
     $user = User::whereEmail('admin@learnovia.com')->first();
     if($user){
-        return "This Site is Installed befpre go and ask admin";
+        return "This Site is Installed before go and ask admin";
     }else{
-        \Spatie\Permission\Models\Permission::create(['name' => 'Send Message to users ']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Notify']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get All Notifications']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get Unread']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Mark as read']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Send Message to users ']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Notify']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get All Notifications']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get Unread']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Mark as read']);
 
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Role']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Role']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Assign Role to User']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Assign Permission To Role']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Revoke Role from User']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Revoke Permission from role']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'List Permissions and Roles']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Bulk of Users']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Role']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Role']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Role to User']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Permission To Role']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Revoke Role from User']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Revoke Permission from role']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'List Permissions and Roles']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Bulk of Users']);
 
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Permission To User']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'List Role with Permissions']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get Individual Role with Permissions']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Role With Permissions']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Export Roles with Permissions']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Import Roles with Permissions']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Permission To User']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'List Role with Permissions']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get Individual Role with Permissions']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Role With Permissions']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Export Roles with Permissions']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Import Roles with Permissions']);
 
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add year']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get all years']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get Year']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Update year']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Year']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete type']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Type']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get all Types']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Update Type']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Assign Type']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Level']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get all Levels']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Level']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Class']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get all Classes']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get Class By id']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Update Class']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Class']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Segment']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Segment']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Assign Segment']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get All Segments']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Category']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Update Category']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Category']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get Categories']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add Course']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Update Course']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Course']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get Courses']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add year']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get all years']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get Year']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update year']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Year']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete type']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Type']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get all Types']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Type']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Type']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Level']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get all Levels']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Level']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Class']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get all Classes']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get Class By id']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Class']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Class']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Segment']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Segment']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Segment']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get All Segments']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Category']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Category']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Category']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get Categories']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Course']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Course']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Course']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get Courses']);
 
         //USER CRUD Permissions
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add User']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Update User']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete User']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'List All Users']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Suspend User']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Un Suspend User']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add User']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update User']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete User']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'List All Users']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Suspend User']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Un Suspend User']);
 
-        $super = \Spatie\Permission\Models\Role::create(['name' => 'Super Admin']);
-        \Spatie\Permission\Models\Role::create(['name' => 'System Admin']);
-        \Spatie\Permission\Models\Role::create(['name' => 'Student']);
-        \Spatie\Permission\Models\Role::create(['name' => 'Teacher']);
-        \Spatie\Permission\Models\Role::create(['name' => 'Manager']);
-        \Spatie\Permission\Models\Role::create(['name' => 'Supervisor']);
-        \Spatie\Permission\Models\Role::create(['name' => 'Parent']);
+        $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api','name' => 'Super Admin']);
+        \Spatie\Permission\Models\Role::create(['guard_name' => 'api','name' => 'System Admin']);
+        \Spatie\Permission\Models\Role::create(['guard_name' => 'api','name' => 'Student']);
+        \Spatie\Permission\Models\Role::create(['guard_name' => 'api','name' => 'Teacher']);
+        \Spatie\Permission\Models\Role::create(['guard_name' => 'api','name' => 'Manager']);
+        \Spatie\Permission\Models\Role::create(['guard_name' => 'api','name' => 'Supervisor']);
+        \Spatie\Permission\Models\Role::create(['guard_name' => 'api','name' => 'Parent']);
 
         $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
 
@@ -112,12 +112,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('addrole', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:Add Role');
     Route::post('deleterole', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:Delete Role');
-    Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser');//->middleware('permission:Assign Role to User');
-    Route::post('assigpertorole', 'SpatieController@Assign_Permission_Role')->name('assignpertorole');//->middleware('permission:Assign Permission To Role');
+    Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser')->middleware('permission:Assign Role to User');
+    Route::post('assigpertorole', 'SpatieController@Assign_Permission_Role')->name('assignpertorole')->middleware('permission:Assign Permission To Role');
     Route::post('revokerole', 'SpatieController@Revoke_Role_from_user')->name('revokerolefromuser')->middleware('permission:Revoke Role from User');
     Route::post('revokepermissionfromrole', 'SpatieController@Revoke_Permission_from_Role')->name('revokepermissionfromrole')->middleware('permission:Revoke Permission from role');
     Route::get('listrandp', 'SpatieController@List_Roles_Permissions')->name('listpermissionandrole')->middleware('permission:List Permissions and Roles');
-    Route::Post('InsertBulkofUsers','UserController@insert_users')->name('AddBulkofUsers')->middleware('permission:Add Bulk of Users');;
+    //this function not Found
+    Route::Post('InsertBulkofUsers','UserController@insert_users')->name('AddBulkofUsers')->middleware('permission:Add Bulk of Users');
     Route::post('addpertouser', 'SpatieController@Assign_Permission_User')->name('addpertouser')->middleware('permission:Add Permission To User');
     Route::get('listrolewithper', 'SpatieController@List_Roles_With_Permission')->name('listRolewithPer')->middleware('permission:List Role with Permissions');
     Route::post('getRoleWithPermission', 'SpatieController@Get_Individual_Role')->name('getRoleWithPermission')->middleware('permission:Get Individual Role with Permissions');
@@ -127,14 +128,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'notification'] , function (){
         Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:Get All Notifications');
         Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
-        Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Make Notification Read');
+        Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Mark as read');
     });
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'AcademicYearController@store')->name('addyear')->middleware('permission:Add year');
     Route::get('get', 'AcademicYearController@index')->name('getallyears')->middleware('permission:Get all years');
-    Route::get('get/{id}', 'AcademicYearController@show')->name('getyearbyid')->middleware('permission:Get Year');
+    Route::post('getById', 'AcademicYearController@show')->name('getyearbyid')->middleware('permission:Get Year');
     Route::put('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:Update year');
     Route::delete('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:Delete Year');
 });
@@ -168,7 +169,7 @@ Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::get('get/{id}', 'ClassController@show')->name('getclassbyid')->middleware('permission:Get Class By id');
     Route::put('update', 'ClassController@update')->name('updateclass')->middleware('permission:Update Class');
     Route::delete('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:Delete Class');
-}); 
+});
 
 Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
     //if you want to add segment to class please,write addsegment in yours
@@ -231,3 +232,4 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role');
     Route::get('test', 'SpatieController@index');
 });
+//Route::post('userimport','ExcelController@EnrollExistUsersFromExcel');

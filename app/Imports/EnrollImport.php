@@ -21,7 +21,7 @@ class EnrollImport implements ToModel,WithHeadingRow
     {
 
         $user_id = User::FindByName( $row['username'])->id;
-        
+
         return new Enroll([
             'username' => $row['username'],
             'user_id'=>$user_id,

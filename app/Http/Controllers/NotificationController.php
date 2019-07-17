@@ -13,7 +13,7 @@ use Validator;
 use DB;
 use Carbon\Carbon;
 
-class NotifactionController extends Controller
+class NotificationController extends Controller
 {
     public function index()
     {
@@ -35,7 +35,7 @@ class NotifactionController extends Controller
             $data[] = json_decode($not, true);
 
         }
-        return HelperController::api_response_format(200, $body = $data, $message = 'all user Unread notifications');
+        return HelperController::api_response_format(200, $body = $data, $message = 'all users notifications');
     }
 
     //  the unread Notification From data base From Notifcation Table

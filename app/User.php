@@ -18,7 +18,7 @@ class User extends Authenticatable
     use HasRoles;
 
     use Notifiable, HasApiTokens, HasRoles;
-    // protected $guard_name = 'api';
+    protected $guard_name = 'api';
 
     /**
      * The attributes that are mass assignable.
@@ -67,7 +67,7 @@ class User extends Authenticatable
     public function roles() {
         return $this->belongsToMany('Spatie\Permission\Models\Role', 'model_has_roles', 'model_id', 'role_id');
     }
-    
+
     public static function FindByName($username)
     {
         return self::where('username', $username)->first();

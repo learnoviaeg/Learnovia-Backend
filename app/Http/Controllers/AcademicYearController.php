@@ -44,9 +44,9 @@ class AcademicYearController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $year = AcademicYear::whereId($id)->get();
+        $year = AcademicYear::whereId($request->id)->get();
         if ($year)
             return HelperController::api_response_format(200, Academic_YearResource::collection($year));
         return HelperController::api_response_format(404, [], 'Not Found');
