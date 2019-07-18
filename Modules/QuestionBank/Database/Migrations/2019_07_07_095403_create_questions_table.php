@@ -17,6 +17,9 @@ class CreateQuestionsTable extends Migration
             $table->bigIncrements('id');
             $table->longText('text');
             $table->integer('mark');
+            $table->integer('parent')->nullable();
+            $table->integer('And_why_mark')->nullable();
+            $table->integer('And_why')->nullable();
             $table->unsignedBigInteger('category_id');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('question_type_id');
@@ -28,7 +31,6 @@ class CreateQuestionsTable extends Migration
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      *

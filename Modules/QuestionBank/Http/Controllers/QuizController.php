@@ -17,6 +17,7 @@ class QuizController extends Controller
      * @param Request $request
      * @return Response
      */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -266,4 +267,172 @@ class QuizController extends Controller
 
         return HelperController::api_response_format(200, [],'Quiz deleted Successfully');
     }
+    public function getQuizwithRandomQuestion(Request $request){
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+        ]);
+
+        $quiz = quiz::find($request->quiz_id);
+        $shuffledQuestion = $quiz->Question->shuffle();
+        foreach($shuffledQuestion as $question){
+            $answers = $question->question_answer->shuffle();
+            $question->answers = $answers;
+            unset($question->question_answer);
+            unset($question->pivot);
+        }
+        $quiz->shuffledQuestion = $shuffledQuestion;
+        unset($quiz->Question);
+
+        return HelperController::api_response_format(200, $quiz);
+    }
+
+    /*public function store(Request $request)
+    {
+        $r = $request->validate([
+            'Question' => 'required|array',
+            'Question.*.mark' => 'required|integer|min:1',
+            'Question.*.Question_Category_id' => 'required|exists:questions_categories,id',
+            'Question.*.Category_id' => 'required|exists:categories,id',
+            'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+            'Question.*.text' => 'required_if:Question.*.Question_Type_id,==,!3',
+            'Question.*.Course_ID' => 'required|exists:courses,id',
+        ]);
+        $Questions = collect([]);
+        foreach ($request->Question as $question) {
+            $validator = null ;
+            switch ($question['Question_Type_id']) {
+                case 1: // True/false
+                    $validator =Validator::make($question , [
+                        'answers' => 'required|array|min:2|max:2|distinct',
+                        'answers.*' => 'required|boolean|distinct',
+                        'And_why' => 'integer|required',
+                        'And_why_mark' => 'integer|min:1|required_if:And_why,==,1',
+                        'Is_True' => 'required|array|distinct',
+                        'Is_True.*' => 'required|boolean',
+                    ]);
+                    break;
+                case 2 ://MCQ
+                    $validator = Validator::make($question , [
+                        'contents' => 'required|array|min:2|distinct',
+                        'contents.*' => 'required|string|min:1',
+                        'Is_True' => 'required|array|min:2',
+                        'Is_True.*' => 'required|boolean',
+                    ]);
+                    break;
+                case 3 ://Essay
+                    $validator = Validator::make($question , [
+                        'match_A' => 'required|array|min:2|distinct',
+                        'match_A.*' => 'required|distinct',
+                        'match_B' => 'required|array|distinct',
+                        'match_B.*' => 'required|distinct'
+                    ]);
+                    break;
+            }
+            if ($validator->fails())
+                return HelperController::api_response_format(400 , $validator->errors() , $question);
+            if ($question['Question_Type_id'] == 3 && count($question['match_A']) > count($question['match_B'])) {
+                return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
+            }
+            if ($question['Question_Type_id'] == 2 || $question['Question_Type_id'] == 1) {
+                $Trues = array();
+                foreach ($question['Is_True'] as $ele) {
+                    if ($ele == 1) {
+                        array_push($Trues, $ele);
+                    }
+                }
+            }
+
+            if ((($question['Question_Type_id'] == 2 && count($question['Is_True']) != count($question['contents']))
+                || ($question['Question_Type_id'] == 1 && count($question['Is_True']) != count($question['answers'])))
+            ) {
+                return HelperController::api_response_format(400, null, ' length of IS_True not equal  length of answers');
+            }
+            if ($question['Question_Type_id'] == 2 && (!(in_array(1, $question['Is_True']) && count($Trues) == 1))) {
+                return HelperController::api_response_format(400, null, '  Please choose only one to be the right answer');
+            }
+            if ($question['Question_Type_id'] == 1 && !(in_array(1, $question['Is_True']) && in_array(0, $question['Is_True']))) {
+                return HelperController::api_response_format(400, null, '  Please choose only one to be the right answer');
+
+            }
+            $cat = Questions::firstOrCreate([
+                'text' => ($question['text'] == null) ? "Match the correct Answer" : $question['text'],
+                'mark' => $question['mark'],
+                'And_why' => ($question['Question_Type_id'] == 1) ? $question['And_why'] : null,
+                'And_why_mark' => ($question['Question_Type_id'] == 1 && $question['And_why'] == 1) ? $question['And_why_mark'] : null,
+                'category_id' => $question['Category_id'],
+                'question_type_id' => $question['Question_Type_id'],
+                'question_category_id' => $question['Question_Category_id'],
+                'course_id' => $question['Course_ID'],
+            ]);
+
+            $Questions->push($cat);
+
+            switch ($question['Question_Type_id']) {
+                case 1 :
+                    if (in_array(1, $question['Is_True']) && in_array(0, $question['Is_True'])) {
+
+                        $is_true = 0;
+                        foreach ($question['answers'] as $answer) {
+                            QuestionsAnswer::firstOrCreate([
+                                'question_id' => $cat->id,
+                                'true_false' => $answer,
+                                'content' => null,
+                                'match_a' => null,
+                                'match_b' => null,
+                                'is_true' => $question['Is_True'][$is_true]
+                            ]);
+                            $is_true += 1;
+                        }
+                    } else {
+                        return HelperController::api_response_format(400, null, '  Please choose only one to be the right answer');
+
+                    }
+                    break;
+                case 2 :
+                    $Trues = array();
+                    foreach ($question['Is_True'] as $ele) {
+                        if ($ele == 1) {
+                            array_push($Trues, $ele);
+                        }
+                    }
+                    if (in_array(1, $question['Is_True']) && count($Trues) == 1) {
+                        $is_true = 0;
+                        foreach ($question['contents'] as $con) {
+                            $answer = QuestionsAnswer::firstOrCreate([
+                                'question_id' => $cat->id,
+                                'true_false' => null,
+                                'content' => $con,
+                                'match_a' => null,
+                                'match_b' => null,
+                                'is_true' => $question['Is_True'][$is_true]
+                            ]);
+                            $is_true += 1;
+                        }
+                    } else {
+                        return HelperController::api_response_format(400, null, ' Please choose one to be the right answer');
+
+                    }
+                    break;
+
+                case 3:
+                    $is_true = 0;
+                    foreach ($question['match_A'] as $index => $MA) {
+                        foreach ($question['match_B'] as $Secindex => $MP) {
+                            $answer = QuestionsAnswer::firstOrCreate([
+                                'question_id' => $cat->id,
+                                'true_false' => null,
+                                'content' => null,
+                                // 'And_why_answer' => null,
+                                'match_a' => $MA,
+                                'match_b' => $MP,
+                                'is_true' => ($index == $Secindex) ? 1 : 0
+                            ]);
+                            $is_true += 1;
+                        }
+                    }
+                    break;
+            }
+        }
+        return HelperController::api_response_format(201, $Questions, 'Question Created Successfully');
+    }*/
 }
