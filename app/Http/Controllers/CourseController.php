@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    public function add(Request $request)
+    public static function add(Request $request)
     {
         $request->validate([
             'name'      => 'required',
@@ -24,19 +24,25 @@ class CourseController extends Controller
             'segment'   => 'required|exists:segments,id',
         ]);
 
-        $course = Course::create([
-            'name' => $request->name,
-            'category_id' => $request->category,
-        ]);
-        $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
-        $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
-        $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
-        $segmentClass = SegmentClass::checkRelation($classLevel->id , $request->segment);
-        CourseSegment::create([
-            'course_id' => $course->id,
-            'segment_class_id' => $segmentClass->id
-        ]);
-        return HelperController::api_response_format(201, $course, 'Course Created Successfully');
+        $course_id=Course::findByName($request->name);
+        if($course_id){
+            return HelperController::api_response_format(201, $course_id, 'Course already exist');
+        }
+        else {
+            $course = Course::create([
+                'name' => $request->name,
+                'category_id' => $request->category,
+            ]);
+            $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
+            $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
+            $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
+            $segmentClass = SegmentClass::checkRelation($classLevel->id , $request->segment);
+            CourseSegment::create([
+                'course_id' => $course->id,
+                'segment_class_id' => $segmentClass->id
+            ]);
+            return HelperController::api_response_format(201, $course, 'Course Created Successfully');
+        }
     }
 
     public function update(Request $request)
