@@ -11,6 +11,7 @@ use Validator;
 use Auth;
 use App\Enroll;
 use DB;
+use Modules\QuestionBank\Entities\Quiz;
 
 class SpatieController extends Controller
 {
@@ -484,33 +485,42 @@ class SpatieController extends Controller
 
             $course_seg_id=CourseSegment::getidfromcourse($request->course_id);
             $r_id=Enroll::getroleid($user_id,$course_seg_id);
-            $user_per=SpatieController::get_role_permission($r_id);
-            return HelperController::api_response_format(200,$user_per);
+
+            $req = new Request([
+                'roleid' => $r_id
+            ]);
+
+            $user_per=SpatieController::Get_Individual_Role($req);
+        }
+       else if($request->type == 'quiz')
+        {
+            $request->validate([
+                'quiz_id' => 'required|exists:quizzes,id',
+            ]);
+
+            $course_id=Quiz::where('id',$request->quiz_id)->pluck('course_id')->first();
+            $course_seg_id=CourseSegment::getidfromcourse($course_id);
+            $r_id=Enroll::getroleid($user_id,$course_seg_id);
+
+            $req = new Request([
+                'roleid' => $r_id
+            ]);
+
+            $user_per=SpatieController::Get_Individual_Role($req);
         }
         else
         {
 
-            $user_id = Auth::user()->id;
             $role_id= DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
-            $user_per=SpatieController::get_role_permission($role_id);
-            return HelperController::api_response_format(200,$user_per);
+
+            $req = new Request([
+                'roleid' => $role_id
+            ]);
+
+            $user_per=SpatieController::Get_Individual_Role($req);
 
         }
 
+        return HelperController::api_response_format(200,$user_per);
     }
-
-    public function get_role_permission($role_id)
-    {
-        $per_id= DB::table('role_has_permissions')->where('role_id',$role_id)->pluck('permission_id');
-
-        $names = collect([]);
-        foreach($per_id as $p)
-        {
-            $per_name=Permission::where('id',$p)->pluck('name')->first();
-            $names->push($per_name);
-        }
-         return HelperController::api_response_format(200,  $names);
-
-    }
-
 }
