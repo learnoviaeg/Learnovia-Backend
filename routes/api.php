@@ -143,6 +143,7 @@ Route::group(['prefix' => 'auth'], function () {
 
 Route::group(['middleware' => 'auth:api'], function () {
 
+
     //user main routes
     Route::get('userRole' , 'AuthController@userRole')->name('userRole');
     Route::get('logout', 'AuthController@logout')->name('logout');
@@ -150,6 +151,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     //Spatie Routes
     Route::get('spatie', 'SpatieController@index')->name('spatie');
+    Route::post('getperforrole','SpatieController@Get_permission_of_user');
     Route::post('addrole', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:roles/add');
     Route::post('deleterole', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:roles/delete');
     Route::post('assignrole', 'SpatieController@Assign_Role_to_user')->name('assignroletouser')->middleware('permission:roles/assign-to-user');
@@ -292,4 +294,3 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
 
 });
 
-//Route::post('userimport','ExcelController@EnrollExistUsersFromExcel');

@@ -6,7 +6,11 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\User;
+use App\CourseSegment;
 use Validator;
+use Auth;
+use App\Enroll;
+use DB;
 
 class SpatieController extends Controller
 {
@@ -461,6 +465,57 @@ class SpatieController extends Controller
     public function checkUserHavePermession(Request $request){
         $request->validate(['permission' => 'required|exists:permissions,name']);
         return HelperController::api_response_format(200 , $request->user()->hasPermissionTo($request->permission));
+    }
+
+    public function Get_permission_of_user(Request $request)
+    {
+
+        $request->validate([
+            'type' => 'nullable|in:course,quiz',
+        ]);
+        $user_id = Auth::user()->id;
+
+        if($request->type == 'course')
+        {
+            $request->validate([
+                'course_id' => 'required|exists:courses,id',
+            ]);
+
+            $course_seg_id=CourseSegment::getidfromcourse($request->course_id);
+            $r_id=Enroll::getroleid(2,$course_seg_id);
+            $per_id= DB::table('role_has_permissions')->where('role_id',$r_id)->pluck('permission_id');
+
+            $names = collect([]);
+            foreach($per_id as $p)
+            {
+                $per_name=Permission::where('id',$p)->pluck('name')->first();
+                $names->push($per_name);
+            }
+
+          return HelperController::api_response_format(200,  $names);
+
+        }
+        else
+        {
+
+            $user_id = Auth::user()->id;
+            $role_id= DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
+            $req = new Request([
+                'roleid' => $role_id
+            ]);
+            $per_id= DB::table('role_has_permissions')->where('role_id',$role_id)->pluck('permission_id');
+
+            $names = collect([]);
+            foreach($per_id as $p)
+            {
+                $per_name=Permission::where('id',$p)->pluck('name')->first();
+                $names->push($per_name);
+            }
+
+          return HelperController::api_response_format(200,  $names);
+
+        }
+
     }
 
 }

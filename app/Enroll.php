@@ -8,7 +8,7 @@ use DB;
 class Enroll extends Model
 {
     protected $fillable = ['user_id' , 'username' , 'course_segment' , 'role_id' ,  'start_date' ,  'end_date'];
-    
+
 
    public static function IsExist ($course_segment_id ,$user_id)
    {
@@ -27,6 +27,12 @@ class Enroll extends Model
     $check = self::where('user_id', $user_id)->pluck('course_segment');
     return $check;
    }
+
+   public static function getroleid ($user_id,$course_segment)
+   {
+    return self::where('user_id',$user_id)->where('course_segment',$course_segment)->pluck('role_id')->first();
+   }
+
     protected $hidden = [
         'created_at','updated_at'
     ];
