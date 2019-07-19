@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 Route::post('storeQuestions', 'QuestionBankControllerV1@store');
-Route::post('updateQuestion', 'QuestionBankController@update');
+Route::post('update', 'QuestionBankControllerV2@update');
 Route::post('updateAnswers', 'QuestionBankController@updateAnswers');
 Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion');
 

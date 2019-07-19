@@ -26,10 +26,11 @@ class QuestionBankControllerV1 extends Controller
             'Question.*.parent' => 'integer|exists:questions,id',
 
         ]);
-        if ($Question['parent']) {
+        $arr=array();
+        if (isset($Question['parent'])) {
             $arr = Questions::where('id',$Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
         }
-        if (!$arr) {
+        if (!isset($arr)) {
             return HelperController::api_response_format(400, null, 'this is not valid parent');
         }
         $Questions = collect([]);
@@ -46,9 +47,7 @@ class QuestionBankControllerV1 extends Controller
         ]);
         $Questions->push($cat);
         return $cat;
-
     }
-
     public static function CreateQuestion($Question)
     {
         Validator::make($Question, [
@@ -62,8 +61,10 @@ class QuestionBankControllerV1 extends Controller
             'Question.*.parent' => 'integer|exists:questions,id',
         ]);
         $Questions = collect([]);
+        $arr=array();
+
         if (isset($Question['parent'])) {
-            $arr = Questions::find($Question['parent'])->where('question_type_id', 5)->get();
+            $arr = Questions::where('id',$Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
         }
         if (!isset($arr)) {
             return HelperController::api_response_format(400, null, 'this is not valid parent');
@@ -92,12 +93,14 @@ class QuestionBankControllerV1 extends Controller
                 'And_why' => 'integer|required',
                 'And_why_mark' => 'integer|min:1|required_if:And_why,==,1',
                 'Is_True' => 'required|boolean',
+
             ]);
             if ($validator->fails()) {
                 return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
             }
 
             $cat = $this::CreateOrFirstQuestion($Question);
+          //dd($cat);
             $is_true = 0;
             $Trues = null;
 
@@ -237,6 +240,6 @@ class QuestionBankControllerV1 extends Controller
                         break;
                 }
             }
-            return $re;
+            return HelperController::api_response_format(200, $re, 'updated Successfully');
         }
     }
