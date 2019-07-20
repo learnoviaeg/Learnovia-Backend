@@ -303,7 +303,7 @@ class QuestionBankController extends Controller
                     break;
             }
         }
-        return HelperController::api_response_format(200, $re, 'null');
+        return HelperController::api_response_format(200, $re, null);
     }
 
     /*updateQuestion*/
