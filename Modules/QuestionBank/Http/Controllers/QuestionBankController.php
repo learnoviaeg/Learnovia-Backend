@@ -78,338 +78,504 @@ class QuestionBankController extends Controller
      *          access Question[0][answers][0] , Question[0][Is_True][0] and so on
      * @return: MSG => Question Created Successfully
      */
+    public static function CreateOrFirstQuestion($Question)
+    {
+        Validator::make($Question, [
+            'Question' => 'required|array',
+            'Question.*.mark' => 'required|integer|min:1',
+            'Question.*.Question_Category_id' => 'required|exists:questions_categories,id',
+            'Question.*.Category_id' => 'required|exists:categories,id',
+            'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+            'Question.*.text' => 'required_if:Question.*.Question_Type_id,==,!3',
+            'Question.*.Course_ID' => 'required|exists:courses,id',
+            'Question.*.parent' => 'integer|exists:questions,id',
 
+        ]);
+        $arr = array();
+        if (isset($Question['parent'])) {
+            $arr = Questions::where('id', $Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
+        }
+        if (!isset($arr)) {
+            return HelperController::api_response_format(400, null, 'this is not valid parent');
+        }
+        $Questions = collect([]);
+        $cat = Questions::firstOrCreate([
+            'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
+            'mark' => $Question['mark'],
+            'And_why' => ($Question['Question_Type_id'] == 1) ? $Question['And_why'] : null,
+            'And_why_mark' => ($Question['Question_Type_id'] == 1 && $Question['And_why'] == 1) ? $Question['And_why_mark'] : null,
+            'category_id' => $Question['Category_id'],
+            'parent' => (isset($Question['parent']) && $Question['Question_Type_id'] != 5) ? $Question['parent'] : null,
+            'question_type_id' => $Question['Question_Type_id'],
+            'question_category_id' => $Question['Question_Category_id'],
+            'course_id' => $Question['Course_ID'],
+        ]);
+        $Questions->push($cat);
+        return $cat;
+    }
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
-    public function update(Request $request)
+    public static function CreateQuestion($Question)
+    {
+        Validator::make($Question, [
+            'Question' => 'required|array',
+            'Question.*.mark' => 'required|integer|min:1',
+            'Question.*.Question_Category_id' => 'required|exists:questions_categories,id',
+            'Question.*.Category_id' => 'required|exists:categories,id',
+            'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+            'Question.*.text' => 'required_if:Question.*.Question_Type_id,==,!3',
+            'Question.*.Course_ID' => 'required|exists:courses,id',
+            'Question.*.parent' => 'integer|exists:questions,id',
+        ]);
+        $Questions = collect([]);
+        $arr = array();
+
+        if (isset($Question['parent'])) {
+            $arr = Questions::where('id', $Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
+        }
+        if (!isset($arr)) {
+            return HelperController::api_response_format(400, null, 'this is not valid parent');
+        }
+        $cat = Questions::Create([
+            'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
+            'mark' => $Question['mark'],
+            'parent' => (isset($Question['parent']) && $Question['Question_Type_id'] != 5) ? $Question['parent'] : null,
+            'And_why' => ($Question['Question_Type_id'] == 1) ? $Question['And_why'] : null,
+            'And_why_mark' => ($Question['Question_Type_id'] == 1 && $Question['And_why'] == 1) ? $Question['And_why_mark'] : null,
+            'category_id' => $Question['Category_id'],
+            'question_type_id' => $Question['Question_Type_id'],
+            'question_category_id' => $Question['Question_Category_id'],
+            'course_id' => $Question['Course_ID'],
+        ]);
+        $Questions->push($cat);
+        return $cat;
+
+    }
+
+    public function TrueFalse($Question)
+    {
+        $validator = Validator::make($Question, [
+            'answers' => 'required|array|distinct|min:2|max:2',
+            'answers.*' => 'required|boolean|distinct',
+            'And_why' => 'integer|required',
+            'And_why_mark' => 'integer|min:1|required_if:And_why,==,1',
+            'Is_True' => 'required|boolean',
+
+        ]);
+        if ($validator->fails()) {
+            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+        }
+
+        $cat = $this::CreateOrFirstQuestion($Question);
+        //dd($cat);
+        $is_true = 0;
+        $Trues = null;
+
+        foreach ($Question['answers'] as $answer) {
+            if ($is_true == $Question['Is_True']) {
+                $Trues = 1;
+            } else {
+                $Trues = 0;
+            }
+            QuestionsAnswer::firstOrCreate([
+                'question_id' => $cat->id,
+                'true_false' => $answer,
+                'content' => null,
+                'match_a' => null,
+                'match_b' => null,
+                'is_true' => $Trues
+            ]);
+            $is_true += 1;
+        }
+        return "success";
+    }
+
+    public
+    function MCQ($Question)
+    {
+        $validator = Validator::make($Question, [
+            'answers' => 'required|array|distinct|min:2',
+            'answers.*' => 'required|string|distinct',
+            'Is_True' => 'required|integer',
+
+        ]);
+        if ($validator->fails()) {
+            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+        }
+        $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
+        $ansA = QuestionsAnswer::where('question_id', $id)->pluck('content')->toArray();
+        $result = array_diff($Question['answers'], $ansA);
+        if ($result == null) {
+            return HelperController::api_response_format(400, null, ' Sorry this Question is exist');
+        }
+        $cat = $this::CreateQuestion($Question);
+        $is_true = 0;
+        $Trues = null;
+        foreach ($Question['answers'] as $answer) {
+            if ($is_true == $Question['Is_True']) {
+                $Trues = 1;
+            } else {
+                $Trues = 0;
+            }
+            $answer = QuestionsAnswer::firstOrCreate([
+                'question_id' => $cat->id,
+                'true_false' => null,
+                'content' => $answer,
+                'match_a' => null,
+                'match_b' => null,
+                'is_true' => $Trues,
+            ]);
+            $is_true += 1;
+        }
+        return "success";
+    }
+
+    public function Match($Question)
+    {
+        $validator = Validator::make($Question, [
+            'match_A' => 'required|array|min:2|distinct',
+            'match_A.*' => 'required|distinct',
+            'match_B' => 'required|array|distinct',
+            'match_B.*' => 'required|distinct',
+        ]);
+        if ($validator->fails()) {
+            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+        }
+        if (count($Question['match_A']) > count($Question['match_B'])) {
+            return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
+        }
+        $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
+        $ansA = QuestionsAnswer::where('question_id', $id)->pluck('match_A')->toArray();
+        $resultA = array_diff($Question['match_A'], $ansA);
+        $ansB = QuestionsAnswer::where('question_id', $id)->pluck('match_B')->toArray();
+        $resultB = array_diff($Question['match_B'], $ansB);
+       // dd($resultA == null && $resultB == null);
+        if ($resultA == null && $resultB == null) {
+            return HelperController::api_response_format(400, null, ' Sorry this Question is exist');
+        }
+        $cat = $this::CreateQuestion($Question);
+        $is_true = 0;
+        foreach ($Question['match_A'] as $index => $MA) {
+            foreach ($Question['match_B'] as $Secindex => $MP) {
+                $answer = QuestionsAnswer::firstOrCreate([
+                    'question_id' => $cat->id,
+                    'true_false' => null,
+                    'content' => null,
+                    'match_a' => $MA,
+                    'match_b' => $MP,
+                    'is_true' => ($index == $Secindex) ? 1 : 0
+                ]);
+                $is_true += 1;
+            }
+        }
+        return "success";
+    }
+
+    public function Essay($Question)
+    {
+        $cat = $this::CreateOrFirstQuestion($Question);
+        return "success";
+    }
+
+    public function paragraph($Question)
+    {
+        $cat = $this::CreateOrFirstQuestion($Question);
+        return "success";
+    }
+
+    public function store(Request $request)
+    {
+        foreach ($request->Question as $question) {
+            switch ($question['Question_Type_id']) {
+                case 1: // True/false
+                    $re[] = $this->TrueFalse($question);
+                    break;
+                case 2: // MCQ
+                    $re[] = $this->MCQ($question);
+                    break;
+                case 3: // Match
+                    $re[] = $this->Match($question);
+                    break;
+                case 4: // Essay
+                    $re[] = $this->Essay($question);
+                    break;
+                case 5: // para
+                    $re[] = $this->paragraph($question);
+                    break;
+            }
+        }
+        return HelperController::api_response_format(200, $re, 'null');
+    }
+
+    /*updateQuestion*/
+    public function updateQuestion($request)
     {
         $request->validate([
             'question_id' => 'required|integer|exists:questions,id',
-            'text' => 'required|string|min:1',
             'mark' => 'required|integer|min:1',
+            //'text' => 'string|min:1',
             'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'required|integer|exists:questions_categories,id',
+            'parent' => 'integer|exists:questions,id',
         ]);
-        $Question = Questions::find($request->question_id);
+        $arr = array();
+        if ($request->parent) {
+            $arr = Questions::where('id', $request->parent)->where('question_type_id', 5)->pluck('id')->first();
+        }
+        if (!isset($arr)) {
+            return HelperController::api_response_format(400, null, 'this is not valid parent');
+        }
+        $question = Questions::find($request->question_id);
 
-        if ($Question->question_type_id == 1) {
+        if ($question->question_type_id != 3) {
             $request->validate([
-                'And_why' => 'integer|required',
-                'And_why_mark' => 'integer|min:1|required_if:And_why,==,1'
+                'text' => 'required|string|min:1',
             ]);
         }
-
-        switch ($Question->question_type_id) {
-            case 1 :
-                $request->validate([
-                    'answers' => 'required|array||min:2|max:2|distinct',
-                    'answers.*' => 'required|boolean|distinct',
-                    'Is_True' => 'required|array|distinct',
-                    'Is_True.*' => 'required|boolean',
-
-                ]);
-
-                break;
-            case 2 : // MCQ
-                $request->validate([
-                    'contents' => 'required|array|min:2|distinct',
-                    'contents.*' => 'required|string|min:1',
-                    'Is_True' => 'required|array|min:2',
-                    'Is_True.*' => 'required|boolean',
-                ]);
-
-                break;
-            case 3 :
-                $request->validate([
-                    'match_A' => 'required|array|min:2|distinct',
-                    'match_A.*' => 'required|distinct',
-                    'match_B' => 'required|array|distinct',
-                    'match_B.*' => 'required|distinct'
-                ]);
-                break;
-        }
-        $Question->update([
-            'text' => $request->text,
+        $question->update([
+            'text' => ($request->text == null) ? "Match the correct Answer" : $request->text,
             'mark' => $request->mark,
             'category_id' => $request->category_id,
+            'parent' => (isset($request->parent) && $request->Question_Type_id != 5) ? $request->parent : null,
             'question_category_id' => $request->question_category_id,
-            'And_why' => ($Question->question_type_id == 1) ? $request->And_why : null,
+            'And_why' => ($request->question_type_id == 1) ? $request->And_why : null,
             'And_why_mark' => ($request->And_why == 1) ? $request->And_why_mark : null,
         ]);
-        switch ($Question->question_type_id) {
-            case 1 :
-                if (in_array(1, $request->Is_True) && in_array(0, $request->Is_True)) {
 
-                    $count = 0;
-                    $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
-                    foreach ($answers as $answer) {
+        return $question;
+    }
 
-                        if ($request->Is_True[$count] == 1) {
-                            $AnswerWithTrue = QuestionsAnswer::where('question_id', $Question->id)->where('is_true', 1)->first();
-                            if ($AnswerWithTrue->id != $answer->id) {
-                                if ($AnswerWithTrue) {
-                                    $AnswerWithTrue->update([
-                                        'is_true' => 0,
-                                    ]);
-                                }
-                            }
-                            $answer->update([
-                                'is_true' => $request->Is_True[$count]
-                            ]);
-                        } else {
-                            $AnswerWithFalse = QuestionsAnswer::where('question_id', $Question->id)->where('is_true', 0)->first();
-                            if ($AnswerWithFalse->id != $answer->id) {
-                                $AnswerWithFalse->update([
-                                    'is_true' => 1,
-                                ]);
-                                $answer->update([
-                                    'is_true' => $request->Is_True
-                                ]);
-                            }
-                        }
-                        $count = $count + 1;
-                    }
+    public function updateTrueFalse($request)
+    {
+
+        $request->validate([
+
+            'answers' => 'required|array|distinct|min:2|max:2',
+            'answers.*' => 'required|boolean|distinct',
+            'Is_True' => 'required|boolean',
+            'And_why' => 'integer|required',
+            'And_why_mark' => 'integer|min:1|required_if:And_why,==,1'
+        ]);
+
+
+        $question = $this->updateQuestion($request);
+        $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
+        $is_true = 0;
+        $Trues = null;
+        foreach ($answers as $answer) {
+            if ($is_true == $request->Is_True) {
+                $Trues = 1;
+            } else {
+                $Trues = 0;
+            }
+            $answer->update([
+                'question_id' => $question->id,
+                'true_false' => $request->answers[$is_true],
+                'is_true' => $Trues
+            ]);
+            $is_true += 1;
+        }
+        return "success";
+
+    }
+
+    public function updateMCQ($request)
+    {
+        $request->validate([
+            'answers' => 'required|array|min:2|distinct',
+            'answers.*' => 'required|string|min:1',
+            'Is_True' => 'required|integer|min:0|max:{$count(answers)-1}',
+        ]);
+
+        $question = $this->updateQuestion($request);
+        $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
+        if (count($request->answers) >= count($answers)) {
+            $is_true = 0;
+            $Trues = null;
+
+            foreach ($request->answers as $answer) {
+                if ($is_true == $request->Is_True) {
+                    $Trues = 1;
                 } else {
-                    return HelperController::api_response_format(400, null, ' Please choose one to be the right answer');
-
+                    $Trues = 0;
                 }
-                break;
-            case 2 :
-                $Trues = array();
-                foreach ($request->Is_True as $ele) {
-                    if ($ele == 1) {
-                        array_push($Trues, $ele);
-                    }
-                }
-                if (in_array(1, $request->Is_True) && count($Trues) == 1) {
-
-                    $count = 0;
-                    $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
-                    foreach ($answers as $answer) {
-                        if (!isset($request->contents[$count])) {
-                            $answer->delete();
-                            continue;
-                        }
-                        if ($request->Is_True[$count] == 1) {
-                            $AnswerWithTrue = QuestionsAnswer::where('question_id', $Question->id)->where('is_true', 1)->first();
-
-                            if ($request->Is_True[$count]) {
-                                if ($AnswerWithTrue->id != $answer->id) {
-                                    $AnswerWithTrue->update([
-                                        'is_true' => 0,
-                                    ]);
-                                }
-                                $answer->update([
-                                    'is_true' => $request->Is_True[$count],
-                                    'content' => $request->contents[$count]]);
-                            }
-                        } else {
-                            $AnswerWithTrue = QuestionsAnswer::where('question_id', $Question->id)->where('is_true', 1)->first();
-                            if ($AnswerWithTrue->id != $answer->id) {
-
-                                $answer->update([
-                                    'is_true' => $request->Is_True[$count],
-                                    'content' => $request->contents[$count]
-                                ]);
-                            } else {
-
-                                return HelperController::api_response_format(200, null, 'there is no True answer , Please choose one to be the right answer');
-
-                            }
-
-                        }
-                        $count = $count + 1;
-                    }
+                if (!isset($answers[$is_true])) {
+                    QuestionsAnswer::firstOrCreate([
+                        'question_id' => $question->id,
+                        'true_false' => null,
+                        'content' => $answer,
+                        'match_a' => null,
+                        'match_b' => null,
+                        'is_true' => $Trues,
+                    ]);
                 } else {
-                    return HelperController::api_response_format(200, null, ' Please choose one to be the right answer');
-
+                    $answers[$is_true]->update([
+                        'question_id' => $question->id,
+                        'true_false' => null,
+                        'content' => $answer,
+                        'match_a' => null,
+                        'match_b' => null,
+                        'is_true' => $Trues,
+                    ]);
+                    $is_true += 1;
                 }
-                break;
-            case 3 :
-                $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
-                $count = 0;
+            }
+        } else {
+            $is_true = 0;
+            $Trues = null;
+            foreach ($answers as $answer) {
+                if (!isset($request->answers[$is_true])) {
+                    $answer->delete();
+                    continue;
+                }
+                if ($is_true == $request->Is_True) {
+                    $Trues = 1;
+                } else {
+                    $Trues = 0;
+                }
+                $answer->update([
+                    'question_id' => $question->id,
+                    'true_false' => null,
+                    'content' => $request->answers[$is_true],
+                    'match_a' => null,
+                    'match_b' => null,
+                    'is_true' => $Trues,
+                ]);
+                $is_true += 1;
 
-                foreach ($request->match_A as $index => $MA) {
-                    foreach ($request->match_B as $Secindex => $MP) {
+            }
+        }
+        return "success";
+    }
+
+    public function updateMatch($request)
+    {
+        $request->validate([
+            'match_A' => 'required|array|min:2|distinct',
+            'match_A.*' => 'required|distinct',
+            'match_B' => 'required|array|distinct',
+            'match_B.*' => 'required|distinct'
+        ]);
+        if (count($request->match_A) > count($request->match_B)) {
+            return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
+        }
+
+
+        $question = $this->updateQuestion($request);
+        $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
+        //dd(count($answers));
+        if (count($request->match_A) * count($request->match_B) == count($answers)) {
+            $count = 0;
+
+            foreach ($request->match_A as $index => $MA) {
+                foreach ($request->match_B as $Secindex => $MP) {
+                    $answers[$count]->update([
+                        'question_id' => $question->id,
+                        'true_false' => null,
+                        'content' => null,
+                        'match_a' => $MA,
+                        'match_b' => $MP,
+                        'is_true' => ($index == $Secindex) ? 1 : 0
+                    ]);
+                    $count += 1;
+                }
+            }
+        } elseif (count($request->match_A) * count($request->match_B) > count($answers)) {
+            $count = 0;
+
+            foreach ($request->match_A as $index => $MA) {
+                foreach ($request->match_B as $Secindex => $MP) {
+                    if (!isset($answers[$count])) {
+                        QuestionsAnswer::firstOrCreate([
+                            'question_id' => $question->id,
+                            'true_false' => null,
+                            'content' => null,
+                            'match_a' => $MA,
+                            'match_b' => $MP,
+                            'is_true' => ($index == $Secindex) ? 1 : 0]);
+
+                    } else {
                         $answers[$count]->update([
-                            'question_id' => $Question->id,
+                            'question_id' => $question->id,
                             'true_false' => null,
                             'content' => null,
                             'match_a' => $MA,
                             'match_b' => $MP,
                             'is_true' => ($index == $Secindex) ? 1 : 0
                         ]);
-                        $count += 1;
                     }
+                    $count += 1;
+
                 }
+            }
+        } elseif (count($request->match_A) * count($request->match_B) < count($answers)) {
+            $diff = count($answers) - (count($request->match_a) * count($request->match_B));
+            for ($x = 0; $x < $diff; $x++) {
+                $answers[$x]->delete();
 
-                break;
+            }
+            // dd($answers);
+            $count = $diff;
 
+            foreach ($request->match_A as $index => $MA) {
+                foreach ($request->match_B as $Secindex => $MP) {
+                    $answers[$count]->update([
+                        'question_id' => $question->id,
+                        'true_false' => null,
+                        'content' => null,
+                        'match_a' => $MA,
+                        'match_b' => $MP,
+                        'is_true' => ($index == $Secindex) ? 1 : 0
+                    ]);
+                    $count += 1;
+                }
+            }
 
         }
 
 
-        $question = $this->QuestionData($Question, 1);
-
-        return HelperController::api_response_format(200, $question, 'updated Successfully');
+        return "updated sucess";
 
     }
 
-//    public function updateAnswers(Request $req)
-//    {
-//        $req->validate([
-//            'id' => 'required|integer|min:1',
-//        ]);
-//        $answer = QuestionsAnswer::find($req->id);
-//        $Question = Questions::where('id', $answer->question_id)->first();
-//        switch ($Question->question_type_id) {
-//            case 1 :
-//                $req->validate([
-//                    'And_why_answer' => 'string|required_if:$Question->And_why,==,1',
-//                    'Is_True' => 'required|boolean',
-//                ]);
-//                if ($Question->And_why == 1) {
-//                    $req->validate([
-//                        'And_why_answer' => 'string|required',
-//                    ]);
-//                }
-//                break;
-//            case 2 : // MCQ
-//                $req->validate([
-//                    'contents' => 'required|string|min:1',
-//                    'Is_True' => 'required|boolean',
-//                ]);
-//
-//                break;
-//            case 3 :
-//                $req->validate([
-//                    'match_A' => 'required',
-//                    'match_B' => 'required',
-//                ]);
-//                break;
-//        }
-//        switch ($Question->question_type_id) {
-//            case 1 :
-//                if ($req->Is_True) {
-//                    $AnswerWithTrue = QuestionsAnswer::where('question_id', $Question->id)->where('is_true', 1)->first();
-//                    if ($AnswerWithTrue->id != $answer->id) {
-//
-//                        if ($AnswerWithTrue) {
-//                            $AnswerWithTrue->update([
-//                                'is_true' => 0,
-//                                'And_why_answer' => null
-//                            ]);
-//                        }
-//                    }
-//                    $answer->update([
-//                        'And_why_answer' => ($Question->And_why == 0) ? null : $req->And_why_answer,
-//                        'is_true' => $req->Is_True
-//                    ]);
-//                } else {
-//                    $AnswerWithFalse = QuestionsAnswer::where('question_id', $Question->id)->where('is_true', 0)->first();
-//                    if ($AnswerWithFalse->id != $answer->id) {
-//                        $AnswerWithFalse->update([
-//                            'is_true' => 1,
-//                            'And_why_answer' => ($Question->And_why == 0) ? null : $req->And_why_answer]);
-//                        $answer->update([
-//                            'And_why_answer' => null,
-//                            'is_true' => $req->Is_True
-//                        ]);
-//                    }
-//                }
-//                break;
-//            case 2 :
-//                $AnswerWithTrue = QuestionsAnswer::where('question_id', $Question->id)->where('is_true', 1)->first();
-//
-//                if ($req->Is_True) {
-//                    if ($AnswerWithTrue->id != $answer->id) {
-//                        $AnswerWithTrue->update([
-//                            'is_true' => 0,
-//                        ]);
-//                    }
-//                    $answer->update([
-//                        'is_true' => $req->Is_True,
-//                        'content' => $req->contents]);
-//                } else {
-//                    if ($AnswerWithTrue->id != $answer->id) {
-//
-//                        $answer->update([
-//                            'is_true' => $req->Is_True,
-//                            'content' => $req->contents]);
-//                    } else {
-//                        $answer->is_true = $req->Is_True;
-//                        $answer->content = $req->contents;
-//                        return HelperController::api_response_format(400, null, 'there is no True answer , Please choose one to be the right answer');
-//
-//                    }
-//
-//                }
-//
-//                break;
-//            case 3 :
-//                $answer->update([
-//                    'true_false' => null,
-//                    'And_why_answer' => null,
-//                    'content' => null,
-//                    'match_a' => $req->match_A,
-//                    'match_b' => $req->match_B,
-//                    'is_true' => 1
-//                ]);
-//                break;
-//
-//
-//        }
-//
-//    }
-////            switch ($request->Question_Type_id) {
-//                case 1: // True/false
-//                    $request->validate([
-//                        'answers' => 'required|array',
-//                        'answers.*' => 'required|boolean',
-//                        'And_why' => 'integer|required',
-//                        'And_why_mark'=> 'integer|min:1|required_if:And_why,==,1',
-//                        'And_why_answer' => 'string|required_if:Question.*.And_why,==,1',
-//                        'Is_True' => 'required|array',
-//                        'Is_True.*' => 'required|boolean',
-//                    ]);
-//                    break;
-//                case 2 :
-//                    $request->validate([
-//                        'contents' => 'required|array',
-//                        'contents.*' => 'required|string|min:1',
-//                        'Is_True' => 'required|array',
-//                        'Is_True.*' => 'required|boolean',
-//                    ]);
-//                    break;
-//                case 3 :
-//                    $request->validate([
-//                        'match_A' => 'required|array',
-//                        'match_A.*' => 'required',
-//                        'match_B' => 'required|array',
-//                        'match_B.*' => 'required'
-//                    ]);
-//                    break;
-//            }
+    public function updateEssay($request)
+    {
+        $question = $this->updateQuestion($request);
 
+        return "updated sucess";
+    }
 
-//        $answers=QuestionsAnswer::where('question_id',$request->question_id)->get();
-//        $count=0;
-//        foreach ($answers as $answer){
-//            switch ($request->Question_Type_id){
-//                case 1 :
-//                    $answer->true_false=$request->answers[$count];
-//                    $answer->And_why_answer= ( $request->And_why==0)?null:$request->And_why_answer;
-//                    $answer->content = null;
-//                    $answer->match_a = null;
-//                    $answer->match_b = null;
-//                    $answer->is_true = $request->Is_True[$count];
-//                    break;
-//
+    public function updateparagraph($request)
+    {
+        $question = $this->updateQuestion($request);
+
+        return "updated sucess";
+    }
+
+    public
+    function update(Request $request)
+    {
+        $Question = Questions::find($request->question_id);
+        switch ($Question->question_type_id) {
+            case 1: // True/false
+                $re[] = $this->updateTrueFalse($request);
+                break;
+            case 2: // MCQ
+                $re[] = $this->updateMCQ($request);
+                break;
+            case 3: // Match
+                $re[] = $this->updateMatch($request);
+                break;
+            case 4: // Essay
+                $re[] = $this->updateEssay($request);
+                break;
+            case 5: // para
+                $re[] = $this->updateparagraph($request);
+                break;
+
+        }
+        return HelperController::api_response_format(200, $re, null);
+    }
+/*end update*/
 
 
     public function destroy(Request $request)

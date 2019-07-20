@@ -1,9 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
-Route::post('storeQuestions', 'QuestionBankControllerV1@store');
-Route::post('update', 'QuestionBankControllerV2@update');
-Route::post('updateAnswers', 'QuestionBankController@updateAnswers');
+Route::post('storeQuestions', 'QuestionBankController@store');
+
 Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion');
 
 Route::get('installQuestionBank', function () {
@@ -26,10 +25,10 @@ Route::group([
         Route::get('getQuestions', 'QuestionBankController@index')->middleware('Get All Questions');
         Route::post('deleteQuestion', 'QuestionBankController@destroy')->middleware('Delete Question');
         Route::get('getRandomQuestion', 'QuestionBankController@getRandomQuestion')->middleware('Get Random Questions For Course');
-       // Route::post('updateQuestion', 'QuestionBankController@update')->middleware('Update Question');
+        Route::post('updateQuestion', 'QuestionBankController@update')->middleware('Update Question');
         Route::post('deleteAnswer', 'QuestionBankController@deleteAnswer')->middleware('Delete Question Answer');
         Route::post('addAnswer', 'QuestionBankController@addAnswer')->middleware('Add New Answer');
-       // Route::post('storeQuestions', 'QuestionBankController@store')->middleware('Add New Questions');
+        Route::post('storeQuestions', 'QuestionBankController@store')->middleware('Add New Questions');
 
         Route::post('storeQuiz', 'QuizController@store');
         Route::post('deleteQuiz', 'QuizController@destroy');
