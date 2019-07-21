@@ -1,9 +1,99 @@
 [
     {
-        "roleName": "Test 22",
+        "roleName": "Super Admin",
         "permission": [
-            "Delete Course"
+            "messages/send",
+            "messages/delete-for-all",
+            "messages/delete-for-me",
+            "messages/seen",
+            "messages/get-from-to",
+            "messages/add-send-permission-for-role",
+            "notifications/get-all",
+            "notifications/get-unread",
+            "notifications/mark-as-read",
+            "roles/add",
+            "roles/delete",
+            "roles/get",
+            "roles/update",
+            "roles/assign-to-user",
+            "permissions/assign-to-role",
+            "roles/revoke-from-user",
+            "permissions/revoke-from-role",
+            "spatie/list-permissions-and-roles",
+            "permissions/assign-to-user",
+            "spatie/list-role-with-permissions",
+            "spatie/get-role-with-permissions",
+            "spatie/add-role-with-permissions",
+            "spatie/export",
+            "spatie/import",
+            "year/add",
+            "year/get-all",
+            "year/get",
+            "year/update",
+            "year/delete",
+            "type/delete",
+            "type/add",
+            "type/get-all",
+            "type/update",
+            "type/assign",
+            "level/add",
+            "level/update",
+            "level/get-all",
+            "level/delete",
+            "class/add",
+            "class/get-all",
+            "class/get",
+            "class/update",
+            "class/delete",
+            "segment/add",
+            "segment/delete",
+            "segment/assign",
+            "segment/update",
+            "category/add",
+            "category/update",
+            "category/delete",
+            "category/get-all",
+            "course/add",
+            "course/update",
+            "course/delete",
+            "course/get-all",
+            "enroll/enroll-single-user",
+            "enroll/un-enroll-single-user",
+            "enroll/get-enrolled-courses",
+            "enroll/mandatory-course",
+            "enroll/bulk-of-exist-users",
+            "enroll/add-and-enroll-bulk-of-new-users",
+            "contact/add",
+            "user/add",
+            "user/update",
+            "user/delete",
+            "user/get-all",
+            "user/suspend",
+            "user/un-suspend"
         ]
+    },
+    {
+        "roleName": "System Admin",
+        "permission": []
+    },
+    {
+        "roleName": "Student",
+        "permission": []
+    },
+    {
+        "roleName": "Teacher",
+        "permission": []
+    },
+    {
+        "roleName": "Manager",
+        "permission": []
+    },
+    {
+        "roleName": "Supervisor",
+        "permission": []
+    },
+    {
+        "roleName": "Parent",
+        "permission": []
     }
-
 ]

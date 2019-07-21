@@ -6,7 +6,12 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\User;
+use App\CourseSegment;
 use Validator;
+use Auth;
+use App\Enroll;
+use DB;
+use Modules\QuestionBank\Entities\Quiz;
 
 class SpatieController extends Controller
 {
@@ -463,4 +468,59 @@ class SpatieController extends Controller
         return HelperController::api_response_format(200 , $request->user()->hasPermissionTo($request->permission));
     }
 
+    public function Get_permission_of_user(Request $request)
+    {
+
+        $request->validate([
+            'type' => 'nullable|in:course,quiz',
+        ]);
+
+        $user_id = Auth::user()->id;
+
+        if($request->type == 'course')
+        {
+            $request->validate([
+                'course_id' => 'required|exists:courses,id',
+            ]);
+
+            $course_seg_id=CourseSegment::getidfromcourse($request->course_id);
+            $r_id=Enroll::getroleid($user_id,$course_seg_id);
+
+            $req = new Request([
+                'roleid' => $r_id
+            ]);
+
+            $user_per=SpatieController::Get_Individual_Role($req);
+        }
+       else if($request->type == 'quiz')
+        {
+            $request->validate([
+                'quiz_id' => 'required|exists:quizzes,id',
+            ]);
+
+            $course_id=Quiz::where('id',$request->quiz_id)->pluck('course_id')->first();
+            $course_seg_id=CourseSegment::getidfromcourse($course_id);
+            $r_id=Enroll::getroleid($user_id,$course_seg_id);
+
+            $req = new Request([
+                'roleid' => $r_id
+            ]);
+
+            $user_per=SpatieController::Get_Individual_Role($req);
+        }
+        else
+        {
+
+            $role_id= DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
+
+            $req = new Request([
+                'roleid' => $role_id
+            ]);
+
+            $user_per=SpatieController::Get_Individual_Role($req);
+
+        }
+
+        return HelperController::api_response_format(200,$user_per);
+    }
 }
