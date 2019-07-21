@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Course extends Model
 {
     protected $fillable = ['name' , 'category_id'];
-
+    
 
     public static function findByName($course_name)
     {
@@ -25,5 +25,4 @@ class Course extends Model
     public function courseSegments(){
         return $this->hasMany('App\CourseSegment');
     }
-
 }

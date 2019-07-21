@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    public function add(Request $request)
+    public static function add(Request $request)
     {
         $request->validate([
             'name' => 'required',
