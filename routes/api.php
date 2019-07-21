@@ -210,6 +210,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'CourseController@update')->name('editcourse')->middleware('permission:Update Course');
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:Delete Course');
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:Get Courses');
+    Route::get('my', 'CourseController@MyCourses')->name('mycourses');//->middleware('permission:Get MyCourses');
 });
 
 Route::group(['prefix' => 'user' , 'middleware' => 'auth:api'] , function (){
