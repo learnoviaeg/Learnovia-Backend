@@ -38,12 +38,13 @@ class CourseSegment extends Model
 
     public function lessons()
     {
-        return $this->hasMany('App\Lesson');
+        return $this->hasMany('App\Lesson')->orderBy('index');
     }
 
-    public static function checkRelation($segmentClass , $course){
+    public static function checkRelation($segmentClass, $course)
+    {
         $courseSegment = self::whereCourse_id($course)->whereSegment_class_id($segmentClass)->first();
-        if ($courseSegment == null){
+        if ($courseSegment == null) {
             $courseSegment = self::create([
                 'course_id' => $course,
                 'segment_class_id' => $segmentClass,
@@ -53,6 +54,6 @@ class CourseSegment extends Model
     }
 
     protected $hidden = [
-        'created_at','updated_at'
+        'created_at', 'updated_at'
     ];
 }
