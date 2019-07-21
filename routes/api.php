@@ -86,6 +86,7 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'course/update']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'course/delete']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'course/get-all']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'course/my-courses']);
 
         //Enroll Permissions
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'enroll/enroll-single-user']);
@@ -254,6 +255,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'CourseController@update')->name('editcourse')->middleware('permission:course/update');
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:course/delete');
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
+    Route::get('my', 'CourseController@MyCourses')->name('mycourses')->middleware('permission:course/my-courses');
 });
 
 //USER CRUD ROUTES
