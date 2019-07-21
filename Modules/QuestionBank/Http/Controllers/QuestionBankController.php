@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuestionsAnswer;
+use Symfony\Component\Console\Question\Question;
 use Validator;
 use App\Http\Controllers\HelperController;
 
@@ -17,13 +18,34 @@ class QuestionBankController extends Controller
      * Display a listing of the resource.
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $questions = Questions::all();
+        $valid=Validator::make($request->all(), [
+            'Question_Category_id' => 'integer|exists:questions_categories,id',
+            'Category_id' => 'integer|exists:categories,id',
+            'Course_ID' => 'integer|exists:courses,id',
+        ]);
+        if ($valid->fails()) {
+            return HelperController::api_response_format(400, $valid->errors());
+        }
 
-        $questions = $this->QuestionData($questions);
+        $questions = Questions::with('question_answer');
+        if (isset($request->Course_ID)){
+            $questions->where('course_id',$request->Course_ID);
+        }
+        if(isset($request->Question_Category_id)){
+            $questions->where('question_category_id',$request->Question_Category_id);
 
-        return HelperController::api_response_format(200, $questions);
+        }
+        if(isset($request->Category_id)){
+            $questions->where('category_id',$request->Category_id);
+
+        }
+        $Questions=$questions->get();
+
+        $Questions = $this->QuestionData($Questions);
+
+        return HelperController::api_response_format(200, $Questions);
     }
 
     public function QuestionData($questions, $type = 0)
