@@ -53,7 +53,6 @@ class CourseController extends Controller
         ]);
 
         $course = Course::find($request->id);
-
         $course->name = $request->name;
         $course->category_id = $request->category;
         $course->save();
