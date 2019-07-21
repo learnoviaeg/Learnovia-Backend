@@ -37,4 +37,7 @@ class ClassLevel extends Model
         }
         return $classlevel;
     }
+    protected $hidden = [
+        'created_at','updated_at'
+    ];
 }

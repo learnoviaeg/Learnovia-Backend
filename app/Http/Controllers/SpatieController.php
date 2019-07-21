@@ -14,10 +14,10 @@ class SpatieController extends Controller
     {
        // $permission1=Permission::findById(1);
        // $p=Permission::create(['name' => 'Send Message to users']);
-        $findPer = Permission::find(2);
-        $findrole = Role::find(1);
+        // $findPer = Permission::find(2);
+        // $findrole = Role::find(1);
 
-        $findrole->givePermissionTo($findPer);
+        // $findrole->givePermissionTo($findPer);
 
      // $role=Role::create(['name' => 'Admin']);
       //  $role->givePermissionTo(['name' => 'Admin']);
@@ -79,6 +79,42 @@ class SpatieController extends Controller
         return HelperController::api_response_format(201, $role, 'Role Added!');
     }
 
+    public function Get_Role(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:roles,id'
+        ]);
+
+        $role = Role::find($request->id);
+
+        unset($role->guard_name);
+        unset($role->created_at);
+        unset($role->updated_at);
+
+        return HelperController::api_response_format(201, $role);
+    }
+
+    public function Update_Role(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:roles,id'
+        ]);
+        $role = Role::find($request->id);
+
+        $request->validate([
+            'name' => 'required|string'
+        ]);
+
+        $update = $role->update([
+            'name' => $request->name,
+        ]);
+
+        unset($role->guard_name);
+        unset($role->created_at);
+        unset($role->updated_at);
+
+        return HelperController::api_response_format(201, $role,'Role Updated Successfully');
+    }
     /*
      This function is to delete Role
      @param: id
@@ -420,6 +456,11 @@ class SpatieController extends Controller
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
         }
+    }
+
+    public function checkUserHavePermession(Request $request){
+        $request->validate(['permission' => 'required|exists:permissions,name']);
+        return HelperController::api_response_format(200 , $request->user()->hasPermissionTo($request->permission));
     }
 
 }

@@ -26,7 +26,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'firstname', 'email', 'password','real_password','lastname','username',
+        'firstname', 'email', 'password', 'real_password', 'lastname', 'username',
     ];
 
     /**
@@ -35,7 +35,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token','real_password'
+        'password', 'remember_token', 'real_password', 'created_at', 'updated_at'
     ];
 
     /**
@@ -47,24 +47,27 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    private static function getUserCounter($lastid){
-        if ($lastid < 10){
+    private static function getUserCounter($lastid)
+    {
+        if ($lastid < 10) {
             return "000" . $lastid;
-        }elseif ($lastid < 100 && $lastid >= 10){
+        } elseif ($lastid < 100 && $lastid >= 10) {
             return "00" . $lastid;
-        }elseif ($lastid < 1000 && $lastid >= 100){
+        } elseif ($lastid < 1000 && $lastid >= 100) {
             return "0" . $lastid;
         }
     }
 
-    public static function generateUsername(){
+    public static function generateUsername()
+    {
         $last_user = User::latest('id')->first();
         if ($last_user)
             return env('PREFIX') . self::getUserCounter($last_user->id);
         return env('PREFIX') . "0001";
     }
 
-    public function roles() {
+    public function roles()
+    {
         return $this->belongsToMany('Spatie\Permission\Models\Role', 'model_has_roles', 'model_id', 'role_id');
     }
 
@@ -75,23 +78,31 @@ class User extends Authenticatable
 
     public static function notify($request)
     {
-        $validater=Validator::make($request,[
-            'message'=>'required',
-            'from'=>'required|integer|exists:users,id',
-            'to'=>'required|integer|exists:users,id',
-            'course_id'=>'required|integer|exists:courses,id',
-            'type'=>'required|string'
+        $validater = Validator::make($request, [
+            'message' => 'required',
+            'from' => 'required|integer|exists:users,id',
+            'to' => 'required|integer|exists:users,id',
+            'course_id' => 'required|integer|exists:courses,id',
+            'type' => 'required|string'
         ]);
 
-        if ($validater->fails())
-        {
-            $errors=$validater->errors();
-            return response()->json($errors,400);
+        if ($validater->fails()) {
+            $errors = $validater->errors();
+            return response()->json($errors, 400);
         }
-        $touserid=$request['to'];
+        $touserid = $request['to'];
         $toUser = User::find($touserid);
         Notification::send($toUser, new Notificationlearnovia($request));
-        return 1 ;
+        return 1;
     }
 
+    public function childs()
+    {
+        return $this->belongsToMany('App\User' , 'parents' , 'parent_id' , 'child_id');
+    }
+
+    public function parent()
+    {
+
+    }
 }

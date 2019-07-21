@@ -18,6 +18,10 @@ Route::get('install', function () {
 
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Role']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Role']);
+        //get and update Role
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get Role By ID']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Role By ID']);
+
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Role to User']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Permission To Role']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Revoke Role from User']);
@@ -43,6 +47,7 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Type']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Assign Type']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Level']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Update Level']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Get all Levels']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Delete Level']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api','name' => 'Add Class']);
@@ -130,6 +135,10 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:Get Unread');
         Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:Mark as read');
     });
+    Route::get('haspermession' , 'SpatieController@checkUserHavePermession');
+    Route::post('getrolebyid','SpatieController@Get_Role')->name('getrolebyid')->middleware('permission:Get Role By ID');
+    Route::post('updaterolebyid','SpatieController@Update_Role')->name('updaterolebyid')->middleware('permission:Update Role By ID');
+
 });
 
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
@@ -161,6 +170,7 @@ Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'LevelsController@AddLevelWithYear')->name('addlevel')->middleware('permission:Add Level');
     Route::get('get', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:Get all Levels');
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:Delete Level');
+    Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:Update Level');
 });
 
 Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
@@ -183,6 +193,8 @@ Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
 
     //if you want to get classes with all segments please,write getclasses in yours
     Route::get('get', "segment_class_Controller@List_Classes_with_all_segment")->name('getclasses')->middleware('permission:Get All Segments');
+
+    Route::post('update', "segment_class_Controller@update")->name('updatesegment');//->middleware('permission:Update Segments');
 });
 
 Route::group(['prefix' => 'category', 'middleware' => 'auth:api'], function () {

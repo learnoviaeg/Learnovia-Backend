@@ -27,5 +27,8 @@ class Enroll extends Model
     $check = self::where('user_id', $user_id)->pluck('course_segment');
     return $check;
    }
+    protected $hidden = [
+        'created_at','updated_at'
+    ];
 
 }

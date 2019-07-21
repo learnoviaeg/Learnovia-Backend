@@ -31,4 +31,7 @@ class AcademicYearType extends Model
         }
         return $yeartype;
     }
+    protected $hidden = [
+        'created_at','updated_at'
+    ];
 }

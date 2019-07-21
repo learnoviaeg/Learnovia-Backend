@@ -10,4 +10,7 @@ class Lesson extends Model
     public function courseSegment(){
         return $this->belongsTo('App\CourseSegment');
     }
+    protected $hidden = [
+        'created_at','updated_at'
+    ];
 }

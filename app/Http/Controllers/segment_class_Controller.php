@@ -23,8 +23,7 @@ class segment_class_Controller extends Controller
      */
     public function List_Classes_with_all_segment()
     {
-        $cat = Segment_class_resource::collection(ClassLevel::with("Segment_class")->get());
-        return HelperController::api_response_format(200, $cat);
+        return HelperController::api_response_format(200, Segment::with('Segment_class')->get());
     }
 
     /**
@@ -118,5 +117,36 @@ class segment_class_Controller extends Controller
         }
         return HelperController::NOTFOUND();
 
+    }
+
+    public function update(Request $request)
+    {
+        $valid = Validator::make($request->all(), [
+            'id' => 'required|exists:segments,id',
+            'name' => 'required',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
+            'level' => 'exists:levels,id|required_with:year',
+            'class' => 'exists:classes,id|required_with:year',
+        ]);
+
+        if ($valid->fails())
+            return HelperController::api_response_format(400, $valid->errors());
+
+        $segment = Segment::find($request->id);
+        $segment->name = $request->name;
+        $segment->save();
+        if ($request->filled('year')) {
+            $oldyearType = AcademicYearType::checkRelation($segment->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academicyear[0]->id , $segment->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academictype[0]->id);
+            $newyearType = AcademicYearType::checkRelation($request->year, $request->type);
+            $oldyearLevel = YearLevel::checkRelation($oldyearType->id, $segment->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->levels[0]->id);
+            $newyearLevel = YearLevel::checkRelation($newyearType->id, $request->level);
+            $oldClassLevel = ClassLevel::checkRelation($segment->Segment_class[0]->classes[0]->id ,$oldyearLevel->id);
+            $newClassLevel = ClassLevel::checkRelation($segment->Segment_class[0]->classes[0]->id,$newyearLevel->id);
+            $oldsegmentClass = SegmentClass::checkRelation($oldClassLevel->id, $segment->id);
+            $oldsegmentClass->delete();
+            SegmentClass::checkRelation($newClassLevel->id, $segment->id);
+        }
+        return HelperController::api_response_format(200, $segment);
     }
 }
