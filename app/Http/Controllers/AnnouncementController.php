@@ -121,10 +121,21 @@ class AnnouncementController extends Controller
            'level_id' => $request->level_id
         ]);
 
-
+        return HelperController::api_response_format(201,'Announcement Sent Successfully');
      }
 
+     public function delete_announcement(Request $request)
+     {
+        $request->validate([
+            'id' => 'required|exists:announcements,id',
+        ]);
 
+        $announce = Announcement::find($request->id);
+        $announce->delete();
+
+        return HelperController::api_response_format(201, 'Announcement Deleted Successfully');
+
+     }
 
 }
 
