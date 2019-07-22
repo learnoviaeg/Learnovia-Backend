@@ -17,6 +17,7 @@ class QuizController extends Controller
      * @param Request $request
      * @return Response
      */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -263,7 +264,24 @@ class QuizController extends Controller
         ]);
 
         quiz::destroy($request->quiz_id);
-
         return HelperController::api_response_format(200, [],'Quiz deleted Successfully');
+    }
+    public function getQuizwithRandomQuestion(Request $request){
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+        ]);
+
+        $quiz = quiz::find($request->quiz_id);
+        $shuffledQuestion = $quiz->Question->shuffle();
+        foreach($shuffledQuestion as $question){
+            $answers = $question->question_answer->shuffle();
+            $question->answers = $answers;
+            unset($question->question_answer);
+            unset($question->pivot);
+        }
+        $quiz->shuffledQuestion = $shuffledQuestion;
+        unset($quiz->Question);
+
+        return HelperController::api_response_format(200, $quiz);
     }
 }
