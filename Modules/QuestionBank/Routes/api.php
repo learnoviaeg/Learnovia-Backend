@@ -1,11 +1,14 @@
 <?php
 
 use Illuminate\Http\Request;
-Route::post('storeQuestions', 'QuestionBankController@store');
-Route::post('/', 'QuestionBankController@index');
+
+Route::group(['middleware' => ['store_question' , 'auth:api']], function() {
+    Route::post('storeQuestions', 'QuestionBankController@store');
+    Route::post('/', 'QuestionBankController@index');
+    Route::post('updateQuestion', 'QuestionBankController@update');
+});
 
 Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion');
-Route::post('updateQuestion', 'QuestionBankController@update');
 
 Route::get('installQuestionBank', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Get All Questions']);
