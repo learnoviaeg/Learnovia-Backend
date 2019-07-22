@@ -28,8 +28,8 @@ class UsersImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email'];
-        $enrollOptional = ['optional1','optional2','optional3'];
-        $teacheroptional=['course1','course2'];
+        $enrollOptional = 'optional';
+        $teacheroptional='course';
 
 
         // dd($classSegID);
@@ -56,7 +56,6 @@ class UsersImport implements ToModel, WithHeadingRow
             $classLevID=ClassLevel::GetClass($row['class_id']);
 
             $classSegID=SegmentClass::GetClasseLevel($classLevID);
-
             //$classLevID=DB::table('class_levels')->where('class_id',$row['class_id'])->pluck('id')->first();
             //$classSegID=DB::table('segment_classes')->where('class_level_id',$classLevID)->pluck('id')->first();
 
@@ -67,36 +66,40 @@ class UsersImport implements ToModel, WithHeadingRow
                 'SegmentClassId' => $classSegID
             ]);
             EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
-            foreach($enrollOptional as $seg) {
-                if (isset($row[$seg])){
+            $enrollcounter=1;
+            while(isset($row[$enrollOptional.$enrollcounter])) {
 
-                    $course_id=Course::findByName($row[$seg]);
-                    $segmentid= CourseSegment::getidfromcourse($course_id);
-                    $option = new Request([
-                                'course_segment' => array($segmentid),
-                                'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                                'users'=> array($user->username),
-                                'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                                'role_id'=>array(3)
-                    ]);
+                $course_id=Course::findByName($row[$enrollOptional.$enrollcounter]);
+                $segmentid= CourseSegment::getidfromcourse($course_id);
+                $option = new Request([
+                    'course_segment' => array($segmentid),
+                    'start_date' => Date::excelToDateTimeObject($row['start_date']),
+                    'users'=> array($user->username),
+                    'end_date' => Date::excelToDateTimeObject($row['end_date']),
+                    'role_id'=>array(3)
+                ]);
                 EnrollUserToCourseController::EnrollCourses($option);
-                }
+
+                $enrollcounter++;
             }
         }
         else{
-            foreach($teacheroptional as $sege){
-                if (isset($row[$sege])){
-                    $course_id=Course::findByName($row[$sege]);
-                    $segmentid= CourseSegment::getidfromcourse($course_id);
-                    $option = new Request([
-                        'course_segment' => array($segmentid),
-                        'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                        'users'=> array($user->username),
-                        'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                        'role_id'=>array($role->id)
-                    ]);
-                    EnrollUserToCourseController::EnrollCourses($option);
-                }
+
+
+
+            $teachercounter=1;
+            while(isset($row[$teacheroptional.$teachercounter])){
+                $course_id=Course::findByName($row[$teacheroptional.$teachercounter]);
+                $segmentid= CourseSegment::getidfromcourse($course_id);
+                $option = new Request([
+                    'course_segment' => array($segmentid),
+                    'start_date' => Date::excelToDateTimeObject($row['start_date']),
+                    'users'=> array($user->username),
+                    'end_date' => Date::excelToDateTimeObject($row['end_date']),
+                    'role_id'=>array($role->id)
+                ]);
+                EnrollUserToCourseController::EnrollCourses($option);
+                $teachercounter++;
             }
 
         }
