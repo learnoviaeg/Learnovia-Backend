@@ -177,7 +177,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:notifications/get-unread');
         Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:notifications/mark-as-read');
     });
-
+    Route::post('deleteannounce','AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
+    Route::post('announce','AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
 });
 
 //Year Routes
@@ -294,6 +295,4 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     // Route::post('update', 'MessageController@edit')->name('editcategory')->middleware('permission:Update Category');
     // Route::post('delete', 'MessageController@delete')->name('deletecategory')->middleware('permission:Delete Category');
     // Route::get('get', 'MessageController@get')->name('getcategory')->middleware('permission:Get Categories');
-
 });
-
