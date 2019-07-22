@@ -296,3 +296,10 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     // Route::post('delete', 'MessageController@delete')->name('deletecategory')->middleware('permission:Delete Category');
     // Route::get('get', 'MessageController@get')->name('getcategory')->middleware('permission:Get Categories');
 });
+
+Route::group(['prefix' => 'Component' , 'middleware' => 'auth:api'] , function (){
+    Route::get('get' , 'ComponentController@GetInstalledComponents');
+    Route::post('install' , 'ComponentController@Install');
+    Route::post('uninstall' , 'ComponentController@Uninstall');
+    Route::put('toggle' , 'ComponentController@ToggleActive');
+});
