@@ -351,7 +351,6 @@ class QuestionBankController extends Controller
                     $re[] = $this->Essay($question);
                     break;
                 case 5: // para
-
                     $re[] = $this->paragraph($question);
                     break;
             }
@@ -666,7 +665,6 @@ class QuestionBankController extends Controller
             'true_false' => $request->true_false,
             'match_a' => $request->match_a,
             'match_b' => $request->match_b,
-            'is_true' => $request->is_true,
             'is_true' => $request->is_true,
             'question_id' => $request->question_id
         ]);
