@@ -32,6 +32,8 @@ class CreateUsersTable extends Migration
             $table->boolean('suspend')->default('0');
             $table->string('password');
             $table->string('real_password');
+            $table->unsignedBigInteger('class_id')->nullable();
+            $table->foreign('class_id')->references('id')->on('classes')->onDelete('cascade')->onUpdate('cascade');
             $table->rememberToken();
             $table->timestamps();
         });

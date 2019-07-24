@@ -295,3 +295,5 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
 
 });
 
+Route::post('GetEnrolledStudent', 'EnrollUserToCourseController@GetEnrolledStudents');
+

@@ -96,6 +96,11 @@ class User extends Authenticatable
         return 1;
     }
 
+    public static function GetUsersByClass_id($class_id){
+        $check = self::where('class_id',$class_id)->pluck('id');
+        return $check;
+    }
+
     public function childs()
     {
         return $this->belongsToMany('App\User' , 'parents' , 'parent_id' , 'child_id');
