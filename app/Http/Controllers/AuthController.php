@@ -102,6 +102,6 @@ class AuthController extends Controller
 
     public function userRole(Request $request)
     {
-        return HelperController::api_response_format(200, $request->user()->getRoleNames()[0]);
+        return HelperController::api_response_format(200, $request->user()->roles);
     }
 }
