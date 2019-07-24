@@ -295,3 +295,11 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
 
 });
 
+Route::post('AddLesson', 'LessonController@AddLesson')->name('AddLesson');
+//->middleware('permission:contact/add');
+Route::get('ShowLesson', 'LessonController@ShowLesson')->name('showlesson');
+Route::post('deleteLesson', 'LessonController@deleteLesson')->name('deleteLesson');
+Route::post('updateLesson', 'LessonController@updateLesson')->name('updateLesson');
+Route::post('Sorting', 'LessonController@Sorting')->name('Sorting');
+
+
