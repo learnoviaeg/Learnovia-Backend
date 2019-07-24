@@ -27,12 +27,15 @@ Route::group([
         Route::post('addAnswer', 'QuestionBankController@addAnswer')->middleware('Add New Answer');
         Route::post('storeQuestions', 'QuestionBankController@store')->middleware('Add New Questions');
 
-        Route::post('storeQuiz', 'QuizController@store');
+        
         Route::post('deleteQuiz', 'QuizController@destroy');
         Route::post('updateQuiz', 'QuizController@update');
+        Route::post('storeQuiz', 'QuizController@store');
+        Route::get('show', 'QuizController@quiz');
 
     });
 });
+Route::post('updateQuiz', 'QuizController@update');
 
 
 ?>

@@ -292,6 +292,8 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     // Route::post('update', 'MessageController@edit')->name('editcategory')->middleware('permission:Update Category');
     // Route::post('delete', 'MessageController@delete')->name('deletecategory')->middleware('permission:Delete Category');
     // Route::get('get', 'MessageController@get')->name('getcategory')->middleware('permission:Get Categories');
+    Route::post('addlesson' , 'LessonController@addLesson');
 
 });
+
 

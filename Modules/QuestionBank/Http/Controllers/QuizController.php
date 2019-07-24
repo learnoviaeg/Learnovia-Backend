@@ -29,19 +29,22 @@ class QuizController extends Controller
                 * type 2 => Without Question
                 */
         ]);
-
+        $index=Quiz::whereCourse_id($request->course_id)->get()->max('index');
+        $Next_index=$index+1;
         if($request->type == 0 ){ // new or new
             $newQuestionsIDs = $this->storeWithNewQuestions($request);
             $oldQuestionsIDs = $this->storeWithOldQuestions($request);
             $questionsIDs = $newQuestionsIDs->merge($oldQuestionsIDs);
         }
+        
         else if($request->type == 1){ // random
             $questionsIDs = $this->storeWithRandomQuestions($request);
         }
         else{ // create Quiz without Question
             $quiz = quiz::create([
                 'name' => $request->name,
-                'course_id' => $request->course_id
+                'course_id' => $request->course_id,
+                'index' => $Next_index
             ]);
             return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
         }
@@ -49,7 +52,8 @@ class QuizController extends Controller
         if($questionsIDs != null){
             $quiz = quiz::create([
                 'name' => $request->name,
-                'course_id' => $request->course_id
+                'course_id' => $request->course_id,
+                'index' => $Next_index
             ]);
 
             $quiz->Question()->attach($questionsIDs);
@@ -228,6 +232,7 @@ class QuizController extends Controller
 
             $quiz->update([
                 'name' => $request->name,
+                'index' => $request->index,
             ]);
 
             $quiz->Question()->detach();
@@ -237,6 +242,8 @@ class QuizController extends Controller
 
         $quiz->update([
             'name' => $request->name,
+            'index' => $request->index,
+
         ]);
 
         $quiz->Question()->detach();
@@ -265,5 +272,11 @@ class QuizController extends Controller
         quiz::destroy($request->quiz_id);
 
         return HelperController::api_response_format(200, [],'Quiz deleted Successfully');
+    }
+
+    public function quiz(){
+        $quiz = Quiz::get();
+        return $quiz;   
+      //  return $this->belongsTo(Course::class);
     }
 }

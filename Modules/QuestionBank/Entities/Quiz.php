@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class quiz extends Model
 {
-    protected $fillable = ['name','course_id'];
+    protected $fillable = ['name','course_id','index'];
     protected $hidden = [
         'created_at', 'updated_at'
     ];
@@ -15,6 +15,8 @@ class quiz extends Model
     {
         return $this->belongsToMany('Modules\QuestionBank\Entities\Questions', 'quiz_questions', 'quiz_id', 'question_id');
     }
+
+
 
 
 }
