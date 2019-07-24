@@ -1,0 +1,14 @@
+{
+    "name": "Assigments",
+    "alias": "assigments",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\Assigments\\Providers\\AssigmentsServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
