@@ -227,23 +227,21 @@ class MessageController extends Controller
     public
     function ViewAllMSG_from_to(Request $req)
     {
+        $req->validate([
+            'id' => 'required|exists:users,id'
+        ]);
         $session_id = Auth::User()->id;
         $check = Message::where('From', $req->id)->orWhere('To', $req->id)->first();
         if ($check) {
-            $req->validate([
-                'id' => 'required|integer',
-            ]);
-
             $messages = Message::where(function ($query) use ($req, $session_id) {
                 $query->where('From', $req->id)->orWhere('To', $req->id);
             })->where(function ($query) use ($session_id) {
                 $query->where('From', $session_id)->orWhere('To', $session_id);
             })->get();
             $msg = MessageFromToResource::collection($messages);
-
-
-            return HelperController::api_response_format(201, $msg);
+            return HelperController::api_response_format(200, $msg);
         }
+        return HelperController::api_response_format(200, [], 'No Messages to this user');
     }
 
     /**

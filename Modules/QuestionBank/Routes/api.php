@@ -2,47 +2,53 @@
 
 use Illuminate\Http\Request;
 
-Route::group(['middleware' => ['store_question' , 'auth:api']], function() {
-    Route::post('storeQuestions', 'QuestionBankController@store');
-    Route::post('/', 'QuestionBankController@index');
-    Route::post('updateQuestion', 'QuestionBankController@update');
-});
 
-Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion');
+Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
-Route::get('installQuestionBank', function () {
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get All Questions']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Question']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get Random Questions For Course']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Update Question']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Question Answer']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add New Answer']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add New Questions']);
-});
+    Route::get('install', function () {
+        if (\Spatie\Permission\Models\Permission::whereName('question/add')->first() != null) {
+            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        }
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/update']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/get']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/delete']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/random']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add-answer']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/delete-answer']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/delete']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-quiz-with-random-questions']);
 
-Route::group([
-    'prefix' => 'auth'
-], function () {
-
-    Route::group([
-      'middleware' => 'auth:api'
-    ], function() {
-        Route::get('getQuestions', 'QuestionBankController@index')->middleware('Get All Questions');
-        Route::post('deleteQuestion', 'QuestionBankController@destroy')->middleware('Delete Question');
-        Route::get('getRandomQuestion', 'QuestionBankController@getRandomQuestion')->middleware('Get Random Questions For Course');
-        Route::post('updateQuestion', 'QuestionBankController@update')->middleware('Update Question');
-        Route::post('deleteAnswer', 'QuestionBankController@deleteAnswer')->middleware('Delete Question Answer');
-        Route::post('addAnswer', 'QuestionBankController@addAnswer')->middleware('Add New Answer');
-        Route::post('storeQuestions', 'QuestionBankController@store')->middleware('Add New Questions');
-
-        Route::post('storeQuiz', 'QuizController@store');
-        Route::post('deleteQuiz', 'QuizController@destroy');
-        Route::post('updateQuiz', 'QuizController@update');
-        Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion');
+        $role = \Spatie\Permission\Models\Role::find(1);
+        $role->givePermissionTo('question/add');
+        $role->givePermissionTo('question/update');
+        $role->givePermissionTo('question/delete');
+        $role->givePermissionTo('quiz/get-quiz-with-random-questions');
+        $role->givePermissionTo('question/random');
+        $role->givePermissionTo('question/add-answer');
+        $role->givePermissionTo('question/delete-answer');
+        $role->givePermissionTo('quiz/add');
+        $role->givePermissionTo('quiz/update');
+        $role->givePermissionTo('quiz/delete');
+        return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
 
     });
+    Route::group(['middleware' => ['store_question']], function () {
+        Route::post('storeQuestions', 'QuestionBankController@store')->middleware('permission:question/add');
+        Route::post('updateQuestion', 'QuestionBankController@update')->middleware('permission:question/update');
+        Route::post('storeQuiz', 'QuizController@store')->middleware('permission:quiz/add');
+        Route::post('updateQuiz', 'QuizController@update')->middleware('permission:quiz/update');
+    });
+
+    Route::get('getQuestions', 'QuestionBankController@index')->middleware('permission:question/get');
+    Route::post('deleteQuestion', 'QuestionBankController@destroy')->middleware('permission:question/delete');
+    Route::get('getRandomQuestion', 'QuestionBankController@getRandomQuestion')->middleware('permission:question/random');
+    Route::post('deleteAnswer', 'QuestionBankController@deleteAnswer')->middleware('permission:question/delete-answer');
+    Route::post('addAnswer', 'QuestionBankController@addAnswer')->middleware('permission:question/add-answer');
+
+    Route::post('deleteQuiz', 'QuizController@destroy')->middleware('permission:quiz/delete');
+    Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion')->middleware('permission:quiz/get-quiz-with-random-questions');
+
 });
-
-
-?>
-

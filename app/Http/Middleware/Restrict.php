@@ -17,6 +17,9 @@ class Restrict
      */
     public function handle($request, Closure $next)
     {
+        $request->validate([
+            'Course_ID' => 'required|exists:courses,id'
+        ]);
         if ($request->user() == null)
             return HelperController::api_response_format(401, [], 'User not logged in');
 
@@ -28,6 +31,6 @@ class Restrict
                 return $next($request);
             }
         }
-        return HelperController::api_response_format(403 );
+        return HelperController::api_response_format(403 , null , 'This Course is not yours...');
         }
 }
