@@ -64,7 +64,6 @@ class MessageController extends Controller
                                 'deleted' => 0,
                                 'To' => $userId,
                                 'file' => uniqid() . File::extension($req->file->getClientOriginalName()),
-
                             ));
                             $is_send = true;
                             break;

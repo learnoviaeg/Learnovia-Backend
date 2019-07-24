@@ -6,6 +6,7 @@ use App\AcademicYearType;
 use App\ClassLevel;
 use App\Course;
 use App\CourseSegment;
+use App\Lesson;
 use App\SegmentClass;
 use App\YearLevel;
 use Illuminate\Http\Request;
@@ -22,8 +23,9 @@ class CourseController extends Controller
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
             'segment' => 'required|exists:segments,id',
+            'no_of_lessons' => 'integer'
         ]);
-
+        $no_of_lessons = 4;
         $course = Course::create([
             'name' => $request->name,
             'category_id' => $request->category,
@@ -32,10 +34,20 @@ class CourseController extends Controller
         $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
         $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
         $segmentClass = SegmentClass::checkRelation($classLevel->id, $request->segment);
-        CourseSegment::create([
+        $courseSegment = CourseSegment::create([
             'course_id' => $course->id,
             'segment_class_id' => $segmentClass->id
         ]);
+        if ($request->filled('no_of_lessons')) {
+            $no_of_lessons = $request->no_of_lessons;
+        }
+
+        for ($i = 1; $i <= $no_of_lessons; $i++) {
+            $courseSegment->lessons()->create([
+                'name' => 'Lesson ' . $i,
+                'index' => $i,
+            ]);
+        }
         return HelperController::api_response_format(201, $course, 'Course Created Successfully');
     }
 
@@ -94,5 +106,13 @@ class CourseController extends Controller
         $course = Course::find($request->id);
         $course->delete();
         return HelperController::api_response_format(200, $course, 'Course Updated Successfully');
+    }
+
+    public function MyCourses(Request $request)
+    {
+        foreach ($request->user()->enroll as $enroll) {
+            $enroll->CourseSegment->courses;
+        }
+        return HelperController::api_response_format(200, $request->user());
     }
 }

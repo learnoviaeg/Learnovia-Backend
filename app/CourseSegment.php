@@ -15,6 +15,12 @@ class CourseSegment extends Model
         return $check;
     }
 
+    public static function GetCourseSegmentId($segment_class_id)
+    {
+        $check = self::where('segment_class_id', $segment_class_id)->pluck('id');
+        return $check;
+    }
+
     public static function GetCoursesBysegment_class($user_id)
     {
         $check = self::where('segment_class_id', $user_id);
