@@ -264,7 +264,7 @@ class QuestionBankController extends Controller
     {
         $request->validate([
             'question_id' => 'required|integer|exists:questions,id',
-            'content'=> 'required|string|min:1',
+            'contents'=> 'required|string|min:1',
             'true_false'=> 'nullable|boolean',
             'match_a'=> 'nullable|string|max:10',
             'match_b'=> 'nullable|string|max:10',
@@ -272,7 +272,7 @@ class QuestionBankController extends Controller
         ]);
 
         $answer = QuestionsAnswer::create([
-            'content'    => $request->content,
+            'content'    => $request->contents,
             'true_false' => $request->true_false,
             'match_a'    => $request->match_a,
             'match_b'    => $request->match_b,

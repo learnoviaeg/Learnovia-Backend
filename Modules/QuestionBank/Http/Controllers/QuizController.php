@@ -2,6 +2,7 @@
 
 namespace Modules\QuestionBank\Http\Controllers;
 
+use App\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -278,5 +279,65 @@ class QuizController extends Controller
         $quiz = Quiz::get();
         return $quiz;   
       //  return $this->belongsTo(Course::class);
+    }
+    public function sortDown($quiz_id,$index){
+
+        $course_id=Quiz::where('id',$quiz_id)->pluck('course_id')->first();
+        $quiz_index=Quiz::where('id',$quiz_id)->pluck('index')->first();
+
+        $quizes= Quiz::where('course_id',$course_id)->get();
+        foreach ($quizes as $quiz ){
+            if($quiz->index > $quiz_index || $quiz->index < $index){
+                continue;
+            }
+            if ($quiz->index  !=  $quiz_index){
+                $quiz->update([
+                    'index'=>$quiz->index+1
+                ]);
+            }else{
+                $quiz->update([
+                    'index'=>$index
+                ]);
+            }
+        }
+        return $quizes ;
+
+    }
+
+    public function SortUp($quiz_id,$index){
+        $course_id=Quiz::where('id',$quiz_id)->pluck('course_id');
+        $quiz_index=Quiz::where('id',$quiz_id)->pluck('index')->first();
+        $quizes= Quiz::where('course_id',$course_id)->get();
+        foreach ($quizes as $quiz ){
+            if($quiz->index > $index || $quiz->index < $quiz_index ){
+                continue;
+            }
+            elseif ($quiz->index  !=  $quiz_index){
+                $quiz->update([
+                    'index'=>$quiz->index-1
+                ]);
+            }else{
+                $quiz->update([
+                    'index'=>$index
+                ]);
+            }
+        }
+        return $quizes ;
+    }
+
+    public function sort(Request $request){
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'index'=>'required|integer'
+        ]);
+        $quiz_index=Quiz::where('id',$request->quiz_id)->pluck('index')->first();
+
+        if($quiz_index>$request->index){
+            $quizes=$this->sortDown($request->quiz_id,$request->index);
+        }
+        else{
+            $quizes = $this->SortUp($request->quiz_id,$request->index);
+        }
+        return HelperController::api_response_format(200, $quizes,' Successfully');
     }
 }

@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
-
+Route::get('sort', 'QuizController@sort');
+Route::get('SortUp', 'QuizController@SortUp');
 Route::get('installQuestionBank', function () {
         \Spatie\Permission\Models\Permission::create(['name' => 'Get All Questions']);
         \Spatie\Permission\Models\Permission::create(['name' => 'Delete Question']);
