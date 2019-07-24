@@ -10,6 +10,7 @@ use App\Lesson;
 use App\SegmentClass;
 use App\YearLevel;
 use Illuminate\Http\Request;
+use App\Enroll;
 
 class CourseController extends Controller
 {
@@ -115,4 +116,53 @@ class CourseController extends Controller
         }
         return HelperController::api_response_format(200, $request->user());
     }
+    public function GetUserCourseLessons(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:enrolls,user_id',
+            'course_id' => 'required|exists:course_segments,course_id'
+        ]);
+        $CourseSeg=Enroll::where('user_id',25)->pluck('course_segment');
+        $seggg=array();
+
+        foreach ($CourseSeg as $cour) {
+            # code...
+            $check=CourseSegment::where('course_id',$request->course_id)->where('id',$cour)->pluck('id')->first();
+            if($check!=null)
+            {
+                $seggg[]=$check;
+
+            }
+        }
+        $CourseSeg=array();
+        foreach($seggg as $segggg){
+            $CourseSeg[]=CourseSegment::where('id',$segggg)->get();
+        }
+        $clase=array();
+        $lessons=null;
+        $i = 0 ;
+        foreach($CourseSeg as $seg)
+        {
+            $lessons= $seg->first()->lessons;
+            foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
+                # code...
+                foreach ($segmentClas->classLevel as $key => $classlev) {
+                    # code...
+                    foreach ($classlev->classes as $key => $class) {
+                        # code...
+                        $clase[$i]=$class;
+                        $clase[$i]->lessons = $lessons;
+                        $i++;
+                    }
+                }
+            }
+        }
+        // foreach ($CourseSeg as $seg) {
+        //         $lessons=$seg->lessons;
+        // }
+        // lessons
+        $clase['course'] = Course::find($request->course_id);
+        return $clase;
+    }
+
 }

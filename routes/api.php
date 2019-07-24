@@ -313,3 +313,6 @@ Route::group(['prefix' => 'Component', 'middleware' => 'auth:api'], function () 
     Route::post('uninstall', 'ComponentController@Uninstall')->name('uninstallcomponenet')->middleware('permission:component/uninstall');
     Route::put('toggle', 'ComponentController@ToggleActive')->name('togglecomponenet')->middleware('permission:component/toggle');
 });
+
+
+Route::post('testplease','CourseController@GetUserCourseLessons');
