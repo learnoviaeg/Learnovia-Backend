@@ -336,6 +336,9 @@ class QuestionBankController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'Question' => 'required|array'
+        ]);
         foreach ($request->Question as $question) {
             switch ($question['Question_Type_id']) {
                 case 1: // True/false

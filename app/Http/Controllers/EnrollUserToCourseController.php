@@ -105,10 +105,6 @@ class EnrollUserToCourseController extends Controller
 
     }
 
-
-
-
-
     public static function EnrollInAllMandatoryCourses(Request $request)
     {
 
@@ -151,17 +147,13 @@ class EnrollUserToCourseController extends Controller
     }
 
     public function EnrollExistUsersFromExcel(Request $request){
-
         $ExcelCntrlVar = new ExcelController();
         $ExcelCntrlVar->import($request);
-
     }
 
     public function AddAndEnrollBulkOfNewUsers(Request $request){
-
         $ExcelCntrlVar = new ExcelController();
         $ExcelCntrlVar->import($request);
-
     }
 
     public function GetEnrolledStudents(Request $request){
