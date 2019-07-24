@@ -245,3 +245,4 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     Route::get('test', 'SpatieController@index');
 });
 //Route::post('userimport','ExcelController@EnrollExistUsersFromExcel');
+Route::post('pdfview','PdfController@pdf');
