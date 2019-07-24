@@ -96,6 +96,7 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/mandatory-course']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/bulk-of-exist-users']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/add-and-enroll-bulk-of-new-users']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/enrolled-users']);
 
         //Contact Permissions
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/add']);
@@ -278,6 +279,7 @@ Route::group(['prefix' => 'enroll'], function () {
     Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:enroll/mandatory-course');
     Route::post('enrollexcel', 'EnrollUserToCourseController@EnrollExistUsersFromExcel')->name('enrollexcel')->middleware('permission:enroll/bulk-of-exist-users');
     Route::post('usertech', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
+    Route::post('GetEnrolledStudent', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');
 });
 
 
@@ -298,9 +300,10 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     // Route::get('get', 'MessageController@get')->name('getcategory')->middleware('permission:Get Categories');
 });
 
+
 Route::group(['prefix' => 'Component', 'middleware' => 'auth:api'], function () {
-    Route::get('get', 'ComponentController@GetInstalledComponents');
-    Route::post('install', 'ComponentController@Install');
-    Route::post('uninstall', 'ComponentController@Uninstall');
-    Route::put('toggle', 'ComponentController@ToggleActive');
+    Route::get('get', 'ComponentController@GetInstalledComponents')->name('getcomponent')->middleware('permission:component/get');
+    Route::post('install', 'ComponentController@Install')->name('installcomponenet')->middleware('permission:component/install');
+    Route::post('uninstall', 'ComponentController@Uninstall')->name('uninstallcomponenet')->middleware('permission:component/uninstall');
+    Route::put('toggle', 'ComponentController@ToggleActive')->name('togglecomponenet')->middleware('permission:component/toggle');
 });
