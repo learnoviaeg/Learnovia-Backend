@@ -8,6 +8,10 @@ use Illuminate\Routing\Controller;
 use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\FileCourseSegment;
 use Modules\UploadFiles\Entities\MediaCourseSegment;
+use Modules\UploadFiles\Entities\FileLesson;
+use Modules\UploadFiles\Entities\MediaLesson;
+use App\ClassLevel;
+use App\Enroll;
 
 
 use Illuminate\Support\Facades\Storage;
@@ -37,10 +41,42 @@ class FilesController extends Controller
                 'description' => 'required|string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-                'course_segment_id'=>'required|integer|exists:course_segments,id',
+                'class_level' => 'required|array',
+                'class_level.*' => 'required|integer|exists:class_levels,id',
+                'lesson_id'=>'required|integer|exists:lessons,id',
                 'from' => 'required|date',
                 'to' => 'required|date|after:from',
             ]);
+
+            // activeCourseSgement
+            $activeCourseSegments = collect([]);
+
+            foreach($request->class_level as $class_level_id){
+                $class_level = ClassLevel::find($class_level_id);
+                $activeSegmentClass = $class_level->segmentClass->where('is_active',1)->first();
+                if(isset($activeSegmentClass)){
+                    $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
+                    if(isset($activeCourseSegment)){
+                        $checkTeacherEnroll = Enroll::where('user_id', Auth::user()->id)
+                            ->where('course_segment', $request->course_segment_id)
+                            ->where('role_id', 4)
+                            ->count();
+
+                        if($checkTeacherEnroll > 0){
+                            $activeCourseSegments->push($activeCourseSegment);
+                        }
+                        else{
+                            return HelperController::api_response_format(400,null,'You\'re unauthorize');
+                        }
+                    }
+                    else{
+                        return HelperController::api_response_format(400,null,'No Course active in segment');
+                    }
+                }
+                else{
+                    return HelperController::api_response_format(400,null,'No Class active in segment');
+                }
+            }
 
             foreach($request->Imported_file as $singlefile){
                 $extension = $singlefile->getClientOriginalExtension();
@@ -49,7 +85,8 @@ class FilesController extends Controller
                 $size = $singlefile->getSize();
                 $description = $request->description;
 
-                $name = file::generateId().'.'.$extension;
+                $name = uniqid().'.'.$extension;
+
                 $file = new file;
                 $file->type = $extension;
                 $file->name = $name;
@@ -61,19 +98,26 @@ class FilesController extends Controller
                 $check = $file->save();
 
                 if($check){
+                    foreach($activeCourseSegments as $courseSegment){
+                        $filesegment = new FileCourseSegment;
+                        $filesegment->course_segment_id = $courseSegment->id;
+                        $filesegment->file_id = $file->id;
+                        $filesegment->save();
+                    }
 
-                    $filesegment = new FileCourseSegment;
-                    $filesegment->course_segment_id = $request->course_segment_id;
-                    $filesegment->file_id = $file->id;
-                    $filesegment->save();
-
+                    $fileLesson = new FileLesson;
+                    $fileLesson->lesson_id = $request->lesson_id;
+                    $fileLesson->file_id = $file->id;
+                    $fileLesson->save();
 
                     Storage::disk('public')->putFileAs(
-                        'files/'.$request->course_segment_id.'/'.$file->id,
+                        'files/'.$request->lesson_id.'/'.$file->id,
                         $singlefile,
                         $name
                     );
+
                 }
+
             }
 
             return HelperController::api_response_format(200,null,'Upload Successfully');
@@ -95,81 +139,89 @@ class FilesController extends Controller
             'course_segment_id'=>'required|integer|exists:course_segments,id',
         ]);
 
-        $mediaSegment = MediaCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
-        $fileSegment = FileCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
-
         $MEDIA = collect([]);
         $FILES = collect([]);
 
+        $checkEnroll = Enroll::where('user_id', Auth::user()->id)
+                            ->where('course_segment', $request->course_segment_id)
+                            ->count();
 
-        foreach ($mediaSegment as $segement) {
-            $allMedia = $segement->Media
-                ->reject(function ($media) {
-                    $year = Carbon::now()->year;
-                    $month = Carbon::now()->month;
-                    $day = Carbon::now()->day;
+        if($checkEnroll > 0){
+            $mediaSegment = MediaCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
+            $fileSegment = FileCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
+            foreach ($mediaSegment as $segement) {
+                $allMedia = $segement->Media
+                    ->reject(function ($media) {
+                        $year = Carbon::now()->year;
+                        $month = Carbon::now()->month;
+                        $day = Carbon::now()->day;
 
-                    $from = explode('-',$media->from);
-                    $to = explode('-',$media->to);
+                        $from = explode('-',$media->from);
+                        $to = explode('-',$media->to);
 
-                    $start = Carbon::create($from[0], $from[1], $from[2]);
-                    $end = Carbon::create($to[0], $to[1], $to[2]);
+                        $start = Carbon::create($from[0], $from[1], $from[2]);
+                        $end = Carbon::create($to[0], $to[1], $to[2]);
 
-                    $checkDate = Carbon::create($year,$month,$day)->between($start, $end);
+                        $checkDate = Carbon::create($year,$month,$day)->between($start, $end);
 
-                    return !$checkDate;
-                })->where('visibility',1);
+                        return !$checkDate;
+                    })->where('visibility',1);
 
-            foreach ($allMedia as $media) {
-                $media->url  = URL::asset('storage/media/'.$request->course_segment_id.'/'.$media->id.'/'.$media->name);
-                $userid = $media->user->id;
-                $firstname = $media->user->firstname;
-                $lastname = $media->user->lastname;
-                $user = collect([
-                    'user_id' => $userid,
-                    'firstname' => $firstname,
-                    'lastname' => $lastname
-                ]);
-                unset($media->user);
-                $media->owner = $user;
+                foreach ($allMedia as $media) {
+                    $lesson_id = $media->MediaLesson->lesson_id;
+                    $media->url  = URL::asset('storage/media/'.$lesson_id.'/'.$media->id.'/'.$media->name);
+                    $userid = $media->user->id;
+                    $firstname = $media->user->firstname;
+                    $lastname = $media->user->lastname;
+                    $user = collect([
+                        'user_id' => $userid,
+                        'firstname' => $firstname,
+                        'lastname' => $lastname
+                    ]);
+                    unset($media->user);
+                    unset($media->MediaLesson);
+                    $media->owner = $user;
 
-                $MEDIA->push($media);
+                    $MEDIA->push($media);
+                }
             }
-        }
 
-        foreach ($fileSegment as $segement) {
-            $allFiles = $segement->File
-                ->reject(function ($file) {
-                    $year = Carbon::now()->year;
-                    $month = Carbon::now()->month;
-                    $day = Carbon::now()->day;
+            foreach ($fileSegment as $segement) {
+                $allFiles = $segement->File
+                    ->reject(function ($file) {
+                        $year = Carbon::now()->year;
+                        $month = Carbon::now()->month;
+                        $day = Carbon::now()->day;
 
-                    $from = explode('-',$file->from);
-                    $to = explode('-',$file->to);
+                        $from = explode('-',$file->from);
+                        $to = explode('-',$file->to);
 
-                    $start = Carbon::create($from[0], $from[1], $from[2]);
-                    $end = Carbon::create($to[0], $to[1], $to[2]);
+                        $start = Carbon::create($from[0], $from[1], $from[2]);
+                        $end = Carbon::create($to[0], $to[1], $to[2]);
 
-                    $checkDate = Carbon::create($year,$month,$day)->between($start, $end);
+                        $checkDate = Carbon::create($year,$month,$day)->between($start, $end);
 
-                    return !$checkDate;
-                })->where('visibility',1);
+                        return !$checkDate;
+                    })->where('visibility',1);
 
-            foreach ($allFiles as $file) {
-                $file->url  = URL::asset('storage/files/'.$request->course_segment_id.'/'.$file->id.'/'.$file->name);
+                foreach ($allFiles as $file) {
+                    $lesson_id = $file->FileLesson->lesson_id;
+                    $file->url  = URL::asset('storage/files/'.$lesson_id.'/'.$file->id.'/'.$file->name);
 
-                $userid = $file->user->id;
-                $firstname = $file->user->firstname;
-                $lastname = $file->user->lastname;
-                $user = collect([
-                    'user_id' => $userid,
-                    'firstname' => $firstname,
-                    'lastname' => $lastname
-                ]);
-                unset($file->user);
-                $file->owner = $user;
+                    $userid = $file->user->id;
+                    $firstname = $file->user->firstname;
+                    $lastname = $file->user->lastname;
+                    $user = collect([
+                        'user_id' => $userid,
+                        'firstname' => $firstname,
+                        'lastname' => $lastname
+                    ]);
+                    unset($file->user);
+                    unset($media->FileLesson);
+                    $file->owner = $user;
 
-                $FILES->push($file);
+                    $FILES->push($file);
+                }
             }
         }
 
@@ -204,11 +256,22 @@ class FilesController extends Controller
             ]);
 
             $file = file::find($request->fileID);
+
+            $courseSegmentID = $file->FileCourseSegment->course_segment_id;
+            $checkEnroll = Enroll::where('user_id', Auth::user()->id)
+            ->where('course_segment', $courseSegmentID)
+            ->where('role_id', 4)
+            ->count();
+
+            if($checkEnroll == 0){
+                return HelperController::api_response_format(400,null,'You\'re unauthorize');
+            }
+
             if(isset($request->Imported_file)){
                 $oldname = $file->name;
 
                 $extension = $request->Imported_file->getClientOriginalExtension();
-                $fileName = file::generateId().'.'.$extension;
+                $fileName = uniqid().'.'.$extension;
 
                // $fileName = $request->Imported_file->getClientOriginalName();
                 $size = $request->Imported_file->getSize();
@@ -226,15 +289,15 @@ class FilesController extends Controller
             if($check){
                 if(isset($request->Imported_file)){
                     $fileId = $file->id;
-                    $segmentId = $file->FileCourseSegment->course_segment_id;
+                    $lesson_id = $file->FileLesson->lesson_id;
 
-                    $filePath = 'storage\files\\'.$segmentId.'\\'.$fileId.'\\'.$oldname;
+                    $filePath = 'storage\files\\'.$lesson_id.'\\'.$fileId.'\\'.$oldname;
                     if (file_exists($filePath)) {
                         unlink($filePath);
                     }
 
                     Storage::disk('public')->putFileAs(
-                       'files/'.$segmentId.'/'.$fileId,
+                       'files/'.$lesson_id.'/'.$fileId,
                         $request->Imported_file,
                         $fileName
                     );
@@ -263,18 +326,29 @@ class FilesController extends Controller
             ]);
 
             $file = file::find($request->fileID);
+
+            //check Authotizing
+            $courseSegmentID = $file->FileCourseSegment->course_segment_id;
+            $checkEnroll = Enroll::where('user_id', Auth::user()->id)
+            ->where('course_segment', $courseSegmentID)
+            ->where('role_id', 4)
+            ->count();
+
+            if($checkEnroll == 0){
+                return HelperController::api_response_format(400,null,'You\'re unauthorize');
+            }
+
             $oldname = $file->name;
             $fileId = $file->id;
-            $segmentId = $file->FileCourseSegment->course_segment_id;
+            $lesson_id = $file->FileLesson->lesson_id;
 
             $check = $file->delete();
 
             if($check){
-
-                $filePath = 'storage\files\\'.$segmentId.'\\'.$fileId.'\\'.$oldname;
+                $filePath = 'storage\files\\'.$lesson_id.'\\'.$fileId.'\\'.$oldname;
                 if (file_exists($filePath)) {
                     unlink($filePath);
-                    unlink('storage\files\\'.$segmentId.'\\'.$fileId);
+                    unlink('storage\files\\'.$lesson_id.'\\'.$fileId);
                 }
             }
             return HelperController::api_response_format(200,null,'Deleted Successfully');
@@ -298,6 +372,18 @@ class FilesController extends Controller
             ]);
 
             $file = file::find($request->fileID);
+
+            //check Authotizing
+            $courseSegmentID = $file->FileCourseSegment->course_segment_id;
+            $checkEnroll = Enroll::where('user_id', Auth::user()->id)
+            ->where('course_segment', $courseSegmentID)
+            ->where('role_id', 4)
+            ->count();
+
+            if($checkEnroll == 0){
+                return HelperController::api_response_format(400,null,'You\'re unauthorize');
+            }
+
             $file->visibility = ($file->visibility == 1)? 0 : 1;
             $file->save();
 
