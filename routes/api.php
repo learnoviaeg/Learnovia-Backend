@@ -109,6 +109,12 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/suspend']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/un-suspend']);
 
+        //Components Permissions
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/get']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/install']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/uninstall']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/toggle']);
+
         //Add Roles
         $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin']);
         \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'System Admin']);
