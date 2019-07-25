@@ -246,3 +246,8 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
 });
 //Route::post('userimport','ExcelController@EnrollExistUsersFromExcel');
 Route::post('pdfview','PdfController@pdf');
+Route::post('convert','PdfController@convertPdfToImage');
+Route::post('converttoimage','PdfController@convertImageToPdf');
+Route::post('pdfSave','PdfController@pdfSave');
+
+

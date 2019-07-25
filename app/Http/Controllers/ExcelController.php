@@ -18,7 +18,7 @@ class ExcelController extends Controller
         $name = $type . '.php';
         if (in_array($name, $files)) {
             eval('$impoerter = new App\Imports\\' . $type . '();');
-            Excel::import($impoerter, request()->file('file'));
+            Excel::import($importer, request()->file('file'));
         } else {
             HelperController::NOTFOUND();
         }
