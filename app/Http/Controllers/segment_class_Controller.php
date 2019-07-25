@@ -57,7 +57,7 @@ class segment_class_Controller extends Controller
         $classLevel = ClassLevel::checkRelation($req->class, $yearlevel->id);
         SegmentClass::create([
             'class_level_id' => $classLevel->id,
-            'segment_id' => $segment->id
+            'segment_id' => $segment->id,
         ]);
 
         if ($segment) {

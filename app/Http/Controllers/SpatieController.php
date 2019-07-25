@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Course;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
@@ -17,15 +18,15 @@ class SpatieController extends Controller
 {
     public function index()
     {
-       // $permission1=Permission::findById(1);
-       // $p=Permission::create(['name' => 'Send Message to users']);
+        // $permission1=Permission::findById(1);
+        // $p=Permission::create(['name' => 'Send Message to users']);
         // $findPer = Permission::find(2);
         // $findrole = Role::find(1);
 
         // $findrole->givePermissionTo($findPer);
 
-     // $role=Role::create(['name' => 'Admin']);
-      //  $role->givePermissionTo(['name' => 'Admin']);
+        // $role=Role::create(['name' => 'Admin']);
+        //  $role->givePermissionTo(['name' => 'Admin']);
         // create permissions
 
         //Permission::create(['name' => 'Add Permission To User']);
@@ -118,8 +119,9 @@ class SpatieController extends Controller
         unset($role->created_at);
         unset($role->updated_at);
 
-        return HelperController::api_response_format(201, $role,'Role Updated Successfully');
+        return HelperController::api_response_format(201, $role, 'Role Updated Successfully');
     }
+
     /*
      This function is to delete Role
      @param: id
@@ -159,7 +161,7 @@ class SpatieController extends Controller
             ]);
             if ($validater->fails()) {
                 $errors = $validater->errors();
-                return HelperController::api_response_format(400 , $errors);
+                return HelperController::api_response_format(400, $errors);
             }
 
             $finduser = User::find($request->userid);
@@ -463,9 +465,10 @@ class SpatieController extends Controller
         }
     }
 
-    public function checkUserHavePermession(Request $request){
+    public function checkUserHavePermession(Request $request)
+    {
         $request->validate(['permission' => 'required|exists:permissions,name']);
-        return HelperController::api_response_format(200 , $request->user()->hasPermissionTo($request->permission));
+        return HelperController::api_response_format(200, $request->user()->hasPermissionTo($request->permission));
     }
 
     public function Get_permission_of_user(Request $request)
@@ -477,50 +480,62 @@ class SpatieController extends Controller
 
         $user_id = Auth::user()->id;
 
-        if($request->type == 'course')
-        {
+        if ($request->type == 'course') {
             $request->validate([
                 'course_id' => 'required|exists:courses,id',
             ]);
 
-            $course_seg_id=CourseSegment::getidfromcourse($request->course_id);
-            $r_id=Enroll::getroleid($user_id,$course_seg_id);
+            $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
+            $r_id = Enroll::getroleid($user_id, $course_seg_id);
 
             $req = new Request([
                 'roleid' => $r_id
             ]);
 
-            $user_per=SpatieController::Get_Individual_Role($req);
-        }
-       else if($request->type == 'quiz')
-        {
+            $user_per = SpatieController::Get_Individual_Role($req);
+        } else if ($request->type == 'quiz') {
             $request->validate([
                 'quiz_id' => 'required|exists:quizzes,id',
             ]);
 
-            $course_id=Quiz::where('id',$request->quiz_id)->pluck('course_id')->first();
-            $course_seg_id=CourseSegment::getidfromcourse($course_id);
-            $r_id=Enroll::getroleid($user_id,$course_seg_id);
+            $course_id = Quiz::where('id', $request->quiz_id)->pluck('course_id')->first();
+            $course_seg_id = CourseSegment::getidfromcourse($course_id);
+            $r_id = Enroll::getroleid($user_id, $course_seg_id);
 
             $req = new Request([
                 'roleid' => $r_id
             ]);
 
-            $user_per=SpatieController::Get_Individual_Role($req);
-        }
-        else
-        {
+            $user_per = SpatieController::Get_Individual_Role($req);
+        } else {
 
-            $role_id= DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
+            $role_id = DB::table('model_has_roles')->where('model_id', $user_id)->pluck('role_id')->first();
 
             $req = new Request([
                 'roleid' => $role_id
             ]);
 
-            $user_per=SpatieController::Get_Individual_Role($req);
+            $user_per = SpatieController::Get_Individual_Role($req);
 
         }
 
-        return HelperController::api_response_format(200,$user_per);
+        return HelperController::api_response_format(200, $user_per);
+    }
+
+    public function checkPermessionOnCourse(Request $request)
+    {
+        $request->validate([
+            'course' => 'required|exists:courses,id',
+            'permissions' => 'required|array|min:1',
+            'permissions.*' => 'required|string|exists:permissions,name'
+        ]);
+        $activeSegment = Course::with('activeSegment')->whereId($request->course)->first();
+        $enroll = Enroll::whereCourse_segment($activeSegment->activeSegment->id)->whereUser_id($request->user()->id)->first();
+        $role = Role::find($enroll->role_id);
+        $has = [];
+        foreach ($request->permissions as $permission) {
+            $has[$permission] = $role->hasPermissionTo($permission);
+        }
+        return HelperController::api_response_format(200, $has);
     }
 }

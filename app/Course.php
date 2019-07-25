@@ -25,4 +25,8 @@ class Course extends Model
     public function courseSegments(){
         return $this->hasMany('App\CourseSegment');
     }
+
+    public function activeSegment(){
+        return $this->hasOne('App\CourseSegment')->whereIs_active(1);
+    }
 }
