@@ -74,8 +74,14 @@ class LevelsController extends Controller
     public function GetAllLevelsInYear(Request $request)
     {
         $request->validate([
-            'year' => 'required|exists:academic_year_types,id'
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id'
         ]);
-        return HelperController::api_response_format(200, Level::whereIn('id', Level::GetAllLevelsInYear($request->year))->get());
+        $yearType = AcademicYearType::checkRelation($request->year , $request->type);
+        $levels = [];
+        foreach ($yearType->yearLevel as $yearLevel){
+            $levels[] = $yearLevel->levels[0];
+        }
+        return HelperController::api_response_format(200,$levels);
     }
 }
