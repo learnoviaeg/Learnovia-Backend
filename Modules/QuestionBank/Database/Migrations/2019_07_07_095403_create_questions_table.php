@@ -17,7 +17,10 @@ class CreateQuestionsTable extends Migration
             $table->bigIncrements('id');
             $table->longText('text');
             $table->integer('mark');
-            $table->integer('parent')->nullable();
+
+            $table->unsignedBigInteger('parent')->nullable();
+            $table->foreign('parent')->references('id')->on('questions')->onDelete('cascade')->onUpdate('cascade');
+
             $table->integer('And_why_mark')->nullable();
             $table->integer('And_why')->nullable();
             $table->unsignedBigInteger('category_id');
