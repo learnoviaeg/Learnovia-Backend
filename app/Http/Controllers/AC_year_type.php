@@ -60,7 +60,7 @@ class AC_year_type extends Controller
         $valid = Validator::make($req->all(), [
             'name' => 'required',
             'segment_no' => 'required',
-            'year' => 'required|exists:academic_years,id'
+            'year' => 'exists:academic_years,id'
         ]);
 
         if ($valid->fails()) {
@@ -70,10 +70,12 @@ class AC_year_type extends Controller
             'name' => $req->name,
             'segment_no' => $req->segment_no
         ]);
-        AcademicYearType::create([
-            'academic_year_id' => $req->year,
-            'academic_type_id' => $Ac->id
-        ]);
+        if($req->filled('year')){
+            AcademicYearType::create([
+                'academic_year_id' => $req->year,
+                'academic_type_id' => $Ac->id
+            ]);
+        }
         if ($Ac) {
             return HelperController::api_response_format(200, $Ac);
         }

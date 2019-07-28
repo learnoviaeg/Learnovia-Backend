@@ -19,11 +19,11 @@ class CourseController extends Controller
         $request->validate([
             'name' => 'required',
             'category' => 'required|exists:categories,id',
-            'year' => 'required|exists:academic_years,id',
-            'type' => 'required|exists:academic_types,id',
-            'level' => 'required|exists:levels,id',
-            'class' => 'required|exists:classes,id',
-            'segment' => 'required|exists:segments,id',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
+            'level' => 'exists:levels,id|required_with:year',
+            'class' => 'exists:classes,id|required_with:year',
+            'segment' => 'exists:segments,id|required_with:year',
             'no_of_lessons' => 'integer'
         ]);
         $no_of_lessons = 4;
@@ -31,23 +31,25 @@ class CourseController extends Controller
             'name' => $request->name,
             'category_id' => $request->category,
         ]);
-        $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
-        $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
-        $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
-        $segmentClass = SegmentClass::checkRelation($classLevel->id, $request->segment);
-        $courseSegment = CourseSegment::create([
-            'course_id' => $course->id,
-            'segment_class_id' => $segmentClass->id
-        ]);
-        if ($request->filled('no_of_lessons')) {
-            $no_of_lessons = $request->no_of_lessons;
-        }
-
-        for ($i = 1; $i <= $no_of_lessons; $i++) {
-            $courseSegment->lessons()->create([
-                'name' => 'Lesson ' . $i,
-                'index' => $i,
+        if ($request->filled('year')) {
+            $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
+            $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
+            $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
+            $segmentClass = SegmentClass::checkRelation($classLevel->id, $request->segment);
+            $courseSegment = CourseSegment::create([
+                'course_id' => $course->id,
+                'segment_class_id' => $segmentClass->id
             ]);
+            if ($request->filled('no_of_lessons')) {
+                $no_of_lessons = $request->no_of_lessons;
+            }
+
+            for ($i = 1; $i <= $no_of_lessons; $i++) {
+                $courseSegment->lessons()->create([
+                    'name' => 'Lesson ' . $i,
+                    'index' => $i,
+                ]);
+            }
         }
         return HelperController::api_response_format(201, $course, 'Course Created Successfully');
     }
@@ -122,47 +124,39 @@ class CourseController extends Controller
             'user_id' => 'required|exists:enrolls,user_id',
             'course_id' => 'required|exists:course_segments,course_id'
         ]);
-        $CourseSeg=Enroll::where('user_id',25)->pluck('course_segment');
-        $seggg=array();
+        $CourseSeg = Enroll::where('user_id', 25)->pluck('course_segment');
+        $seggg = array();
 
         foreach ($CourseSeg as $cour) {
             # code...
-            $check=CourseSegment::where('course_id',$request->course_id)->where('id',$cour)->pluck('id')->first();
-            if($check!=null)
-            {
-                $seggg[]=$check;
-
+            $check = CourseSegment::where('course_id', $request->course_id)->where('id', $cour)->pluck('id')->first();
+            if ($check != null) {
+                $seggg[] = $check;
             }
         }
-        $CourseSeg=array();
-        foreach($seggg as $segggg){
-            $CourseSeg[]=CourseSegment::where('id',$segggg)->get();
+        $CourseSeg = array();
+        foreach ($seggg as $segggg) {
+            $CourseSeg[] = CourseSegment::where('id', $segggg)->get();
         }
-        $clase=array();
-        $lessons=null;
-        $i = 0 ;
-        foreach($CourseSeg as $seg)
-        {
-            $lessons= $seg->first()->lessons;
+        $clase = array();
+        $lessons = null;
+        $i = 0;
+        foreach ($CourseSeg as $seg) {
+            $lessons = $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
                 # code...
                 foreach ($segmentClas->classLevel as $key => $classlev) {
                     # code...
                     foreach ($classlev->classes as $key => $class) {
                         # code...
-                        $clase[$i]=$class;
+                        $clase[$i] = $class;
                         $clase[$i]->lessons = $lessons;
                         $i++;
                     }
                 }
             }
         }
-        // foreach ($CourseSeg as $seg) {
-        //         $lessons=$seg->lessons;
-        // }
-        // lessons
         $clase['course'] = Course::find($request->course_id);
         return $clase;
     }
-
 }
