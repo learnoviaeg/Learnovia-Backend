@@ -30,7 +30,6 @@ class AssigmentsController extends Controller
             'opening_date' => 'required|before:closing_date|after:'. Carbon::now(),
             'closing_date' => 'required',
             'visiable'=>'required|boolean',
-            'submit_date'=>'required|before:closing_date|after:opening_date|after:'. Carbon::now(),
             'course_segment' => 'required|exists:enrolls,course_segment',
         ]);
         if(!isset($request->file)&&!isset($request->content))
@@ -126,7 +125,6 @@ class AssigmentsController extends Controller
         $assigment->opening_date=$request->opening_date;
         $assigment->closing_date=$request->closing_date;
         $assigment->visiable=$request->visiable;
-
         $assigment->save();
 
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
@@ -149,7 +147,6 @@ public function assignAsstoUsers($request)
         $userassigment->assignment_id=$request['assignments_id'];
         $userassigment->status_id=2;
         $userassigment->override=0;
-        $userassigment->submit_date=$request['submit_date'];
         $userassigment->save();
 
 
@@ -169,7 +166,8 @@ public function submitAssigment(Request $request)
 {
     $request->validate([
         'user_id' => 'required|exists:user_assigments,user_id',
-        'assignment_id'=>'required|exists:user_assigments,assignment_id'
+        'assignment_id'=>'required|exists:user_assigments,assignment_id',
+        'submit_date'=>'required',
     ]);
     if(!isset($request->file)&&!isset($request->content))
     {
@@ -206,7 +204,7 @@ public function submitAssigment(Request $request)
     else {
         $userassigment->content=null;
     }
-
+    $userassigment->submit_date = $request->submit_date;
     $userassigment->save();
     return HelperController::api_response_format(200, $body = $userassigment, $message = 'your answer is submitted');
 }
