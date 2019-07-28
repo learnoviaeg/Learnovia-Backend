@@ -33,12 +33,7 @@ public static function upload_attachment($file,$type,$description=null)
     $attachment->type = $type;
     $attachment->extension = $extension;
     $attachment->save();
-    Storage::disk('public')->putFileAs(
-        'assigments/',
-                $singlefile,
-                $fileName
-
-    );
+    Storage::disk('public')->putFileAs('assigments/', $singlefile, $fileName);
     return $attachment;
 }
 }

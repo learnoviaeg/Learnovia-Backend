@@ -264,6 +264,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:course/delete');
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
     Route::get('my', 'CourseController@MyCourses')->name('mycourses')->middleware('permission:course/my-courses');
+    Route::post('layout','CourseController@GetUserCourseLessons')->name('layout')->middleware('permission:course/layout');
 });
 
 //USER CRUD ROUTES
@@ -313,5 +314,10 @@ Route::group(['prefix' => 'Component', 'middleware' => 'auth:api'], function () 
     Route::put('toggle', 'ComponentController@ToggleActive')->name('togglecomponenet')->middleware('permission:component/toggle');
 });
 
-
-Route::post('testplease','CourseController@GetUserCourseLessons');
+Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
+    Route::post('add', 'LessonController@AddLesson')->name('addLesson')->middleware('permission:lesson/add');
+    Route::get('get', 'LessonController@ShowLesson')->name('showlesson')->middleware('permission:lesson/get');
+    Route::post('delete', 'LessonController@deleteLesson')->name('deleteLesson')->middleware('permission:lesson/delete');
+    Route::post('update', 'LessonController@updateLesson')->name('updateLesson')->middleware('permission:lesson/update');
+    Route::post('sort', 'LessonController@Sorting')->name('sortlesson')->middleware('permission:lesson/sort');
+});

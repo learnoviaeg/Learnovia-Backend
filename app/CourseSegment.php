@@ -59,7 +59,19 @@ class CourseSegment extends Model
         return $courseSegment;
     }
 
+
+
+    // public static function Get_lessons_from_CourseSegmentID($id){
+    //     $CourseSegment=self::where('id',$id)->first();
+    //     $lessons=$CourseSegment->courseSegment->lessons;
+    //     return $lessons;
+
+
+    // }
+
     protected $hidden = [
         'created_at', 'updated_at'
     ];
+
+
 }

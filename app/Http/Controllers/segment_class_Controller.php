@@ -62,12 +62,14 @@ class segment_class_Controller extends Controller
             return HelperController::api_response_format(400, $valid->errors());
         }
 
-        $segment = Segment::create([
-            'name' => $req->name
-        ]);
         $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
         $yearlevel = YearLevel::checkRelation($yeartype->id, $req->level);
         $classLevel = ClassLevel::checkRelation($req->class, $yearlevel->id);
+
+        $segment = Segment::create([
+            'name' => $req->name
+        ]);
+
         SegmentClass::create([
             'class_level_id' => $classLevel->id,
             'segment_id' => $segment->id,
