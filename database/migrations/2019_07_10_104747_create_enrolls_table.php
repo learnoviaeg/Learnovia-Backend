@@ -25,10 +25,10 @@ class CreateEnrollsTable extends Migration
             $table->unsignedInteger('role_id');
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
 
-            
-            
+
+
             $table->timestamps();
-            
+
         });
     }
 

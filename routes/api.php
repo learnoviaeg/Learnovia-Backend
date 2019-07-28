@@ -186,6 +186,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     });
     Route::post('deleteannounce', 'AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
     Route::post('announce', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
+    Route::post('calendar','CalendarController@calendar');
+
 });
 
 //Year Routes
@@ -321,3 +323,5 @@ Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'LessonController@updateLesson')->name('updateLesson')->middleware('permission:lesson/update');
     Route::post('sort', 'LessonController@Sorting')->name('sortlesson')->middleware('permission:lesson/sort');
 });
+
+

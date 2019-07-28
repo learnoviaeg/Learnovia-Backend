@@ -19,7 +19,7 @@ class CreateAnnouncementsTable extends Migration
             $table->text('description');
             $table->string('attached_file')->nullable();
             $table->dateTime('start_date')->nullable();
-            $table->dateTime('due_date')->nullable();
+            $table->dateTime('end_date')->nullable();
             $table->enum('assign', ['all', 'class','course','level'])->nullable();
             $table->string('class_id')->nullable();
             $table->string('level_id')->nullable();
