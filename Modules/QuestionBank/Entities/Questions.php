@@ -36,6 +36,11 @@ class Questions extends Model
         return $this->hasMany('Modules\QuestionBank\Entities\QuestionsAnswer', 'question_id', 'id');
     }
 
+    public function childeren()
+    {
+        return $this->hasMany('Modules\QuestionBank\Entities\Questions', 'parent', 'id');
+    }
+
 
 
 }

@@ -49,6 +49,13 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('addAnswer', 'QuestionBankController@addAnswer')->middleware('permission:question/add-answer');
 
     Route::post('deleteQuiz', 'QuizController@destroy')->middleware('permission:quiz/delete');
-    Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion')->middleware('permission:quiz/get-quiz-with-random-questions');
+    //Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion')->middleware('permission:quiz/get-quiz-with-random-questions');
+
+    Route::post('addQuizLesson', 'QuizLessonController@store');
+    Route::post('updateQuizLesson', 'QuizLessonController@update');
+    Route::post('deleteQuizLesson', 'QuizLessonController@destroy');
+
+    Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion');
 
 });
+
