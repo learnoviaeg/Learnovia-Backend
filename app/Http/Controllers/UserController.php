@@ -7,11 +7,15 @@
  */
 
 namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
 use App\User;
-use Validator;
-use File;
+use App\Course;
+use App\CourseSegment;
+use Spatie\Permission\Models\Role;
+use Illuminate\Http\Request;
+use App\Http\Controllers\EnrollUserToCourseController;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use App\ClassLevel;
+use App\SegmentClass;
 
 class UserController extends Controller
 {
@@ -24,20 +28,79 @@ class UserController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'name' => 'required|array',
-            'name.*' => 'required|string|min:3|max:50',
-            'email' => 'required|array',
-            'email.*' => 'required|email|unique:users,email',
+            'firstname' => 'required|array',
+            'firstname.*' => 'required|string|min:3|max:50',
+            'lastname' => 'required|array',
+            'lastname.*' => 'required|string|min:3|max:50',
             'password' => 'required|array',
-            'password.*' => 'required|string|min:8|max:191'
+            'password.*' => 'required|string|min:8|max:191',
+            'role' => 'required|array',
+            'role.*' => 'required|exists:roles,id',
+            'class_id' => 'required|array',
         ]);
         $users = collect([]);
-        foreach ($request->name as $key => $name) {
+        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email'];
+        $enrollOptional = 'optional';
+        $teacheroptional='course';
+        foreach ($request->firstname as $key => $firstname) {
             $user = User::create([
-                'name' => $name,
-                'email' => $request->email[$key],
-                'password' => bcrypt($request->password[$key])
+                'firstname' => $firstname,
+                'lastname' => $request->lastname[$key],
+                'username' => User::generateUsername(),
+                'password' => bcrypt($request->password[$key]),
+                'real_password'=> $request->password[$key]
             ]);
+
+            foreach ($optionals as $optional) {
+                if ($request->filled($optional))
+                    $user->$optional = $request->$optional;
+            }
+            $user->save();
+            $role = Role::find($request->role[$key]);
+            $user->assignRole($role);
+            if ($request->role[$key] == 3) {
+
+                $classLevID=ClassLevel::GetClass($request->class_id[$key]);
+
+                $classSegID=SegmentClass::GetClasseLevel($classLevID);
+                $request = new Request([
+                    'username' => $user->username,
+                    'start_date' => $request->start_date[$key],
+                    'end_date' => $request->end_date[$key],
+                    'SegmentClassId' => $classSegID
+                ]);
+                EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
+                $enrollcounter=1;
+                while( $request->filled($enrollOptional.$enrollcounter) ) {
+                    $course_id=Course::findByName($request->$enrollOptional.$enrollcounter);
+                    $segmentid= CourseSegment::getidfromcourse($course_id);
+                    $option = new Request([
+                        'course_segment' => array($segmentid),
+                        'start_date' => Date::excelToDateTimeObject($request->start_date[$key]),
+                        'users'=> array($user->username),
+                        'end_date' => Date::excelToDateTimeObject($request->end_date[$key]),
+                        'role_id'=>array(3)
+                    ]);
+                    EnrollUserToCourseController::EnrollCourses($option);
+                    $enrollcounter++;
+                }
+            }
+            else{
+                $teachercounter=1;
+                while($request->filled($teacheroptional.$teachercounter)){
+                    $course_id=Course::findByName($request->$teacheroptional.$teachercounter);
+                    $segmentid= CourseSegment::getidfromcourse($course_id);
+                    $option = new Request([
+                        'course_segment' => array($segmentid),
+                        'start_date' => Date::excelToDateTimeObject($request->start_date[$key]),
+                        'users'=> array($user->username),
+                        'end_date' => Date::excelToDateTimeObject($request->start_date[$key]),
+                        'role_id'=>array($role->id)
+                    ]);
+                    EnrollUserToCourseController::EnrollCourses($option);
+                    $teachercounter++;
+                }
+            }
             $users->push($user);
         }
         return HelperController::api_response_format(201, $users, 'User Created Successfully');
@@ -53,6 +116,7 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
+        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email'];
         $request->validate([
             'id' => 'required|exists:users,id',
         ]);
@@ -61,21 +125,20 @@ class UserController extends Controller
 
         $request->validate([
             'name' => 'required|string|min:3|max:50',
-            'email' => [
-                'required',
-                Rule::unique('users')->ignore($user->id),
-                'email'
-            ],
+            'email' => ['required',Rule::unique('users')->ignore($user->id),'email'],
             'password' => 'required|string|min:8|max:191'
         ]);
-
-
         $check = $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password)
         ]);
 
+        foreach ($optionals as $optional) {
+            if ($request->filled($optional))
+                $user->$optional = $request->$optional;
+        }
+        $user->save();
         return HelperController::api_response_format(201, $user, 'User Updated Successfully');
 
     }

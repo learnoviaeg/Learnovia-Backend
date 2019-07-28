@@ -84,9 +84,6 @@ class UsersImport implements ToModel, WithHeadingRow
             }
         }
         else{
-
-
-
             $teachercounter=1;
             while(isset($row[$teacheroptional.$teachercounter])){
                 $course_id=Course::findByName($row[$teacheroptional.$teachercounter]);
@@ -101,7 +98,6 @@ class UsersImport implements ToModel, WithHeadingRow
                 EnrollUserToCourseController::EnrollCourses($option);
                 $teachercounter++;
             }
-
         }
         return $user;
     }
