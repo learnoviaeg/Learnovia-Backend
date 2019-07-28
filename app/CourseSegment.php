@@ -32,6 +32,11 @@ class CourseSegment extends Model
         return self::where('course_id', $course_id)->pluck('id')->first();
     }
 
+    public static function getActive_segmentfromcourse($course_id)
+    {
+        return self::where('course_id', $course_id)->where('is_active','1')->pluck('id')->first();
+    }
+
     public function courses()
     {
         return $this->hasMany('App\Course', 'id', 'course_id');
