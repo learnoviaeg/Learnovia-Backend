@@ -21,14 +21,14 @@ class CreateUserAssigmentsTable extends Migration
             $table->foreign('assignment_id')->references('id')->on('assignments')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('attachment_id')->nullable();
             $table->foreign('attachment_id')->references('id')->on('attachments')->onDelete('cascade')->onUpdate('cascade');
-            $table->dateTime('submit_date');
+            $table->dateTime('submit_date')->nullable();
             $table->longText('content')->nullable();
             $table->boolean('override');
             $table->unsignedBigInteger('status_id');
             $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade')->onUpdate('cascade');
             $table->string('feedback')->nullable();
             $table->integer('grade')->nullable();
-            
+
             $table->timestamps();
 
         });
