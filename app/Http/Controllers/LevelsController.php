@@ -15,18 +15,20 @@ class LevelsController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'year' => 'required|exists:academic_years,id',
-            'type' => 'required|exists:academic_types,id',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
         ]);
 
         $level = Level::create([
             'name' => $request->name,
         ]);
-        $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
-        YearLevel::create([
-            'academic_year_type_id' => $yeartype->id,
-            'level_id' => $level->id,
-        ]);
+        if($request->filled('year')){
+            $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
+            YearLevel::create([
+                'academic_year_type_id' => $yeartype->id,
+                'level_id' => $level->id,
+            ]);
+        }
         return HelperController::api_response_format(201, $level, 'Level Created Successfully');
     }
 
