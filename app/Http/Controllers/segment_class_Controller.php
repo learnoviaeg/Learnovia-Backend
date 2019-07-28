@@ -10,6 +10,7 @@ use Validator;
 use App\SegmentClass;
 use App\Segment;
 use App\Http\Resources\Segment_class_resource;
+use App\AcademicType;
 
 class segment_class_Controller extends Controller
 
@@ -65,7 +66,11 @@ class segment_class_Controller extends Controller
         $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
         $yearlevel = YearLevel::checkRelation($yeartype->id, $req->level);
         $classLevel = ClassLevel::checkRelation($req->class, $yearlevel->id);
-
+        $type = AcademicType::find($req->type);
+        $count = SegmentClass::whereClass_level_id($classLevel->id)->count();
+        if($count >= $type->segment_no){
+            return HelperController::api_response_format(200 , null , 'This class has its all segments before');
+        }
         $segment = Segment::create([
             'name' => $req->name
         ]);

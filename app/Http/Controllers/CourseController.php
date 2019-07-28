@@ -119,27 +119,12 @@ class CourseController extends Controller
     }
     public function GetUserCourseLessons(Request $request)
     {
-        // $lesson= lesson::where('id',1);
-        // return
-        // $comp=Component::where('type',1)->get();
-        // // return $comp;
-        // // $le=$lesson->module($comp->module,$comp->model)->get();
-        // // return $le;
-        // $lele=array();
-        // foreach($comp as $com)
-        // {
-        //     $lele[$com->name]=$lesson->module($com->module,$com->model)->get();
-
-        // }
-        // return $lele;
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id'
         ]);
         $CourseSeg=Enroll::where('user_id',$request->user()->id)->pluck('course_segment');
         $seggg=array();
-
         foreach ($CourseSeg as $cour) {
-            # code...
             $check=CourseSegment::where('course_id',$request->course_id)->where('id',$cour)->pluck('id')->first();
             if($check!=null)
             {
@@ -159,11 +144,6 @@ class CourseController extends Controller
         foreach($CourseSeg as $seg)
         {
             $lessons= $seg->first()->lessons;
-            // foreach ($lessons as $lesson)
-            // {
-            //     $lessoncounter[]=Lesson::find($lesson->id);
-            // }
-            // return $lessoncounter;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
                 # code...
                 foreach ($segmentClas->classLevel as $key => $classlev) {
@@ -188,5 +168,4 @@ class CourseController extends Controller
         $clase['course'] = Course::find($request->course_id);
         return $clase;
     }
-
 }
