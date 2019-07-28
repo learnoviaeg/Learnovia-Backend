@@ -321,3 +321,5 @@ Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'LessonController@updateLesson')->name('updateLesson')->middleware('permission:lesson/update');
     Route::post('sort', 'LessonController@Sorting')->name('sortlesson')->middleware('permission:lesson/sort');
 });
+Route::post('GetUserCourseLessons','CourseController@GetUserCourseLessons');
+

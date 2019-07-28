@@ -15,6 +15,11 @@ class Lesson extends Model
         $lessons=$lesson->courseSegment->lessons;
         return $lessons;
     }
+    public function module($name,$model)
+    {
+        // dd($model.'_id');
+        return $this->belongsToMany('Modules\\'.$name.'\Entities\\'.$model, $model.'_lessons', 'lesson_id', $model.'_id');
+    }
     protected $hidden = [
         'created_at','updated_at'
     ];

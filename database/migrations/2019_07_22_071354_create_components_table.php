@@ -16,6 +16,9 @@ class CreateComponentsTable extends Migration
         Schema::create('components', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name')->unique();
+            $table->string('module');
+            $table->string('model');
+            $table->integer('type');
             $table->boolean('active')->default(1);
             $table->timestamps();
         });

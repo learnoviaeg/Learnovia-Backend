@@ -13,13 +13,13 @@ class CreateAssigmentLessonTable extends Migration
      */
     public function up()
     {
-        Schema::create('assigment_lesson', function (Blueprint $table) {
+        Schema::create('assignment_lessons', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('assigment_id');
-            $table->foreign('assigment_id')->references('id')->on('assignments')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('assignment_id');
+            $table->foreign('assignment_id')->references('id')->on('assignments')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('lesson_id');
             $table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade')->onUpdate('cascade');
-            
+
             $table->timestamps();
         });
     }
