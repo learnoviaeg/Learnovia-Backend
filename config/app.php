@@ -232,5 +232,7 @@ return [
         'Zipper' => Chumper\Zipper\Zipper::class,
         'TXPDF' => Elibyy\TCPDF\Facades\TCPDF::class
 
+        // check Enroll
+        'checkEnroll' => App\Http\Controllers\checkEnrollController::class,
     ],
 ];
