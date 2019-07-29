@@ -214,7 +214,7 @@ class FilesController extends Controller
                         'lastname' => $lastname
                     ]);
                     unset($file->user);
-                    unset($media->FileLesson);
+                    unset($file->FileLesson);
                     $file->owner = $user;
 
                     $FILES->push($file);
