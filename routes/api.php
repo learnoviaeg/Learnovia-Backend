@@ -232,4 +232,7 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role');
     Route::get('test', 'SpatieController@index');
 });
-//Route::post('userimport','ExcelController@EnrollExistUsersFromExcel');
+Route::post('userimport','EnrollUserToCourseController@EnrollExistUsersFromExcel');
+Route::post('GetEnrolledStudent', 'EnrollUserToCourseController@GetEnrolledStudents');
+Route::post('EnrollCourses', 'EnrollUserToCourseController@EnrollCourses');
+

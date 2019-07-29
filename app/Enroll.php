@@ -28,4 +28,9 @@ class Enroll extends Model
     return $check;
    }
 
+   public static function GetUsers_id($course_seg_id){
+    $check = self::where('course_segment', $course_seg_id)->where('role_id',3)->pluck('user_id');
+    return $check;
+   }
+
 }
