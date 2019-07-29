@@ -112,7 +112,7 @@ class EnrollUserToCourseController extends Controller
             'username' => 'required|exists:users,username',
             'start_date' => 'required|before:end_date|after:'.Carbon::now(),
             'end_date' => 'required|after:'.Carbon::now(),
-            'SegmentClassId' => 'required|exists:course_segments,id'
+            'SegmentClassId' => 'required|exists:course_segments,segment_class_id'
         ]);
 
 
@@ -161,7 +161,7 @@ class EnrollUserToCourseController extends Controller
         $request->validate([
             'course_id' => 'required|exists:courses,id'
         ]);
-        
+
         if($request->class_id == null){
             $course_seg_id=CourseSegment::getidfromcourse($request->course_id);
 
@@ -174,7 +174,7 @@ class EnrollUserToCourseController extends Controller
             return HelperController::api_response_format(200, $UsersIds, 'students are ... ');
         }
 
-        //if was send class_id and course_id  
+        //if was send class_id and course_id
         else {
             $request->validate([
                 'class_id' => 'required|exists:classes,id'
@@ -183,12 +183,12 @@ class EnrollUserToCourseController extends Controller
             $course_seg_id=CourseSegment::getidfromcourse($request->course_id);
 
             $users_id=Enroll::GetUsers_id($course_seg_id);
-            
+
             foreach ($users_id as $users) {
                 $UsersIds[] = User::findOrFail($users);
             }
 
-            //$usersByClass is an array that have all users in this class 
+            //$usersByClass is an array that have all users in this class
             $usersByClass=User::GetUsersByClass_id($request->class_id);
 
             foreach ($usersByClass as $users) {
@@ -204,6 +204,6 @@ class EnrollUserToCourseController extends Controller
 
             return HelperController::api_response_format(200, $Usersenrolled, 'students are ... ');
         }
-        
+
     }
 }
