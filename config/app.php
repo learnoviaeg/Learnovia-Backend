@@ -228,6 +228,8 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
 
+        // check Enroll
+        'checkEnroll' => App\Http\Controllers\checkEnrollController::class,
     ],
 
 ];

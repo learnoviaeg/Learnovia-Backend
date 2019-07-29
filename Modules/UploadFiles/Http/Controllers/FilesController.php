@@ -17,6 +17,7 @@ use App\Enroll;
 use Illuminate\Support\Facades\Storage;
 use URL;
 use Auth;
+use checkEnroll;
 use App\Http\Controllers\HelperController;
 use Carbon\Carbon;
 
@@ -57,12 +58,10 @@ class FilesController extends Controller
                 if(isset($activeSegmentClass)){
                     $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
                     if(isset($activeCourseSegment)){
-                        $checkTeacherEnroll = Enroll::where('user_id', Auth::user()->id)
-                            ->where('course_segment', $request->course_segment_id)
-                            ->where('role_id', 4)
-                            ->count();
+                        // check Enroll
+                        $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
 
-                        if($checkTeacherEnroll > 0){
+                        if($checkTeacherEnroll == true){
                             $activeCourseSegments->push($activeCourseSegment);
                         }
                         else{
@@ -142,11 +141,9 @@ class FilesController extends Controller
         $MEDIA = collect([]);
         $FILES = collect([]);
 
-        $checkEnroll = Enroll::where('user_id', Auth::user()->id)
-                            ->where('course_segment', $request->course_segment_id)
-                            ->count();
+        $checkEnroll = checkEnroll::checkEnrollment($request->course_segment_id);
 
-        if($checkEnroll > 0){
+        if($checkEnroll == true){
             $mediaSegment = MediaCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
             $fileSegment = FileCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
             foreach ($mediaSegment as $segement) {
@@ -258,12 +255,11 @@ class FilesController extends Controller
             $file = file::find($request->fileID);
 
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
-            $checkEnroll = Enroll::where('user_id', Auth::user()->id)
-            ->where('course_segment', $courseSegmentID)
-            ->where('role_id', 4)
-            ->count();
 
-            if($checkEnroll == 0){
+            // check Enroll
+            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
+
+            if($checkTeacherEnroll == false){
                 return HelperController::api_response_format(400,null,'You\'re unauthorize');
             }
 
@@ -329,12 +325,11 @@ class FilesController extends Controller
 
             //check Authotizing
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
-            $checkEnroll = Enroll::where('user_id', Auth::user()->id)
-            ->where('course_segment', $courseSegmentID)
-            ->where('role_id', 4)
-            ->count();
 
-            if($checkEnroll == 0){
+            // check Enroll
+            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
+
+            if($checkTeacherEnroll == false){
                 return HelperController::api_response_format(400,null,'You\'re unauthorize');
             }
 
@@ -375,12 +370,10 @@ class FilesController extends Controller
 
             //check Authotizing
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
-            $checkEnroll = Enroll::where('user_id', Auth::user()->id)
-            ->where('course_segment', $courseSegmentID)
-            ->where('role_id', 4)
-            ->count();
 
-            if($checkEnroll == 0){
+            // check Enroll
+            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
+            if($checkTeacherEnroll == false){
                 return HelperController::api_response_format(400,null,'You\'re unauthorize');
             }
 

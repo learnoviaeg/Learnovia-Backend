@@ -13,6 +13,7 @@ use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
 use App\ClassLevel;
 use App\Enroll;
+use checkEnroll;
 
 use App\Http\Controllers\HelperController;
 use Auth;
@@ -58,12 +59,10 @@ class MediaController extends Controller
                 if(isset($activeSegmentClass)){
                     $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
                     if(isset($activeCourseSegment)){
-                        $checkTeacherEnroll = Enroll::where('user_id', Auth::user()->id)
-                            ->where('course_segment', $request->course_segment_id)
-                            ->where('role_id', 4)
-                            ->count();
+                        // check Enroll
+                        $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
 
-                        if($checkTeacherEnroll > 0){
+                        if($checkTeacherEnroll == true){
                             $activeCourseSegments->push($activeCourseSegment);
                         }
                         else{
@@ -153,12 +152,10 @@ class MediaController extends Controller
 
             //check Authotizing
             $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
-            $checkEnroll = Enroll::where('user_id', Auth::user()->id)
-            ->where('course_segment', $courseSegmentID)
-            ->where('role_id', 4)
-            ->count();
 
-            if($checkEnroll == 0){
+            // check Enroll
+            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
+            if($checkTeacherEnroll == false){
                 return HelperController::api_response_format(400,null,'You\'re unauthorize');
             }
 
@@ -222,12 +219,10 @@ class MediaController extends Controller
 
             //check Authotizing
             $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
-            $checkEnroll = Enroll::where('user_id', Auth::user()->id)
-            ->where('course_segment', $courseSegmentID)
-            ->where('role_id', 4)
-            ->count();
 
-            if($checkEnroll == 0){
+            // check Enroll
+            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
+            if($checkTeacherEnroll == false){
                 return HelperController::api_response_format(400,null,'You\'re unauthorize');
             }
 
@@ -268,12 +263,10 @@ class MediaController extends Controller
 
             //check Authotizing
             $courseSegmentID = $media->MediaCourseSegment->course_segment_id;
-            $checkEnroll = Enroll::where('user_id', Auth::user()->id)
-            ->where('course_segment', $courseSegmentID)
-            ->where('role_id', 4)
-            ->count();
 
-            if($checkEnroll == 0){
+            // check Enroll
+            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
+            if($checkTeacherEnroll == false){
                 return HelperController::api_response_format(400,null,'You\'re unauthorize');
             }
 
