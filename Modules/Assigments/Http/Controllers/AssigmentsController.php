@@ -3,6 +3,8 @@
 namespace Modules\Assigments\Http\Controllers;
 use App\attachment;
 use App\Enroll;
+use App\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -305,6 +307,52 @@ public function deleteAssigment(Request $request)
     $assigment=assignment::where('id',$request->assignment_id)->first();
     $assigment->delete();
     return HelperController::api_response_format(200, $body = [], $message = 'Assigment deleted succesfully');
+
+}
+public function GetAssignment(Request $request)
+{
+    $request->validate([
+        'assignment_id'=>'required|exists:assignments,id',
+    ]);
+    $user = Auth::user();
+    $assignment=assignment::where('id',$request->assignment_id)->first();
+    $assignment['attachment']=attachment::where('id',$assignment->attachment_id)->first();
+    $userassigments=UserAssigment::where('assignment_id',$assignment->id)->get();
+    $assignment['user_assignment']=$userassigments;
+    foreach ($assignment['user_assignment'] as $value)
+    {
+        # code...
+    $value['attachment']=attachment::where('id',$value->attachment_id)->first();
+    }
+
+    if(($user->roles->first()->id)==4)
+    {
+        return HelperController::api_response_format(200, $body = $assignment, $message = []);
+    }
+
+    ///////////////student
+    if(($user->roles->first()->id)==3)
+    {
+        $studentassigment=UserAssigment::where('assignment_id',$assignment->id)->where('user_id',$user->id)->first();
+        if($assignment->opening_date > Carbon::now() || $assignment->closing_date < Carbon::now())
+        {
+            if($studentassigment->override==0){
+                return HelperController::api_response_format(400, $body = [], $message = 'you are not allowed to see the assignment at this moment');
+            }
+        }
+        if($assignment->visiable==0)
+        {
+            return HelperController::api_response_format(400, $body = [], $message = 'you are not allowed to see the assignment at this moment');
+        }
+        $stuassignment=assignment::where('id',$request->assignment_id)->first();
+        $stuassignment['attachment']=attachment::where('id',$stuassignment->attachment_id)->first();
+        $stuassignment['user_submit']=$studentassigment;
+        $stuassignment['user_submit']->attachment=attachment::where('id',$stuassignment['user_submit']->attachment_id)->first();
+        return HelperController::api_response_format(200, $body = $stuassignment, $message = []);
+
+
+
+    }
 
 }
 
