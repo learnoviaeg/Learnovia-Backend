@@ -35,6 +35,10 @@ class UserController extends Controller
             'password' => 'required|array',
             'password.*' => 'required|string|min:8|max:191',
             'role' => 'required|array',
+            'optional.*' => 'exists:courses,name',
+            'optional' => 'array',
+            'course.*' => 'exists:courses,name',
+            'course' => 'array',
             'role.*' => 'required|exists:roles,id',
             'class_id' => 'required|array',
         ]);
@@ -61,24 +65,24 @@ class UserController extends Controller
             if ($request->role[$key] == 3) {
 
                 $classLevID=ClassLevel::GetClass($request->class_id[$key]);
-
                 $classSegID=SegmentClass::GetClasseLevel($classLevID);
-                $request = new Request([
+
+                $option = new Request([
                     'username' => $user->username,
                     'start_date' => $request->start_date[$key],
                     'end_date' => $request->end_date[$key],
                     'SegmentClassId' => $classSegID
                 ]);
-                EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
-                $enrollcounter=1;
-                while( $request->filled($enrollOptional.$enrollcounter) ) {
-                    $course_id=Course::findByName($request->$enrollOptional.$enrollcounter);
+                EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
+                $enrollcounter=0;
+                while(isset($request->$enrollOptional[$key][$enrollcounter])) {
+                    $course_id=Course::findByName($request->$enrollOptional[$key][$enrollcounter]);
                     $segmentid= CourseSegment::getidfromcourse($course_id);
                     $option = new Request([
                         'course_segment' => array($segmentid),
-                        'start_date' => Date::excelToDateTimeObject($request->start_date[$key]),
+                        'start_date' => $request->start_date[$key],
                         'users'=> array($user->username),
-                        'end_date' => Date::excelToDateTimeObject($request->end_date[$key]),
+                        'end_date' => $request->end_date[$key],
                         'role_id'=>array(3)
                     ]);
                     EnrollUserToCourseController::EnrollCourses($option);
@@ -86,15 +90,17 @@ class UserController extends Controller
                 }
             }
             else{
-                $teachercounter=1;
-                while($request->filled($teacheroptional.$teachercounter)){
-                    $course_id=Course::findByName($request->$teacheroptional.$teachercounter);
+                $teachercounter=0;
+
+                while(isset($request->$teacheroptional[$key][$teachercounter])){
+
+                    $course_id=Course::findByName($request->$teacheroptional[$key][$teachercounter]);
                     $segmentid= CourseSegment::getidfromcourse($course_id);
                     $option = new Request([
                         'course_segment' => array($segmentid),
-                        'start_date' => Date::excelToDateTimeObject($request->start_date[$key]),
+                        'start_date' => $request->start_date[$key],
                         'users'=> array($user->username),
-                        'end_date' => Date::excelToDateTimeObject($request->start_date[$key]),
+                        'end_date' => $request->end_date[$key],
                         'role_id'=>array($role->id)
                     ]);
                     EnrollUserToCourseController::EnrollCourses($option);
