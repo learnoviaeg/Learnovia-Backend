@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 
 
 Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
+    Route::post('storeQuestions', 'QuestionBankController@store');
 
     Route::get('install', function () {
         if (\Spatie\Permission\Models\Permission::whereName('question/add')->first() != null) {
