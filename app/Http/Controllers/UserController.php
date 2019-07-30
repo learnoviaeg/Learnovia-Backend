@@ -34,13 +34,6 @@ class UserController extends Controller
             'lastname.*' => 'required|string|min:3|max:50',
             'password' => 'required|array',
             'password.*' => 'required|string|min:8|max:191',
-            'role' => 'required|array',
-            'optional.*' => 'exists:courses,name',
-            'optional' => 'array',
-            'course.*' => 'exists:courses,name',
-            'course' => 'array',
-            'role.*' => 'required|exists:roles,id',
-            'class_id' => 'required|array',
         ]);
         $users = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email'];
@@ -60,6 +53,21 @@ class UserController extends Controller
                     $user->$optional = $request->$optional;
             }
             $user->save();
+            if(!isset($request->class_id[$key]))
+            {
+                $users->push($user);
+                continue;
+            }
+            $request->validate([
+                'role' => 'required|array',
+                'optional.*' => 'exists:courses,name',
+                'optional' => 'array',
+                'course.*' => 'exists:courses,name',
+                'course' => 'array',
+                'role.*' => 'required|exists:roles,id',
+                'class_id' => 'required|array',
+                'class_id.*' => 'required|exists:classes,id',
+            ]);
             $role = Role::find($request->role[$key]);
             $user->assignRole($role);
             if ($request->role[$key] == 3) {
