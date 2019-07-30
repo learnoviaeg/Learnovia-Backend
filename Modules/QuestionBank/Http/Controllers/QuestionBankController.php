@@ -338,7 +338,9 @@ class QuestionBankController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'Question' => 'required|array'
+            'Question' => 'required|array',
+            'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+
         ]);
         foreach ($request->Question as $question) {
             switch ($question['Question_Type_id']) {
@@ -607,6 +609,8 @@ class QuestionBankController extends Controller
     public
     function update(Request $request)
     {
+    $request->validate([
+         'question_id' => 'required|integer|exists:questions,id',]);
         $Question = Questions::find($request->question_id);
         switch ($Question->question_type_id) {
             case 1: // True/false
