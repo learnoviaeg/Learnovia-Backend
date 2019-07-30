@@ -230,7 +230,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'Zipper' => Chumper\Zipper\Zipper::class,
-        'TXPDF' => Elibyy\TCPDF\Facades\TCPDF::class
+        'TXPDF' => Elibyy\TCPDF\Facades\TCPDF::class,
 
         // check Enroll
         'checkEnroll' => App\Http\Controllers\checkEnrollController::class,
