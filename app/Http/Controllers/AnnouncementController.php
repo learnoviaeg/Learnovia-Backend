@@ -6,20 +6,16 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\File;
 use App\Notifications\Announcment;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Announcement;
-use Carbon\Carbon;
-use App\Classes;
-use App\Course;
-use App\Level;
-use App\User;
 use App\CourseSegment;
+use Carbon\Carbon;
 use App\Enroll;
 use App\ClassLevel;
 use App\SegmentClass;
 use App\YearLevel;
-
+use App\AcademicYearType;
+use App\User;
 
 class AnnouncementController extends Controller
 {
@@ -103,6 +99,38 @@ class AnnouncementController extends Controller
             Notification::send($noti, new Announcment($request));
 
         }
+        else if ($request->assign == 'year')
+        {
+            $request->validate([
+                'year_id'=>'required|exists:academic_years,id',
+            ]);
+
+            $academic_year_type_id=AcademicYearType::get_yaer_type_by_year($request->year_id);
+            $Year_level_id=YearLevel::get_year_level_id($academic_year_type_id);
+            $class_level_id=ClassLevel::GetClassLevelid($Year_level_id);
+            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
+            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
+            $users=Enroll::Get_User_ID($course_segment_id);
+            $noti=User::find($users);
+            Notification::send($noti, new Announcment($request));
+
+        }
+        else if ($request->assign == 'type')
+        {
+            $request->validate([
+                'type_id'=>'required|exists:academic_types,id',
+            ]);
+
+            $academic_year_type_id=AcademicYearType::get_yaer_type_by_type($request->type_id);
+            $Year_level_id=YearLevel::get_year_level_id($academic_year_type_id);
+            $class_level_id=ClassLevel::GetClassLevelid($Year_level_id);
+            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
+            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
+            $users=Enroll::Get_User_ID($course_segment_id);
+            $noti=User::find($users);
+            Notification::send($noti, new Announcment($request));
+
+        }
         else
         {
             return ('Operation Fails!');
@@ -118,7 +146,9 @@ class AnnouncementController extends Controller
            'assign'=>$request->assign,
            'class_id' => $request->class_id,
            'course_id' => $request->course_id,
-           'level_id' => $request->level_id
+           'level_id' => $request->level_id,
+           'year_id' => $request->level_id,
+           'type_id' => $request->level_id
         ]);
 
         return HelperController::api_response_format(201,'Announcement Sent Successfully');
