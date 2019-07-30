@@ -186,6 +186,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     });
     Route::post('deleteannounce', 'AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
     Route::post('announce', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
+    Route::get('calendar','CalendarController@Calendar');
 });
 
 //Year Routes
@@ -264,7 +265,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:course/delete');
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
     Route::get('my', 'CourseController@MyCourses')->name('mycourses')->middleware('permission:course/my-courses');
-    Route::post('layout','CourseController@GetUserCourseLessons')->name('layout')->middleware('permission:course/layout');
+    Route::post('layout','CourseController@GetUserCourseLessons');//->name('layout')->middleware('permission:course/layout');
 });
 
 //USER CRUD ROUTES
