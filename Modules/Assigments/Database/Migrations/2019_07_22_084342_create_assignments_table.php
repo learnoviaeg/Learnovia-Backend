@@ -26,7 +26,7 @@ class CreateAssignmentsTable extends Migration
             $table->unsignedBigInteger('grade_category')->nullable();
             $table->integer('mark');
             $table->unsignedBigInteger('scale_id')->nullable();
-            $table->boolean('allow_attachment');
+            $table->tinyInteger('allow_attachment');
             $table->timestamps();
 
         });
