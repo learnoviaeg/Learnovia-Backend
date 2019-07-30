@@ -26,7 +26,7 @@ class AssigmentsController extends Controller
             'name' => 'required|string',
             'is_graded' => 'required|boolean',
             'mark' => 'required|integer',
-            'allow_attachment' => 'required|boolean',
+            'allow_attachment' => 'required|integer|min:0|max:3',
             'opening_date' => 'required|before:closing_date|after:'. Carbon::now(),
             'closing_date' => 'required',
             'visiable'=>'required|boolean',
@@ -167,17 +167,40 @@ public function submitAssigment(Request $request)
     $request->validate([
         'user_id' => 'required|exists:user_assigments,user_id',
         'assignment_id'=>'required|exists:user_assigments,assignment_id',
-        'submit_date'=>'required',
     ]);
-    if(!isset($request->file)&&!isset($request->content))
-    {
-        return HelperController::api_response_format(400, $body = [], $message = 'please enter file or content');
-    }
+    $assigment=assignment::where('id',$request->assignment_id)->first();
+
+/*
+
+        0===================>content
+        1===================>attached_file
+        2===================>both
+        3===================>can submit content or file
+
+
+
+*/
+        if((($assigment->allow_attachment==3))&&((!isset($request->content))&&(!isset($request->file))))
+        {
+            return HelperController::api_response_format(400, $body = [], $message = 'you must enter the content or the file');
+        }
+        if((($assigment->allow_attachment==0))&&((!isset($request->content))||(isset($request->file))))
+        {
+            return HelperController::api_response_format(400, $body = [], $message = 'you must enter only the content');
+        }
+
+        if((($assigment->allow_attachment==1))&&((isset($request->content))||(!isset($request->file))))
+        {
+            return HelperController::api_response_format(400, $body = [], $message = 'you must enter only the file');
+        }
+        if((($assigment->allow_attachment==2))&&((!isset($request->content))||(!isset($request->file))))
+        {
+            return HelperController::api_response_format(400, $body = [], $message = 'you must enter both the content and the file');
+        }
     $userassigment= UserAssigment::where('user_id',$request->user_id)->where('assignment_id',$request->assignment_id)->first();
-    if((($userassigment->submit_date <  Carbon::now())&&($userassigment->override==0))||($userassigment->status_id ==1))
+    if(((($assigment->opening_date >  Carbon::now())||( Carbon::now() > $assigment->closing_date ))&&($userassigment->override==0))||($userassigment->status_id ==1)||($assigment->visiable==0))
     {
         return HelperController::api_response_format(400, $body = [], $message = 'sorry you are not allowed to submit anymore');
-
     }
     if(isset($request->file))
     {
@@ -204,7 +227,7 @@ public function submitAssigment(Request $request)
     else {
         $userassigment->content=null;
     }
-    $userassigment->submit_date = $request->submit_date;
+    $userassigment->submit_date = Carbon::now();
     $userassigment->save();
     return HelperController::api_response_format(200, $body = $userassigment, $message = 'your answer is submitted');
 }
