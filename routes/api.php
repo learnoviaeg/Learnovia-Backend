@@ -115,6 +115,11 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/uninstall']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/toggle']);
 
+        //Announcements Permissions
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/delete']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/send']);
+
+
         //Add Roles
         $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin']);
         \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'System Admin']);

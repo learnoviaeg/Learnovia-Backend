@@ -45,4 +45,9 @@ class YearLevel extends Model
         return $check;
     }
 
+    public static function get_year_level_id ($academic_year_type)
+    {
+        return  self::where('academic_year_type_id', $academic_year_type)->pluck('id')->first();
+    }
+
 }
