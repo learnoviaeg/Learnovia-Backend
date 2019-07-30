@@ -538,4 +538,50 @@ class SpatieController extends Controller
         }
         return HelperController::api_response_format(200, $has);
     }
+
+    public function comparepermissions(Request $request)
+    {
+        $request->validate([
+            'permissions' => 'required|array',
+            'permissions.*' => 'required|string|min:3|max:50|exists:permissions,name',
+        ]);
+
+        $user_id=Auth::user()->id;
+        $user_role=DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id');
+
+        $user_permissions=array();
+        foreach ($user_role as $role)
+        {
+            $findrole=Role::find($role);
+            $user_permissions[]= $findrole->permissions;
+        }
+
+        $userpermissions_name=collect([]);
+        foreach($user_permissions as $uper)
+        {
+            foreach($uper as $per)
+            {
+                $userpermissions_name->push($per->name);
+            }
+        }
+        $uniquepername= $userpermissions_name->unique();
+
+        $results=array();
+        $trueper=array();
+        $count=0;
+        foreach ($request->permissions as  $value)
+        {
+            foreach($uniquepername as $per)
+            {
+                $results[]= isset($per) && $value == $per ? 'true' : 'false';
+                if($results[$count] == 'true')
+                {
+                    $trueper[]=$value;
+                }
+                $count++;
+            }
+
+        }
+        return HelperController::api_response_format(201, $trueper);
+    }
 }
