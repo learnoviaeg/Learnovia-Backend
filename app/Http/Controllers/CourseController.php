@@ -112,10 +112,25 @@ class CourseController extends Controller
 
     public function MyCourses(Request $request)
     {
+        $cours=array();
         foreach ($request->user()->enroll as $enroll) {
-            $enroll->CourseSegment->courses;
+            $cours[]=$enroll->CourseSegment->courses;
         }
-        return HelperController::api_response_format(200, $request->user());
+        //$request->user()
+        return HelperController::api_response_format(200,$cours );
+    }
+    public function getcourse(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,id'
+        ]);
+        if($request->user()->roles->first()->id==3||$request->user()->roles->first()->id==7)
+        {
+            return HelperController::api_response_format(400,[],'you are not allowed');
+
+        }
+        $course=Course::where('id',$request->course_id)->first();
+        return $course;
     }
     public function GetUserCourseLessons(Request $request)
     {

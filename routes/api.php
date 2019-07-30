@@ -265,6 +265,8 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
     Route::get('my', 'CourseController@MyCourses')->name('mycourses')->middleware('permission:course/my-courses');
     Route::post('layout','CourseController@GetUserCourseLessons')->name('layout')->middleware('permission:course/layout');
+    Route::post('getcourse', 'CourseController@getcourse');//->name('addcourse')->middleware('permission:course/add');
+
 });
 
 //USER CRUD ROUTES
