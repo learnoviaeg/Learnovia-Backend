@@ -16,12 +16,12 @@ class CreateMediaTable extends Migration
         Schema::create('media', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->text('description');
-            $table->string('size');
-            $table->string('type');
+            $table->text('description')->nullable();
+            $table->string('size')->nullable();
+            $table->string('type')->nullable();
+            $table->text('link')->nullable();
+
             $table->boolean('visibility')->default(1);
-            $table->date('from');
-            $table->date('to');
 
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');

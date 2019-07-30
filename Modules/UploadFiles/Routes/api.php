@@ -32,6 +32,12 @@ Route::group([
         /* Delete specific Media */
         Route::post('deleteMedia', 'MediaController@destroy')->name('deleteMedia');
 
+        /* Attach link as media */
+        Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink');
+
+        /* update link as media */
+        Route::post('updateMediaLink', 'MediaController@updateMediaLink')->name('updateMediaLink');
+
         /* Toggle Visibility of specific Media */
         Route::post('toggleMediaVisibility', 'MediaController@toggleVisibility')->name('toggleMediaVisibility');
 
