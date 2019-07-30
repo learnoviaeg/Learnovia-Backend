@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
-
-
+Route::post('storeQuestions', 'QuestionBankController@store');
+Route::post('updateQuestion', 'QuestionBankController@update');
 Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
     Route::get('install', function () {
@@ -36,8 +36,8 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
     });
     Route::group(['middleware' => ['store_question']], function () {
-        Route::post('storeQuestions', 'QuestionBankController@store')->middleware('permission:question/add');
-        Route::post('updateQuestion', 'QuestionBankController@update')->middleware('permission:question/update');
+    //    Route::post('storeQuestions', 'QuestionBankController@store')->middleware('permission:question/add');
+        //Route::post('updateQuestion', 'QuestionBankController@update')->middleware('permission:question/update');
         Route::post('storeQuiz', 'QuizController@store')->middleware('permission:quiz/add');
         Route::post('updateQuiz', 'QuizController@update')->middleware('permission:quiz/update');
     });

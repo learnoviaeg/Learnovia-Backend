@@ -224,8 +224,7 @@ class MessageController extends Controller
         }
     }
 
-    public
-    function ViewAllMSG_from_to(Request $req)
+    public function ViewAllMSG_from_to(Request $req)
     {
         $req->validate([
             'id' => 'required|exists:users,id'

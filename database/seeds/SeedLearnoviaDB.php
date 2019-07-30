@@ -91,6 +91,7 @@ class SeedLearnoviaDB extends Seeder
             ['name' => 'Secndary'],
             ['name' => 'lesson three']
         ];
+        
         foreach($Categoty as $Categot){
         Category::create($Categot);
     }
@@ -176,9 +177,9 @@ class SeedLearnoviaDB extends Seeder
             attachment::create($attachment);
         }
         $components=[
-            ['name'=>'Quiz'],
-            ['name'=>'Media'],
-            ['name'=>'Assignment'],
+            ['name'=>'Quiz', 'module'=> 'QuestionBank' , 'model'=> 'Quiz' ,'type'=> '1' ],
+            ['name'=>'Media', 'module'=> 'test' , 'model'=> 'test' ,'type'=> '1' ],
+            ['name'=>'Assignment', 'module'=> 'Assigments' , 'model'=> 'Assignment' ,'type'=> '1' ],
             ];
         foreach($components as $component){
             Component::create($component);
