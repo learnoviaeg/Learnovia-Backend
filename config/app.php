@@ -177,6 +177,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
         Elibyy\TCPDF\ServiceProvider::class,
+        \hisorange\BrowserDetect\ServiceProvider::class,
+
 
     ],
 
@@ -234,5 +236,8 @@ return [
 
         // check Enroll
         'checkEnroll' => App\Http\Controllers\checkEnrollController::class,
+
+        'Browser' => \hisorange\BrowserDetect\Facade::class,
+
     ],
 ];

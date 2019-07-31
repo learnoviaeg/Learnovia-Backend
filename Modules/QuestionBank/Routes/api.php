@@ -58,5 +58,8 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
     Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion');
 
+    Route::post('storeUserQuiz', 'UserQuizController@store_user_quiz');
+
 });
+
 

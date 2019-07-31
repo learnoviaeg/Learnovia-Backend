@@ -14,7 +14,7 @@ class CreateQuizLessonsTable extends Migration
     public function up()
     {
         Schema::create('quiz_lessons', function (Blueprint $table) {
-            $table->increments('id');
+            $table->bigIncrements('id');
 
             $table->unsignedBigInteger('quiz_id');
             $table->foreign('quiz_id')->references('id')->on('quizzes')->onDelete('cascade')->onUpdate('cascade');
