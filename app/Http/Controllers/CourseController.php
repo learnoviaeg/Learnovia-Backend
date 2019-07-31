@@ -167,6 +167,6 @@ class CourseController extends Controller
             }
         }
         $clase['course'] = Course::find($request->course_id);
-        return $clase;
+        return HelperController::api_response_format(200 , $clase);
     }
 }
