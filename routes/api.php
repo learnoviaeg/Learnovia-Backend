@@ -193,7 +193,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     });
     Route::post('deleteannounce', 'AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
     Route::post('announce', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
-    Route::post('calendar','CalendarController@Calendar')->name('calendar');//->middleware('permission:calendar/get');
+    Route::post('calendar','CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
     Route::post('comparepermissions','SpatieController@comparepermissions');
 });
 
