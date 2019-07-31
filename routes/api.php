@@ -198,8 +198,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 //Year Routes
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'AcademicYearController@store')->name('addyear')->middleware('permission:year/add');
-    Route::get('get', 'AcademicYearController@index')->name('getallyears')->middleware('permission:year/get-all');
-    Route::post('getById', 'AcademicYearController@show')->name('getyearbyid')->middleware('permission:year/get');
+    Route::get('get', 'AcademicYearController@get')->name('getyear')->middleware('permission:year/get');
     Route::put('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
     Route::delete('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
 });
@@ -251,7 +250,7 @@ Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
     Route::post('assign', "segment_class_Controller@Assign_to_anther_Class")->name('assignsegment')->middleware('permission:segment/assign');
 
     //if you want to get classes with all segments please,write getclasses in yours
-    Route::get('get', "segment_class_Controller@List_Classes_with_all_segment")->name('getclasses')->middleware('permission:segment/get-all');
+    Route::get('get', "segment_class_Controller@List_Classes_with_segments")->name('getclasses')->middleware('permission:segment/get-all');
 
     Route::post('update', "segment_class_Controller@update")->name('updatesegment')->middleware('permission:segment/update');
 });
@@ -331,4 +330,9 @@ Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
 });
 
 Route::post('GetUserCourseLessons','CourseController@GetUserCourseLessons');
+
+//Route::get('get', 'AcademicYearController@get');
+//Route::get('get', 'AC_year_type@List_Years_with_types');
+//Route::get('get', "segment_class_Controller@List_Classes_with_segments");
+
 

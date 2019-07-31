@@ -17,13 +17,25 @@ class AC_year_type extends Controller
      * @return : response of all Years with its Typs
      *
      */
+
     public function List_Years_with_types(Request $request)
     {
         $request->validate([
             'year' => 'required|exists:academic_years,id'
         ]);
-        $cat = AcademicYear::whereId($request->year)->first()->AC_Type;
-        return HelperController::api_response_format(200, $cat);
+
+        if($request->id != null)
+        {
+            $request->validate([
+                'id' => 'exists:academic_types,id'
+            ]);
+            $cat = AcademicType::where('id',$request->id)->first();
+            return HelperController::api_response_format(200, $cat);
+        }
+        else {
+            $cat = AcademicYear::whereId($request->year)->first()->AC_Type;
+            return HelperController::api_response_format(200, $cat);
+        }
     }
 
     /**

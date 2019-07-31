@@ -44,7 +44,7 @@ class CategoryController extends Controller
     public function get(Request $request)
     {
         $request->validate([
-            'id' => 'exists:categories,id,'
+            'id' => 'exists:categories,id'
         ]);
         if (isset($request->id))
             return HelperController::api_response_format(200, Category::find($request->id));
