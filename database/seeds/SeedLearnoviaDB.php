@@ -176,16 +176,16 @@ class SeedLearnoviaDB extends Seeder
             attachment::create($attachment);
         }
         $components=[
-            ['name'=>'Quiz'],
-            ['name'=>'Media'],
-            ['name'=>'Assignment'],
-            ];
+            ['name'=>'Quiz','module'=>'Hello','model'=>'Hello','type'=>1],
+            ['name'=>'Media','module'=>'Hello','model'=>'Hello','type'=>1],
+            ['name'=>'Assignment','module'=>'Hello','model'=>'Hello','type'=>1],
+        ];
         foreach($components as $component){
             Component::create($component);
         }
         $Contacts=[
             ['Person_id'=>1 ,'Friend_id'=>2],
-           ['Person_id'=>1 ,'Friend_id'=>2],
+            ['Person_id'=>1 ,'Friend_id'=>2],
             ['Person_id'=>1 ,'Friend_id'=>3],
             ['Person_id'=>1 ,'Friend_id'=>4],
             ['Person_id'=>1 ,'Friend_id'=>5],
@@ -248,8 +248,7 @@ class SeedLearnoviaDB extends Seeder
             ['user_id'=>1 , 'username'=> '0002','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
             ['user_id'=>2 , 'username'=>'0003','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
             ['user_id'=>3 , 'username'=> '0004','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
-
-            ];
+        ];
         foreach($Enrolls as $user){
             Enroll::create($user);
         }

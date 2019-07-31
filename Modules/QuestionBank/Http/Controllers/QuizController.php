@@ -59,7 +59,6 @@ class QuizController extends Controller
             $quiz = quiz::create([
                 'name' => $request->name,
                 'course_id' => $request->course_id,
-
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
@@ -228,7 +227,6 @@ class QuizController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
-
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
         ]);

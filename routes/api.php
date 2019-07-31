@@ -313,7 +313,6 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     // Route::get('get', 'MessageController@get')->name('getcategory')->middleware('permission:Get Categories');
 });
 
-
 Route::group(['prefix' => 'Component', 'middleware' => 'auth:api'], function () {
     Route::get('get', 'ComponentController@GetInstalledComponents')->name('getcomponent')->middleware('permission:component/get');
     Route::post('install', 'ComponentController@Install')->name('installcomponenet')->middleware('permission:component/install');
@@ -328,6 +327,3 @@ Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'LessonController@updateLesson')->name('updateLesson')->middleware('permission:lesson/update');
     Route::post('sort', 'LessonController@Sorting')->name('sortlesson')->middleware('permission:lesson/sort');
 });
-
-Route::post('GetUserCourseLessons','CourseController@GetUserCourseLessons');
-
