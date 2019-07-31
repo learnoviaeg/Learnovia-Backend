@@ -22,7 +22,7 @@ class Course extends Model
         return $this->belongsTo('App\Category');
     }
 
-    public function courseSegments(){
+    public  function courseSegments(){
         return $this->hasMany('App\CourseSegment');
     }
 

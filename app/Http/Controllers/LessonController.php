@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Lesson;
+use App\Course;
 use App\CourseSegment;
 
 class LessonController extends Controller
@@ -13,29 +14,41 @@ class LessonController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'course_segment_id' => 'required|exists:course_segments,id',
+            'course_id'=>'required|exists:courses,id'
         ]);
         $Lessons_array = array();
-        array_push(
-            $Lessons_array,
-            array(
-                'name' =>  $request['name'],
-                'course_segment_id' => $request['course_segment_id'],
-            )
-        );
+       
+        $course_segment = CourseSegment::getActive_segmentfromcourse($request->course_id);
 
-        foreach ($Lessons_array as $input) {
-            for ($x = 0; $x < count($input); $x++) {
-                $lessons_in_CourseSegment = Lesson::where('course_segment_id', $request->course_segment_id)->max('index');
+        if($course_segment){
+        array_push($Lessons_array,$request['name']);
+        $lessons_in_CourseSegment = Lesson::where('course_segment_id', $course_segment)->max('index');
                 $Next_index = $lessons_in_CourseSegment + 1;
+        foreach ($Lessons_array as $input) {
+            if(count($input)==1){
                 $lesson = Lesson::create([
-                    'name' => $input['name'][$x],
-                    'course_segment_id' => $input['course_segment_id'][$x],
+                    'name' => $input['0'],
+                    'course_segment_id' => $course_segment,
+                    'index' => $Next_index
+                ]);  
+            }else{
+            for ($x =0; $x <= (count($Lessons_array)+1); $x++) {
+               
+                $lesson = Lesson::create([
+                    'name' => $input[$x],
+                    'course_segment_id' => $course_segment,
                     'index' => $Next_index
                 ]);
+                
             }
         }
+        }
         return HelperController::api_response_format(201, $lesson, 'Lesson is Created Successfully');
+    }
+    else{
+        return HelperController::api_response_format(201, 'No Segment is allowed');
+
+    }
     }
 
 
@@ -66,12 +79,13 @@ class LessonController extends Controller
         $request->validate([
             'name' => 'required',
             'id'  => 'required|exists:lessons,id',
-            'course_segment_id' => 'exists:course_segments,id',
+            'course_id' => 'exists:courses,id',
         ]);
         $lesson = Lesson::find($request->id);
         $lesson->name = $request->name;
-        if ($request->filled('course_segment_id')) {
-            $lesson->course_segment_id = $request->course_segment_id;
+        if ($request->filled('course_id')) {
+            $course_segment = CourseSegment::getidfromcourse($request->course_id);
+            $lesson->course_segment_id = $course_segment;
         }
         $lesson->save();
         return HelperController::api_response_format(200, $lesson, 'Lesson is updated Successfully');
