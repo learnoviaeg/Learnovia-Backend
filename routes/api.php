@@ -281,7 +281,7 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'UserController@delete')->name('deleteuser')->middleware('permission:user/delete');
     Route::get('get', 'UserController@list')->name('listAll')->middleware('permission:user/get-all');
     Route::post('suspend', 'UserController@suspend_user')->name('suspenduser')->middleware('permission:user/suspend');
-    Route::post('Show_and_hide_real_password_with_permission', 'UserController@Show_and_hide_real_password_with_permission');
+    Route::get('Show_and_hide_real_password_with_permission', 'UserController@Show_and_hide_real_password_with_permission');
     Route::post('unsuspend', 'UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:user/un-suspend');
 });
 

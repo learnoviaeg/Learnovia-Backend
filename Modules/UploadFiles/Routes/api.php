@@ -42,8 +42,7 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
     Route::post('deleteFile', 'FilesController@destroy')->name('deleteFile')->middleware('permission:file/delete');
 
     /* Toggle Visibility of specific file */
-    Route::post('toggleFileVisibility', 'FilesController@toggleVisibility')->name('toggleFileVisibility')->middleware('permission:file/toggle');;
-
+    Route::post('toggleFileVisibility', 'FilesController@toggleVisibility')->name('toggleFileVisibility')->middleware('permission:file/toggle');
     /* Media Routes */
     /* Upload array of Media to specific course segment */
     Route::post('uploadMedia', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
@@ -55,6 +54,12 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
 
     /* Toggle Visibility of specific Media */
     Route::post('toggleMediaVisibility', 'MediaController@toggleVisibility')->name('toggleMediaVisibility')->middleware('permission:media/toggle');
+
+    /* Attach link as media */
+    Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink')->middleware('permission:link/add');
+
+    /* update link as media */
+    Route::post('updateMediaLink', 'MediaController@updateMediaLink')->name('updateMediaLink')->middleware('permission:link/update');
 
     /* Get All files and Media assigned to specific course segment */
     Route::get('getFileMedia', 'FilesController@show')->name('getFileMedia')->middleware('permission:file-media/get');;

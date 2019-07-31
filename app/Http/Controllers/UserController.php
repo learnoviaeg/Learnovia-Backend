@@ -181,7 +181,7 @@ class UserController extends Controller
     public function list()
     {
         $user = User::all(['id', 'name', 'email', 'suspend', 'created_at']);
-        return HelperController::api_response_format(201, $user);
+        return HelperController::api_response_format(200, $user);
     }
 
     /*
@@ -230,7 +230,7 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
         ]);
         $user = User::find($request->id);
-        
+
         return HelperController::api_response_format(201, $user, null);
     }
 
@@ -245,7 +245,7 @@ class UserController extends Controller
             'real_password' => $request->password,
             'password' => bcrypt($request->password)
         ]);
-        
+
         return HelperController::api_response_format(201, $user, 'User Updated Successfully');
     }
 
@@ -259,11 +259,11 @@ class UserController extends Controller
             {
                 $row->setHidden(['password']);
             });
-            return HelperController::api_response_format(201, $user);
+            return HelperController::api_response_format(200, $user);
         }
         else {
             $user = User::all();
-            return HelperController::api_response_format(201, $user);
+            return HelperController::api_response_format(200, $user);
         }
-    } 
+    }
 }

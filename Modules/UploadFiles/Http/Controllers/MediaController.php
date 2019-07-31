@@ -46,8 +46,7 @@ class MediaController extends Controller
                 'class_level' => 'required|array',
                 'class_level.*' => 'required|integer|exists:class_levels,id',
                 'lesson_id'=>'required|integer|exists:lessons,id',
-                'from' => 'required|date',
-                'to' => 'required|date|after:from',
+                'visibility' => 'required|boolean',
             ]);
 
             // activeCourseSgement
@@ -92,8 +91,7 @@ class MediaController extends Controller
                 $file->name = $name;
                 $file->description = $description;
                 $file->size = $size;
-                $file->from = $request->from;
-                $file->to = $request->to;
+                $file->visibility = $request->visibility;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
 
@@ -144,8 +142,7 @@ class MediaController extends Controller
                 'mediaId' => 'required|integer|exists:media,id',
                 'description' => 'required|string|min:1',
                 'Imported_file' => 'nullable|file|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
-                'from' => 'required|date',
-                'to' => 'required|date|after:from',
+                'visibility' => 'required|boolean'
             ]);
 
             $file = media::find($request->mediaId);
@@ -174,8 +171,7 @@ class MediaController extends Controller
             }
 
             $file->description = $request->description;
-            $file->from = $request->from;
-            $file->to = $request->to;
+            $file->visibility = $request->visibility;
             $check = $file->save();
 
             if($check){
@@ -279,5 +275,129 @@ class MediaController extends Controller
         }
     }
 
+
+    public function storeMediaLink(Request $request)
+    {
+        try{
+            $request->validate([
+                'name' => 'required|string|max:130',
+                'description' => 'nullable|string|min:1',
+                'url' => 'required|active_url',
+                'class_level' => 'required|array',
+                'class_level.*' => 'required|integer|exists:class_levels,id',
+                'lesson_id'=>'required|integer|exists:lessons,id',
+                'visibility' => 'required|boolean',
+            ]);
+
+            $avaiableHosts = collect([
+                'www.youtube.com',
+                'vimeo.com',
+                'soundcloud.com',
+            ]);
+
+            $urlparts = parse_url($request->url);
+            if(!$avaiableHosts->contains($urlparts['host'])){
+                return HelperController::api_response_format(400,$request->url,'Link is invalid');
+            }
+
+            // activeCourseSgement
+            $activeCourseSegments = collect([]);
+
+            foreach($request->class_level as $class_level_id){
+                $class_level = ClassLevel::find($class_level_id);
+                $activeSegmentClass = $class_level->segmentClass->where('is_active',1)->first();
+                if(isset($activeSegmentClass)){
+                    $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
+                    if(isset($activeCourseSegment)){
+                        // check Enroll
+                        $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
+
+                        if($checkTeacherEnroll == true){
+                            $activeCourseSegments->push($activeCourseSegment);
+                        }
+                        else{
+                            return HelperController::api_response_format(400,null,'You\'re unauthorize');
+                        }
+                    }
+                    else{
+                        return HelperController::api_response_format(400,null,'No Course active in segment');
+                    }
+                }
+                else{
+                    return HelperController::api_response_format(400,null,'No Class active in segment');
+                }
+            }
+
+            $file = new media;
+            $file->name = $request->name;
+            $file->description = $request->description;
+            $file->visibility = $request->visibility;
+            $file->link = $request->url;
+            $file->user_id = Auth::user()->id;
+            $check = $file->save();
+
+            if($check){
+
+                foreach($activeCourseSegments as $courseSegment){
+                    $filesegment = new MediaCourseSegment;
+                    $filesegment->course_segment_id = $courseSegment->id;
+                    $filesegment->media_id = $file->id;
+                    $filesegment->save();
+                }
+
+                $fileLesson = new MediaLesson;
+                $fileLesson->lesson_id = $request->lesson_id;
+                $fileLesson->media_id = $file->id;
+                $fileLesson->save();
+            }
+
+            return HelperController::api_response_format(200,null,'Link added Successfully');
+        }catch (Exception $ex){
+            return HelperController::api_response_format(400,null,'Please Try again');
+        }
+    }
+
+    public function updateMediaLink(Request $request)
+    {
+        try{
+            $request->validate([
+                'mediaId' => 'required|integer|exists:media,id',
+                'name' => 'required|string|max:130',
+                'description' => 'nullable|string|min:1',
+                'url' => 'required|active_url',
+            ]);
+
+            $file = media::find($request->mediaId);
+
+            $avaiableHosts = collect([
+                'www.youtube.com',
+                'vimeo.com',
+                'soundcloud.com',
+            ]);
+
+            $urlparts = parse_url($request->url);
+            if(!$avaiableHosts->contains($urlparts['host'])){
+                return HelperController::api_response_format(400,$request->url,'Link is invalid');
+            }
+
+            //check Authotizing
+            $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
+
+            // check Enroll
+            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
+            if($checkTeacherEnroll == false){
+                return HelperController::api_response_format(400,null,'You\'re unauthorize');
+            }
+
+            $file->name = $request->name;
+            $file->description = $request->description;
+            $file->link = $request->url;
+            $file->save();
+
+            return HelperController::api_response_format(200,null,'Update Link Successfully');
+        }catch (Exception $ex){
+            return HelperController::api_response_format(400,null,'Please Try again');
+        }
+    }
 
 }

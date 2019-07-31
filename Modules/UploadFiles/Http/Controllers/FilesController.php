@@ -45,8 +45,7 @@ class FilesController extends Controller
                 'class_level' => 'required|array',
                 'class_level.*' => 'required|integer|exists:class_levels,id',
                 'lesson_id'=>'required|integer|exists:lessons,id',
-                'from' => 'required|date',
-                'to' => 'required|date|after:from',
+                'visibility' => 'required|boolean'
             ]);
 
             // activeCourseSgement
@@ -91,8 +90,7 @@ class FilesController extends Controller
                 $file->name = $name;
                 $file->description = $description;
                 $file->size = $size;
-                $file->from = $request->from;
-                $file->to = $request->to;
+                $file->visibility = $request->visibility;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
 
@@ -146,27 +144,15 @@ class FilesController extends Controller
         if($checkEnroll == true){
             $mediaSegment = MediaCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
             $fileSegment = FileCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
+
             foreach ($mediaSegment as $segement) {
-                $allMedia = $segement->Media
-                    ->reject(function ($media) {
-                        $year = Carbon::now()->year;
-                        $month = Carbon::now()->month;
-                        $day = Carbon::now()->day;
-
-                        $from = explode('-',$media->from);
-                        $to = explode('-',$media->to);
-
-                        $start = Carbon::create($from[0], $from[1], $from[2]);
-                        $end = Carbon::create($to[0], $to[1], $to[2]);
-
-                        $checkDate = Carbon::create($year,$month,$day)->between($start, $end);
-
-                        return !$checkDate;
-                    })->where('visibility',1);
+                $allMedia = $segement->Media->where('visibility',1);
 
                 foreach ($allMedia as $media) {
                     $lesson_id = $media->MediaLesson->lesson_id;
-                    $media->url  = URL::asset('storage/media/'.$lesson_id.'/'.$media->id.'/'.$media->name);
+                    if(!isset($media->link)){
+                        $media->path  = URL::asset('storage/media/'.$lesson_id.'/'.$media->id.'/'.$media->name);
+                    }
                     $userid = $media->user->id;
                     $firstname = $media->user->firstname;
                     $lastname = $media->user->lastname;
@@ -184,26 +170,11 @@ class FilesController extends Controller
             }
 
             foreach ($fileSegment as $segement) {
-                $allFiles = $segement->File
-                    ->reject(function ($file) {
-                        $year = Carbon::now()->year;
-                        $month = Carbon::now()->month;
-                        $day = Carbon::now()->day;
-
-                        $from = explode('-',$file->from);
-                        $to = explode('-',$file->to);
-
-                        $start = Carbon::create($from[0], $from[1], $from[2]);
-                        $end = Carbon::create($to[0], $to[1], $to[2]);
-
-                        $checkDate = Carbon::create($year,$month,$day)->between($start, $end);
-
-                        return !$checkDate;
-                    })->where('visibility',1);
+                $allFiles = $segement->File->where('visibility',1);
 
                 foreach ($allFiles as $file) {
                     $lesson_id = $file->FileLesson->lesson_id;
-                    $file->url  = URL::asset('storage/files/'.$lesson_id.'/'.$file->id.'/'.$file->name);
+                    $file->path  = URL::asset('storage/files/'.$lesson_id.'/'.$file->id.'/'.$file->name);
 
                     $userid = $file->user->id;
                     $firstname = $file->user->firstname;
@@ -214,7 +185,7 @@ class FilesController extends Controller
                         'lastname' => $lastname
                     ]);
                     unset($file->user);
-                    unset($media->FileLesson);
+                    unset($file->FileLesson);
                     $file->owner = $user;
 
                     $FILES->push($file);
@@ -248,8 +219,7 @@ class FilesController extends Controller
                 'fileID' => 'required|integer|exists:files,id',
                 'description' => 'required|string|min:1',
                 'Imported_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-                'from' => 'required|date',
-                'to' => 'required|date|after:from',
+                'visibility' => 'required|boolean'
             ]);
 
             $file = file::find($request->fileID);
@@ -278,8 +248,7 @@ class FilesController extends Controller
             }
 
             $file->description = $request->description;
-            $file->from = $request->from;
-            $file->to = $request->to;
+            $file->visibility = $request->visibility;
             $check = $file->save();
 
             if($check){
