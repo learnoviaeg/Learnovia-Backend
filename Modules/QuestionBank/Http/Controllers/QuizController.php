@@ -19,7 +19,6 @@ class QuizController extends Controller
      * @param Request $request
      * @return Response
      */
-
     public function store(Request $request)
     {
         $request->validate([
@@ -85,104 +84,7 @@ class QuizController extends Controller
 
     // New Questions
     public function storeWithNewQuestions(Request $request){
-        $request->validate([
-            'Question' => 'nullable|array',
-            'Question.*.text' => 'required',
-            'Question.*.mark' => 'required|integer',
-            'Question.*.Question_Category_id' => 'required|exists:questions_categories,id',
-            'Question.*.Category_id' => 'required|exists:categories,id',
-            'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
-          //  'Question.*.Course_ID' => 'required|exists:courses,id',
-        ]);
-
-        $questionsIDs = collect([]);
-        if(isset($request->Question)){
-            foreach ($request->Question as $question) {
-                switch ($question['Question_Type_id']) {
-                    case 1:
-                        $request->validate([
-                            'Question.*.answers' => 'required|array',
-                            'Question.*.answers.*' => 'required|boolean',
-                            'Question.*.Is_True' => 'required|array',
-                            'Question.*.Is_True.*' => 'required|boolean',
-                        ]);
-                        break;
-                    case 2 :
-                        $request->validate([
-                            'Question.*.contents' => 'required|array',
-                            'Question.*.contents.*' => 'required|string|min:1',
-                            'Question.*.Is_True' => 'required|array',
-                            'Question.*.Is_True.*' => 'required|boolean',
-                        ]);
-                        break;
-                    case 3 :
-                        $request->validate([
-                            'Question.*.match_A' => 'required|array',
-                            'Question.*.match_A.*' => 'required',
-                            'Question.*.match_B' => 'required|array',
-                            'Question.*.match_B.*' => 'required'
-                        ]);
-                        break;
-                }
-                $cat = Questions::firstOrCreate([
-                    'text' => $question['text'],
-                    'mark' => $question['mark'],
-                    'category_id' => $question['Category_id'],
-                    'question_type_id' => $question['Question_Type_id'],
-                    'question_category_id' => $question['Question_Category_id'],
-                    'course_id' => $request->course_id,
-                ]);
-
-                $questionsIDs->push($cat->id);
-                switch ($question['Question_Type_id']) {
-                    case 1 :
-                        $is_true = 0;
-                        foreach ($question['answers'] as $answer) {
-                            QuestionsAnswer::firstOrCreate([
-                                'question_id' => $cat->id,
-                                'true_false' => $answer,
-                                'content' => null,
-                                'match_a' => null,
-                                'match_b' => null,
-                                'is_true' => $question['Is_True'][$is_true]
-                            ]);
-                            $is_true += 1;
-                        }
-                        break;
-                    case 2 :
-                        $is_true = 0;
-                        foreach ($question['contents'] as $con) {
-                            $answer = QuestionsAnswer::firstOrCreate([
-                                'question_id' => $cat->id,
-                                'true_false' => null,
-                                'content' => $con,
-                                'match_a' => null,
-                                'match_b' => null,
-                                'is_true' => $question['Is_True'][$is_true]
-                            ]);
-                            $is_true += 1;
-                        }
-                        break;
-
-                    case 3:
-                        $is_true = 0;
-                        foreach ($question['match_A'] as $index => $MA) {
-                            foreach ($question['match_B'] as $Secindex => $MP) {
-                                $answer = QuestionsAnswer::firstOrCreate([
-                                    'question_id' => $cat->id,
-                                    'true_false' => null,
-                                    'content' => null,
-                                    'match_a' => $MA,
-                                    'match_b' => $MP,
-                                    'is_true' => ($index == $Secindex) ? 1 : 0
-                                ]);
-                                $is_true += 1;
-                            }
-                        }
-                        break;
-                }
-            }
-        }
+        $questionsIDs = app('Modules\QuestionBank\Http\Controllers\QuestionBankController')->store($request,1);
         return $questionsIDs;
     }
 

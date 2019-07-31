@@ -229,8 +229,7 @@ class QuestionBankController extends Controller
 
     }
 
-    public
-    function MCQ($Question)
+    public function MCQ($Question)
     {
         $validator = Validator::make($Question, [
             'answers' => 'required|array|distinct|min:2',
@@ -335,33 +334,44 @@ class QuestionBankController extends Controller
         return $cat;
     }
 
-    public function store(Request $request)
+    public function store(Request $request,$type = 0)
     {
         $request->validate([
             'Question' => 'required|array',
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
 
         ]);
+        $re = collect([]);
         foreach ($request->Question as $question) {
             switch ($question['Question_Type_id']) {
                 case 1: // True/false
-                    $re[] = $this->TrueFalse($question);
+                    $true_false = $this->TrueFalse($question);
+                    $re->push($true_false);
                     break;
                 case 2: // MCQ
-                    $re[] = $this->MCQ($question);
+                    $mcq = $this->MCQ($question);
+                    $re->push($mcq);
                     break;
                 case 3: // Match
-                    $re[] = $this->Match($question);
+                    $match = $this->Match($question);
+                    $re->push($match);
                     break;
                 case 4: // Essay
-                    $re[] = $this->Essay($question);
+                    $essay = $this->Essay($question);
+                    $re->push($essay);
                     break;
                 case 5: // para
-                    $re[] = $this->paragraph($question);
+                    $paragraph = $this->paragraph($question);
+                    $re->push($paragraph);
                     break;
             }
         }
-        return HelperController::api_response_format(200, $re, null);
+        if($type == 0){
+            return HelperController::api_response_format(200, $re, null);
+        }
+        else{
+            return $re->pluck('id');
+        }
     }
 
     /*updateQuestion*/
