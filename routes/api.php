@@ -119,6 +119,8 @@ Route::get('install', function () {
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/delete']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/send']);
 
+        //Calendar Permission
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'calendar/get']);
 
         //Add Roles
         $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin']);
@@ -191,7 +193,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     });
     Route::post('deleteannounce', 'AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
     Route::post('announce', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
-    Route::get('calendar','CalendarController@Calendar');
+    Route::post('calendar','CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
     Route::post('comparepermissions','SpatieController@comparepermissions');
 });
 
