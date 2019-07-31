@@ -77,13 +77,18 @@ class LevelsController extends Controller
     {
         $request->validate([
             'year' => 'required|exists:academic_years,id',
-            'type' => 'required|exists:academic_types,id'
+            'type' => 'required|exists:academic_types,id',
+            'id'=>'exists:levels,id'
         ]);
         $yearType = AcademicYearType::checkRelation($request->year , $request->type);
         $levels = [];
+        if($request->filled('id')){
+            $levels=Level::find($request->id);
+        }else{
         foreach ($yearType->yearLevel as $yearLevel){
             $levels[] = $yearLevel->levels[0];
         }
+    }
         return HelperController::api_response_format(200,$levels);
     }
 }

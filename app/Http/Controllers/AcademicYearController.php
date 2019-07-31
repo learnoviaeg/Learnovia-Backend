@@ -10,18 +10,6 @@ use App\Http\Resources\Academic_Year as Academic_YearResource;
 class AcademicYearController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $year = AcademicYear::with('AC_Type')->paginate(10);
-        //$tmp = Academic_YearResource::collection($year);
-        return HelperController::api_response_format(201, $year, 'Year Created Successfully');
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
@@ -44,12 +32,21 @@ class AcademicYearController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request)
+
+    public function get(Request $request)
     {
-        $year = AcademicYear::whereId($request->id)->get();
-        if ($year)
-            return HelperController::api_response_format(200, Academic_YearResource::collection($year));
-        return HelperController::api_response_format(404, [], 'Not Found');
+        if($request->id == null)
+        {
+            $year = AcademicYear::with('AC_Type')->paginate(10);
+            return HelperController::api_response_format(201, $year);
+        }
+        else {
+                $year = AcademicYear::where('id',$request->id)->with('AC_Type')->first();
+                if($year)
+                    return HelperController::api_response_format(200 ,$year);
+                    
+                return HelperController::api_response_format(404 ,'NOT FOUND');
+        }
     }
 
     /**
