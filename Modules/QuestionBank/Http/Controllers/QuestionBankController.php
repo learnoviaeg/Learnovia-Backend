@@ -11,6 +11,8 @@ use Modules\QuestionBank\Entities\QuestionsAnswer;
 use Symfony\Component\Console\Question\Question;
 use Validator;
 use App\Http\Controllers\HelperController;
+use Modules\QuestionBank\Entities\QuestionsCategory;
+use Modules\QuestionBank\Entities\QuestionsType;
 
 class QuestionBankController extends Controller
 {
@@ -34,6 +36,8 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add-quiz-lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update-quiz-lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-types']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-categories']);
 
 
         $role = \Spatie\Permission\Models\Role::find(1);
@@ -51,6 +55,8 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/add-quiz-lesson');
         $role->givePermissionTo('quiz/update-quiz-lesson');
         $role->givePermissionTo('quiz/destroy-quiz-lesson');
+        $role->givePermissionTo('quiz/get-all-types');
+        $role->givePermissionTo('quiz/get-all-categories');
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
 
@@ -733,5 +739,13 @@ class QuestionBankController extends Controller
         ]);
 
         return HelperController::api_response_format(200, $answer, 'Question Added Successfully');
+    }
+
+    public function getAllTypes(Request $request){
+        return HelperController::api_response_format(200 , QuestionsType::all(['name' , 'id']));
+    }
+
+    public function getAllCategories(Request $request){
+        return HelperController::api_response_format(200 , QuestionsCategory::all(['name' , 'id']));
     }
 }
