@@ -20,6 +20,9 @@ class CreateFileLessonsTable extends Migration
 
             $table->unsignedBigInteger('file_id');
             $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade')->onUpdate('cascade');
+
+            $table->integer("index")->nullable();
+
             $table->timestamps();
         });
     }

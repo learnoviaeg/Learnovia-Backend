@@ -62,5 +62,11 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
     Route::post('updateMediaLink', 'MediaController@updateMediaLink')->name('updateMediaLink')->middleware('permission:link/update');
 
     /* Get All files and Media assigned to specific course segment */
-    Route::get('getFileMedia', 'FilesController@show')->name('getFileMedia')->middleware('permission:file-media/get');;
+    Route::get('getFileMedia', 'FilesController@show')->name('getFileMedia')->middleware('permission:file-media/get');
+
+    /* sortLessonFile */
+    Route::post('sortLessonFile', 'FilesController@sortLessonFile')->name('sortLessonFile')->middleware('permission:file/sort');
+
+    /* sortLessonMedia */
+    Route::post('sortLessonMedia', 'MediaController@sortLessonMedia')->name('sortLessonMedia')->middleware('permission:media/sort');
 });

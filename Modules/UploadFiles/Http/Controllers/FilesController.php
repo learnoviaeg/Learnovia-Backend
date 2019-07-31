@@ -12,6 +12,7 @@ use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
 use App\ClassLevel;
 use App\Enroll;
+use App\Lesson;
 
 
 use Illuminate\Support\Facades\Storage;
@@ -102,9 +103,19 @@ class FilesController extends Controller
                         $filesegment->save();
                     }
 
+                    $maxIndex = FileLesson::where('lesson_id',$request->lesson_id)->max('index');
+
+                    if($maxIndex == null){
+                        $newIndex = 1;
+                    }
+                    else{
+                        $newIndex = ++$maxIndex;
+                    }
+
                     $fileLesson = new FileLesson;
                     $fileLesson->lesson_id = $request->lesson_id;
                     $fileLesson->file_id = $file->id;
+                    $fileLesson->index = $newIndex;
                     $fileLesson->save();
 
                     Storage::disk('public')->putFileAs(
@@ -133,20 +144,21 @@ class FilesController extends Controller
     public function show(Request $request)
     {
         $request->validate([
-            'course_segment_id'=>'required|integer|exists:course_segments,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
 
         $MEDIA = collect([]);
         $FILES = collect([]);
 
-        $checkEnroll = checkEnroll::checkEnrollment($request->course_segment_id);
+        $lesson = Lesson::find($request->lesson_id);
+        $checkEnroll = checkEnroll::checkEnrollment($lesson->course_segment_id);
 
         if($checkEnroll == true){
-            $mediaSegment = MediaCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
-            $fileSegment = FileCourseSegment::where('course_segment_id', $request->course_segment_id)->get();
+            $mediaLessons = MediaLesson::where('lesson_id', $request->lesson_id)->orderBy('index','asc')->get();
+            $fileLessons = FileLesson::where('lesson_id', $request->lesson_id)->orderBy('index','asc')->get();
 
-            foreach ($mediaSegment as $segement) {
-                $allMedia = $segement->Media->where('visibility',1);
+            foreach ($mediaLessons as $mediaLesson) {
+                $allMedia = $mediaLesson->Media->where('visibility',1);
 
                 foreach ($allMedia as $media) {
                     $lesson_id = $media->MediaLesson->lesson_id;
@@ -169,8 +181,8 @@ class FilesController extends Controller
                 }
             }
 
-            foreach ($fileSegment as $segement) {
-                $allFiles = $segement->File->where('visibility',1);
+            foreach ($fileLessons as $fileLesson) {
+                $allFiles = $fileLesson->File->where('visibility',1);
 
                 foreach ($allFiles as $file) {
                     $lesson_id = $file->FileLesson->lesson_id;
@@ -354,5 +366,77 @@ class FilesController extends Controller
             return HelperController::api_response_format(400,null,'Please Try again');
         }
     }
+
+    public function sortLessonFile(Request $request){
+        $request->validate([
+            'file_lesson_id' => 'required|integer|exists:file_lessons,id',
+            'index'=>'required|integer'
+        ]);
+        $fileLesson = FileLesson::find($request->file_lesson_id);
+        $maxIndex = $fileLesson->max('index');
+        $minIndex = $fileLesson->min('index');
+
+        if(!($request->index <= $maxIndex && $request->index >= $minIndex)){
+            return HelperController::api_response_format(400, null,' invalid index');
+        }
+
+        $currentIndex = $fileLesson->index;
+        if($currentIndex > $request->index){
+            $this->sortDown($fileLesson,$currentIndex,$request->index);
+        }
+        else{
+            $this->sortUp($fileLesson,$currentIndex,$request->index);
+        }
+        return HelperController::api_response_format(200, null,' Successfully');
+    }
+
+    public function sortDown($fileLesson,$currentIndex,$newIndex){
+
+        $lesson_id = $fileLesson->lesson_id;
+
+        $fileLessons = FileLesson::where('lesson_id',$lesson_id)->get();
+
+        foreach ($fileLessons as $singleFileLesson ){
+            if($singleFileLesson->index < $newIndex || $singleFileLesson->index > $currentIndex ){
+                continue;
+            }
+            elseif ($singleFileLesson->index  !=  $currentIndex){
+                $singleFileLesson->update([
+                    'index'=>$singleFileLesson->index+1
+                ]);
+            }else{
+                $singleFileLesson->update([
+                    'index'=>$newIndex
+                ]);
+            }
+        }
+        return $fileLessons ;
+
+    }
+
+    public function sortUp($fileLesson,$currentIndex,$newIndex){
+
+        $lesson_id = $fileLesson->lesson_id;
+
+        $fileLessons = FileLesson::where('lesson_id',$lesson_id)->get();
+
+        foreach ($fileLessons as $singleFileLesson ){
+            if($singleFileLesson->index > $newIndex || $singleFileLesson->index < $currentIndex ){
+                continue;
+            }
+            elseif ($singleFileLesson->index  !=  $currentIndex){
+                $singleFileLesson->update([
+                    'index'=>$singleFileLesson->index-1
+                ]);
+            }else{
+                $singleFileLesson->update([
+                    'index'=>$newIndex
+                ]);
+            }
+        }
+        return $fileLessons ;
+    }
+
+
 
 }
