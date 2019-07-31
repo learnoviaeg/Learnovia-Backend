@@ -84,6 +84,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/seen']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/get-from-to']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/add-send-permission-for-role']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/mythreads']);
 
             //Notifications Permissiosns
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/get-all']);
