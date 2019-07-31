@@ -136,7 +136,7 @@ Route::get('install', function () {
 Route::post('import', 'ExcelController@import')->name('import');
 
 //Login and Signup
-Route::group(['prefix' => 'auth'], function () {
+Route::group(['prefix' => 'auth','namespace'=>'Auth','as'=>'api.auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
