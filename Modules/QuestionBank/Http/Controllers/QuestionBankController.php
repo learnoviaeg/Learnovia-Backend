@@ -14,10 +14,54 @@ use App\Http\Controllers\HelperController;
 
 class QuestionBankController extends Controller
 {
+
+    public function install_question_bank()
+    {
+        if (\Spatie\Permission\Models\Permission::whereName('question/add')->first() != null) {
+            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        }
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/update']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/get']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/delete']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/random']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add-answer']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/delete-answer']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/delete']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-quiz-with-random-questions']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add-quiz-lesson']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update-quiz-lesson']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson']);
+
+
+        $role = \Spatie\Permission\Models\Role::find(1);
+        $role->givePermissionTo('question/add');
+        $role->givePermissionTo('question/update');
+        $role->givePermissionTo('question/delete');
+        $role->givePermissionTo('question/get');
+        $role->givePermissionTo('quiz/get-quiz-with-random-questions');
+        $role->givePermissionTo('question/random');
+        $role->givePermissionTo('question/add-answer');
+        $role->givePermissionTo('question/delete-answer');
+        $role->givePermissionTo('quiz/add');
+        $role->givePermissionTo('quiz/update');
+        $role->givePermissionTo('quiz/delete');
+        $role->givePermissionTo('quiz/add-quiz-lesson');
+        $role->givePermissionTo('quiz/update-quiz-lesson');
+        $role->givePermissionTo('quiz/destroy-quiz-lesson');
+
+        return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
+
+    }
+
+
     /**
      * Display a listing of the resource.
      * @return Response
      */
+
     public function index(Request $request)
     {
         $valid = Validator::make($request->all(), [
