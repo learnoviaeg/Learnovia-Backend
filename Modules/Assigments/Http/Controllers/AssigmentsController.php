@@ -14,14 +14,34 @@ use Modules\Assigments\Entities\assignment;
 use Modules\Assigments\Entities\UserAssigment;
 class AssigmentsController extends Controller
 {
-/*
 
+    public function install_Assignment()
+    {
+        if (\Spatie\Permission\Models\Permission::whereName('assignment/add')->first() != null) {
+            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        }
 
-            add Assigment
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/add']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/update']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/submit']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/grade']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/override']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/delete']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/get']);
 
+        $role = \Spatie\Permission\Models\Role::find(1);
+        $role->givePermissionTo('assignment/add');
+        $role->givePermissionTo('assignment/update');
+        $role->givePermissionTo('assignment/submit');
+        $role->givePermissionTo('assignment/grade');
+        $role->givePermissionTo('assignment/override');
+        $role->givePermissionTo('assignment/delete');
+        $role->givePermissionTo('assignment/get');
 
-*/
+        return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
+    }
 
+    //Create assignment
     public function createAssigment(Request $request)
     {
         $request->validate([

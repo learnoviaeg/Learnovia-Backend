@@ -25,6 +25,44 @@ use Carbon\Carbon;
 class FilesController extends Controller
 {
 
+    public function install_file()
+    {
+        if (\Spatie\Permission\Models\Permission::whereName('file/add')->first() != null) {
+            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        }
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/add']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/update']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/delete']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/toggle']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file-media/get']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/add']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/update']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/sort']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/sort']);
+
+
+        $role = \Spatie\Permission\Models\Role::find(1);
+        $role->givePermissionTo('file/add');
+        $role->givePermissionTo('file/update');
+        $role->givePermissionTo('file/delete');
+        $role->givePermissionTo('file/toggle');
+        $role->givePermissionTo('media/add');
+        $role->givePermissionTo('media/update');
+        $role->givePermissionTo('media/delete');
+        $role->givePermissionTo('media/toggle');
+        $role->givePermissionTo('file-media/get');
+        $role->givePermissionTo('link/add');
+        $role->givePermissionTo('link/update');
+        $role->givePermissionTo('file/sort');
+        $role->givePermissionTo('media/sort');
+
+        return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
+    }
+
     /**
      * Store a array of files to specific course segment.
      * @param Request $request
