@@ -195,6 +195,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('announce', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
     Route::post('calendar','CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
     Route::post('comparepermissions','SpatieController@comparepermissions');
+    Route::get('test' , 'MessageController@GetMyThreads');
 });
 
 //Year Routes
@@ -324,7 +325,7 @@ Route::group(['prefix' => 'Component', 'middleware' => 'auth:api'], function () 
 });
 
 Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
-    Route::post('add', 'LessonController@AddLesson')->name('addLesson')->middleware('permission:lesson/add');
+    Route::post('add', 'LessonController@AddLesson')->name('addLesson');//->middleware('permission:lesson/add');
     Route::get('get', 'LessonController@ShowLesson')->name('showlesson')->middleware('permission:lesson/get');
     Route::post('delete', 'LessonController@deleteLesson')->name('deleteLesson')->middleware('permission:lesson/delete');
     Route::post('update', 'LessonController@updateLesson')->name('updateLesson')->middleware('permission:lesson/update');

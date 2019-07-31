@@ -251,8 +251,7 @@ class MessageController extends Controller
      *          IF NOT ->   return MSG -> 'Message Role insertion Fail'
      *
      */
-    public
-    function add_send_Permission_for_role(Request $req)
+    public function add_send_Permission_for_role(Request $req)
     {
 
         $valid = Validator::make($req->all(), [
@@ -272,5 +271,11 @@ class MessageController extends Controller
         }
         return HelperController::api_response_format(404, null, 'Message Role insertion Fail');
 
+    }
+
+    public function GetMyThreads(Request $request){
+        $messages = Message::where('From', $request->user()->id)->orWhere('To', $request->user()->id)->get();
+        $users = Message::GetMessageDetails($messages , $request->user()->id);
+        return HelperController::api_response_format(200 , $users);
     }
 }
