@@ -10,12 +10,14 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Course;
 use App\CourseSegment;
+use Auth;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\SegmentClass;
+use DB;
 
 class UserController extends Controller
 {
@@ -43,7 +45,8 @@ class UserController extends Controller
             'class_id' => 'required|array',
         ]);
         $users = collect([]);
-        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email'];
+        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
+                        'language','timezone','religion','second language'];
         $enrollOptional = 'optional';
         $teacheroptional='course';
         foreach ($request->firstname as $key => $firstname) {
@@ -122,7 +125,8 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
-        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email'];
+        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
+                        'language','timezone','religion','second language'];
         $request->validate([
             'id' => 'required|exists:users,id',
         ]);
@@ -218,7 +222,48 @@ class UserController extends Controller
             'suspend' => 0
         ]);
         return HelperController::api_response_format(201, $user, 'User Un Blocked Successfully');
-
     }
 
+    public function GetUserById(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users,id',
+        ]);
+        $user = User::find($request->id);
+        
+        return HelperController::api_response_format(201, $user, null);
+    }
+
+    public function UpdateUserPassword(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users,id',
+            'password' => 'required|string|min:8|max:191'
+        ]);
+        $user = User::find($request->id);
+        $user->update([
+            'real_password' => $request->password,
+            'password' => bcrypt($request->password)
+        ]);
+        
+        return HelperController::api_response_format(201, $user, 'User Updated Successfully');
+    }
+
+    public function Show_and_hide_real_password_with_permission(){
+
+        $user_id = Auth::user()->id;
+        $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
+        if($role_id == 1 || $role_id==2)
+        {
+            $user =User::all()->each(function($row)
+            {
+                $row->setHidden(['password']);
+            });
+            return HelperController::api_response_format(201, $user);
+        }
+        else {
+            $user = User::all();
+            return HelperController::api_response_format(201, $user);
+        }
+    } 
 }

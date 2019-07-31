@@ -27,7 +27,8 @@ class UsersImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email'];
+        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
+                        'language','timezone','religion','second language'];
         $enrollOptional = 'optional';
         $teacheroptional='course';
 
