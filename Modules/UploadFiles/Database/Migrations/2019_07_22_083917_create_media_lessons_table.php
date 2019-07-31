@@ -21,6 +21,8 @@ class CreateMediaLessonsTable extends Migration
             $table->unsignedBigInteger('media_id');
             $table->foreign('media_id')->references('id')->on('media')->onDelete('cascade')->onUpdate('cascade');
 
+            $table->integer("index")->nullable();
+
             $table->timestamps();
         });
     }

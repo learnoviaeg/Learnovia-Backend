@@ -44,6 +44,12 @@ Route::group([
         /* Get All files and Media assigned to specific course segment */
         Route::get('getFileMedia', 'FilesController@show')->name('getFileMedia');
 
+
+        /* sortLessonFile */
+        Route::post('sortLessonFile', 'FilesController@sortLessonFile')->name('sortLessonFile');
+
+        /* sortLessonMedia */
+        Route::post('sortLessonMedia', 'MediaController@sortLessonMedia')->name('sortLessonMedia');
     });
 });
 

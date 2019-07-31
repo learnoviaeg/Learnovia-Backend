@@ -104,10 +104,19 @@ class MediaController extends Controller
                         $filesegment->save();
                     }
 
+                    $maxIndex = MediaLesson::where('lesson_id',$request->lesson_id)->max('index');
+
+                    if($maxIndex == null){
+                        $newIndex = 1;
+                    }
+                    else{
+                        $newIndex = ++$maxIndex;
+                    }
 
                     $fileLesson = new MediaLesson;
                     $fileLesson->lesson_id = $request->lesson_id;
                     $fileLesson->media_id = $file->id;
+                    $fileLesson->index = $newIndex;
                     $fileLesson->save();
 
                     Storage::disk('public')->putFileAs(
@@ -345,9 +354,19 @@ class MediaController extends Controller
                     $filesegment->save();
                 }
 
+                $maxIndex = MediaLesson::where('lesson_id',$request->lesson_id)->max('index');
+
+                if($maxIndex == null){
+                    $newIndex = 1;
+                }
+                else{
+                    $newIndex = ++$maxIndex;
+                }
+
                 $fileLesson = new MediaLesson;
                 $fileLesson->lesson_id = $request->lesson_id;
                 $fileLesson->media_id = $file->id;
+                $fileLesson->index = $newIndex;
                 $fileLesson->save();
             }
 
@@ -399,5 +418,77 @@ class MediaController extends Controller
             return HelperController::api_response_format(400,null,'Please Try again');
         }
     }
+
+    public function sortLessonMedia(Request $request){
+        $request->validate([
+            'media_lesson_id' => 'required|integer|exists:media_lessons,id',
+            'index'=>'required|integer'
+        ]);
+        $mediaLesson = MediaLesson::find($request->media_lesson_id);
+        $maxIndex = $mediaLesson->max('index');
+        $minIndex = $mediaLesson->min('index');
+
+        if(!($request->index <= $maxIndex && $request->index >= $minIndex)){
+            return HelperController::api_response_format(400, null,' invalid index');
+        }
+
+        $currentIndex = $mediaLesson->index;
+        if($currentIndex > $request->index){
+            $this->sortDown($mediaLesson,$currentIndex,$request->index);
+        }
+        else{
+            $this->sortUp($mediaLesson,$currentIndex,$request->index);
+        }
+        return HelperController::api_response_format(200, null,' Successfully');
+    }
+
+    public function sortDown($mediaLesson,$currentIndex,$newIndex){
+
+        $lesson_id = $mediaLesson->lesson_id;
+
+        $MediaLessons = MediaLesson::where('lesson_id',$lesson_id)->get();
+
+        foreach ($MediaLessons as $singleMediaLesson ){
+            if($singleMediaLesson->index < $newIndex || $singleMediaLesson->index > $currentIndex ){
+                continue;
+            }
+            elseif ($singleMediaLesson->index  !=  $currentIndex){
+                $singleMediaLesson->update([
+                    'index'=>$singleMediaLesson->index+1
+                ]);
+            }else{
+                $singleMediaLesson->update([
+                    'index'=>$newIndex
+                ]);
+            }
+        }
+        return $MediaLessons ;
+
+    }
+
+    public function sortUp($mediaLesson,$currentIndex,$newIndex){
+
+        $lesson_id = $mediaLesson->lesson_id;
+
+        $MediaLessons = MediaLesson::where('lesson_id',$lesson_id)->get();
+
+        foreach ($MediaLessons as $singleMediaLesson ){
+            if($singleMediaLesson->index > $newIndex || $singleMediaLesson->index < $currentIndex ){
+                continue;
+            }
+            elseif ($singleMediaLesson->index  !=  $currentIndex){
+                $singleMediaLesson->update([
+                    'index'=>$singleMediaLesson->index-1
+                ]);
+            }else{
+                $singleMediaLesson->update([
+                    'index'=>$newIndex
+                ]);
+            }
+        }
+        return $MediaLessons ;
+    }
+
+
 
 }

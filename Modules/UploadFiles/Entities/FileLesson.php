@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class FileLesson extends Model
 {
     protected $table = 'file_lessons';
-    protected $fillable = [];
+    protected $fillable = ['index'];
     protected $hidden = ['updated_at','created_at'];
 
 
