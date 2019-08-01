@@ -18,7 +18,7 @@ class Restrict
     public function handle($request, Closure $next)
     {
         $request->validate([
-            'Course_ID' => 'required|exists:courses,id'
+            'course_id' => 'required|exists:courses,id'
         ]);
         if ($request->user() == null)
             return HelperController::api_response_format(401, [], 'User not logged in');
@@ -27,7 +27,7 @@ class Restrict
         $course_segment_ids = Enroll::where('user_id', $session_id)->where('role_id', 4)->pluck('course_segment');
         foreach ($course_segment_ids as $course_segment_id) {
             $couse_id = CourseSegment::where('id', $course_segment_id)->pluck('course_id')->first();
-            if ($couse_id == $request->Course_ID) {
+            if ($couse_id == $request->course_id) {
                 return $next($request);
             }
         }

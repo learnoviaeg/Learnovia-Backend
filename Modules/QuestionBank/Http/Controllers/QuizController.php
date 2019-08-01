@@ -187,40 +187,49 @@ class QuizController extends Controller
         return HelperController::api_response_format(200, [],'Quiz deleted Successfully');
     }
 
-    public function getQuizwithRandomQuestion(Request $request){
+    public function get(Request $request){
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
+            'shuffle' => 'integer'
         ]);
-
-        $quiz = quiz::find($request->quiz_id);
-        $shuffledQuestion = $quiz->Question->shuffle();
-        foreach($shuffledQuestion as $question){
-            if(count($question->childeren) > 0){
-                $shuffledChildQuestion = $question->childeren->shuffle();
-                unset($question->childeren);
-                $question->childeren = $shuffledChildQuestion;
-                foreach($shuffledChildQuestion as $childQuestion){
-                    $answers = $childQuestion->question_answer->shuffle();
-                    $childQuestion->answers = $answers;
-                    unset($childQuestion->question_answer);
-                    unset($childQuestion->pivot);
-                }
-            }
-            else{
-                unset($question->childeren);
-            }
-            $answers = $question->question_answer->shuffle();
-            $question->answers = $answers;
-            unset($question->question_answer);
-            unset($question->pivot);
+        if($request->shuffle == 0 )
+        {
+            $quiz = quiz::find($request->quiz_id);
+            $Questions = $quiz->Question;
+            
+            return HelperController::api_response_format(200, $Questions);
         }
-        $quiz->shuffledQuestion = $shuffledQuestion;
-        unset($quiz->Question);
+        else {
+            $quiz = quiz::find($request->quiz_id);
+            $shuffledQuestion = $quiz->Question->shuffle();
+            foreach($shuffledQuestion as $question){
+                if(count($question->childeren) > 0){
+                    $shuffledChildQuestion = $question->childeren->shuffle();
+                    unset($question->childeren);
+                    $question->childeren = $shuffledChildQuestion;
+                    foreach($shuffledChildQuestion as $childQuestion){
+                        $answers = $childQuestion->question_answer->shuffle();
+                        $childQuestion->answers = $answers;
+                        unset($childQuestion->question_answer);
+                        unset($childQuestion->pivot);
+                    }
+                }
+                else{
+                    unset($question->childeren);
+                }
+                $answers = $question->question_answer->shuffle();
+                $question->answers = $answers;
+                unset($question->question_answer);
+                unset($question->pivot);
+            }
+            $quiz->shuffledQuestion = $shuffledQuestion;
+            unset($quiz->Question);
 
-        TXPDF::AddPage();
-        TXPDF::Write(0, $quiz);
-        TXPDF::Output(Storage_path('app\public\PDF\\Quiz '.$request->quiz_id.'.pdf'), 'F');
+            TXPDF::AddPage();
+            TXPDF::Write(0, $quiz);
+            TXPDF::Output(Storage_path('app\public\PDF\\Quiz '.$request->quiz_id.'.pdf'), 'F');
 
-        return HelperController::api_response_format(200, $quiz);
+            return HelperController::api_response_format(200, $quiz);
+        }
     }
 }
