@@ -73,15 +73,15 @@ class QuestionBankController extends Controller
         $valid = Validator::make($request->all(), [
             'Question_Category_id' => 'integer|exists:questions_categories,id',
             'Category_id' => 'integer|exists:categories,id',
-            'Course_ID' => 'integer|exists:courses,id',
+            'course_id' => 'integer|exists:courses,id',
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors());
         }
 
         $questions = Questions::with('question_answer');
-        if (isset($request->Course_ID)) {
-            $questions->where('course_id', $request->Course_ID);
+        if (isset($request->course_id)) {
+            $questions->where('course_id', $request->course_id);
         }
         if (isset($request->Question_Category_id)) {
             $questions->where('question_category_id', $request->Question_Category_id);
@@ -158,7 +158,7 @@ class QuestionBankController extends Controller
             'mark' => 'required|integer|min:1',
             'Question_Category_id' => 'required|exists:questions_categories,id',
             'Category_id' => 'required|exists:categories,id',
-            'Course_ID' => 'required|exists:courses,id',
+            'course_id' => 'required|exists:courses,id',
             'parent' => 'integer|exists:questions,id',
 
         ]);
@@ -184,7 +184,7 @@ class QuestionBankController extends Controller
             'parent' => (isset($Question['parent']) && $Question['Question_Type_id'] != 5) ? $Question['parent'] : null,
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
-            'course_id' => $Question['Course_ID'],
+            'course_id' => $Question['course_id'],
         ]);
 
         $Questions->push($cat);
@@ -201,7 +201,7 @@ class QuestionBankController extends Controller
             'mark' => 'required|integer|min:1',
             'Question_Category_id' => 'required|exists:questions_categories,id',
             'Category_id' => 'required|exists:categories,id',
-            'Course_ID' => 'required|exists:courses,id',
+            'course_id' => 'required|exists:courses,id',
             'parent' => 'integer|exists:questions,id',
 
         ]);
@@ -228,7 +228,7 @@ class QuestionBankController extends Controller
             'category_id' => $Question['Category_id'],
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
-            'course_id' => $Question['Course_ID'],
+            'course_id' => $Question['course_id'],
         ]);
         $Questions->push($cat);
         return $cat;
