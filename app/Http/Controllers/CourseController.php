@@ -119,7 +119,6 @@ class CourseController extends Controller
                 continue;
             $courses[$i] = $enroll->CourseSegment->courses[0];
             $courses[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
-            $courses[$i]['lessons'] = $enroll->CourseSegment->lessons;
         }
         return HelperController::api_response_format(200, $courses);
     }
@@ -135,7 +134,6 @@ class CourseController extends Controller
             if($check!=null)
             {
                 $seggg[]=$check;
-
             }
         }
         $CourseSeg=array();
