@@ -57,7 +57,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     });
 
     //Calendar Route
-    Route::post('calendar','CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
+    Route::post('calendar','CalendarController@Calendar');//->name('calendar')->middleware('permission:calendar/get');
     Route::post('comparepermissions','SpatieController@comparepermissions');
 
     //Import Excel Route
