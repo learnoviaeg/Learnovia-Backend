@@ -29,7 +29,7 @@ class CourseSegment extends Model
 
     public static function getidfromcourse($course_id)
     {
-        return self::where('course_id', $course_id)->pluck('id')->first();
+        return self::where('course_id', $course_id)->pluck('id');
     }
 
     public static function getActive_segmentfromcourse($course_id)

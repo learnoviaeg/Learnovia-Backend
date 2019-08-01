@@ -65,10 +65,43 @@ class AnnouncementController extends Controller
             ]);
 
             $class_level_id=ClassLevel::GetClassLevel($request->class_id);
-            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
-            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
-            $users=Enroll::Get_User_ID($course_segment_id);
-            $noti=User::find($users);
+            $segmeny_class_id=array();
+            foreach($class_level_id as $cl)
+            {
+                $segmeny_class_id[]=SegmentClass::GetClasseLevel($cl);
+            }
+
+            $course_segment_id=array();
+            foreach($segmeny_class_id as $sc)
+            {
+                $course_segment_id[]=CourseSegment::GetCourseSegmentId($sc);
+            }
+
+            $users=collect([]);
+            foreach($course_segment_id as $cs)
+            {
+                foreach($cs as $c)
+                {
+                    $users->push(Enroll::Get_User_ID($c));
+                }
+            }
+
+            $uniq=collect([]);
+            foreach($users as $u)
+            {
+                foreach($u as $un)
+                {
+                    $uniq->push($un);
+                }
+            }
+            $usersid=array();
+            $usersid=$uniq->unique();
+
+            $noti=array();
+            foreach($usersid as $id)
+            {
+                $noti[]=User::find($id);
+            }
             Notification::send($noti, new Announcment($request));
 
         }
@@ -79,8 +112,27 @@ class AnnouncementController extends Controller
             ]);
 
             $course_segment=CourseSegment::getidfromcourse($request->course_id);
-            $users=Enroll::Get_User_ID($course_segment);
-            $noti=User::find($users);
+            $users=collect([]);
+            foreach($course_segment as $cs)
+            {
+                $users->push(Enroll::Get_User_ID($cs));
+            }
+            $uniq=collect([]);
+            foreach($users as $u)
+            {
+                foreach($u as $un)
+                {
+                    $uniq->push($un);
+                }
+            }
+            $usersid=array();
+            $usersid=$uniq->unique();
+
+            $noti=array();
+            foreach($usersid as $id)
+            {
+                $noti[]=User::find($id);
+            }
             Notification::send($noti, new Announcment($request));
 
         }
@@ -91,13 +143,54 @@ class AnnouncementController extends Controller
             ]);
 
             $Year_level_id=YearLevel::GetYearLevelId($request->level_id);
-            $class_level_id=ClassLevel::GetClassLevelid($Year_level_id);
-            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
-            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
-            $users=Enroll::Get_User_ID($course_segment_id);
-            $noti=User::find($users);
-            Notification::send($noti, new Announcment($request));
 
+            $class_level_id=array();
+            foreach($Year_level_id as $yl)
+            {
+                $class_level_id[]=ClassLevel::GetClassLevelid($Year_level_id);
+            }
+
+            $segmeny_class_id=array();
+            foreach($class_level_id as $cl)
+            {
+                foreach($cl as $c)
+                {
+                    $segmeny_class_id[]=SegmentClass::GetClasseLevel($c);
+                }
+            }
+
+            $course_segment_id=array();
+            foreach($segmeny_class_id as $sc)
+            {
+                $course_segment_id[]=CourseSegment::GetCourseSegmentId($sc);
+            }
+
+            $users=collect([]);
+            foreach($course_segment_id as $cs)
+            {
+                foreach($cs as $c)
+                {
+                    $users->push(Enroll::Get_User_ID($c));
+                }
+            }
+
+            $uniq=collect([]);
+            foreach($users as $u)
+            {
+                foreach($u as $un)
+                {
+                    $uniq->push($un);
+                }
+            }
+            $usersid=array();
+            $usersid=$uniq->unique();
+
+            $noti=array();
+            foreach($usersid as $id)
+            {
+                $noti[]=User::find($id);
+            }
+            Notification::send($noti, new Announcment($request));
         }
         else if ($request->assign == 'year')
         {
@@ -106,14 +199,66 @@ class AnnouncementController extends Controller
             ]);
 
             $academic_year_type_id=AcademicYearType::get_yaer_type_by_year($request->year_id);
-            $Year_level_id=YearLevel::get_year_level_id($academic_year_type_id);
-            $class_level_id=ClassLevel::GetClassLevelid($Year_level_id);
-            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
-            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
-            $users=Enroll::Get_User_ID($course_segment_id);
-            $noti=User::find($users);
-            Notification::send($noti, new Announcment($request));
 
+            $Year_level_id=array();
+            foreach($academic_year_type_id as $ay)
+            {
+                $Year_level_id[]=YearLevel::get_year_level_id($ay);
+            }
+
+            $class_level_id=array();
+            foreach($Year_level_id as $yl)
+            {
+                foreach($yl as $y)
+                {
+                    $class_level_id[]=ClassLevel::GetClassLevelid($y);
+                }
+            }
+
+            $segmeny_class_id=array();
+            foreach($class_level_id as $cl)
+            {
+                foreach($cl as $c)
+                {
+                    $segmeny_class_id[]=SegmentClass::GetClasseLevel($c);
+                }
+            }
+
+            $course_segment_id=array();
+            foreach($segmeny_class_id as $sc)
+            {
+                foreach($sc as $s)
+                {
+                    $course_segment_id[]=CourseSegment::GetCourseSegmentId($s);
+                }
+            }
+
+            $users=collect([]);
+            foreach($course_segment_id as $cs)
+            {
+                foreach($cs as $c)
+                {
+                    $users->push(Enroll::Get_User_ID($c));
+                }
+            }
+
+            $uniq=collect([]);
+            foreach($users as $u)
+            {
+                foreach($u as $un)
+                {
+                    $uniq->push($un);
+                }
+            }
+            $usersid=array();
+            $usersid=$uniq->unique();
+
+            $noti=array();
+            foreach($usersid as $id)
+            {
+                $noti[]=User::find($id);
+            }
+            Notification::send($noti, new Announcment($request));
         }
         else if ($request->assign == 'type')
         {
@@ -122,12 +267,65 @@ class AnnouncementController extends Controller
             ]);
 
             $academic_year_type_id=AcademicYearType::get_yaer_type_by_type($request->type_id);
-            $Year_level_id=YearLevel::get_year_level_id($academic_year_type_id);
-            $class_level_id=ClassLevel::GetClassLevelid($Year_level_id);
-            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
-            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
-            $users=Enroll::Get_User_ID($course_segment_id);
-            $noti=User::find($users);
+
+            $Year_level_id=array();
+            foreach($academic_year_type_id as $ay)
+            {
+                $Year_level_id[]=YearLevel::get_year_level_id($ay);
+            }
+
+            $class_level_id=array();
+            foreach($Year_level_id as $yl)
+            {
+                foreach($yl as $y)
+                {
+                    $class_level_id[]=ClassLevel::GetClassLevelid($y);
+                }
+            }
+
+            $segmeny_class_id=array();
+            foreach($class_level_id as $cl)
+            {
+                foreach($cl as $c)
+                {
+                    $segmeny_class_id[]=SegmentClass::GetClasseLevel($c);
+                }
+            }
+
+            $course_segment_id=array();
+            foreach($segmeny_class_id as $sc)
+            {
+                foreach($sc as $s)
+                {
+                    $course_segment_id[]=CourseSegment::GetCourseSegmentId($s);
+                }
+            }
+
+            $users=collect([]);
+            foreach($course_segment_id as $cs)
+            {
+                foreach($cs as $c)
+                {
+                    $users->push(Enroll::Get_User_ID($c));
+                }
+            }
+
+            $uniq=collect([]);
+            foreach($users as $u)
+            {
+                foreach($u as $un)
+                {
+                    $uniq->push($un);
+                }
+            }
+            $usersid=array();
+            $usersid=$uniq->unique();
+
+            $noti=array();
+            foreach($usersid as $id)
+            {
+                $noti[]=User::find($id);
+            }
             Notification::send($noti, new Announcment($request));
 
         }
