@@ -33,7 +33,6 @@ class QuizController extends Controller
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
         ]);
-
         if($request->type == 0 ){ // new or new
             $newQuestionsIDs = $this->storeWithNewQuestions($request);
             $oldQuestionsIDs = $this->storeWithOldQuestions($request);
@@ -46,7 +45,6 @@ class QuizController extends Controller
             $quiz = quiz::create([
                 'name' => $request->name,
                 'course_id' => $request->course_id,
-
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
@@ -62,11 +60,8 @@ class QuizController extends Controller
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
             ]);
-
             $quiz->Question()->attach($questionsIDs);
-
             $quiz->Question;
-
             foreach($quiz->Question as $question){
                 unset($question->pivot);
                 $question->category;

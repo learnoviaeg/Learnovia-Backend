@@ -151,7 +151,7 @@ class QuestionBankController extends Controller
      * @return: MSG => Question Created Successfully
      */
     public static function CreateOrFirstQuestion($Question)
-    {  // dd($Question);
+    {
         $valid = Validator::make($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
@@ -164,7 +164,6 @@ class QuestionBankController extends Controller
         ]);
 
         if ($valid->fails()) {
-            //    dd($valid->errors());
             return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
         }
 
@@ -252,7 +251,6 @@ class QuestionBankController extends Controller
         }
 
         $cat = $this::CreateOrFirstQuestion($Question);
-        //dd($cat);
         if (isset($cat->id)) {
             $is_true = 0;
             $Trues = null;
@@ -300,7 +298,9 @@ class QuestionBankController extends Controller
         $ansA = QuestionsAnswer::where('question_id', $id)->pluck('content')->toArray();
         $result = array_diff($Question['answers'], $ansA);
         if ($result == null) {
-            return HelperController::api_response_format(400, null, ' Sorry this Question is exist');
+            $questionn = Questions:: where('id', $id)->first();
+
+            return $questionn;
         }
         $cat = $this::CreateQuestion($Question);
         if (isset($cat->id)) {
@@ -346,9 +346,10 @@ class QuestionBankController extends Controller
         $resultA = array_diff($Question['match_A'], $ansA);
         $ansB = QuestionsAnswer::where('question_id', $id)->pluck('match_B')->toArray();
         $resultB = array_diff($Question['match_B'], $ansB);
-        // dd($resultA == null && $resultB == null);
         if ($resultA == null && $resultB == null) {
-            return HelperController::api_response_format(400, null, ' Sorry this Question is exist');
+            $questionRe = Questions:: where('id', $id)->first();
+
+            return $questionRe;
         }
         $cat = $this::CreateQuestion($Question);
         if (isset($cat->id)) {
@@ -580,7 +581,6 @@ class QuestionBankController extends Controller
 
         $question = $this->updateQuestion($request);
         $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
-        //dd(count($answers));
         if (count($request->match_A) * count($request->match_B) == count($answers)) {
             $count = 0;
 
