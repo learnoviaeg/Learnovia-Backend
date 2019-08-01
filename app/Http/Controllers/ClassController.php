@@ -16,11 +16,20 @@ class ClassController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $class = Classes::paginate(10);
+        $request->validate([
+            'year'  => 'required|exists:academic_years,id',
+            'type'  => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+        ]);
+        $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
+        $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
+        $class =[];
+        foreach ($yearlevel->classLevels as $classLevel){
+            $class[] = $classLevel->classes[0];
+        }
         return HelperController::api_response_format(200, $class);
-        //return Classs::collection($class);
     }
 
     /**
@@ -44,20 +53,22 @@ class ClassController extends Controller
     {
         $request->validate([
             'name'  => 'required',
-            'year'  => 'required|exists:academic_years,id',
-            'type'  => 'required|exists:academic_types,id',
-            'level' => 'required|exists:levels,id',
+            'year'  => 'exists:academic_years,id',
+            'type'  => 'exists:academic_types,id|required_with:year',
+            'level' => 'exists:levels,id|required_with:year',
         ]);
 
         $class = Classes::create([
             'name' => $request->name,
         ]);
-        $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
-        $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
-        ClassLevel::create([
-            'year_level_id' => $yearlevel->id,
-            'class_id' => $class->id
-        ]);
+        if($request->filled('year')){
+            $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
+            $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
+            ClassLevel::create([
+                'year_level_id' => $yearlevel->id,
+                'class_id' => $class->id
+            ]);
+        }
         return HelperController::api_response_format(200, new  Classs($class), 'Class Created Successfully');
     }
 

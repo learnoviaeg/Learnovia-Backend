@@ -15,18 +15,20 @@ class LevelsController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'year' => 'required|exists:academic_years,id',
-            'type' => 'required|exists:academic_types,id',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
         ]);
 
         $level = Level::create([
             'name' => $request->name,
         ]);
-        $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
-        YearLevel::create([
-            'academic_year_type_id' => $yeartype->id,
-            'level_id' => $level->id,
-        ]);
+        if($request->filled('year')){
+            $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
+            YearLevel::create([
+                'academic_year_type_id' => $yeartype->id,
+                'level_id' => $level->id,
+            ]);
+        }
         return HelperController::api_response_format(201, $level, 'Level Created Successfully');
     }
 
@@ -74,8 +76,19 @@ class LevelsController extends Controller
     public function GetAllLevelsInYear(Request $request)
     {
         $request->validate([
-            'year' => 'required|exists:academic_year_types,id'
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'id'=>'exists:levels,id'
         ]);
-        return HelperController::api_response_format(200, Level::whereIn('id', Level::GetAllLevelsInYear($request->year))->get());
+        $yearType = AcademicYearType::checkRelation($request->year , $request->type);
+        $levels = [];
+        if($request->filled('id')){
+            $levels=Level::find($request->id);
+        }else{
+        foreach ($yearType->yearLevel as $yearLevel){
+            $levels[] = $yearLevel->levels[0];
+        }
+    }
+        return HelperController::api_response_format(200,$levels);
     }
 }

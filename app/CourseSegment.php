@@ -15,6 +15,12 @@ class CourseSegment extends Model
         return $check;
     }
 
+    public static function GetCourseSegmentId($segment_class_id)
+    {
+        $check = self::where('segment_class_id', $segment_class_id)->pluck('id');
+        return $check;
+    }
+
     public static function GetCoursesBysegment_class($user_id)
     {
         $check = self::where('segment_class_id', $user_id);
@@ -26,9 +32,19 @@ class CourseSegment extends Model
         return self::where('course_id', $course_id)->pluck('id')->first();
     }
 
+    public static function getActive_segmentfromcourse($course_id)
+    {
+        return self::where('course_id', $course_id)->where('is_active','1')->pluck('id')->first();
+    }
+
     public function courses()
     {
         return $this->hasMany('App\Course', 'id', 'course_id');
+    }
+
+    public function users()
+    {
+        return $this->hasMany('App\User');
     }
 
     public function segmentClasses()
@@ -53,7 +69,19 @@ class CourseSegment extends Model
         return $courseSegment;
     }
 
+
+
+    // public static function Get_lessons_from_CourseSegmentID($id){
+    //     $CourseSegment=self::where('id',$id)->first();
+    //     $lessons=$CourseSegment->courseSegment->lessons;
+    //     return $lessons;
+
+
+    // }
+
     protected $hidden = [
         'created_at', 'updated_at'
     ];
+
+
 }

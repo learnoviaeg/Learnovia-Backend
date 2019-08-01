@@ -9,6 +9,7 @@ use Excel;
 use App\Imports\EnrollImport;
 use App\Enroll;
 use Carbon\Carbon;
+use App\ClassLevel;
 use App\CourseSegment;
 use App\SegmentClass;
 use DB;
@@ -97,17 +98,13 @@ class EnrollUserToCourseController extends Controller
         $user_id=User::FindByName($request->username)->id;
         $users =Enroll::GetCourseSegment($user_id);
         $courseID=array();
-             foreach($users as $test){
-                $courseID[] = CourseSegment::GetCoursesByCourseSegment($test)->pluck('course_id')->first();
-            };
+        foreach($users as $test){
+            $courseID[] = CourseSegment::GetCoursesByCourseSegment($test)->pluck('course_id')->first();
+        };
 
         return HelperController::api_response_format(200, $courseID, 'The Courses Registerd is');
 
     }
-
-
-
-
 
     public static function EnrollInAllMandatoryCourses(Request $request)
     {
@@ -116,7 +113,7 @@ class EnrollUserToCourseController extends Controller
             'username' => 'required|exists:users,username',
             'start_date' => 'required|before:end_date|after:'.Carbon::now(),
             'end_date' => 'required|after:'.Carbon::now(),
-            'SegmentClassId' => 'required|exists:course_segments,id'
+            'SegmentClassId' => 'required|exists:course_segments,segment_class_id'
         ]);
 
 
@@ -151,16 +148,63 @@ class EnrollUserToCourseController extends Controller
     }
 
     public function EnrollExistUsersFromExcel(Request $request){
-
         $ExcelCntrlVar = new ExcelController();
         $ExcelCntrlVar->import($request);
-
     }
 
     public function AddAndEnrollBulkOfNewUsers(Request $request){
-
         $ExcelCntrlVar = new ExcelController();
         $ExcelCntrlVar->import($request);
+    }
+
+    public function GetEnrolledStudents(Request $request){
+
+        $request->validate([
+            'course_id' => 'required|exists:courses,id'
+        ]);
+
+        if($request->class_id == null){
+            $course_seg_id=CourseSegment::getidfromcourse($request->course_id);
+
+            $users_id=Enroll::GetUsers_id($course_seg_id);
+
+            foreach ($users_id as $users) {
+                $UsersIds[] = User::findOrFail($users);
+            }
+            //return all users that enrolled in this course
+            return HelperController::api_response_format(200, $UsersIds, 'students are ... ');
+        }
+
+        //if was send class_id and course_id
+        else {
+            $request->validate([
+                'class_id' => 'required|exists:classes,id'
+            ]);
+
+            $course_seg_id=CourseSegment::getidfromcourse($request->course_id);
+
+            $users_id=Enroll::GetUsers_id($course_seg_id);
+
+            foreach ($users_id as $users) {
+                $UsersIds[] = User::findOrFail($users);
+            }
+
+            //$usersByClass is an array that have all users in this class
+            $usersByClass=User::GetUsersByClass_id($request->class_id);
+
+            foreach ($usersByClass as $users) {
+                $UsersClassIds[] = User::findOrFail($users);
+            }
+
+            // $result is an array of users enrolled this course in this class
+            $result= array_intersect($usersByClass->toArray(), $users_id->toArray()) ;
+
+            foreach ($result as $users) {
+                $Usersenrolled[] = User::findOrFail($users);
+            }
+
+            return HelperController::api_response_format(200, $Usersenrolled, 'students are ... ');
+        }
 
     }
 }

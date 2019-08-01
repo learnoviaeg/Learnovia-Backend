@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Questions extends Model
 {
-    protected $fillable = ['text','mark','category_id','question_type_id','question_category_id','course_id'];
+    protected $fillable = ['text','mark','parent','And_why','And_why_mark','category_id','question_type_id','question_category_id','course_id'];
     protected $hidden = [
         'created_at', 'updated_at','course_id','category_id','question_type_id','question_category_id'
     ];
@@ -34,6 +34,11 @@ class Questions extends Model
     public function question_answer()
     {
         return $this->hasMany('Modules\QuestionBank\Entities\QuestionsAnswer', 'question_id', 'id');
+    }
+
+    public function childeren()
+    {
+        return $this->hasMany('Modules\QuestionBank\Entities\Questions', 'parent', 'id');
     }
 
 

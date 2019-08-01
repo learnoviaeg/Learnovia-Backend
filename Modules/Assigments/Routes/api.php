@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Http\Request;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
+
+Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function () {
+
+    //install Assignments Routes
+    Route::get('install','AssigmentsController@install_Assignment');
+
+    //Assignment Routes
+    Route::post('create', 'AssigmentsController@createAssigment')->middleware('permission:assignment/add');
+    Route::post('update', 'AssigmentsController@ubdateAssigment')->middleware('permission:assignment/update');
+    Route::post('submit', 'AssigmentsController@submitAssigment')->middleware('permission:assignment/submit');
+    Route::post('grade', 'AssigmentsController@gradeAssigment')->middleware('permission:assignment/grade');
+    Route::post('override', 'AssigmentsController@override')->middleware('permission:assignment/override');
+    Route::post('delete', 'AssigmentsController@deleteAssigment')->middleware('permission:assignment/delete');
+    Route::post('GetAssignment','AssigmentsController@GetAssignment')->middleware('permission:assignment/get');
+
+});

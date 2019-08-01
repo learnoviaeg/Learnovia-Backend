@@ -32,6 +32,10 @@ class CreateUsersTable extends Migration
             $table->boolean('suspend')->default('0');
             $table->string('password');
             $table->string('real_password');
+            $table->string('language')->nullable();
+            $table->string('timezone')->nullable();
+            $table->string('religion')->nullable();
+            $table->string('second language')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

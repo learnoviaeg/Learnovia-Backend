@@ -19,6 +19,7 @@ class CreateSegmentClassesTable extends Migration
             $table->foreign('segment_id')->references('id')->on('segments')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('class_level_id');
             $table->foreign('class_level_id')->references('id')->on('class_levels')->onDelete('cascade')->onUpdate('cascade');
+            $table->boolean('is_active')->default(0);
             $table->timestamps();
         });
     }

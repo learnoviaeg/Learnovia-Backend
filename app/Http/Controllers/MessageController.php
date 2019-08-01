@@ -64,7 +64,6 @@ class MessageController extends Controller
                                 'deleted' => 0,
                                 'To' => $userId,
                                 'file' => uniqid() . File::extension($req->file->getClientOriginalName()),
-
                             ));
                             $is_send = true;
                             break;
@@ -228,23 +227,21 @@ class MessageController extends Controller
     public
     function ViewAllMSG_from_to(Request $req)
     {
+        $req->validate([
+            'id' => 'required|exists:users,id'
+        ]);
         $session_id = Auth::User()->id;
         $check = Message::where('From', $req->id)->orWhere('To', $req->id)->first();
         if ($check) {
-            $req->validate([
-                'id' => 'required|integer',
-            ]);
-
             $messages = Message::where(function ($query) use ($req, $session_id) {
                 $query->where('From', $req->id)->orWhere('To', $req->id);
             })->where(function ($query) use ($session_id) {
                 $query->where('From', $session_id)->orWhere('To', $session_id);
             })->get();
             $msg = MessageFromToResource::collection($messages);
-
-
-            return HelperController::api_response_format(201, $msg);
+            return HelperController::api_response_format(200, $msg);
         }
+        return HelperController::api_response_format(200, [], 'No Messages to this user');
     }
 
     /**
@@ -254,8 +251,7 @@ class MessageController extends Controller
      *          IF NOT ->   return MSG -> 'Message Role insertion Fail'
      *
      */
-    public
-    function add_send_Permission_for_role(Request $req)
+    public function add_send_Permission_for_role(Request $req)
     {
 
         $valid = Validator::make($req->all(), [
@@ -275,5 +271,11 @@ class MessageController extends Controller
         }
         return HelperController::api_response_format(404, null, 'Message Role insertion Fail');
 
+    }
+
+    public function GetMyThreads(Request $request){
+        $messages = Message::where('From', $request->user()->id)->orWhere('To', $request->user()->id)->get();
+        $users = Message::GetMessageDetails($messages , $request->user()->id);
+        return HelperController::api_response_format(200 , $users);
     }
 }

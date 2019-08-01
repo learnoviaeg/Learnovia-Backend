@@ -2,38 +2,36 @@
 
 use Illuminate\Http\Request;
 
-Route::get('installQuestionBank', function () {
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get All Questions']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Question']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Get Random Questions For Course']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Update Question']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Delete Question Answer']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add New Answer']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'Add New Questions']);
-});
 
-Route::group([
-    'prefix' => 'auth'
-], function () {
+Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
-    Route::group([
-      'middleware' => 'auth:api'
-    ], function() {
-        Route::get('getQuestions', 'QuestionBankController@index')->middleware('Get All Questions');
-        Route::post('deleteQuestion', 'QuestionBankController@destroy')->middleware('Delete Question');
-        Route::get('getRandomQuestion', 'QuestionBankController@getRandomQuestion')->middleware('Get Random Questions For Course');
-        Route::post('updateQuestion', 'QuestionBankController@update')->middleware('Update Question');
-        Route::post('deleteAnswer', 'QuestionBankController@deleteAnswer')->middleware('Delete Question Answer');
-        Route::post('addAnswer', 'QuestionBankController@addAnswer')->middleware('Add New Answer');
-        Route::post('storeQuestions', 'QuestionBankController@store')->middleware('Add New Questions');
+    //Install Question Bank
+    Route::get('install','QuestionBankController@install_question_bank');
 
-        Route::post('storeQuiz', 'QuizController@store');
-        Route::post('deleteQuiz', 'QuizController@destroy');
-        Route::post('updateQuiz', 'QuizController@update');
-
+    //Add/Update Question and Quiz
+    Route::group(['middleware' => ['store_question']], function () {
+        Route::post('storeQuestions', 'QuestionBankController@store')->middleware('permission:question/add');
+        Route::post('updateQuestion', 'QuestionBankController@update')->middleware('permission:question/update');
+        Route::post('storeQuiz', 'QuizController@store')->middleware('permission:quiz/add');
+        Route::post('updateQuiz', 'QuizController@update')->middleware('permission:quiz/update');
     });
+
+    //Question Routes
+    Route::get('getQuestions', 'QuestionBankController@index')->middleware('permission:question/get');
+    Route::post('deleteQuestion', 'QuestionBankController@destroy')->middleware('permission:question/delete');
+    Route::get('getRandomQuestion', 'QuestionBankController@getRandomQuestion')->middleware('permission:question/random');
+    Route::post('deleteAnswer', 'QuestionBankController@deleteAnswer')->middleware('permission:question/delete-answer');
+    Route::post('addAnswer', 'QuestionBankController@addAnswer')->middleware('permission:question/add-answer');
+
+    //Quiz Routes
+    Route::post('deleteQuiz', 'QuizController@destroy')->middleware('permission:quiz/delete');
+    Route::get('getQuiz', 'QuizController@getQuizwithRandomQuestion')->middleware('permission:quiz/get-quiz-with-random-questions');
+
+    //Quiz Lesson Routes
+    Route::post('addQuizLesson', 'QuizLessonController@store')->middleware('permission:quiz/add-quiz-lesson');
+    Route::post('updateQuizLesson', 'QuizLessonController@update')->middleware('permission:quiz/update-quiz-lesson');
+    Route::post('deleteQuizLesson', 'QuizLessonController@destroy')->middleware('permission:quiz/destroy-quiz-lesson');
+    Route::get('types' , 'QuestionBankController@getAllTypes');//->middleware('permission:quiz/get-all-types');
+    Route::get('categories' , 'QuestionBankController@getAllCategories');//->middleware('permission:quiz/get-all-categories');
 });
-
-
-?>
 

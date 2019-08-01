@@ -20,8 +20,6 @@ class CreateFilesTable extends Migration
             $table->string('size');
             $table->string('type');
             $table->boolean('visibility')->default(1);
-            $table->date('from');
-            $table->date('to');
 
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');

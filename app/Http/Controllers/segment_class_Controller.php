@@ -10,6 +10,7 @@ use Validator;
 use App\SegmentClass;
 use App\Segment;
 use App\Http\Resources\Segment_class_resource;
+use App\AcademicType;
 
 class segment_class_Controller extends Controller
 
@@ -21,9 +22,40 @@ class segment_class_Controller extends Controller
      * @return : response of all Classes with its Segments
      *
      */
-    public function List_Classes_with_all_segment()
+    public function List_Classes_with_segments(Request $request)
     {
-        return HelperController::api_response_format(200, Segment::with('Segment_class')->get());
+        $request->validate([
+            'year'  => 'required|exists:academic_years,id',
+            'type'  => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+        ]);
+        if($request->id == null)
+        {
+            $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
+            $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
+            $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
+            $segments = [];
+            foreach ($classLevel->segmentClass as $segmentClass){
+                $segments[] = $segmentClass->segments[0];
+            }
+            return HelperController::api_response_format(200, $segments);
+        }
+        else {
+            $request->validate([
+                'id'  => 'exists:academic_years,id',
+            ]);
+            $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
+            $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
+            $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
+            $segments = [];
+            foreach ($classLevel->segmentClass as $segmentClass){
+                $segments[] = $segmentClass->segments[0];
+            }
+            $segmentsdd = collect($segments);
+            $test= $segmentsdd->where('id',$request->id);
+            return HelperController::api_response_format(200, $test);
+        }
     }
 
     /**
@@ -49,15 +81,21 @@ class segment_class_Controller extends Controller
             return HelperController::api_response_format(400, $valid->errors());
         }
 
-        $segment = Segment::create([
-            'name' => $req->name
-        ]);
         $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
         $yearlevel = YearLevel::checkRelation($yeartype->id, $req->level);
         $classLevel = ClassLevel::checkRelation($req->class, $yearlevel->id);
+        $type = AcademicType::find($req->type);
+        $count = SegmentClass::whereClass_level_id($classLevel->id)->count();
+        if($count >= $type->segment_no){
+            return HelperController::api_response_format(200 , null , 'This class has its all segments before');
+        }
+        $segment = Segment::create([
+            'name' => $req->name
+        ]);
+
         SegmentClass::create([
             'class_level_id' => $classLevel->id,
-            'segment_id' => $segment->id
+            'segment_id' => $segment->id,
         ]);
 
         if ($segment) {

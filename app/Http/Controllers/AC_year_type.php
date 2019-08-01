@@ -17,10 +17,25 @@ class AC_year_type extends Controller
      * @return : response of all Years with its Typs
      *
      */
-    public function List_Years_with_types()
+
+    public function List_Years_with_types(Request $request)
     {
-        $cat = Year_type_resource::collection(AcademicYear::with("AC_type")->get());
-        return HelperController::api_response_format(200, $cat);
+        $request->validate([
+            'year' => 'required|exists:academic_years,id'
+        ]);
+
+        if($request->id != null)
+        {
+            $request->validate([
+                'id' => 'exists:academic_types,id'
+            ]);
+            $cat = AcademicType::where('id',$request->id)->first();
+            return HelperController::api_response_format(200, $cat);
+        }
+        else {
+            $cat = AcademicYear::whereId($request->year)->first()->AC_Type;
+            return HelperController::api_response_format(200, $cat);
+        }
     }
 
     /**
@@ -57,7 +72,7 @@ class AC_year_type extends Controller
         $valid = Validator::make($req->all(), [
             'name' => 'required',
             'segment_no' => 'required',
-            'year' => 'required|exists:academic_years,id'
+            'year' => 'exists:academic_years,id'
         ]);
 
         if ($valid->fails()) {
@@ -67,12 +82,14 @@ class AC_year_type extends Controller
             'name' => $req->name,
             'segment_no' => $req->segment_no
         ]);
-        AcademicYearType::create([
-            'academic_year_id' => $req->year,
-            'academic_type_id' => $Ac->id
-        ]);
+        if($req->filled('year')){
+            AcademicYearType::create([
+                'academic_year_id' => $req->year,
+                'academic_type_id' => $Ac->id
+            ]);
+        }
         if ($Ac) {
-            return HelperController::api_response_format(200, $this->List_Years_with_types());
+            return HelperController::api_response_format(200, $Ac);
         }
         return HelperController::api_response_format(404, [], 'Type insertion Fail');
     }
@@ -141,7 +158,7 @@ class AC_year_type extends Controller
                 'academic_type_id' => $req->id_type
 
             ]);
-            return HelperController::api_response_format(200, $this->List_Years_with_types());
+            return HelperController::api_response_format(200, $ac);
         }
         return HelperController::api_response_format(400, [], 'Assignment Fail');
     }
