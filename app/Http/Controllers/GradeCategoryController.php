@@ -37,9 +37,9 @@ class GradeCategoryController extends Controller
     public function GetGradeCategory(Request $request)
     {
         if($request->filled('id')){
-            $gradeCategory=GradeCategory::with('ParentCategory')->where('id',$request->id)->first();}
+            $gradeCategory=GradeCategory::with('Child')->where('id',$request->id)->first();}
             else{
-            $gradeCategory=GradeCategory::with('ParentCategory')->get();}
+            $gradeCategory=GradeCategory::with('Child')->get();}
         return HelperController::api_response_format(200, $gradeCategory);
 
     }
@@ -85,5 +85,10 @@ class GradeCategoryController extends Controller
         ]);
         return HelperController::api_response_format(200, $GardeCategory,'Grade Category is moved successfully');
 
+    }
+    public function GetCategoriesFromCourseSegments(Request $request){
+     $grade=CourseSegment::GradeCategoryPerSegmentbyId($request->id);
+     return $grade;
+   
     }
 }
