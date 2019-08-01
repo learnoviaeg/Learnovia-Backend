@@ -92,155 +92,40 @@ class CourseController extends Controller
 
     public function get(Request $request)
     {
+
         $request->validate([
             'id' => 'exists:courses,id',
-            'type'=>'nullable|in:category,year,type,level,class,segment'
+            'category_id' => 'nullable|exists:categories,id',
+            'year_id' => 'nullable|exists:academic_years,id',
+            'type_id' => 'nullable|exists:academic_types,id',
+            'level_id' => 'nullable|exists:levels,id',
+            'class_id' => 'nullable|exists:classes,id',
+            'segment_id' => 'nullable|exists:segments,id',
         ]);
         if (isset($request->id))
         {
             return HelperController::api_response_format(200, Course::with('category')->whereId($request->id)->first());
         }
-        else if($request->type == 'category')
+        else if(isset($request->category_id))
         {
-            $request->validate([
-                'category_id'=>'required|exists:categories,id',
-            ]);
-
             $courses=Course::where('category_id',$request->category_id)->get();
-
             return HelperController::api_response_format(200, $courses);
         }
-        else if($request->type == 'year')
-        {
-            $request->validate([
-                'year_id'=>'required|exists:academic_years,id',
-            ]);
-
-            $course=array();
-            $course[]=CourseController::get_course_by_year_type($request->type,$request->year_id);
-            return HelperController::api_response_format(200, $course);
-
-        }
-        else if($request->type == 'type')
-        {
-            $request->validate([
-                'type_id'=>'required|exists:academic_types,id',
-            ]);
-
-            $course=array();
-            $course[]=CourseController::get_course_by_year_type($request->type,$request->type_id);
-            return HelperController::api_response_format(200, $course);
-        }
-        else if($request->type == 'level')
-        {
-            $request->validate([
-                'level_id'=>'required|exists:levels,id',
-            ]);
-
-            $year_level=YearLevel::where('level_id',$request->level_id)->get('id');
-
-            $class_level=array();
-            foreach ($year_level as $year)
-            {
-                $class_level[]=ClassLevel::where('year_level_id',$year->id)->pluck('id');
-            }
-
-            $segment_class=array();
-            foreach ($class_level as $class)
-            {
-                foreach($class as $c)
-                {
-                    $segment_class[]=SegmentClass::where('class_level_id',$c)->pluck('id');
-                }
-            }
-
-            $course_id=array();
-            foreach ($segment_class as $segment)
-            {
-                foreach($segment as $s)
-                {
-                    $course_id[]=CourseSegment::where('segment_class_id',$s)->pluck('course_id');
-                }
-            }
-
-            $course=collect([]);
-            foreach ($course_id as $cour)
-            {
-                foreach($cour as $cc)
-                {
-                    $course->push(Course::where('id',$cc)->get());
-                }
-            }
-            $typeyearcourse=array();
-            $typeyearcourse[]= $course->unique();
-            return HelperController::api_response_format(200, $typeyearcourse);
-
-        }
-        else if($request->type == 'class')
-        {
-            $request->validate([
-                'class_id'=>'required|exists:classes,id',
-            ]);
-
-            $class_level=ClassLevel::where('class_id',$request->class_id)->get('id');
-
-            $segment_class=array();
-            foreach ($class_level as $class)
-            {
-                 $segment_class[]=SegmentClass::where('class_level_id',$class->id)->pluck('id');
-            }
-
-            $course_id=array();
-            foreach ($segment_class as $segment)
-            {
-                foreach($segment as $s)
-                {
-                    $course_id[]=CourseSegment::where('segment_class_id',$s)->pluck('course_id');
-                }
-            }
-
-            $course=collect([]);
-            foreach ($course_id as $cour)
-            {
-                foreach($cour as $cc)
-                {
-                    $course->push(Course::where('id',$cc)->get());
-                }
-            }
-            $typeyearcourse=array();
-            $typeyearcourse[]= $course->unique();
-            return HelperController::api_response_format(200, $typeyearcourse);
-        }
-        else if($request->type == 'segment')
-        {
-            $request->validate([
-                'segment_id'=>'required|exists:segments,id',
-            ]);
-
-            $segment_class=SegmentClass::where('segment_id',$request->segment_id)->pluck('id');
-
-
-            $course_id=array();
-            foreach ($segment_class as $segment)
-            {
-                $course_id[]=CourseSegment::where('segment_class_id',$segment)->pluck('course_id');
-            }
-
-            $course=collect([]);
-            foreach ($course_id as $cour)
-            {
-                foreach($cour as $cc)
-                {
-                    $course->push(Course::where('id',$cc)->get());
-                }
-            }
-            $typeyearcourse=array();
-            $typeyearcourse[]= $course->unique();
-            return HelperController::api_response_format(200, $typeyearcourse);
-
-        }
         else {
-            return HelperController::api_response_format(200, Course::with('category')->get());
+            $course= CourseController::get_course_by_year_type($request);
+            if(!isset($course))
+            {
+                return HelperController::api_response_format(200, Course::with('category')->get());
+            }
+            else
+            {
+                $returncourse=array();
+                foreach($course as $cc)
+                {
+                    $returncourse[]=Course::where('id',$cc)->first();
+                }
+                return HelperController::api_response_format(200, $returncourse);
+            }
         }
     }
 
@@ -315,61 +200,116 @@ class CourseController extends Controller
     }
 
 
-    public function get_course_by_year_type($type,$id)
+    public function get_course_by_year_type(Request $request)
     {
 
-        if($type == 'type')
+        $academic_year_type=array();
+        $academic_year_type=null;
+        if(isset($request->type_id) && !isset($request->year_id))
         {
-            $academic_year_type=AcademicYearType::where('academic_type_id',$id)->get('id');
+            $academic_year_type[]=AcademicYearType::where('academic_type_id',$request->type_id)->pluck('id');
         }
-        else if($type == 'year')
+        else if(!isset($request->type_id) && isset($request->year_id))
         {
-            $academic_year_type=AcademicYearType::where('academic_year_id',$id)->get('id');
+            $academic_year_type[]=AcademicYearType::where('academic_year_id',$request->year_id)->pluck('id');
         }
+        else if(isset($request->type_id) && isset($request->year_id))
+        {
+            $academic_year_type[] = AcademicYearType::checkRelation($request->year_id, $request->type_id)->id;
+        }
+        return CourseController::get_year_level($request,$academic_year_type);
 
-        $year_level=array();
-        foreach($academic_year_type as $type)
-        {
-            $year_level[]=YearLevel::where('academic_year_type_id',$type->id)->pluck('id');
-        }
-
-        $class_level=array();
-        foreach ($year_level as $year)
-        {
-            foreach($year as $y)
-            {
-                $class_level[]=ClassLevel::where('year_level_id',$y)->pluck('id');
-            }
-        }
-
-        $segment_class=array();
-        foreach ($class_level as $class)
-        {
-            foreach($class as $c)
-            {
-                $segment_class[]=SegmentClass::where('class_level_id',$c)->pluck('id');
-            }
-        }
-
-        $course_id=array();
-        foreach ($segment_class as $segment)
-        {
-            foreach($segment as $s)
-            {
-                $course_id[]=CourseSegment::where('segment_class_id',$s)->pluck('course_id');
-            }
-        }
-
-        $course=collect([]);
-        foreach ($course_id as $cour)
-        {
-            foreach($cour as $cc)
-            {
-                $course->push(Course::where('id',$cc)->get());
-            }
-        }
-        $typeyearcourse=array();
-        $typeyearcourse[]= $course->unique();
-        return $typeyearcourse;
     }
+
+    public static function get_year_level(Request $request ,$academic_year_type)
+    {
+        $year_level=array();
+        $year_level=null;
+        if(isset($request->level_id) && !isset($academic_year_type))
+        {
+            $year_level[]=YearLevel::where('level_id',$request->level_id)->pluck('id');
+        }
+        else if(!isset($request->level_id) && isset($academic_year_type))
+        {
+            foreach($academic_year_type as $ac)
+            {
+                $year_level[]=YearLevel::where('academic_year_type_id',$ac)->pluck('id');
+            }
+        }
+        else if(isset($request->level_id) && isset($academic_year_type))
+        {
+            foreach($academic_year_type as $ac)
+            {
+                $year_level[]=YearLevel::checkRelation($ac,$request->level_id)->id;
+            }
+        }
+
+        return CourseController::get_class_level($request,$year_level);
+    }
+
+    public static function get_class_level(Request $request ,$year_level)
+    {
+        $class_level=array();
+        $class_level=null;
+        if(isset($request->class_id) && !isset($year_level))
+        {
+            $class_level[]=ClassLevel::where('class_id',$request->class_id)->pluck('id');
+        }
+        else if(!isset($request->class_id) && isset($year_level))
+        {
+            foreach($year_level as $ac)
+            {
+                $class_level[]=ClassLevel::where('year_level_id',$ac)->pluck('id');
+            }
+        }
+        else if(isset($request->class_id) && isset($year_level))
+        {
+            foreach($year_level as $ac)
+            {
+                $class_level[]=ClassLevel::checkRelation($request->class_id,$ac)->id;
+            }
+        }
+        return CourseController::get_segment_class_level($request,$class_level);
+    }
+
+    public static function get_segment_class_level(Request $request ,$class_level)
+    {
+        $segment_class=array();
+        $segment_class=null;
+        if(isset($request->segment_id) && !isset($class_level))
+        {
+            $segment_class[]=SegmentClass::where('segment_id',$request->segment_id)->pluck('id');
+        }
+        else if(!isset($request->segment_id) && isset($class_level))
+        {
+            foreach($class_level as $ac)
+            {
+                $segment_class[]=SegmentClass::where('class_level_id',$ac)->pluck('id');
+            }
+        }
+        else if(isset($request->segment_id) && isset($class_level))
+        {
+            foreach($class_level as $ac)
+            {
+                $segment_class[]=SegmentClass::checkRelation($ac,$request->segment_id)->id;
+            }
+        }
+
+        return CourseController::get_course_segment_level($segment_class);
+    }
+
+    public static function get_course_segment_level($segment_class)
+    {
+        $course_segment=array();
+        $course_segment=null;
+        if(isset($segment_class))
+        {
+            foreach ($segment_class as $sc)
+            {
+                $course_segment[]=CourseSegment::where('segment_class_id',$sc)->pluck('course_id');
+            }
+        }
+        return $course_segment;
+    }
+
 }
