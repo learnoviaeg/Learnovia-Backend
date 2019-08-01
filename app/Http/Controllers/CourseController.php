@@ -112,11 +112,13 @@ class CourseController extends Controller
 
     public function MyCourses(Request $request)
     {
+        $i = 0 ;
         $courses = [];
         foreach ($request->user()->enroll as $enroll) {
             if(in_array($enroll->CourseSegment->courses[0] , $courses))
                 continue;
-            $courses[] = $enroll->CourseSegment->courses[0];
+            $courses[$i] = $enroll->CourseSegment->courses[0];
+            $courses[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
         }
         return HelperController::api_response_format(200, $courses);
     }

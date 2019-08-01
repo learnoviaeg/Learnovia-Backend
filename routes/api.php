@@ -8,9 +8,6 @@ header("Access-Control-Allow-Credentials:true");
 //install all permissions and roles of system Route
 Route::get('install','SpatieController@install');
 
-//Import Excel Route
-Route::post('import', 'ExcelController@import')->name('import');
-
 //Login and Signup
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
@@ -62,7 +59,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     //Calendar Route
     Route::post('calendar','CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
     Route::post('comparepermissions','SpatieController@comparepermissions');
-    Route::get('test' , 'MessageController@GetMyThreads');
+
+    //Import Excel Route
+    Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:calendar/get');
 });
 
 //Year Routes
