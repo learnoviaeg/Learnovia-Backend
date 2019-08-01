@@ -189,10 +189,11 @@ class QuizController extends Controller
 
     public function get(Request $request){
         $request->validate([
-            'quiz_id' => 'required|integer|exists:quizzes,id',
-            'shuffle' => 'integer'
+            'quiz_id' => 'required|integer|exists:quizzes,id'
         ]);
-        if($request->shuffle == 0 )
+        $quiz = Quiz::where('id',$request->quiz_id)->pluck('shuffle');
+
+        if($quiz == '0' )
         {
             $quiz = quiz::find($request->quiz_id);
             $Questions = $quiz->Question;
@@ -225,9 +226,9 @@ class QuizController extends Controller
             $quiz->shuffledQuestion = $shuffledQuestion;
             unset($quiz->Question);
 
-            TXPDF::AddPage();
-            TXPDF::Write(0, $quiz);
-            TXPDF::Output(Storage_path('app\public\PDF\\Quiz '.$request->quiz_id.'.pdf'), 'F');
+            // TXPDF::AddPage();
+            // TXPDF::Write(0, $quiz);
+            // TXPDF::Output(Storage_path('app\public\PDF\\Quiz '.$request->quiz_id.'.pdf'), 'F');
 
             return HelperController::api_response_format(200, $quiz);
         }
