@@ -193,7 +193,7 @@ class QuizController extends Controller
         ]);
         $quiz = Quiz::where('id',$request->quiz_id)->pluck('shuffle');
 
-        if($quiz == '0' )
+        if($quiz == 0 )
         {
             $quiz = quiz::find($request->quiz_id);
             $Questions = $quiz->Question;

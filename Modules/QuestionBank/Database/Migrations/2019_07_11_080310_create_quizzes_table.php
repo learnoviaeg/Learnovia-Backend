@@ -26,7 +26,7 @@ class CreateQuizzesTable extends Migration
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 
-            $table->string('Shuffle')->default(0);
+            $table->integer('Shuffle')->default(0);
 
             $table->timestamps();
         });
