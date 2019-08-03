@@ -254,12 +254,7 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
         }
 
-<<<<<<< HEAD
         $cat = $this::CreateOrFirstQuestion($Question);
-=======
-        $cat = $this::CreateOrFirstQuestion($Question,$parent);
-        //dd($cat);
->>>>>>> remotes/origin/subquestions
         if (isset($cat->id)) {
             $is_true = 0;
             $Trues = null;
@@ -307,15 +302,8 @@ class QuestionBankController extends Controller
 
         $result = array_diff($Question['answers'], $ansA);
         if ($result == null) {
-<<<<<<< HEAD
             $questionn = Questions:: where('id', $id)->first();
-
             return $questionn;
-=======
-            $question = Questions:: where('id', $id)->first();
-
-            return $question;
->>>>>>> remotes/origin/subquestions
         }
         $cat = $this::CreateQuestion($Question,$parent);
         if (isset($cat->id)) {
@@ -365,12 +353,7 @@ class QuestionBankController extends Controller
             $questionRe = Questions:: where('id', $id)->first();
             return $questionRe;
         }
-<<<<<<< HEAD
-
         $cat = $this::CreateQuestion($Question);
-=======
-        $cat = $this::CreateQuestion($Question,$parent);
->>>>>>> remotes/origin/subquestions
         if (isset($cat->id)) {
             $is_true = 0;
             foreach ($Question['match_A'] as $index => $MA) {
@@ -700,13 +683,8 @@ class QuestionBankController extends Controller
 
         }
 
-
-<<<<<<< HEAD
         $question = $this->updateQuestion($request);
         $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
-=======
-        //dd(count($answers));
->>>>>>> remotes/origin/subquestions
         if (count($request->match_A) * count($request->match_B) == count($answers)) {
             $count = 0;
 
