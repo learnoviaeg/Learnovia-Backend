@@ -197,7 +197,9 @@ class QuizController extends Controller
         {
             $quiz = quiz::find($request->quiz_id);
             $Questions = $quiz->Question;
-
+            foreach($Questions as $Question){
+                $Question->question_answer->shuffle();
+            }
             return HelperController::api_response_format(200, $Questions);
         }
         else {
