@@ -32,6 +32,7 @@ class QuizController extends Controller
                 */
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
+            'suffle' => 'boolean'
         ]);
 
         if($request->type == 0 ){ // new or new
@@ -50,6 +51,7 @@ class QuizController extends Controller
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
+                'Shuffle' => quiz::checkSuffle($request),
             ]);
             return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
         }
@@ -61,6 +63,7 @@ class QuizController extends Controller
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
+                'Shuffle' => quiz::checkSuffle($request),
             ]);
             $quiz->Question()->attach($questionsIDs);
             $quiz->Question;
