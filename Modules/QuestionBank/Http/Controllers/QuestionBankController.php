@@ -91,10 +91,14 @@ class QuestionBankController extends Controller
             $questions->where('category_id', $request->Category_id);
 
         }
-        $Questions = $questions->get();
-
-        $Questions = $this->QuestionData($Questions);
-
+        $Questions = $questions->with('childeren')->get();
+        $question=array();
+        foreach ($Questions as $ques){
+            if($ques->parent==null){
+                array_push($question,$ques);
+            }
+        }
+        $Questions = $this->QuestionData($question);
         return HelperController::api_response_format(200, $Questions);
     }
 
@@ -181,7 +185,7 @@ class QuestionBankController extends Controller
             'And_why' => ($Question['Question_Type_id'] == 1) ? $Question['And_why'] : null,
             'And_why_mark' => ($Question['Question_Type_id'] == 1 && $Question['And_why'] == 1) ? $Question['And_why_mark'] : null,
             'category_id' => $Question['Category_id'],
-            'parent' => (isset($Question['parent']) && $Question['Question_Type_id'] != 5) ? $Question['parent'] : null,
+            'parent' => $parent,
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
             'course_id' => $Question['course_id'],
@@ -191,7 +195,7 @@ class QuestionBankController extends Controller
         return $cat;
     }
 
-    public static function CreateQuestion($Question)
+    public static function CreateQuestion($Question,$parent=null)
     {
 
         $valid = Validator::make($Question, [
@@ -222,7 +226,7 @@ class QuestionBankController extends Controller
         $cat = Questions::Create([
             'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
             'mark' => $Question['mark'],
-            'parent' => (isset($Question['parent']) && $Question['Question_Type_id'] != 5) ? $Question['parent'] : null,
+            'parent' => $parent,
             'And_why' => ($Question['Question_Type_id'] == 1) ? $Question['And_why'] : null,
             'And_why_mark' => ($Question['Question_Type_id'] == 1 && $Question['And_why'] == 1) ? $Question['And_why_mark'] : null,
             'category_id' => $Question['Category_id'],
@@ -235,7 +239,7 @@ class QuestionBankController extends Controller
 
     }
 
-    public function TrueFalse($Question)
+    public function TrueFalse($Question,$parent)
     {
         $validator = Validator::make($Question, [
             'answers' => 'required|array|distinct|min:2|max:2',
@@ -250,7 +254,12 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
         }
 
+<<<<<<< HEAD
         $cat = $this::CreateOrFirstQuestion($Question);
+=======
+        $cat = $this::CreateOrFirstQuestion($Question,$parent);
+        //dd($cat);
+>>>>>>> remotes/origin/subquestions
         if (isset($cat->id)) {
             $is_true = 0;
             $Trues = null;
@@ -277,7 +286,7 @@ class QuestionBankController extends Controller
 
     }
 
-    public function MCQ($Question)
+    public function MCQ($Question,$parent)
     {
         $validator = Validator::make($Question, [
             'answers' => 'required|array|distinct|min:2',
@@ -286,23 +295,29 @@ class QuestionBankController extends Controller
             'text' => 'required|string'
 
         ]);
-
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
         }
         if ($Question['Is_True'] > count($Question['answers']) - 1) {
             return HelperController::api_response_format(400, null, 'is True invalid');
-
         }
         $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
+      //  dd($id);
         $ansA = QuestionsAnswer::where('question_id', $id)->pluck('content')->toArray();
+
         $result = array_diff($Question['answers'], $ansA);
         if ($result == null) {
+<<<<<<< HEAD
             $questionn = Questions:: where('id', $id)->first();
 
             return $questionn;
+=======
+            $question = Questions:: where('id', $id)->first();
+
+            return $question;
+>>>>>>> remotes/origin/subquestions
         }
-        $cat = $this::CreateQuestion($Question);
+        $cat = $this::CreateQuestion($Question,$parent);
         if (isset($cat->id)) {
 
             $is_true = 0;
@@ -327,7 +342,7 @@ class QuestionBankController extends Controller
         return $cat;
     }
 
-    public function Match($Question)
+    public function Match($Question,$parent)
     {
         $validator = Validator::make($Question, [
             'match_A' => 'required|array|min:2|distinct',
@@ -350,10 +365,13 @@ class QuestionBankController extends Controller
             $questionRe = Questions:: where('id', $id)->first();
             return $questionRe;
         }
+<<<<<<< HEAD
 
         $cat = $this::CreateQuestion($Question);
+=======
+        $cat = $this::CreateQuestion($Question,$parent);
+>>>>>>> remotes/origin/subquestions
         if (isset($cat->id)) {
-
             $is_true = 0;
             foreach ($Question['match_A'] as $index => $MA) {
                 foreach ($Question['match_B'] as $Secindex => $MP) {
@@ -373,17 +391,47 @@ class QuestionBankController extends Controller
         return $cat;
     }
 
-    public function Essay($Question)
+    public function Essay($Question,$parent)
     {
-        $cat = $this::CreateOrFirstQuestion($Question);
+        $cat = $this::CreateOrFirstQuestion($Question,$parent);
         return $cat;
     }
 
     public function paragraph($Question)
     {
-        $cat = $this->CreateOrFirstQuestion($Question);
+        $validator = Validator::make($Question, [
+            'subQuestions' => 'required|array|distinct'/*|min:2*/,
+            'subQuestions.*' => 'required|distinct',
+            'subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+        ]);
+        if ($validator->fails()) {
+            return HelperController::api_response_format(400, $validator->errors());
+        }
 
-        return $cat;
+        $cat = $this->CreateOrFirstQuestion($Question);
+        $re = collect([]);
+            foreach ($Question['subQuestions'] as $subQuestion) {
+                switch ($subQuestion['Question_Type_id']) {
+                    case 1: // True/false
+                        $true_false = $this->TrueFalse($subQuestion, $cat->id);
+                        $re->push($true_false);
+                        break;
+                    case 2: // MCQ
+                        $mcq = $this->MCQ($subQuestion, $cat->id);
+                        $re->push($mcq);
+                        break;
+                    case 3: // Match
+//                        dd($subQuestion);
+                        $match = $this->Match($subQuestion, $cat->id);
+                        $re->push($match);
+                        break;
+                    case 4: // Essay
+                        $essay = $this->Essay($subQuestion, $cat->id);
+                        $re->push($essay);
+                        break;
+            }
+        }
+            return $cat;
     }
 
     public function store(Request $request,$type = 0)
@@ -393,33 +441,42 @@ class QuestionBankController extends Controller
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
 
         ]);
+
         $re = collect([]);
         foreach ($request->Question as $question) {
 
             switch ($question['Question_Type_id']) {
                 case 1: // True/false
-                    $true_false = $this->TrueFalse($question);
+                    $true_false = $this->TrueFalse($question,null);
                     $re->push($true_false);
                     break;
                 case 2: // MCQ
-                    $mcq = $this->MCQ($question);
+                    $mcq = $this->MCQ($question,null);
                     $re->push($mcq);
                     break;
                 case 3: // Match
-                    $match = $this->Match($question);
+                    $match = $this->Match($question,null);
                     $re->push($match);
                     break;
                 case 4: // Essay
-                    $essay = $this->Essay($question);
+                    $essay = $this->Essay($question,null);
                     $re->push($essay);
                     break;
                 case 5: // para
                     $paragraph = $this->paragraph($question);
+                    $paragraph->childeren;
                     $re->push($paragraph);
                     break;
             }
         }
         if($type == 0){
+         /*   $questiones=array();
+            foreach ($re as $questions){
+                foreach ($questions as $question){
+                    if($question['parent']==null){
+                    array_push($questiones,$question);
+                }
+            }}*/
             return HelperController::api_response_format(200, $re, null);
         }
         else{
@@ -433,7 +490,6 @@ class QuestionBankController extends Controller
         $request->validate([
             'question_id' => 'required|integer|exists:questions,id',
             'mark' => 'required|integer|min:1',
-            //'text' => 'string|min:1',
             'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'required|integer|exists:questions_categories,id',
             'parent' => 'integer|exists:questions,id',
@@ -446,12 +502,14 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, null, 'this is not valid parent');
         }
         $question = Questions::find($request->question_id);
+        //dd($question);
 
         if ($question->question_type_id != 3) {
             $request->validate([
                 'text' => 'required|string|min:1',
             ]);
         }
+
         $question->update([
             'text' => ($request->text == null) ? "Match the correct Answer" : $request->text,
             'mark' => $request->mark,
@@ -465,11 +523,42 @@ class QuestionBankController extends Controller
         return $question;
     }
 
-    public function updateTrueFalse($request)
+    public function updatesubQuestion($squestion, $parent=null,$Question_Type_id=null)
     {
+        $validator = Validator::make($squestion->all(), [
+            'mark' => 'required|integer|min:1',
+            'category_id' => 'required|integer|exists:categories,id',
+            'question_category_id' => 'required|integer|exists:questions_categories,id',
+        ]);
+        if ($validator->fails()) {
+            return HelperController::api_response_format(400, $validator->errors());
+        }
 
+
+        $question_id = Questions::where('parent', $parent)->where('question_type_id', $Question_Type_id)->pluck('id')->first();
+        $question = Questions::find($question_id);
+
+        if ($question->question_type_id != 3) {
+            $squestion->validate([
+                'text' => 'required|string|min:1',
+            ]);
+        }
+        $question->update([
+            'text' => ($squestion['text'] == null) ? "Match the correct Answer" : $squestion['text'],
+            'mark' =>$squestion['mark'],
+            'category_id' => $squestion['category_id'],
+            'parent' => $parent,
+            'question_category_id' => $squestion['question_category_id'],
+            'And_why' => ($Question_Type_id== 1) ? $squestion['And_why'] : null,
+            'And_why_mark' => Questions::CheckAndWhy($squestion),
+        ]);
+
+        return $question;
+    }
+
+    public function updateTrueFalse($request, $parent,$Question_Type_id)
+    {
         $request->validate([
-
             'answers' => 'required|array|distinct|min:2|max:2',
             'answers.*' => 'required|boolean|distinct',
             'Is_True' => 'required|boolean',
@@ -478,8 +567,18 @@ class QuestionBankController extends Controller
         ]);
 
 
-        $question = $this->updateQuestion($request);
-        $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
+
+        if ($parent==null){
+            $question = $this->updateQuestion($request,$parent);
+            $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
+
+        }
+        else {
+            $question = $this->updatesubQuestion($request,$parent,$Question_Type_id);
+            // dd($question);
+            $answers = QuestionsAnswer::where('question_id', $question->id)->get();
+
+        }
         $is_true = 0;
         $Trues = null;
         foreach ($answers as $answer) {
@@ -495,20 +594,29 @@ class QuestionBankController extends Controller
             ]);
             $is_true += 1;
         }
-        return "success";
+        // $question = $this->updateQuestion($request,$parent);
 
+        return "success";
     }
 
-    public function updateMCQ($request)
+    public function updateMCQ($request,$parent,$Question_Type_id)
     {
         $request->validate([
             'answers' => 'required|array|min:2|distinct',
             'answers.*' => 'required|string|min:1',
             'Is_True' => 'required|integer|min:0|max:{$count(answers)-1}',
         ]);
-        //if()
-        $question = $this->updateQuestion($request);
-        $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
+        if ($parent==null){
+            $question = $this->updateQuestion($request,$parent);
+            $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
+
+        }
+        else {
+            $question = $this->updatesubQuestion($request,$parent,$Question_Type_id);
+            // dd($question);
+            $answers = QuestionsAnswer::where('question_id', $question->id)->get();
+
+        }
         if (count($request->answers) >= count($answers)) {
             $is_true = 0;
             $Trues = null;
@@ -568,7 +676,7 @@ class QuestionBankController extends Controller
         return "success";
     }
 
-    public function updateMatch($request)
+    public function updateMatch($request,$parent,$Question_Type_id)
     {
         $request->validate([
             'match_A' => 'required|array|min:2|distinct',
@@ -580,9 +688,25 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
         }
 
+        if ($parent==null){
+            $question = $this->updateQuestion($request,$parent);
+            $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
 
+        }
+        else {
+            $question = $this->updatesubQuestion($request,$parent,$Question_Type_id);
+            // dd($question);
+            $answers = QuestionsAnswer::where('question_id', $question->id)->get();
+
+        }
+
+
+<<<<<<< HEAD
         $question = $this->updateQuestion($request);
         $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
+=======
+        //dd(count($answers));
+>>>>>>> remotes/origin/subquestions
         if (count($request->match_A) * count($request->match_B) == count($answers)) {
             $count = 0;
 
@@ -654,38 +778,65 @@ class QuestionBankController extends Controller
 
     }
 
-    public function updateEssay($request)
+    public function updateEssay($request,$parent,$Question_Type_id)
     {
-        $question = $this->updateQuestion($request);
+        if ($parent==null){
+            $question = $this->updateQuestion($request,$parent, $Question_Type_id);}
+        else {
+            $question = $this->updatesubQuestion($request,$parent,$Question_Type_id);
+            // dd($question);
+        }
 
         return "updated sucess";
     }
 
     public function updateparagraph($request)
     {
-        $question = $this->updateQuestion($request);
+        $request->validate([
+            'subQuestions' => 'required|array|distinct',//|min:2',
+            'subQuestions.*' => 'required|distinct',
+            'subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
 
+        ]);
+        $question = $this->updateQuestion($request);
+        foreach ($request->subQuestions as $subQuestion) {
+            // print_r($subQuestion);
+            $subQuestion = new Request($subQuestion);
+            switch ($subQuestion->Question_Type_id) {
+                case 1: // True/false
+                    //dd($subQuestion->Question_Type_id);
+                    $re[] = $this->updateTrueFalse($subQuestion,$question->id,$subQuestion->Question_Type_id);
+                    break;
+                case 2: // MCQ
+                    $re[] = $this->updateMCQ($subQuestion,$question->id,$subQuestion->Question_Type_id);
+                    break;
+                case 3: // Match
+                    $re[] = $this->updateMatch($subQuestion,$question->id,$subQuestion['Question_Type_id']);
+                    break;
+                case 4: // Essay
+                    $re[] = $this->updateEssay($subQuestion,$question->id,$subQuestion->Question_Type_id);
+                    break;
+            }
+        }
         return "updated sucess";
     }
-
-    public
-    function update(Request $request)
+    public function update(Request $request)
     {
-    $request->validate([
-         'question_id' => 'required|integer|exists:questions,id',]);
+        $request->validate([
+            'question_id' => 'required|integer|exists:questions,id',]);
         $Question = Questions::find($request->question_id);
         switch ($Question->question_type_id) {
             case 1: // True/false
-                $re[] = $this->updateTrueFalse($request);
+                $re[] = $this->updateTrueFalse($request,null,null);
                 break;
             case 2: // MCQ
-                $re[] = $this->updateMCQ($request);
+                $re[] = $this->updateMCQ($request,null , null);
                 break;
             case 3: // Match
-                $re[] = $this->updateMatch($request);
+                $re[] = $this->updateMatch($request,null,null);
                 break;
             case 4: // Essay
-                $re[] = $this->updateEssay($request);
+                $re[] = $this->updateEssay($request,null , null);
                 break;
             case 5: // para
                 $re[] = $this->updateparagraph($request);
@@ -694,8 +845,6 @@ class QuestionBankController extends Controller
         }
         return HelperController::api_response_format(200, $re, null);
     }
-
-    /*end update*/
 
 
     public function destroy(Request $request)

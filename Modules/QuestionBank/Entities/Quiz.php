@@ -21,8 +21,8 @@ class quiz extends Model
     }
 
     public static function checkSuffle($request){
-        if(isset($request->suffle)){
-            return $request->suffle;
+        if(isset($request->shuffle)){
+            return $request->shuffle;
         }
         return 0 ;
     }

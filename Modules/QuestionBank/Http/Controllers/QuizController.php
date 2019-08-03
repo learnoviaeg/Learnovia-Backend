@@ -32,7 +32,7 @@ class QuizController extends Controller
                 */
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
-            'suffle' => 'boolean'
+            'shuffle' => 'boolean'
         ]);
 
         if($request->type == 0 ){ // new or new

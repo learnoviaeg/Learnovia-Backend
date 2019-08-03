@@ -41,6 +41,13 @@ class Questions extends Model
         return $this->hasMany('Modules\QuestionBank\Entities\Questions', 'parent', 'id');
     }
 
-
-
+    public static function CheckAndWhy($squestion){
+        if(isset($squestion->And_why))
+        {
+            if($squestion->And_why == 1){
+                return $squestion->And_why_mark;
+            }
+        }
+        return null ;
+    }
 }
