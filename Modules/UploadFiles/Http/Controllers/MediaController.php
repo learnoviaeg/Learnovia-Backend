@@ -46,7 +46,6 @@ class MediaController extends Controller
                 'class_level' => 'required|array',
                 'class_level.*' => 'required|integer|exists:class_levels,id',
                 'lesson_id'=>'required|integer|exists:lessons,id',
-                'visibility' => 'required|boolean',
             ]);
 
             // activeCourseSgement
@@ -91,7 +90,7 @@ class MediaController extends Controller
                 $file->name = $name;
                 $file->description = $description;
                 $file->size = $size;
-                $file->visibility = $request->visibility;
+                $file->visibility = 0;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
 
@@ -126,7 +125,9 @@ class MediaController extends Controller
                     );
                 }
             }
-
+                        // Notfiy all selected Role_id to the teachers
+                        $NotifyEnrollment = checkEnroll::userNotifyEnrollment($request->lesson_id);
+                        
             return HelperController::api_response_format(200,null,'Upload Successfully');
         }catch (Exception $ex){
             return HelperController::api_response_format(400,null,'Please Try again');
@@ -151,7 +152,6 @@ class MediaController extends Controller
                 'mediaId' => 'required|integer|exists:media,id',
                 'description' => 'required|string|min:1',
                 'Imported_file' => 'nullable|file|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
-                'visibility' => 'required|boolean'
             ]);
 
             $file = media::find($request->mediaId);
@@ -180,7 +180,6 @@ class MediaController extends Controller
             }
 
             $file->description = $request->description;
-            $file->visibility = $request->visibility;
             $check = $file->save();
 
             if($check){
@@ -295,7 +294,6 @@ class MediaController extends Controller
                 'class_level' => 'required|array',
                 'class_level.*' => 'required|integer|exists:class_levels,id',
                 'lesson_id'=>'required|integer|exists:lessons,id',
-                'visibility' => 'required|boolean',
             ]);
 
             $avaiableHosts = collect([
@@ -340,7 +338,7 @@ class MediaController extends Controller
             $file = new media;
             $file->name = $request->name;
             $file->description = $request->description;
-            $file->visibility = $request->visibility;
+            $file->visibility = 0;
             $file->link = $request->url;
             $file->user_id = Auth::user()->id;
             $check = $file->save();

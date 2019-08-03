@@ -1,12 +1,16 @@
 <?php
 
 namespace App;
-
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 
 class Enroll extends Model
 {
+    use Notifiable;
+
+
     protected $fillable = ['user_id', 'username', 'course_segment', 'role_id', 'start_date', 'end_date'];
 
     public static function getroleid($user_id, $course_segment)

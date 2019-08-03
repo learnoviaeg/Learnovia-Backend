@@ -56,6 +56,11 @@ class CourseSegment extends Model
     {
         return $this->hasMany('App\Lesson')->orderBy('index');
     }
+    
+    public function enrolls()
+    {
+        return $this->hasMany('App\Enroll' ,'course_segment', 'id');
+    }
 
     public static function checkRelation($segmentClass, $course)
     {

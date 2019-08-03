@@ -13,7 +13,8 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use App\ClassLevel;
 use App\Enroll;
 use App\Lesson;
-
+use App\CourseSegment;
+use App\User;
 
 use Illuminate\Support\Facades\Storage;
 use URL;
@@ -74,6 +75,9 @@ class FilesController extends Controller
      * @param to as the end date of showing this file
      * @return Response as success Message
      */
+
+    // 
+
     public function store(Request $request)
     {
         try{
@@ -84,12 +88,10 @@ class FilesController extends Controller
                 'class_level' => 'required|array',
                 'class_level.*' => 'required|integer|exists:class_levels,id',
                 'lesson_id'=>'required|integer|exists:lessons,id',
-                'visibility' => 'required|boolean'
             ]);
 
             // activeCourseSgement
-            $activeCourseSegments = collect([]);
-
+            $activeCourseSegments = collect([]);    
             foreach($request->class_level as $class_level_id){
                 $class_level = ClassLevel::find($class_level_id);
                 $activeSegmentClass = $class_level->segmentClass->where('is_active',1)->first();
@@ -103,7 +105,7 @@ class FilesController extends Controller
                             $activeCourseSegments->push($activeCourseSegment);
                         }
                         else{
-                            return HelperController::api_response_format(400,null,'You\'re unauthorize');
+                            return HelperController::api_response_format(400, null,'You\'re unauthorize');
                         }
                     }
                     else{
@@ -129,7 +131,7 @@ class FilesController extends Controller
                 $file->name = $name;
                 $file->description = $description;
                 $file->size = $size;
-                $file->visibility = $request->visibility;
+                $file->visibility = 0;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
 
@@ -165,6 +167,9 @@ class FilesController extends Controller
                 }
 
             }
+
+            // Notfiy all selected Role_id to the teachers
+            $NotifyEnrollment = checkEnroll::userNotifyEnrollment($request->lesson_id);
 
             return HelperController::api_response_format(200,null,'Upload Successfully');
         }catch (Exception $ex){
@@ -269,7 +274,6 @@ class FilesController extends Controller
                 'fileID' => 'required|integer|exists:files,id',
                 'description' => 'required|string|min:1',
                 'Imported_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-                'visibility' => 'required|boolean'
             ]);
 
             $file = file::find($request->fileID);
@@ -298,7 +302,6 @@ class FilesController extends Controller
             }
 
             $file->description = $request->description;
-            $file->visibility = $request->visibility;
             $check = $file->save();
 
             if($check){
