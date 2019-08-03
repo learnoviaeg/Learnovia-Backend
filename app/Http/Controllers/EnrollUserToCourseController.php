@@ -22,7 +22,6 @@ class EnrollUserToCourseController extends Controller
     // Enroll one\more users to one\more course_segements
     public static function EnrollCourses(Request $request)
     {
-
         $request->validate([
             'course_segment' => 'required|array|exists:course_segments,id',
             'start_date' => 'required|before:end_date|after:'.Carbon::now(),
@@ -36,14 +35,12 @@ class EnrollUserToCourseController extends Controller
         $count=0;
         $rolecount=0;
         foreach($request->course_segment as $courses){
-
-
             foreach($request->users as $username)
             {
 
                 $user_id=User::FindByName($username)->id;
 
-
+                
                 $check =Enroll::IsExist($courses,$user_id);
                 if(!$check){
                     $enroll = new Enroll;

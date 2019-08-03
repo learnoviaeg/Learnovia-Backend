@@ -87,6 +87,9 @@ Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
     //if you want to get all Academic year with all types please,write getyearswithtype in yours
     Route::get('get', 'AC_year_type@List_Years_with_types')->name('getyearswithtype')->middleware('permission:type/get-all');
 
+    //get all types without year_id
+    Route::get('getall', 'AC_year_type@get')->name('gettypes')->middleware('permission:type/get');
+
     //if you want to update type please,write updatetype in yours
     Route::post('update', 'AC_year_type@updateType')->name('updatetype')->middleware('permission:type/update');
 
@@ -98,6 +101,8 @@ Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
 Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'LevelsController@AddLevelWithYear')->name('addlevel')->middleware('permission:level/add');
     Route::get('get', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get-all');
+    //without year or typr request
+    Route::get('gets', 'LevelsController@get')->name('getlevels')->middleware('permission:level/gets');
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
 });
@@ -106,7 +111,8 @@ Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
 Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'ClassController@AddClassWithYear')->name('addclass')->middleware('permission:class/add');
     Route::get('get', 'ClassController@index')->name('getallclasses')->middleware('permission:class/get-all');
-    Route::get('get/{id}', 'ClassController@show')->name('getclassbyid')->middleware('permission:class/get');
+    //without any parameters
+    Route::get('getall', 'ClassController@show')->name('getallclass')->middleware('permission:class/get');
     Route::put('update', 'ClassController@update')->name('updateclass')->middleware('permission:class/update');
     Route::delete('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:class/delete');
 });
@@ -159,7 +165,7 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
 
 //Enroll Routes
 Route::group(['prefix' => 'enroll' , 'middleware' => 'auth:api'], function () {
-    Route::post('/add', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/enroll-single-user');
+    Route::post('add', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/enroll-single-user');
     Route::post('unenroll', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
     Route::get('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserErollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
     Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:enroll/mandatory-course');

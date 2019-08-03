@@ -52,10 +52,17 @@ class segment_class_Controller extends Controller
             foreach ($classLevel->segmentClass as $segmentClass){
                 $segments[] = $segmentClass->segments[0];
             }
-            $segmentsdd = collect($segments);
-            $test= $segmentsdd->where('id',$request->id);
-            return HelperController::api_response_format(200, $test);
+            $segmentscoll = collect($segments);
+            $allsegments= $segmentscoll->where('id',$request->id);
+            return HelperController::api_response_format(200, $allsegments);
         }
+    }
+
+    public function get()
+    {
+        $segments=Segment::all();   
+        return HelperController::api_response_format(200, $segments);
+
     }
 
     /**

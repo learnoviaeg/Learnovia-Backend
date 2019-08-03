@@ -22,14 +22,26 @@ class ClassController extends Controller
             'year'  => 'required|exists:academic_years,id',
             'type'  => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
+            'id' => 'exists:classes,id'
         ]);
-        $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
-        $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
-        $class =[];
-        foreach ($yearlevel->classLevels as $classLevel){
-            $class[] = $classLevel->classes[0];
+        if($request->id == null)
+        {
+            $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
+            $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
+            $class =[];
+            foreach ($yearlevel->classLevels as $classLevel){
+                $class[] = $classLevel->classes[0];
+            }
+            return HelperController::api_response_format(200, $class);
         }
-        return HelperController::api_response_format(200, $class);
+        else
+        {
+            $class = Classes::find($request->id);
+            if ($class)
+                return HelperController::api_response_format(200, new Classs($class));
+            return HelperController::NOTFOUND();
+        }
+        
     }
 
     /**
@@ -78,12 +90,10 @@ class ClassController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show()
     {
-        $class = Classes::find($id);
-        if ($class)
-            return HelperController::api_response_format(200, new Classs($class));
-        return HelperController::NOTFOUND();
+        $classes = Classes::all();
+        return HelperController::api_response_format(200,$classes );
     }
 
     /**
