@@ -8,10 +8,11 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     //Install Question Bank
     Route::get('install','QuestionBankController@install_question_bank');
     Route::post('storeQuestions', 'QuestionBankController@store');
+    Route::post('updateQuestion', 'updateQuestion@update');
     //Add/Update Question and Quiz
     Route::group(['middleware' => ['store_question']], function () {
      //   Route::post('storeQuestions', 'QuestionBankController@store');//->middleware('permission:question/add');
-        Route::post('updateQuestion', 'QuestionBankController@update')->middleware('permission:question/update');
+        //Route::post('updateQuestion', 'QuestionBankController@update');//->middleware('permission:question/update');
         Route::post('storeQuiz', 'QuizController@store')->middleware('permission:quiz/add');
         Route::post('updateQuiz', 'QuizController@update')->middleware('permission:quiz/update');
     });
