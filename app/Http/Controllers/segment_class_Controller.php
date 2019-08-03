@@ -58,11 +58,18 @@ class segment_class_Controller extends Controller
         }
     }
 
-    public function get()
+    public function get(Request $request)
     {
-        $segments=Segment::all();   
-        return HelperController::api_response_format(200, $segments);
-
+        if ($request->id == null)
+        {
+            $segments=Segment::all();
+            return HelperController::api_response_format(200, $segments);
+        }
+        else
+        {
+            $class = Segment::find($request->id);
+            return HelperController::api_response_format(200, $class);
+        }
     }
 
     /**

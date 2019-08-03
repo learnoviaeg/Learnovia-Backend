@@ -37,14 +37,14 @@ class AcademicYearController extends Controller
     {
         if($request->id == null)
         {
-            $year = AcademicYear::with('AC_Type')->paginate(10);
+            $year = AcademicYear::with('AC_Type')->get();
             return HelperController::api_response_format(201, $year);
         }
         else {
                 $year = AcademicYear::where('id',$request->id)->with('AC_Type')->first();
                 if($year)
                     return HelperController::api_response_format(200 ,$year);
-                    
+
                 return HelperController::api_response_format(404 ,'NOT FOUND');
         }
     }

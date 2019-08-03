@@ -17,29 +17,29 @@ class LessonController extends Controller
             'course_id'=>'required|exists:courses,id'
         ]);
         $Lessons_array = array();
-       
+
         $course_segment = CourseSegment::getActive_segmentfromcourse($request->course_id);
 
         if($course_segment){
         array_push($Lessons_array,$request['name']);
         $lessons_in_CourseSegment = Lesson::where('course_segment_id', $course_segment)->max('index');
                 $Next_index = $lessons_in_CourseSegment + 1;
+
         foreach ($Lessons_array as $input) {
             if(count($input)==1){
                 $lesson = Lesson::create([
                     'name' => $input['0'],
                     'course_segment_id' => $course_segment,
                     'index' => $Next_index
-                ]);  
+                ]);
             }else{
             for ($x =0; $x <= (count($Lessons_array)+1); $x++) {
-               
                 $lesson = Lesson::create([
                     'name' => $input[$x],
                     'course_segment_id' => $course_segment,
                     'index' => $Next_index
                 ]);
-                
+
             }
         }
         }

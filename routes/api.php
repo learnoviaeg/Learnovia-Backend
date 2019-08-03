@@ -85,10 +85,10 @@ Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'AC_year_type@Add_type_to_Year')->name('addtype')->middleware('permission:type/add');
 
     //if you want to get all Academic year with all types please,write getyearswithtype in yours
-    Route::get('get', 'AC_year_type@List_Years_with_types')->name('getyearswithtype')->middleware('permission:type/get-all');
+    Route::get('get', 'AC_year_type@List_Years_with_types')->name('getyearswithtype')->middleware('permission:type/get');
 
     //get all types without year_id
-    Route::get('getall', 'AC_year_type@get')->name('gettypes')->middleware('permission:type/get');
+    Route::get('getall', 'AC_year_type@get')->name('gettypes')->middleware('permission:type/get-all');
 
     //if you want to update type please,write updatetype in yours
     Route::post('update', 'AC_year_type@updateType')->name('updatetype')->middleware('permission:type/update');
@@ -130,6 +130,8 @@ Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
 
     //if you want to get classes with all segments please,write getclasses in yours
     Route::get('get', "segment_class_Controller@List_Classes_with_segments")->name('getclasses')->middleware('permission:segment/get-all');
+
+    Route::get('getall', "segment_class_Controller@get")->name('getclasses')->middleware('permission:segment/get');
 
     Route::post('update', "segment_class_Controller@update")->name('updatesegment')->middleware('permission:segment/update');
 });

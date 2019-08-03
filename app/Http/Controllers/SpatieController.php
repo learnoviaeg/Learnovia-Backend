@@ -112,7 +112,6 @@ class SpatieController extends Controller
 
             //Year Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/add']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/get-all']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/get']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/update']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/delete']);
@@ -121,6 +120,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/delete']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/add']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/get-all']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/get']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/update']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/assign']);
 
@@ -128,6 +128,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/add']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/update']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/get-all']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/gets']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/delete']);
 
             //Class Permissions
@@ -143,6 +144,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/assign']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/update']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/get-all']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/get']);
+
 
             //Cetegory Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'category/add']);

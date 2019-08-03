@@ -38,10 +38,10 @@ class ClassController extends Controller
         {
             $class = Classes::find($request->id);
             if ($class)
-                return HelperController::api_response_format(200, new Classs($class));
+                return HelperController::api_response_format(200, new Classes($class));
             return HelperController::NOTFOUND();
         }
-        
+
     }
 
     /**
@@ -90,10 +90,22 @@ class ClassController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show()
+    public function show(Request $request)
     {
-        $classes = Classes::all();
-        return HelperController::api_response_format(200,$classes );
+        if($request->id == null)
+        {
+            $classes = Classes::all();
+            return HelperController::api_response_format(200,$classes );
+        }
+        else
+        {
+            $request->validate([
+                'id' => 'exists:classes,id',
+            ]);
+            $class = Classes::find($request->id);
+            return HelperController::api_response_format(200,$class );
+
+        }
     }
 
     /**
