@@ -1,10 +1,5 @@
 <?php
-$request_headers        = apache_request_headers();
-$http_origin            = $request_headers['Origin'];
-$allowed_http_origins   = array("http://localhost:4200","http://35.238.30.213",);
-if (in_array($http_origin, $allowed_http_origins)){
-    header("Access-Control-Allow-Origin: " . $http_origin);
-}
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers:Accept, Authorization, Content-Type");
 header("Access-Control-Allow-Credentials:true");
