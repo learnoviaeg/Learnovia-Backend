@@ -91,4 +91,12 @@ class LevelsController extends Controller
     }
         return HelperController::api_response_format(200,$levels);
     }
+
+
+    public function get()
+    {
+        $levels=Level::all();
+        return HelperController::api_response_format(200,$levels);
+
+    }
 }
