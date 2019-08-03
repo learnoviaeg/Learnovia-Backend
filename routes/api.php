@@ -198,6 +198,15 @@ Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'LessonController@updateLesson')->name('updateLesson')->middleware('permission:lesson/update');
     Route::post('sort', 'LessonController@Sorting')->name('sortlesson')->middleware('permission:lesson/sort');
 });
+
+Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
+    Route::post('add', 'GradeController@create')->name('addgrade');//->middleware('permission:grade/add');
+    Route::get('get', 'GradeController@list')->name('getgrade');//->middleware('permission:grade/get');
+    Route::post('delete', 'GradeController@delete')->name('deletegrade');//->middleware('permission:grade/delete');
+    Route::post('update', 'GradeController@update')->name('updategrade');//->middleware('permission:grade/update');
+});
+
+
 Route::post('createCat', 'GradeCategoryController@AddGradeCategory');
 Route::get('GetGradeCategory', 'GradeCategoryController@GetGradeCategory');
 Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory');
