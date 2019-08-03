@@ -32,7 +32,7 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/delete']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-quiz-with-random-questions']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add-quiz-lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update-quiz-lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson']);
@@ -45,7 +45,7 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('question/update');
         $role->givePermissionTo('question/delete');
         $role->givePermissionTo('question/get');
-        $role->givePermissionTo('quiz/get-quiz-with-random-questions');
+        $role->givePermissionTo('quiz/get');
         $role->givePermissionTo('question/random');
         $role->givePermissionTo('question/add-answer');
         $role->givePermissionTo('question/delete-answer');
@@ -348,9 +348,9 @@ class QuestionBankController extends Controller
         $resultB = array_diff($Question['match_B'], $ansB);
         if ($resultA == null && $resultB == null) {
             $questionRe = Questions:: where('id', $id)->first();
-
             return $questionRe;
         }
+
         $cat = $this::CreateQuestion($Question);
         if (isset($cat->id)) {
 
@@ -369,6 +369,7 @@ class QuestionBankController extends Controller
                 }
             }
         }
+
         return $cat;
     }
 
@@ -394,6 +395,7 @@ class QuestionBankController extends Controller
         ]);
         $re = collect([]);
         foreach ($request->Question as $question) {
+
             switch ($question['Question_Type_id']) {
                 case 1: // True/false
                     $true_false = $this->TrueFalse($question);
@@ -589,8 +591,8 @@ class QuestionBankController extends Controller
                     $answers[$count]->update([
                         'question_id' => $question->id,
                         'true_false' => null,
-                        'content' => null,
                         'match_a' => $MA,
+                        'content' => null,
                         'match_b' => $MP,
                         'is_true' => ($index == $Secindex) ? 1 : 0
                     ]);

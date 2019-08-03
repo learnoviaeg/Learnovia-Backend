@@ -33,8 +33,10 @@ class QuizController extends Controller
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
         ]);
+
         if($request->type == 0 ){ // new or new
             $newQuestionsIDs = $this->storeWithNewQuestions($request);
+
             $oldQuestionsIDs = $this->storeWithOldQuestions($request);
             $questionsIDs = $newQuestionsIDs->merge($oldQuestionsIDs);
         }
@@ -192,7 +194,7 @@ class QuizController extends Controller
         {
             $quiz = quiz::find($request->quiz_id);
             $Questions = $quiz->Question;
-            
+
             return HelperController::api_response_format(200, $Questions);
         }
         else {
@@ -215,6 +217,11 @@ class QuizController extends Controller
                 }
                 $answers = $question->question_answer->shuffle();
                 $question->answers = $answers;
+                $question->question_category;
+                $question->question_type;
+                foreach($question->answers as $answer){
+                    unset($answer->is_true);
+                }
                 unset($question->question_answer);
                 unset($question->pivot);
             }
