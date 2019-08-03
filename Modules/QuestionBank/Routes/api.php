@@ -60,6 +60,8 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
     Route::post('storeUserQuiz', 'UserQuizController@store_user_quiz');
 
+    Route::post('storeUserQuizAnswer', 'UserQuizController@quiz_answer');
+
 });
 
 

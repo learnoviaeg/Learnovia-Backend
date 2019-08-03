@@ -31,6 +31,8 @@ class CreateUserQuizAnswersTable extends Migration
 
             $table->mediumText('choices_array')->nullable();
 
+            $table->mediumText('content')->nullable();
+
             $table->timestamps();
         });
     }
