@@ -68,7 +68,19 @@ class CourseSegment extends Model
         }
         return $courseSegment;
     }
-
+    Public function GradeCategory()
+    { 
+        return $this->hasMany('App\GradeCategory');
+    }
+    Public static function GradeCategoryPerSegmentbyId($id)
+    {   
+        $GradeCategoriesInSegment=self::find($id)->with('GradeCategory')->first();
+        foreach($GradeCategoriesInSegment->GradeCategory as $cat){
+            $cat->Child;
+        }
+        return $GradeCategoriesInSegment;
+    }
+  
 
 
     // public static function Get_lessons_from_CourseSegmentID($id){
