@@ -227,4 +227,4 @@ Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory'
 Route::post('UpdateGradeCategory', 'GradeCategoryController@UpdateGradeCategory');
 Route::post('MoveToParentCategory', 'GradeCategoryController@MoveToParentCategory');
 Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
-Route::get('gettree', 'GradeCategoryController@Get_Tree');
+Route::post('gettree', 'GradeCategoryController@Get_Tree');
