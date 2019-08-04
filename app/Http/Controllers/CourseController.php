@@ -127,15 +127,24 @@ class CourseController extends Controller
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id'
         ]);
-        $CourseSeg=Enroll::where('user_id',$request->user()->id)->pluck('course_segment');
         $seggg=array();
-        foreach ($CourseSeg as $cour) {
-            $check=CourseSegment::where('course_id',$request->course_id)->where('id',$cour)->pluck('id')->first();
-            if($check!=null)
-            {
-                $seggg[]=$check;
-            }
+        if($request->user()->roles->first()->id==1)
+        {
+            $seggg=CourseSegment::where('course_id',$request->course_id)->pluck('id');
+
         }
+        else {
+            $CourseSeg=Enroll::where('user_id',$request->user()->id)->pluck('course_segment');
+            foreach ($CourseSeg as $cour) {
+                $check=CourseSegment::where('course_id',$request->course_id)->where('id',$cour)->pluck('id')->first();
+                if($check!=null)
+                {
+                    $seggg[]=$check;
+                }
+            }
+
+        }
+
         $CourseSeg=array();
         foreach($seggg as $segggg){
             $CourseSeg[]=CourseSegment::where('id',$segggg)->get();
@@ -145,6 +154,14 @@ class CourseController extends Controller
         $i = 0 ;
         $lessoncounter=array();
         $comp=Component::where('type',1)->get();
+        $compcount=array();
+        $compcountall=array();
+        $compcountall=null;
+        foreach ($comp as $acom)
+        {
+            $compcountall[$acom->name]=0;
+        }
+
         foreach($CourseSeg as $seg)
         {
             $lessons= $seg->first()->lessons;
@@ -162,14 +179,17 @@ class CourseController extends Controller
                             foreach($comp as $com)
                             {
                                 $lessonn[$com->name]= $lessoncounter->module($com->module,$com->model)->get();
+                                $compcount[$com->name]=$lessoncounter->module($com->module,$com->model)->count();
+                                $compcountall[$com->name]=$compcountall[$com->name]+$lessoncounter->module($com->module,$com->model)->count();
                             }
+                            $lessonn['count']=$compcount;
                         }
                         $i++;
                     }
                 }
             }
         }
-        //$clase['course'] = Course::find($request->course_id);
+        $clase['count'] = $compcountall;
         return HelperController::api_response_format(200 , $clase);
     }
 }
