@@ -21,7 +21,7 @@ class GradeCategory extends Model
     }
     public function GradeItems()
     {
-        return $this->hasMany('App\GradeItems');
+        return $this->hasMany('App\GradeItems','grade_category','id');
     }
 
 }
