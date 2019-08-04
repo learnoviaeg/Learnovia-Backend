@@ -25,8 +25,8 @@ class CreateUserGradesTable extends Migration
             $table->unsignedBigInteger('raw_scale_id');
             $table->foreign('raw_scale_id')->references('id')->on('scales')->onDelete('cascade')->onUpdate('cascade');
             $table->decimal('final_grade');
-            $table->tinyInteger('hidden');
-            $table->tinyInteger('locked');
+            $table->boolean('hidden')->default(0);
+            $table->boolean('locked')->default(0);
             $table->mediumText('feedback');
             $table->unsignedBigInteger('letter_id');
             $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade')->onUpdate('cascade');
