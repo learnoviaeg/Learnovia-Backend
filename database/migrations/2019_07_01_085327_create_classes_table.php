@@ -16,6 +16,7 @@ class CreateClassesTable extends Migration
         Schema::create('classes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
+            $table->boolean('current')->default(false);
             $table->timestamps();
         });
     }

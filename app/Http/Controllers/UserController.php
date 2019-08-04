@@ -66,9 +66,10 @@ class UserController extends Controller
             $role = Role::find($request->role[$key]);
             $user->assignRole($role);
             if ($request->role[$key] == 3) {
-
+                // return HelperController::get_course_by_any($request,$key);
                 $classLevID=ClassLevel::GetClass($request->class_id[$key]);
                 $classSegID=SegmentClass::GetClasseLevel($classLevID);
+                return $classLevID;
 
                 $option = new Request([
                     'username' => $user->username,

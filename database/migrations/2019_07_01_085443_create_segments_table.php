@@ -16,6 +16,7 @@ class CreateSegmentsTable extends Migration
         Schema::create('segments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
+            $table->boolean('current')->default(false);
             $table->timestamps();
         });
     }

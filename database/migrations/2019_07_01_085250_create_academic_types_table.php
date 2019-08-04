@@ -17,6 +17,7 @@ class CreateAcademicTypesTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->integer('segment_no');
+            $table->boolean('current')->default(false);
             $table->timestamps();
         });
     }
