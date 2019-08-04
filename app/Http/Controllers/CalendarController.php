@@ -106,17 +106,15 @@ class CalendarController extends Controller
                 $decodedannounce[]=json_decode($decode, true);
                 }
             }
-
-            $withdatesannounce=array();
+            $withdatesannounce=collect([]);
             foreach ($decodedannounce as $an)
             {
-                $withdatesannounce[]=Announcement::where('title',$an['title'])
+                $withdatesannounce->push(Announcement::where('title',$an['title'])
                 ->where('description',$an['description'])
                 ->whereMonth('start_date','=', $date)
                 ->orderBy('start_date')
-                ->get();
+                ->first());
             }
-
          return  $withdatesannounce;
     }
 
@@ -142,11 +140,24 @@ class CalendarController extends Controller
             {
                 foreach($comp as $com)
                 {
-                    $les[$com->name]= $les->module($com->module,$com->model)
-                    ->whereMonth('start_date','=', $date)
-                    ->orderBy('start_date')
-                    ->get();
+                    if($com->name=='Quiz')
+                    {
+                        $les[$com->name]= $les->module($com->module,$com->model)
+                        ->whereMonth('start_date','=', $date)
+                        ->orderBy('start_date')
+                        ->withPivot('start_date')
+                        ->get();
+                    }
+                    else
+                    {
+                        $les[$com->name]= $les->module($com->module,$com->model)
+                        ->whereMonth('start_date','=', $date)
+                        ->orderBy('start_date')
+                        ->get();
+                    }
                 }
+
+
             }
 
         }
