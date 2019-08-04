@@ -114,4 +114,8 @@ class User extends Authenticatable
     public function enroll(){
        return $this->hasMany('App\Enroll' , 'user_id');
     }
+    public function UserGrade()
+    {
+        return $this->hasMany('App\UserGrade');
+    }
 }

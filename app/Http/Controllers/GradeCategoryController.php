@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\GradeCategory;
 use App\CourseSegment;
+use App\AcademicYearType;
+use App\ClassLevel;
+use App\YearLevel;
+use App\SegmentClass;
 use Illuminate\Http\Request;
 
 class GradeCategoryController extends Controller
@@ -33,7 +37,7 @@ class GradeCategoryController extends Controller
 
     }
 
-    
+
     public function GetGradeCategory(Request $request)
     {
         if($request->filled('id')){
@@ -89,6 +93,26 @@ class GradeCategoryController extends Controller
     public function GetCategoriesFromCourseSegments(Request $request){
      $grade=CourseSegment::GradeCategoryPerSegmentbyId($request->id);
      return $grade;
-   
+
+    }
+
+    public function Get_Tree(Request $request)
+    {
+        $request->validate([
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+            'segment' => 'required|exists:segments,id',
+            'course' => 'required|exists:courses,id',
+        ]);
+
+        $academic_year_type = AcademicYearType::checkRelation($request->year,$request->type);
+        $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
+        $class_level = ClassLevel::checkRelation($request->class ,$year_level->id);
+        $segment_class = SegmentClass::checkRelation($class_level->id, $request->segment);
+        $course_segment= CourseSegment::checkRelation($segment_class->id , $request->course);
+        $grade_category=GradeCategory::with(['Child' , 'GradeItems' , 'Child.GradeItems'])->where('course_segment_id',$course_segment->id)->get();
+        return HelperController::api_response_format(200 , $grade_category);
     }
 }

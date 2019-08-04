@@ -7,14 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Course extends Model
 {
     protected $fillable = ['name' , 'category_id'];
-    
+
 
     public static function findByName($course_name)
     {
         return self::where('name',$course_name)->pluck('id')->first();
     }
 
-
+    public function letter()
+    {
+        return $this->hasMany('App\Letter');
+    }
     protected $hidden = [
         'created_at', 'updated_at',
     ];
