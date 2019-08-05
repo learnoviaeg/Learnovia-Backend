@@ -19,6 +19,7 @@ class LessonController extends Controller
         $Lessons_array = array();
 
         $course_segment = CourseSegment::getActive_segmentfromcourse($request->course_id);
+        //$course_segment = EnrollUserToCourseController::GetActiveCourse_segment($request->course_id);
 
         if($course_segment){
         array_push($Lessons_array,$request['name']);

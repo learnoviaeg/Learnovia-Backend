@@ -9,6 +9,7 @@ use Excel;
 use App\Imports\EnrollImport;
 use App\Enroll;
 use Carbon\Carbon;
+use Auth;
 use App\ClassLevel;
 use App\CourseSegment;
 use App\SegmentClass;
@@ -37,10 +38,8 @@ class EnrollUserToCourseController extends Controller
         foreach($request->course_segment as $courses){
             foreach($request->users as $username)
             {
-
                 $user_id=User::FindByName($username)->id;
 
-                
                 $check =Enroll::IsExist($courses,$user_id);
                 if(!$check){
                     $enroll = new Enroll;
@@ -203,5 +202,18 @@ class EnrollUserToCourseController extends Controller
             return HelperController::api_response_format(200, $Usersenrolled, 'students are ... ');
         }
 
+    }
+
+    public static function GetActiveCourse_segment($request)
+    {
+        $active_course_seg=CourseSegment::where('course_id',$request)
+                                        ->where('is_active',1)->pluck('id');
+        $session_id=Auth::user()->id;
+
+        $teachers=Enroll::where('role_id',4)->where('user_id',$session_id)->pluck('id');
+
+        $result= array_intersect($active_course_seg->toArray(), $teachers->toArray());
+
+        return $result;
     }
 }

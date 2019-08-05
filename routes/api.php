@@ -16,6 +16,7 @@ Route::group(['prefix' => 'auth'], function () {
 
 Route::group(['middleware' => 'auth:api'], function () {
     //user main routes
+    Route::post('get', 'EnrollUserToCourseController@GetActiveCourse_segment');
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('user', 'AuthController@user')->name('user');

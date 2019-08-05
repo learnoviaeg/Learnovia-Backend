@@ -27,13 +27,24 @@ public static function upload_attachment($file,$type,$description=null)
     $fileName = uniqid().$singlefile->getClientOriginalName();
     $size = $singlefile->getSize();
 
+    if($type=='Assignment')
+    {
+        $attachment->path = 'assigments/'.$fileName;
+        Storage::disk('public')->putFileAs('assigments/', $singlefile, $fileName);
+    }
+    else if($type=='Message')
+    {
+        $attachment->path = 'Message/'.$fileName;
+        Storage::disk('public')->putFileAs('Message/', $singlefile, $fileName);
+
+    }
     $attachment->name = $fileName;
-    $attachment->path = 'assigments/'.$fileName;
     $attachment->description = $description;
     $attachment->type = $type;
     $attachment->extension = $extension;
     $attachment->save();
-    Storage::disk('public')->putFileAs('assigments/', $singlefile, $fileName);
+    
     return $attachment;
 }
+
 }

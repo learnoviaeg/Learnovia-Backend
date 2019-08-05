@@ -23,7 +23,9 @@ class CreateMessagesTable extends Migration
             $table->foreign('To')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->boolean('seen');
             $table->integer('deleted');
-            $table->string('file')->nullable();
+            $table->unsignedBigInteger('attachment_id')->nullable();
+            $table->foreign('attachment_id')->references('id')->on('attachments')->onDelete('cascade')->onUpdate('cascade')->nullable();
+            // $table->string('file')->nullable();
             $table->timestamps();
         });
     }

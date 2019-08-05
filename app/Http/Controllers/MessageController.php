@@ -6,6 +6,7 @@ use App\Contacts;
 use App\User;
 use Illuminate\Http\Request;
 use File;
+use App\attachment;
 use Spatie\Permission\Traits\HasRoles;
 use Validator;
 use Session;
@@ -56,18 +57,33 @@ class MessageController extends Controller
                     foreach ($From_Role_ids as $From_Role_id) {
                         $permission = Message_Role::where('From_Role', $From_Role_id)->where('To_Role', $to_Role_id)->first();
                         if ($permission) {
-                            Message::Create(array(
-                                'text' => $req->text,
-                                'about' => ($req->about == null) ? $req->From : $req->about, /*replace  $req->From  to $session_id when you session  */
-                                'From' => $session_id,
-                                'seen' => false,
-                                'deleted' => 0,
-                                'To' => $userId,
-                                'file' => uniqid() . File::extension($req->file->getClientOriginalName()),
+                            if($req->file == null)
+                            {
+                                Message::Create(array(
+                                    'text' => $req->text,
+                                    'about' => ($req->about == null) ? $req->From : $req->about, /*replace  $req->From  to $session_id when you session  */
+                                    'From' => $session_id,
+                                    'seen' => false,
+                                    'deleted' => 0,
+                                    'To' => $userId
+                                ));
+                            }
+                            else
+                            {
+                                $messagefile= attachment::upload_attachment($req->file,'Message',$req->text)->id;
+                                //dd($messagefile);
+                                Message::Create(array(
+                                    'text' => $req->text,
+                                    'about' => ($req->about == null) ? $req->From : $req->about, /*replace  $req->From  to $session_id when you session  */
+                                    'From' => $session_id,
+                                    'seen' => false,
+                                    'deleted' => 0,
+                                    'attachment_id' => $messagefile,
+                                    'To' => $userId
                             ));
+                            }
                             $is_send = true;
                             break;
-
                         }
                     }
                     if ($is_send) {
@@ -81,10 +97,6 @@ class MessageController extends Controller
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
             }
         }
-        Storage::disk('public')->put(
-            uniqid() . $req->file->getClientOriginalName(),
-            $req->file
-        );
         return HelperController::api_response_format(201, null, 'Successfully Sent Message!');
 
 
