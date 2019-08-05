@@ -314,5 +314,14 @@ class CourseController extends Controller
         }
         return $course_segment;
     }
+    public function getCoursesOptional(Request $request){
+
+        $course_segment= HelperController::Get_Course_segment($request);
+        $optional=array();
+        foreach ($course_segment as $cs){
+                array_push($optional,$cs->optionalCourses);
+        }
+        return $optional;
+    }
 
 }
