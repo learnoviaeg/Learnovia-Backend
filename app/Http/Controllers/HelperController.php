@@ -10,6 +10,7 @@ use App\AcademicYearType;
 use App\YearLevel;
 use App\ClassLevel;
 use App\SegmentClass;
+use Validator;
 use App\CourseSegment;
 use Illuminate\Support\Facades\Validator;
 class HelperController extends Controller
