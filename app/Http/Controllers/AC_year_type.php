@@ -19,12 +19,7 @@ class AC_year_type extends Controller
      * @return : response of all Years with its Typs
      *
      */
-    public function get_courses(Request $request)
-    {
-        $course = HelperController::Get_Course_segment($request);
-         return $course;
 
-    }
     public function List_Years_with_types(Request $request)
     {
         $request->validate([
