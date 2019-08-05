@@ -38,7 +38,8 @@ class CourseController extends Controller
         $segmentClass = SegmentClass::checkRelation($classLevel->id, $request->segment);
         $courseSegment = CourseSegment::create([
             'course_id' => $course->id,
-            'segment_class_id' => $segmentClass->id
+            'segment_class_id' => $segmentClass->id,
+            'is_active' => 1
         ]);
         if ($request->filled('no_of_lessons')) {
             $no_of_lessons = $request->no_of_lessons;
@@ -205,7 +206,6 @@ class CourseController extends Controller
 
     public function get_course_by_year_type(Request $request)
     {
-
         $academic_year_type=array();
         $academic_year_type=null;
         if(isset($request->type_id) && !isset($request->year_id))

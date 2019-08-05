@@ -11,7 +11,7 @@ use App\YearLevel;
 use App\ClassLevel;
 use App\SegmentClass;
 use App\CourseSegment;
-
+use Illuminate\Support\Facades\Validator;
 class HelperController extends Controller
 {
     public static function api_response_format($code, $body = [], $message = [])
@@ -32,31 +32,29 @@ class HelperController extends Controller
 
     public static function Get_Course_segment($request)
     {
-
-        $request->validate([
+        $rules = [
             'year' => 'exists:academic_years,id',
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
             'segment' => 'exists:segments,id',
-        ]);
-        if ($request->year) {
-            $academic_year_type = AcademicYearType::checkRelation($request->year, $request->type);
+        ];
+        $validator = Validator::make($request->all() , $rules);
+        if($validator->fails())
+            return $validator->errors();
+        $year = AcademicYear::Get_current()->id ;
+        $segment = Segment::Get_current()->id;
+        if ($request->filled('year')) {
+            $year = $request->year ;
         }
-        else
-        {
-            $academic_year_type = AcademicYear::Get_current();
+        if ($request->filled('segment')) {
+            $segment = $request->segment ;
         }
+        $academic_year_type = AcademicYearType::checkRelation($year, $request->type);
         $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
         $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
-        if ($request->segment) {
-            $segment_class = SegmentClass::checkRelation($class_level->id, $request->segment);
-        }
-        else
-        {
-            $segment_class = Segment::Get_current();
-        }
-            $course_segment = CourseSegment::where('segment_class_id', $segment_class->id)->get();
+        $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
+        $course_segment = CourseSegment::where('segment_class_id', $segment_class->id)->get();
         return $course_segment;
     }
 }

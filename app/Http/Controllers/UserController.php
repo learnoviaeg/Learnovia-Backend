@@ -180,8 +180,20 @@ class UserController extends Controller
 
     public function list()
     {
-        $user = User::all(['id', 'name', 'email', 'suspend', 'created_at']);
-        return HelperController::api_response_format(200, $user);
+        $user_id = Auth::user()->id;
+        $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
+        if($role_id == 1 || $role_id == 2)
+        {
+            $user =User::all()->each(function($row)
+            {
+                $row->setHidden(['password']);
+            });
+            return HelperController::api_response_format(200, $user);
+        }
+        else {
+            $user = User::all();
+            return HelperController::api_response_format(200, $user);
+        }
     }
 
     /*
@@ -250,7 +262,6 @@ class UserController extends Controller
     }
 
     public function Show_and_hide_real_password_with_permission(){
-
         $user_id = Auth::user()->id;
         $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
         if($role_id == 1 || $role_id == 2)

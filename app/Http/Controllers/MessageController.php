@@ -193,8 +193,7 @@ class MessageController extends Controller
     function List_All_Message()
     {
         $Message = Messageresource::collection(Message::get());
-        return HelperController::api_response_format(201, $Message, 'All messages');
-
+        return HelperController::api_response_format(200, $Message, 'All messages');
     }
 
     /**
