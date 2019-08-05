@@ -51,4 +51,5 @@ class Enroll extends Model
         $check = self::where('course_segment', $Course_segment_id)->pluck('user_id');
         return $check;
     }
+
 }
