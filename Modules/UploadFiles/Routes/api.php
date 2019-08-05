@@ -32,7 +32,8 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
     Route::post('toggleMediaVisibility', 'MediaController@toggleVisibility')->name('toggleMediaVisibility')->middleware('permission:media/toggle');
 
     /* Attach link as media */
-    Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink')->middleware('permission:link/add');
+    //Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink')->middleware('permission:link/add');
+    Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink');
 
     /* update link as media */
     Route::post('updateMediaLink', 'MediaController@updateMediaLink')->name('updateMediaLink')->middleware('permission:link/update');

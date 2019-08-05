@@ -37,4 +37,12 @@ class HelperController extends Controller
         $course_segment= CourseSegment::where( 'segment_class_id',$segment_class->id)->get();
         return $course_segment;
     }
+
+    public static function Get_class_LEVELS($request)
+    {
+        $academic_year_type = AcademicYearType::checkRelation($request->year,$request->type);
+        $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
+        $class_level = ClassLevel::checkRelation($request->class ,$year_level->id);
+        return $class_level;
+    }
 }

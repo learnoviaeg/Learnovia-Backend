@@ -43,24 +43,39 @@ class MediaController extends Controller
                 'description' => 'required|string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
-                'class_level' => 'required|array',
-                'class_level.*' => 'required|integer|exists:class_levels,id',
+
                 'lesson_id'=>'required|integer|exists:lessons,id',
-                'visibility' => 'required|boolean',
+
+                'year' => 'required|integer|exists:academic_years,id',
+
+                'type' => 'required|integer|exists:academic_types,id',
+
+                'level' => 'required|integer|exists:levels,id',
+
+                'class' => 'required|array',
+                'class.*' => 'required|integer|exists:classes,id',
             ]);
 
             // activeCourseSgement
             $activeCourseSegments = collect([]);
 
-            foreach($request->class_level as $class_level_id){
-                $class_level = ClassLevel::find($class_level_id);
+            foreach($request->class as $class){
+
+                $newRequest = new Request();
+                $newRequest->setMethod('POST');
+                $newRequest->request->add(['year' => $request->year]);
+                $newRequest->request->add(['type' => $request->type]);
+                $newRequest->request->add(['level' => $request->level]);
+                $newRequest->request->add(['class' => $class]);
+
+                $class_level = HelperController::Get_class_LEVELS($newRequest);
+
                 $activeSegmentClass = $class_level->segmentClass->where('is_active',1)->first();
                 if(isset($activeSegmentClass)){
                     $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
                     if(isset($activeCourseSegment)){
                         // check Enroll
                         $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
-
                         if($checkTeacherEnroll == true){
                             $activeCourseSegments->push($activeCourseSegment);
                         }
@@ -91,7 +106,7 @@ class MediaController extends Controller
                 $file->name = $name;
                 $file->description = $description;
                 $file->size = $size;
-                $file->visibility = $request->visibility;
+                $file->visibility = 0;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
 
@@ -151,7 +166,6 @@ class MediaController extends Controller
                 'mediaId' => 'required|integer|exists:media,id',
                 'description' => 'required|string|min:1',
                 'Imported_file' => 'nullable|file|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
-                'visibility' => 'required|boolean'
             ]);
 
             $file = media::find($request->mediaId);
@@ -180,7 +194,6 @@ class MediaController extends Controller
             }
 
             $file->description = $request->description;
-            $file->visibility = $request->visibility;
             $check = $file->save();
 
             if($check){
@@ -292,10 +305,17 @@ class MediaController extends Controller
                 'name' => 'required|string|max:130',
                 'description' => 'nullable|string|min:1',
                 'url' => 'required|active_url',
-                'class_level' => 'required|array',
-                'class_level.*' => 'required|integer|exists:class_levels,id',
+
                 'lesson_id'=>'required|integer|exists:lessons,id',
-                'visibility' => 'required|boolean',
+
+                'year' => 'required|integer|exists:academic_years,id',
+
+                'type' => 'required|integer|exists:academic_types,id',
+
+                'level' => 'required|integer|exists:levels,id',
+
+                'class' => 'required|array',
+                'class.*' => 'required|integer|exists:classes,id',
             ]);
 
             $avaiableHosts = collect([
@@ -312,15 +332,23 @@ class MediaController extends Controller
             // activeCourseSgement
             $activeCourseSegments = collect([]);
 
-            foreach($request->class_level as $class_level_id){
-                $class_level = ClassLevel::find($class_level_id);
+            foreach($request->class as $class){
+
+                $newRequest = new Request();
+                $newRequest->setMethod('POST');
+                $newRequest->request->add(['year' => $request->year]);
+                $newRequest->request->add(['type' => $request->type]);
+                $newRequest->request->add(['level' => $request->level]);
+                $newRequest->request->add(['class' => $class]);
+
+                $class_level = HelperController::Get_class_LEVELS($newRequest);
+
                 $activeSegmentClass = $class_level->segmentClass->where('is_active',1)->first();
                 if(isset($activeSegmentClass)){
                     $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
                     if(isset($activeCourseSegment)){
                         // check Enroll
                         $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
-
                         if($checkTeacherEnroll == true){
                             $activeCourseSegments->push($activeCourseSegment);
                         }
@@ -340,7 +368,7 @@ class MediaController extends Controller
             $file = new media;
             $file->name = $request->name;
             $file->description = $request->description;
-            $file->visibility = $request->visibility;
+            $file->visibility = 0;
             $file->link = $request->url;
             $file->user_id = Auth::user()->id;
             $check = $file->save();
