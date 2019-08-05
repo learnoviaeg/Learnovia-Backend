@@ -82,6 +82,7 @@ Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
     //if you want to get all Academic year with all types please,write getyearswithtype in yours
     Route::get('get', 'AC_year_type@List_Years_with_types')->name('getyearswithtype')->middleware('permission:type/get');
 
+
     //get all types without year_id
     Route::get('getall', 'AC_year_type@get')->name('gettypes')->middleware('permission:type/get-all');
 

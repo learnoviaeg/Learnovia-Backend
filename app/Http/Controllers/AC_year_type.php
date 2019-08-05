@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\AcademicType;
 use App\AcademicYear;
 use App\AcademicYearType;
+use App\Enroll;
+use App\Segment;
 use Illuminate\Http\Request;
 use App\Http\Resources\Year_type_resource;
 use Validator;
