@@ -350,4 +350,27 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200, $body = $stuassignment, $message = []);
         }
     }
+<<<<<<< HEAD
+=======
+
+}
+
+    public function toggleAssignmentVisibity(Request $request){
+        try{
+            $request->validate([
+                'assignment_id'=>'required|exists:assignments,id',
+            ]);
+
+            $assigment = assignment::find($request->assignment_id);
+
+            $assigment->visiable = ($assigment->visiable == 1)? 0 : 1;
+            $assigment->save();
+
+            return HelperController::api_response_format(200,$assigment,'Toggle Successfully');
+        }catch (Exception $ex){
+            return HelperController::api_response_format(400,null,'Please Try again');
+        }
+    }
+
+>>>>>>> remotes/origin/assignmentVisibity
 }

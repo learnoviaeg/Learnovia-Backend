@@ -26,5 +26,5 @@ Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function ()
     Route::post('override', 'AssigmentsController@override')->middleware('permission:assignment/override');
     Route::post('delete', 'AssigmentsController@deleteAssigment')->middleware('permission:assignment/delete');
     Route::post('GetAssignment','AssigmentsController@GetAssignment')->middleware('permission:assignment/get');
-
+    Route::post('toggleVisiblity', 'AssigmentsController@toggleAssignmentVisibity');
 });
