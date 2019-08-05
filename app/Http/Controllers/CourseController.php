@@ -103,27 +103,19 @@ class CourseController extends Controller
             'class_id' => 'nullable|exists:classes,id',
             'segment_id' => 'nullable|exists:segments,id',
         ]);
-        if (isset($request->id))
-        {
+        if (isset($request->id)) {
             return HelperController::api_response_format(200, Course::with('category')->whereId($request->id)->first());
-        }
-        else if(isset($request->category_id))
-        {
-            $courses=Course::where('category_id',$request->category_id)->get();
+        } else if (isset($request->category_id)) {
+            $courses = Course::where('category_id', $request->category_id)->get();
             return HelperController::api_response_format(200, $courses);
-        }
-        else {
-            $course= CourseController::get_course_by_year_type($request);
-            if(!isset($course))
-            {
+        } else {
+            $course = CourseController::get_course_by_year_type($request);
+            if (!isset($course)) {
                 return HelperController::api_response_format(200, Course::with('category')->get());
-            }
-            else
-            {
-                $returncourse=array();
-                foreach($course as $cc)
-                {
-                    $returncourse[]=Course::where('id',$cc)->first();
+            } else {
+                $returncourse = array();
+                foreach ($course as $cc) {
+                    $returncourse[] = Course::where('id', $cc)->first();
                 }
                 return HelperController::api_response_format(200, $returncourse);
             }
@@ -142,10 +134,10 @@ class CourseController extends Controller
 
     public function MyCourses(Request $request)
     {
-        $i = 0 ;
+        $i = 0;
         $courses = [];
         foreach ($request->user()->enroll as $enroll) {
-            if(in_array($enroll->CourseSegment->courses[0] , $courses))
+            if (in_array($enroll->CourseSegment->courses[0], $courses))
                 continue;
             $courses[$i] = $enroll->CourseSegment->courses[0];
             $courses[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
@@ -157,41 +149,37 @@ class CourseController extends Controller
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id'
         ]);
-        $CourseSeg=Enroll::where('user_id',$request->user()->id)->pluck('course_segment');
-        $seggg=array();
+        $CourseSeg = Enroll::where('user_id', $request->user()->id)->pluck('course_segment');
+        $seggg = array();
         foreach ($CourseSeg as $cour) {
-            $check=CourseSegment::where('course_id',$request->course_id)->where('id',$cour)->pluck('id')->first();
-            if($check!=null)
-            {
-                $seggg[]=$check;
+            $check = CourseSegment::where('course_id', $request->course_id)->where('id', $cour)->pluck('id')->first();
+            if ($check != null) {
+                $seggg[] = $check;
             }
         }
-        $CourseSeg=array();
-        foreach($seggg as $segggg){
-            $CourseSeg[]=CourseSegment::where('id',$segggg)->get();
+        $CourseSeg = array();
+        foreach ($seggg as $segggg) {
+            $CourseSeg[] = CourseSegment::where('id', $segggg)->get();
         }
-        $clase=array();
-        $lessons=null;
-        $i = 0 ;
-        $lessoncounter=array();
-        $comp=Component::where('type',1)->get();
-        foreach($CourseSeg as $seg)
-        {
-            $lessons= $seg->first()->lessons;
+        $clase = array();
+        $lessons = null;
+        $i = 0;
+        $lessoncounter = array();
+        $comp = Component::where('type', 1)->get();
+        foreach ($CourseSeg as $seg) {
+            $lessons = $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
                 # code...
                 foreach ($segmentClas->classLevel as $key => $classlev) {
                     # code...
                     foreach ($classlev->classes as $key => $class) {
                         # code...
-                        $clase[$i]=$class;
+                        $clase[$i] = $class;
                         $clase[$i]->lessons = $lessons;
-                        foreach($clase[$i]->lessons as $lessonn)
-                        {
-                            $lessoncounter=Lesson::find($lessonn->id);
-                            foreach($comp as $com)
-                            {
-                                $lessonn[$com->name]= $lessoncounter->module($com->module,$com->model)->get();
+                        foreach ($clase[$i]->lessons as $lessonn) {
+                            $lessoncounter = Lesson::find($lessonn->id);
+                            foreach ($comp as $com) {
+                                $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
                             }
                         }
                         $i++;
@@ -200,101 +188,74 @@ class CourseController extends Controller
             }
         }
         //$clase['course'] = Course::find($request->course_id);
-        return HelperController::api_response_format(200 , $clase);
+        return HelperController::api_response_format(200, $clase);
     }
 
 
     public function get_course_by_year_type(Request $request)
     {
-        $academic_year_type=array();
-        $academic_year_type=null;
-        if(isset($request->type_id) && !isset($request->year_id))
-        {
-            $academic_year_type[]=AcademicYearType::where('academic_type_id',$request->type_id)->pluck('id');
-        }
-        else if(!isset($request->type_id) && isset($request->year_id))
-        {
-            $academic_year_type[]=AcademicYearType::where('academic_year_id',$request->year_id)->pluck('id');
-        }
-        else if(isset($request->type_id) && isset($request->year_id))
-        {
+        $academic_year_type = array();
+        $academic_year_type = null;
+        if (isset($request->type_id) && !isset($request->year_id)) {
+            $academic_year_type[] = AcademicYearType::where('academic_type_id', $request->type_id)->pluck('id');
+        } else if (!isset($request->type_id) && isset($request->year_id)) {
+            $academic_year_type[] = AcademicYearType::where('academic_year_id', $request->year_id)->pluck('id');
+        } else if (isset($request->type_id) && isset($request->year_id)) {
             $academic_year_type[] = AcademicYearType::checkRelation($request->year_id, $request->type_id)->id;
         }
-        return CourseController::get_year_level($request,$academic_year_type);
-
+        return CourseController::get_year_level($request, $academic_year_type);
     }
 
-    public static function get_year_level(Request $request ,$academic_year_type)
+    public static function get_year_level(Request $request, $academic_year_type)
     {
-        $year_level=array();
-        $year_level=null;
-        if(isset($request->level_id) && !isset($academic_year_type))
-        {
-            $year_level[]=YearLevel::where('level_id',$request->level_id)->pluck('id');
-        }
-        else if(!isset($request->level_id) && isset($academic_year_type))
-        {
-            foreach($academic_year_type as $ac)
-            {
-                $year_level[]=YearLevel::where('academic_year_type_id',$ac)->pluck('id');
+        $year_level = array();
+        $year_level = null;
+        if (isset($request->level_id) && !isset($academic_year_type)) {
+            $year_level[] = YearLevel::where('level_id', $request->level_id)->pluck('id');
+        } else if (!isset($request->level_id) && isset($academic_year_type)) {
+            foreach ($academic_year_type as $ac) {
+                $year_level[] = YearLevel::where('academic_year_type_id', $ac)->pluck('id');
             }
-        }
-        else if(isset($request->level_id) && isset($academic_year_type))
-        {
-            foreach($academic_year_type as $ac)
-            {
-                $year_level[]=YearLevel::checkRelation($ac,$request->level_id)->id;
+        } else if (isset($request->level_id) && isset($academic_year_type)) {
+            foreach ($academic_year_type as $ac) {
+                $year_level[] = YearLevel::checkRelation($ac, $request->level_id)->id;
             }
         }
 
-        return CourseController::get_class_level($request,$year_level);
+        return CourseController::get_class_level($request, $year_level);
     }
 
-    public static function get_class_level(Request $request ,$year_level)
+    public static function get_class_level(Request $request, $year_level)
     {
-        $class_level=array();
-        $class_level=null;
-        if(isset($request->class_id) && !isset($year_level))
-        {
-            $class_level[]=ClassLevel::where('class_id',$request->class_id)->pluck('id');
-        }
-        else if(!isset($request->class_id) && isset($year_level))
-        {
-            foreach($year_level as $ac)
-            {
-                $class_level[]=ClassLevel::where('year_level_id',$ac)->pluck('id');
+        $class_level = array();
+        $class_level = null;
+        if (isset($request->class_id) && !isset($year_level)) {
+            $class_level[] = ClassLevel::where('class_id', $request->class_id)->pluck('id');
+        } else if (!isset($request->class_id) && isset($year_level)) {
+            foreach ($year_level as $ac) {
+                $class_level[] = ClassLevel::where('year_level_id', $ac)->pluck('id');
+            }
+        } else if (isset($request->class_id) && isset($year_level)) {
+            foreach ($year_level as $ac) {
+                $class_level[] = ClassLevel::checkRelation($request->class_id, $ac)->id;
             }
         }
-        else if(isset($request->class_id) && isset($year_level))
-        {
-            foreach($year_level as $ac)
-            {
-                $class_level[]=ClassLevel::checkRelation($request->class_id,$ac)->id;
-            }
-        }
-        return CourseController::get_segment_class_level($request,$class_level);
+        return CourseController::get_segment_class_level($request, $class_level);
     }
 
-    public static function get_segment_class_level(Request $request ,$class_level)
+    public static function get_segment_class_level(Request $request, $class_level)
     {
-        $segment_class=array();
-        $segment_class=null;
-        if(isset($request->segment_id) && !isset($class_level))
-        {
-            $segment_class[]=SegmentClass::where('segment_id',$request->segment_id)->pluck('id');
-        }
-        else if(!isset($request->segment_id) && isset($class_level))
-        {
-            foreach($class_level as $ac)
-            {
-                $segment_class[]=SegmentClass::where('class_level_id',$ac)->pluck('id');
+        $segment_class = array();
+        $segment_class = null;
+        if (isset($request->segment_id) && !isset($class_level)) {
+            $segment_class[] = SegmentClass::where('segment_id', $request->segment_id)->pluck('id');
+        } else if (!isset($request->segment_id) && isset($class_level)) {
+            foreach ($class_level as $ac) {
+                $segment_class[] = SegmentClass::where('class_level_id', $ac)->pluck('id');
             }
-        }
-        else if(isset($request->segment_id) && isset($class_level))
-        {
-            foreach($class_level as $ac)
-            {
-                $segment_class[]=SegmentClass::checkRelation($ac,$request->segment_id)->id;
+        } else if (isset($request->segment_id) && isset($class_level)) {
+            foreach ($class_level as $ac) {
+                $segment_class[] = SegmentClass::checkRelation($ac, $request->segment_id)->id;
             }
         }
 
@@ -303,25 +264,25 @@ class CourseController extends Controller
 
     public static function get_course_segment_level($segment_class)
     {
-        $course_segment=array();
-        $course_segment=null;
-        if(isset($segment_class))
-        {
-            foreach ($segment_class as $sc)
-            {
-                $course_segment[]=CourseSegment::where('segment_class_id',$sc)->pluck('course_id');
+        $course_segment = array();
+        $course_segment = null;
+        if (isset($segment_class)) {
+            foreach ($segment_class as $sc) {
+                $course_segment[] = CourseSegment::where('segment_class_id', $sc)->pluck('course_id');
             }
         }
         return $course_segment;
     }
-    public function getCoursesOptional(Request $request){
+    public function getCoursesOptional(Request $request)
+    {
 
-        $course_segment= HelperController::Get_Course_segment($request);
-        $optional=array();
-        foreach ($course_segment as $cs){
-                array_push($optional,$cs->optionalCourses);
+        $course_segment = HelperController::Get_Course_segment($request);
+        if (!$course_segment['result'])
+            return HelperController::api_response_format(400, $course_segment['value']);
+        $optional = array();
+        foreach ($course_segment as $cs) {
+            array_push($optional, $cs->optionalCourses);
         }
         return $optional;
     }
-
 }

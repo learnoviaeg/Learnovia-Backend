@@ -6,7 +6,6 @@ header("Access-Control-Allow-Credentials:true");
 
 //install all permissions and roles of system Route
 Route::get('install','SpatieController@install');
-//Route::get('getCoursesOptional', 'CourseController@getCoursesOptional');
 
 //Login and Signup
 Route::group(['prefix' => 'auth'], function () {
@@ -149,6 +148,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::get('get', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
     Route::get('my', 'CourseController@MyCourses')->name('mycourses')->middleware('permission:course/my-courses');
     Route::get('layout','CourseController@GetUserCourseLessons')->name('layout')->middleware('permission:course/layout');
+    Route::get('optional', 'CourseController@getCoursesOptional')->name('optional')->middleware('permission:course/optional');
 });
 
 //USER CRUD ROUTES

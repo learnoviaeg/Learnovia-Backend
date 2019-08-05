@@ -160,6 +160,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-all']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/my-courses']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/layout']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/optional']);
 
             //Enroll Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/enroll-single-user']);
