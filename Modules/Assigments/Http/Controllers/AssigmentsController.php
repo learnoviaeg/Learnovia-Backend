@@ -350,10 +350,6 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200, $body = $stuassignment, $message = []);
         }
     }
-<<<<<<< HEAD
-=======
-
-}
 
     public function toggleAssignmentVisibity(Request $request){
         try{
@@ -372,5 +368,4 @@ class AssigmentsController extends Controller
         }
     }
 
->>>>>>> remotes/origin/assignmentVisibity
 }
