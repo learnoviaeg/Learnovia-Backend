@@ -6,7 +6,6 @@ header("Access-Control-Allow-Credentials:true");
 
 //install all permissions and roles of system Route
 Route::get('install','SpatieController@install');
-//Route::get('getCoursesOptional', 'CourseController@getCoursesOptional');
 
 //Login and Signup
 Route::group(['prefix' => 'auth'], function () {
@@ -70,6 +69,7 @@ Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::get('get', 'AcademicYearController@get')->name('getyear')->middleware('permission:year/get');
     Route::put('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
     Route::delete('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
+    Route::post('setCurrent', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/setCurrent');
 });
 
 //Type Routes
@@ -131,6 +131,8 @@ Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
     Route::get('getall', "segment_class_Controller@get")->name('getclasses')->middleware('permission:segment/get');
 
     Route::post('update', "segment_class_Controller@update")->name('updatesegment')->middleware('permission:segment/update');
+    Route::post('setCurrent', 'segment_class_Controller@setCurrent_segmant')->name('SetCurrentSegment')->middleware('permission:segment/setCurrent');
+
 });
 
 //Category Routes

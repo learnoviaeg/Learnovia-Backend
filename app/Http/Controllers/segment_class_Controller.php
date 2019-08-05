@@ -201,4 +201,18 @@ class segment_class_Controller extends Controller
         }
         return HelperController::api_response_format(200, $segment);
     }
+    public function setCurrent_segmant(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:segments,id'
+        ]);
+
+        $segment = Segment::find($request->id);
+        $segment->update(['current'=>1]);
+
+        Segment::where('id', '!=', $request->id)
+            ->update(['current' => 0]);
+        return HelperController::api_response_format(200, [], ' this Segment is  set to be current ');
+
+    }
 }
