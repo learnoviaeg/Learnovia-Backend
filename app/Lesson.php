@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Lesson extends Model
 {
-    protected $fillable = ['name','course_segment_id','index'];
+    protected $fillable = ['name','course_segment_id','index' , 'image' , 'description'];
     public function courseSegment(){
         return $this->belongsTo('App\CourseSegment');
     }

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Lesson;
 use App\Course;
 use App\CourseSegment;
+use App\attachment;
 
 class LessonController extends Controller
 {
@@ -15,38 +16,32 @@ class LessonController extends Controller
         $request->validate([
             'name' => 'required|array',
             'name.*' => 'required|string',
-            'course_id' => 'required|exists:courses,id'
+            'image' => 'array',
+            'image.*' => 'mimes:jpeg,jpg,png,gif|max:10000',
+            'description' => 'array',
+            'description.*' => 'string'
         ]);
-        $Lessons_array = array();
-
-        $course_segment = CourseSegment::getActive_segmentfromcourse($request->course_id);
-
-        if ($course_segment) {
-            array_push($Lessons_array, $request['name']);
-            $lessons_in_CourseSegment = Lesson::where('course_segment_id', $course_segment)->max('index');
+        $segments = HelperController::Get_Course_segment_Course($request);
+        if (!$segments['result'])
+            return HelperController::api_response_format(400, $segments['value']);
+        foreach ($request->name as $key => $name) {
+            //dd($request->image[$key]);
+            $lessons_in_CourseSegment = Lesson::where('course_segment_id', $segments['value']->id)->max('index');
             $Next_index = $lessons_in_CourseSegment + 1;
-
-            foreach ($Lessons_array as $input) {
-                if (count($input) == 1) {
-                    $lesson = Lesson::create([
-                        'name' => $input['0'],
-                        'course_segment_id' => $course_segment,
-                        'index' => $Next_index
-                    ]);
-                } else {
-                    for ($x = 0; $x <= (count($Lessons_array) + 1); $x++) {
-                        $lesson = Lesson::create([
-                            'name' => $input[$x],
-                            'course_segment_id' => $course_segment,
-                            'index' => $Next_index
-                        ]);
-                    }
-                }
+            $lesson = Lesson::create([
+                'name' => $name,
+                'course_segment_id' => $segments['value']->id,
+                'index' => $Next_index
+            ]);
+            if (isset($request->image[$key])) {
+                $lesson->image = attachment::upload_attachment($request->image[$key], 'lesson', '')->path;
             }
-            return HelperController::api_response_format(201, $lesson, 'Lesson is Created Successfully');
-        } else {
-            return HelperController::api_response_format(201, 'No Segment is allowed');
+            if (isset($request->description[$key])) {
+                $lesson->description = $request->description[$key];
+            }
+            $lesson->save();
         }
+        return HelperController::api_response_format(200, $segments['value']->lessons);
     }
 
 
@@ -68,6 +63,11 @@ class LessonController extends Controller
         ]);
         $lesson = Lesson::find($request->id);
         $lesson->delete();
+        $lessons = Lesson::whereCourse_segment_id($lesson->course_segment_id)->where('index', '>', $lesson->index)->get();
+        foreach ($lessons as $temp) {
+            $temp->index = $temp->index - 1;
+            $temp->save();
+        }
         return HelperController::api_response_format(200, null, 'Lesson is deleted Successfully');
     }
 
@@ -77,15 +77,11 @@ class LessonController extends Controller
         $request->validate([
             'name' => 'required',
             'id'  => 'required|exists:lessons,id',
-            'course_id' => 'exists:courses,id',
         ]);
         $lesson = Lesson::find($request->id);
         $lesson->name = $request->name;
-        if ($request->filled('course_id')) {
-            $course_segment = CourseSegment::getidfromcourse($request->course_id);
-            $lesson->course_segment_id = $course_segment;
-        }
         $lesson->save();
+
         return HelperController::api_response_format(200, $lesson, 'Lesson is updated Successfully');
     }
 
