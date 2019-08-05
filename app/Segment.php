@@ -9,7 +9,7 @@ class Segment extends Model
     protected $fillable = ['name'];
 
     public function Segment_class(){
-        return $this->belongsToMany('App\ClassLevel', 'segment_classes','segment_id','class_level_id');
+        return $this->hasMany('App\SegmentClass','segment_id','id');
     }
     protected $hidden = [
         'created_at','updated_at'
