@@ -89,101 +89,111 @@ class UserQuizController extends Controller
    public function quiz_answer(Request $request){
         $request->validate([
             'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
-            'question_id' => 'required|integer|exists:questions,id',
+            'Questions' => 'required|array',
+            'Questions.*.id' => 'required|integer|exists:questions,id',
         ]);
 
         // check that question exist in the Quiz
         $user_quiz = userQuiz::find($request->user_quiz_id);
         $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
-        if(!$questions_ids->contains($request->question_id)){
-            return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
-        }
 
-        $question = Questions::find($request->question_id);
-        $question_type_id = $question->question_type->id;
-        $question_answers = $question->question_answer->pluck('id');
+        $allData = collect([]);
+        foreach ($request->Questions as $index => $question) {
 
-        $data = [
-            'user_quiz_id' => $request->user_quiz_id,
-            'question_id' => $request->question_id
-        ];
+            if(!$questions_ids->contains($question['id'])){
+                return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+            }
 
-        if(isset($question_type_id)){
-            switch ($question_type_id) {
-                case 1: // True_false
-                    # code...
-                    $request->validate([
-                        'answer_id' => 'required|integer|exists:questions_answers,id',
-                        'and_why' => 'required|string',
-                    ]);
+            $currentQuestion = Questions::find($question['id']);
+            $question_type_id = $currentQuestion->question_type->id;
+            $question_answers = $currentQuestion->question_answer->pluck('id');
 
-                    if(!$question_answers->contains($request->answer_id)){
-                        return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
-                    }
+            $data = [
+                'user_quiz_id' => $request->user_quiz_id,
+                'question_id' => $question['id']
+            ];
 
-                    $data['answer_id'] = $request->answer_id;
-                    $data['and_why'] = $request->and_why;
-                    break;
+            if(isset($question_type_id)){
+                switch ($question_type_id) {
+                    case 1: // True_false
+                        # code...
+                        $request->validate([
+                            'Questions.'.$index.'.answer_id' => 'required|integer|exists:questions_answers,id',
+                            'Questions.'.$index.'.and_why' => 'required|string',
+                        ]);
 
-                case 2: // MCQ
-                    # code...
-                    $request->validate([
-                        'mcq_answers_array' => 'required|array',
-                        'mcq_answers_array.*' => 'required|integer|exists:questions_answers,id'
-                    ]);
-
-                    foreach($request->mcq_answers_array as $mcq_answer){
-                        if(!$question_answers->contains($mcq_answer)){
-                            return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
+                        if(!$question_answers->contains($question['answer_id'])){
+                            return HelperController::api_response_format(400, $question['answer_id'], 'This answer didn\'t belongs to this question');
                         }
-                    }
-                    $data['mcq_answers_array'] = serialize($request->mcq_answers_array);
-                    break;
 
-                case 3: // Match
-                    # code...
-                    $request->validate([
-                        'choices_array' => 'required|array',
-                        'choices_array.*' => 'required|array|min:2|max:2',
-                        'choices_array.*.*' => 'required|integer|exists:questions_answers,id',
-                    ]);
+                        $data['answer_id'] = $question['answer_id'];
+                        $data['and_why'] = $question['and_why'];
+                        break;
 
-                    foreach($request->choices_array as $choices_array){
-                        foreach($choices_array as $choice){
-                            if(!$question_answers->contains($choice)){
+                    case 2: // MCQ
+                        # code...
+                        $request->validate([
+                            'Questions.'.$index.'.mcq_answers_array' => 'required|array',
+                            'Questions.'.$index.'.mcq_answers_array.*' => 'required|integer|exists:questions_answers,id'
+                        ]);
+
+                        foreach($question['mcq_answers_array'] as $mcq_answer){
+                            if(!$question_answers->contains($mcq_answer)){
                                 return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
                             }
                         }
-                    }
+                        $data['mcq_answers_array'] = serialize($question['mcq_answers_array']);
+                        break;
 
-                    $data['choices_array'] = serialize($request->choices_array);
-                    break;
+                    case 3: // Match
+                        # code...
+                        $request->validate([
+                            'Questions.'.$index.'.choices_array' => 'required|array',
+                            'Questions.'.$index.'.choices_array.*' => 'required|array|min:2|max:2',
+                            'Questions.'.$index.'.choices_array.*.*' => 'required|integer|exists:questions_answers,id',
+                        ]);
 
-                case 4: // Essay
-                    # code...
-                    $request->validate([
-                        'content' => 'required|string',
-                    ]);
-                    $data['content'] = $request->content;
-                    break;
+                        foreach($question['choices_array'] as $choices_array){
+                            foreach($choices_array as $choice){
+                                if(!$question_answers->contains($choice)){
+                                    return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
+                                }
+                            }
+                        }
 
-                case 5: // Paragraph
-                    # code...
-                    $request->validate([
-                        'content' => 'required|string',
-                    ]);
-                    $data['content'] = $request->content;
-                    break;
+                        $data['choices_array'] = serialize($question['choices_array']);
+                        break;
 
+                    case 4: // Essay
+                        # code...
+                        $request->validate([
+                            'Questions.'.$index.'.content' => 'required|string',
+                        ]);
+                        $data['content'] = $question['content'];
+                        break;
+
+                    case 5: // Paragraph
+                        # code...
+                        $request->validate([
+                            'Questions.'.$index.'.content' => 'required|string',
+                        ]);
+                        $data['content'] = $question['content'];
+                        break;
+
+                }
+
+                $allData->push($data);
+            }
+            else{
+                return HelperController::api_response_format(400, null, 'Something went wrong');
             }
 
-            $userQuiz = userQuizAnswer::create($data);
-
-            return HelperController::api_response_format(200, $userQuiz, 'Quiz Answer Registered Successfully');
-
         }
-        else{
-            return HelperController::api_response_format(400, null, 'Something went wrong');
+        foreach($allData as $data){
+            userQuizAnswer::create($data);
         }
+
+        return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
+
    }
 }
