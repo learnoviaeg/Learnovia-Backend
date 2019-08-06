@@ -93,10 +93,10 @@ class LevelsController extends Controller
     }
 
 
-    public function get()
+    public function get(Request $request)
     {
-        $levels=Level::all();
-        return HelperController::api_response_format(200,$levels);
+        $levels=Level::paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(200,$levels->items());
 
     }
 }

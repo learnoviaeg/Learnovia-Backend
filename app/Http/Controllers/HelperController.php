@@ -95,4 +95,12 @@ class HelperController extends Controller
         $class_level = ClassLevel::checkRelation($request->class ,$year_level->id);
         return $class_level;
     }
+
+    public static function GetPaginate($request)
+    {
+        if($request->filled('paginate')){
+            return $request->paginate;
+        }
+        return 10 ;
+    }
 }
