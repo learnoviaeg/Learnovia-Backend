@@ -62,8 +62,8 @@ class segment_class_Controller extends Controller
     {
         if ($request->id == null)
         {
-            $segments=Segment::all();
-            return HelperController::api_response_format(200, $segments);
+            $segments=Segment::paginate(HelperController::GetPaginate($request));
+            return HelperController::api_response_format(200, $segments->items());
         }
         else
         {
