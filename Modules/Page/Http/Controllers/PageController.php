@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Modules\Page\Entities\Page;
+use Modules\Page\Entities\pageLesson;
 
 class PageController extends Controller
 {
@@ -44,41 +45,43 @@ class PageController extends Controller
      * Display a listing of the resource.
      * @return Response
      */
-    public function index()
+    public function add(Request $request)
     {
-        return view('page::index');
-    }
+        $request->validate([
+            'title' => 'required|string',
+            'content' => 'required|string',
+            'visible' => 'nullable|boolean'
+        ]);
+        $page= new Page();
+        $page->title=$request->title;
+        $page->content=$request->content;
+        if(isset($request->visible))
+        {
+            $page->visible;
+        }
+        $page->save();
+        return HelperController::api_response_format(200, $page,'Page added Successfully');
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Response
-     */
-    public function store(Request $request)
+    }
+    public function linkpagelesson(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'page_id' => 'required|exists:pages,id',
+            'lesson_id' => 'required|exists:lessons,id',
+        ]);
+        $check=pageLesson::where('page_id',$request->page_id)->where('lesson_id',$request->lesson_id)->pluck('id')->first();
+        if($check!=null)
+        {
+            return HelperController::api_response_format(422, [],'relation is already exist');
 
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Response
-     */
-    public function show($id)
-    {
-        return view('page::show');
-    }
+        }
+        $page= new pageLesson();
+        $page->page_id=$request->page_id;
+        $page->lesson_id=$request->lesson_id;
+        $page->save();
+        return HelperController::api_response_format(200, $page,'Page linked with lesson Successfully');
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        return view('page::edit');
     }
-
     /**
      * Update the specified resource in storage.
      * @param Request $request

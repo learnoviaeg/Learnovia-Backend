@@ -15,8 +15,10 @@ use Illuminate\Http\Request;
 
 Route::group(['prefix' => 'page', 'middleware' => 'auth:api'] , function(){
     Route::get('install' , 'PageController@install')->name('installPage');
-    Route::get('add' , 'PageController@store')->name('addPage')->middleware('permission:page/add');
+    Route::post('add' , 'PageController@add');//->name('addPage')->middleware('permission:page/add');
     Route::post('update' , 'PageController@update');//->name('updatePage')->middleware('permission:page/update');
     Route::post('delete' , 'PageController@destroy');//->name('deletePage')->middleware('permission:page/delete');
     Route::post('toggle' , 'PageController@toggle');//->name('togglePage')->middleware('permission:page/toggle');
+    Route::post('linklesson' , 'PageController@linkpagelesson');
+
 });
