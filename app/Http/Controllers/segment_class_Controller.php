@@ -40,25 +40,18 @@ class segment_class_Controller extends Controller
             // ->with(['yearLevels','yearLevels.yearType'])
             $segmentsTotal = collect([]);
             foreach ($classLevel->segmentClass as $segmentClass){
-                $segments = $segmentClass->segments;
-                foreach($segments as $segment){
-                    foreach($segment->Segment_class as $segmentClass){
-                        foreach($segmentClass->classLevel as $classLevel){
-                            $classLevel->yearLevels;
-                            foreach($classLevel->yearLevels as $yearLevels){
-                                $yearLevels->yearType->academicyear;
-                                $yearLevels->yearType->academictype;
-                            }
-                        }
-                    }
-                }
-                //$segment->Segment_class;
+                $segment = Segment::with([
+                    'Segment_class',
+                    'Segment_class.classLevel',
+                    'Segment_class.classLevel.yearLevels',
+                    'Segment_class.classLevel.yearLevels.yearType.academicyear',
+                    'Segment_class.classLevel.yearLevels.yearType.academictype',
+                    ])->where('id',$segmentClass->segment_id)->get();
     
                 $segmentsTotal->push($segment);
             }
-            return response()->json($segmentsTotal);
 
-            return HelperController::api_response_format(200, $segments);
+            return HelperController::api_response_format(200, $segmentsTotal);
         }
         else{
             $request->validate([
@@ -67,6 +60,7 @@ class segment_class_Controller extends Controller
             $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
             $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
             $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
+
             $segmentsTotal = collect([]);
             foreach ($classLevel->segmentClass as $segmentClass){
                 $segments = $segmentClass->segments;
