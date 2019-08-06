@@ -169,5 +169,4 @@ class AC_year_type extends Controller
         }
         return HelperController::api_response_format(400, [], 'Assignment Fail');
     }
-
 }

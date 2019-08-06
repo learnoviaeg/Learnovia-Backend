@@ -45,13 +45,9 @@ class MediaController extends Controller
                 'Imported_file.*' => 'required|file|distinct|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
 
                 'lesson_id'=>'required|integer|exists:lessons,id',
-
                 'year' => 'required|integer|exists:academic_years,id',
-
                 'type' => 'required|integer|exists:academic_types,id',
-
                 'level' => 'required|integer|exists:levels,id',
-
                 'class' => 'required|array',
                 'class.*' => 'required|integer|exists:classes,id',
             ]);
@@ -71,6 +67,7 @@ class MediaController extends Controller
                 $class_level = HelperController::Get_class_LEVELS($newRequest);
 
                 $activeSegmentClass = $class_level->segmentClass->where('is_active',1)->first();
+
                 if(isset($activeSegmentClass)){
                     $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
                     if(isset($activeCourseSegment)){
