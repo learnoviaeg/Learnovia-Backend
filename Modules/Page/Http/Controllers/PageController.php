@@ -2,9 +2,11 @@
 
 namespace Modules\Page\Http\Controllers;
 
+use App\Http\Controllers\HelperController;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Modules\Page\Entities\Page;
 
 class PageController extends Controller
 {
@@ -83,9 +85,30 @@ class PageController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        $request->validate([
+            'id' => 'required|exists:pages,id'
+        ]);
+
+        $page = Page::find($request->id);
+
+        $request->validate([
+            'title' => 'required|string',
+            'content' => 'required|string',
+            'visible' => 'nullable|boolean'
+        ]);
+
+        $data=[
+                'title' => $request->title,
+                'content' => $request->content
+            ];
+            if(isset($request->visible)) {
+                $data['visible']=$request->visible;
+            }
+
+        $page->update($data);
+        return HelperController::api_response_format(200, $page,'Page Updated Successfully');
     }
 
     /**
@@ -93,8 +116,38 @@ class PageController extends Controller
      * @param int $id
      * @return Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        //
+        $request->validate([
+            'id' => 'required|exists:pages,id',
+        ]);
+
+        $page =Page::find($request->id);
+        if ($page->delete()) {
+            return HelperController::api_response_format(200, $page,'Page Deleted Successfully');
+        }
+        return HelperController::api_response_format(404, [], 'Not Found');
     }
+
+    public function toggle(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:pages,id',
+        ]);
+
+        $page =Page::find($request->id);
+        if($page->visible == 0)
+        {
+            $page->update([
+                'visible' => 1
+            ]);
+        }
+        else{
+            $page->update([
+                'visible' => 0
+            ]);
+        }
+        return HelperController::api_response_format(200, $page,'Page Toggled Successfully');
+    }
+
 }
