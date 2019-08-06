@@ -46,6 +46,11 @@ class Enroll extends Model
         return $this->belongsTo('App\CourseSegment', 'course_segment');
     }
 
+    public function User()
+    {
+        return $this->belongsTo('App\User', 'user_id');
+    }
+
     public static function Get_User_ID($Course_segment_id)
     {
         $check = self::where('course_segment', $Course_segment_id)->pluck('user_id');

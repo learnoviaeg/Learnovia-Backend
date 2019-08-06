@@ -20,7 +20,7 @@ class YearLevel extends Model
 
     public function yearType()
     {
-        return $this->hasMany('App\AcademicYearType', 'id');
+        return $this->belongsTo('App\AcademicYearType', 'id');
     }
 
     public static function checkRelation($yearType, $level)

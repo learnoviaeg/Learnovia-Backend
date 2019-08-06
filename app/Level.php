@@ -12,6 +12,11 @@ class Level extends Model
         return $this->belongsToMany('App\AcademicYearType', 'year_levels', 'level_id', 'academic_year_type_id');
     }
 
+    public function year_level()
+    {
+        return $this->hasMany('App\YearLevel', 'level_id', 'id');
+    }
+
     public static function Validate($data){
         $validator = Validator::make($data, [
             'name' => 'required|string|max:50',

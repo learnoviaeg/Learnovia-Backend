@@ -9,7 +9,7 @@ class AcademicType extends Model
     protected $fillable = ['name' , 'segment_no'];
     public function AC_year()
     {
-        return $this->belongsToMany('App\AcademicYear', 'academic_year_types', 'academic_year_id', 'academic_type_id');
+        return $this->belongsToMany('App\AcademicYear', 'academic_year_types', 'academic_type_id', 'academic_year_id');
     }
 
     public function yearType(){

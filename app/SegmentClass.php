@@ -22,11 +22,11 @@ class SegmentClass extends Model
     }
 
     public function segments(){
-        return $this->hasMany('App\Segment' , 'id' , 'segment_id');
+        return $this->belongsTo('App\Segment' , 'id' , 'segment_id');
     }
 
     public function classLevel(){
-        return $this->hasMany('App\ClassLevel' , 'id' , 'class_level_id');
+        return $this->belongsTo('App\ClassLevel' , 'id' , 'class_level_id');
     }
 
     public static function checkRelation($classLevel , $segment){

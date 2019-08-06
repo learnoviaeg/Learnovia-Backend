@@ -39,12 +39,12 @@ class CourseSegment extends Model
 
     public function courses()
     {
-        return $this->hasMany('App\Course', 'id', 'course_id');
+        return $this->belongsTo('App\Course', 'id', 'course_id');
     }
 
     public function optionalCourses()
     {
-        return $this->hasMany('App\Course', 'id', 'course_id')->whereMandatory(0);
+        return $this->belongsTo('App\Course', 'id', 'course_id')->whereMandatory(0);
     }
     public function users()
     {
@@ -53,7 +53,7 @@ class CourseSegment extends Model
 
     public function segmentClasses()
     {
-        return $this->hasMany('App\SegmentClass', 'id', 'segment_class_id');
+        return $this->belongsTo('App\SegmentClass', 'id', 'segment_class_id');
     }
 
     public function lessons()
@@ -72,10 +72,16 @@ class CourseSegment extends Model
         }
         return $courseSegment;
     }
-    Public function GradeCategory()
+    public function GradeCategory()
     {
         return $this->hasMany('App\GradeCategory');
     }
+
+    public function Enroll()
+    {
+        return $this->hasMany('App\Enroll','course_segment');
+    }
+
     Public static function GradeCategoryPerSegmentbyId($id)
     {
         $GradeCategoriesInSegment=self::find($id)->with('GradeCategory')->first();

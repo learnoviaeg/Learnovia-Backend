@@ -28,12 +28,12 @@ class ClassLevel extends Model
 
     public function classes()
     {
-        return $this->hasMany('App\Classes', 'id', 'class_id');
+        return $this->belongsTo('App\Classes', 'id', 'class_id');
     }
 
     public function yearLevels()
     {
-        return $this->hasMany('App\YearLevel', 'id', 'year_level_id');
+        return $this->belongsTo('App\YearLevel', 'id', 'year_level_id');
     }
 
     public function segmentClass()
