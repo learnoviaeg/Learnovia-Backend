@@ -34,11 +34,11 @@ class HelperController extends Controller
     public static function Get_Course_segment($request)
     {
         $rules = [
-            'year' => 'exists:academic_years,id',
+            'year' => 'nullable|exists:academic_years,id',
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
-            'segment' => 'exists:segments,id',
+            'segment' => 'nullable|exists:segments,id',
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
@@ -62,11 +62,11 @@ class HelperController extends Controller
     public static function Get_Course_segment_Course($request)
     {
         $rules = [
-            'year' => 'exists:academic_years,id',
+            'year' => 'nullable|exists:academic_years,id',
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
-            'segment' => 'exists:segments,id',
+            'segment' => 'nullable|exists:segments,id',
             'course' => 'required|exists:courses,id',
         ];
         $validator = Validator::make($request->all(), $rules);
