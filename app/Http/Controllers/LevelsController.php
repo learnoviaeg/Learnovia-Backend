@@ -83,10 +83,11 @@ class LevelsController extends Controller
         $yearType = AcademicYearType::checkRelation($request->year , $request->type);
         $levels = [];
         if($request->filled('id')){
-            $levels=Level::find($request->id);
+           $levels=Level::where('id',$request->id)->with('years')->first();
+           
         }else{
         foreach ($yearType->yearLevel as $yearLevel){
-            $levels[] = $yearLevel->levels[0];
+            $levels[] = $yearLevel->levels[0]->with('years')->first();
         }
     }
         return HelperController::api_response_format(200,$levels);
@@ -95,7 +96,7 @@ class LevelsController extends Controller
 
     public function get()
     {
-        $levels=Level::all();
+        $levels=Level::with('years')->get();
         return HelperController::api_response_format(200,$levels);
 
     }

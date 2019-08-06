@@ -35,25 +35,58 @@ class segment_class_Controller extends Controller
             $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
             $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
             $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
-            $segments = [];
+
+
+            // ->with(['yearLevels','yearLevels.yearType'])
+            $segmentsTotal = collect([]);
             foreach ($classLevel->segmentClass as $segmentClass){
-                $segments[] = $segmentClass->segments[0];
+                $segments = $segmentClass->segments;
+                foreach($segments as $segment){
+                    foreach($segment->Segment_class as $segmentClass){
+                        foreach($segmentClass->classLevel as $classLevel){
+                            $classLevel->yearLevels;
+                            foreach($classLevel->yearLevels as $yearLevels){
+                                $yearLevels->yearType->academicyear;
+                                $yearLevels->yearType->academictype;
+                            }
+                        }
+                    }
+                }
+                //$segment->Segment_class;
+    
+                $segmentsTotal->push($segment);
             }
+            return response()->json($segmentsTotal);
+
             return HelperController::api_response_format(200, $segments);
         }
-        else {
+        else{
             $request->validate([
                 'id'  => 'exists:academic_years,id',
             ]);
             $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
             $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
             $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
-            $segments = [];
+            $segmentsTotal = collect([]);
             foreach ($classLevel->segmentClass as $segmentClass){
-                $segments[] = $segmentClass->segments[0];
+                $segments = $segmentClass->segments;
+                foreach($segments as $segment){
+                    foreach($segment->Segment_class as $segmentClass){
+                        foreach($segmentClass->classLevel as $classLevel){
+                            $classLevel->yearLevels;
+                            foreach($classLevel->yearLevels as $yearLevels){
+                                $yearLevels->yearType->academicyear;
+                                $yearLevels->yearType->academictype;
+                            }
+                        }
+                    }
+                }
+                //$segment->Segment_class;
+    
+                $segmentsTotal->push($segment);
+
             }
-            $segmentscoll = collect($segments);
-            $allsegments= $segmentscoll->where('id',$request->id);
+            $allsegments= $segmentsTotal->where('id',$request->id);
             return HelperController::api_response_format(200, $allsegments);
         }
     }

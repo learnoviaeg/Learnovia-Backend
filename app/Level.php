@@ -36,6 +36,6 @@ class Level extends Model
         return $ids;
     }
     protected $hidden = [
-        'created_at','updated_at'
+        'created_at','updated_at','pivot'
     ];
 }

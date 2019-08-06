@@ -47,7 +47,7 @@ class CategoryController extends Controller
             'id' => 'exists:categories,id'
         ]);
         if (isset($request->id))
-            return HelperController::api_response_format(200, Category::find($request->id));
-        return HelperController::api_response_format(200, Category::all());
+            return HelperController::api_response_format(200, Category::where('id',$request->id)->with(['courses','courses.activeSegment','courses.activeSegment.segmentClasses','courses.activeSegment.segmentClasses.classLevel','courses.activeSegment.segmentClasses.classLevel.yearLevels','courses.activeSegment.segmentClasses.classLevel.yearLevels.yearType'])->first());
+        return HelperController::api_response_format(200, Category::with(['courses','courses.activeSegment','courses.activeSegment.segmentClasses','courses.activeSegment.segmentClasses.classLevel','courses.activeSegment.segmentClasses.classLevel.yearLevels','courses.activeSegment.segmentClasses.classLevel.yearLevels.yearType'])->get());
     }
 }

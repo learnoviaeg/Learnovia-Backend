@@ -10,12 +10,12 @@ class AcademicYearType extends Model
 
     public function academicyear()
     {
-        return $this->hasMany('App\AcademicYear' , 'id' , 'academic_year_id');
+        return $this->belongsTo('App\AcademicYear' , 'academic_year_id' , 'id');
     }
 
     public function academictype()
     {
-        return $this->hasMany('App\AcademicType' , 'id' , 'academic_type_id');
+        return $this->belongsTo('App\AcademicType' , 'academic_type_id' , 'id');
     }
     public function yearLevel(){
         return $this->hasMany('App\YearLevel');
@@ -43,6 +43,6 @@ class AcademicYearType extends Model
     }
 
     protected $hidden = [
-        'created_at','updated_at'
+        'created_at','updated_at','pivot',
     ];
 }

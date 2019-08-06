@@ -30,15 +30,16 @@ class ClassController extends Controller
             $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
             $class =[];
             foreach ($yearlevel->classLevels as $classLevel){
-                $class[] = $classLevel->classes[0];
+                $class[] = $classLevel->classes[0]->with(['classlevel' , 'classlevel.yearLevels'])->first();
+                
             }
             return HelperController::api_response_format(200, $class);
         }
         else
         {
-            $class = Classes::find($request->id);
+            $class = Classes::where('id',$request->id)->with(['classlevel' , 'classlevel.yearLevels'])->first();
             if ($class)
-                return HelperController::api_response_format(200, new Classes($class));
+                return HelperController::api_response_format(200,$class);
             return HelperController::NOTFOUND();
         }
 

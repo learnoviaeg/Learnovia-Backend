@@ -103,23 +103,23 @@ class CourseController extends Controller
             'class_id' => 'nullable|exists:classes,id',
             'segment_id' => 'nullable|exists:segments,id',
         ]);
-        if (isset($request->id)) {
-            return HelperController::api_response_format(200, Course::with('category')->whereId($request->id)->first());
-        } else if (isset($request->category_id)) {
-            $courses = Course::where('category_id', $request->category_id)->get();
-            return HelperController::api_response_format(200, $courses);
-        } else {
-            $course = CourseController::get_course_by_year_type($request);
-            if (!isset($course)) {
-                return HelperController::api_response_format(200, Course::with('category')->get());
-            } else {
-                $returncourse = array();
-                foreach ($course as $cc) {
-                    $returncourse[] = Course::where('id', $cc)->first();
-                }
-                return HelperController::api_response_format(200, $returncourse);
-            }
+        $teacher=array();
+        $active_course_SegmentID=CourseSegment::getActive_segmentfromcourse($request->id);
+        $teacher=Enroll::where('course_segment',$active_course_SegmentID)->where('role_id',1)->pluck('username')->first();
+        if (isset($request->id)){
+            $Course=Course::where('id',$request->id)->with(['activeSegment','activeSegment.segmentClasses','activeSegment.segmentClasses.classLevel','activeSegment.segmentClasses.classLevel.yearLevels','activeSegment.segmentClasses.classLevel.yearLevels.yearType'])->first();
+            return HelperController::api_response_format(200, [$Course,$teacher]);
         }
+            else{
+                $course_id=Course::get('id');
+                foreach($course_id as $id){
+                    $active_course_SegmentID=CourseSegment::getActive_segmentfromcourse($request->id);
+                    $teacher[]=Enroll::where('course_segment',$active_course_SegmentID)->where('role_id',1)->pluck('username')->first();
+                }
+                return HelperController::api_response_format(200, [Course::with(['activeSegment','activeSegment.segmentClasses','activeSegment.segmentClasses.classLevel','activeSegment.segmentClasses.classLevel.yearLevels','activeSegment.segmentClasses.classLevel.yearLevels.yearType'])->get() , $teacher]);
+
+
+            }
     }
 
     public function delete(Request $request)
