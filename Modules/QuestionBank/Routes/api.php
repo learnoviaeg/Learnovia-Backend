@@ -28,6 +28,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('deleteQuiz', 'QuizController@destroy')->middleware('permission:quiz/delete');
     Route::get('getQuiz', 'QuizController@get')->middleware('permission:quiz/get');
 
+
     //Quiz Lesson Routes
     Route::post('addQuizLesson', 'QuizLessonController@store')->middleware('permission:quiz/add-quiz-lesson');
     Route::post('updateQuizLesson', 'QuizLessonController@update')->middleware('permission:quiz/update-quiz-lesson');

@@ -191,9 +191,8 @@ class QuizController extends Controller
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id'
         ]);
-        $quiz = Quiz::where('id',$request->quiz_id)->pluck('shuffle');
-
-        if($quiz == '0' )
+        $quiz = Quiz::where('id',$request->quiz_id)->pluck('shuffle')->first();
+        if($quiz == 0)
         {
             $quiz = quiz::find($request->quiz_id);
             $Questions = $quiz->Question;
@@ -209,6 +208,9 @@ class QuizController extends Controller
                 if(count($question->childeren) > 0){
                     $shuffledChildQuestion = $question->childeren->shuffle();
                     unset($question->childeren);
+                    foreach($shuffledChildQuestion as $single){
+                        $single->question_type;
+                    }
                     $question->childeren = $shuffledChildQuestion;
                     foreach($shuffledChildQuestion as $childQuestion){
                         $answers = $childQuestion->question_answer->shuffle();

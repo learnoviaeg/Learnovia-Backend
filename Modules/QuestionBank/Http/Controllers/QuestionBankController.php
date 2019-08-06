@@ -112,6 +112,12 @@ class QuestionBankController extends Controller
                 $question->question_category;
                 $question->question_course;
                 $question->question_answer;
+
+                $question->childeren;
+                foreach($question->childeren as $single){
+                    $single->question_type;
+                }
+
             }
             $data = $questions;
         } else {
@@ -121,6 +127,10 @@ class QuestionBankController extends Controller
             $question->question_category;
             $question->question_course;
             $question->question_answer;
+            $question->childeren;
+            foreach($question->childeren as $single){
+                $single->question_type;
+            }
 
             $data = $question;
         }
@@ -140,6 +150,7 @@ class QuestionBankController extends Controller
 
         $questions = Questions::inRandomOrder()
             ->where('course_id', $request->course_id)
+            ->where('parent', null)
             ->limit($request->randomNumber)
             ->get();
 
@@ -154,7 +165,7 @@ class QuestionBankController extends Controller
      *          access Question[0][answers][0] , Question[0][Is_True][0] and so on
      * @return: MSG => Question Created Successfully
      */
-    public static function CreateOrFirstQuestion($Question)
+    public static function CreateOrFirstQuestion($Question,$parent = null)
     {
         $valid = Validator::make($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
