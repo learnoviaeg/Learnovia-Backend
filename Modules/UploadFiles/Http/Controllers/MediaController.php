@@ -40,7 +40,7 @@ class MediaController extends Controller
     {
         try{
             $request->validate([
-                'description' => 'required|string|min:1',
+                'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
 
