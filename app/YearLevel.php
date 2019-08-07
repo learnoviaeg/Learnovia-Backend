@@ -36,7 +36,7 @@ class YearLevel extends Model
     }
 
     protected $hidden = [
-        'created_at', 'updated_at'
+        'created_at', 'updated_at','academic_year_type_id','id','level_id'
     ];
 
     public static function GetYearLevelId($LevelID)

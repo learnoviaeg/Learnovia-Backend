@@ -204,4 +204,16 @@ class EnrollUserToCourseController extends Controller
         }
 
     }
+    Public function EditUserRoleInCourse(Request $request){
+      
+        $request->validate([
+            'role_id' => 'required|exists:roles,id',
+            'id' => 'required|exists:enrolls,id',
+        ]);
+        $Eroll=Enroll::find($request->id);
+        $Eroll->update([
+            'role_id' => $request->role_id,
+        ]);
+        return HelperController::api_response_format(200, $Eroll, 'Role is updated successfully ');
+    } 
 }

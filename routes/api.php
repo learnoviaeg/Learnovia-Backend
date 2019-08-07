@@ -70,6 +70,7 @@ Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::put('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
     Route::delete('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
 });
+Route::get('GetTypeOrYear', 'AcademicYearController@GetTypeOrYear');
 
 //Type Routes
 Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
@@ -102,7 +103,6 @@ Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
 });
-
 //Class Routes
 Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'ClassController@AddClassWithYear')->name('addclass')->middleware('permission:class/add');
@@ -131,6 +131,7 @@ Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
 
     Route::post('update', "segment_class_Controller@update")->name('updatesegment')->middleware('permission:segment/update');
 });
+Route::get('GetTree', "segment_class_Controller@GetAllTree");
 
 //Category Routes
 Route::group(['prefix' => 'category', 'middleware' => 'auth:api'], function () {
@@ -172,6 +173,8 @@ Route::group(['prefix' => 'enroll' , 'middleware' => 'auth:api'], function () {
     Route::post('usertech', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
     Route::get('GetEnrolledStudent', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');
 });
+Route::post('EditRole', 'EnrollUserToCourseController@EditUserRoleInCourse');
+
 
 
 //Messages Routes
@@ -221,3 +224,5 @@ Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory'
 Route::post('UpdateGradeCategory', 'GradeCategoryController@UpdateGradeCategory');
 Route::post('MoveToParentCategory', 'GradeCategoryController@MoveToParentCategory');
 Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
+
+

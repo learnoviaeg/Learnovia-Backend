@@ -11,6 +11,7 @@ use App\SegmentClass;
 use App\Segment;
 use App\Http\Resources\Segment_class_resource;
 use App\AcademicType;
+use App\AcademicYear;
 
 class segment_class_Controller extends Controller
 
@@ -201,4 +202,59 @@ class segment_class_Controller extends Controller
         }
         return HelperController::api_response_format(200, $segment);
     }
+
+    Public function GetAllTree (Request $request){
+        $request->validate([
+            'year'  => 'exists:academic_years,id',
+        ]);
+        if($request->filled('year')){
+            $tree=AcademicYearType::with([
+                'academictype'=> function ($query) {
+                    $query->select('id','name');},
+             
+                'yearLevel.levels'=> function ($query) {
+                    $query->select('id','name');},
+             
+                'yearLevel.classLevels.classes'=> function ($query) {
+                    $query->select('id','name');},
+
+                'yearLevel.classLevels.segmentClass',
+                'yearLevel.classLevels.segmentClass.segments'=> function ($query) {
+                    $query->select('id','name');},
+                
+                'yearLevel.classLevels.segmentClass.courseSegment.courses'=> function ($query) {
+                    $query->select('id','name');},
+                ])->where('academic_year_id',$request->year)->get();
+                 $finaltree=array();
+                 foreach($tree as $tre)
+                 $finaltree[]=array_except($tre,['academic_year_id','academic_type_id']);
+                return $finaltree;
+
+        }
+else{
+    $tree=AcademicYearType::with([
+        'academictype'=> function ($query) {
+            $query->select('id','name');},
+     
+        'yearLevel.levels'=> function ($query) {
+            $query->select('id','name');},
+     
+        'yearLevel.classLevels.classes'=> function ($query) {
+            $query->select('id','name');},
+  
+        'yearLevel.classLevels.segmentClass.segments'=> function ($query) {
+            $query->select('id','name');},
+        
+        'yearLevel.classLevels.segmentClass.courseSegment.courses'=> function ($query) {
+            $query->select('id','name');},
+        ])->get();
+         $finaltree=array();
+         foreach($tree as $tre)
+         $finaltree[]=array_except($tre,['academic_year_id','academic_type_id']);
+        return $finaltree;
+    }
+ }
+
+
+
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\AcademicYear;
 use App\AcademicYearType;
+use App\AcademicType;
 use App\Http\Resources\Academic_Year as Academic_YearResource;
 
 class AcademicYearController extends Controller
@@ -84,5 +85,20 @@ class AcademicYearController extends Controller
             return HelperController::api_response_format(200, $year);
         }
         return HelperController::api_response_format(404, [], 'Not Found');
+    }
+    Public function GetTypeOrYear(Request $request){
+        $request->validate([
+            'year'  => 'exists:academic_years,id',
+            'type'  => 'exists:academic_types,id',
+            ]);
+            if($request->filled('year')){
+                $type=AcademicYear::where('id',$request->year)->with('AC_Type')->get();
+                return HelperController::api_response_format(200, $type);
+            }
+            if($request->filled('type')){
+                $year=AcademicType::where('id',$request->type)->with('AC_year')->get();
+                return HelperController::api_response_format(200, $year);
+            }
+    
     }
 }
