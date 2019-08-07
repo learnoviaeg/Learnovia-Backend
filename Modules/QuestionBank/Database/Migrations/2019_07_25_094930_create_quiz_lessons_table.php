@@ -22,8 +22,8 @@ class CreateQuizLessonsTable extends Migration
             $table->unsignedBigInteger('lesson_id');
             $table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade')->onUpdate('cascade');
 
-            $table->dateTime('start_date');
-            $table->dateTime('due_date');
+            $table->timestamp('start_date');
+            $table->timestamp('due_date')->nullable();
 
             $table->integer('max_attemp');
             $table->unsignedBigInteger('grading_method_id');

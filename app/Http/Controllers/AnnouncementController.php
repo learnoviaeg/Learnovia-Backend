@@ -30,8 +30,8 @@ class AnnouncementController extends Controller
             'title'=>'required',
             'description' => 'required',
             'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
-            'start_date'=>'before:due_date|after:'.Carbon::now(),
-            'due_date'=>'after:'.Carbon::now(),
+            'start_date'=>'date |date_format:Y-m-d H:i:s|before:due_date|after:'.Carbon::now(),
+            'due_date'=>'date |date_format:Y-m-d H:i:s|after:'.Carbon::now(),
             'assign'=> 'required'
         ]);
 

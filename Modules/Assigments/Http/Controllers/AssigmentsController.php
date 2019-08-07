@@ -51,8 +51,8 @@ class AssigmentsController extends Controller
             'is_graded' => 'required|boolean',
             'mark' => 'required|integer',
             'allow_attachment' => 'required|integer|min:0|max:3',
-            'opening_date' => 'required|before:closing_date|after:' . Carbon::now(),
-            'closing_date' => 'required',
+            'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date|after:' . Carbon::now(),
+            'closing_date' => 'required|date|date_format:Y-m-d H:i:s',
             'visiable' => 'required|boolean',
             'course_segment' => 'required|exists:enrolls,course_segment',
         ]);
@@ -104,8 +104,8 @@ class AssigmentsController extends Controller
             'is_graded' => 'required|boolean',
             'mark' => 'required|integer',
             'allow_attachment' => 'required|boolean',
-            'opening_date' => 'required|before:closing_date|after:' . Carbon::now(),
-            'closing_date' => 'required',
+            'opening_date' => 'required|date |date_format:Y-m-d H:i:s|before:closing_date|after:' . Carbon::now(),
+            'closing_date' => 'required|date |date_format:Y-m-d H:i:s',
             'visiable' => 'required|boolean',
             'file_description' => 'string',
 

@@ -19,8 +19,8 @@ class CreateAssignmentsTable extends Migration
             $table->longText('content')->nullable();
             $table->unsignedBigInteger('attachment_id')->nullable();
             $table->foreign('attachment_id')->references('id')->on('attachments')->onDelete('cascade')->onUpdate('cascade');
-            $table->dateTime('start_date');
-            $table->dateTime('due_date');
+            $table->timestamp('start_date');
+            $table->timestamp('due_date')->nullable();
             $table->boolean('is_graded');
             $table->boolean('visiable');
             $table->unsignedBigInteger('grade_category')->nullable();
