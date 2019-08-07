@@ -11,6 +11,7 @@ use App\SegmentClass;
 use App\Segment;
 use App\Http\Resources\Segment_class_resource;
 use App\AcademicType;
+use App\AcademicYear;
 
 class segment_class_Controller extends Controller
 
@@ -147,28 +148,50 @@ class segment_class_Controller extends Controller
      *           if not -> return "NOTFOUND Error"
      *
      */
-    public function Assign_to_anther_Class(Request $req)
+    public function Assign_to_anther_Class(Request $request)
     {
+        $rules =[
+            'year' => 'array',
+            'year.*' => 'exists:academic_years,id',
+            'type' => 'array',
+            'type.*' => 'required|exists:academic_types,id',
+            'level'=> 'array',
+            'level.*' => 'required|exists:levels,id',
+            'class'=> 'array',
+            'class.*' => 'required|exists:classes,id',
+            'segment' => 'required|exists:segments,id',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails())
+            return ['result' => false, 'value' => $validator->errors()];
 
-        $valid = Validator::make($req->all(), [
-            'id_segment' => 'required|exists:segments,id',
-            'class_level_id' => 'required|exists:class_levels,id'
-        ]);
-        if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors());
+        $count=0;
+        if( (count($request->type) == count($request->level)) && (count($request->level) == count($request->class)))
+        {
+            while(isset($request->class[$count]))
+            {
+                $year = AcademicYear::Get_current()->id;
+                if (isset($request->year[$count])) {
+                    $year = $request->year[$count];
+                }
+
+                $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
+                $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
+                $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
+                SegmentClass::create([
+                    'segment_id' => $request->segment,
+                    'class_level_id' => $class_level->id
+                ]);
+
+                $count++;
+            }
         }
-        $ac = Segment::Find($req->id_segment);
-        if ($ac) {
-            SegmentClass::create([
-                'segment_id' => $req->id_segment,
-                'class_level_id' => $req->class_level_id
-
-            ]);
-            return HelperController::api_response_format(200, $ac, 'Assignment sucess');
-
+        else
+        {
+            return HelperController::api_response_format(201, 'Please Enter Equal number of array');
         }
-        return HelperController::NOTFOUND();
 
+        return HelperController::api_response_format(201, 'Segment Assigned Successfully');
     }
 
     public function update(Request $request)

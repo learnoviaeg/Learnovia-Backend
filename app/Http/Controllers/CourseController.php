@@ -12,6 +12,9 @@ use App\Component;
 use App\YearLevel;
 use Illuminate\Http\Request;
 use App\Enroll;
+use App\Segment;
+use App\AcademicYear;
+use Illuminate\Support\Facades\Validator;
 
 class CourseController extends Controller
 {
@@ -284,5 +287,56 @@ class CourseController extends Controller
             array_push($optional, $cs->optionalCourses);
         }
         return $optional;
+    }
+
+    public function Assgin_course_to(Request $request)
+    {
+        $rules =[
+                'year' => 'array',
+                'year.*' => 'exists:academic_years,id',
+                'type' => 'array',
+                'type.*' => 'required|exists:academic_types,id',
+                'level'=> 'array',
+                'level.*' => 'required|exists:levels,id',
+                'class'=> 'array',
+                'class.*' => 'required|exists:classes,id',
+                'segment'=> 'array',
+                'segment.*' => 'exists:segments,id',
+                'course' => 'required|exists:courses,id',
+            ];
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails())
+                return ['result' => false, 'value' => $validator->errors()];
+
+            $count=0;
+            if( (count($request->type) == count($request->level)) && (count($request->level) == count($request->class)))
+            {
+                while(isset($request->class[$count]))
+                {
+                    $year = AcademicYear::Get_current()->id;
+                    $segment = Segment::Get_current()->id;
+                    if (isset($request->year[$count])) {
+                        $year = $request->year[$count];
+                    }
+                    if (isset($request->segment[$count])) {
+                        $segment = $request->segment[$count];
+                    }
+                    $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
+                    $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
+                    $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
+                    $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
+                    CourseSegment::create([
+                        'course_id' => $request->course,
+                        'segment_class_id' => $segment_class->id,
+                    ]);
+                        $count++;
+                }
+            }
+            else
+            {
+                return HelperController::api_response_format(201, 'Please Enter Equal number of array');
+            }
+
+            return HelperController::api_response_format(201, 'Course Assigned Successfully');
     }
 }

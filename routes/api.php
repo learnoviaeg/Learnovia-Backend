@@ -149,6 +149,8 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::get('my', 'CourseController@MyCourses')->name('mycourses')->middleware('permission:course/my-courses');
     Route::get('layout','CourseController@GetUserCourseLessons')->name('layout')->middleware('permission:course/layout');
     Route::get('optional', 'CourseController@getCoursesOptional')->name('optional')->middleware('permission:course/optional');
+    Route::post('assgincourseto', 'CourseController@Assgin_course_to')->name('assgincourseto');//->middleware('permission:course/assgin-course-to');
+
 });
 
 //USER CRUD ROUTES
