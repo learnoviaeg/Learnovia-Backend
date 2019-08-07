@@ -50,6 +50,7 @@ class PageController extends Controller
         $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
+            'Lesson_id' => 'required|exists:lessons,id',
             'visible' => 'nullable|boolean'
         ]);
         $page= new Page();
@@ -60,6 +61,8 @@ class PageController extends Controller
             $page->visible;
         }
         $page->save();
+        pageLesson::firstOrCreate(['page_id'=>$page->id,
+            'lesson_id' => $request->Lesson_id]);
         return HelperController::api_response_format(200, $page,'Page added Successfully');
 
     }

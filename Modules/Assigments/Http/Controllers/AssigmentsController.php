@@ -12,6 +12,7 @@ use Illuminate\Routing\Controller;
 use App\Http\Controllers\HelperController;
 use Carbon\Carbon;
 use Modules\Assigments\Entities\assignment;
+use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\UserAssigment;
 
 class AssigmentsController extends Controller
@@ -48,6 +49,7 @@ class AssigmentsController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
+            'Lesson_id' => 'required|exists:lessons,id',
             'is_graded' => 'required|boolean',
             'mark' => 'required|integer',
             'allow_attachment' => 'required|integer|min:0|max:3',
@@ -84,9 +86,13 @@ class AssigmentsController extends Controller
         $assigment->visiable = $request->visiable;
         $assigment->save();
 
+
         $data = array("course_segment" => $request->course_segment, "assignments_id" => $assigment->id, "submit_date" => $request->submit_date);
 
         $this->assignAsstoUsers($data);
+        AssignmentLesson::firstOrCreate(['assignment_id'=>$assigment->id,
+            'lesson_id' => $request->Lesson_id]);
+
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
     }
     /*

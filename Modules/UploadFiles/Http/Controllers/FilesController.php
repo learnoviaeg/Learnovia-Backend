@@ -78,7 +78,7 @@ class FilesController extends Controller
     {
         try{
             $request->validate([
-                'description' => 'required|string|min:1',
+                'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
 
