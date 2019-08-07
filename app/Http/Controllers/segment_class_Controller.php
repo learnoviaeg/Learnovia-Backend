@@ -178,11 +178,7 @@ class segment_class_Controller extends Controller
                 $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
                 $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
                 $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
-                SegmentClass::create([
-                    'segment_id' => $request->segment,
-                    'class_level_id' => $class_level->id
-                ]);
-
+                SegmentClass::checkRelation($class_level->id,$request->segment);
                 $count++;
             }
         }
