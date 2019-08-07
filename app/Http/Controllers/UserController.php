@@ -165,11 +165,26 @@ class UserController extends Controller
         $request->validate([
             'id' => 'required|exists:users,id',
         ]);
+        
+         $user_id=Auth::user()->id;
+         $auth_role = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
+        if($auth_role == 1){
 
-        $user = User::find($request->id);
-        $user->delete();
+            $user = User::find($request->id);
+            $user_role = DB::table('model_has_roles')->where('model_id',$user->id)->pluck('role_id')->first();
+            //dd($user_role);
+           
+           if($user_role == 1){
+               
+            return HelperController::api_response_format(201, null, 'You Cant Delete Super Admin');
+        }
+           else {
+               $user->delete();
+               return HelperController::api_response_format(201, null, 'User Deleted Successfully');
+           }
+        }
 
-        return HelperController::api_response_format(201, null, 'User Deleted Successfully');
+        return HelperController::api_response_format(201, null, 'You Cant done this operation');
 
     }
 
