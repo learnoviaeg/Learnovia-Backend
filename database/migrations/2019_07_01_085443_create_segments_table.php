@@ -17,6 +17,8 @@ class CreateSegmentsTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->boolean('current')->default(0);
+            $table->unsignedBigInteger('academic_type_id');
+            $table->foreign('academic_type_id')->references('id')->on('academic_types')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

@@ -25,48 +25,43 @@ class segment_class_Controller extends Controller
     public function List_Classes_with_segments(Request $request)
     {
         $request->validate([
-            'year'  => 'required|exists:academic_years,id',
-            'type'  => 'required|exists:academic_types,id',
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
         ]);
-        if($request->id == null)
-        {
+        if ($request->id == null) {
             $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
             $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
             $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
             $segments = [];
-            foreach ($classLevel->segmentClass as $segmentClass){
+            foreach ($classLevel->segmentClass as $segmentClass) {
                 $segments[] = $segmentClass->segments[0];
             }
             return HelperController::api_response_format(200, $segments);
-        }
-        else {
+        } else {
             $request->validate([
-                'id'  => 'exists:academic_years,id',
+                'id' => 'exists:academic_years,id',
             ]);
             $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
             $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
             $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
             $segments = [];
-            foreach ($classLevel->segmentClass as $segmentClass){
+            foreach ($classLevel->segmentClass as $segmentClass) {
                 $segments[] = $segmentClass->segments[0];
             }
             $segmentscoll = collect($segments);
-            $allsegments= $segmentscoll->where('id',$request->id);
+            $allsegments = $segmentscoll->where('id', $request->id);
             return HelperController::api_response_format(200, $allsegments);
         }
     }
 
     public function get(Request $request)
     {
-        if ($request->id == null)
-        {
-            $segments=Segment::paginate(HelperController::GetPaginate($request));
+        if ($request->id == null) {
+            $segments = Segment::paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(200, $segments->items());
-        }
-        else
-        {
+        } else {
             $class = Segment::find($request->id);
             return HelperController::api_response_format(200, $class);
         }
@@ -100,8 +95,8 @@ class segment_class_Controller extends Controller
         $classLevel = ClassLevel::checkRelation($req->class, $yearlevel->id);
         $type = AcademicType::find($req->type);
         $count = SegmentClass::whereClass_level_id($classLevel->id)->count();
-        if($count >= $type->segment_no){
-            return HelperController::api_response_format(200 , null , 'This class has its all segments before');
+        if ($count >= $type->segment_no) {
+            return HelperController::api_response_format(200, null, 'This class has its all segments before');
         }
         $segment = Segment::create([
             'name' => $req->name
@@ -189,16 +184,37 @@ class segment_class_Controller extends Controller
         $segment->name = $request->name;
         $segment->save();
         if ($request->filled('year')) {
-            $oldyearType = AcademicYearType::checkRelation($segment->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academicyear[0]->id , $segment->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academictype[0]->id);
+            $oldyearType = AcademicYearType::checkRelation($segment->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academicyear[0]->id, $segment->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academictype[0]->id);
             $newyearType = AcademicYearType::checkRelation($request->year, $request->type);
             $oldyearLevel = YearLevel::checkRelation($oldyearType->id, $segment->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->levels[0]->id);
             $newyearLevel = YearLevel::checkRelation($newyearType->id, $request->level);
-            $oldClassLevel = ClassLevel::checkRelation($segment->Segment_class[0]->classes[0]->id ,$oldyearLevel->id);
-            $newClassLevel = ClassLevel::checkRelation($segment->Segment_class[0]->classes[0]->id,$newyearLevel->id);
+            $oldClassLevel = ClassLevel::checkRelation($segment->Segment_class[0]->classes[0]->id, $oldyearLevel->id);
+            $newClassLevel = ClassLevel::checkRelation($segment->Segment_class[0]->classes[0]->id, $newyearLevel->id);
             $oldsegmentClass = SegmentClass::checkRelation($oldClassLevel->id, $segment->id);
             $oldsegmentClass->delete();
             SegmentClass::checkRelation($newClassLevel->id, $segment->id);
         }
         return HelperController::api_response_format(200, $segment);
+    }
+
+    public function setCurrent_segmant(Request $request)
+    {
+        $request->validate([
+            'segment_id' => 'required|exists:segments,id',
+            'type_id' => 'required|exists:academic_types,id'
+        ]);
+
+        $segment = Segment::where('id', $request->segment_id)->where('academic_type_id', $request->type_id)->first();
+        if(isset($segment)) {
+            $segment->update(['current' => 1]);
+
+            Segment::where('id', '!=', $request->segment_id)->where('academic_type_id', $request->type_id)
+                ->update(['current' => 0]);
+            return HelperController::api_response_format(200, [], ' this Segment is  set to be current ');
+        }
+        else{
+            return HelperController::api_response_format(200, [], ' this Segment invalid');
+
+        }
     }
 }

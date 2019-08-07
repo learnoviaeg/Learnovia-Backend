@@ -91,7 +91,7 @@ class QuestionBankController extends Controller
             $questions->where('category_id', $request->Category_id);
 
         }
-        $Questions = $questions->with('childeren')->get();
+        $Questions = $questions->with('childeren.question_answer')->get();
         $question=array();
         foreach ($Questions as $ques){
             if($ques->parent==null){
@@ -152,6 +152,7 @@ class QuestionBankController extends Controller
             ->where('course_id', $request->course_id)
             ->where('parent', null)
             ->limit($request->randomNumber)
+            ->with('childeren.question_answer')
             ->get();
 
         $questions = $this->QuestionData($questions);
@@ -265,7 +266,7 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
         }
 
-        $cat = $this::CreateOrFirstQuestion($Question);
+        $cat = $this::CreateOrFirstQuestion($Question,$parent);
         if (isset($cat->id)) {
             $is_true = 0;
             $Trues = null;
@@ -364,7 +365,7 @@ class QuestionBankController extends Controller
             $questionRe = Questions:: where('id', $id)->first();
             return $questionRe;
         }
-        $cat = $this::CreateQuestion($Question);
+        $cat = $this::CreateQuestion($Question,$parent);
         if (isset($cat->id)) {
             $is_true = 0;
             foreach ($Question['match_A'] as $index => $MA) {
@@ -403,6 +404,7 @@ class QuestionBankController extends Controller
         }
 
         $cat = $this->CreateOrFirstQuestion($Question);
+      //  dd($cat);
         $re = collect([]);
             foreach ($Question['subQuestions'] as $subQuestion) {
                 switch ($subQuestion['Question_Type_id']) {

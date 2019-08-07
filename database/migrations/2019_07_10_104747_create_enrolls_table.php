@@ -20,8 +20,8 @@ class CreateEnrollsTable extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('course_segment');
             $table->foreign('course_segment')->references('id')->on('course_segments')->onDelete('cascade')->onUpdate('cascade');
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->timestamp('start_date');
+            $table->timestamp('end_date')->nullable();
             $table->unsignedInteger('role_id');
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
 

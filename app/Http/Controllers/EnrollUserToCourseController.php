@@ -24,10 +24,10 @@ class EnrollUserToCourseController extends Controller
     {
         $request->validate([
             'course_segment' => 'required|array|exists:course_segments,id',
-            'start_date' => 'required|before:end_date|after:'.Carbon::now(),
+            'start_date' => 'required|date |date_format:Y-m-d H:i:s|before:end_date|after:'.Carbon::now(),
             'users'=> 'required|array',
             'users.*'=>'required|string|exists:users,username',
-            'end_date' => 'required|after:'.Carbon::now(),
+            'end_date' => 'required|date |date_format:Y-m-d H:i:s|after:'.Carbon::now(),
             'role_id'=>'required|array|exists:roles,id'
         ]);
 
@@ -108,8 +108,8 @@ class EnrollUserToCourseController extends Controller
 
         $request->validate([
             'username' => 'required|exists:users,username',
-            'start_date' => 'required|before:end_date|after:'.Carbon::now(),
-            'end_date' => 'required|after:'.Carbon::now(),
+            'start_date' => 'required|date |date_format:Y-m-d H:i:s|before:end_date|after:'.Carbon::now(),
+            'end_date' => 'required|date |date_format:Y-m-d H:i:s|after:'.Carbon::now(),
             'SegmentClassId' => 'required|exists:course_segments,segment_class_id'
         ]);
 
