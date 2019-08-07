@@ -85,4 +85,17 @@ class AcademicYearController extends Controller
         }
         return HelperController::api_response_format(404, [], 'Not Found');
     }
+    public function setCurrent_year(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:academic_years,id',
+        ]);
+
+        $year = AcademicYear::find($request->id);
+        $year->update(['current'=>1]);
+        $all= AcademicYear::where('id', '!=', $request->id)
+            ->update(['current' => 0]);
+        return HelperController::api_response_format(200, [], ' this year is  set to be current ');
+
+    }
 }

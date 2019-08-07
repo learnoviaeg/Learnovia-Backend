@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Segment extends Model
 {
-    protected $fillable = ['name','currents'];
+    protected $fillable = ['name','current','academic_type_id'];
 
     public function Segment_class(){
         return $this->belongsToMany('App\ClassLevel', 'segment_classes','segment_id','class_level_id');
