@@ -9,6 +9,7 @@ use App\Classes;
 use App\ClassLevel;
 use App\Http\Resources\Classes as Classs;
 use Validator;
+use App\AcademicYear;
 class ClassController extends Controller
 {
     /**
@@ -156,5 +157,42 @@ class ClassController extends Controller
         $class = Classes::find($request->id);
         $class->delete();
         return HelperController::api_response_format(200, new Classs($class));
+    }
+
+
+    public function Assign_class_to(Request $request)
+    {
+        $rules =[
+            'year' => 'array',
+            'year.*' => 'exists:academic_years,id',
+            'type' => 'array',
+            'type.*' => 'required|exists:academic_types,id',
+            'level' => 'array',
+            'level.*' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id'
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails())
+            return ['result' => false, 'value' => $validator->errors()];
+
+        $count=0;
+        if( count($request->type) == count ($request->level))
+        {
+            while(isset($request->type[$count]))
+                {
+                    $year = AcademicYear::Get_current()->id;
+                    if (isset($request->year[$count])) {
+                        $year = $request->year[$count];
+                    }
+                    $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
+                    $Year_level=YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
+                    $Class_level=ClassLevel::checkRelation($request->class, $Year_level->id);
+                    $count++;
+                }
+        }
+        else {
+             return HelperController::api_response_format(201, 'Arrays must have same length');
+        }
+        return HelperController::api_response_format(201, 'Class Assigned Successfully');
     }
 }
