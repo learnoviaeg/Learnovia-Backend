@@ -23,29 +23,27 @@ class EnrollUserToCourseController extends Controller
     public static function EnrollCourses(Request $request)
     {
         $request->validate([
-            'course_segment' => 'required|array|exists:course_segments,id',
-            'start_date' => 'required|before:end_date|after:'.Carbon::now(),
             'users'=> 'required|array',
             'users.*'=>'required|string|exists:users,username',
-            'end_date' => 'required|after:'.Carbon::now(),
-            'role_id'=>'required|array|exists:roles,id'
+            'role_id'=>'required|array|exists:roles,id',
+            'start_date' => 'required|before:end_date|after:'.Carbon::now(),
+            'end_date' => 'required|after:'.Carbon::now()
         ]);
 
         $data=array();
         $count=0;
         $rolecount=0;
-        foreach($request->course_segment as $courses){
+        $course_segment = HelperController::Get_Course_segment($request);
+        foreach($course_segment as $courses){
             foreach($request->users as $username)
             {
-
                 $user_id=User::FindByName($username)->id;
-
                 
-                $check =Enroll::IsExist($courses,$user_id);
+                $check =Enroll::IsExist($courses->id,$user_id);
                 if(!$check){
                     $enroll = new Enroll;
                     $enroll->setAttribute('user_id', $user_id);
-                    $enroll->setAttribute('course_segment', $courses);
+                    $enroll->setAttribute('course_segment', $courses->id);
                     $enroll->setAttribute('start_date',$request->start_date);
                     $enroll->setAttribute('end_date',$request->end_date);
                     $enroll->setAttribute('role_id',$request->role_id[$rolecount]);
@@ -75,18 +73,19 @@ class EnrollUserToCourseController extends Controller
     public function UnEnroll(Request $request){
 
         $request->validate([
-            'username' => 'required|exists:enrolls,username',
-            'course_segment' => 'required|exists:enrolls,course_segment'
+            'username' => 'required|array|exists:enrolls,username'
         ]);
-        $user_id=User::FindByName($request->username)->id;
-        $users_enroll= Enroll::FindUserbyID($user_id,$request->course_segment);
-        $users_enroll->delete();
+        $courseSegment=HelperController::Get_Course_segment_By_Course($request);
+        foreach($request->username as $users)
+        {
+            $course_segment = Enroll::where('course_segment', $courseSegment)->where('username',$users)->delete();
+        }
 
-        return HelperController::api_response_format(200 ,$users_enroll , 'users UnEnrolled Successfully');
+        return HelperController::api_response_format(200 ,$course_segment , 'users UnEnrolled Successfully');
     }
 
 
-    public function ViewAllCoursesThatUserErollment(Request $request)
+    public function ViewAllCoursesThatUserEnrollment(Request $request)
     {
         $request->validate([
             'username' => 'required|exists:users,username'
@@ -105,19 +104,19 @@ class EnrollUserToCourseController extends Controller
 
     public static function EnrollInAllMandatoryCourses(Request $request)
     {
-
         $request->validate([
-            'username' => 'required|exists:users,username',
+            'username' => 'required|array|exists:users,username',
             'start_date' => 'required|before:end_date|after:'.Carbon::now(),
             'end_date' => 'required|after:'.Carbon::now(),
-            'SegmentClassId' => 'required|exists:course_segments,segment_class_id'
         ]);
 
-
-        $userId =User::FindByName($request->username)->id;
-
-        $x = SegmentClass::find($request->SegmentClassId);
-        $segments = collect([]);
+        $count=0;
+        foreach($request->username as $user)
+        {
+            $userId =User::FindByName($user)->id;
+            $x = HelperController::Get_segment_class($request);
+            $segments = collect([]);
+            //dd($x->courseSegment);
             $x->courseSegment;
             foreach ($x->courseSegment as $key => $segment) {
                 $segment->courses;
@@ -126,24 +125,33 @@ class EnrollUserToCourseController extends Controller
                         $segments->push($segment->id);
                     }
                 }
+                }
+            $check =Enroll::where('user_id',$userId)->where('course_segment',$segments)->pluck('id');
+            if(count($check)==0)
+            {
+                foreach($segments as $segment){
+                    Enroll::create([
+                        'username' => $user,
+                        'user_id' => $userId,
+                        'course_segment' => $segment,
+                        'start_date'=> $request->start_date,
+                        'end_date'=>$request->end_date,
+                        'role_id'=>3,
+                    ]);
+                }
             }
-
-        $role=Role::findByName('Student')->id;
-        foreach($segments as $segment){
-            Enroll::create([
-                'username' => $request->username,
-                'user_id' => $userId,
-                'course_segment' => $segment,
-                'start_date'=> $request->start_date,
-                'end_date'=>$request->end_date,
-                'role_id'=>$role,
-            ]);
+            else
+            {
+                $count++;
+            }
         }
-    // dd('done');
-    return HelperController::api_response_format(200, [], 'added successfully');
-
+        if($count > 0)
+        {
+            return HelperController::api_response_format(200, [], 'those users added before');
+        }
+        return HelperController::api_response_format(200, [], 'added successfully');
     }
-
+        
     public function EnrollExistUsersFromExcel(Request $request){
         $ExcelCntrlVar = new ExcelController();
         $ExcelCntrlVar->import($request);

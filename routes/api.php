@@ -165,10 +165,10 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
 Route::group(['prefix' => 'enroll' , 'middleware' => 'auth:api'], function () {
     Route::post('add', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/enroll-single-user');
     Route::post('unenroll', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
-    Route::get('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserErollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
+    Route::get('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserEnrollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
     Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:enroll/mandatory-course');
     Route::post('enrollexcel', 'EnrollUserToCourseController@EnrollExistUsersFromExcel')->name('enrollexcel')->middleware('permission:enroll/bulk-of-exist-users');
-    Route::post('usertech', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
+    //Route::post('usertech', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
     Route::get('GetEnrolledStudent', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');
 });
 
@@ -220,3 +220,7 @@ Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory'
 Route::post('UpdateGradeCategory', 'GradeCategoryController@UpdateGradeCategory');
 Route::post('MoveToParentCategory', 'GradeCategoryController@MoveToParentCategory');
 Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
+//Route::post('import', 'ExcelController@import');//->name('import')->middleware('permission:calendar/get');
+
+Route::post('import', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers');//->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
+
