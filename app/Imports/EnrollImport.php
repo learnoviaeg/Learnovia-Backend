@@ -6,6 +6,7 @@ use App\User;
 use App\Enroll;
 use Maatwebsite\Excel\Concerns\ToModel;
 use App\Http\Controllers\HelperController;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
@@ -19,18 +20,26 @@ class EnrollImport implements ToModel,WithHeadingRow
 
     public function model(array $row)
     {
-
         $user_id = User::FindByName( $row['username'])->id;
+
+        $request = new Request([
+            'year' => $row['year'],
+            'type' => $row['type'],
+            'level' => $row['level'],
+            'class' => $row['class'],
+            'segment' => $row['segment'],
+            'course' => $row['course']
+        ]);
+
+        $courseSegment = HelperController::Get_Course_segment_By_Course($request);
 
         return new Enroll([
             'username' => $row['username'],
             'user_id'=>$user_id,
-            'course_segment' => $row['course_segment'],
+            'course_segment' => $courseSegment[0],
             'role_id'=>$row['role_id'],
             'start_date'=>Date::excelToDateTimeObject($row['start_date']),
             'end_date'=>Date::excelToDateTimeObject($row['end_date']),
         ]);
-
-
     }
 }

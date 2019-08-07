@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
 use App\Classes;
+use App\Enroll;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Maatwebsite\Excel\Facades\Excel;
 use App\ClassLevel;
@@ -53,32 +54,35 @@ class UsersImport implements ToModel, WithHeadingRow
         $role = Role::find($row['role_id']);
         $user->assignRole($role);
         if ($row['role_id'] == 3) {
-
-            $classLevID=ClassLevel::GetClass($row['class_id']);
-
-            $classSegID=SegmentClass::GetClasseLevel($classLevID);
-            //$classLevID=DB::table('class_levels')->where('class_id',$row['class_id'])->pluck('id')->first();
-            //$classSegID=DB::table('segment_classes')->where('class_level_id',$classLevID)->pluck('id')->first();
-
             $request = new Request([
-                'username' => $user->username,
+                'username' => array($user->username),
                 'start_date' => Date::excelToDateTimeObject($row['start_date']),
                 'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                'SegmentClassId' => $classSegID
+                'year' => $row['year'],
+                'type' => $row['type'],
+                'level' => $row['level'],
+                'class' => $row['class'],
+                'segment' => $row['segment']
             ]);
+
             EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
+
             $enrollcounter=1;
             while(isset($row[$enrollOptional.$enrollcounter])) {
 
-                $course_id=Course::findByName($row[$enrollOptional.$enrollcounter]);
-                $segmentid= CourseSegment::getidfromcourse($course_id);
                 $option = new Request([
-                    'course_segment' => array($segmentid),
+                    'year' => $row['year'],
+                    'type' => $row['type'],
+                    'level' => $row['level'],
+                    'class' => $row['class'],
+                    'segment' => $row['segment'],
+                    'course' => $row['course'],
                     'start_date' => Date::excelToDateTimeObject($row['start_date']),
                     'users'=> array($user->username),
                     'end_date' => Date::excelToDateTimeObject($row['end_date']),
                     'role_id'=>array(3)
                 ]);
+
                 EnrollUserToCourseController::EnrollCourses($option);
 
                 $enrollcounter++;
@@ -88,15 +92,18 @@ class UsersImport implements ToModel, WithHeadingRow
             $teachercounter=1;
             while(isset($row[$teacheroptional.$teachercounter])){
                 $course_id=Course::findByName($row[$teacheroptional.$teachercounter]);
-                $segmentid= CourseSegment::getidfromcourse($course_id);
-                $option = new Request([
-                    'course_segment' => array($segmentid),
+                $courseSeg=CourseSegment::getidfromcourse($course_id);
+                $userId =User::FindByName($user->username)->id; 
+
+                Enroll::create([
+                    'course_segment' => $courseSeg,
+                    'user_id' => $userId,
                     'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                    'users'=> array($user->username),
+                    'username'=> $user->username,
                     'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                    'role_id'=>array($role->id)
+                    'role_id'=> 4
                 ]);
-                EnrollUserToCourseController::EnrollCourses($option);
+
                 $teachercounter++;
             }
         }
