@@ -18,7 +18,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     });
 
     //Question Routes
-    Route::get('getQuestions', 'QuestionBankController@index');//->middleware('permission:question/get');
+    Route::get('getQuestions', 'QuestionBankController@index')->middleware('permission:question/get');
     Route::post('deleteQuestion', 'QuestionBankController@destroy')->middleware('permission:question/delete');
     Route::get('getRandomQuestion', 'QuestionBankController@getRandomQuestion')->middleware('permission:question/random');
     Route::post('deleteAnswer', 'QuestionBankController@deleteAnswer')->middleware('permission:question/delete-answer');
