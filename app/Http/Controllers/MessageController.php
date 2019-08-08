@@ -85,10 +85,6 @@ class MessageController extends Controller
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
             }
         }
-        Storage::disk('public')->put(
-            uniqid() . $req->file->getClientOriginalName(),
-            $req->file
-        );
         return HelperController::api_response_format(201, null, 'Successfully Sent Message!');
 
 
