@@ -57,15 +57,18 @@ class MessageController extends Controller
                     foreach ($From_Role_ids as $From_Role_id) {
                         $permission = Message_Role::where('From_Role', $From_Role_id)->where('To_Role', $to_Role_id)->first();
                         if ($permission) {
-                            Message::Create(array(
+                            $message = Message::Create(array(
                                 'text' => $req->text,
                                 'about' => ($req->about == null) ? $req->From : $req->about, /*replace  $req->From  to $session_id when you session  */
                                 'From' => $session_id,
                                 'seen' => false,
                                 'deleted' => 0,
                                 'To' => $userId,
-                                'file' => attachment::upload_attachment($req->file , 'message'),
                             ));
+                            if($req->filled('file')){
+                                $message->file = attachment::upload_attachment($req->file , 'message');
+                            }
+                            $message->save();
                             $is_send = true;
                             break;
 
