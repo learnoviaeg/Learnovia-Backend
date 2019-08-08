@@ -286,7 +286,7 @@ class CourseController extends Controller
         foreach ($course_segment['value'] as $cs) {
             array_push($optional, $cs->optionalCourses);
         }
-        return $optional;
+        return HelperController::api_response_format(200 , $optional);
     }
 
     public function Assgin_course_to(Request $request)
