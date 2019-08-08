@@ -189,7 +189,7 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     Route::post('Seen', 'MessageController@SeenMessage')->name('SeenMessage')->middleware('permission:messages/seen');
     Route::get('ViewFromTo', 'MessageController@ViewAllMSG_from_to')->name('ViewFromTo')->middleware('permission:messages/get-from-to');
     Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role')->name('Message_add_send_Permission_for_role')->middleware('permission:messages/add-send-permission-for-role');
-    Route::get('GetMyThreads', 'MessageController@GetMyThreads@')->name('mythreads')->middleware('permission:messages/mythreads');
+    Route::get('GetMyThreads', 'MessageController@GetMyThreads')->name('mythreads')->middleware('permission:messages/mythreads');
 
     //Contact Route
     Route::post('addContact', 'ContactController@addContact')->name('addContact')->middleware('permission:contact/add');
