@@ -41,6 +41,7 @@ class Message extends Model
         $i = 0 ;
         foreach($users as $user){
             $temp[$i]['picture'] = $user->picture;
+            $temp[$i]['id'] = $user->id;
             $temp[$i]['name'] = $user->firstname . ' ' .$user->lastname;
             $temp[$i]['roles'] = $user->getRoleNames();
             $temp[$i]['last'] = self::getLastMessage($user_id , $user->id);
