@@ -22,8 +22,8 @@ class LessonController extends Controller
             'description.*' => 'string'
         ]);
         $segments = HelperController::Get_Course_segment_Course($request);
-        if (!$segments['result'])
-            return HelperController::api_response_format(400, $segments['value']);
+        if (!$segments['result'] || $segments['value'] == null)
+            return HelperController::api_response_format(400, $segments['value'] , 'Something went wrong or no active segments on this class');
         foreach ($request->name as $key => $name) {
             //dd($request->image[$key]);
             $lessons_in_CourseSegment = Lesson::where('course_segment_id', $segments['value']->id)->max('index');
