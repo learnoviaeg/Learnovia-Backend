@@ -65,13 +65,12 @@ class MessageController extends Controller
                                 'deleted' => 0,
                                 'To' => $userId,
                             ));
-                            if($req->filled('file')){
+                            if($req->hasFile('file')){
                                 $message->file = attachment::upload_attachment($req->file , 'message')->path;
                             }
                             $message->save();
                             $is_send = true;
                             break;
-
                         }
                     }
                     if ($is_send) {
