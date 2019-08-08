@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Message;
 use DB;
 use Illuminate\Support\Facades\Storage;
+use App\attachment;
 
 class MessageController extends Controller
 {
@@ -63,7 +64,7 @@ class MessageController extends Controller
                                 'seen' => false,
                                 'deleted' => 0,
                                 'To' => $userId,
-                                'file' => uniqid() . File::extension($req->file->getClientOriginalName()),
+                                'file' => attachment::upload_attachment($req->file , 'message'),
                             ));
                             $is_send = true;
                             break;
