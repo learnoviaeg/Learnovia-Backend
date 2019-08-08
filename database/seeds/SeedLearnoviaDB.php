@@ -66,9 +66,11 @@ class SeedLearnoviaDB extends Seeder
             Level::create($level);
         }
         $segments = [
-            ['name' => 'term one'],
-            ['name' => 'term two'],
-            ['name' => 'term three']
+            ['name' => 'term one' ,'academic_type_id'=>2 , 'current'=>1],
+            ['name' => 'term two','academic_type_id'=>2],
+            ['name' => 'term three','academic_type_id'=>2],
+            ['name' => 'term one' ,'academic_type_id'=>1 , 'current'=>1 ],
+            ['name' => 'term two','academic_type_id'=>1],
         ];
         foreach($segments as $segment){
             Segment::create($segment);
@@ -81,7 +83,6 @@ class SeedLearnoviaDB extends Seeder
             ['name' => '2/1'],
             ['name' => '2/3'],
             ['name' => '4/4'],
-
         ];
         foreach($classes as $class){
             Classes::create($class);
@@ -135,9 +136,9 @@ class SeedLearnoviaDB extends Seeder
         }
         $CourseSegment = [
             ['course_id' => 1, 'segment_class_id' => 1],
-            ['course_id' => 1, 'segment_class_id' => 1,'is_active'=>1],
+            ['course_id' => 2, 'segment_class_id' => 1,'is_active'=>1],
             ['course_id' => 2, 'segment_class_id' => 2],
-            ['course_id' => 2, 'segment_class_id' => 2,'is_active'=>1],
+            ['course_id' => 2, 'segment_class_id' => 3,'is_active'=>1],
             ['course_id' => 3, 'segment_class_id' => 3,'is_active'=>1],
             ['course_id' => 1, 'segment_class_id' => 2],
 
@@ -158,11 +159,12 @@ class SeedLearnoviaDB extends Seeder
             Announcement::create($annoncemen);
         }
         $users = [
-            [ 'firstname' => 'hoor', 'email' => 'stephan-v@gmail.com', 'password' => bcrypt('123456') ,'real_password' =>'123456' , 'lastname' => 'Ali' , 'username'=> '0002'],
-            [ 'firstname' => 'Mahmoud', 'email' => 'johndoe@gmail.com', 'password' => bcrypt('123456'),'real_password' =>'123456' , 'lastname' => 'Ali' , 'username'=> '0006'],
-            [ 'firstname' => 'morsy', 'email' => 'jhndfoe@gmail.com', 'password' => bcrypt('123456'),'real_password' =>'123456' , 'lastname' => 'Ali' , 'username'=> '0003'],
-            [ 'firstname' => 'hozifa', 'email' => 'johnde@gmail.com', 'password' => bcrypt('123456'),'real_password' =>'123456' , 'lastname' => 'Ali' , 'username'=> '0004'],
-            [ 'firstname' => 'hamza', 'email' => 'jooe@gmail.com', 'password' => bcrypt('123456'),'real_password' =>'123456' , 'lastname' => 'Ali' ,'username'=> '0005'],
+
+            [ 'firstname' => 'Hend', 'email' => 'Hend-v@gmail.com', 'password' => bcrypt('123456') ,'real_password' =>'123456' , 'lastname' => 'kagha' , 'username'=> 'Learn0002'],
+            [ 'firstname' => 'Mariam', 'email' => 'Mariam@gmail.com', 'password' => bcrypt('123456'),'real_password' =>'123456' , 'lastname' => 'samir' , 'username'=> 'Learn0003'],
+            [ 'firstname' => 'Salma', 'email' => 'Salma@gmail.com', 'password' => bcrypt('123456'),'real_password' =>'123456' , 'lastname' => 'Amr' , 'username'=> 'Learn0004'],
+            [ 'firstname' => 'Miirna', 'email' => 'Miirna@gmail.com', 'password' => bcrypt('123456'),'real_password' =>'123456' , 'lastname' => 'Mourad' ,'username'=> 'Learn0005'],
+            [ 'firstname' => 'Huda', 'email' => 'Huda@gmail.com', 'password' => bcrypt('123456'),'real_password' =>'123456' , 'lastname' => 'Mahmoud' , 'username'=> 'Learn0006'],
         ];
         foreach($users as $user){
             User::create($user);
@@ -185,7 +187,6 @@ class SeedLearnoviaDB extends Seeder
         }
         $Contacts=[
             ['Person_id'=>1 ,'Friend_id'=>2],
-            ['Person_id'=>1 ,'Friend_id'=>2],
             ['Person_id'=>1 ,'Friend_id'=>3],
             ['Person_id'=>1 ,'Friend_id'=>4],
             ['Person_id'=>1 ,'Friend_id'=>5],
@@ -199,7 +200,7 @@ class SeedLearnoviaDB extends Seeder
         $Lessons = [
             ['name'=>  'lesson one' ,'course_segment_id'=> 1  ,'index'=> 1],
             ['name'=>  'lesson two' ,'course_segment_id'=> 1  ,'index'=> 2],
-            ['name'=>  'lesson Three' ,'course_segment_id'=> 2  ,'index'=> 3],
+            ['name'=>  'lesson one' ,'course_segment_id'=> 2  ,'index'=> 1],
         ];
         foreach($Lessons as $Lesson){
             Lesson::create($Lesson);
@@ -230,33 +231,29 @@ class SeedLearnoviaDB extends Seeder
         }
 
         $Enrolls=[
-            ['user_id'=>1 , 'username'=> '0002','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>1, 'role_id'=>3],
-            ['user_id'=>2 , 'username'=>'0003','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>1, 'role_id'=>3],
-            ['user_id'=>3 , 'username'=> '0004','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>1, 'role_id'=>3],
-            ['user_id'=>4 , 'username'=> '0002','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>1, 'role_id'=>4],
-            ['user_id'=>5 , 'username'=>'0003','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>1, 'role_id'=>4],
-            ['user_id'=>1 , 'username'=> '0002','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>2, 'role_id'=>3],
-            ['user_id'=>2 , 'username'=>'0003','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>2, 'role_id'=>3],
-            ['user_id'=>3 , 'username'=> '0004','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>2, 'role_id'=>3],
-            ['user_id'=>1 , 'username'=> '0002','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>2, 'role_id'=>3],
-            ['user_id'=>2 , 'username'=>'0003','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>2, 'role_id'=>4],
-            ['user_id'=>1 , 'username'=> '0002','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>2, 'role_id'=>3],
-            ['user_id'=>2 , 'username'=>'0003','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
-            ['user_id'=>3 , 'username'=> '0004','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
-            ['user_id'=>4 , 'username'=> '0002','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
-            ['user_id'=>5 , 'username'=>'0003','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
-            ['user_id'=>1 , 'username'=> '0002','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
-            ['user_id'=>2 , 'username'=>'0003','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
-            ['user_id'=>3 , 'username'=> '0004','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27', 'course_segment'=>3, 'role_id'=>3],
+            ['user_id'=>2 , 'username'=> 'Learn0002','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27',
+                'course_segment'=>1, 'role_id'=>4],
+            ['user_id'=>3 , 'username'=> 'Learn0003','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27',
+                'course_segment'=>1, 'role_id'=>3],
+            ['user_id'=>4 , 'username'=> 'Learn0004','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27',
+                'course_segment'=>2, 'role_id'=>4],
+            ['user_id'=>5 , 'username'=>'Learn0005','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27',
+                'course_segment'=>1, 'role_id'=>3],
+            ['user_id'=>6 , 'username'=> 'Learn0006','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27',
+                'course_segment'=>2, 'role_id'=>3],
+            ['user_id'=>6 , 'username'=> 'Learn0006','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27',
+                'course_segment'=>3, 'role_id'=>3],
+            ['user_id'=>6 , 'username'=> 'Learn0006','start_date'=> '2019-07-28 13:23:27' ,'end_date'=> '2019-07-28 13:23:27',
+                'course_segment'=>1, 'role_id'=>3],
+
         ];
         foreach($Enrolls as $user){
             Enroll::create($user);
         }
         $parents=[
-            ['parent_id'=>1 , 'child_id'=>5],
-            ['parent_id'=>1 , 'child_id'=>2],
-            ['parent_id'=>1 , 'child_id'=>3],
-            ['parent_id'=>1 , 'child_id'=>4],
+            ['parent_id'=>2 , 'child_id'=>5],
+            ['parent_id'=>2 , 'child_id'=>3],
+            ['parent_id'=>2 , 'child_id'=>4],
 
         ];
         foreach($parents as $parent){
