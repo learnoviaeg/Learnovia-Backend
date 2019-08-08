@@ -66,7 +66,7 @@ class MessageController extends Controller
                                 'To' => $userId,
                             ));
                             if($req->filled('file')){
-                                $message->file = attachment::upload_attachment($req->file , 'message');
+                                $message->file = attachment::upload_attachment($req->file , 'message')->path;
                             }
                             $message->save();
                             $is_send = true;
