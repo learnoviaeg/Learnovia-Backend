@@ -283,7 +283,7 @@ class CourseController extends Controller
         if (!$course_segment['result'])
             return HelperController::api_response_format(400, $course_segment['value']);
         $optional = array();
-        foreach ($course_segment as $cs) {
+        foreach ($course_segment['value'] as $cs) {
             array_push($optional, $cs->optionalCourses);
         }
         return $optional;
