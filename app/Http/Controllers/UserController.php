@@ -165,26 +165,45 @@ class UserController extends Controller
         $request->validate([
             'id' => 'required|exists:users,id',
         ]);
-        
-         $user_id=Auth::user()->id;
-         $auth_role = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
-        if($auth_role == 1){
+        // $user = User::find($request->id);
+        // $role = DB::table('model_has_roles')->where('model_id',$user->id)->pluck('role_id')->first();
+        // if($role == 1)
+        //     return HelperController::api_response_format(200, null, 'Super Admin ca not be deleted');
+        // if($role == 2){
+        //     $role2 = DB::table('model_has_roles')->where('model_id',Auth::user()->id)->pluck('role_id')->first();   
+        //     if($role2 != 1 || $role2 != 2)
+        //     return HelperController::api_response_format(200, null, 'You Cant Delete System Admin');
+        // }
+        // $user->delete();
 
+
+
+
+         $CurrentUser=Auth::user()->id;
+         $auth_role = DB::table('model_has_roles')->where('model_id',$CurrentUser)->pluck('role_id')->first();
+         if($auth_role == 1){
             $user = User::find($request->id);
-            $user_role = DB::table('model_has_roles')->where('model_id',$user->id)->pluck('role_id')->first();
-            //dd($user_role);
-           
-           if($user_role == 1){
-               
-            return HelperController::api_response_format(201, null, 'You Cant Delete Super Admin');
+            $role = DB::table('model_has_roles')->where('model_id',$user->id)->pluck('role_id')->first();
+            if($role == 1){
+                return HelperController::api_response_format(200, null, 'You Cant Delete Super Admin');
+            }
+            else {
+                $user->delete();
+                return HelperController::api_response_format(200, null, 'User Deleted Successfully');
+            }
+         }
+         elseif($auth_role == 2) {
+                $user = User::find($request->id);
+                $role = DB::table('model_has_roles')->where('model_id',$user->id)->pluck('role_id')->first();
+            if($role == 1 | $role == 2){
+                return HelperController::api_response_format(200, null, 'You Cant Delete Super Admin or your self as System admin');
+            }
+            else{
+                $user->delete();
+                return HelperController::api_response_format(200, null, 'User Deleted Successfully');
+            }
         }
-           else {
-               $user->delete();
-               return HelperController::api_response_format(201, null, 'User Deleted Successfully');
-           }
-        }
-
-        return HelperController::api_response_format(201, null, 'You Cant done this operation');
+            return HelperController::api_response_format(200, null, 'You Cant done this operation');
 
     }
 

@@ -155,7 +155,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
 Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'UserController@create')->name('adduser')->middleware('permission:user/add');
     Route::post('update', 'UserController@update')->name('updateuser')->middleware('permission:user/update');
-    Route::post('delete', 'UserController@delete')->name('deleteuser')->middleware('permission:user/delete');
+    Route::post('delete', 'UserController@delete')->name('deleteuser');//->middleware('permission:user/delete');
     Route::get('get', 'UserController@list')->name('listAll')->middleware('permission:user/get-all');
     Route::post('suspend', 'UserController@suspend_user')->name('suspenduser')->middleware('permission:user/suspend');
     Route::get('Show_and_hide_real_password_with_permission', 'UserController@Show_and_hide_real_password_with_permission')->name('show/hiderealpass')->middleware('permission:user/show-hide-real-pass');
