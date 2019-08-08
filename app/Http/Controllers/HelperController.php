@@ -63,12 +63,15 @@ class HelperController extends Controller
     {
         $rules = [
             'year' => 'exists:academic_years,id',
-            'type' => 'required|exists:academic_types,id',
-            'level' => 'required|exists:levels,id',
+            'type' => 'exists:academic_types,id',
+            'level' => '|exists:levels,id',
             'class' => 'required|exists:classes,id',
             'segment' => 'exists:segments,id',
             'course' => 'required|exists:courses,id',
         ];
+        if(!$request->filled('year') && !$request->filled('type') && !$request->filled('level') && !$request->filled('segment')){
+            return ['result' => true, 'value' => CourseSegment::GetWithClassAndCourse($request->class , $request->course)];
+        }
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
