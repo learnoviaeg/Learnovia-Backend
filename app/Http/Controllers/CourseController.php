@@ -152,47 +152,73 @@ class CourseController extends Controller
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id'
         ]);
-        $CourseSeg = Enroll::where('user_id', $request->user()->id)->pluck('course_segment');
-        $seggg = array();
-        foreach ($CourseSeg as $cour) {
-            $check = CourseSegment::where('course_id', $request->course_id)->where('id', $cour)->pluck('id')->first();
-            if ($check != null) {
-                $seggg[] = $check;
+        $seggg=array();
+        if($request->user()->roles->first()->id==1)
+        {
+            $seggg=CourseSegment::where('course_id',$request->course_id)->pluck('id');
+
+        }
+        else {
+            $CourseSeg=Enroll::where('user_id',$request->user()->id)->pluck('course_segment');
+            foreach ($CourseSeg as $cour) {
+                $check=CourseSegment::where('course_id',$request->course_id)->where('id',$cour)->pluck('id')->first();
+                if($check!=null)
+                {
+                    $seggg[]=$check;
+                }
             }
+
         }
-        $CourseSeg = array();
-        foreach ($seggg as $segggg) {
-            $CourseSeg[] = CourseSegment::where('id', $segggg)->get();
+
+        $CourseSeg=array();
+        foreach($seggg as $segggg){
+            $CourseSeg[]=CourseSegment::where('id',$segggg)->get();
         }
-        $clase = array();
-        $lessons = null;
-        $i = 0;
-        $lessoncounter = array();
-        $comp = Component::where('type', 1)->get();
-        foreach ($CourseSeg as $seg) {
-            $lessons = $seg->first()->lessons;
+        $clase=array();
+        $lessons=null;
+        $i = 0 ;
+        $lessoncounter=array();
+        $comp=Component::where('type',1)->get();
+        $compcount=array();
+        $compcountall=array();
+        $compcountall=null;
+        foreach ($comp as $acom)
+        {
+            $compcountall[$acom->name]=0;
+        }
+
+        foreach($CourseSeg as $seg)
+        {
+            $lessons= $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
                 # code...
                 foreach ($segmentClas->classLevel as $key => $classlev) {
                     # code...
                     foreach ($classlev->classes as $key => $class) {
                         # code...
-                        $clase[$i] = $class;
+                        $clase[$i]=$class;
                         $clase[$i]->lessons = $lessons;
-                        foreach ($clase[$i]->lessons as $lessonn) {
-                            $lessoncounter = Lesson::find($lessonn->id);
-                            foreach ($comp as $com) {
-                                $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
+                        foreach($clase[$i]->lessons as $lessonn)
+                        {
+                            $lessoncounter=Lesson::find($lessonn->id);
+                            foreach($comp as $com)
+                            {
+                                $lessonn[$com->name]= $lessoncounter->module($com->module,$com->model)->get();
+                                $compcount[$com->name]=$lessoncounter->module($com->module,$com->model)->count();
+                                $compcountall[$com->name]=$compcountall[$com->name]+$lessoncounter->module($com->module,$com->model)->count();
                             }
+                            $lessonn['count']=$compcount;
                         }
                         $i++;
                     }
                 }
             }
         }
-        //$clase['course'] = Course::find($request->course_id);
-        return HelperController::api_response_format(200, $clase);
+        $clase['count'] = $compcountall;
+        return HelperController::api_response_format(200 , $clase);
     }
+
+
 
 
     public function get_course_by_year_type(Request $request)
