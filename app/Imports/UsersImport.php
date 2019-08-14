@@ -17,6 +17,8 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\HelperController;
+use Carbon\Carbon;
+
 
 class UsersImport implements ToModel, WithHeadingRow
 {
@@ -28,11 +30,24 @@ class UsersImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        Validator::make($row, [
-            'firstname' => 'required|alpha',
-            'lastname' => 'required|alpha',
-            'role_id' => 'required|exists:roles,id',
+        Validator::make($row,[
+            'firstname'=>'required|alpha',
+            'lastname'=>'required|alpha',
+            'role_id'=>'required|exists:roles,id',
+            'year' => 'exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+            'segment' => 'exists:segments,id',
+            'course' => 'exists:courses,id' 
         ])->validate();
+
+        $time=['start_date'=>Date::excelToDateTimeObject($row['start_date']),'end_date' =>Date::excelToDateTimeObject($row['end_date'])];
+        Validator::make($time,[
+            'start_date'=> 'required|before:end_date|after:' . Carbon::now(),
+            'end_date' => 'required|after:' . Carbon::now()
+        ])->validate();
+        
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
                         'language','timezone','religion','second language'];
         $enrollOptional = 'optional';
@@ -113,7 +128,6 @@ class UsersImport implements ToModel, WithHeadingRow
             }
         }
         $this->count++;
-        return $user;
     }
 
 }
