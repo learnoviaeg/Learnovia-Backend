@@ -277,4 +277,33 @@ class UserController extends Controller
             return HelperController::api_response_format(200, $user);
         }
     }
+
+    public function parent_child(Request $request)
+    {
+        $user_id = Auth::user()->id;
+        $user=User::find($user_id);
+        $parent=array();
+        foreach($user->parents as $p)
+        {
+            $parent[]=$p;
+        }
+        $child=array();
+        foreach($user->childs as $c)
+        {
+            $child[]=$c;
+        }
+        if($parent == null && $child != null)
+        {
+            return HelperController::api_response_format(201, ['Childs' => $child]);
+        }
+        else if($child == null && $parent != null)
+        {
+            return HelperController::api_response_format(201, ['Parent'=>$parent]);
+        }
+        else
+        {
+            return HelperController::api_response_format(201,null,'There is no data for you.');
+        }
+
+    }
 }

@@ -182,6 +182,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/suspend']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/un-suspend']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/show-hide-real-pass']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/parent-child']);
 
             //Components Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/get']);

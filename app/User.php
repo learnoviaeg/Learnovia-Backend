@@ -106,6 +106,11 @@ class User extends Authenticatable
         return $this->belongsToMany('App\User' , 'parents' , 'parent_id' , 'child_id');
     }
 
+    public function parents()
+    {
+        return $this->belongsToMany('App\User' , 'parents' , 'child_id' , 'parent_id');
+    }
+
     public function coursesegnments()
     {
         return $this->hasMany('App\CourseSegment');
