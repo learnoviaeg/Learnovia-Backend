@@ -17,60 +17,6 @@ use Modules\QuestionBank\Entities\Quiz;
 
 class SpatieController extends Controller
 {
-    public function index()
-    {
-        // $permission1=Permission::findById(1);
-        // $p=Permission::create(['name' => 'Send Message to users']);
-        // $findPer = Permission::find(2);
-        // $findrole = Role::find(1);
-
-        // $findrole->givePermissionTo($findPer);
-
-        // $role=Role::create(['name' => 'Admin']);
-        //  $role->givePermissionTo(['name' => 'Admin']);
-        // create permissions
-
-        //Permission::create(['name' => 'Add Permission To User']);
-
-        // $permission1=Permission::findById(1);
-        // $permission2=Permission::findById(2);
-        // $permission3=Permission::findById(3);
-        // $permission4=Permission::findById(4);
-        // $permission5=Permission::findById(5);
-        // $permission6=Permission::findById(6);
-        // $permission7=Permission::findById(7);
-        // $permission8=Permission::findById(8);
-        // $permission9=Permission::findById(9);
-        // $permission10=Permission::findById(10);
-        // $permission11=Permission::findById(11);
-        // $permission12=Permission::findById(12);
-        // $permission13=Permission::findById(13);
-        // $permission14=Permission::findById(14);
-
-        // $role = Role::findById(1);
-
-        // $role->syncPermissions([$permission1, $permission2,$permission3,$permission4,$permission5,$permission6,$permission7,$permission8,$permission9,$permission10,$permission11,$permission12,$permission13,$permission14]);
-        // Permission::create(['name' => 'Add Bulk of Users']);
-
-
-        // create roles and assign created permissions
-
-        // this can be done as separate statements
-        /*$role = Role::create(['name' => 'Admin']);
-        $role->givePermissionTo('Add Role');
-        $role->givePermissionTo('Delete Role');
-        $role->givePermissionTo('Assign Role to User');
-        $role->givePermissionTo('Assign Permission To Role');
-        $role->givePermissionTo('Revoke Role from User');
-        $role->givePermissionTo('Revoke Permission from role');*/
-
-        // $role = Role::create(['name' => 'Teacher']) ->givePermissionTo(['Add Course', 'delete Course','Update Course','List Course']);
-        //$role->givePermissionTo(Permission::all());
-
-        // auth()->user()->assignRole('Admin');
-        // return User::role('Admin')->get();
-    }
-
     public function install()
     {
         $user = User::whereEmail('admin@learnovia.com')->first();
@@ -115,6 +61,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/get']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/update']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/delete']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/set-current']);
 
             //Type Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/delete']);
@@ -145,7 +92,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/update']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/get-all']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/get']);
-
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/set-current']);
 
             //Cetegory Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'category/add']);
@@ -194,7 +141,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/send']);
 
             //Calendar Permission
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'calendar/get']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'import']);
 
             //Lesson Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/add']);
@@ -298,7 +245,6 @@ class SpatieController extends Controller
             return HelperController::api_response_format(200, $find, 'Role Deleted!');
         }
         return HelperController::NOTFOUND();
-
 
     }
 
@@ -596,7 +542,9 @@ class SpatieController extends Controller
 
     public function Import_Role_with_Permission(Request $request)
     {
-        //dd(json_decode(file_get_contents($request->Imported_file)));
+        $request->validate([
+            'Imported_file' => 'required|file'
+        ]);
         try {
             $extension = $request->Imported_file->getClientOriginalExtension();
             if ($extension == 'json' || $extension == 'Json' || $extension == 'JSON') {

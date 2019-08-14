@@ -83,9 +83,8 @@ class QuizLessonController extends Controller
         $quizLesson->update([
             'quiz_id' => $request->quiz_id,
             'lesson_id' => $request->lesson_id,
-
-            'opening_time' => $request->opening_time,
-            'closing_time' => $request->closing_time,
+            'start_date' => $request->opening_time,
+            'due_date' => $request->closing_time,
             'max_attemp' => $request->max_attemp,
             'grading_method_id' => $request->grading_method_id,
             'grade' => $request->grade,

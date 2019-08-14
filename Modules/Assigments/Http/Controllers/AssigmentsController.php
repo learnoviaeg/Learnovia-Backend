@@ -141,8 +141,8 @@ class AssigmentsController extends Controller
         $assigment->is_graded = $request->is_graded;
         $assigment->mark = $request->mark;
         $assigment->allow_attachment = $request->allow_attachment;
-        $assigment->opening_date = $request->opening_date;
-        $assigment->closing_date = $request->closing_date;
+        $assigment->start_date = $request->opening_date;
+        $assigment->due_date = $request->closing_date;
         $assigment->visiable = $request->visiable;
         $assigment->save();
 

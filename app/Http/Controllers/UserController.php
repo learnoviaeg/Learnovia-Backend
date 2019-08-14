@@ -135,13 +135,14 @@ class UserController extends Controller
 
         $request->validate([
             'name' => 'required|string|min:3|max:50',
-            'email' => ['required',Rule::unique('users')->ignore($user->id),'email'],
+            'email' => ['required','email' , 'unique:users,email'],
             'password' => 'required|string|min:8|max:191'
         ]);
         $check = $user->update([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
+            'real_password' => $request->password,
         ]);
 
         foreach ($optionals as $optional) {
@@ -149,7 +150,7 @@ class UserController extends Controller
                 $user->$optional = $request->$optional;
         }
         $user->save();
-        return HelperController::api_response_format(201, $user, 'User Updated Successfully');
+        return HelperController::api_response_format(200, $user, 'User Updated Successfully');
 
     }
 

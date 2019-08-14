@@ -1,9 +1,4 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE");
-header("Access-Control-Allow-Headers:Accept, Authorization, Content-Type");
-header("Access-Control-Allow-Credentials:true");
-
 //install all permissions and roles of system Route
 Route::get('install','SpatieController@install');
 
@@ -13,7 +8,6 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
 
-Route::post('setCurrent', 'AcademicYearController@setCurrent_year');
 Route::group(['middleware' => 'auth:api'], function () {
     //user main routes
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
@@ -60,7 +54,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('comparepermissions','SpatieController@comparepermissions');
 
     //Import Excel Route
-    Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:calendar/get');
+    Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:import');
 });
 
 //Year Routes
@@ -69,8 +63,7 @@ Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::get('get', 'AcademicYearController@get')->name('getyear')->middleware('permission:year/get');
     Route::put('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
     Route::delete('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
-   // Route::post('setCurrent', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/setCurrent');
-
+   Route::post('current', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/set-current');
 });
 
 //Type Routes
@@ -83,7 +76,6 @@ Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
 
     //if you want to get all Academic year with all types please,write getyearswithtype in yours
     Route::get('get', 'AC_year_type@List_Years_with_types')->name('getyearswithtype')->middleware('permission:type/get');
-
 
     //get all types without year_id
     Route::get('getall', 'AC_year_type@get')->name('gettypes')->middleware('permission:type/get-all');
@@ -133,8 +125,7 @@ Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
 
     Route::post('update', "segment_class_Controller@update")->name('updatesegment')->middleware('permission:segment/update');
 
-      Route::post('setCurrent', 'segment_class_Controller@setCurrent_segmant')->name('SetCurrentSegment')->middleware('permission:segment/setCurrent');
-
+    Route::post('current', 'segment_class_Controller@setCurrent_segmant')->name('SetCurrentSegment')->middleware('permission:segment/set-current');
 });
 
 //Category Routes
@@ -190,13 +181,8 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     Route::get('ViewFromTo', 'MessageController@ViewAllMSG_from_to')->name('ViewFromTo')->middleware('permission:messages/get-from-to');
     Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role')->name('Message_add_send_Permission_for_role')->middleware('permission:messages/add-send-permission-for-role');
     Route::get('GetMyThreads', 'MessageController@GetMyThreads')->name('mythreads')->middleware('permission:messages/mythreads');
-
     //Contact Route
     Route::post('addContact', 'ContactController@addContact')->name('addContact')->middleware('permission:contact/add');
-
-    // Route::post('update', 'MessageController@edit')->name('editcategory')->middleware('permission:Update Category');
-    // Route::post('delete', 'MessageController@delete')->name('deletecategory')->middleware('permission:Delete Category');
-    // Route::get('get', 'MessageController@get')->name('getcategory')->middleware('permission:Get Categories');
 });
 
 Route::group(['prefix' => 'Component', 'middleware' => 'auth:api'], function () {
@@ -228,7 +214,3 @@ Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory'
 Route::post('UpdateGradeCategory', 'GradeCategoryController@UpdateGradeCategory');
 Route::post('MoveToParentCategory', 'GradeCategoryController@MoveToParentCategory');
 Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
-//Route::post('import', 'ExcelController@import');//->name('import')->middleware('permission:calendar/get');
-
-Route::post('import', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers');//->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
-
