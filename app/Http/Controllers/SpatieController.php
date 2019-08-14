@@ -346,7 +346,8 @@ class SpatieController extends Controller
 
         try {
             $validater = Validator::make($request->all(), [
-                'permissionid' => 'required|integer|exists:permissions,id',
+                'permissionid' => 'required|array',
+                'permissionid.*' => 'required|integer|exists:permissions,id',
                 'roleid' => 'required|integer|exists:roles,id'
 
             ]);
@@ -355,12 +356,16 @@ class SpatieController extends Controller
                 return response()->json($errors, 400);
             }
 
-            $findPer = Permission::find($request->permissionid);
             $findrole = Role::find($request->roleid);
 
-            $findrole->givePermissionTo($findPer);
+            foreach($request->permissionid as $per)
+            {
+                $findPer = Permission::find($per);
+                $findrole->givePermissionTo($findPer);
 
-            return HelperController::api_response_format(201, [], 'Permission Assigned to Role Successfully');
+            }
+
+            return HelperController::api_response_format(201, [], 'Permission/s Assigned to Role Successfully');
 
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
