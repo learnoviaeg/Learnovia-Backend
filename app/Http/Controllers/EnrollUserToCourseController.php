@@ -68,7 +68,7 @@ class EnrollUserToCourseController extends Controller
         $request->validate([
             'username' => 'required|array|exists:enrolls,username'
         ]);
-        $courseSegment = HelperController::Get_Course_segment_By_Course($request);
+        $courseSegment = HelperController::Get_Course_segment_Course($request);
         foreach ($request->username as $users) {
             $course_segment = Enroll::where('course_segment', $courseSegment)->where('username', $users)->delete();
         }

@@ -20,8 +20,15 @@ class Restrict
         $request->validate([
             'course_id' => 'required|exists:courses,id'
         ]);
-        if ($request->user() == null)
+
+
+        if ($request->user() == null){
             return HelperController::api_response_format(401, [], 'User not logged in');
+        }
+
+        if($request->user()->hasRole('Super Admin')){
+            return $next($request);
+        }
 
         $session_id = $request->user()->id;
         $course_segment_ids = Enroll::where('user_id', $session_id)->where('role_id', 4)->pluck('course_segment');

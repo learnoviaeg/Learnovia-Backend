@@ -31,7 +31,7 @@ class EnrollImport implements ToModel,WithHeadingRow
             'course' => $row['course']
         ]);
 
-        $courseSegment = HelperController::Get_Course_segment_By_Course($request);
+        $courseSegment = HelperController::Get_Course_segment_Course($request);
 
         return new Enroll([
             'username' => $row['username'],

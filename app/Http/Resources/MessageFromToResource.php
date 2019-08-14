@@ -23,9 +23,9 @@ class MessageFromToResource extends JsonResource
         $arr=[
             'id' => $this->id,
             'Message' => $this->text,
-            'Child' => $this->about,
-            'From' => $from->firstname,
-            'To' => $To->firstname
+            'about' => User::find($this->about),
+            'From' => $from->username,
+            'To' => $To->username
         ];
 
             if ($this->deleted == 0) {

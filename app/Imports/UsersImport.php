@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Http\Controllers\SpatieController;
 use DB;
 use App\User;
 use App\Course;
@@ -11,16 +12,17 @@ use Spatie\Permission\Models\Role;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
-use App\Enroll;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\HelperController;
+use App\Classes;
+use App\Enroll;
+use Validator;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Maatwebsite\Excel\Facades\Excel;
+use App\ClassLevel;
+use App\SegmentClass;
 
 class UsersImport implements ToModel, WithHeadingRow
 {
-    private $count = 0;
     /**
      * @param array $row
      *
@@ -28,11 +30,13 @@ class UsersImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        Validator::make($row, [
-            'firstname' => 'required|alpha',
-            'lastname' => 'required|alpha',
-            'role_id' => 'required|exists:roles,id',
+        Validator::make($row,[
+            // 'start_date'
+            'firstname'=>'required|alpha',
+            'lastname'=>'required|alpha',
+            'role_id'=>'required|exists:roles,id'
         ])->validate();
+
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
                         'language','timezone','religion','second language'];
         $enrollOptional = 'optional';
@@ -112,8 +116,7 @@ class UsersImport implements ToModel, WithHeadingRow
                 $teachercounter++;
             }
         }
-        $this->count++;
-        return $user;
-    }
+        //return HelperController::api_response_format(200 , 'Imported Successfully');
 
+    }
 }

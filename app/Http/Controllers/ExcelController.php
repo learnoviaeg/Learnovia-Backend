@@ -18,11 +18,10 @@ class ExcelController extends Controller
         $name = $type . '.php';
         if (in_array($name, $files)) {
             eval('$impoerter = new App\Imports\\' . $type . '();');
-            Excel::import($impoerter, request()->file('file'));
+            $x = Excel::import($impoerter, request()->file('file'));
+            return HelperController::api_response_format(201 , [] , 'Data Imported Successfully');
         } else {
-            HelperController::NOTFOUND();
+            return HelperController::NOTFOUND();
         }
-        return HelperController::api_response_format(201 , [] , 'Data Imported Successfully');
-
     }
 }
