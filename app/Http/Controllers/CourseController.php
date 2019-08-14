@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Enroll;
 use App\Segment;
 use App\AcademicYear;
+use App\User;
 use Illuminate\Support\Facades\Validator;
 
 class CourseController extends Controller
@@ -144,8 +145,21 @@ class CourseController extends Controller
                 continue;
             $courses[$i] = $enroll->CourseSegment->courses[0];
             $courses[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
+            $courses[$i]['Teacher'] = User::whereId(Enroll::where('role_id','4')->where('course_segment',$enroll->CourseSegment->id)->pluck('user_id'))->get(['id' , 'username' , 'firstname' , 'lastname' , 'picture'])[0];
+            $courses[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
         }
-        return HelperController::api_response_format(200, $courses);
+     return HelperController::api_response_format(200, $courses);
+    }
+
+    public function course_with_teacher()
+    {
+        $teachers=Enroll::where('role_id','4')->get(['username','course_segment']);
+        foreach($teachers as $tech)
+        {
+            $coursesegment=CourseSegment::find($tech->course_segment);
+            $tech['course']=$coursesegment->courses;
+        }
+        return $teachers;
     }
     public function GetUserCourseLessons(Request $request)
     {
