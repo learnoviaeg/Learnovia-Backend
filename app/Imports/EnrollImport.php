@@ -9,6 +9,9 @@ use App\Http\Controllers\HelperController;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Carbon\Carbon;
 
 class EnrollImport implements ToModel,WithHeadingRow
 {
@@ -20,6 +23,24 @@ class EnrollImport implements ToModel,WithHeadingRow
 
     public function model(array $row)
     {
+        Validator::make($row,[
+            'username'=>'required|exists:users,username',
+            'year'=>'exists:academic_years,id',
+            'level'=>'required|exists:levels,id',
+            'type'=>'required|exists:academic_types,id',
+            'segment'=>'exists:segments,id',
+            'class'=>'required|exists:classes,id',
+            'course'=>'required|exists:course_segments,course_id',
+            'role_id'=>'required|exists:roles,id',
+
+
+        ])->validate();
+        $time=['start_date'=>Date::excelToDateTimeObject($row['start_date']),'end_date' =>Date::excelToDateTimeObject($row['end_date'])];
+        Validator::make($time,[
+            'start_date'=> 'required|before:end_date|after:' . Carbon::now(),
+            'end_date' => 'required|after:' . Carbon::now()
+
+        ])->validate();
         $user_id = User::FindByName( $row['username'])->id;
 
         $request = new Request([

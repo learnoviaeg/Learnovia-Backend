@@ -12,9 +12,11 @@ use Illuminate\Http\Request;
 use App\YearLevel;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Illuminate\Support\Facades\Validator;
 
 
-class CoursesImport implements ToModel , WithHeadingRow 
+
+class CoursesImport implements ToModel , WithHeadingRow
 {
     /**
     * @param array $row
@@ -23,6 +25,17 @@ class CoursesImport implements ToModel , WithHeadingRow
     */
     public function model(array $row)
     {
+        Validator::make($row,[
+            'name'=>'string',
+            'category'=>'exists:categories,id',
+            'year'=>'exists:academic_years,id',
+            'type'=>'required|exists:academic_types,id',
+            'level'=>'exists:levels,id',
+            'class'=>'required|exists:classes,id',
+            'segment'=>'exists:segments,id',
+
+
+        ])->validate();
 
         $request = new Request([
             'name' => $row['name'],
@@ -37,5 +50,5 @@ class CoursesImport implements ToModel , WithHeadingRow
         CourseController::add($request);
 
     }
-    
+
 }

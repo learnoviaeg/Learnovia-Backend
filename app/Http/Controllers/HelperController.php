@@ -121,7 +121,7 @@ class HelperController extends Controller
 
         if($validator->fails())
             return $validator->errors();
-        $year = AcademicYear::Get_current()->id ;
+        $year = AcademicYear::Get_current()->id;
         $segment = Segment::Get_current()->id;
         if ($request->filled('year')) {
             $year = $request->year ;
