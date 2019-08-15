@@ -44,12 +44,6 @@ class UsersImport implements ToModel, WithHeadingRow
             'year' => 'exists:academic_years,id'
         ])->validate();
 
-        $time=['start_date'=>Date::excelToDateTimeObject($row['start_date']),'end_date' =>Date::excelToDateTimeObject($row['end_date'])];
-        Validator::make($time,[
-            'start_date'=> 'required|before:end_date|after:' . Carbon::now(),
-            'end_date' => 'required|after:' . Carbon::now()
-        ])->validate();
-
         if (isset($row['year'])) {
 
             Validator::make($row,[
@@ -99,59 +93,74 @@ class UsersImport implements ToModel, WithHeadingRow
         }
         $user->save();
 
-        $role = Role::find($row['role_id']);
-        $user->assignRole($role);
-        if ($row['role_id'] == 3) {
-            $request = new Request([
-                'username' => array($user->username),
-                'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                'year' => $year,
-                'type' => $row['type'],
-                'level' => $row['level'],
-                'class' => $row['class'],
-                'segment' => $segment
-            ]);
+        if (isset($row['start_date'])&&isset($row['end_date']))
+        {
+            $time=['start_date'=>Date::excelToDateTimeObject($row['start_date']),'end_date' =>Date::excelToDateTimeObject($row['end_date'])];
 
-            EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
+            Validator::make($time,[
+                'start_date'=> 'required|before:end_date|after:' . Carbon::now(),
+                'end_date' => 'required|after:' . Carbon::now()
+            ])->validate();
 
-            $enrollcounter=1;
-            while(isset($row[$enrollOptional.$enrollcounter])) {
+            Validator::make($row,[
+                'role_id'=>'required|exists:roles,id',
+            ])->validate();
 
-                $course_id=Course::findById($row[$enrollOptional.$enrollcounter]);
-                $courseSeg=CourseSegment::getidfromcourse($course_id);
-                $userId =User::FindByName($user->username)->id;
-
-                Enroll::firstOrCreate([
-                    'course_segment' => $courseSeg,
-                    'user_id' => $userId,
+            $role = Role::find($row['role_id']);
+            $user->assignRole($role);
+            if ($row['role_id'] == 3) {
+                $request = new Request([
+                    'username' => array($user->username),
                     'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                    'username'=> $user->username,
                     'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                    'role_id'=> 3
+                    'year' => $year,
+                    'type' => $row['type'],
+                    'level' => $row['level'],
+                    'class' => $row['class'],
+                    'segment' => $segment
                 ]);
 
-                $enrollcounter++;
+                EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
+
+                $enrollcounter=1;
+                while(isset($row[$enrollOptional.$enrollcounter])) {
+
+                    $course_id=Course::findById($row[$enrollOptional.$enrollcounter]);
+                    $courseSeg=CourseSegment::getidfromcourse($course_id);
+                    $userId =User::FindByName($user->username)->id;
+
+                    Enroll::firstOrCreate([
+                        'course_segment' => $courseSeg,
+                        'user_id' => $userId,
+                        'start_date' => Date::excelToDateTimeObject($row['start_date']),
+                        'username'=> $user->username,
+                        'end_date' => Date::excelToDateTimeObject($row['end_date']),
+                        'role_id'=> 3
+                    ]);
+
+                    $enrollcounter++;
+                }
+            }
+            else{
+                $teachercounter=1;
+                while(isset($row[$teacheroptional.$teachercounter])){
+                    $course_id=Course::findById($row[$teacheroptional.$teachercounter]);
+                    $courseSeg=CourseSegment::getidfromcourse($course_id);
+                    $userId =User::FindByName($user->username)->id; 
+
+                    Enroll::create([
+                        'course_segment' => $courseSeg,
+                        'user_id' => $userId,
+                        'start_date' => Date::excelToDateTimeObject($row['start_date']),
+                        'username'=> $user->username,
+                        'end_date' => Date::excelToDateTimeObject($row['end_date']),
+                        'role_id'=> 4
+                    ]);
+
+                    $teachercounter++;
+                }
             }
         }
-        else{
-            $teachercounter=1;
-            while(isset($row[$teacheroptional.$teachercounter])){
-                $course_id=Course::findById($row[$teacheroptional.$teachercounter]);
-                $courseSeg=CourseSegment::getidfromcourse($course_id);
-                $userId =User::FindByName($user->username)->id; 
-
-                Enroll::create([
-                    'course_segment' => $courseSeg,
-                    'user_id' => $userId,
-                    'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                    'username'=> $user->username,
-                    'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                    'role_id'=> 4
-                ]);
-
-                $teachercounter++;
-            }
-        }
+        
     }
 }
