@@ -93,7 +93,7 @@ Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
 Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'LevelsController@AddLevelWithYear')->name('addlevel')->middleware('permission:level/add');
     Route::get('get', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get-all');
-    //without year or typr request
+    //without year or type request
     Route::get('gets', 'LevelsController@get')->name('getlevels')->middleware('permission:level/gets');
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
@@ -169,7 +169,7 @@ Route::group(['prefix' => 'enroll' , 'middleware' => 'auth:api'], function () {
     Route::get('getAll', 'EnrollUserToCourseController@ViewAllCoursesThatUserEnrollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
     Route::post('mandatory', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:enroll/mandatory-course');
     Route::post('enrollexcel', 'EnrollUserToCourseController@EnrollExistUsersFromExcel')->name('enrollexcel')->middleware('permission:enroll/bulk-of-exist-users');
-    //Route::post('usertech', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
+    Route::post('usertech', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
     Route::get('GetEnrolledStudent', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');
 });
 
@@ -215,4 +215,9 @@ Route::get('GetGradeCategory', 'GradeCategoryController@GetGradeCategory');
 Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory');
 Route::post('UpdateGradeCategory', 'GradeCategoryController@UpdateGradeCategory');
 Route::post('MoveToParentCategory', 'GradeCategoryController@MoveToParentCategory');
+<<<<<<< HEAD
 Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
+=======
+
+Route::post('import', 'ExcelController@import');//->name('import')->middleware('permission:calendar/get');
+>>>>>>> remotes/origin/validUserImport

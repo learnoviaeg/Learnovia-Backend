@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\AcademicYear;
 use App\Segment;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use App\AcademicYearType;
 use App\YearLevel;
 use App\ClassLevel;
@@ -44,7 +42,7 @@ class HelperController extends Controller
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
         $year = AcademicYear::Get_current()->id;
-        $segment = Segment::Get_current()->id;
+        $segment = Segment::Get_current($request->type)->id;
         if ($request->filled('year')) {
             $year = $request->year;
         }
@@ -76,7 +74,7 @@ class HelperController extends Controller
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
         $year = AcademicYear::Get_current()->id;
-        $segment = Segment::Get_current()->id;
+        $segment = Segment::Get_current($request->type)->id;
         if ($request->filled('year')) {
             $year = $request->year;
         }
@@ -120,7 +118,7 @@ class HelperController extends Controller
         if($validator->fails())
             return $validator->errors();
         $year = AcademicYear::Get_current()->id ;
-        $segment = Segment::Get_current()->id;
+        $segment = Segment::Get_current($request->type)->id;
         if ($request->filled('year')) {
             $year = $request->year ;
         }

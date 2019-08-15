@@ -27,7 +27,12 @@ class EnrollUserToCourseController extends Controller
             'users.*' => 'required|string|exists:users,username',
             'role_id' => 'required|array|exists:roles,id',
             'start_date' => 'required|before:end_date|after:' . Carbon::now(),
-            'end_date' => 'required|after:' . Carbon::now()
+            'end_date' => 'required|after:' . Carbon::now(),
+            'year' => 'exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+            'segment' => 'exists:segments,id'
         ]);
 
         $data = array();
@@ -64,16 +69,24 @@ class EnrollUserToCourseController extends Controller
     // unEnroll a user to a coursor more courses
     public function UnEnroll(Request $request)
     {
-
         $request->validate([
-            'username' => 'required|array|exists:enrolls,username'
+            'username' => 'required|array|exists:enrolls,username',
+            'year' => 'exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+            'segment' => 'exists:segments,id',
+            'course' => 'exists:courses,id'
         ]);
         $courseSegment = HelperController::Get_Course_segment_Course($request);
         foreach ($request->username as $users) {
             $course_segment = Enroll::where('course_segment', $courseSegment)->where('username', $users)->delete();
         }
 
-        return HelperController::api_response_format(200, $course_segment, 'users UnEnrolled Successfully');
+        if($course_segment > 0)
+            return HelperController::api_response_format(200, $course_segment, 'users UnEnrolled Successfully');
+
+        return HelperController::NOTFOUND();
     }
 
 
@@ -99,6 +112,11 @@ class EnrollUserToCourseController extends Controller
             'username' => 'required|array|exists:users,username',
             'start_date' => 'required|before:end_date|after:' . Carbon::now(),
             'end_date' => 'required|after:' . Carbon::now(),
+            'year' => 'exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+            'segment' => 'exists:segments,id'
         ]);
 
         $count = 0;
@@ -118,7 +136,7 @@ class EnrollUserToCourseController extends Controller
             $check = Enroll::where('user_id', $userId)->where('course_segment', $segments)->pluck('id');
             if (count($check) == 0) {
                 foreach ($segments as $segment) {
-                    Enroll::create([
+                    Enroll::firstOrCreate([
                         'username' => $user,
                         'user_id' => $userId,
                         'course_segment' => $segment,

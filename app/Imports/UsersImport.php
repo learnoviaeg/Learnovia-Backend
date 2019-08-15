@@ -6,6 +6,8 @@ use App\Http\Controllers\SpatieController;
 use DB;
 use App\User;
 use App\Course;
+use App\AcademicYear;
+use App\Segment;
 use App\CourseSegment;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Spatie\Permission\Models\Role;
@@ -20,6 +22,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Maatwebsite\Excel\Facades\Excel;
 use App\ClassLevel;
 use App\SegmentClass;
+use Carbon\Carbon;
 
 class UsersImport implements ToModel, WithHeadingRow
 {
@@ -31,19 +34,51 @@ class UsersImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         Validator::make($row,[
-            // 'start_date'
             'firstname'=>'required|alpha',
             'lastname'=>'required|alpha',
-            'role_id'=>'required|exists:roles,id'
+            'role_id'=>'required|exists:roles,id',
+            'type' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+            'segment' => 'exists:segments,id',
+            'year' => 'exists:academic_years,id'
         ])->validate();
+
+        $time=['start_date'=>Date::excelToDateTimeObject($row['start_date']),'end_date' =>Date::excelToDateTimeObject($row['end_date'])];
+        Validator::make($time,[
+            'start_date'=> 'required|before:end_date|after:' . Carbon::now(),
+            'end_date' => 'required|after:' . Carbon::now()
+        ])->validate();
+
+        if (isset($row['year'])) {
+
+            Validator::make($row,[
+                'year' => 'exists:academic_years,id'
+            ])->validate();
+
+            $year = $row['year'];
+        }
+        else
+        {
+            $year = AcademicYear::Get_current()->id;
+        }
+        if (isset($row['segment'])) {
+
+            Validator::make($row,[
+                'segment' => 'exists:segments,id',
+            ])->validate();
+
+            $segment = $row['segment'];
+        }
+        else{
+            $segment = Segment::Get_current($row['type'])->id;
+        }
 
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
                         'language','timezone','religion','second language'];
         $enrollOptional = 'optional';
         $teacheroptional='course';
 
-
-        // dd($classSegID);
         $password = mt_rand(100000, 999999);
 
         $user = new User([
@@ -55,8 +90,12 @@ class UsersImport implements ToModel, WithHeadingRow
         ]);
 
         foreach ($optionals as $optional) {
-            if (isset($row[$optional]))
+            if (isset($row[$optional])){
+                if($optional =='birthdate'){
+                    $row[$optional] =  Date::excelToDateTimeObject($row['birthdate']);
+                }
                 $user->$optional = $row[$optional];
+            }
         }
         $user->save();
 
@@ -67,11 +106,11 @@ class UsersImport implements ToModel, WithHeadingRow
                 'username' => array($user->username),
                 'start_date' => Date::excelToDateTimeObject($row['start_date']),
                 'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                'year' => $row['year'],
+                'year' => $year,
                 'type' => $row['type'],
                 'level' => $row['level'],
                 'class' => $row['class'],
-                'segment' => $row['segment']
+                'segment' => $segment
             ]);
 
             EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
@@ -79,20 +118,18 @@ class UsersImport implements ToModel, WithHeadingRow
             $enrollcounter=1;
             while(isset($row[$enrollOptional.$enrollcounter])) {
 
-                $option = new Request([
-                    'year' => $row['year'],
-                    'type' => $row['type'],
-                    'level' => $row['level'],
-                    'class' => $row['class'],
-                    'segment' => $row['segment'],
-                    'course' => $row['course'],
-                    'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                    'users'=> array($user->username),
-                    'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                    'role_id'=>array(3)
-                ]);
+                $course_id=Course::findById($row[$enrollOptional.$enrollcounter]);
+                $courseSeg=CourseSegment::getidfromcourse($course_id);
+                $userId =User::FindByName($user->username)->id;
 
-                EnrollUserToCourseController::EnrollCourses($option);
+                Enroll::firstOrCreate([
+                    'course_segment' => $courseSeg,
+                    'user_id' => $userId,
+                    'start_date' => Date::excelToDateTimeObject($row['start_date']),
+                    'username'=> $user->username,
+                    'end_date' => Date::excelToDateTimeObject($row['end_date']),
+                    'role_id'=> 3
+                ]);
 
                 $enrollcounter++;
             }
@@ -100,7 +137,7 @@ class UsersImport implements ToModel, WithHeadingRow
         else{
             $teachercounter=1;
             while(isset($row[$teacheroptional.$teachercounter])){
-                $course_id=Course::findByName($row[$teacheroptional.$teachercounter]);
+                $course_id=Course::findById($row[$teacheroptional.$teachercounter]);
                 $courseSeg=CourseSegment::getidfromcourse($course_id);
                 $userId =User::FindByName($user->username)->id;
 
@@ -116,7 +153,5 @@ class UsersImport implements ToModel, WithHeadingRow
                 $teachercounter++;
             }
         }
-        //return HelperController::api_response_format(200 , 'Imported Successfully');
-
     }
 }
