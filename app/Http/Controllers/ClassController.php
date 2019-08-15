@@ -65,21 +65,34 @@ class ClassController extends Controller
     {
         $request->validate([
             'name'  => 'required',
-            'year'  => 'exists:academic_years,id',
-            'type'  => 'exists:academic_types,id|required_with:year',
-            'level' => 'exists:levels,id|required_with:year',
+            'year'=>'array|required_with:type|required_with:level',
+            'year.*'=>'exists:academic_years,id',
+            'type'=>'array|required_with:year',
+            'type.*'=> 'exists:academic_types,id',
+            'level'=>'array|required_with:year',
+            'level.*'=> 'exists:levels,id',
         ]);
 
-        $class = Classes::create([
+        $class = Classes::firstOrCreate([
             'name' => $request->name,
         ]);
-        if($request->filled('year')){
-            $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
-            $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
-            ClassLevel::create([
-                'year_level_id' => $yearlevel->id,
-                'class_id' => $class->id
-            ]);
+        if($request->filled('year')&&$request->filled('type')&&$request->filled('level')){
+            foreach ($request->year as $year) {
+                # code...
+                foreach ($request->type as $type) {
+                    # code...
+                    $yeartype = AcademicYearType::checkRelation($year , $type);
+                    foreach ($request->level as $level) {
+                        # code...
+                        $yearlevel = YearLevel::checkRelation($yeartype->id , $level);
+                        ClassLevel::firstOrCreate([
+                            'year_level_id' => $yearlevel->id,
+                            'class_id' => $class->id
+                        ]);
+                    }
+                }
+            }
+
         }
         return HelperController::api_response_format(200, new  Classs($class), 'Class Created Successfully');
     }
