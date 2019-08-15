@@ -134,7 +134,10 @@ class EnrollUserToCourseController extends Controller
                         $segments->push($segment->id);
                     }
                 }
-            }   
+            }
+            if($segments == null)
+                break;
+   
             $check = Enroll::where('user_id', $userId)->where('course_segment', $segments)->pluck('id');
             if (count($check) == 0) {
                 foreach ($segments as $segment) {

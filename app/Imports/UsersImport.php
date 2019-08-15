@@ -127,6 +127,8 @@ class UsersImport implements ToModel, WithHeadingRow
 
                     $course_id=Course::findById($row[$enrollOptional.$enrollcounter]);
                     $courseSeg=CourseSegment::getidfromcourse($course_id);
+                    if($courseSeg == null)
+                        break;
                     $userId =User::FindByName($user->username)->id;
 
                     Enroll::firstOrCreate([
@@ -146,6 +148,8 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$teacheroptional.$teachercounter])){
                     $course_id=Course::findById($row[$teacheroptional.$teachercounter]);
                     $courseSeg=CourseSegment::getidfromcourse($course_id);
+                    if($courseSeg == null)
+                        break;
                     $userId =User::FindByName($user->username)->id; 
 
                     Enroll::create([
