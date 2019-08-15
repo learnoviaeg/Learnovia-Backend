@@ -227,3 +227,5 @@ Route::get('GetGradeCategory', 'GradeCategoryController@GetGradeCategory');
 Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory');
 Route::post('UpdateGradeCategory', 'GradeCategoryController@UpdateGradeCategory');
 Route::post('MoveToParentCategory', 'GradeCategoryController@MoveToParentCategory');
+
+Route::post('import', 'ExcelController@import');//->name('import')->middleware('permission:calendar/get');

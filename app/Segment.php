@@ -11,11 +11,14 @@ class Segment extends Model
     public function Segment_class(){
         return $this->belongsToMany('App\ClassLevel', 'segment_classes','segment_id','class_level_id');
     }
-    public  static function Get_current()
+
+    public static function Get_current($type)
     {
-        $current= self::where('current',1)->first();
-        return $current;
+        $year = self::where('academic_type_id', $type)->where('current',1)->first();
+        
+        return $year;
     }
+
     protected $hidden = [
         'created_at','updated_at'
     ];

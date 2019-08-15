@@ -14,6 +14,11 @@ class Course extends Model
         return self::where('name',$course_name)->pluck('id')->first();
     }
 
+    public static function findById($course_id)
+    {
+        return self::where('id',$course_id)->pluck('id')->first();
+    }
+
     protected $hidden = [
         'created_at', 'updated_at',
     ];

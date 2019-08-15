@@ -44,7 +44,7 @@ class HelperController extends Controller
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
         $year = AcademicYear::Get_current()->id;
-        $segment = Segment::Get_current()->id;
+        $segment = Segment::Get_current($request->type)->id;
         if ($request->filled('year')) {
             $year = $request->year;
         }
@@ -76,7 +76,7 @@ class HelperController extends Controller
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
         $year = AcademicYear::Get_current()->id;
-        $segment = Segment::Get_current()->id;
+        $segment = Segment::Get_current($request->type)->id;
         if ($request->filled('year')) {
             $year = $request->year;
         }
@@ -122,7 +122,7 @@ class HelperController extends Controller
         if($validator->fails())
             return $validator->errors();
         $year = AcademicYear::Get_current()->id ;
-        $segment = Segment::Get_current()->id;
+        $segment = Segment::Get_current($request->type)->id;
         if ($request->filled('year')) {
             $year = $request->year ;
         }
@@ -150,7 +150,7 @@ class HelperController extends Controller
         if($validator->fails())
             return $validator->errors();
         $year = AcademicYear::Get_current()->id ;
-        $segment = Segment::Get_current()->id;
+        $segment = Segment::Get_current($request->type)->id;
         if ($request->filled('year')) {
             $year = $request->year ;
         }
