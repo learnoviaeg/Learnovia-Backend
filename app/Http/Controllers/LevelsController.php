@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\AcademicYearType;
 use App\YearLevel;
 use Illuminate\Http\Request;
-
+use App\AcademicYear;
 use App\Level;
 use Validator;
 
@@ -100,6 +100,35 @@ class LevelsController extends Controller
         return HelperController::api_response_format(200,$levels);
     }
 
+    public function Assign_level_to(Request $request)
+    {
+        $rules =[
+            'year' => 'array',
+            'year.*' => 'exists:academic_years,id',
+            'type' => 'array',
+            'type.*' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails())
+            return ['result' => false, 'value' => $validator->errors()];
+
+        $count=0;
+            while(isset($request->type[$count]))
+                {
+                    $year = AcademicYear::Get_current()->id;
+                    if (isset($request->year[$count])) {
+                        $year = $request->year[$count];
+                    }
+
+                    $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
+                    YearLevel::checkRelation($academic_year_type->id, $request->level);
+                    $count++;
+                }
+
+        return HelperController::api_response_format(201, 'Level Assigned Successfully');
+
+    }
 
     public function get(Request $request)
     {

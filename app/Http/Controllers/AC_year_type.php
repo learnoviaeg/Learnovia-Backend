@@ -158,20 +158,19 @@ class AC_year_type extends Controller
     {
         $valid = Validator::make($req->all(), [
             'id_type' => 'required|exists:academic_types,id',
-            'id_year' => 'required|exists:academic_years,id'
+            'id_year'=>'required|array',
+            'id_year.*' => 'required|exists:academic_years,id'
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
         }
-        $ac = AcademicType::Find($req->id_type);
-        if ($ac) {
-            AcademicYearType::create([
-                'academic_year_id' => $req->id_year,
-                'academic_type_id' => $req->id_type
-
-            ]);
-            return HelperController::api_response_format(200, $ac);
+        $counter=0;
+        while(isset($req->id_year[$counter]))
+        {
+            $academic_year_type=AcademicYearType::checkRelation($req->id_year[$counter],$req->id_type);
+            $counter++;
         }
-        return HelperController::api_response_format(400, [], 'Assignment Fail');
+         return HelperController::api_response_format(200, 'Academic Year-Type Relation Created Succssesfully');
+
     }
 }

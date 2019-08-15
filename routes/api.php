@@ -97,6 +97,7 @@ Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
     Route::get('gets', 'LevelsController@get')->name('getlevels')->middleware('permission:level/gets');
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
+    Route::post('assign', 'LevelsController@Assign_level_to')->name('assignlevel');//->middleware('permission:level/assign');
 });
 
 //Class Routes
@@ -107,6 +108,7 @@ Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::get('getall', 'ClassController@show')->name('getallclass')->middleware('permission:class/get');
     Route::put('update', 'ClassController@update')->name('updateclass')->middleware('permission:class/update');
     Route::delete('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:class/delete');
+    Route::post('assign', 'ClassController@Assign_class_to')->name('assignclass');//->middleware('permission:class/assign');
 });
 
 //Segment Routes
