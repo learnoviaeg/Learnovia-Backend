@@ -1,6 +1,6 @@
 <?php
-
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use App\Announcement;
 use Modules\Assigments\Entities\assignment;
@@ -140,6 +140,8 @@ class CalendarController extends Controller
             {
                 foreach($comp as $com)
                 {
+                    if($com->type == 3)
+                        continue;
                     if($com->name=='Quiz')
                     {
                         $les[$com->name]= $les->module($com->module,$com->model)

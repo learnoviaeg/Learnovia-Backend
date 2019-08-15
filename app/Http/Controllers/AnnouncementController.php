@@ -27,135 +27,114 @@ class AnnouncementController extends Controller
 
         //Validtaion
         $request->validate([
-            'title'=>'required',
+            'title' => 'required',
             'description' => 'required',
             'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
-            'start_date'=>'date |date_format:Y-m-d H:i:s|before:due_date|after:'.Carbon::now(),
-            'due_date'=>'date |date_format:Y-m-d H:i:s|after:'.Carbon::now(),
-            'assign'=> 'required'
+            'start_date' => 'date |date_format:Y-m-d H:i:s|before:due_date|after:' . Carbon::now(),
+            'due_date' => 'date |date_format:Y-m-d H:i:s|after:' . Carbon::now(),
+            'assign' => 'required'
         ]);
 
         //Files uploading
-        if (Input::hasFile('attached_file'))
-        {
+        if (Input::hasFile('attached_file')) {
 
             $destinationPath = public_path();
             $name = Input::file('attached_file')->getClientOriginalName();
             $extension = Input::file('attached_file')->getClientOriginalExtension();
-            $fileName = $name.'.'.uniqid($request->id).'.'.$extension;
+            $fileName = $name . '.' . uniqid($request->id) . '.' . $extension;
 
             //store the file in the $destinationPath
             $file = Input::file('attached_file')->move($destinationPath, $fileName);
-        }
-        else
-        {
-            $fileName=null;
+        } else {
+            $fileName = null;
         }
 
         //Assign Conditions
-        if($request->assign == 'all')
-        {
+        if ($request->assign == 'all') {
             $toUser = User::get();
             Notification::send($toUser, new Announcment($request));
-        }
-        else if ($request->assign == 'class')
-        {
+        } else if ($request->assign == 'class') {
             $request->validate([
-                'class_id'=>'required|exists:classes,id',
+                'class_id' => 'required|exists:classes,id',
             ]);
 
-            $class_level_id=ClassLevel::GetClassLevel($request->class_id);
-            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
-            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
-            $users=Enroll::Get_User_ID($course_segment_id);
-            $noti=User::find($users);
+            $class_level_id = ClassLevel::GetClassLevel($request->class_id);
+            $segmeny_class_id = SegmentClass::GetClasseLevel($class_level_id);
+            $course_segment_id = CourseSegment::GetCourseSegmentId($segmeny_class_id);
+            $users = Enroll::Get_User_ID($course_segment_id);
+            $noti = User::find($users);
             Notification::send($noti, new Announcment($request));
-
-        }
-        else if ($request->assign == 'course')
-        {
+        } else if ($request->assign == 'course') {
             $request->validate([
-                'course_id'=>'required|exists:courses,id',
+                'course_id' => 'required|exists:courses,id',
             ]);
 
-            $course_segment=CourseSegment::getidfromcourse($request->course_id);
-            $users=Enroll::Get_User_ID($course_segment);
-            $noti=User::find($users);
+            $course_segment = CourseSegment::getidfromcourse($request->course_id);
+            $users = Enroll::Get_User_ID($course_segment);
+            $noti = User::find($users);
             Notification::send($noti, new Announcment($request));
-
-        }
-        else if ($request->assign == 'level')
-        {
+        } else if ($request->assign == 'level') {
             $request->validate([
-                'level_id'=>'required|exists:levels,id',
+                'level_id' => 'required|exists:levels,id',
             ]);
 
-            $Year_level_id=YearLevel::GetYearLevelId($request->level_id);
-            $class_level_id=ClassLevel::GetClassLevelid($Year_level_id);
-            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
-            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
-            $users=Enroll::Get_User_ID($course_segment_id);
-            $noti=User::find($users);
+            $Year_level_id = YearLevel::GetYearLevelId($request->level_id);
+            $class_level_id = ClassLevel::GetClassLevelid($Year_level_id);
+            $segmeny_class_id = SegmentClass::GetClasseLevel($class_level_id);
+            $course_segment_id = CourseSegment::GetCourseSegmentId($segmeny_class_id);
+            $users = Enroll::Get_User_ID($course_segment_id);
+            $noti = User::find($users);
             Notification::send($noti, new Announcment($request));
-
-        }
-        else if ($request->assign == 'year')
-        {
+        } else if ($request->assign == 'year') {
             $request->validate([
-                'year_id'=>'required|exists:academic_years,id',
+                'year_id' => 'required|exists:academic_years,id',
             ]);
 
-            $academic_year_type_id=AcademicYearType::get_yaer_type_by_year($request->year_id);
-            $Year_level_id=YearLevel::get_year_level_id($academic_year_type_id);
-            $class_level_id=ClassLevel::GetClassLevelid($Year_level_id);
-            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
-            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
-            $users=Enroll::Get_User_ID($course_segment_id);
-            $noti=User::find($users);
+            $academic_year_type_id = AcademicYearType::get_yaer_type_by_year($request->year_id);
+            $Year_level_id = YearLevel::get_year_level_id($academic_year_type_id);
+            $class_level_id = ClassLevel::GetClassLevelid($Year_level_id);
+            $segmeny_class_id = SegmentClass::GetClasseLevel($class_level_id);
+            $course_segment_id = CourseSegment::GetCourseSegmentId($segmeny_class_id);
+            $users = Enroll::Get_User_ID($course_segment_id);
+            $noti = User::find($users);
             Notification::send($noti, new Announcment($request));
-
-        }
-        else if ($request->assign == 'type')
-        {
+        } else if ($request->assign == 'type') {
             $request->validate([
-                'type_id'=>'required|exists:academic_types,id',
+                'type_id' => 'required|exists:academic_types,id',
             ]);
 
-            $academic_year_type_id=AcademicYearType::get_yaer_type_by_type($request->type_id);
-            $Year_level_id=YearLevel::get_year_level_id($academic_year_type_id);
-            $class_level_id=ClassLevel::GetClassLevelid($Year_level_id);
-            $segmeny_class_id=SegmentClass::GetClasseLevel($class_level_id);
-            $course_segment_id=CourseSegment::GetCourseSegmentId($segmeny_class_id);
-            $users=Enroll::Get_User_ID($course_segment_id);
-            $noti=User::find($users);
+            $academic_year_type_id = AcademicYearType::get_yaer_type_by_type($request->type_id);
+            $Year_level_id = YearLevel::get_year_level_id($academic_year_type_id);
+            $class_level_id = ClassLevel::GetClassLevelid($Year_level_id);
+            $segmeny_class_id = SegmentClass::GetClasseLevel($class_level_id);
+            $course_segment_id = CourseSegment::GetCourseSegmentId($segmeny_class_id);
+            $users = Enroll::Get_User_ID($course_segment_id);
+            $noti = User::find($users);
             Notification::send($noti, new Announcment($request));
-
-        }
-        else
-        {
+        } else {
             return ('Operation Fails!');
         }
 
         //Creating announcement in DB
-        Announcement::create([
-           'title' => $request->title,
-           'description' =>$request->description,
-           'attached_file' => $fileName,
-           'start_date' => $request->start_date,
-           'due_date' => $request->due_date,
-           'assign'=>$request->assign,
-           'class_id' => $request->class_id,
-           'course_id' => $request->course_id,
-           'level_id' => $request->level_id,
-           'year_id' => $request->level_id,
-           'type_id' => $request->level_id
+        $announcment = Announcement::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'attached_file' => $fileName,
+            'start_date' => $request->start_date,
+            'due_date' => $request->due_date,
+            'assign' => $request->assign,
+            'class_id' => $request->class_id,
+            'course_id' => $request->course_id,
+            'level_id' => $request->level_id,
+            'year_id' => $request->level_id,
+            'type_id' => $request->level_id
         ]);
 
-        return HelperController::api_response_format(201,'Announcement Sent Successfully');
-     }
+        return HelperController::api_response_format(201,$announcment,'Announcement Sent Successfully');
+    }
 
-     public function delete_announcement(Request $request)
-     {
+    public function delete_announcement(Request $request)
+    {
         $request->validate([
             'id' => 'required|exists:announcements,id',
         ]);
@@ -164,10 +143,5 @@ class AnnouncementController extends Controller
         $announce->delete();
 
         return HelperController::api_response_format(201, 'Announcement Deleted Successfully');
-
-     }
-
+    }
 }
-
-
-

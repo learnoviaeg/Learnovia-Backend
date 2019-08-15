@@ -41,6 +41,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('getall', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:notifications/get-all');
         Route::get('unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:notifications/get-unread');
         Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:notifications/mark-as-read');
+        Route::get('user', 'NotificationController@GetNotifcations')->name('readnotification')->middleware('permission:notifications/get-for-user');
+        Route::get('delete', 'NotificationController@DeletewithTime')->name('readnotification')->middleware('permission:notifications/delete-duration');
     });
 
     //Announcements Routes
