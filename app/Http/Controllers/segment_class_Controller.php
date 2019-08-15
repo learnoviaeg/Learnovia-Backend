@@ -12,6 +12,7 @@ use App\Segment;
 use App\Http\Resources\Segment_class_resource;
 use App\AcademicType;
 use App\AcademicYear;
+use DB;
 
 class segment_class_Controller extends Controller
 
@@ -235,5 +236,36 @@ class segment_class_Controller extends Controller
             return HelperController::api_response_format(200, [], ' this Segment invalid');
 
         }
+    }
+
+
+
+    
+    public function is_active(Request $request)
+    {
+        $request->validate([
+            'year' => 'required|integer|exists:academic_years,id',
+            'type' => 'required|integer|exists:academic_types,id',
+            'segment' => 'required|exists:segments,id',
+            'class' => 'required|exists:classes,id',
+            'level' => 'required|exists:levels,id',
+        ]);
+                
+                $newRequest = new Request();
+                $newRequest->setMethod('POST');
+                $newRequest->request->add(['year' => $request->year]);
+                $newRequest->request->add(['type' => $request->type]);
+                $newRequest->request->add(['level' => $request->level]);
+                $newRequest->request->add(['class' => $request->class]);
+                $newRequest->request->add(['segment' => $request->segment]);
+
+                $result = HelperController::Get_Course_segment($newRequest);
+                $course_segment=$result['value']->first();
+                foreach ($course_segment->segmentClasses as $single) {
+                    $single->update([
+                        'is_active' => ($single->is_active == 0) ? 1 : 0,
+                    ]);
+                }
+                return response()->json($course_segment->segmentClasses);
     }
 }

@@ -214,3 +214,5 @@ Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory'
 Route::post('UpdateGradeCategory', 'GradeCategoryController@UpdateGradeCategory');
 Route::post('MoveToParentCategory', 'GradeCategoryController@MoveToParentCategory');
 Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
+
+Route::post('active', 'segment_class_Controller@is_active');
