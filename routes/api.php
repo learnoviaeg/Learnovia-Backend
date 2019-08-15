@@ -148,6 +148,8 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('assign', 'CourseController@Assgin_course_to')->name('assgincourseto');//->middleware('permission:course/assgin-course-to');
     Route::get('coursewithteacher', 'CourseController@course_with_teacher')->name('coursewithteacher');//->middleware('permission:course/course-with-teacher');
 });
+Route::post('activate', 'CourseController@ActivateCourseSegment');
+
 
 //USER CRUD ROUTES
 Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {

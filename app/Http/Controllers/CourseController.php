@@ -350,4 +350,20 @@ class CourseController extends Controller
 
             return HelperController::api_response_format(201, 'Course Assigned Successfully');
     }
+
+    Public function ActivateCourseSegment(Request $request)
+    {
+        $request->validate([
+            'course_segment_id'=>'required|exists:course_segments,id',
+        ]);
+        $segment=CourseSegment::where('id',$request->course_segment_id)->update([
+            'is_active' => 1
+        ]);
+        $course_id=CourseSegment::where('id',$request->course_segment_id)->pluck('course_id')->first();
+        $SegmentsINSameCourse=CourseSegment::where('course_id',$course_id)->get();       
+        $SegmentsINSameCourse= CourseSegment::where('id', '!=', $request->course_segment_id)->where('course_id',$course_id)
+        ->update(['is_active' => 0]);
+
+        return HelperController::api_response_format(200, $segment, 'Course Segment is activated Successfully');
+    }
 }
