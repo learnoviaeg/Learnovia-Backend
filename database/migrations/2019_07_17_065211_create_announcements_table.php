@@ -17,7 +17,8 @@ class CreateAnnouncementsTable extends Migration
             $table->bigIncrements('id');
             $table->string('title');
             $table->text('description');
-            $table->string('attached_file')->nullable();
+            $table->unsignedBigInteger('attached_file')->nullable();
+            $table->foreign('attached_file')->references('id')->on('attachments')->onDelete('cascade')->onUpdate('cascade');
             $table->dateTime('start_date')->nullable();
             $table->dateTime('due_date')->nullable();
             $table->enum('assign', ['all', 'class','course','level','year','type','segment'])->nullable();

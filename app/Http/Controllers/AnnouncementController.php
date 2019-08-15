@@ -24,6 +24,7 @@ use App\AcademicType;
 use App\AcademicYear;
 use App\attachment;
 use Auth;
+use Illuminate\Support\Facades\DB;
 
 class AnnouncementController extends Controller
 {
@@ -43,76 +44,31 @@ class AnnouncementController extends Controller
             'assign'=> 'required'
         ]);
 
+        $users=array();
         //Files uploading
         if (Input::hasFile('attached_file'))
         {
-
-            attachment::upload_attachment($request->attached_file,'Announcement');
-            $destinationPath = public_path();
-            $name = Input::file('attached_file')->getClientOriginalName();
-            $extension = Input::file('attached_file')->getClientOriginalExtension();
-            $fileName = $name.'.'.uniqid($request->id).'.'.$extension;
-
-            //store the file in the $destinationPath
-            $file = Input::file('attached_file')->move($destinationPath, $fileName);
+            $fileName=attachment::upload_attachment($request->attached_file,'Announcement');
+            $file_id=$fileName->id;
+            $requ = new Request([
+                'title' => $request->title,
+                'description' =>$request->description,
+                'attached_file' => $file_id,
+            ]);
         }
         else
         {
-            $fileName=null;
+            $file_id=null;
+            $requ = new Request([
+                'title' => $request->title,
+                'description' =>$request->description,
+            ]);
         }
 
         //Assign Conditions
         if($request->assign == 'all')
         {
             $toUser = User::get();
-            Notification::send($toUser, new Announcment($request));
-        }
-        else if ($request->assign == 'class')
-        {
-            $request->validate([
-                'class_id'=>'required|exists:classes,id',
-            ]);
-
-            $class_level_id=ClassLevel::GetClassLevel($request->class_id);
-            $segmeny_class_id=array();
-            foreach($class_level_id as $cl)
-            {
-                $segmeny_class_id[]=SegmentClass::GetClasseLevel($cl);
-            }
-
-            $course_segment_id=array();
-            foreach($segmeny_class_id as $sc)
-            {
-                $course_segment_id[]=CourseSegment::GetCourseSegmentId($sc);
-            }
-
-            $users=collect([]);
-            foreach($course_segment_id as $cs)
-            {
-                foreach($cs as $c)
-                {
-                    $users->push(Enroll::Get_User_ID($c));
-                }
-            }
-
-            $uniq=collect([]);
-            foreach($users as $u)
-            {
-                foreach($u as $un)
-                {
-                    $uniq->push($un);
-                }
-            }
-            $usersid=array();
-            $usersid=$uniq->unique();
-
-            $noti=array();
-            foreach($usersid as $id)
-            {
-                $noti[]=User::find($id);
-            }
-            Notification::send($noti, new Announcment($request));
-
         }
         else if ($request->assign == 'course')
         {
@@ -120,30 +76,40 @@ class AnnouncementController extends Controller
                 'course_id'=>'required|exists:courses,id',
             ]);
 
-            $course_segment=CourseSegment::getidfromcourse($request->course_id);
-            $users=collect([]);
-            foreach($course_segment as $cs)
+            $course=Course::find($request->course_id);
+            $course_seg= $course->courseSegments;
+            foreach($course_seg as $cs)
             {
-                $users->push(Enroll::Get_User_ID($cs));
-            }
-            $uniq=collect([]);
-            foreach($users as $u)
-            {
-                foreach($u as $un)
+                foreach($cs->enroll as $enroll)
                 {
-                    $uniq->push($un);
+                    $users[]=$enroll->user_id;
                 }
             }
-            $usersid=array();
-            $usersid=$uniq->unique();
+        }
+        else if ($request->assign == 'class')
+        {
+            $request->validate([
+                'class_id'=>'required|exists:classes,id',
+            ]);
 
-            $noti=array();
-            foreach($usersid as $id)
+            $class=Classes::find($request->class_id);
+            $seg_class= $class->classlevel->segmentClass;
+            $course_seg_id=array();
+            foreach($seg_class as $sg)
             {
-                $noti[]=User::find($id);
+                $course_seg_id[]=$sg->courseSegment;
             }
-            Notification::send($noti, new Announcment($request));
 
+            foreach($course_seg_id as $cour)
+            {
+                foreach($cour as $c)
+                {
+                    foreach ($c->enroll as $enroll)
+                    {
+                        $users[]=$enroll->user_id;
+                    }
+                }
+            }
         }
         else if ($request->assign == 'level')
         {
@@ -151,55 +117,22 @@ class AnnouncementController extends Controller
                 'level_id'=>'required|exists:levels,id',
             ]);
 
-            $Year_level_id=YearLevel::GetYearLevelId($request->level_id);
+            $level=Level::find($request->level_id);
+            $class_level_id= $level->yearlevel->classLevels;
 
-            $class_level_id=array();
-            foreach($Year_level_id as $yl)
-            {
-                $class_level_id[]=ClassLevel::GetClassLevelid($Year_level_id);
-            }
-
-            $segmeny_class_id=array();
             foreach($class_level_id as $cl)
             {
-                foreach($cl as $c)
+                foreach($cl->segmentClass as $sg)
                 {
-                    $segmeny_class_id[]=SegmentClass::GetClasseLevel($c);
+                    foreach($sg->courseSegment as $cs)
+                    {
+                        foreach($cs->enroll as $enroll)
+                        {
+                            $users[]=$enroll->user_id;
+                        }
+                    }
                 }
             }
-
-            $course_segment_id=array();
-            foreach($segmeny_class_id as $sc)
-            {
-                $course_segment_id[]=CourseSegment::GetCourseSegmentId($sc);
-            }
-
-            $users=collect([]);
-            foreach($course_segment_id as $cs)
-            {
-                foreach($cs as $c)
-                {
-                    $users->push(Enroll::Get_User_ID($c));
-                }
-            }
-
-            $uniq=collect([]);
-            foreach($users as $u)
-            {
-                foreach($u as $un)
-                {
-                    $uniq->push($un);
-                }
-            }
-            $usersid=array();
-            $usersid=$uniq->unique();
-
-            $noti=array();
-            foreach($usersid as $id)
-            {
-                $noti[]=User::find($id);
-            }
-            Notification::send($noti, new Announcment($request));
         }
         else if ($request->assign == 'year')
         {
@@ -207,67 +140,25 @@ class AnnouncementController extends Controller
                 'year_id'=>'required|exists:academic_years,id',
             ]);
 
-            $academic_year_type_id=AcademicYearType::get_yaer_type_by_year($request->year_id);
+            $year=AcademicYear::find($request->year_id);
+            $year_level= $year->Acyeartype->yearLevel;
 
-            $Year_level_id=array();
-            foreach($academic_year_type_id as $ay)
+            foreach($year_level as $yea)
             {
-                $Year_level_id[]=YearLevel::get_year_level_id($ay);
-            }
-
-            $class_level_id=array();
-            foreach($Year_level_id as $yl)
-            {
-                foreach($yl as $y)
+                foreach($yea->classLevels as $cl)
                 {
-                    $class_level_id[]=ClassLevel::GetClassLevelid($y);
+                    foreach($cl->segmentClass as $sc)
+                    {
+                        foreach($sc->courseSegment as $c)
+                        {
+                            foreach($c->enroll as $enroll)
+                            {
+                                $users[]=$enroll->user_id;
+                            }
+                        }
+                    }
                 }
             }
-
-            $segmeny_class_id=array();
-            foreach($class_level_id as $cl)
-            {
-                foreach($cl as $c)
-                {
-                    $segmeny_class_id[]=SegmentClass::GetClasseLevel($c);
-                }
-            }
-
-            $course_segment_id=array();
-            foreach($segmeny_class_id as $sc)
-            {
-                foreach($sc as $s)
-                {
-                    $course_segment_id[]=CourseSegment::GetCourseSegmentId($s);
-                }
-            }
-
-            $users=collect([]);
-            foreach($course_segment_id as $cs)
-            {
-                foreach($cs as $c)
-                {
-                    $users->push(Enroll::Get_User_ID($c));
-                }
-            }
-
-            $uniq=collect([]);
-            foreach($users as $u)
-            {
-                foreach($u as $un)
-                {
-                    $uniq->push($un);
-                }
-            }
-            $usersid=array();
-            $usersid=$uniq->unique();
-
-            $noti=array();
-            foreach($usersid as $id)
-            {
-                $noti[]=User::find($id);
-            }
-            Notification::send($noti, new Announcment($request));
         }
         else if ($request->assign == 'type')
         {
@@ -275,67 +166,25 @@ class AnnouncementController extends Controller
                 'type_id'=>'required|exists:academic_types,id',
             ]);
 
-            $academic_year_type_id=AcademicYearType::get_yaer_type_by_type($request->type_id);
+            $type=AcademicType::find($request->type_id);
+            $year_level= $type->Actypeyear->yearLevel;
 
-            $Year_level_id=array();
-            foreach($academic_year_type_id as $ay)
+            foreach($year_level as $yea)
             {
-                $Year_level_id[]=YearLevel::get_year_level_id($ay);
-            }
-
-            $class_level_id=array();
-            foreach($Year_level_id as $yl)
-            {
-                foreach($yl as $y)
+                foreach($yea->classLevels as $cl)
                 {
-                    $class_level_id[]=ClassLevel::GetClassLevelid($y);
+                    foreach($cl->segmentClass as $sc)
+                    {
+                        foreach($sc->courseSegment as $c)
+                        {
+                            foreach($c->enroll as $enroll)
+                            {
+                                $users[]=$enroll->user_id;
+                            }
+                        }
+                    }
                 }
             }
-
-            $segmeny_class_id=array();
-            foreach($class_level_id as $cl)
-            {
-                foreach($cl as $c)
-                {
-                    $segmeny_class_id[]=SegmentClass::GetClasseLevel($c);
-                }
-            }
-
-            $course_segment_id=array();
-            foreach($segmeny_class_id as $sc)
-            {
-                foreach($sc as $s)
-                {
-                    $course_segment_id[]=CourseSegment::GetCourseSegmentId($s);
-                }
-            }
-
-            $users=collect([]);
-            foreach($course_segment_id as $cs)
-            {
-                foreach($cs as $c)
-                {
-                    $users->push(Enroll::Get_User_ID($c));
-                }
-            }
-
-            $uniq=collect([]);
-            foreach($users as $u)
-            {
-                foreach($u as $un)
-                {
-                    $uniq->push($un);
-                }
-            }
-            $usersid=array();
-            $usersid=$uniq->unique();
-
-            $noti=array();
-            foreach($usersid as $id)
-            {
-                $noti[]=User::find($id);
-            }
-            Notification::send($noti, new Announcment($request));
 
         }
         else if($request->assign == 'segment')
@@ -345,7 +194,6 @@ class AnnouncementController extends Controller
             ]);
 
             $segmentclass=SegmentClass::find($request->segment_id);
-            $users=array();
             foreach($segmentclass->courseSegment as $cs)
             {
                 foreach($cs->enroll as $enroll)
@@ -353,24 +201,33 @@ class AnnouncementController extends Controller
                     $users[]=$enroll->user_id;
                 }
             }
-            $user=array_unique($users);
-            $noti=array();
-            foreach($user as $id)
-            {
-                $noti[]=User::find($id);
-            }
-            Notification::send($noti, new Announcment($request));
         }
         else
         {
-            return ('Operation Fails!');
+            return ('Operation Fails! Please Choose Correct Filter.');
+        }
+
+        //sending announcements
+        if($request->assign == 'all')
+        {
+            Notification::send($toUser, new Announcment($requ));
+        }
+        else
+        {
+            $user=array_unique($users);
+            $noti=array();
+                foreach($user as $id)
+                {
+                    $noti[]=User::find($id);
+                }
+                Notification::send($noti, new Announcment($requ));
         }
 
         //Creating announcement in DB
         $ann= Announcement::create([
            'title' => $request->title,
            'description' =>$request->description,
-           'attached_file' => $fileName,
+           'attached_file' => $file_id,
            'start_date' => $request->start_date,
            'due_date' => $request->due_date,
            'assign'=>$request->assign,
@@ -383,23 +240,46 @@ class AnnouncementController extends Controller
         ]);
 
         return HelperController::api_response_format(201,$ann,'Announcement Sent Successfully');
-     }
+    }
 
-     public function delete_announcement(Request $request)
-     {
+    public function delete_announcement(Request $request)
+    {
         $request->validate([
             'id' => 'required|exists:announcements,id',
         ]);
 
+        //get the announcement to be deleted
         $announce = Announcement::find($request->id);
+        //get data that sent to users
+        $announcefinal['title'] = $announce->title;
+        $announcefinal['description'] = $announce->description;
+        if($announce->attached_file != null)
+        {
+            $announcefinal['attached_file'] = $announce->attached_file;
+
+        }
+        //encode that data to compare it with notifications data
+        $dataencode=json_encode($announcefinal);
+        //get data from notifications
+        $deleted=DB::table('notifications')->where('data', $dataencode)->where('type','App\Notifications\Announcment')->get();
+        foreach($deleted as $de)
+        {
+            foreach($de as $d)
+            {
+                DB::table('notifications')
+                ->where('id', $d)
+                ->delete();
+            }
+        }
+
         $announce->delete();
 
         return HelperController::api_response_format(200, $announce,'Announcement Deleted Successfully');
 
-     }
+    }
 
-     public function new_user_announcements()
-     {
+    public function new_user_announcements()
+    {
         $user_id=Auth::user()->id;
         $user=User::find($user_id);
         $courses=array();
@@ -470,6 +350,23 @@ class AnnouncementController extends Controller
         }
 
         return HelperController::api_response_format(201,$all_ann);
-     }
+    }
+
+    public function get_announcement(Request $request)
+    {
+        $user_id=Auth::user()->id;
+        $noti = DB::table('notifications')->where('notifiable_id', $user_id)
+        ->where('type','App\Notifications\Announcment')
+        ->orderBy('created_at')
+        ->pluck('data');
+        $data = array();
+        $c=0;
+        foreach ($noti as $not) {
+         $data[]= json_decode($not, true);
+         $data[$c]['attached_file']=attachment::where('id',$data[$c]['attached_file'])->first();
+         $c++;
+        }
+        return HelperController::api_response_format(200, $body = $data, $message = 'User Announcements!');
+    }
 
 }

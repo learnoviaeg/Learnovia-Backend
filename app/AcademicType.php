@@ -19,4 +19,9 @@ class AcademicType extends Model
     protected $hidden = [
         'created_at','updated_at','pivot'
     ];
+
+    public function Actypeyear()
+    {
+        return $this->belongsTo('App\AcademicYearType', 'id', 'academic_type_id');
+    }
 }

@@ -47,22 +47,22 @@ class Announcment extends Notification
      */
     public function todatabase($notifiable)
     {
-        $returnobj = [
-            'title'=> $this->req->title,
-            'description'=>$this->req->description,
-        ];
-
-        if (Input::hasFile('attached_file')){
-            $file=$this->req->file('attached_file');
-            $name = $file->getClientOriginalName();
-            $extension = $file->getClientOriginalExtension();
-            $fileName = $name.'.'.uniqid($this->req->id).'.'.$extension;
-            $returnobj['attached_file']= $fileName;
+        if($this->req->attached_file)
+        {
+            $returnobj = [
+                'title'=> $this->req->title,
+                'description'=>$this->req->description,
+                'attached_file'=>$this->req->attached_file
+            ];
         }
         else
         {
-            $fileName='';
+            $returnobj = [
+                'title'=> $this->req->title,
+                'description'=>$this->req->description,
+            ];
         }
+
         return $returnobj;
     }
 
