@@ -170,6 +170,7 @@ Route::group(['prefix' => 'enroll' , 'middleware' => 'auth:api'], function () {
     //Route::post('usertech', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
     Route::get('GetEnrolledStudent', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');
 });
+Route::post('editenroll', 'EnrollUserToCourseController@EditUserRoleInCourse');
 
 
 //Messages Routes

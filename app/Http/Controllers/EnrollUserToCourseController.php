@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use App\ClassLevel;
 use App\CourseSegment;
 use App\SegmentClass;
+use App\Course;
 use DB;
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
@@ -148,6 +149,29 @@ class EnrollUserToCourseController extends Controller
         $ExcelCntrlVar = new ExcelController();
         $ExcelCntrlVar->import($request);
     }
+
+
+    Public function EditUserRoleInCourse(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'course_id' => 'required|exists:courses,id',
+            'role_id' => 'required|exists:roles,id'
+            ]);
+        $Course_segment=CourseSegment::where('course_id',$request->course_id)->get();
+        foreach($Course_segment as $seg){
+          $Enroll=Enroll::where('course_segment',$seg->id)->where('user_id',$request->user_id)->first();
+          if(!empty($Enroll)){
+            $Enroll->update([
+                'role_id' => $request->role_id,
+            ]); 
+            return HelperController::api_response_format(200, $Enroll, 'Role is updated successfully ');
+         }
+       }
+       return HelperController::api_response_format(200, null, 'This user is not enrolled in this course');
+
+       
+    } 
 
     public function GetEnrolledStudents(Request $request)
     {
