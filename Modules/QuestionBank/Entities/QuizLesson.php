@@ -17,4 +17,9 @@ class QuizLesson extends Model
         'grade_category_id'
     ];
     protected $table = 'quiz_lessons';
+
+    public function quiz()
+    {
+        return $this->belongsTo('Modules\QuestionBank\Entities\quiz', 'quiz_id', 'id');
+    }
 }

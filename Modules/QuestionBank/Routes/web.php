@@ -14,3 +14,4 @@
 Route::prefix('questionbank')->group(function() {
     Route::get('/', 'QuestionBankController@index');
 });
+

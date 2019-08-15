@@ -177,6 +177,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
         Elibyy\TCPDF\ServiceProvider::class,
+        \hisorange\BrowserDetect\ServiceProvider::class,
+
 
     ],
 
@@ -231,8 +233,7 @@ return [
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'Zipper' => Chumper\Zipper\Zipper::class,
         'TXPDF' => Elibyy\TCPDF\Facades\TCPDF::class,
-
-        // check Enroll
         'checkEnroll' => App\Http\Controllers\checkEnrollController::class,
+        'Browser' => \hisorange\BrowserDetect\Facade::class,
     ],
 ];

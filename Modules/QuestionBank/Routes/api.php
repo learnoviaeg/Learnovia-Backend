@@ -28,15 +28,13 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('deleteQuiz', 'QuizController@destroy')->middleware('permission:quiz/delete');
     Route::get('getQuiz', 'QuizController@get')->middleware('permission:quiz/get');
 
-
     //Quiz Lesson Routes
     Route::post('addQuizLesson', 'QuizLessonController@store')->middleware('permission:quiz/add-quiz-lesson');
     Route::post('updateQuizLesson', 'QuizLessonController@update')->middleware('permission:quiz/update-quiz-lesson');
     Route::post('deleteQuizLesson', 'QuizLessonController@destroy')->middleware('permission:quiz/destroy-quiz-lesson');
     Route::get('types' , 'QuestionBankController@getAllTypes');//->middleware('permission:quiz/get-all-types');
     Route::get('categories' , 'QuestionBankController@getAllCategories');//->middleware('permission:quiz/get-all-categories');
+    //User Quiz
+    Route::post('storeUserQuiz', 'UserQuizController@store_user_quiz');
+    Route::post('storeUserQuizAnswer', 'UserQuizController@quiz_answer');
 });
-
-//Route::post('test', 'QuizController@get');
-
-
