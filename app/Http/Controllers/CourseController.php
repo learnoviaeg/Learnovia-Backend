@@ -24,37 +24,62 @@ class CourseController extends Controller
         $request->validate([
             'name' => 'required',
             'category' => 'required|exists:categories,id',
-            'year' => 'required|exists:academic_years,id',
-            'type' => 'required|exists:academic_types,id',
-            'level' => 'required|exists:levels,id',
-            'class' => 'required|exists:classes,id',
-            'segment' => 'required|exists:segments,id',
+            'year'=>'array|required',
+            'year.*' => 'required|exists:academic_years,id',
+            'type'=>'array|required',
+            'type.*' => 'required|exists:academic_types,id',
+            'level'=>'array|required',
+            'level.*' => 'required|exists:levels,id',
+            'class'=>'array|required',
+            'class.*' => 'required|exists:classes,id',
+            'segment'=>'array|required',
+            'segment.*' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer'
         ]);
         $no_of_lessons = 4;
-        $course = Course::create([
+        $course = Course::firstOrCreate([
             'name' => $request->name,
             'category_id' => $request->category,
         ]);
-        $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
-        $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
-        $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
-        $segmentClass = SegmentClass::checkRelation($classLevel->id, $request->segment);
-        $courseSegment = CourseSegment::create([
-            'course_id' => $course->id,
-            'segment_class_id' => $segmentClass->id,
-            'is_active' => 1
-        ]);
-        if ($request->filled('no_of_lessons')) {
-            $no_of_lessons = $request->no_of_lessons;
+        foreach ($request->year as $year) {
+            # code...
+            foreach ($request->type as $type) {
+                # code...
+                $yeartype = AcademicYearType::checkRelation($year, $type);
+                foreach ($request->level as $level) {
+                    # code...
+                    $yearlevel = YearLevel::checkRelation($yeartype->id, $level);
+                    foreach ($request->class as $class) {
+                        # code...
+                        $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
+                        foreach ($request->segment as $segment) {
+                            # code...
+                            $segmentClass = SegmentClass::checkRelation($classLevel->id, $segment);
+                            $courseSegment = CourseSegment::firstOrCreate([
+                                'course_id' => $course->id,
+                                'segment_class_id' => $segmentClass->id,
+                                'is_active' => 1
+                            ]);
+                            if ($request->filled('no_of_lessons')) {
+                                $no_of_lessons = $request->no_of_lessons;
+                            }
+
+                            for ($i = 1; $i <= $no_of_lessons; $i++) {
+                                $courseSegment->lessons()->firstOrCreate([
+                                    'name' => 'Lesson ' . $i,
+                                    'index' => $i,
+                                ]);
+                            }
+                        }
+
+                    }
+
+                }
+
+            }
         }
 
-        for ($i = 1; $i <= $no_of_lessons; $i++) {
-            $courseSegment->lessons()->create([
-                'name' => 'Lesson ' . $i,
-                'index' => $i,
-            ]);
-        }
+
         return HelperController::api_response_format(201, $course, 'Course Created Successfully');
     }
 

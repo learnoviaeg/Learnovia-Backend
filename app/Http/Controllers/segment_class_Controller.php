@@ -99,11 +99,12 @@ class segment_class_Controller extends Controller
         if ($count >= $type->segment_no) {
             return HelperController::api_response_format(200, null, 'This class has its all segments before');
         }
-        $segment = Segment::create([
-            'name' => $req->name
+        $segment = Segment::firstOrCreate([
+            'name' => $req->name,
+            'academic_type_id'=>$req->type
         ]);
 
-        SegmentClass::create([
+        SegmentClass::firstOrCreate([
             'class_level_id' => $classLevel->id,
             'segment_id' => $segment->id,
         ]);
