@@ -16,6 +16,14 @@ use App\SegmentClass;
 use App\YearLevel;
 use App\AcademicYearType;
 use App\User;
+use App\Course;
+use App\Classes;
+use App\Level;
+use App\Segment;
+use App\AcademicType;
+use App\AcademicYear;
+use App\attachment;
+use Auth;
 
 class AnnouncementController extends Controller
 {
@@ -39,6 +47,7 @@ class AnnouncementController extends Controller
         if (Input::hasFile('attached_file'))
         {
 
+            attachment::upload_attachment($request->attached_file,'Announcement');
             $destinationPath = public_path();
             $name = Input::file('attached_file')->getClientOriginalName();
             $extension = Input::file('attached_file')->getClientOriginalExtension();
@@ -329,13 +338,36 @@ class AnnouncementController extends Controller
             Notification::send($noti, new Announcment($request));
 
         }
+        else if($request->assign == 'segment')
+        {
+            $request->validate([
+                'segment_id'=>'required|exists:segments,id',
+            ]);
+
+            $segmentclass=SegmentClass::find($request->segment_id);
+            $users=array();
+            foreach($segmentclass->courseSegment as $cs)
+            {
+                foreach($cs->enroll as $enroll)
+                {
+                    $users[]=$enroll->user_id;
+                }
+            }
+            $user=array_unique($users);
+            $noti=array();
+            foreach($user as $id)
+            {
+                $noti[]=User::find($id);
+            }
+            Notification::send($noti, new Announcment($request));
+        }
         else
         {
             return ('Operation Fails!');
         }
 
         //Creating announcement in DB
-        Announcement::create([
+        $ann= Announcement::create([
            'title' => $request->title,
            'description' =>$request->description,
            'attached_file' => $fileName,
@@ -345,11 +377,12 @@ class AnnouncementController extends Controller
            'class_id' => $request->class_id,
            'course_id' => $request->course_id,
            'level_id' => $request->level_id,
-           'year_id' => $request->level_id,
-           'type_id' => $request->level_id
+           'year_id' => $request->year_id,
+           'type_id' => $request->type_id,
+           'segment_id' => $request->segment_id
         ]);
 
-        return HelperController::api_response_format(201,'Announcement Sent Successfully');
+        return HelperController::api_response_format(201,$ann,'Announcement Sent Successfully');
      }
 
      public function delete_announcement(Request $request)
@@ -361,11 +394,82 @@ class AnnouncementController extends Controller
         $announce = Announcement::find($request->id);
         $announce->delete();
 
-        return HelperController::api_response_format(201, 'Announcement Deleted Successfully');
+        return HelperController::api_response_format(200, $announce,'Announcement Deleted Successfully');
 
      }
 
+     public function new_user_announcements()
+     {
+        $user_id=Auth::user()->id;
+        $user=User::find($user_id);
+        $courses=array();
+        $seg_class=array();
+        foreach($user->enroll as $enroll)
+        {
+            $course_seg=CourseSegment::find($enroll->course_segment);
+            $courses[]=$course_seg->courses[0]->id;
+            foreach($course_seg->segmentClasses as $csc)
+            {
+                $seg_class[]=$csc->id;
+            }
+        }
+
+        //get general Announcements
+        $all_ann=array();
+        $all_ann['General Announcements']=Announcement::where('assign','all')->get(['title','description','attached_file']);
+
+        //get Class announcements
+        $uniq_seg=array_unique($seg_class);
+        $class_level_id=array();
+        $year_level_id=array();
+
+        foreach($uniq_seg as $seg)
+        {
+            $segmentclass=SegmentClass::find($seg);
+            $segmentname=Segment::find($segmentclass->segment_id);
+            $all_ann[$segmentname->name]=Announcement::where('segment_id',$segmentclass->segment_id)->get(['title','description','attached_file']);
+
+            foreach($segmentclass->classLevel as $scl)
+            {
+                $classname=Classes::find($scl->class_id);
+                $all_ann[$classname->name]=Announcement::where('class_id',$scl->class_id)->get(['title','description','attached_file']);
+                $class_level_id[]=$scl->id;
+            }
+        }
+
+        //get level Announcements
+        foreach($class_level_id as $cd)
+        {
+            $class_level=ClassLevel::find($cd);
+            foreach($class_level->yearLevels as $yl)
+            {
+                $levelename=Level::find($yl->level_id);
+                $all_ann[$levelename->name]=Announcement::where('level_id',$yl->level_id)->get(['title','description','attached_file']);
+                $year_level_id[]=$yl->id;
+            }
+        }
+
+        //get year/type announcements
+        foreach($year_level_id as $yd)
+        {
+            $Year_level=YearLevel::find($yd);
+            foreach($Year_level->yearType as $ayt)
+            {
+                $typename=AcademicType::find($ayt->academic_type_id);
+                $yearname=AcademicYear::find($ayt->academic_year_id);
+                $all_ann[$yearname->name]=Announcement::where('year_id',$ayt->academic_year_id)->get(['title','description','attached_file']);
+                $all_ann[$typename->name]=Announcement::where('type_id',$ayt->academic_type_id)->get(['title','description','attached_file']);
+            }
+        }
+
+        //get courses Announcements
+        foreach($courses as $cou)
+        {
+            $coursename=Course::find($cou);
+            $all_ann[$coursename->name]=Announcement::where('course_id',$cou)->get(['title','description','attached_file']);
+        }
+
+        return HelperController::api_response_format(201,$all_ann);
+     }
+
 }
-
-
-

@@ -20,12 +20,13 @@ class CreateAnnouncementsTable extends Migration
             $table->string('attached_file')->nullable();
             $table->dateTime('start_date')->nullable();
             $table->dateTime('due_date')->nullable();
-            $table->enum('assign', ['all', 'class','course','level','year','type'])->nullable();
-            $table->string('class_id')->nullable();
-            $table->string('level_id')->nullable();
-            $table->string('course_id')->nullable();
-            $table->string('year_id')->nullable();
-            $table->string('type_id')->nullable();
+            $table->enum('assign', ['all', 'class','course','level','year','type','segment'])->nullable();
+            $table->integer('class_id')->nullable();
+            $table->integer('level_id')->nullable();
+            $table->integer('course_id')->nullable();
+            $table->integer('year_id')->nullable();
+            $table->integer('type_id')->nullable();
+            $table->integer('segment_id')->nullable();
             $table->timestamps();
         });
     }

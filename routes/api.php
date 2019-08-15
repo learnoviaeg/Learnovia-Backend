@@ -57,6 +57,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'announcement'], function () {
         Route::post('deleteannounce', 'AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
         Route::post('announce', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
+        Route::get('newannounce', 'AnnouncementController@new_user_announcements')->name('newannounce');//->middleware('permission:announcements/new-user-announce');
     });
 
     //Calendar Route
