@@ -17,35 +17,32 @@ class MessageFromToResource extends JsonResource
      */
 
     public function toArray($request)
-    {   $session_id=Auth::User()->id;
-        $from =User::find($this->From);
+    {
+        $session_id = Auth::User()->id;
+        $from = User::find($this->From);
         $To = User::find($this->To);
-        $arr=[
+        $arr = [
             'id' => $this->id,
             'Message' => $this->text,
             'about' => User::find($this->about),
-            'From' => $from->username,
-            'To' => $To->username
+            'From' => $from,
+            'To' => $To
         ];
-
-            if ($this->deleted == 0) {
-                return $arr;
-            }elseif ($this->deleted == Message::$DELETE_FROM_ALL) {
-                $arr['Message'] = "this message was Deleted for All";
-                return $arr;
-            } elseif ($this->deleted == Message::$DELETE_FOR_RECEIVER && $session_id == $this->To) {
-                $arr['Message']= "this message was Deleted";
-                return $arr;
-            } elseif ($this->deleted == Message::$DELETE_FOR_RECEIVER && $session_id == $this->From) {
-                return $arr;
-            } elseif ($this->deleted == Message::$DELETE_FOR_SENDER && $session_id == $this->From) {
-                $arr['Message'] = "this message was Deleted";
-                return $arr;
-            } elseif ($this->deleted == Message::$DELETE_FOR_SENDER && $session_id == $this->To) {
-                return $arr;
-            }
-
-
-
+        if ($this->deleted == 0) {
+            return $arr;
+        } elseif ($this->deleted == Message::$DELETE_FROM_ALL) {
+            $arr['Message'] = "this message was Deleted for All";
+            return $arr;
+        } elseif ($this->deleted == Message::$DELETE_FOR_RECEIVER && $session_id == $this->To) {
+            $arr['Message'] = "this message was Deleted";
+            return $arr;
+        } elseif ($this->deleted == Message::$DELETE_FOR_RECEIVER && $session_id == $this->From) {
+            return $arr;
+        } elseif ($this->deleted == Message::$DELETE_FOR_SENDER && $session_id == $this->From) {
+            $arr['Message'] = "this message was Deleted";
+            return $arr;
+        } elseif ($this->deleted == Message::$DELETE_FOR_SENDER && $session_id == $this->To) {
+            return $arr;
+        }
     }
 }
