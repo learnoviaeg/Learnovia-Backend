@@ -38,7 +38,7 @@ class AcademicYearController extends Controller
         if($request->id == null)
         {
             $year = AcademicYear::with('AC_Type')->paginate(HelperController::GetPaginate($request));
-            return HelperController::api_response_format(201, $year->items());
+            return HelperController::api_response_format(201, $year);
         }
         else {
                 $year = AcademicYear::where('id',$request->id)->with('AC_Type')->first();

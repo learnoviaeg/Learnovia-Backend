@@ -95,7 +95,7 @@ class ClassController extends Controller
         if($request->id == null)
         {
             $classes = Classes::paginate(HelperController::GetPaginate($request));
-            return HelperController::api_response_format(200,$classes->items());
+            return HelperController::api_response_format(200,$classes);
         }
         else
         {

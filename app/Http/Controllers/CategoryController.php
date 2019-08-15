@@ -48,6 +48,6 @@ class CategoryController extends Controller
         ]);
         if (isset($request->id))
             return HelperController::api_response_format(200, Category::find($request->id));
-        return HelperController::api_response_format(200, Category::paginate(HelperController::GetPaginate($request))->items());
+        return HelperController::api_response_format(200, Category::paginate(HelperController::GetPaginate($request)));
     }
 }

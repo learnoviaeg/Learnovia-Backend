@@ -185,10 +185,10 @@ class UserController extends Controller
         $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
         if($role_id == 1 || $role_id == 2)
         {
-            $user =User::paginate(HelperController::GetPaginate($request))->each(function($row)
-            {
-                $row->setHidden(['password']);
-            });
+            $user =User::paginate(HelperController::GetPaginate($request));
+            foreach ($user->items() as $value) {
+                $value->setHidden(['password']);
+            }
             return HelperController::api_response_format(200, $user);
         }
         else {

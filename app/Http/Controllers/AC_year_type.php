@@ -42,7 +42,7 @@ class AC_year_type extends Controller
 
     public function get(Request $request){
         $types = AcademicType::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(202, $types->items());
+        return HelperController::api_response_format(202, $types);
     }
 
     /**
