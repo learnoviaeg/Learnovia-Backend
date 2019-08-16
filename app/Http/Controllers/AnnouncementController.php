@@ -256,6 +256,8 @@ class AnnouncementController extends Controller
         if($announce->attached_file != null)
         {
             $announcefinal['attached_file'] = $announce->attached_file;
+            //delete attached file from attachement
+            attachment::where('id',$announce->attached_file)->delete();
 
         }
         //encode that data to compare it with notifications data
@@ -271,7 +273,6 @@ class AnnouncementController extends Controller
                 ->delete();
             }
         }
-
         $announce->delete();
 
         return HelperController::api_response_format(200, $announce,'Announcement Deleted Successfully');
@@ -349,10 +350,10 @@ class AnnouncementController extends Controller
             $all_ann[$coursename->name]=Announcement::where('course_id',$cou)->get(['title','description','attached_file']);
         }
 
-        return HelperController::api_response_format(201,$all_ann);
+        return $all_ann;
     }
 
-    public function get_announcement(Request $request)
+    public function get_announcement()
     {
         $user_id=Auth::user()->id;
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
@@ -366,7 +367,21 @@ class AnnouncementController extends Controller
          $data[$c]['attached_file']=attachment::where('id',$data[$c]['attached_file'])->first();
          $c++;
         }
-        return HelperController::api_response_format(200, $body = $data, $message = 'User Announcements!');
+        return $data;
+    }
+
+    public function get()
+    {
+        $anounce=AnnouncementController::get_announcement();
+        if($anounce != null)
+        {
+            return HelperController::api_response_format(200, $body = $anounce, $message = 'User Announcements!');
+        }
+        else
+        {
+            $anouncenew=AnnouncementController::new_user_announcements();
+            return HelperController::api_response_format(201,$anouncenew);
+        }
     }
 
 }
