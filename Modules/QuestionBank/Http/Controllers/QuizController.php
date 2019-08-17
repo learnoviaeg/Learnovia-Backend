@@ -431,6 +431,8 @@ class QuizController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id'
         ]);
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+        if($quizLesson == null)
+        return HelperController::api_response_format(400 , [] , 'No avaiable date for this info');
         $userQuizes = userQuiz::with(['UserQuizAnswer.Question'])->where('quiz_lesson_id', $quizLesson->id)->where('user_id', $request->student_id)->get();
         return HelperController::api_response_format(200 , $userQuizes);
     }
