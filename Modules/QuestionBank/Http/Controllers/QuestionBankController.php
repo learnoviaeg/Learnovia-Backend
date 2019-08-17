@@ -211,7 +211,6 @@ class QuestionBankController extends Controller
     {
 
         $valid = Validator::make($Question, [
-            // 'Question' => 'required|array',
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
             'mark' => 'required|integer|min:1',
@@ -309,9 +308,7 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, null, 'is True invalid');
         }
         $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
-      //  dd($id);
         $ansA = QuestionsAnswer::where('question_id', $id)->pluck('content')->toArray();
-
         $result = array_diff($Question['answers'], $ansA);
         if ($result == null) {
             $questionn = Questions:: where('id', $id)->first();
@@ -780,11 +777,9 @@ class QuestionBankController extends Controller
         ]);
         $question = $this->updateQuestion($request);
         foreach ($request->subQuestions as $subQuestion) {
-            // print_r($subQuestion);
             $subQuestion = new Request($subQuestion);
             switch ($subQuestion->Question_Type_id) {
                 case 1: // True/false
-                    //dd($subQuestion->Question_Type_id);
                     $re[] = $this->updateTrueFalse($subQuestion,$question->id,$subQuestion->Question_Type_id);
                     break;
                 case 2: // MCQ
@@ -803,7 +798,8 @@ class QuestionBankController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'question_id' => 'required|integer|exists:questions,id',]);
+            'question_id' => 'required|integer|exists:questions,id',
+        ]);
         $Question = Questions::find($request->question_id);
         switch ($Question->question_type_id) {
             case 1: // True/false
