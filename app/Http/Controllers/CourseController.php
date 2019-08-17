@@ -207,7 +207,7 @@ class CourseController extends Controller
         $lessons = null;
         $i = 0;
         $lessoncounter = array();
-        $comp = Component::where('type', 1)->get();
+        $comp = Component::where('type', 1)->orWhere('type' , 3)->get();
         foreach ($CourseSeg as $seg) {
             $lessons = $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {

@@ -94,7 +94,7 @@ class FilesController extends Controller
             if ($activeCourseSegments['result'] == false || $activeCourseSegments['value'] == null) {
                 return HelperController::api_response_format(400, null, 'No Course active in segment');
             }
-            $activeCourseSegments = $activeCourseSegments['value'];
+            $activeCourseSegments =  $activeCourseSegments['value'];
             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegments->id);
             if (!$checkTeacherEnroll == true) {
                 return HelperController::api_response_format(400, null, 'You\'re unauthorize');
