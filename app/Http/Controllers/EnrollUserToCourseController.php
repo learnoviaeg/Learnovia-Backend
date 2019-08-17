@@ -133,6 +133,9 @@ class EnrollUserToCourseController extends Controller
                     }
                 }
             }
+            if($segments == null)
+                break;
+   
             $check = Enroll::where('user_id', $userId)->where('course_segment', $segments)->pluck('id');
             if (count($check) == 0) {
                 foreach ($segments as $segment) {
@@ -149,6 +152,7 @@ class EnrollUserToCourseController extends Controller
                 $count++;
             }
         }
+       //($count);
         if ($count > 0) {
             return HelperController::api_response_format(200, [], 'those users added before');
         }
