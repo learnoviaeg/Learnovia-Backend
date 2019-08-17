@@ -35,18 +35,20 @@ class AcademicYearController extends Controller
 
     public function get(Request $request)
     {
-        if($request->id == null)
-        {
-            $year = AcademicYear::with('AC_Type')->paginate(HelperController::GetPaginate($request));
-            return HelperController::api_response_format(201, $year);
+        $request->validate([
+            'id' => 'exists:academic_years,id',
+            'all' => 'boolean',
+        ]);
+        $year = AcademicYear::with('AC_Type');
+        if ($request->filled('id')) {
+            $year->where('id', $request->id);
         }
-        else {
-                $year = AcademicYear::where('id',$request->id)->with('AC_Type')->first();
-                if($year)
-                    return HelperController::api_response_format(200 ,$year);
-
-                return HelperController::api_response_format(404 ,'NOT FOUND');
+        if ($request->filled('all')) {
+            $year->get();
+        } else {
+            $year->paginate(HelperController::GetPaginate($request));
         }
+        return HelperController::api_response_format(201, $year);
     }
 
     /**
@@ -92,10 +94,9 @@ class AcademicYearController extends Controller
         ]);
 
         $year = AcademicYear::find($request->id);
-        $year->update(['current'=>1]);
-        $all= AcademicYear::where('id', '!=', $request->id)
+        $year->update(['current' => 1]);
+        $all = AcademicYear::where('id', '!=', $request->id)
             ->update(['current' => 0]);
-        return HelperController::api_response_format(200, $year , ' this year is  set to be current ');
-
+        return HelperController::api_response_format(200, $year, ' this year is  set to be current ');
     }
 }
