@@ -242,6 +242,88 @@ class AnnouncementController extends Controller
         return HelperController::api_response_format(201,$ann,'Announcement Sent Successfully');
     }
 
+    public function update_announce(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:announcements,id',
+        ]);
+
+        //get the announcement to be deleted
+        $announce = Announcement::whereId($request->id)->first();
+        if($announce['attached_file'] != null)
+        {
+            $attch=attachment::find($announce['attached_file']);
+            $data=([
+                'title'=>$announce['title'],
+                'description'=>$announce['description'],
+                'attached_file'=>$announce['attached_file']
+            ]);
+        }
+        else
+        {
+            $data=([
+                'title'=>$announce['title'],
+                'description'=>$announce['description'],
+            ]);
+        }
+
+        $encode=json_encode($data);
+        $deleted=DB::table('notifications')->where('data', $encode)->where('type','App\Notifications\Announcment')->get();
+        $users=array();
+        foreach($deleted as $de)
+        {
+            $users[]=$de->notifiable_id;
+            foreach($de as $d)
+            {
+                DB::table('notifications')
+                ->where('id', $d)
+                ->delete();
+            }
+        }
+
+        //Validtaionof updated data
+         $request->validate([
+            'title'=>'required',
+            'description' => 'required',
+            'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
+        ]);
+
+        //Files uploading
+        if (Input::hasFile('attached_file'))
+        {
+            $fileName=attachment::upload_attachment($request->attached_file,'Announcement');
+            $file_id=$fileName->id;
+            $requ = new Request([
+                'title' => $request->title,
+                'description' =>$request->description,
+                'attached_file' => $file_id,
+            ]);
+        }
+        else
+        {
+            $file_id=null;
+            $requ = new Request([
+                'title' => $request->title,
+                'description' =>$request->description,
+            ]);
+        }
+
+        $noti=array();
+        foreach($users as $id)
+        {
+            $noti[]=User::find($id);
+        }
+        Notification::send($noti, new Announcment($requ));
+
+        $announce->update([
+            'title' => $request->title,
+            'description' =>$request->description,
+            'attached_file' => $file_id,
+        ]);
+        $attch->delete();
+        return HelperController::api_response_format(201, $announce,'Announcement Updated Successfully');
+
+    }
     public function delete_announcement(Request $request)
     {
         $request->validate([
@@ -257,7 +339,7 @@ class AnnouncementController extends Controller
         {
             $announcefinal['attached_file'] = $announce->attached_file;
             //delete attached file from attachement
-            attachment::where('id',$announce->attached_file)->delete();
+            $attch=attachment::find($announce->attached_file);
 
         }
         //encode that data to compare it with notifications data
@@ -274,9 +356,8 @@ class AnnouncementController extends Controller
             }
         }
         $announce->delete();
-
+        $attch->delete();
         return HelperController::api_response_format(200, $announce,'Announcement Deleted Successfully');
-
     }
 
     public function new_user_announcements()
@@ -294,26 +375,42 @@ class AnnouncementController extends Controller
                 $seg_class[]=$csc->id;
             }
         }
-
         //get general Announcements
         $all_ann=array();
         $all_ann['General Announcements']=Announcement::where('assign','all')->get(['title','description','attached_file']);
+        $g=0;
+        foreach($all_ann['General Announcements'] as $all)
+        {
+            $all_ann['General Announcements'][$g]['attached_file']=attachment::where('id',$all['attached_file'])->first();
+            $g++;
+        }
 
         //get Class announcements
         $uniq_seg=array_unique($seg_class);
         $class_level_id=array();
         $year_level_id=array();
-
         foreach($uniq_seg as $seg)
         {
             $segmentclass=SegmentClass::find($seg);
             $segmentname=Segment::find($segmentclass->segment_id);
             $all_ann[$segmentname->name]=Announcement::where('segment_id',$segmentclass->segment_id)->get(['title','description','attached_file']);
+            $s=0;
+            foreach($all_ann[$segmentname->name]as $all)
+            {
+                $all_ann[$segmentname->name][$s]['attached_file']=attachment::where('id',$all['attached_file'])->first();
+                $s++;
+            }
 
             foreach($segmentclass->classLevel as $scl)
             {
                 $classname=Classes::find($scl->class_id);
                 $all_ann[$classname->name]=Announcement::where('class_id',$scl->class_id)->get(['title','description','attached_file']);
+                $cl=0;
+                foreach($all_ann[$classname->name]as $all)
+                {
+                    $all_ann[$classname->name][$cl]['attached_file']=attachment::where('id',$all['attached_file'])->first();
+                    $cl++;
+                }
                 $class_level_id[]=$scl->id;
             }
         }
@@ -326,6 +423,12 @@ class AnnouncementController extends Controller
             {
                 $levelename=Level::find($yl->level_id);
                 $all_ann[$levelename->name]=Announcement::where('level_id',$yl->level_id)->get(['title','description','attached_file']);
+                $l=0;
+                foreach($all_ann[$levelename->name]as $all)
+                {
+                    $all_ann[$levelename->name][$l]['attached_file']=attachment::where('id',$all['attached_file'])->first();
+                    $l++;
+                }
                 $year_level_id[]=$yl->id;
             }
         }
@@ -339,7 +442,19 @@ class AnnouncementController extends Controller
                 $typename=AcademicType::find($ayt->academic_type_id);
                 $yearname=AcademicYear::find($ayt->academic_year_id);
                 $all_ann[$yearname->name]=Announcement::where('year_id',$ayt->academic_year_id)->get(['title','description','attached_file']);
+                $y=0;
+                foreach($all_ann[$yearname->name]as $all)
+                {
+                    $all_ann[$yearname->name][$y]['attached_file']=attachment::where('id',$all['attached_file'])->first();
+                    $y++;
+                }
                 $all_ann[$typename->name]=Announcement::where('type_id',$ayt->academic_type_id)->get(['title','description','attached_file']);
+                $t=0;
+                foreach($all_ann[$typename->name]as $all)
+                {
+                    $all_ann[$typename->name][$t]['attached_file']=attachment::where('id',$all['attached_file'])->first();
+                    $t++;
+                }
             }
         }
 
@@ -348,9 +463,15 @@ class AnnouncementController extends Controller
         {
             $coursename=Course::find($cou);
             $all_ann[$coursename->name]=Announcement::where('course_id',$cou)->get(['title','description','attached_file']);
+            $co=0;
+            foreach($all_ann[$coursename->name]as $all)
+            {
+                $all_ann[$coursename->name][$co]['attached_file']=attachment::where('id',$all['attached_file'])->first();
+                $co++;
+            }
         }
 
-        return $all_ann;
+         return $all_ann;
     }
 
     public function get_announcement()
@@ -373,15 +494,8 @@ class AnnouncementController extends Controller
     public function get()
     {
         $anounce=AnnouncementController::get_announcement();
-        if($anounce != null)
-        {
-            return HelperController::api_response_format(200, $body = $anounce, $message = 'User Announcements!');
-        }
-        else
-        {
-            $anouncenew=AnnouncementController::new_user_announcements();
-            return HelperController::api_response_format(201,$anouncenew);
-        }
+        $anouncenew=AnnouncementController::new_user_announcements();
+        return HelperController::api_response_format(201, ['Current Announcements'=>$anounce, 'All Announcements' => $anouncenew]);
     }
 
 }
