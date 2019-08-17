@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Lesson;
-use App\Course;
-use App\CourseSegment;
 use App\attachment;
 
 class LessonController extends Controller
@@ -25,7 +23,6 @@ class LessonController extends Controller
         if (!$segments['result'] || $segments['value'] == null)
             return HelperController::api_response_format(400, $segments['value'] , 'Something went wrong or no active segments on this class');
         foreach ($request->name as $key => $name) {
-            //dd($request->image[$key]);
             $lessons_in_CourseSegment = Lesson::where('course_segment_id', $segments['value']->id)->max('index');
             $Next_index = $lessons_in_CourseSegment + 1;
             $lesson = Lesson::create([
@@ -126,9 +123,6 @@ class LessonController extends Controller
         }
         return $all_lessons;
     }
-
-
-
 
     public function Sorting(Request $request)
     {

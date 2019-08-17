@@ -466,13 +466,6 @@ class QuestionBankController extends Controller
             }
         }
         if($type == 0){
-         /*   $questiones=array();
-            foreach ($re as $questions){
-                foreach ($questions as $question){
-                    if($question['parent']==null){
-                    array_push($questiones,$question);
-                }
-            }}*/
             return HelperController::api_response_format(200, $re, null);
         }
         else{
@@ -571,9 +564,7 @@ class QuestionBankController extends Controller
         }
         else {
             $question = $this->updatesubQuestion($request,$parent,$Question_Type_id);
-            // dd($question);
             $answers = QuestionsAnswer::where('question_id', $question->id)->get();
-
         }
         $is_true = 0;
         $Trues = null;
@@ -609,9 +600,7 @@ class QuestionBankController extends Controller
         }
         else {
             $question = $this->updatesubQuestion($request,$parent,$Question_Type_id);
-            // dd($question);
             $answers = QuestionsAnswer::where('question_id', $question->id)->get();
-
         }
         if (count($request->answers) >= count($answers)) {
             $is_true = 0;
@@ -872,7 +861,7 @@ class QuestionBankController extends Controller
         ]);
 
         $answer = QuestionsAnswer::create([
-            'content' => $request->contents,
+            'content'    => $request->contents,
             'true_false' => $request->true_false,
             'match_a' => $request->match_a,
             'match_b' => $request->match_b,

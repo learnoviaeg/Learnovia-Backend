@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Http\Request;
-
-
 Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
     //Install Question Bank
@@ -16,7 +14,6 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
         Route::post('storeQuiz', 'QuizController@store')->middleware('permission:quiz/add');
         Route::post('updateQuiz', 'QuizController@update')->middleware('permission:quiz/update');
     });
-
     //Question Routes
     Route::get('getQuestions', 'QuestionBankController@index')->middleware('permission:question/get');
     Route::post('deleteQuestion', 'QuestionBankController@destroy')->middleware('permission:question/delete');
@@ -27,7 +24,8 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     //Quiz Routes
     Route::post('deleteQuiz', 'QuizController@destroy')->middleware('permission:quiz/delete');
     Route::get('getQuiz', 'QuizController@get')->middleware('permission:quiz/get');
-
+    Route::get('sort', 'QuizController@sort');
+    Route::get('SortUp', 'QuizController@SortUp');
     //Quiz Lesson Routes
     Route::post('addQuizLesson', 'QuizLessonController@store')->middleware('permission:quiz/add-quiz-lesson');
     Route::post('updateQuizLesson', 'QuizLessonController@update')->middleware('permission:quiz/update-quiz-lesson');

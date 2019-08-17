@@ -2,6 +2,7 @@
 
 namespace Modules\QuestionBank\Http\Controllers;
 
+use App\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -34,13 +35,15 @@ class QuizController extends Controller
             'duration' => 'required|integer',
             'shuffle' => 'boolean'
         ]);
-
+        $index=Quiz::whereCourse_id($request->course_id)->get()->max('index');
+        $Next_index=$index+1;
         if($request->type == 0 ){ // new or new
             $newQuestionsIDs = $this->storeWithNewQuestions($request);
 
             $oldQuestionsIDs = $this->storeWithOldQuestions($request);
             $questionsIDs = $newQuestionsIDs->merge($oldQuestionsIDs);
         }
+
         else if($request->type == 1){ // random
             $questionsIDs = $this->storeWithRandomQuestions($request);
         }
@@ -52,6 +55,7 @@ class QuizController extends Controller
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
                 'Shuffle' => quiz::checkSuffle($request),
+                'index' => $Next_index
             ]);
             return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
         }
@@ -64,6 +68,7 @@ class QuizController extends Controller
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
                 'Shuffle' => quiz::checkSuffle($request),
+                'index' => $Next_index
             ]);
             $quiz->Question()->attach($questionsIDs);
             $quiz->Question;
@@ -146,6 +151,7 @@ class QuizController extends Controller
                 'name' => $request->name,
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
+                'index' => $request->index,
             ]);
 
             $quiz->Question()->detach();
@@ -157,6 +163,7 @@ class QuizController extends Controller
             'name' => $request->name,
             'is_graded' => $request->is_graded,
             'duration' => $request->duration,
+            'index' => $request->index,
         ]);
 
         $quiz->Question()->detach();
@@ -241,5 +248,65 @@ class QuizController extends Controller
 
             return HelperController::api_response_format(200, $quiz);
         }
+    }
+    public function sortDown($quiz_id,$index){
+
+        $course_id=Quiz::where('id',$quiz_id)->pluck('course_id')->first();
+        $quiz_index=Quiz::where('id',$quiz_id)->pluck('index')->first();
+
+        $quizes= Quiz::where('course_id',$course_id)->get();
+        foreach ($quizes as $quiz ){
+            if($quiz->index > $quiz_index || $quiz->index < $index){
+                continue;
+            }
+            if ($quiz->index  !=  $quiz_index){
+                $quiz->update([
+                    'index'=>$quiz->index+1
+                ]);
+            }else{
+                $quiz->update([
+                    'index'=>$index
+                ]);
+            }
+        }
+        return $quizes ;
+
+    }
+
+    public function SortUp($quiz_id,$index){
+        $course_id=Quiz::where('id',$quiz_id)->pluck('course_id');
+        $quiz_index=Quiz::where('id',$quiz_id)->pluck('index')->first();
+        $quizes= Quiz::where('course_id',$course_id)->get();
+        foreach ($quizes as $quiz ){
+            if($quiz->index > $index || $quiz->index < $quiz_index ){
+                continue;
+            }
+            elseif ($quiz->index  !=  $quiz_index){
+                $quiz->update([
+                    'index'=>$quiz->index-1
+                ]);
+            }else{
+                $quiz->update([
+                    'index'=>$index
+                ]);
+            }
+        }
+        return $quizes ;
+    }
+
+    public function sort(Request $request){
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'index'=>'required|integer'
+        ]);
+        $quiz_index=Quiz::where('id',$request->quiz_id)->pluck('index')->first();
+
+        if($quiz_index>$request->index){
+            $quizes=$this->sortDown($request->quiz_id,$request->index);
+        }
+        else{
+            $quizes = $this->SortUp($request->quiz_id,$request->index);
+        }
+        return HelperController::api_response_format(200, $quizes,' Successfully');
     }
 }
