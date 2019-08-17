@@ -353,7 +353,7 @@ class CourseController extends Controller
                 while(isset($request->class[$count]))
                 {
                     $year = AcademicYear::Get_current()->id;
-                    $segment = Segment::Get_current()->id;
+                    $segment = Segment::Get_current($request->type[$count])->id;
                     if (isset($request->year[$count])) {
                         $year = $request->year[$count];
                     }
