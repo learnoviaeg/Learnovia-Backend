@@ -76,68 +76,72 @@ class FilesController extends Controller
      */
     public function store(Request $request)
     {
-        try{
+        try {
             $request->validate([
                 'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-
-                'lesson_id'=>'required|integer|exists:lessons,id',
-
-                'year' => 'required|integer|exists:academic_years,id',
-
-                'type' => 'required|integer|exists:academic_types,id',
-
-                'level' => 'required|integer|exists:levels,id',
-
-                'class' => 'required|array',
-                'class.*' => 'required|integer|exists:classes,id',
+                'lesson_id' => 'required|integer|exists:lessons,id',
+                //'year' => 'required|integer|exists:academic_years,id',
+                //'type' => 'required|integer|exists:academic_types,id',
+                //'level' => 'required|integer|exists:levels,id',
+                //'class' => 'required|array',
+                //'class.*' => 'required|integer|exists:classes,id',
             ]);
 
             // activeCourseSgement
-            $activeCourseSegments = collect([]);
-
-            foreach($request->class as $class){
-
-                $newRequest = new Request();
-                $newRequest->setMethod('POST');
-                $newRequest->request->add(['year' => $request->year]);
-                $newRequest->request->add(['type' => $request->type]);
-                $newRequest->request->add(['level' => $request->level]);
-                $newRequest->request->add(['class' => $class]);
-
-                $class_level = HelperController::Get_class_LEVELS($newRequest);
-
-                $activeSegmentClass = $class_level->segmentClass->where('is_active',1)->first();
-                if(isset($activeSegmentClass)){
-                    $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
-                    if(isset($activeCourseSegment)){
-                        // check Enroll
-                        $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
-                        if($checkTeacherEnroll == true){
-                            $activeCourseSegments->push($activeCourseSegment);
-                        }
-                        else{
-                            return HelperController::api_response_format(400,null,'You\'re unauthorize');
-                        }
-                    }
-                    else{
-                        return HelperController::api_response_format(400,null,'No Course active in segment');
-                    }
-                }
-                else{
-                    return HelperController::api_response_format(400,null,'No Class active in segment');
-                }
+            $activeCourseSegments = HelperController::Get_Course_segment_Course($request);
+            if ($activeCourseSegments['result'] == false || $activeCourseSegments['value'] == null) {
+                return HelperController::api_response_format(400, null, 'No Course active in segment');
+            }
+            $activeCourseSegments = $activeCourseSegments['value'];
+            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegments->id);
+            if (!$checkTeacherEnroll == true) {
+                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
             }
 
-            foreach($request->Imported_file as $singlefile){
+            //to be refactor but this in phase 1
+            // foreach($request->class as $class){
+
+            //     $newRequest = new Request();
+            //     $newRequest->setMethod('POST');
+            //     $newRequest->request->add(['year' => $request->year]);
+            //     $newRequest->request->add(['type' => $request->type]);
+            //     $newRequest->request->add(['level' => $request->level]);
+            //     $newRequest->request->add(['class' => $class]);
+
+            //     $class_level = HelperController::Get_class_LEVELS($newRequest);
+
+            //     $activeSegmentClass = $class_level->segmentClass->where('is_active',1)->first();
+            //     if(isset($activeSegmentClass)){
+            //         $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
+            //         if(isset($activeCourseSegment)){
+            //             // check Enroll
+            //             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
+            //             if($checkTeacherEnroll == true){
+            //                 $activeCourseSegments->push($activeCourseSegment);
+            //             }
+            //             else{
+            //                 return HelperController::api_response_format(400,null,'You\'re unauthorize');
+            //             }
+            //         }
+            //         else{
+            //             return HelperController::api_response_format(400,null,'No Course active in segment');
+            //         }
+            //     }
+            //     else{
+            //         return HelperController::api_response_format(400,null,'No Class active in segment');
+            //     }
+            // }
+
+            foreach ($request->Imported_file as $singlefile) {
                 $extension = $singlefile->getClientOriginalExtension();
 
                 $fileName = $singlefile->getClientOriginalName();
                 $size = $singlefile->getSize();
                 $description = $request->description;
 
-                $name = uniqid().'.'.$extension;
+                $name = uniqid() . '.' . $extension;
 
                 $file = new file;
                 $file->type = $extension;
@@ -148,20 +152,18 @@ class FilesController extends Controller
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
 
-                if($check){
-                    foreach($activeCourseSegments as $courseSegment){
-                        $filesegment = new FileCourseSegment;
-                        $filesegment->course_segment_id = $courseSegment->id;
-                        $filesegment->file_id = $file->id;
-                        $filesegment->save();
-                    }
+                if ($check) {
+                    $filesegment = new FileCourseSegment;
+                    $filesegment->course_segment_id = $activeCourseSegments->id;
+                    $filesegment->file_id = $file->id;
+                    $filesegment->save();
 
-                    $maxIndex = FileLesson::where('lesson_id',$request->lesson_id)->max('index');
 
-                    if($maxIndex == null){
+                    $maxIndex = FileLesson::where('lesson_id', $request->lesson_id)->max('index');
+
+                    if ($maxIndex == null) {
                         $newIndex = 1;
-                    }
-                    else{
+                    } else {
                         $newIndex = ++$maxIndex;
                     }
 
@@ -172,18 +174,15 @@ class FilesController extends Controller
                     $fileLesson->save();
 
                     Storage::disk('public')->putFileAs(
-                        'files/'.$request->lesson_id.'/'.$file->id,
+                        'files/' . $request->lesson_id . '/' . $file->id,
                         $singlefile,
                         $name
                     );
-
                 }
-
             }
-
-            return HelperController::api_response_format(200,null,'Upload Successfully');
-        }catch (Exception $ex){
-            return HelperController::api_response_format(400,null,'Please Try again');
+            return HelperController::api_response_format(200, $file, 'Upload Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
 
@@ -206,17 +205,17 @@ class FilesController extends Controller
         $lesson = Lesson::find($request->lesson_id);
         $checkEnroll = checkEnroll::checkEnrollment($lesson->course_segment_id);
 
-        if($checkEnroll == true){
-            $mediaLessons = MediaLesson::where('lesson_id', $request->lesson_id)->orderBy('index','asc')->get();
-            $fileLessons = FileLesson::where('lesson_id', $request->lesson_id)->orderBy('index','asc')->get();
+        if ($checkEnroll == true) {
+            $mediaLessons = MediaLesson::where('lesson_id', $request->lesson_id)->orderBy('index', 'asc')->get();
+            $fileLessons = FileLesson::where('lesson_id', $request->lesson_id)->orderBy('index', 'asc')->get();
 
             foreach ($mediaLessons as $mediaLesson) {
-                $allMedia = $mediaLesson->Media->where('visibility',1);
+                $allMedia = $mediaLesson->Media->where('visibility', 1);
 
                 foreach ($allMedia as $media) {
                     $lesson_id = $media->MediaLesson->lesson_id;
-                    if(!isset($media->link)){
-                        $media->path  = URL::asset('storage/media/'.$lesson_id.'/'.$media->id.'/'.$media->name);
+                    if (!isset($media->link)) {
+                        $media->path  = URL::asset('storage/media/' . $lesson_id . '/' . $media->id . '/' . $media->name);
                     }
                     $userid = $media->user->id;
                     $firstname = $media->user->firstname;
@@ -235,11 +234,11 @@ class FilesController extends Controller
             }
 
             foreach ($fileLessons as $fileLesson) {
-                $allFiles = $fileLesson->File->where('visibility',1);
+                $allFiles = $fileLesson->File->where('visibility', 1);
 
                 foreach ($allFiles as $file) {
                     $lesson_id = $file->FileLesson->lesson_id;
-                    $file->path  = URL::asset('storage/files/'.$lesson_id.'/'.$file->id.'/'.$file->name);
+                    $file->path  = URL::asset('storage/files/' . $lesson_id . '/' . $file->id . '/' . $file->name);
 
                     $userid = $file->user->id;
                     $firstname = $file->user->firstname;
@@ -263,7 +262,7 @@ class FilesController extends Controller
             'files' => $FILES
         ]);
 
-        return HelperController::api_response_format(200,$Files_media);
+        return HelperController::api_response_format(200, $Files_media);
     }
 
     /**
@@ -279,7 +278,7 @@ class FilesController extends Controller
      */
     public function update(Request $request)
     {
-        try{
+        try {
             $request->validate([
                 'fileID' => 'required|integer|exists:files,id',
                 'description' => 'required|string|min:1',
@@ -293,17 +292,17 @@ class FilesController extends Controller
             // check Enroll
             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
 
-            if($checkTeacherEnroll == false){
-                return HelperController::api_response_format(400,null,'You\'re unauthorize');
+            if ($checkTeacherEnroll == false) {
+                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
             }
 
-            if(isset($request->Imported_file)){
+            if (isset($request->Imported_file)) {
                 $oldname = $file->name;
 
                 $extension = $request->Imported_file->getClientOriginalExtension();
-                $fileName = uniqid().'.'.$extension;
+                $fileName = uniqid() . '.' . $extension;
 
-               // $fileName = $request->Imported_file->getClientOriginalName();
+                // $fileName = $request->Imported_file->getClientOriginalName();
                 $size = $request->Imported_file->getSize();
 
                 $file->type = $extension;
@@ -314,30 +313,30 @@ class FilesController extends Controller
             $file->description = $request->description;
             $check = $file->save();
 
-            if($check){
-                if(isset($request->Imported_file)){
+            if ($check) {
+                if (isset($request->Imported_file)) {
                     $fileId = $file->id;
                     $lesson_id = $file->FileLesson->lesson_id;
 
-                    $filePath = 'storage\files\\'.$lesson_id.'\\'.$fileId.'\\'.$oldname;
+                    $filePath = 'storage\files\\' . $lesson_id . '\\' . $fileId . '\\' . $oldname;
                     if (file_exists($filePath)) {
                         unlink($filePath);
                     }
 
                     Storage::disk('public')->putFileAs(
-                       'files/'.$lesson_id.'/'.$fileId,
+                        'files/' . $lesson_id . '/' . $fileId,
                         $request->Imported_file,
                         $fileName
                     );
                 }
             }
-            return HelperController::api_response_format(200,null,'Update Successfully');
-        }catch (Exception $ex){
-            return HelperController::api_response_format(400,null,'Please Try again');
+            return HelperController::api_response_format(200, null, 'Update Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
 
-   // return response()->json();
+    // return response()->json();
 
     /**
      * Delete Specifc File
@@ -348,7 +347,7 @@ class FilesController extends Controller
      */
     public function destroy(Request $request)
     {
-        try{
+        try {
             $request->validate([
                 'fileID' => 'required|integer|exists:files,id',
             ]);
@@ -361,8 +360,8 @@ class FilesController extends Controller
             // check Enroll
             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
 
-            if($checkTeacherEnroll == false){
-                return HelperController::api_response_format(400,null,'You\'re unauthorize');
+            if ($checkTeacherEnroll == false) {
+                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
             }
 
             $oldname = $file->name;
@@ -371,16 +370,16 @@ class FilesController extends Controller
 
             $check = $file->delete();
 
-            if($check){
-                $filePath = 'storage\files\\'.$lesson_id.'\\'.$fileId.'\\'.$oldname;
+            if ($check) {
+                $filePath = 'storage\files\\' . $lesson_id . '\\' . $fileId . '\\' . $oldname;
                 if (file_exists($filePath)) {
                     unlink($filePath);
-                    unlink('storage\files\\'.$lesson_id.'\\'.$fileId);
+                    unlink('storage\files\\' . $lesson_id . '\\' . $fileId);
                 }
             }
-            return HelperController::api_response_format(200,null,'Deleted Successfully');
-        }catch (Exception $ex){
-            return HelperController::api_response_format(400,null,'Please Try again');
+            return HelperController::api_response_format(200, null, 'Deleted Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
 
@@ -393,7 +392,7 @@ class FilesController extends Controller
      */
     public function toggleVisibility(Request $request)
     {
-        try{
+        try {
             $request->validate([
                 'fileID' => 'required|integer|exists:files,id',
             ]);
@@ -405,89 +404,85 @@ class FilesController extends Controller
 
             // check Enroll
             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
-            if($checkTeacherEnroll == false){
-                return HelperController::api_response_format(400,null,'You\'re unauthorize');
+            if ($checkTeacherEnroll == false) {
+                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
             }
 
-            $file->visibility = ($file->visibility == 1)? 0 : 1;
+            $file->visibility = ($file->visibility == 1) ? 0 : 1;
             $file->save();
 
-            return HelperController::api_response_format(200,$file,'Toggle Successfully');
-        }catch (Exception $ex){
-            return HelperController::api_response_format(400,null,'Please Try again');
+            return HelperController::api_response_format(200, $file, 'Toggle Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
 
-    public function sortLessonFile(Request $request){
+    public function sortLessonFile(Request $request)
+    {
         $request->validate([
             'file_lesson_id' => 'required|integer|exists:file_lessons,id',
-            'index'=>'required|integer'
+            'index' => 'required|integer'
         ]);
         $fileLesson = FileLesson::find($request->file_lesson_id);
         $maxIndex = $fileLesson->max('index');
         $minIndex = $fileLesson->min('index');
 
-        if(!($request->index <= $maxIndex && $request->index >= $minIndex)){
-            return HelperController::api_response_format(400, null,' invalid index');
+        if (!($request->index <= $maxIndex && $request->index >= $minIndex)) {
+            return HelperController::api_response_format(400, null, ' invalid index');
         }
 
         $currentIndex = $fileLesson->index;
-        if($currentIndex > $request->index){
-            $this->sortDown($fileLesson,$currentIndex,$request->index);
+        if ($currentIndex > $request->index) {
+            $this->sortDown($fileLesson, $currentIndex, $request->index);
+        } else {
+            $this->sortUp($fileLesson, $currentIndex, $request->index);
         }
-        else{
-            $this->sortUp($fileLesson,$currentIndex,$request->index);
-        }
-        return HelperController::api_response_format(200, null,' Successfully');
+        return HelperController::api_response_format(200, null, ' Successfully');
     }
 
-    public function sortDown($fileLesson,$currentIndex,$newIndex){
+    public function sortDown($fileLesson, $currentIndex, $newIndex)
+    {
 
         $lesson_id = $fileLesson->lesson_id;
 
-        $fileLessons = FileLesson::where('lesson_id',$lesson_id)->get();
+        $fileLessons = FileLesson::where('lesson_id', $lesson_id)->get();
 
-        foreach ($fileLessons as $singleFileLesson ){
-            if($singleFileLesson->index < $newIndex || $singleFileLesson->index > $currentIndex ){
+        foreach ($fileLessons as $singleFileLesson) {
+            if ($singleFileLesson->index < $newIndex || $singleFileLesson->index > $currentIndex) {
                 continue;
-            }
-            elseif ($singleFileLesson->index  !=  $currentIndex){
+            } elseif ($singleFileLesson->index  !=  $currentIndex) {
                 $singleFileLesson->update([
-                    'index'=>$singleFileLesson->index+1
+                    'index' => $singleFileLesson->index + 1
                 ]);
-            }else{
+            } else {
                 $singleFileLesson->update([
-                    'index'=>$newIndex
+                    'index' => $newIndex
                 ]);
             }
         }
-        return $fileLessons ;
-
+        return $fileLessons;
     }
 
-    public function sortUp($fileLesson,$currentIndex,$newIndex){
+    public function sortUp($fileLesson, $currentIndex, $newIndex)
+    {
 
         $lesson_id = $fileLesson->lesson_id;
 
-        $fileLessons = FileLesson::where('lesson_id',$lesson_id)->get();
+        $fileLessons = FileLesson::where('lesson_id', $lesson_id)->get();
 
-        foreach ($fileLessons as $singleFileLesson ){
-            if($singleFileLesson->index > $newIndex || $singleFileLesson->index < $currentIndex ){
+        foreach ($fileLessons as $singleFileLesson) {
+            if ($singleFileLesson->index > $newIndex || $singleFileLesson->index < $currentIndex) {
                 continue;
-            }
-            elseif ($singleFileLesson->index  !=  $currentIndex){
+            } elseif ($singleFileLesson->index  !=  $currentIndex) {
                 $singleFileLesson->update([
-                    'index'=>$singleFileLesson->index-1
+                    'index' => $singleFileLesson->index - 1
                 ]);
-            }else{
+            } else {
                 $singleFileLesson->update([
-                    'index'=>$newIndex
+                    'index' => $newIndex
                 ]);
             }
         }
-        return $fileLessons ;
+        return $fileLessons;
     }
-
-
-
 }
