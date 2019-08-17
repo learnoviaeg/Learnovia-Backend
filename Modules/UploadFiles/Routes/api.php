@@ -46,4 +46,10 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
 
     /* sortLessonMedia */
     Route::post('sortLessonMedia', 'MediaController@sortLessonMedia')->name('sortLessonMedia')->middleware('permission:media/sort');
+
+    Route::get('getAllFiles','FilesController@getAllFiles');
+
+    Route::get('getAllMedia','MediaController@getAllMedia');
+
 });
+

@@ -10,4 +10,9 @@ class userQuizAnswer extends Model
         'user_quiz_id','question_id','answer_id',
         'and_why','mcq_answers_array','choices_array','content'
     ];
+
+    public function Question()
+    {
+        return $this->belongsTo('Modules\QuestionBank\Entities\Questions', 'question_id', 'id');
+    }
 }

@@ -120,4 +120,9 @@ class User extends Authenticatable
        return $this->hasMany('App\Enroll' , 'user_id');
     }
 
+
+    public function userQuiz()
+    {
+        return $this->hasMany('Modules\QuestionBank\Entities\userQuiz', 'user_id', 'id');
+    }
 }

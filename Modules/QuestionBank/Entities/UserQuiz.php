@@ -17,4 +17,9 @@ class userQuiz extends Model
     {
         return $this->belongsTo('Modules\QuestionBank\Entities\QuizLesson', 'quiz_lesson_id', 'id');
     }
+
+    public function UserQuizAnswer()
+    {
+        return $this->hasMany('Modules\QuestionBank\Entities\userQuizAnswer', 'user_quiz_id', 'id');
+    }
 }
