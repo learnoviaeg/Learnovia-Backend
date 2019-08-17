@@ -21,9 +21,6 @@ class UserQuizController extends Controller
 
         $request->validate([
             'quiz_lesson_id' => 'required|integer|exists:quiz_lessons,id',
-            'status_id' => 'required|integer|exists:statuses,id',
-            'feedback' => 'required|string',
-            'grade' => 'required|integer',
         ]);
 
         $max_attempt_index = userQuiz::where('quiz_lesson_id', $request->quiz_lesson_id)
