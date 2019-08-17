@@ -24,12 +24,12 @@ class CreateUserQuizzesTable extends Migration
 
             $table->boolean('override')->default(0);
 
-            $table->unsignedBigInteger('status_id');
+            $table->unsignedBigInteger('status_id')->nullable();
             $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade')->onUpdate('cascade');
 
-            $table->string('feedback');
+            $table->string('feedback')->nullable();
 
-            $table->integer('grade');
+            $table->integer('grade')->nullable();
 
             $table->integer('attempt_index');
 

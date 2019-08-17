@@ -71,9 +71,9 @@ class UserQuizController extends Controller
         $userQuiz = userQuiz::create([
             'user_id' => Auth::user()->id,
             'quiz_lesson_id' => $request->quiz_lesson_id,
-            'status_id' => $request->status_id,
-            'feedback' => $request->feedback,
-            'grade' => $request->grade,
+            'status_id' => 2,
+            'feedback' => null,
+            'grade' => null,
             'attempt_index' => $attempt_index,
             'ip' => $request->ip(),
             'device_data' => $deviceData,
