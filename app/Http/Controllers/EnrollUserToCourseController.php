@@ -16,6 +16,8 @@ use DB;
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
+use App\Http\Resources\UserResource;
+
 
 class EnrollUserToCourseController extends Controller
 {
@@ -135,7 +137,7 @@ class EnrollUserToCourseController extends Controller
             }
             if($segments == null)
                 break;
-   
+
             $check = Enroll::where('user_id', $userId)->where('course_segment', $segments)->pluck('id');
             if (count($check) == 0) {
                 foreach ($segments as $segment) {
@@ -175,50 +177,71 @@ class EnrollUserToCourseController extends Controller
     {
 
         $request->validate([
-            'course_id' => 'required|exists:courses,id'
+            'course_id' => 'required|exists:courses,id',
+            'class_id' => 'required|exists:classes,id',
+            'filter'=> 'nullable|in:parent,child'
         ]);
 
-        if ($request->class_id == null) {
-            $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
-
-            $users_id = Enroll::GetUsers_id($course_seg_id);
-
-            foreach ($users_id as $users) {
-                $UsersIds[] = User::findOrFail($users);
-            }
-            //return all users that enrolled in this course
-            return HelperController::api_response_format(200, $UsersIds, 'students are ... ');
+        $course_seg=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
+        $users=array();
+        if($course_seg == null)
+        {
+            return HelperController::api_response_format(200, null , 'There is no users found');
         }
-
-        //if was send class_id and course_id
-        else {
-            $request->validate([
-                'class_id' => 'required|exists:classes,id'
-            ]);
-
-            $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
-
-            $users_id = Enroll::GetUsers_id($course_seg_id);
-
-            foreach ($users_id as $users) {
-                $UsersIds[] = User::findOrFail($users);
+        else
+        {
+            foreach($course_seg->enroll as $enroll)
+            {
+                if($enroll->role_id == 3)
+                {
+                    $users[]=$enroll->user_id;
+                }
+            }
+            $uniuser=array_unique($users);
+            $childparent=array();
+            $child=array();
+            //find every student parent
+            foreach($uniuser as $us)
+            {
+                $use=User::find($us);
+                $childparent[]=$use->parents;
+                $child[]=$use;
             }
 
-            //$usersByClass is an array that have all users in this class
-            $usersByClass = User::GetUsersByClass_id($request->class_id);
-
-            foreach ($usersByClass as $users) {
-                $UsersClassIds[] = User::findOrFail($users);
+            //starting filters
+            if($request->filter == null)
+            {
+                $childwithparent=array();
+                foreach($child as $cs)
+                {
+                    $childwithparent[]= new UserResource($cs);
+                    foreach($cs->parents as $parent)
+                    {
+                        $childwithparent[]['parents'] = new UserResource($parent);
+                    }
+                }
+                return HelperController::api_response_format(200, $childwithparent , 'Enrolled Students With Parnets');
             }
-
-            // $result is an array of users enrolled this course in this class
-            $result = array_intersect($usersByClass->toArray(), $users_id->toArray());
-
-            foreach ($result as $users) {
-                $Usersenrolled[] = User::findOrFail($users);
+            else if($request->filter == 'parent')
+            {
+                $parents=array();
+                foreach($childparent as $par)
+                {
+                    $parents[]=new UserResource(User::find($par[0]['pivot']['parent_id']));
+                }
+                return HelperController::api_response_format(200, $parents , 'Parnets of Enrolled Students');
             }
+            else if($request->filter == 'child')
+            {
+                $student=array();
+                foreach($uniuser as $u)
+                {
+                    $use=new UserResource(User::find($u));
+                    $student[]=$use;
+                }
 
-            return HelperController::api_response_format(200, $Usersenrolled, 'students are ... ');
+                return HelperController::api_response_format(200, $student , 'Enrolled Students');
+            }
         }
     }
 }

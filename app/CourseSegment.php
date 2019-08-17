@@ -88,6 +88,11 @@ class CourseSegment extends Model
         'created_at', 'updated_at'
     ];
 
+    public function enroll()
+    {
+        return $this->hasMany('App\Enroll', 'course_segment');
+    }
+
     public static function GetWithClassAndCourse($class_id , $course_id){
         return CourseSegment::Join('segment_classes' , 'segment_classes.id' , 'course_segments.segment_class_id')
         ->Join('class_levels' , 'class_levels.id' , 'segment_classes.class_level_id')
