@@ -28,7 +28,7 @@ class CourseSegment extends Model
 
     public static function getidfromcourse($course_id)
     {
-        return self::where('course_id', $course_id)->pluck('id')->first();
+        return self::where('course_id', $course_id)->pluck('id');
     }
 
     public static function getActive_segmentfromcourse($course_id)
@@ -60,6 +60,10 @@ class CourseSegment extends Model
         return $this->hasMany('App\Lesson')->orderBy('index');
     }
 
+    public function enroll()
+    {
+        return $this->hasMany('App\Enroll','course_segment');
+    }
     public static function checkRelation($segmentClass, $course)
     {
         $courseSegment = self::whereCourse_id($course)->whereSegment_class_id($segmentClass)->first();

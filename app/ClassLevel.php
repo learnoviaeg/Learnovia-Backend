@@ -16,13 +16,13 @@ class ClassLevel extends Model
 
     public static function GetClassLevel($class_id)
     {
-        $check = self::where('class_id', $class_id)->pluck('id')->first();
+        $check = self::where('class_id', $class_id)->pluck('id');
         return $check;
     }
 
     public static function GetClassLevelid($yaer_level_id)
     {
-        $check = self::where('year_level_id', $yaer_level_id)->pluck('id')->first();
+        $check = self::where('year_level_id', $yaer_level_id)->pluck('id');
         return $check;
     }
 

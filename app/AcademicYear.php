@@ -20,4 +20,9 @@ class AcademicYear extends Model
     protected $hidden = [
         'created_at','updated_at'
     ];
+
+    public function Acyeartype()
+    {
+        return $this->belongsTo('App\AcademicYearType', 'id', 'academic_year_id');
+    }
 }

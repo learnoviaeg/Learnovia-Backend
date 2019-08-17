@@ -135,7 +135,7 @@ class EnrollUserToCourseController extends Controller
             }
             if($segments == null)
                 break;
-   
+
             $check = Enroll::where('user_id', $userId)->where('course_segment', $segments)->pluck('id');
             if (count($check) == 0) {
                 foreach ($segments as $segment) {
@@ -173,21 +173,20 @@ class EnrollUserToCourseController extends Controller
 
     public function GetEnrolledStudents(Request $request)
     {
-
         $request->validate([
-            'course_id' => 'required|exists:courses,id'
+            'course' => 'required|exists:courses,id',
         ]);
 
         if ($request->class_id == null) {
             $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
 
             $users_id = Enroll::GetUsers_id($course_seg_id);
-
+            $return = [];
             foreach ($users_id as $users) {
                 $UsersIds[] = User::findOrFail($users);
             }
             //return all users that enrolled in this course
-            return HelperController::api_response_format(200, $UsersIds, 'students are ... ');
+            return HelperController::api_response_format(200, $return ,'students are ... ');
         }
 
         //if was send class_id and course_id

@@ -3,6 +3,7 @@
 namespace Modules\Assigments\Http\Controllers;
 
 use App\attachment;
+use App\CourseSegment;
 use App\Enroll;
 use App\User;
 use Illuminate\Support\Facades\Auth;
@@ -56,14 +57,17 @@ class AssigmentsController extends Controller
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date|after:' . Carbon::now(),
             'closing_date' => 'required|date|date_format:Y-m-d H:i:s',
             'visiable' => 'required|boolean',
-            'course_segment' => 'required|exists:enrolls,course_segment',
+            'class' => 'required|exists:classes,id',
+            'course' => 'required|exists:courses,id',
         ]);
+        $segments = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
+        if($segments == null)
+            return HelperController::api_response_format(400 , [], 'No Active segment to this class in this course');
         if (!isset($request->file) && !isset($request->content)) {
             return HelperController::api_response_format(400, $body = [], $message = 'please enter file or content');
         }
         $assigment = new assignment;
         if (isset($request->file)) {
-
             $request->validate([
                 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg',
             ]);
@@ -85,13 +89,15 @@ class AssigmentsController extends Controller
         $assigment->due_date = $request->closing_date;
         $assigment->visiable = $request->visiable;
         $assigment->save();
-
-
-        $data = array("course_segment" => $request->course_segment, "assignments_id" => $assigment->id, "submit_date" => $request->submit_date);
+        $data = array("course_segment" => $segments->id, "assignments_id" => $assigment->id, "submit_date" => $request->submit_date);
 
         $this->assignAsstoUsers($data);
-        AssignmentLesson::firstOrCreate(['assignment_id'=>$assigment->id,
-            'lesson_id' => $request->Lesson_id]);
+        AssignmentLesson::firstOrCreate(
+            [
+                'assignment_id' => $assigment->id,
+                'lesson_id' => $request->Lesson_id
+            ]
+        );
 
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
     }
@@ -357,21 +363,21 @@ class AssigmentsController extends Controller
         }
     }
 
-    public function toggleAssignmentVisibity(Request $request){
-        try{
+    public function toggleAssignmentVisibity(Request $request)
+    {
+        try {
             $request->validate([
-                'assignment_id'=>'required|exists:assignments,id',
+                'assignment_id' => 'required|exists:assignments,id',
             ]);
 
             $assigment = assignment::find($request->assignment_id);
 
-            $assigment->visiable = ($assigment->visiable == 1)? 0 : 1;
+            $assigment->visiable = ($assigment->visiable == 1) ? 0 : 1;
             $assigment->save();
 
-            return HelperController::api_response_format(200,$assigment,'Toggle Successfully');
-        }catch (Exception $ex){
-            return HelperController::api_response_format(400,null,'Please Try again');
+            return HelperController::api_response_format(200, $assigment, 'Toggle Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
-
 }

@@ -34,12 +34,12 @@ class AcademicYearType extends Model
 
     public static function get_yaer_type_by_year ($academic_year)
     {
-        return self::where('academic_year_id', $academic_year)->pluck('id')->first();
+        return self::where('academic_year_id', $academic_year)->pluck('id');
     }
 
     public static function get_yaer_type_by_type ($academic_type)
     {
-        return self::where('academic_type_id', $academic_type)->pluck('id')->first();
+        return self::where('academic_type_id', $academic_type)->pluck('id');
     }
 
     protected $hidden = [
