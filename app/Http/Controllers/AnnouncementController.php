@@ -485,7 +485,7 @@ class AnnouncementController extends Controller
         $c=0;
         foreach ($noti as $not) {
          $data[]= json_decode($not, true);
-         if($data[$c]['attached_file'])
+         if(isset($data[$c]['attached_file']))
             $data[$c]['attached_file']=attachment::where('id',$data[$c]['attached_file'])->first();
          $c++;
         }
