@@ -383,18 +383,13 @@ class MediaController extends Controller
                 'name' => 'required|string|max:130',
                 'description' => 'nullable|string|min:1',
                 'url' => 'required|active_url',
-
                 'lesson_id' => 'required|integer|exists:lessons,id',
-
-                'year' => 'required|integer|exists:academic_years,id',
-
-                'type' => 'required|integer|exists:academic_types,id',
-
-                'level' => 'required|integer|exists:levels,id',
-
-                'class' => 'required|array',
-                'class.*' => 'required|integer|exists:classes,id',
-            ]);
+                //'year' => 'required|integer|exists:academic_years,id',
+                //'type' => 'required|integer|exists:academic_types,id',
+                //'level' => 'required|integer|exists:levels,id',
+                //'class' => 'required|array',
+                //'class.*' => 'required|integer|exists:classes,id',
+                ]);
 
             $avaiableHosts = collect([
                 'www.youtube.com',
@@ -407,8 +402,16 @@ class MediaController extends Controller
                 return HelperController::api_response_format(400, $request->url, 'Link is invalid');
             }
 
-            // activeCourseSgement
-            $activeCourseSegments = collect([]);
+             // activeCourseSgement
+             $activeCourseSegments = HelperController::Get_Course_segment_Course($request);
+             if ($activeCourseSegments['result'] == false || $activeCourseSegments['value'] == null) {
+                 return HelperController::api_response_format(400, null, 'No Course active in segment');
+             }
+             $activeCourseSegments = $activeCourseSegments['value'];
+             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegments->id);
+             if (!$checkTeacherEnroll == true) {
+                 return HelperController::api_response_format(400, null, 'You\'re unauthorize');
+             }
 
             foreach ($request->class as $class) {
 
@@ -449,13 +452,11 @@ class MediaController extends Controller
             $check = $file->save();
 
             if ($check) {
-
-                foreach ($activeCourseSegments as $courseSegment) {
                     $filesegment = new MediaCourseSegment;
-                    $filesegment->course_segment_id = $courseSegment->id;
+                    $filesegment->course_segment_id = $activeCourseSegments->id;
                     $filesegment->media_id = $file->id;
                     $filesegment->save();
-                }
+
 
                 $maxIndex = MediaLesson::where('lesson_id', $request->lesson_id)->max('index');
 
@@ -472,7 +473,7 @@ class MediaController extends Controller
                 $fileLesson->save();
             }
 
-            return HelperController::api_response_format(200, null, 'Link added Successfully');
+            return HelperController::api_response_format(200, $file, 'Link added Successfully');
         } catch (Exception $ex) {
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
