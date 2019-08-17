@@ -413,35 +413,35 @@ class MediaController extends Controller
                  return HelperController::api_response_format(400, null, 'You\'re unauthorize');
              }
 
-            foreach ($request->class as $class) {
+            // foreach ($request->class as $class) {
 
-                $newRequest = new Request();
-                $newRequest->setMethod('POST');
-                $newRequest->request->add(['year' => $request->year]);
-                $newRequest->request->add(['type' => $request->type]);
-                $newRequest->request->add(['level' => $request->level]);
-                $newRequest->request->add(['class' => $class]);
+            //     $newRequest = new Request();
+            //     $newRequest->setMethod('POST');
+            //     $newRequest->request->add(['year' => $request->year]);
+            //     $newRequest->request->add(['type' => $request->type]);
+            //     $newRequest->request->add(['level' => $request->level]);
+            //     $newRequest->request->add(['class' => $class]);
 
-                $class_level = HelperController::Get_class_LEVELS($newRequest);
+            //     $class_level = HelperController::Get_class_LEVELS($newRequest);
 
-                $activeSegmentClass = $class_level->segmentClass->where('is_active', 1)->first();
-                if (isset($activeSegmentClass)) {
-                    $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active', 1)->first();
-                    if (isset($activeCourseSegment)) {
-                        // check Enroll
-                        $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
-                        if ($checkTeacherEnroll == true) {
-                            $activeCourseSegments->push($activeCourseSegment);
-                        } else {
-                            return HelperController::api_response_format(400, null, 'You\'re unauthorize');
-                        }
-                    } else {
-                        return HelperController::api_response_format(400, null, 'No Course active in segment');
-                    }
-                } else {
-                    return HelperController::api_response_format(400, null, 'No Class active in segment');
-                }
-            }
+            //     $activeSegmentClass = $class_level->segmentClass->where('is_active', 1)->first();
+            //     if (isset($activeSegmentClass)) {
+            //         $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active', 1)->first();
+            //         if (isset($activeCourseSegment)) {
+            //             // check Enroll
+            //             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
+            //             if ($checkTeacherEnroll == true) {
+            //                 $activeCourseSegments->push($activeCourseSegment);
+            //             } else {
+            //                 return HelperController::api_response_format(400, null, 'You\'re unauthorize');
+            //             }
+            //         } else {
+            //             return HelperController::api_response_format(400, null, 'No Course active in segment');
+            //         }
+            //     } else {
+            //         return HelperController::api_response_format(400, null, 'No Class active in segment');
+            //     }
+            // }
 
             $file = new media;
             $file->name = $request->name;
