@@ -37,9 +37,10 @@ class QuizController extends Controller
 
         if($request->type == 0 ){ // new or new
             $newQuestionsIDs = $this->storeWithNewQuestions($request);
-
+            if(count($newQuestionsIDs['wrong']) > 0 )
+                return HelperController::api_response_format(200, $newQuestionsIDs['wrong'],'This questions has wrong format');
             $oldQuestionsIDs = $this->storeWithOldQuestions($request);
-            $questionsIDs = $newQuestionsIDs->merge($oldQuestionsIDs);
+            $questionsIDs = $newQuestionsIDs['ids']->merge($oldQuestionsIDs);
         }
         else if($request->type == 1){ // random
             $questionsIDs = $this->storeWithRandomQuestions($request);
@@ -85,7 +86,15 @@ class QuizController extends Controller
     // New Questions
     public function storeWithNewQuestions(Request $request){
         $questionsIDs = app('Modules\QuestionBank\Http\Controllers\QuestionBankController')->store($request,1);
-        return $questionsIDs;
+        $result = [];
+        foreach ($questionsIDs as $key => $question){
+            if($question==0){
+                $result['wrong'][] = $request->all()['Question'][$key];
+                continue;
+            }
+            $result['ids'][] = $question;
+        }
+        return $result;
     }
 
     // Old Questions

@@ -180,7 +180,7 @@ class QuestionBankController extends Controller
         ]);
 
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return  $valid->errors();
         }
 
         $arr = array();
@@ -188,7 +188,7 @@ class QuestionBankController extends Controller
             $arr = Questions::where('id', $Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
         }
         if (!isset($arr)) {
-            return HelperController::api_response_format(400, null, 'this is not valid parent');
+            return 'this is not valid parent';
         }
         $Questions = collect([]);
         $cat = Questions::firstOrCreate([
@@ -223,7 +223,7 @@ class QuestionBankController extends Controller
         ]);
 
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return $valid->errors();
         }
 
         $Questions = collect([]);
@@ -233,7 +233,7 @@ class QuestionBankController extends Controller
             $arr = Questions::where('id', $Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
         }
         if (!isset($arr)) {
-            return HelperController::api_response_format(400, null, 'this is not valid parent');
+            return 'this is not valid parent';
         }
         $cat = Questions::Create([
             'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
@@ -263,7 +263,7 @@ class QuestionBankController extends Controller
 
         ]);
         if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+            return  $validator->errors();
         }
 
         $cat = $this::CreateOrFirstQuestion($Question,$parent);
@@ -303,7 +303,7 @@ class QuestionBankController extends Controller
 
         ]);
         if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+            return  $validator->errors();
         }
         if ($Question['Is_True'] > count($Question['answers']) - 1) {
             return HelperController::api_response_format(400, null, 'is True invalid');
@@ -351,7 +351,7 @@ class QuestionBankController extends Controller
             'match_B.*' => 'required|distinct',
         ]);
         if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+            return  $validator->errors();
         }
         if (count($Question['match_A']) > count($Question['match_B'])) {
             return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
@@ -395,17 +395,16 @@ class QuestionBankController extends Controller
     public function paragraph($Question)
     {
         $validator = Validator::make($Question, [
-            'subQuestions' => 'required|array|distinct'/*|min:2*/,
+            'subQuestions' => 'required|array|distinct|'/*min:2'*/,
             'subQuestions.*' => 'required|distinct',
             'subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
         ]);
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors());
         }
-
         $cat = $this->CreateOrFirstQuestion($Question);
-      //  dd($cat);
-        $re = collect([]);
+        if ($cat instanceof Questions) {
+            $re = collect([]);
             foreach ($Question['subQuestions'] as $subQuestion) {
                 switch ($subQuestion['Question_Type_id']) {
                     case 1: // True/false
@@ -425,9 +424,13 @@ class QuestionBankController extends Controller
                         $essay = $this->Essay($subQuestion, $cat->id);
                         $re->push($essay);
                         break;
+                }
             }
-        }
+            $cat["childeren"]=$re;
             return $cat;
+        }else {
+            return $cat;
+        }
     }
 
     public function store(Request $request,$type = 0)
@@ -435,7 +438,6 @@ class QuestionBankController extends Controller
         $request->validate([
             'Question' => 'required|array',
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
-
         ]);
 
         $re = collect([]);
@@ -460,23 +462,28 @@ class QuestionBankController extends Controller
                     break;
                 case 5: // para
                     $paragraph = $this->paragraph($question);
-                    $paragraph->childeren;
+                   // $paragraph->childeren;
                     $re->push($paragraph);
                     break;
             }
         }
         if($type == 0){
-         /*   $questiones=array();
-            foreach ($re as $questions){
-                foreach ($questions as $question){
-                    if($question['parent']==null){
-                    array_push($questiones,$question);
-                }
-            }}*/
             return HelperController::api_response_format(200, $re, null);
         }
         else{
-            return $re->pluck('id');
+            $ids=array();
+            foreach ($re as $aa){
+               // dd($aa->id);
+               if(isset($aa->id)){
+                   array_push($ids, $aa->id);
+
+               }else{
+                   array_push($ids,0);
+
+               }
+            }
+//            return $re->pluck('id');
+            return $ids;
         }
     }
 
