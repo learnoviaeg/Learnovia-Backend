@@ -8,7 +8,13 @@ use Illuminate\Routing\Controller;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
-use Modules\QuestionBank\Entities\QuestionsAnswer;
+use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\userQuizAnswer;
+use Modules\QuestionBank\Entities\userQuiz;
+
+
+use App\Lesson;
+use App\Classes;
 use Auth;
 use TXPDF;
 
@@ -241,5 +247,127 @@ class QuizController extends Controller
 
             return HelperController::api_response_format(200, $quiz);
         }
+    }
+
+
+    public function getAllQuizes(Request $request){
+        $request->validate([
+            'course' => 'required_with:class|integer|exists:courses,id',
+            'class' => 'required_with:course|integer|exists:classes,id',
+        ]);
+
+        if(isset($request->class)){
+            $quizes = collect([]);
+            $class = Classes::with([
+                'classlevel.segmentClass.courseSegment' =>
+                    function ($query) use ($request) {
+                        $query->with(['lessons'])->where('course_id',$request->course);
+                    }])->whereId($request->class)->first();
+
+            foreach($class->classlevel->segmentClass as $segmentClass){
+                foreach($segmentClass->courseSegment as $courseSegment){
+                    foreach($courseSegment->lessons as $lesson){
+
+                        foreach($lesson->QuizLesson as $QuizLesson){
+                            $quiz = $QuizLesson->quiz;
+                            foreach($quiz->Question as $question){
+                                if(count($question->childeren) > 0){
+                                    foreach($question->childeren as $single){
+                                        $single->question_type;
+                                        $single->question_answer;
+                                        unset($single->pivot);
+                                    }
+                                }
+                                else{
+                                    unset($question->childeren);
+                                }
+                                $question->question_answer;
+                                $question->question_category;
+                                $question->question_type;
+                                foreach($question->question_answer as $answer){
+                                    unset($answer->is_true);
+                                }
+                                unset($question->pivot);
+                            }
+                            $quizes->push($quiz);
+                        }
+                    }
+
+                }
+            }
+        }
+        else{
+            $quizes = quiz::all();
+            foreach($quizes as $quiz){
+                foreach($quiz->Question as $question){
+                    if(count($question->childeren) > 0){
+                        foreach($question->childeren as $single){
+                            $single->question_type;
+                            $single->question_answer;
+                            unset($single->pivot);
+                        }
+                    }
+                    else{
+                        unset($question->childeren);
+                    }
+                    $question->question_answer;
+                    $question->question_category;
+                    $question->question_type;
+                    foreach($question->question_answer as $answer){
+                        unset($answer->is_true);
+                    }
+                    unset($question->pivot);
+                }
+            }
+
+        }
+        return HelperController::api_response_format(200,$quizes);
+    }
+
+    public function getStudentinQuiz(Request $request){
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id'
+        ]);
+
+        $USERS = collect([]);
+
+        $quiz = quiz::find($request->quiz_id);
+        $quizLessons = $quiz->quizLessson->pluck('id');
+        $courseSegment = $quiz->course->courseSegments->where('is_active',1)->first();
+        $enroll = $courseSegment->Enroll->where('role_id',3);
+        foreach($enroll as $enrollment){
+            $userData = collect([]);
+            $currentUser = $enrollment->user;
+            $fullname = $currentUser->firstname . ' ' . $currentUser->lastname;
+            $userData->put('id',$currentUser->id);
+            $userData->put('Name',$fullname);
+            $userData->put('picture',$currentUser->picture);
+            $userQuiz = $currentUser->userQuiz->whereIn('quiz_lesson_id',$quizLessons);
+            $hasAnswer = 0;
+            foreach($userQuiz as $singleAccess){
+                $count = userQuizAnswer::where('user_quiz_id', $singleAccess->id)->count();
+                if($count > 0){
+                    $hasAnswer = 1;
+                    break;
+                }
+            }
+            $userData->put('hasAnswer',$hasAnswer);
+
+            $USERS->push($userData);
+        }
+        return HelperController::api_response_format(200,$USERS);
+    }
+
+    public function getStudentAnswerinQuiz(Request $request){
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'student_id' => 'required|integer|exists:users,id',
+            'lesson_id' => 'required|integer|exists:lessons,id'
+        ]);
+
+        $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+
+        $userQuizes = userQuiz::with(['UserQuizAnswer.Question'])->where('quiz_lesson_id', $quizLesson->id)->where('user_id', $request->student_id)->get();
+        return response()->json($userQuizes);
     }
 }

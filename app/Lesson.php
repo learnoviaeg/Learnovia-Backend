@@ -23,4 +23,19 @@ class Lesson extends Model
     protected $hidden = [
         'created_at','updated_at'
     ];
+
+    public function FileLesson()
+    {
+        return $this->hasMany('Modules\UploadFiles\Entities\FileLesson', 'lesson_id', 'id');
+    }
+
+    public function MediaLesson()
+    {
+        return $this->hasMany('Modules\UploadFiles\Entities\MediaLesson', 'lesson_id', 'id');
+    }
+
+    public function QuizLesson()
+    {
+        return $this->hasMany('Modules\QuestionBank\Entities\QuizLesson', 'lesson_id', 'id');
+    }
 }

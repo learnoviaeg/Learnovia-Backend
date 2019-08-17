@@ -20,6 +20,16 @@ class quiz extends Model
         return $this->belongsToMany('App\Lesson', 'quiz_lessons', 'quiz_id', 'lesson_id');
     }
 
+    public function course()
+    {
+        return $this->belongsTo('App\Course', 'course_id', 'id');
+    }
+
+    public function quizLessson()
+    {
+        return $this->hasMany('Modules\QuestionBank\Entities\QuizLesson', 'quiz_id', 'id');
+    }
+
     public static function checkSuffle($request){
         if(isset($request->shuffle)){
             return $request->shuffle;

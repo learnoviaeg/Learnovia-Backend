@@ -60,6 +60,11 @@ class CourseSegment extends Model
         return $this->hasMany('App\Lesson')->orderBy('index');
     }
 
+    public function Enroll()
+    {
+        return $this->hasMany('App\Enroll', 'course_segment', 'id');
+    }
+
     public static function checkRelation($segmentClass, $course)
     {
         $courseSegment = self::whereCourse_id($course)->whereSegment_class_id($segmentClass)->first();

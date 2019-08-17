@@ -14,6 +14,9 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use App\ClassLevel;
 use App\Enroll;
 use checkEnroll;
+use URL;
+use App\Lesson;
+use App\Classes;
 
 use App\Http\Controllers\HelperController;
 use Auth;
@@ -24,6 +27,80 @@ use File;
 
 class MediaController extends Controller
 {
+
+    public function getAllMedia(Request $request){
+        $request->validate([
+            'course' => 'required_with:class|integer|exists:courses,id',
+            'class' => 'required_with:course|integer|exists:classes,id',
+        ]);
+        $MEDIA = collect([]);
+
+        if(isset($request->class)){
+
+            $class = Classes::with([
+                'classlevel.segmentClass.courseSegment' =>
+                    function ($query) use ($request) {
+                        $query->with(['lessons'])->where('course_id',$request->course);
+                    }])->whereId($request->class)->first();
+
+            foreach($class->classlevel->segmentClass as $segmentClass){
+                foreach($segmentClass->courseSegment as $courseSegment){
+                    foreach($courseSegment->lessons as $lesson){
+
+                        foreach($lesson->MediaLesson as $mediaLesson){
+                            $allMedia = $mediaLesson->Media;
+
+                            foreach ($allMedia as $media) {
+                                $lesson_id = $media->MediaLesson->lesson_id;
+                                if(!isset($media->link)){
+                                    $media->path  = URL::asset('storage/media/'.$lesson_id.'/'.$media->id.'/'.$media->name);
+                                }
+                                $userid = $media->user->id;
+                                $firstname = $media->user->firstname;
+                                $lastname = $media->user->lastname;
+                                $user = collect([
+                                    'user_id' => $userid,
+                                    'firstname' => $firstname,
+                                    'lastname' => $lastname
+                                ]);
+                                unset($media->user);
+                                unset($media->MediaLesson);
+                                $media->owner = $user;
+
+                                $MEDIA->push($media);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        else{
+            $allMedia = media::all();
+
+            foreach ($allMedia as $media) {
+                $lesson_id = $media->MediaLesson->lesson_id;
+                if(!isset($media->link)){
+                    $media->path  = URL::asset('storage/media/'.$lesson_id.'/'.$media->id.'/'.$media->name);
+                }
+                $userid = $media->user->id;
+                $firstname = $media->user->firstname;
+                $lastname = $media->user->lastname;
+                $user = collect([
+                    'user_id' => $userid,
+                    'firstname' => $firstname,
+                    'lastname' => $lastname
+                ]);
+                unset($media->user);
+                unset($media->MediaLesson);
+                $media->owner = $user;
+
+                $MEDIA->push($media);
+            }
+        }
+        return HelperController::api_response_format(200,$MEDIA);
+
+    }
 
     /**
      * Store a array of Media to specific course segment.

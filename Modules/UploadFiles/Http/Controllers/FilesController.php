@@ -13,6 +13,7 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use App\ClassLevel;
 use App\Enroll;
 use App\Lesson;
+use App\Classes;
 
 
 use Illuminate\Support\Facades\Storage;
@@ -61,6 +62,79 @@ class FilesController extends Controller
         $role->givePermissionTo('media/sort');
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
+    }
+
+
+    public function getAllFiles(Request $request){
+        $request->validate([
+            'course' => 'required_with:class|integer|exists:courses,id',
+            'class' => 'required_with:course|integer|exists:classes,id',
+        ]);
+        $FILES = collect([]);
+
+        if(isset($request->class)){
+
+            $class = Classes::with([
+                'classlevel.segmentClass.courseSegment' =>
+                    function ($query) use ($request) {
+                        $query->with(['lessons'])->where('course_id',$request->course);
+                    }])->whereId($request->class)->first();
+
+            foreach($class->classlevel->segmentClass as $segmentClass){
+                foreach($segmentClass->courseSegment as $courseSegment){
+                    foreach($courseSegment->lessons as $lesson){
+
+                        foreach($lesson->fileLesson as $fileLesson){
+                            $allFiles = $fileLesson->File;
+
+                            foreach ($allFiles as $file) {
+                                $lesson_id = $file->FileLesson->lesson_id;
+                                $file->path  = URL::asset('storage/files/'.$lesson_id.'/'.$file->id.'/'.$file->name);
+
+                                $userid = $file->user->id;
+                                $firstname = $file->user->firstname;
+                                $lastname = $file->user->lastname;
+                                $user = collect([
+                                    'user_id' => $userid,
+                                    'firstname' => $firstname,
+                                    'lastname' => $lastname
+                                ]);
+                                unset($file->user);
+                                unset($file->FileLesson);
+                                $file->owner = $user;
+
+                                $FILES->push($file);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        else{
+            $allFiles = File::all();
+
+            foreach ($allFiles as $file) {
+                $lesson_id = $file->FileLesson->lesson_id;
+                $file->path  = URL::asset('storage/files/'.$lesson_id.'/'.$file->id.'/'.$file->name);
+
+                $userid = $file->user->id;
+                $firstname = $file->user->firstname;
+                $lastname = $file->user->lastname;
+                $user = collect([
+                    'user_id' => $userid,
+                    'firstname' => $firstname,
+                    'lastname' => $lastname
+                ]);
+                unset($file->user);
+                unset($file->FileLesson);
+                $file->owner = $user;
+
+                $FILES->push($file);
+            }
+        }
+        return HelperController::api_response_format(200,$FILES);
+
     }
 
     /**
@@ -336,8 +410,6 @@ class FilesController extends Controller
             return HelperController::api_response_format(400,null,'Please Try again');
         }
     }
-
-   // return response()->json();
 
     /**
      * Delete Specifc File
