@@ -9,6 +9,7 @@ use App\CourseSegment;
 use App\Lesson;
 use App\SegmentClass;
 use App\Component;
+use Auth;
 use App\YearLevel;
 use Illuminate\Http\Request;
 use App\Enroll;
@@ -186,6 +187,60 @@ class CourseController extends Controller
         }
         return $teachers;
     }
+
+    // public function GetUserCourseLessons(Request $request)
+    // {
+    //     $request->validate([
+    //         'course_id' => 'required|exists:course_segments,course_id'
+    //     ]);
+    //     $CourseSeg = Enroll::where('user_id', $request->user()->id)->pluck('course_segment');
+    //     $CourseSeggg = array();
+    //     foreach ($CourseSeg as $cour) {
+    //         $check = CourseSegment::where('course_id', $request->course_id)->where('id', $cour)->pluck('id')->first();
+    //         if ($check != null) {
+    //             $CourseSeggg[] = $check;
+    //         }
+    //     }
+    //     foreach ($CourseSeggg as $Classseg) {
+    //         $ClseSeg[] = CourseSegment::where('id', $Classseg)->pluck('segment_class_id')->first();
+    //     }
+
+    //     $clase = array();
+    //     $lessons = null;
+    //     $i = 0;
+    //     $lessoncounter = array();
+    //     $comp = Component::where('type', 1)->get();
+    //     $count='Counter';
+
+    //     foreach ($CourseSeggg as $seg) {
+    //         $lessons = $seg->lessons;
+    //         foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
+    //             # code...
+    //             foreach ($segmentClas->classLevel as $key => $classlev) {
+    //                 # code...
+    //                 foreach ($classlev->classes as $key => $class) {
+    //                     # code...
+    //                     $clase[$i] = $class;
+    //                     $clase[$i]->lessons = $lessons;
+    //                     foreach ($clase[$i]->lessons as $lessonn) {
+    //                         $lessoncounter = Lesson::find($lessonn->id);
+    //                         foreach ($comp as $com) {
+    //                             $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
+    //                             $lessonn[$com->name][$com->name.$count] =  count($lessonn[$com->name]);
+    //                             $clase[$i]['Counts']+=$lessonn[$com->name][$com->name.$count];
+    //                         }
+    //                     }
+    //                     $i++;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //  //   dd($Q);
+    //     //$clase['course'] = Course::find($request->course_id);
+    //     return HelperController::api_response_format(200, $clase);
+    // }
+
     public function GetUserCourseLessons(Request $request)
     {
         $request->validate([
@@ -208,6 +263,8 @@ class CourseController extends Controller
         $i = 0;
         $lessoncounter = array();
         $comp = Component::where('type', 1)->get();
+        $count='Counter';
+
         foreach ($CourseSeg as $seg) {
             $lessons = $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
@@ -222,6 +279,8 @@ class CourseController extends Controller
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
                                 $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
+                                $lessonn[$com->name][$com->name.$count] =  count($lessonn[$com->name]);
+                                $clase[$i]['Counts']+=$lessonn[$com->name][$com->name.$count];
                             }
                         }
                         $i++;
@@ -229,6 +288,8 @@ class CourseController extends Controller
                 }
             }
         }
+
+     //   dd($Q);
         //$clase['course'] = Course::find($request->course_id);
         return HelperController::api_response_format(200, $clase);
     }
