@@ -17,7 +17,7 @@ use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
 use App\Http\Resources\UserResource;
-
+use phpDocumentor\Reflection\Types\Parent_;
 
 class EnrollUserToCourseController extends Controller
 {
@@ -207,27 +207,36 @@ class EnrollUserToCourseController extends Controller
                 $childparent[]=$use->parents;
                 $child[]=$use;
             }
-
             //starting filters
             if($request->filter == null)
             {
-                $childwithparent=array();
-                foreach($child as $cs)
+                foreach($child as $c)
                 {
-                    $childwithparent[]= new UserResource($cs);
-                    foreach($cs->parents as $parent)
-                    {
-                        $childwithparent[]['parents'] = new UserResource($parent);
-                    }
+                       $c = array_except($c, ['id','arabicname','country',
+                       'birthdate','gender','phone','address','nationality',
+                       'notes','email','email_verified_at','suspend','language','timezone','religion',
+                       'second language','class_id']);
+                       foreach($c['parents'] as $cc)
+                       {
+                        $cc = array_except($cc, ['id','arabicname','country',
+                        'birthdate','gender','phone','address','nationality',
+                        'notes','email','email_verified_at','suspend','language','timezone','religion',
+                        'second language','class_id','pivot']);
+                       }
+                        $child[]=$c;
                 }
-                return HelperController::api_response_format(200, $childwithparent , 'Enrolled Students With Parnets');
+                $uniq=array_unique($child);
+                return HelperController::api_response_format(200, $uniq , 'Enrolled Students With Parnets');
             }
             else if($request->filter == 'parent')
             {
                 $parents=array();
                 foreach($childparent as $par)
                 {
-                    $parents[]=new UserResource(User::find($par[0]['pivot']['parent_id']));
+                    foreach($par as $p)
+                    {
+                        $parents[]=new UserResource(User::find($p['pivot']['parent_id']));
+                    }
                 }
                 return HelperController::api_response_format(200, $parents , 'Parnets of Enrolled Students');
             }
