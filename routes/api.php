@@ -1,7 +1,6 @@
 <?php
 //install all permissions and roles of system Route
 Route::get('install','SpatieController@install');
-
 //Login and Signup
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
@@ -190,6 +189,7 @@ Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
     Route::get('GetMyThreads', 'MessageController@GetMyThreads')->name('mythreads')->middleware('permission:messages/mythreads');
     //Contact Route
     Route::post('addContact', 'ContactController@addContact')->name('addContact')->middleware('permission:contact/add');
+    Route::get('ViewMyContact', 'ContactController@ViewMyContact')->name('ViewMyContact')->middleware('permission:contact/get');
 });
 
 Route::group(['prefix' => 'Component', 'middleware' => 'auth:api'], function () {

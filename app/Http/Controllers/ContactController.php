@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Illuminate\Http\Request;
 use App\Contacts;
 use Validator;
@@ -54,19 +55,12 @@ class ContactController extends Controller
      * @return: List of my friends
      *
      * */
-    public function ViewMyContact(Request $req)
+    public function ViewMyContact()
     {
-        /*$session_id = session()->getId()*//*when you used session please   uncomment this Line*/
         $session_id = Auth::User()->id;
-
-        $valid = Validator::make($req->all(), [
-            //'Person_id' => 'required|exists:users,id' ///*when you used session please  comment this Line
-        ]);
-        if ($valid->fails()) {
-            return response()->json(['msg' => $valid->errors()], 404);
-        }
-        $contacts = Contacts::wherePerson_id($req->Person_id)->get();
-        return Contactresource::collection($contacts);
+        $user=User::find($session_id);
+        $contacts = $user->contacts;
+        return HelperController::api_response_format(404, Contactresource::Collection($contacts), 'My Contact ');
     }
 
 
