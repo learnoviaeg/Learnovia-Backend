@@ -22,4 +22,8 @@ class QuizLesson extends Model
     {
         return $this->belongsTo('Modules\QuestionBank\Entities\quiz', 'quiz_id', 'id');
     }
+    public function lesson()
+    {
+        return $this->belongsTo('App\Lesson', 'lesson_id', 'id');
+    }
 }

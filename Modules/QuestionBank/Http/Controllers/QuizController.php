@@ -392,14 +392,16 @@ class QuizController extends Controller
 
     public function getStudentinQuiz(Request $request){
         $request->validate([
-            'quiz_id' => 'required|integer|exists:quizzes,id'
+            'quiz'      => 'required|integer|exists:quiz_lessons,quiz_id',
+            'lesson'    => 'required|integer|exists:quiz_lessons,lesson_id'
         ]);
-
+        $check = QuizLesson::whereQuiz_id($request->quiz)->whereLesson_id($request->lesson)->first();
+        if($check == null)
+            return HelperController::api_response_format(400, null,'This Quiz not in this lesson');
         $USERS = collect([]);
-
         $quiz = quiz::find($request->quiz_id);
-        $quizLessons = $quiz->quizLessson->pluck('id');
-        $courseSegment = $quiz->course->courseSegments->where('is_active',1)->first();
+        $quizLessons = $check->id;
+        $courseSegment = $check->lesson->courseSegment;//$quiz->course->courseSegments->where('is_active',1)->first();
         $enroll = $courseSegment->Enroll->where('role_id',3);
         foreach($enroll as $enrollment){
             $userData = collect([]);
@@ -408,7 +410,7 @@ class QuizController extends Controller
             $userData->put('id',$currentUser->id);
             $userData->put('Name',$fullname);
             $userData->put('picture',$currentUser->picture);
-            $userQuiz = $currentUser->userQuiz->whereIn('quiz_lesson_id',$quizLessons);
+            $userQuiz = $currentUser->userQuiz->where('quiz_lesson_id',$quizLessons);
             $hasAnswer = 0;
             foreach($userQuiz as $singleAccess){
                 $count = userQuizAnswer::where('user_quiz_id', $singleAccess->id)->count();
