@@ -26,14 +26,24 @@ class NotificationController extends Controller
     public function getallnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->get();
-        return HelperController::api_response_format(200, $body = $noti, $message = 'all users notifications');
+        foreach ($noti as $not) {
+            foreach($not as $no)
+            $data[] = json_decode($no, true);
+
+        }
+        return HelperController::api_response_format(200, $body = $data, $message = 'all users notifications');
     }
 
     //  the unread Notification From data base From Notifcation Table
     public function unreadnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
-        return HelperController::api_response_format(200, $body = $noti, $message = 'all user Unread notifications');
+        foreach ($noti as $not) {
+            foreach($not as $no)
+            $data[] = json_decode($no, true);
+
+        }
+        return HelperController::api_response_format(200, $body = $data, $message = 'all user Unread notifications');
     }
 
     //  make all the Notification Readto the user id
@@ -46,7 +56,12 @@ class NotificationController extends Controller
     public function GetNotifcations(Request $request)
     {
         $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->pluck('data');
-        return HelperController::api_response_format(200, $body = $noti, $message = 'all user notifications');
+        foreach ($noti as $not) {
+            foreach($not as $no)
+            $data[] = json_decode($no, true);
+
+        }
+        return HelperController::api_response_format(200, $body = $data, $message = 'all user notifications');
     }
 
     public function DeletewithTime(Request $request)
