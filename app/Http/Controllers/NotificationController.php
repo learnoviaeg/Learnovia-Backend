@@ -25,7 +25,7 @@ class NotificationController extends Controller
     //  get all Notification From data base From Notifcation Table
     public function getallnotifications(Request $request)
     {
-        $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->id)->get();
+        $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->get();
         return HelperController::api_response_format(200, $body = $noti, $message = 'all users notifications');
     }
 
