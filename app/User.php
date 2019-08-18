@@ -8,9 +8,9 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use App\Notifications\Notificationlearnovia;
+use App\Notifications\NewMessage;
 use Illuminate\Support\Facades\Notification;
-
+use Illuminate\Support\Facades\Validator;
 use DB;
 
 class User extends Authenticatable
@@ -92,7 +92,7 @@ class User extends Authenticatable
         }
         $touserid = $request['to'];
         $toUser = User::find($touserid);
-        Notification::send($toUser, new Notificationlearnovia($request));
+        Notification::send($toUser, new NewMessage($request));
         return 1;
     }
 

@@ -5,11 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\User;
-use App\Notifications\Notificationlearnovia;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Http\Request;
-use Validator;
 use DB;
 use Carbon\Carbon;
 
@@ -30,23 +26,14 @@ class NotificationController extends Controller
     public function getallnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->id)->get();
-        $data = array();
-        foreach ($noti as $not) {
-            $data[] = json_decode($not, true);
-
-        }
-        return HelperController::api_response_format(200, $body = $data, $message = 'all users notifications');
+        return HelperController::api_response_format(200, $body = $noti, $message = 'all users notifications');
     }
 
     //  the unread Notification From data base From Notifcation Table
     public function unreadnotifications(Request $request)
     {
-        $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->id)->where('read_at', null)->get();
-        $data = array();
-        foreach ($noti as $not) {
-            $data[] = json_decode($not, true);
-        }
-        return HelperController::api_response_format(200, $body = $data, $message = 'all user Unread notifications');
+        $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
+        return HelperController::api_response_format(200, $body = $noti, $message = 'all user Unread notifications');
     }
 
     //  make all the Notification Readto the user id
@@ -58,17 +45,8 @@ class NotificationController extends Controller
 
     public function GetNotifcations(Request $request)
     {
-        $request->validate([
-            'userid' => 'required|exists:users,id'
-
-        ]);
-        $noti = DB::table('notifications')->where('notifiable_id', $request->userid)->pluck('data');
-        $data = array();
-        foreach ($noti as $not) {
-            $data[] = json_decode($not, true);
-
-        }
-        return HelperController::api_response_format(200, $body = $data, $message = 'all user notifications');
+        $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->pluck('data');
+        return HelperController::api_response_format(200, $body = $noti, $message = 'all user notifications');
     }
 
     public function DeletewithTime(Request $request)
