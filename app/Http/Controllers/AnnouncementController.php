@@ -389,88 +389,121 @@ class AnnouncementController extends Controller
         $uniq_seg=array_unique($seg_class);
         $class_level_id=array();
         $year_level_id=array();
+        $s=0;
+        $cl=0;
         foreach($uniq_seg as $seg)
         {
             $segmentclass=SegmentClass::find($seg);
             $segmentname=Segment::find($segmentclass->segment_id);
-            $all_ann[$segmentname->name]=Announcement::where('segment_id',$segmentclass->segment_id)->get(['title','description','attached_file']);
-            $s=0;
-            foreach($all_ann[$segmentname->name]as $all)
-            {
-                $all_ann[$segmentname->name][$s]['attached_file']=attachment::where('id',$all['attached_file'])->first();
-                $s++;
-            }
+            $all_ann['Segment'][$s]['name']=$segmentname->name;
+            $all_ann['Segment'][$s]['announcements']=Announcement::where('segment_id',$segmentclass->segment_id)->get(['title','description','attached_file']);
 
             foreach($segmentclass->classLevel as $scl)
             {
                 $classname=Classes::find($scl->class_id);
-                $all_ann[$classname->name]=Announcement::where('class_id',$scl->class_id)->get(['title','description','attached_file']);
-                $cl=0;
-                foreach($all_ann[$classname->name]as $all)
-                {
-                    $all_ann[$classname->name][$cl]['attached_file']=attachment::where('id',$all['attached_file'])->first();
-                    $cl++;
-                }
+                $all_ann['Class'][$cl]['name']=$classname->name;
+                $all_ann['Class'][$cl]['announcements']=Announcement::where('class_id',$scl->class_id)->get(['title','description','attached_file']);
+
                 $class_level_id[]=$scl->id;
+                $cl++;
+            }
+            $s++;
+        }
+
+        foreach($all_ann['Segment'] as $se)
+        {
+            foreach($se['announcements'] as $ann)
+            {
+                $ann->attached_file=attachment::where('id',$ann->attached_file)->first();
+            }
+        }
+
+        foreach($all_ann['Class'] as $cl)
+        {
+            foreach($cl['announcements'] as $ann)
+            {
+                $ann->attached_file=attachment::where('id',$ann->attached_file)->first();
             }
         }
 
         //get level Announcements
+        $l=0;
         foreach($class_level_id as $cd)
         {
             $class_level=ClassLevel::find($cd);
             foreach($class_level->yearLevels as $yl)
             {
                 $levelename=Level::find($yl->level_id);
-                $all_ann[$levelename->name]=Announcement::where('level_id',$yl->level_id)->get(['title','description','attached_file']);
-                $l=0;
-                foreach($all_ann[$levelename->name]as $all)
-                {
-                    $all_ann[$levelename->name][$l]['attached_file']=attachment::where('id',$all['attached_file'])->first();
-                    $l++;
-                }
+                $all_ann['Level'][$l]['name']=$levelename->name;
+                $all_ann['Level'][$l]['announcements']=Announcement::where('level_id',$yl->level_id)->get(['title','description','attached_file']);
+
                 $year_level_id[]=$yl->id;
+                $l++;
+            }
+        }
+
+        foreach($all_ann['Level'] as $le)
+        {
+            foreach($le['announcements'] as $ann)
+            {
+                $ann->attached_file=attachment::where('id',$ann->attached_file)->first();
             }
         }
 
         //get year/type announcements
+        $y=0;
+        $t=0;
         foreach($year_level_id as $yd)
         {
             $Year_level=YearLevel::find($yd);
             foreach($Year_level->yearType as $ayt)
             {
                 $typename=AcademicType::find($ayt->academic_type_id);
+                $all_ann['Type'][$t]['name']=$typename->name;
+                $all_ann['Type'][$t]['announcements']=Announcement::where('type_id',$ayt->academic_type_id)->get(['title','description','attached_file']);
+
                 $yearname=AcademicYear::find($ayt->academic_year_id);
-                $all_ann[$yearname->name]=Announcement::where('year_id',$ayt->academic_year_id)->get(['title','description','attached_file']);
-                $y=0;
-                foreach($all_ann[$yearname->name]as $all)
-                {
-                    $all_ann[$yearname->name][$y]['attached_file']=attachment::where('id',$all['attached_file'])->first();
-                    $y++;
-                }
-                $all_ann[$typename->name]=Announcement::where('type_id',$ayt->academic_type_id)->get(['title','description','attached_file']);
-                $t=0;
-                foreach($all_ann[$typename->name]as $all)
-                {
-                    $all_ann[$typename->name][$t]['attached_file']=attachment::where('id',$all['attached_file'])->first();
-                    $t++;
-                }
+                $all_ann['Year'][$y]['name']=$yearname->name;
+                $all_ann['Year'][$y]['announcements']=Announcement::where('year_id',$ayt->academic_year_id)->get(['title','description','attached_file']);
+
+                $t++;
+                $y++;
+            }
+        }
+        foreach($all_ann['Type'] as $ty)
+        {
+            foreach($ty['announcements'] as $ann)
+            {
+                $ann->attached_file=attachment::where('id',$ann->attached_file)->first();
+            }
+        }
+        foreach($all_ann['Year'] as $ye)
+        {
+            foreach($ye['announcements'] as $ann)
+            {
+                $ann->attached_file=attachment::where('id',$ann->attached_file)->first();
             }
         }
 
+
+
         //get courses Announcements
+        $co=0;
         foreach($courses as $cou)
         {
             $coursename=Course::find($cou);
-            $all_ann[$coursename->name]=Announcement::where('course_id',$cou)->get(['title','description','attached_file']);
-            $co=0;
-            foreach($all_ann[$coursename->name]as $all)
-            {
-                $all_ann[$coursename->name][$co]['attached_file']=attachment::where('id',$all['attached_file'])->first();
-                $co++;
-            }
+            $all_ann['Courses'][$co]['name']=$coursename->name;
+            $all_ann['Courses'][$co]['announcements']=Announcement::where('course_id',$cou)->get(['title','description','attached_file']);
+            $co++;
         }
 
+        foreach($all_ann['Courses'] as $cor)
+        {
+            foreach($cor['announcements'] as $couann)
+            {
+                $couann->attached_file=attachment::where('id',$couann->attached_file)->first();
+            }
+        }
          return $all_ann;
     }
 
