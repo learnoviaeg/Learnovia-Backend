@@ -9,6 +9,7 @@ use Auth;
 use Browser;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
+use Modules\QuestionBank\Entities\QuizLesson;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
@@ -85,13 +86,20 @@ class UserQuizController extends Controller
 
    public function quiz_answer(Request $request){
         $request->validate([
-            'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
+            'quiz_id' => 'required|integer|exists:quiz_lessons,quiz_id',
+            'lesson_id'=>'required|integer|exists:quiz_lessons,lesson_id',
+            'user_id'=>'required|integer|exists:user_quizzes,user_id',
             'Questions' => 'required|array',
             'Questions.*.id' => 'required|integer|exists:questions,id',
         ]);
 
         // check that question exist in the Quiz
-        $user_quiz = userQuiz::find($request->user_quiz_id);
+        $quizless=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+        $user_quiz=userQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizless->id)->first();
+        if((($user_quiz->status_id==1)||($quizless->start_date > Carbon::now())||($quizless->due_date < Carbon::now()))&& ($user_quiz->override==0))
+        {
+            return HelperController::api_response_format(400, [],'you are not allowed to submit your answer at this moment');
+        }
         $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
 
         $allData = collect([]);
@@ -106,7 +114,7 @@ class UserQuizController extends Controller
             $question_answers = $currentQuestion->question_answer->pluck('id');
 
             $data = [
-                'user_quiz_id' => $request->user_quiz_id,
+                'user_quiz_id' => $user_quiz->id,
                 'question_id' => $question['id']
             ];
 
@@ -191,6 +199,31 @@ class UserQuizController extends Controller
         }
 
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
+
+   }
+   public function override(Request $request)
+   {
+    $request->validate([
+        'quiz_id' => 'required|integer|exists:quiz_lessons,quiz_id',
+        'lesson_id'=>'required|integer|exists:quiz_lessons,lesson_id',
+        'user_id'=>'required|array',
+        'user_id.*' => 'required|integer|exists:user_quizzes,user_id',
+    ]);
+    $quizless=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->pluck('id');
+    $notfound=array();
+    foreach ($request->user_id as $value) {
+        # code...
+        $userQu=userQuiz::where('user_id',$value)->where('quiz_lesson_id',$quizless)->first();
+        if(!$userQu)
+        {
+            $notfound[]=$value;
+            continue;
+        }
+        $userQu->override=1;
+        $userQu->save();
+    }
+
+    return HelperController::api_response_format(200, $notfound, 'all users overrided succes except ...');
 
    }
 }
