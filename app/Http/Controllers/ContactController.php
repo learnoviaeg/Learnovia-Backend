@@ -60,7 +60,7 @@ class ContactController extends Controller
         $session_id = Auth::User()->id;
         $user=User::find($session_id);
         $contacts = $user->contacts;
-        return HelperController::api_response_format(404, Contactresource::Collection($contacts), 'My Contact ');
+        return HelperController::api_response_format(200, Contactresource::Collection($contacts), 'My Contact ');
     }
 
 
