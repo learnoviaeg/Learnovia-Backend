@@ -14,9 +14,16 @@ class Contactresource extends JsonResource
      * @return array
      */
     public function toArray($request)
-    {   $MYFrind=User::find($this->Friend_id);
+    {
+
         return [
-            'Friend' => $MYFrind,
+            'id' => $this->id,
+            'firstname' => $this->firstname,
+            'lastname' => $this->lastname,
+            'email' => $this->email,
+            'username' => $this->username,
+            'picture' => $this->picture,
+
         ];
     }
 }
