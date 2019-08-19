@@ -52,8 +52,7 @@ class NewMessage extends Notification
 
         if($this->mess['type']=='announcement')
         {
-            if($this->mess['attached_file'])
-        {
+            if(isset($this->mess['attached_file'])){
             $returnobj = [
                 'title'=> $this->mess['title'],
                 'type'=>$this->mess['type'],
