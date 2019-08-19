@@ -33,4 +33,9 @@ class Course extends Model
     public function activeSegment(){
         return $this->hasOne('App\CourseSegment')->whereIs_active(1);
     }
+
+    public function attachment()
+    {
+        return $this->hasOne('App\attachment', 'attachment_id', 'id');
+    }
 }

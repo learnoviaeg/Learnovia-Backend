@@ -92,7 +92,7 @@ class CourseController extends Controller
             }
         }
 
-
+        $course->attachment;
         return HelperController::api_response_format(201, $course, 'Course Created Successfully');
     }
 
@@ -148,16 +148,16 @@ class CourseController extends Controller
         if (isset($request->id)) {
             return HelperController::api_response_format(200, Course::with('category')->whereId($request->id)->first());
         } else if (isset($request->category_id)) {
-            $courses = Course::where('category_id', $request->category_id)->get();
+            $courses = Course::where('category_id', $request->category_id)->with('attachment')->get();
             return HelperController::api_response_format(200, $courses);
         } else {
             $course = CourseController::get_course_by_year_type($request);
             if (!isset($course)) {
-                return HelperController::api_response_format(200, Course::with('category')->get());
+                return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->get());
             } else {
                 $returncourse = array();
                 foreach ($course as $cc) {
-                    $returncourse[] = Course::where('id', $cc)->first();
+                    $returncourse[] = Course::where('id', $cc)->with('attachment')->first();
                 }
                 return HelperController::api_response_format(200, $returncourse);
             }
