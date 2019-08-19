@@ -8,21 +8,14 @@ use Illuminate\Routing\Controller;
 
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\MediaCourseSegment;
-use Modules\UploadFiles\Entities\FileCourseSegment;
-use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
-use App\ClassLevel;
-use App\Enroll;
 use checkEnroll;
 use URL;
-use App\Lesson;
 use App\Classes;
 
 use App\Http\Controllers\HelperController;
 use Auth;
 use Illuminate\Support\Facades\Storage;
-use Validator;
-use File;
 
 
 class MediaController extends Controller
@@ -189,6 +182,7 @@ class MediaController extends Controller
                 $file->size = $size;
                 $file->visibility = 0;
                 $file->user_id = Auth::user()->id;
+                $file->link = url('/storage/media/' . $request->lesson_id . '/' . $name);
                 $check = $file->save();
 
                 if ($check) {
@@ -213,7 +207,7 @@ class MediaController extends Controller
                     $fileLesson->save();
 
                     Storage::disk('public')->putFileAs(
-                        'media/' . $request->lesson_id . '/' . $file->id,
+                        'media/' . $request->lesson_id . '/',
                         $singlefile,
                         $name
                     );

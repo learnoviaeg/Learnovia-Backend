@@ -221,7 +221,8 @@ class FilesController extends Controller
                 $file->visibility = 0;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
-
+                $file->url = url('/storage/files/' . $request->lesson_id . '/' . $name);
+                $file->save();
                 if ($check) {
                     $filesegment = new FileCourseSegment;
                     $filesegment->course_segment_id = $activeCourseSegments->id;
@@ -243,7 +244,11 @@ class FilesController extends Controller
                     $fileLesson->index = $newIndex;
                     $fileLesson->save();
 
-                    Storage::disk('public')->putFileAs('files/' . $request->lesson_id . '/' . $file->id,$singlefile,$name);
+                    Storage::disk('public')->putFileAs(
+                        'files/' . $request->lesson_id . '/',
+                        $singlefile,
+                        $name
+                    );
                 }
             }
             return HelperController::api_response_format(200, $file, 'Upload Successfully');

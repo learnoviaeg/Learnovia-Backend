@@ -19,6 +19,7 @@ class CreateFilesTable extends Migration
             $table->text('description');
             $table->string('size');
             $table->string('type');
+            $table->string('url')->nullable();
             $table->boolean('visibility')->default(1);
 
             $table->unsignedBigInteger('user_id');
