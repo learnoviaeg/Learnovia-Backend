@@ -20,5 +20,5 @@ Route::group(['prefix' => 'page', 'middleware' => 'auth:api'] , function(){
     Route::post('delete' , 'PageController@destroy');//->name('deletePage')->middleware('permission:page/delete');
     Route::post('toggle' , 'PageController@toggle');//->name('togglePage')->middleware('permission:page/toggle');
     Route::post('linklesson' , 'PageController@linkpagelesson');
-
+    Route::get('get' , 'PageController@get');
 });
