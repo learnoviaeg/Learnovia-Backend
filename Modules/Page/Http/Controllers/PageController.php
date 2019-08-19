@@ -156,4 +156,11 @@ class PageController extends Controller
         return HelperController::api_response_format(200, $page,'Page Toggled Successfully');
     }
 
+    public function get(Request $request){
+        $request->validate([
+            'id' => 'required|exists:pages,id'
+        ]);
+        $page = page::whereId($request->id)->WhereVisible(1)->first();
+        return HelperController::api_response_format(200 , $page);
+    }
 }

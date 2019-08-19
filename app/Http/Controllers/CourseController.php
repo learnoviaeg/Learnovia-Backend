@@ -317,7 +317,6 @@ class CourseController extends Controller
     }
     public function getCoursesOptional(Request $request)
     {
-
         $course_segment = HelperController::Get_Course_segment($request);
         if (!$course_segment['result'])
             return HelperController::api_response_format(400, $course_segment['value']);
