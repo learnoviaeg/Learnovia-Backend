@@ -340,7 +340,7 @@ class AssigmentsController extends Controller
             $value['attachment'] = attachment::where('id', $value->attachment_id)->first();
         }
 
-        if (($user->roles->first()->id) == 4) {
+        if (($user->roles->first()->id) == 4 || ($user->roles->first()->id) == 1) {
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
 
