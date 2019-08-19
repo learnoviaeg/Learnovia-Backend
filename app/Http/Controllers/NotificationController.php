@@ -16,7 +16,7 @@ class NotificationController extends Controller
         return user::notify([
             'message' => 'two',
             'from' => 1,
-            'to' => 2,
+            'users' => [2],
             'course_id' => 2,
             'type' => 'annoucn'
         ]);

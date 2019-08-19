@@ -9,6 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use App\User;
 use Illuminate\Http\Request;
 use App\Message;
+use Illuminate\Support\Facades\Validator;
 
 class NewMessage extends Notification
 {
@@ -48,12 +49,38 @@ class NewMessage extends Notification
 
     public function toDatabase($notifiable)
     {
-        return ([
-            'message' =>$this->mess['message'],
-            'from'=>$this->mess['from'],
-            'to'=>$this->mess['to'],
-            'type'=>$this->mess['type'],
-            'course_id'=>$this->mess['course_id'],
-        ]);
+
+        if($this->mess['type']=='announcement')
+        {
+            if($this->mess['attached_file'])
+        {
+            $returnobj = [
+                'title'=> $this->mess['title'],
+                'type'=>$this->mess['type'],
+                'description'=>$this->mess['description'],
+                'attached_file'=>$this->mess['attached_file']
+            ];
+        }
+        else
+        {
+            $returnobj = [
+                'title'=> $this->mess['title'],
+                'type'=>$this->mess['type'],
+                'description'=>$this->mess['description'],
+            ];
+        }
+
+        return $returnobj;
+        }
+        else
+        {
+            return ([
+                'message' =>$this->mess['message'],
+                'from'=>$this->mess['from'],
+                'type'=>$this->mess['type'],
+                'course_id'=>$this->mess['course_id'],
+            ]);
+        }
+
     }
 }

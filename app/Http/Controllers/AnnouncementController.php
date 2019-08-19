@@ -50,18 +50,20 @@ class AnnouncementController extends Controller
         {
             $fileName=attachment::upload_attachment($request->attached_file,'Announcement');
             $file_id=$fileName->id;
-            $requ = new Request([
+            $requ =([
                 'title' => $request->title,
                 'description' =>$request->description,
                 'attached_file' => $file_id,
+                'type' => 'announcement'
             ]);
         }
         else
         {
             $file_id=null;
-            $requ = new Request([
+            $requ =([
                 'title' => $request->title,
                 'description' =>$request->description,
+                'type' => 'announcement'
             ]);
         }
 
@@ -210,17 +212,17 @@ class AnnouncementController extends Controller
         //sending announcements
         if($request->assign == 'all')
         {
-            Notification::send($toUser, new Announcment($requ));
+            foreach($toUser as $use)
+            {
+                $requ['users'][]=$use->id;
+            }
+            $notificatin=User::notify($requ);
         }
         else
         {
             $user=array_unique($users);
-            $noti=array();
-                foreach($user as $id)
-                {
-                    $noti[]=User::find($id);
-                }
-                Notification::send($noti, new Announcment($requ));
+            $requ['users']=$user;
+            $notificatin=User::notify($requ);
         }
 
         //Creating announcement in DB
@@ -239,7 +241,11 @@ class AnnouncementController extends Controller
            'segment_id' => $request->segment_id
         ]);
 
-        return HelperController::api_response_format(201,$ann,'Announcement Sent Successfully');
+        if($notificatin == '1')
+        {
+            return HelperController::api_response_format(201,$ann,'Announcement Sent Successfully');
+        }
+        return HelperController::api_response_format(201,$notificatin,'Announcement Sent Successfully');
     }
 
     public function update_announce(Request $request)
@@ -255,6 +261,7 @@ class AnnouncementController extends Controller
             $attch=attachment::find($announce['attached_file']);
             $data=([
                 'title'=>$announce['title'],
+                'type'=>'announcement',
                 'description'=>$announce['description'],
                 'attached_file'=>$announce['attached_file']
             ]);
@@ -263,12 +270,13 @@ class AnnouncementController extends Controller
         {
             $data=([
                 'title'=>$announce['title'],
+                'type'=>'announcement',
                 'description'=>$announce['description'],
             ]);
         }
 
         $encode=json_encode($data);
-        $deleted=DB::table('notifications')->where('data', $encode)->where('type','App\Notifications\Announcment')->get();
+        $deleted=DB::table('notifications')->where('data', $encode)->get();
         $users=array();
         foreach($deleted as $de)
         {
@@ -293,36 +301,37 @@ class AnnouncementController extends Controller
         {
             $fileName=attachment::upload_attachment($request->attached_file,'Announcement');
             $file_id=$fileName->id;
-            $requ = new Request([
+            $requ = [
                 'title' => $request->title,
                 'description' =>$request->description,
                 'attached_file' => $file_id,
-            ]);
+                'type' => 'announcement'
+            ];
         }
         else
         {
             $file_id=null;
-            $requ = new Request([
+            $requ = [
                 'title' => $request->title,
                 'description' =>$request->description,
-            ]);
+                'type' => 'announcement'
+            ];
         }
 
-        $noti=array();
-        foreach($users as $id)
-        {
-            $noti[]=User::find($id);
-        }
-        Notification::send($noti, new Announcment($requ));
+        $requ['users']=$users;
+        $notificatin=User::notify($requ);
 
         $announce->update([
             'title' => $request->title,
             'description' =>$request->description,
             'attached_file' => $file_id,
         ]);
-        $attch->delete();
-        return HelperController::api_response_format(201, $announce,'Announcement Updated Successfully');
 
+        if($notificatin == '1')
+        {
+            return HelperController::api_response_format(201,$announce,'Announcement Updated Successfully');
+        }
+        return HelperController::api_response_format(201,$notificatin,'Announcement Updated Successfully');
     }
     public function delete_announcement(Request $request)
     {
@@ -334,6 +343,7 @@ class AnnouncementController extends Controller
         $announce = Announcement::find($request->id);
         //get data that sent to users
         $announcefinal['title'] = $announce->title;
+        $announcefinal['type'] = 'announcement';
         $announcefinal['description'] = $announce->description;
         if($announce->attached_file != null)
         {
@@ -345,7 +355,7 @@ class AnnouncementController extends Controller
         //encode that data to compare it with notifications data
         $dataencode=json_encode($announcefinal);
         //get data from notifications
-        $deleted=DB::table('notifications')->where('data', $dataencode)->where('type','App\Notifications\Announcment')->get();
+        $deleted=DB::table('notifications')->where('data', $dataencode)->get();
         foreach($deleted as $de)
         {
             foreach($de as $d)
@@ -396,12 +406,14 @@ class AnnouncementController extends Controller
             $segmentclass=SegmentClass::find($seg);
             $segmentname=Segment::find($segmentclass->segment_id);
             $all_ann['Segment'][$s]['name']=$segmentname->name;
+            $all_ann['Segment'][$s]['id']=$segmentname->id;
             $all_ann['Segment'][$s]['announcements']=Announcement::where('segment_id',$segmentclass->segment_id)->get(['title','description','attached_file']);
 
             foreach($segmentclass->classLevel as $scl)
             {
                 $classname=Classes::find($scl->class_id);
                 $all_ann['Class'][$cl]['name']=$classname->name;
+                $all_ann['Class'][$cl]['id']=$classname->id;
                 $all_ann['Class'][$cl]['announcements']=Announcement::where('class_id',$scl->class_id)->get(['title','description','attached_file']);
 
                 $class_level_id[]=$scl->id;
@@ -435,6 +447,7 @@ class AnnouncementController extends Controller
             {
                 $levelename=Level::find($yl->level_id);
                 $all_ann['Level'][$l]['name']=$levelename->name;
+                $all_ann['Level'][$l]['id']=$levelename->id;
                 $all_ann['Level'][$l]['announcements']=Announcement::where('level_id',$yl->level_id)->get(['title','description','attached_file']);
 
                 $year_level_id[]=$yl->id;
@@ -460,10 +473,12 @@ class AnnouncementController extends Controller
             {
                 $typename=AcademicType::find($ayt->academic_type_id);
                 $all_ann['Type'][$t]['name']=$typename->name;
+                $all_ann['Type'][$t]['id']=$typename->id;
                 $all_ann['Type'][$t]['announcements']=Announcement::where('type_id',$ayt->academic_type_id)->get(['title','description','attached_file']);
 
                 $yearname=AcademicYear::find($ayt->academic_year_id);
                 $all_ann['Year'][$y]['name']=$yearname->name;
+                $all_ann['Year'][$y]['id']=$yearname->id;
                 $all_ann['Year'][$y]['announcements']=Announcement::where('year_id',$ayt->academic_year_id)->get(['title','description','attached_file']);
 
                 $t++;
@@ -486,13 +501,13 @@ class AnnouncementController extends Controller
         }
 
 
-
         //get courses Announcements
         $co=0;
         foreach($courses as $cou)
         {
             $coursename=Course::find($cou);
             $all_ann['Courses'][$co]['name']=$coursename->name;
+            $all_ann['Courses'][$co]['id']=$coursename->id;
             $all_ann['Courses'][$co]['announcements']=Announcement::where('course_id',$cou)->get(['title','description','attached_file']);
             $co++;
         }
@@ -511,18 +526,24 @@ class AnnouncementController extends Controller
     {
         $user_id=Auth::user()->id;
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
-        ->where('type','App\Notifications\Announcment')
         ->orderBy('created_at')
-        ->pluck('data');
-        $data = array();
-        $c=0;
+        ->get(['id','data']);
+        $notif=array();
+        $count=0;
         foreach ($noti as $not) {
-         $data[]= json_decode($not, true);
-         if(isset($data[$c]['attached_file']))
-            $data[$c]['attached_file']=attachment::where('id',$data[$c]['attached_file'])->first();
-         $c++;
+            $not->data= json_decode($not->data, true);
+            if($not->data['type'] == 'announcement')
+            {
+                if(isset($not->data['attached_file']))
+                {
+                    $not->data['attached_file']=attachment::where('id',$not->data['attached_file'])->first();
+                }
+                $notif[$count]['id']=$not->id;
+                $notif[$count]['data']=$not->data;
+                $count++;
+            }
         }
-        return $data;
+        return $notif;
     }
 
     public function get()

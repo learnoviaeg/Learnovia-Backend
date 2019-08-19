@@ -78,6 +78,7 @@ class CalendarController extends Controller
             foreach($allannounce as $announ)
             {
                 $announcefinal[$counter]['title'] = $announ->title;
+                $announcefinal[$counter]['type'] = 'announcement';
                 $announcefinal[$counter]['description'] = $announ->description;
                 if($announ->attached_file!=null)
                 {
@@ -96,7 +97,7 @@ class CalendarController extends Controller
             $id=array();
             foreach($dataencode as $encode )
             {
-                $anounce[] = DB::table('notifications')->where('notifiable_id', $auth)->where('type','App\Notifications\Announcment')->where('data',$encode)->pluck('data')->first();
+                $anounce[] = DB::table('notifications')->where('notifiable_id', $auth)->where('data',$encode)->pluck('data')->first();
             }
 
             foreach($anounce as $decode)

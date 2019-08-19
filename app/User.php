@@ -79,10 +79,8 @@ class User extends Authenticatable
     public static function notify($request)
     {
         $validater = Validator::make($request, [
-            'message' => 'required',
-            'from' => 'required|integer|exists:users,id',
-            'to' => 'required|integer|exists:users,id',
-            'course_id' => 'required|integer|exists:courses,id',
+            'users'=>'required|array',
+            'users.*' => 'required|integer|exists:users,id',
             'type' => 'required|string'
         ]);
 
@@ -90,9 +88,26 @@ class User extends Authenticatable
             $errors = $validater->errors();
             return response()->json($errors, 400);
         }
-        $touserid = $request['to'];
-        $toUser = User::find($touserid);
-        Notification::send($toUser, new NewMessage($request));
+        if($request['type']!='announcement')
+        {
+            $validater = Validator::make($request, [
+                'message' => 'required',
+                'from' => 'required|integer|exists:users,id',
+                'course_id' => 'required|integer|exists:courses,id',
+            ]);
+
+            if ($validater->fails()) {
+                $errors = $validater->errors();
+                return response()->json($errors, 400);
+            }
+        }
+        $touserid = array();
+        foreach($request['users'] as $user)
+        {
+            $touserid[] = User::find($user);
+        }
+
+         Notification::send($touserid, new NewMessage($request));
         return 1;
     }
 
