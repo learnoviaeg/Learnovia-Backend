@@ -36,6 +36,6 @@ class Course extends Model
 
     public function attachment()
     {
-        return $this->hasOne('App\attachment', 'attachment_id', 'id');
+        return $this->hasOne('App\attachment', 'image', 'id');
     }
 }
