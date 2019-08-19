@@ -160,7 +160,7 @@ class PageController extends Controller
         $request->validate([
             'id' => 'required|exists:pages,id'
         ]);
-        $page = page::whereId($request->id)->WhereVisible(1)->first();
+        $page = page::whereId($request->id)->whereVisible(1)->first();
         return HelperController::api_response_format(200 , $page);
     }
 }
