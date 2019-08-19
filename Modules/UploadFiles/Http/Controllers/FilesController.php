@@ -7,11 +7,8 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\FileCourseSegment;
-use Modules\UploadFiles\Entities\MediaCourseSegment;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
-use App\ClassLevel;
-use App\Enroll;
 use App\Lesson;
 use App\Classes;
 
@@ -21,7 +18,6 @@ use URL;
 use Auth;
 use checkEnroll;
 use App\Http\Controllers\HelperController;
-use Carbon\Carbon;
 
 class FilesController extends Controller
 {
@@ -247,11 +243,7 @@ class FilesController extends Controller
                     $fileLesson->index = $newIndex;
                     $fileLesson->save();
 
-                    Storage::disk('public')->putFileAs(
-                        'files/' . $request->lesson_id . '/' . $file->id,
-                        $singlefile,
-                        $name
-                    );
+                    Storage::disk('public')->putFileAs('files/' . $request->lesson_id . '/' . $file->id,$singlefile,$name);
                 }
             }
             return HelperController::api_response_format(200, $file, 'Upload Successfully');
