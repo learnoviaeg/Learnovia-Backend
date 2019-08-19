@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Enroll;
 use App\Segment;
 use App\AcademicYear;
+use App\attachment;
 use App\User;
 use Illuminate\Support\Facades\Validator;
 
@@ -34,13 +35,25 @@ class CourseController extends Controller
             'class.*' => 'required|exists:classes,id',
             'segment'=>'array|required',
             'segment.*' => 'required|exists:segments,id',
-            'no_of_lessons' => 'integer'
+            'no_of_lessons' => 'integer',
+            'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
+            'description' =>'string'
         ]);
         $no_of_lessons = 4;
         $course = Course::firstOrCreate([
             'name' => $request->name,
             'category_id' => $request->category,
         ]);
+
+        if($request->filled('image')){
+            $course->image = attachment::upload_attachment($request->image , 'course')->id;
+            $course->save();
+        }
+
+        if($request->filled('description')){
+            $course->description = $request->description;
+            $course->save();
+        }
         foreach ($request->year as $year) {
             # code...
             foreach ($request->type as $type) {

@@ -182,7 +182,7 @@ class MediaController extends Controller
                 $file->size = $size;
                 $file->visibility = 0;
                 $file->user_id = Auth::user()->id;
-                $file->link = url('public/storage/media/' . $request->lesson_id . '/' . $name);
+                $file->link = 'https://docs.google.com/viewer?url=' . url('public/storage/media/' . $request->lesson_id . '/' . $name);
                 $check = $file->save();
 
                 if ($check) {

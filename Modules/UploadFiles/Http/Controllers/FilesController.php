@@ -221,7 +221,7 @@ class FilesController extends Controller
                 $file->visibility = 0;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
-                $file->url = url('public/storage/files/' . $request->lesson_id . '/' . $name);
+                $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $request->lesson_id . '/' . $name);
                 $file->save();
                 if ($check) {
                     $filesegment = new FileCourseSegment;

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
-    protected $fillable = ['name' , 'category_id','mandatory'];
+    protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description'];
 
 
     public static function findByName($course_name)
