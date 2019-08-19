@@ -18,6 +18,4 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
-    SetEnvIf Origin "^http(s)?://(.+\.)?(localhost:4200|35.238.30.213)$" origin_is=$0
-    Header always set Access-Control-Allow-Origin %{origin_is}e env=origin_is
 </IfModule>
