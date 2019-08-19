@@ -37,7 +37,7 @@ class attachment extends Model
         Storage::disk('public')->putFileAs('files/' . $type, $singlefile, $fileName);
         return $attachment;
     }
-    public function getPATHAttribute($value) {
-        return url(Storage::url($value));
+    public function getPATHAttribute() {
+        return url(Storage::url( $this->attributes['path']));
     }
 }
