@@ -34,7 +34,7 @@ class attachment extends Model
         $attachment->type = $type;
         $attachment->extension = $extension;
         $attachment->save();
-        Storage::disk('public')->putFileAs('files/' . $type, $singlefile, $fileName);
+        Storage::disk('public')->putFileAs($type, $singlefile, $fileName);
         return $attachment;
     }
     public function getPathAttribute() {
