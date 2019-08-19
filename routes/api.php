@@ -7,6 +7,8 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
 
+Route::get('url','URLController@index');
+
 Route::group(['middleware' => 'auth:api'], function () {
     //user main routes
     Route::get('userRole', 'AuthController@userRole')->name('userRole');

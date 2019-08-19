@@ -28,12 +28,12 @@ public static function upload_attachment($file,$type,$description=null)
     $size = $singlefile->getSize();
 
     $attachment->name = $fileName;
-    $attachment->path = 'assigments/'.$fileName;
+    $attachment->path = 'files/'.$type.'/'.$fileName;
     $attachment->description = $description;
     $attachment->type = $type;
     $attachment->extension = $extension;
     $attachment->save();
-    Storage::disk('public')->putFileAs('assigments/', $singlefile, $fileName);
+    Storage::disk('public')->putFileAs('files/'.$type, $singlefile, $fileName);
     return $attachment;
 }
 }

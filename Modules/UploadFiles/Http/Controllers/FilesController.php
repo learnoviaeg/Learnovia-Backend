@@ -225,7 +225,8 @@ class FilesController extends Controller
                 $file->visibility = 0;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
-
+                $file->url = url('/storage/files/' . $request->lesson_id . '/' . $name);
+                $file->save();
                 if ($check) {
                     $filesegment = new FileCourseSegment;
                     $filesegment->course_segment_id = $activeCourseSegments->id;
@@ -248,7 +249,7 @@ class FilesController extends Controller
                     $fileLesson->save();
 
                     Storage::disk('public')->putFileAs(
-                        'files/' . $request->lesson_id . '/' . $file->id,
+                        'files/' . $request->lesson_id . '/',
                         $singlefile,
                         $name
                     );
