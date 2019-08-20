@@ -5,6 +5,12 @@ namespace Modules\Page\Http\Controllers;
 use App\Http\Controllers\HelperController;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use App\Lesson;
+use App\Enroll;
+use App\Course;
+use App\CourseSegment;
+use App\User;
 use Illuminate\Routing\Controller;
 use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
@@ -53,6 +59,17 @@ class PageController extends Controller
             'Lesson_id' => 'required|exists:lessons,id',
             'visible' => 'nullable|boolean'
         ]);
+        $courseSegID=Lesson::where('id',$request->Lesson_id)->pluck('course_segment_id');
+        $courseID=CourseSegment::where('id',$courseSegID)->pluck('course_id')->first();
+        $usersIDs=Enroll::where('course_segment',$courseSegID)->pluck('user_id')->toarray();
+        User::notify([
+            'message' => 'A new Page is added',
+            'from' => Auth::user()->id,
+            'users' => $usersIDs,
+            'course_id' => $courseID,
+            'type' => 'Page'
+        ]);
+
         $page= new Page();
         $page->title=$request->title;
         $page->content=$request->content;
@@ -61,8 +78,10 @@ class PageController extends Controller
             $page->visible;
         }
         $page->save();
+
         pageLesson::firstOrCreate(['page_id'=>$page->id,
             'lesson_id' => $request->Lesson_id]);
+    
         return HelperController::api_response_format(200, $page,'Page added Successfully');
 
     }
@@ -112,8 +131,25 @@ class PageController extends Controller
             if(isset($request->visible)) {
                 $data['visible']=$request->visible;
             }
+            $lessonID=pageLesson::where('page_id',$request->id)->pluck('lesson_id')->first();
 
         $page->update($data);
+          
+        $courseSegID=Lesson::where('id',$lessonID)->pluck('course_segment_id');
+        $courseID=CourseSegment::where('id',$courseSegID)->pluck('course_id')->first();
+        $usersIDs=Enroll::where('course_segment',$courseSegID)->pluck('user_id')->toarray();
+        User::notify([
+            'message' => 'Page is Edited',
+            'from' => Auth::user()->id,
+            'users' => $usersIDs,
+            'course_id' => $courseID,
+            'type' => 'Page'
+        ]);
+
+
+
+
+
         return HelperController::api_response_format(200, $page,'Page Updated Successfully');
     }
 
@@ -156,11 +192,4 @@ class PageController extends Controller
         return HelperController::api_response_format(200, $page,'Page Toggled Successfully');
     }
 
-    public function get(Request $request){
-        $request->validate([
-            'id' => 'required|exists:pages,id'
-        ]);
-        $page = page::whereId($request->id)->whereVisible(1)->first();
-        return HelperController::api_response_format(200 , $page);
-    }
 }

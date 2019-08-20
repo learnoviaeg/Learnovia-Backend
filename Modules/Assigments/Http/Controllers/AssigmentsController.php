@@ -46,6 +46,7 @@ class AssigmentsController extends Controller
     }
 
     //Create assignment
+
     public function createAssigment(Request $request)
     {
         $request->validate([
@@ -60,6 +61,7 @@ class AssigmentsController extends Controller
             'class' => 'required|exists:classes,id',
             'course' => 'required|exists:courses,id',
         ]);
+
         $segments = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
         if($segments == null)
             return HelperController::api_response_format(400 , [], 'No Active segment to this class in this course');
@@ -90,8 +92,7 @@ class AssigmentsController extends Controller
         $assigment->visiable = $request->visiable;
         $assigment->save();
         $data = array("course_segment" => $segments->id, "assignments_id" => $assigment->id, "submit_date" => $request->submit_date);
-
-        $this->assignAsstoUsers($data);
+         $this->assignAsstoUsers($data);
         AssignmentLesson::firstOrCreate(
             [
                 'assignment_id' => $assigment->id,
@@ -108,7 +109,7 @@ class AssigmentsController extends Controller
 
 
 */
-    public function ubdateAssigment(Request $request)
+    public function updateAssigment(Request $request)
     {
         $request->validate([
             'id' => 'required|exists:assignments,id',
@@ -152,28 +153,49 @@ class AssigmentsController extends Controller
         $assigment->visiable = $request->visiable;
         $assigment->save();
 
+        $usersIDs = Enroll::where('course_segment', $assigment->course_segment)->pluck('user_id')->toarray();
+
+        $courseID=CourseSegment::where('id',$assigment->course_segment)->pluck('course_id')->first();
+
+
+        user::notify([
+            'message' => 'Assignment is Updated ',
+            'from' => Auth::user()->id,
+            'users' => $usersIDs,
+            'course_id' => $courseID,
+            'type' => 'assignment'
+        ]);
+
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
     }
     /*
 
-
             assign Assigment to users
 
-
 */
+
 
     public function assignAsstoUsers($request)
     {
         $usersIDs = Enroll::where('course_segment', $request['course_segment'])->pluck('user_id')->toarray();
-        foreach ($usersIDs as $userId) {
-            # code...
+        foreach ($usersIDs as $userId) {    
             $userassigment = new UserAssigment;
             $userassigment->user_id = $userId;
             $userassigment->assignment_id = $request['assignments_id'];
             $userassigment->status_id = 2;
             $userassigment->override = 0;
             $userassigment->save();
+           
         }
+      
+        $courseID=CourseSegment::where('id',$request['course_segment'])->pluck('course_id')->first();
+         user::notify([
+                'message' => 'A new Assignment is added',
+                'from' => Auth::user()->id,
+                'users' => $usersIDs,
+                'course_id' => $courseID,
+                'type' => 'assignment'
+            ]);
     }
     /*
 
@@ -214,7 +236,7 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(400, $body = [], $message = 'you must enter both the content and the file');
         }
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_id', $request->assignment_id)->first();
-        if (((($assigment->start_date >  Carbon::now()) || (Carbon::now() > $assigment->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1) || ($assigment->visiable == 0)) {
+        if (((($assigment->opening_date >  Carbon::now()) || (Carbon::now() > $assigment->closing_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1) || ($assigment->visiable == 0)) {
             return HelperController::api_response_format(400, $body = [], $message = 'sorry you are not allowed to submit anymore');
         }
         if (isset($request->file)) {
@@ -340,14 +362,14 @@ class AssigmentsController extends Controller
             $value['attachment'] = attachment::where('id', $value->attachment_id)->first();
         }
 
-        if (($user->roles->first()->id) == 4 || ($user->roles->first()->id) == 1) {
+        if (($user->roles->first()->id) == 4) {
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
 
         ///////////////student
         if (($user->roles->first()->id) == 3) {
             $studentassigment = UserAssigment::where('assignment_id', $assignment->id)->where('user_id', $user->id)->first();
-            if ($assignment->start_date > Carbon::now() || $assignment->due_date < Carbon::now()) {
+            if ($assignment->opening_date > Carbon::now() || $assignment->closing_date < Carbon::now()) {
                 if ($studentassigment->override == 0) {
                     return HelperController::api_response_format(400, $body = [], $message = 'you are not allowed to see the assignment at this moment');
                 }

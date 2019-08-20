@@ -3,6 +3,9 @@
 namespace Modules\QuestionBank\Http\Controllers;
 
 use App\Course;
+use App\CourseSegment;
+use App\Enroll;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -21,6 +24,22 @@ use TXPDF;
 
 class QuizController extends Controller
 {
+    public function NotifyQuiz($request)
+    {
+        $course_seg=CourseSegment::getidfromcourse($request->course_id);
+        foreach($course_seg as $course_Segment)
+        {
+            $users = Enroll::where('course_segment', $course_Segment)->where('role_id',3)->pluck('user_id')->toarray();  
+            user::notify([
+                'message' => 'Quiz',
+                'from' => Auth::user()->id,
+                'users' => $users,
+                'course_id' => $request->course_id,
+                'type' =>'quiz'
+            ]);              
+        }   
+    }
+
     /**
      * Store a newly created resource in storage.
      * @param Request $request
@@ -36,22 +55,26 @@ class QuizController extends Controller
                 * type 0 => new Question OR OLD
                 * type 1 => random Questions
                 * type 2 => Without Question
-                */
+              */
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
             'shuffle' => 'boolean'
         ]);
+        
         $index=Quiz::whereCourse_id($request->course_id)->get()->max('index');
-        $Next_index=$index+1;
+        $Next_index=$index + 1;
         if($request->type == 0 ){ // new or new
             $newQuestionsIDs = $this->storeWithNewQuestions($request);
 
             $oldQuestionsIDs = $this->storeWithOldQuestions($request);
             $questionsIDs = $newQuestionsIDs->merge($oldQuestionsIDs);
+
+            $this->NotifyQuiz($request);
         }
 
         else if($request->type == 1){ // random
             $questionsIDs = $this->storeWithRandomQuestions($request);
+            $this->NotifyQuiz($request);
         }
         else{ // create Quiz without Question
             $quiz = quiz::create([
@@ -63,6 +86,7 @@ class QuizController extends Controller
                 'Shuffle' => quiz::checkSuffle($request),
                 'index' => $Next_index
             ]);
+            $this->NotifyQuiz($request);
             return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
         }
 
@@ -76,6 +100,7 @@ class QuizController extends Controller
                 'Shuffle' => quiz::checkSuffle($request),
                 'index' => $Next_index
             ]);
+
             $quiz->Question()->attach($questionsIDs);
             $quiz->Question;
             foreach($quiz->Question as $question){
@@ -87,9 +112,9 @@ class QuizController extends Controller
                 $question->question_answer;
             }
 
+            $this->NotifyQuiz($request);
             return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
         }
-
         return HelperController::api_response_format(200, null,'There\'s no Questions for this course in Question Bank');
     }
 
@@ -147,6 +172,7 @@ class QuizController extends Controller
         $quiz = quiz::find($request->quiz_id);
 
         $newQuestionsIDs = $this->storeWithNewQuestions($request);
+
         $oldQuestionsIDs = $this->storeWithOldQuestions($request);
 
         $questionsIDs = $newQuestionsIDs->merge($oldQuestionsIDs);
@@ -162,6 +188,7 @@ class QuizController extends Controller
 
             $quiz->Question()->detach();
 
+            $this->NotifyQuiz($request);
             return HelperController::api_response_format(200, $quiz,'Quiz Updated Successfully');
         }
 
@@ -171,9 +198,9 @@ class QuizController extends Controller
             'duration' => $request->duration,
             'index' => $request->index,
         ]);
-
+        
         $quiz->Question()->detach();
-        $quiz->Question()->attach($questionsIDs);
+        $quiz->Question()->attach($questionsIDs[0]);
 
         $quiz->Question;
 
@@ -185,10 +212,9 @@ class QuizController extends Controller
             $question->question_course;
             $question->question_answer;
         }
-
+        $this->NotifyQuiz($request);
         return HelperController::api_response_format(200, $quiz,'Quiz Updated Successfully');
     }
-
 
     public function destroy(Request $request)
     {
