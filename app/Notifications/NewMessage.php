@@ -25,7 +25,6 @@ class NewMessage extends Notification
     {
         //
         $this->mess = $request;
-
     }
 
     /**
@@ -49,37 +48,26 @@ class NewMessage extends Notification
 
     public function toDatabase($notifiable)
     {
-
-        if($this->mess['type']=='announcement')
-        {
-            if(isset($this->mess['attached_file'])){
+        if ($this->mess['type'] == 'announcement') {
             $returnobj = [
-                'title'=> $this->mess['title'],
-                'type'=>$this->mess['type'],
-                'description'=>$this->mess['description'],
-                'attached_file'=>$this->mess['attached_file']
+                'title' => $this->mess['title'],
+                'type' => $this->mess['type'],
+                'description' => $this->mess['description'],
             ];
-        }
-        else
-        {
-            $returnobj = [
-                'title'=> $this->mess['title'],
-                'type'=>$this->mess['type'],
-                'description'=>$this->mess['description'],
+            if (isset($this->mess['attached_file'])) {
+                $returnobj['attached_file'] = $this->mess['attached_file'];
+            }
+            return $returnobj;
+        } else {
+            $array = [
+                'message' => $this->mess['message'],
+                'from' => $this->mess['from'],
+                'type' => $this->mess['type'],
+                'course_id' => $this->mess['course_id'],
             ];
+            if(isset($this->mess['link']))
+                $array['link'] = $this->mess['link'];
+            return $array;
         }
-
-        return $returnobj;
-        }
-        else
-        {
-            return ([
-                'message' =>$this->mess['message'],
-                'from'=>$this->mess['from'],
-                'type'=>$this->mess['type'],
-                'course_id'=>$this->mess['course_id'],
-            ]);
-        }
-
     }
 }
