@@ -77,10 +77,10 @@ class LessonController extends Controller
         ]);
         $lesson = Lesson::find($request->id);
         $lesson->name = $request->name;
-        if (isset($request->image)) {
+        if ($request->hasFile('image')) {
             $lesson->image = attachment::upload_attachment($request->image, 'lesson', '')->path;
         }
-        if (isset($request->description)) {
+        if ($request->filled('description')) {
             $lesson->description = $request->description;
         }
         $lesson->save();
