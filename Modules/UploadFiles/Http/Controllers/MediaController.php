@@ -190,10 +190,7 @@ class MediaController extends Controller
                     $filesegment->course_segment_id = $activeCourseSegments->id;
                     $filesegment->media_id = $file->id;
                     $filesegment->save();
-
-
                     $maxIndex = MediaLesson::where('lesson_id', $request->lesson_id)->max('index');
-
                     if ($maxIndex == null) {
                         $newIndex = 1;
                     } else {

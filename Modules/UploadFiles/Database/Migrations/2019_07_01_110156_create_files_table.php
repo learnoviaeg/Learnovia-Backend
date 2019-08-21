@@ -20,8 +20,8 @@ class CreateFilesTable extends Migration
             $table->string('size');
             $table->string('type');
             $table->string('url')->nullable();
+            $table->string('url2')->nullable();
             $table->boolean('visibility')->default(1);
-
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 
