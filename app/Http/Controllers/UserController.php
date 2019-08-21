@@ -18,6 +18,8 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\SegmentClass;
 use DB;
+use Modules\QuestionBank\Entities\UserQuiz;
+use Modules\Assigments\Entities\UserAssigment;
 
 class UserController extends Controller
 {
@@ -306,5 +308,16 @@ class UserController extends Controller
             return HelperController::api_response_format(201,null,'There is no data for you.');
         }
 
+    }
+    public function userEnroll(Request $request){
+        $CurrentUser = Auth::user()->id;        
+
+        $userQuiz = userQuiz::where('user_id',$CurrentUser)->with('quiz_lesson')->pluck('quiz_lesson_id');
+        // dd($userQuiz);
+
+        $userAssigmennt = UserAssigment::where('user_id',$CurrentUser)->with('assignment')->pluck('assignment_id');
+       // dd($userAssigmennt);
+       echo$userQuiz;
+       echo$userAssigmennt;
     }
 }
