@@ -259,11 +259,12 @@ class QuestionBankController extends Controller
             'And_why' => 'integer|required',
             'And_why_mark' => 'integer|min:1|required_if:And_why,==,1',
             'Is_True' => 'required|boolean',
-
         ]);
+
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
         }
+        
 
         $cat = $this::CreateOrFirstQuestion($Question,$parent);
         if (isset($cat->id)) {
@@ -294,6 +295,7 @@ class QuestionBankController extends Controller
 
     public function MCQ($Question,$parent)
     {
+        
         $validator = Validator::make($Question, [
             'answers' => 'required|array|distinct|min:2',
             'answers.*' => 'required|string|distinct',
@@ -301,6 +303,7 @@ class QuestionBankController extends Controller
             'text' => 'required|string'
 
         ]);
+
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
         }
@@ -314,6 +317,7 @@ class QuestionBankController extends Controller
             $questionn = Questions:: where('id', $id)->first();
             return $questionn;
         }
+
         $cat = $this::CreateQuestion($Question,$parent);
         if (isset($cat->id)) {
 

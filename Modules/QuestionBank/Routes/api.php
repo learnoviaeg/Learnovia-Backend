@@ -11,7 +11,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::group(['middleware' => 'Restrict'], function () {
         Route::post('storeQuestions', 'QuestionBankController@store')->middleware('permission:question/add');
         Route::post('updateQuestion', 'QuestionBankController@update')->middleware('permission:question/update');
-        Route::post('storeQuiz', 'QuizController@store')->middleware('permission:quiz/add');
+        Route::post('storeQuiz', 'QuizController@store');//->middleware('permission:quiz/add');
         Route::post('updateQuiz', 'QuizController@update')->middleware('permission:quiz/update');
     });
     //Question Routes
