@@ -77,6 +77,12 @@ class LessonController extends Controller
         ]);
         $lesson = Lesson::find($request->id);
         $lesson->name = $request->name;
+        if (isset($request->image)) {
+            $lesson->image = attachment::upload_attachment($request->image, 'lesson', '')->path;
+        }
+        if (isset($request->description)) {
+            $lesson->description = $request->description;
+        }
         $lesson->save();
 
         return HelperController::api_response_format(200, $lesson, 'Lesson is updated Successfully');
