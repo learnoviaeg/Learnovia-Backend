@@ -159,11 +159,12 @@ class AssigmentsController extends Controller
 
 
         user::notify([
-            'message' => 'Assignment is Updated ',
+            'message' => 'Assignment is Updated in course ' . $assigment->course_segment->courses[0]->name,
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
-            'type' => 'assignment'
+            'type' => 'assignment',
+            'link' => url(route('getAssignment')) . '?assignment_id=' . $assigment->id
         ]);
 
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
