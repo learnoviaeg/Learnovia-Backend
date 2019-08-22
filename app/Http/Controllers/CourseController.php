@@ -182,6 +182,7 @@ class CourseController extends Controller
             if (in_array($enroll->CourseSegment->courses[0], $courses))
                 continue;
             $courses[$i] = $enroll->CourseSegment->courses[0];
+            $enroll->CourseSegment->courses[0]->attachment;
             $courses[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
             $courses[$i]['Teacher'] = User::whereId(Enroll::where('role_id','4')->where('course_segment',$enroll->CourseSegment->id)->pluck('user_id'))->get(['id' , 'username' , 'firstname' , 'lastname' , 'picture'])[0];
             $courses[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
