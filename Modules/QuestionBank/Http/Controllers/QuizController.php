@@ -29,15 +29,15 @@ class QuizController extends Controller
         $course_seg=CourseSegment::getidfromcourse($request->course_id);
         foreach($course_seg as $course_Segment)
         {
-            $users = Enroll::where('course_segment', $course_Segment)->where('role_id',3)->pluck('user_id')->toarray();  
+            $users = Enroll::where('course_segment', $course_Segment)->where('role_id',3)->pluck('user_id')->toarray();
             user::notify([
                 'message' => 'Quiz',
                 'from' => Auth::user()->id,
                 'users' => $users,
                 'course_id' => $request->course_id,
                 'type' =>'quiz'
-            ]);              
-        }   
+            ]);
+        }
     }
 
     /**
@@ -91,7 +91,7 @@ class QuizController extends Controller
                         'Is_True' => 'required|integer',
                         'text' => 'required|string'
                     ]);
-            
+
                     if ($question['Is_True'] > count($question['answers']) - 1) {
                         return HelperController::api_response_format(400, $question, 'is True invalid');
                     }
@@ -127,7 +127,7 @@ class QuizController extends Controller
                     break;
             }
         }
-        
+
         $index=Quiz::whereCourse_id($request->course_id)->get()->max('index');
         $Next_index=$index + 1;
         if($request->type == 0 ){ // new or new
@@ -265,7 +265,7 @@ class QuizController extends Controller
             'duration' => $request->duration,
             'index' => $request->index,
         ]);
-        
+
         $quiz->Question()->detach();
         $quiz->Question()->attach($questionsIDs[0]);
 
@@ -530,5 +530,34 @@ class QuizController extends Controller
         return HelperController::api_response_format(400 , [] , 'No avaiable date for this info');
         $userQuizes = userQuiz::with(['UserQuizAnswer.Question'])->where('quiz_lesson_id', $quizLesson->id)->where('user_id', $request->student_id)->get();
         return HelperController::api_response_format(200 , $userQuizes);
+    }
+
+    public function getSingleQuiz(Request $request){
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id'
+        ]);
+        $quiz = Quiz::find($request->quiz_id);
+
+        foreach($quiz->Question as $question){
+            if(count($question->childeren) > 0){
+                foreach($question->childeren as $single){
+                    $single->question_type;
+                    $single->question_answer;
+                    unset($single->pivot);
+                }
+            }
+            else{
+                unset($question->childeren);
+            }
+            $question->question_answer;
+            $question->question_category;
+            $question->question_type;
+            foreach($question->question_answer as $answer){
+                unset($answer->is_true);
+            }
+            unset($question->pivot);
+        }
+
+        return HelperController::api_response_format(200,$quiz);
     }
 }
