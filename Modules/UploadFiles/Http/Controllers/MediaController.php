@@ -110,9 +110,10 @@ class MediaController extends Controller
     {
         try {
             $request->validate([
+                'attachment_name' => 'required|string|max:190',
                 'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
-                'Imported_file.*' => 'required|file|distinct|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
+                'Imported_file.*' => 'required|file|distinct|mimes:mp4,wmv,avi,flv,mpga,ogg,wma,jpg,jpeg,png,gif',
                 'lesson_id' => 'required|integer|exists:lessons,id',
                 //'year' => 'required|integer|exists:academic_years,id',
                 //'type' => 'required|integer|exists:academic_types,id',
@@ -123,9 +124,13 @@ class MediaController extends Controller
 
             // activeCourseSgement
             $activeCourseSegments = HelperController::Get_Course_segment_Course($request);
-            if ($activeCourseSegments['result'] == false || $activeCourseSegments['value'] == null) {
+            if ($activeCourseSegments['result'] == false) {
+                return HelperController::api_response_format(400, null, $activeCourseSegments['value']);
+            }
+            if ($activeCourseSegments['value'] == null) {
                 return HelperController::api_response_format(400, null, 'No Course active in segment');
             }
+
             $activeCourseSegments = $activeCourseSegments['value'];
             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegments->id);
             if (!$checkTeacherEnroll == true) {
@@ -181,6 +186,7 @@ class MediaController extends Controller
                 $file->description = $description;
                 $file->size = $size;
                 $file->visibility = 0;
+                $file->attachment_name = $request->attachment_name;
                 $file->user_id = Auth::user()->id;
                 $file->link = url('public/storage/media/' . $request->lesson_id . '/' . $name);
                 $check = $file->save();
@@ -233,8 +239,9 @@ class MediaController extends Controller
         try {
             $request->validate([
                 'mediaId' => 'required|integer|exists:media,id',
+                'attachment_name' => 'required|string|max:190',
                 'description' => 'required|string|min:1',
-                'Imported_file' => 'nullable|file|mimes:mp4,wmv,avi,flv,mp3,ogg,wma,jpg,jpeg,png,gif',
+                'Imported_file' => 'nullable|file|mimes:mp4,wmv,avi,flv,mpga,ogg,wma,jpg,jpeg,png,gif',
             ]);
 
             $file = media::find($request->mediaId);
@@ -261,7 +268,7 @@ class MediaController extends Controller
                 $file->name = $fileName;
                 $file->size = $size;
             }
-
+            $file->attachment_name = $request->attachment_name;
             $file->description = $request->description;
             $check = $file->save();
 
@@ -375,6 +382,7 @@ class MediaController extends Controller
                 'description' => 'nullable|string|min:1',
                 'url' => 'required|active_url',
                 'lesson_id' => 'required|integer|exists:lessons,id',
+                'attachment_name' => 'required|string|max:190',
                 //'year' => 'required|integer|exists:academic_years,id',
                 //'type' => 'required|integer|exists:academic_types,id',
                 //'level' => 'required|integer|exists:levels,id',
@@ -439,6 +447,7 @@ class MediaController extends Controller
             $file->description = $request->description;
             $file->visibility = 0;
             $file->link = $request->url;
+            $file->attachment_name = $request->attachment_name;
             $file->user_id = Auth::user()->id;
             $check = $file->save();
 
@@ -478,6 +487,7 @@ class MediaController extends Controller
                 'name' => 'required|string|max:130',
                 'description' => 'nullable|string|min:1',
                 'url' => 'required|active_url',
+                'attachment_name' => 'required|string|max:190',
             ]);
 
             $file = media::find($request->mediaId);
@@ -505,6 +515,7 @@ class MediaController extends Controller
             $file->name = $request->name;
             $file->description = $request->description;
             $file->link = $request->url;
+            $file->attachment_name = $request->attachment_name;
             $file->save();
 
             return HelperController::api_response_format(200, null, 'Update Link Successfully');

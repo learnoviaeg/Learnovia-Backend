@@ -15,6 +15,7 @@ class CreateMediaTable extends Migration
     {
         Schema::create('media', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('attachment_name');
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('size')->nullable();
