@@ -29,15 +29,15 @@ class QuizController extends Controller
         $course_seg=CourseSegment::getidfromcourse($request->course_id);
         foreach($course_seg as $course_Segment)
         {
-            $users = Enroll::where('course_segment', $course_Segment)->where('role_id',3)->pluck('user_id')->toarray();  
+            $users = Enroll::where('course_segment', $course_Segment)->where('role_id',3)->pluck('user_id')->toarray();
             user::notify([
                 'message' => 'Quiz',
                 'from' => Auth::user()->id,
                 'users' => $users,
                 'course_id' => $request->course_id,
                 'type' =>'quiz'
-            ]);              
-        }   
+            ]);
+        }
     }
 
     /**
@@ -64,11 +64,9 @@ class QuizController extends Controller
         $request->validate([
             'Question' => 'required|array',
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
-
         ]);
 
         foreach ($request->Question as $question) {
-
             switch ($question['Question_Type_id']) {
                 case 1: // True/false
                     $validator = Validator::make($question, [
@@ -91,7 +89,7 @@ class QuizController extends Controller
                         'Is_True' => 'required|integer',
                         'text' => 'required|string'
                     ]);
-            
+
                     if ($question['Is_True'] > count($question['answers']) - 1) {
                         return HelperController::api_response_format(400, $question, 'is True invalid');
                     }
@@ -127,7 +125,7 @@ class QuizController extends Controller
                     break;
             }
         }
-        
+
         $index=Quiz::whereCourse_id($request->course_id)->get()->max('index');
         $Next_index=$index + 1;
         if($request->type == 0 ){ // new or new
@@ -265,7 +263,7 @@ class QuizController extends Controller
             'duration' => $request->duration,
             'index' => $request->index,
         ]);
-        
+
         $quiz->Question()->detach();
         $quiz->Question()->attach($questionsIDs[0]);
 
