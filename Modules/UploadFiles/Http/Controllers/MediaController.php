@@ -110,7 +110,6 @@ class MediaController extends Controller
     {
         try {
             $request->validate([
-                'attachment_name' => 'required|string|max:190',
                 'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:mp4,wmv,avi,flv,mpga,ogg,wma,jpg,jpeg,png,gif',
@@ -186,7 +185,7 @@ class MediaController extends Controller
                 $file->description = $description;
                 $file->size = $size;
                 $file->visibility = 0;
-                $file->attachment_name = $request->attachment_name;
+                $file->attachment_name = $fileName;
                 $file->user_id = Auth::user()->id;
                 $file->link = url('public/storage/media/' . $request->lesson_id . '/' . $name);
                 $check = $file->save();
@@ -267,8 +266,8 @@ class MediaController extends Controller
                 $file->type = $extension;
                 $file->name = $fileName;
                 $file->size = $size;
+                $file->attachment_name =$request->Imported_file->getClientOriginalName();
             }
-            $file->attachment_name = $request->attachment_name;
             $file->description = $request->description;
             $check = $file->save();
 
