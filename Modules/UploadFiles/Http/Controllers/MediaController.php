@@ -12,7 +12,9 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use checkEnroll;
 use URL;
 use App\Classes;
-
+use App\CourseSegment;
+use App\Enroll;
+use App\User;
 use App\Http\Controllers\HelperController;
 use Auth;
 use Illuminate\Support\Facades\Storage;
@@ -184,6 +186,15 @@ class MediaController extends Controller
                 $file->user_id = Auth::user()->id;
                 $file->link = url('public/storage/media/' . $request->lesson_id . '/' . $name);
                 $check = $file->save();
+                $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
+                $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
+                User::notify([
+                    'message' => 'This media is added',
+                    'from' => Auth::user()->id,
+                    'users' => $usersIDs,
+                    'course_id' => $courseID,
+                    'type' => 'media',
+                ]);
 
                 if ($check) {
                     $filesegment = new MediaCourseSegment;
@@ -240,6 +251,7 @@ class MediaController extends Controller
             $file = media::find($request->mediaId);
 
             //check Authotizing
+
             $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
 
             // check Enroll
@@ -264,6 +276,16 @@ class MediaController extends Controller
 
             $file->description = $request->description;
             $check = $file->save();
+            $courseID=CourseSegment::where('id',$courseSegmentID)->pluck('course_id')->first();
+            $usersIDs=Enroll::where('course_segment',$courseSegmentID)->pluck('user_id')->toarray();
+                User::notify([
+                'message' => 'This media is Updated',
+                'from' => Auth::user()->id,
+                'users' => $usersIDs,
+                'course_id' => $courseID,
+                'type' => 'media',
+            ]);
+
 
             if ($check) {
                 if (isset($request->Imported_file)) {
