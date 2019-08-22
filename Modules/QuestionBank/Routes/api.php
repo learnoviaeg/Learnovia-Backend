@@ -1,12 +1,12 @@
 <?php
 
 use Illuminate\Http\Request;
+
 Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
     //Install Question Bank
-    Route::get('install','QuestionBankController@install_question_bank');
-    //Route::post('storeQuestions', 'QuestionBankController@store');
-    //Route::post('updateQuestion', 'QuestionBankController@update');
+    Route::get('install', 'QuestionBankController@install_question_bank');
+
     //Add/Update Question and Quiz
     Route::group(['middleware' => 'Restrict'], function () {
         Route::post('storeQuestions', 'QuestionBankController@store')->middleware('permission:question/add');
@@ -14,6 +14,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
         Route::post('storeQuiz', 'QuizController@store')->middleware('permission:quiz/add');
         Route::post('updateQuiz', 'QuizController@update')->middleware('permission:quiz/update');
     });
+
     //Question Routes
     Route::get('getQuestions', 'QuestionBankController@index')->middleware('permission:question/get');
     Route::post('deleteQuestion', 'QuestionBankController@destroy')->middleware('permission:question/delete');
@@ -26,19 +27,21 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('getQuiz', 'QuizController@get')->name('getquiz')->middleware('permission:quiz/get');
     Route::get('sort', 'QuizController@sort');
     Route::get('SortUp', 'QuizController@SortUp');
+
     //Quiz Lesson Routes
     Route::post('addQuizLesson', 'QuizLessonController@store')->middleware('permission:quiz/add-quiz-lesson');
     Route::post('updateQuizLesson', 'QuizLessonController@update')->middleware('permission:quiz/update-quiz-lesson');
     Route::post('deleteQuizLesson', 'QuizLessonController@destroy')->middleware('permission:quiz/destroy-quiz-lesson');
-    Route::get('types' , 'QuestionBankController@getAllTypes');//->middleware('permission:quiz/get-all-types');
-    Route::get('categories' , 'QuestionBankController@getAllCategories');//->middleware('permission:quiz/get-all-categories');
+    Route::get('types', 'QuestionBankController@getAllTypes'); //->middleware('permission:quiz/get-all-types');
+    Route::get('categories', 'QuestionBankController@getAllCategories'); //->middleware('permission:quiz/get-all-categories');
+
     //User Quiz
     Route::post('storeUserQuiz', 'UserQuizController@store_user_quiz');
     Route::post('storeUserQuizAnswer', 'UserQuizController@quiz_answer');
 
-    Route::get('getAllQuizes','QuizController@getAllQuizes');
-    Route::get('getStudentinQuiz','QuizController@getStudentinQuiz');
-    Route::get('getStudentAnswerinQuiz','QuizController@getStudentAnswerinQuiz');
-    Route::get('getAllStudentsAnswerinQuiz','QuizController@getAllStudentsAnswerinQuiz');
-
+    Route::get('getAllQuizes', 'QuizController@getAllQuizes');
+    Route::get('getStudentinQuiz', 'QuizController@getStudentinQuiz');
+    Route::get('getStudentAnswerinQuiz', 'QuizController@getStudentAnswerinQuiz');
+    Route::get('getAllStudentsAnswerinQuiz', 'QuizController@getAllStudentsAnswerinQuiz');
+    Route::get('getSingleQuiz', 'QuizController@getSingleQuiz');
 });

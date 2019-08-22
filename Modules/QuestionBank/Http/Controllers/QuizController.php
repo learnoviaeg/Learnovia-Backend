@@ -583,4 +583,33 @@ class QuizController extends Controller
         }
         return $students;
     }
+
+    public function getSingleQuiz(Request $request){
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id'
+        ]);
+        $quiz = Quiz::find($request->quiz_id);
+
+        foreach($quiz->Question as $question){
+            if(count($question->childeren) > 0){
+                foreach($question->childeren as $single){
+                    $single->question_type;
+                    $single->question_answer;
+                    unset($single->pivot);
+                }
+            }
+            else{
+                unset($question->childeren);
+            }
+            $question->question_answer;
+            $question->question_category;
+            $question->question_type;
+            foreach($question->question_answer as $answer){
+                unset($answer->is_true);
+            }
+            unset($question->pivot);
+        }
+
+        return HelperController::api_response_format(200,$quiz);
+    }
 }
