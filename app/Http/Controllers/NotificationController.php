@@ -26,6 +26,7 @@ class NotificationController extends Controller
     public function getallnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->get();
+        $data=array();
         foreach ($noti as $not) {
             foreach($not as $no)
             $data[] = json_decode($no, true);

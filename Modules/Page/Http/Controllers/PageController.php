@@ -67,7 +67,8 @@ class PageController extends Controller
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
-            'type' => 'Page'
+            'type' => 'Page',
+            'link' => url(route('getAssignment')) . '?assignment_id=' . $request['assignments_id']
         ]);
 
         $page= new Page();
