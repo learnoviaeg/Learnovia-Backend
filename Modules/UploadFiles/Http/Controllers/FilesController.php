@@ -148,6 +148,7 @@ class FilesController extends Controller
     {
         try {
             $request->validate([
+                'attachment_name' => 'required|string|max:190',
                 'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
@@ -161,7 +162,10 @@ class FilesController extends Controller
 
             // activeCourseSgement
             $activeCourseSegments = HelperController::Get_Course_segment_Course($request);
-            if ($activeCourseSegments['result'] == false || $activeCourseSegments['value'] == null) {
+            if ($activeCourseSegments['result'] == false) {
+                return HelperController::api_response_format(400, null, $activeCourseSegments['value']);
+            }
+            if ($activeCourseSegments['value'] == null) {
                 return HelperController::api_response_format(400, null, 'No Course active in segment');
             }
             $activeCourseSegments =  $activeCourseSegments['value'];
@@ -219,6 +223,7 @@ class FilesController extends Controller
                 $file->description = $description;
                 $file->size = $size;
                 $file->visibility = 0;
+                $file->attachment_name = $request->attachment_name;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
                 $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $request->lesson_id . '/' . $name);
@@ -353,6 +358,7 @@ class FilesController extends Controller
         try {
             $request->validate([
                 'fileID' => 'required|integer|exists:files,id',
+                'attachment_name' => 'required|string|max:190',
                 'description' => 'required|string|min:1',
                 'Imported_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
             ]);
@@ -382,6 +388,7 @@ class FilesController extends Controller
                 $file->size = $size;
             }
 
+            $file->attachment_name = $request->attachment_name;
             $file->description = $request->description;
             $check = $file->save();
 

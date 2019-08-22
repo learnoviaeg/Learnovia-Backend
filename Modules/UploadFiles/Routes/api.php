@@ -21,7 +21,8 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
     Route::post('toggleFileVisibility', 'FilesController@toggleVisibility')->name('toggleFileVisibility')->middleware('permission:file/toggle');
     /* Media Routes */
     /* Upload array of Media to specific course segment */
-    Route::post('uploadMedia', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
+   // Route::post('uploadMedia', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
+    Route::post('uploadMedia', 'MediaController@store')->name('uploadMedia');
     /* Update specific Media */
     Route::post('updateMedia', 'MediaController@update')->name('updateMedia')->middleware('permission:media/update');
 
