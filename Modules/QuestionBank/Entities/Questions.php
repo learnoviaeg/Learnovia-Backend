@@ -51,5 +51,11 @@ class Questions extends Model
         return null ;
     }
 
+    public function userAnswer($id)
+    {
+        return $this->hasOne('Modules\QuestionBank\Entities\userQuizAnswer', 'question_id', 'id')
+            ->where('user_quiz_id',$id)->first();
+    }
+
 
 }

@@ -39,4 +39,6 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('getAllQuizes','QuizController@getAllQuizes');
     Route::get('getStudentinQuiz','QuizController@getStudentinQuiz');
     Route::get('getStudentAnswerinQuiz','QuizController@getStudentAnswerinQuiz');
+    Route::get('getAllStudentsAnswerinQuiz','QuizController@getAllStudentsAnswerinQuiz');
+
 });
