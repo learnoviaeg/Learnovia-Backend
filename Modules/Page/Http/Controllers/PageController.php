@@ -67,7 +67,8 @@ class PageController extends Controller
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
-            'type' => 'Page'
+            'type' => 'Page',
+            'link' => url(route('getAssignment')) . '?assignment_id=' . $request['assignments_id']
         ]);
 
         $page= new Page();
@@ -81,7 +82,7 @@ class PageController extends Controller
 
         pageLesson::firstOrCreate(['page_id'=>$page->id,
             'lesson_id' => $request->Lesson_id]);
-    
+
         return HelperController::api_response_format(200, $page,'Page added Successfully');
 
     }
@@ -134,7 +135,7 @@ class PageController extends Controller
             $lessonID=pageLesson::where('page_id',$request->id)->pluck('lesson_id')->first();
 
         $page->update($data);
-          
+
         $courseSegID=Lesson::where('id',$lessonID)->pluck('course_segment_id');
         $courseID=CourseSegment::where('id',$courseSegID)->pluck('course_id')->first();
         $usersIDs=Enroll::where('course_segment',$courseSegID)->pluck('user_id')->toarray();
@@ -191,5 +192,6 @@ class PageController extends Controller
         }
         return HelperController::api_response_format(200, $page,'Page Toggled Successfully');
     }
+
 
 }
