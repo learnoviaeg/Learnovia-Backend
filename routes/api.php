@@ -164,6 +164,8 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
     Route::get('Show_and_hide_real_password_with_permission', 'UserController@Show_and_hide_real_password_with_permission')->name('show/hiderealpass')->middleware('permission:user/show-hide-real-pass');
     Route::post('unsuspend', 'UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:user/un-suspend');
     Route::get('parentchild', 'UserController@parent_child')->name('parentchild')->middleware('permission:user/parent-child');
+    Route::get('CountQuiz', 'UserController@CountQuiz');//->name('coursewithteacher');//->middleware('permission:course/course-with-teacher');
+    Route::get('CountAssignment', 'UserController@CountAssignment');//->name('coursewithteacher');//->middleware('permission:course/course-with-teacher');
 });
 
 //Enroll Routes
@@ -220,3 +222,5 @@ Route::get('GetGradeCategory', 'GradeCategoryController@GetGradeCategory');
 Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory');
 Route::post('UpdateGradeCategory', 'GradeCategoryController@UpdateGradeCategory');
 Route::post('MoveToParentCategory', 'GradeCategoryController@MoveToParentCategory');
+
+

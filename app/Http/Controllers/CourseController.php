@@ -199,6 +199,7 @@ class CourseController extends Controller
         }
         return $teachers;
     }
+
     public function GetUserCourseLessons(Request $request)
     {
         $request->validate([
@@ -221,6 +222,8 @@ class CourseController extends Controller
         $i = 0;
         $lessoncounter = array();
         $comp = Component::where('type', 1)->orWhere('type' , 3)->get();
+        $count='Counter';
+
         foreach ($CourseSeg as $seg) {
             $lessons = $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
@@ -235,6 +238,9 @@ class CourseController extends Controller
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
                                 $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
+                                $lessonn[$com->name][$com->name.$count] =  count($lessonn[$com->name]);
+                                if(isset($com->name))
+                                    $clase[$i][$com->name.$count]+=$lessonn[$com->name][$com->name.$count];
                             }
                         }
                         $i++;
@@ -245,7 +251,6 @@ class CourseController extends Controller
         //$clase['course'] = Course::find($request->course_id);
         return HelperController::api_response_format(200, $clase);
     }
-
 
     public function get_course_by_year_type(Request $request)
     {

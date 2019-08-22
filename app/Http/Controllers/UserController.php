@@ -9,13 +9,19 @@
 namespace App\Http\Controllers;
 use App\User;
 use App\Course;
+use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\Assigments\Entities\Assignment;
 use App\CourseSegment;
 use Auth;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
+use Modules\QuestionBank\Entities\QuizLesson;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
+use Carbon\Carbon;
+use App\Enroll;
+use App\Lesson;
 use App\SegmentClass;
 use DB;
 
@@ -305,6 +311,53 @@ class UserController extends Controller
         {
             return HelperController::api_response_format(201,null,'There is no data for you.');
         }
+    }
 
+    public function CountQuiz(Request $request)
+    {
+        $countQuiz=0;
+        $course_segments = Enroll::where('user_id',$request->user()->id)->pluck('course_segment');
+        foreach($course_segments as $course_seg)
+            $lessons[] = Lesson::where('course_segment_id',$course_seg)->pluck('id');
+        foreach($lessons as $lesson)
+        {
+            foreach($lesson as $less)
+            {
+                $dates=QuizLesson::where('lesson_id',$less)->pluck('due_date');
+                foreach($dates as $date)
+                {
+                    if($date > Carbon::now())
+                        $countQuiz++;
+                }
+            }
+        }
+        return HelperController::api_response_format(201,$countQuiz,'Number of Current Quiz');
+
+    }
+
+    public function CountAssignment(Request $request)
+    {
+        $countAssignment=0;
+        $course_segments = Enroll::where('user_id',$request->user()->id)->pluck('course_segment');
+
+        foreach($course_segments as $course_seg)
+            $lessons[] = Lesson::where('course_segment_id',$course_seg)->pluck('id');
+
+        foreach($lessons as $lesson)
+            # code..
+            foreach($lesson as $less)
+                $assignments[]=AssignmentLesson::where('lesson_id',$less)->pluck('assignment_id');
+
+        foreach($assignments as $assignment)
+            # code..
+            foreach($assignment as $assign)
+            {
+                $dates=Assignment::where('id',$assign)->pluck('due_date');
+                foreach($dates as $date)
+                    if($date > Carbon::now())
+                        $countAssignment++;
+            }    
+        
+        return HelperController::api_response_format(201,$countAssignment,'Number of Current Assignment');
     }
 }
