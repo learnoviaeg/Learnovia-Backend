@@ -158,7 +158,6 @@ class AssigmentsController extends Controller
                 'lesson_id' => $request->Lesson_id
             ]
         );
-
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
     }
     /*
@@ -175,7 +174,7 @@ class AssigmentsController extends Controller
             'name' => 'required|string',
             'is_graded' => 'required|boolean',
             'mark' => 'required|integer',
-            'allow_attachment' => 'required|boolean',
+            'allow_attachment' => 'required|integer|min:0|max:3',
             'opening_date' => 'required|date |date_format:Y-m-d H:i:s|before:closing_date|after:' . Carbon::now(),
             'closing_date' => 'required|date |date_format:Y-m-d H:i:s',
             'visiable' => 'required|boolean',
@@ -212,21 +211,21 @@ class AssigmentsController extends Controller
         $assigment->visiable = $request->visiable;
         $assigment->save();
 
-        $usersIDs = Enroll::where('course_segment', $assigment->course_segment)->pluck('user_id')->toarray();
+        // $usersIDs = Enroll::where('course_segment', $assigment->course_segment)->pluck('user_id')->toarray();
 
-        $courseID=CourseSegment::where('id',$assigment->course_segment)->pluck('course_id')->first();
+        // $courseID=CourseSegment::where('id',$assigment->course_segment)->pluck('course_id')->first();
 
+        // return  $usersIDs;
+        // user::notify([
+        //     'message' => 'Assignment is Updated in course ' . $courseID->name,
+        //     'from' => Auth::user()->id,
+        //     'users' => $usersIDs,
+        //     'course_id' => $courseID,
+        //     'type' => 'assignment',
+        //     'link' => url(route('getAssignment')) . '?assignment_id=' . $assigment->id
+        // ]);
 
-        user::notify([
-            'message' => 'Assignment is Updated in course ' . $assigment->course_segment->courses[0]->name,
-            'from' => Auth::user()->id,
-            'users' => $usersIDs,
-            'course_id' => $courseID,
-            'type' => 'assignment',
-            'link' => url(route('getAssignment')) . '?assignment_id=' . $assigment->id
-        ]);
-
-        return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
+        return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment edited');
     }
     /*
 
@@ -249,12 +248,14 @@ class AssigmentsController extends Controller
         }
 
         $courseID=CourseSegment::where('id',$request['course_segment'])->pluck('course_id')->first();
-         user::notify([
+
+        user::notify([
                 'message' => 'A new Assignment is added',
                 'from' => Auth::user()->id,
                 'users' => $usersIDs,
                 'course_id' => $courseID,
-                'type' => 'assignment'
+                'type' => 'assignment',
+                'link' => url(route('getAssignment')) . '?assignment_id=' . $request['assignments_id']
             ]);
     }
     /*
