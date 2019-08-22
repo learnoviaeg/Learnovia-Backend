@@ -27,4 +27,7 @@ Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function ()
     Route::post('delete', 'AssigmentsController@deleteAssigment')->middleware('permission:assignment/delete');
     Route::get('GetAssignment','AssigmentsController@GetAssignment')->name('getAssignment')->middleware('permission:assignment/get');
     Route::post('toggleVisiblity', 'AssigmentsController@toggleAssignmentVisibity');
+
+    Route::get('getAllAssigment', 'AssigmentsController@getAllAssigment');
+
 });

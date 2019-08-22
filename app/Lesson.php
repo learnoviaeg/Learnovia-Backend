@@ -37,4 +37,9 @@ class Lesson extends Model
     {
         return $this->hasMany('Modules\QuestionBank\Entities\QuizLesson', 'lesson_id', 'id');
     }
+
+    public function AssignmentLesson()
+    {
+        return $this->hasMany('Modules\Assigments\Entities\AssignmentLesson', 'lesson_id', 'id');
+    }
 }

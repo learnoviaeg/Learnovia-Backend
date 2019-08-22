@@ -9,7 +9,7 @@ class assignment extends Model
     protected $fillable = ['name','visiable','content','attachment_id','opening_date','closing_date','is_graded','grade_category','mark','scale_id','allow_attachment'];
     public function attachment()
     {
-        return $this->hasOne('App\attachment', 'attachment_id', 'id');
+        return $this->belongsTo('App\attachment', 'attachment_id', 'id');
     }
     public function UserAssigment()
     {

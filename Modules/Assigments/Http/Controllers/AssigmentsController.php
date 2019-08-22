@@ -6,6 +6,9 @@ use App\attachment;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
+use App\Classes;
+use URL;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -43,6 +46,62 @@ class AssigmentsController extends Controller
         $role->givePermissionTo('assignment/get');
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
+    }
+
+    public function getAllAssigment(Request $request){
+        $request->validate([
+            'course' => 'required_with:class|integer|exists:courses,id',
+            'class' => 'required_with:course|integer|exists:classes,id',
+        ]);
+        $ASSIGNMENTS = collect([]);
+
+        if(isset($request->class)){
+
+            $class = Classes::with([
+                'classlevel.segmentClass.courseSegment' =>
+                    function ($query) use ($request) {
+                        $query->with(['lessons'])->where('course_id',$request->course);
+                    }])->whereId($request->class)->first();
+
+            foreach($class->classlevel->segmentClass as $segmentClass){
+                foreach($segmentClass->courseSegment as $courseSegment){
+
+                    foreach($courseSegment->lessons as $lesson){
+                        foreach($lesson->AssignmentLesson as $AssignmentLesson){
+                            $assignments = $AssignmentLesson->Assignment;
+
+                            foreach ($assignments as $assignment) {
+
+                                $attachment =  $assignment->attachment;
+                                if(isset($attachment)){
+                                    $assignment->path  = URL::asset('storage/files/'.$attachment->type.'/'.$attachment->name);
+                                }
+
+                                unset($assignment->attachment);
+
+                                $ASSIGNMENTS->push($assignment);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        else{
+            $assignments = assignment::all();
+
+            foreach ($assignments as $assignment) {
+                $attachment =  $assignment->attachment;
+                if(isset($attachment)){
+                    $assignment->path  = URL::asset('storage/files/'.$attachment->type.'/'.$attachment->name);
+                }
+
+                unset($assignment->attachment);
+
+                $ASSIGNMENTS->push($assignment);
+            }
+        }
+        return HelperController::api_response_format(200,$ASSIGNMENTS);
     }
 
     //Create assignment
