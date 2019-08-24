@@ -39,14 +39,23 @@ class AnnouncementController extends Controller
             'title'=>'required',
             'description' => 'required',
             'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
-            'start_date'=>'before:due_date|after:'.Carbon::now(),
-            'due_date'=>'after:'.Carbon::now(),
+            'start_date'=>'required|before:due_date|after:'.Carbon::now(),
+            'due_date'=>'required|after:'.Carbon::now(),
+            'publish_date'=> 'nullable|after:'.Carbon::now(),
             'assign'=> 'required'
         ]);
 
+        if(isset($request->publish_date))
+        {
+            $publishdate=$request->publish_date;
+        }
+        else
+        {
+            $publishdate=Carbon::now();
+        }
         $users=array();
         //Files uploading
-        if (Input::hasFile('attached_file'))
+        if (isset($request->attached_file))
         {
             $fileName=attachment::upload_attachment($request->attached_file,'Announcement');
             $file_id=$fileName->id;
@@ -54,7 +63,8 @@ class AnnouncementController extends Controller
                 'title' => $request->title,
                 'description' =>$request->description,
                 'attached_file' => $file_id,
-                'type' => 'announcement'
+                'type' => 'announcement',
+                'publish_date' => $publishdate
             ]);
         }
         else
@@ -63,7 +73,8 @@ class AnnouncementController extends Controller
             $requ =([
                 'title' => $request->title,
                 'description' =>$request->description,
-                'type' => 'announcement'
+                'type' => 'announcement',
+                'publish_date' => $publishdate
             ]);
         }
 
@@ -238,7 +249,8 @@ class AnnouncementController extends Controller
            'level_id' => $request->level_id,
            'year_id' => $request->year_id,
            'type_id' => $request->type_id,
-           'segment_id' => $request->segment_id
+           'segment_id' => $request->segment_id,
+           'publish_date' => $request->publish_date,
         ]);
 
         if($notificatin == '1')
@@ -263,6 +275,7 @@ class AnnouncementController extends Controller
                 'title'=>$announce['title'],
                 'type'=>'announcement',
                 'description'=>$announce['description'],
+                'publish_date'=>$announce['publish_date'],
                 'attached_file'=>$announce['attached_file']
             ]);
         }
@@ -272,6 +285,7 @@ class AnnouncementController extends Controller
                 'title'=>$announce['title'],
                 'type'=>'announcement',
                 'description'=>$announce['description'],
+                'publish_date'=>$announce['publish_date'],
             ]);
         }
 
@@ -294,7 +308,19 @@ class AnnouncementController extends Controller
             'title'=>'required',
             'description' => 'required',
             'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
+            'start_date'=>'required|before:due_date|after:'.Carbon::now(),
+            'due_date'=>'required|after:'.Carbon::now(),
+            'publish_date'=> 'nullable|after:'.Carbon::now(),
         ]);
+
+        if(isset($request->publish_date))
+        {
+            $publishdate=$request->publish_date;
+        }
+        else
+        {
+            $publishdate=Carbon::now();
+        }
 
         //Files uploading
         if (Input::hasFile('attached_file'))
@@ -305,7 +331,8 @@ class AnnouncementController extends Controller
                 'title' => $request->title,
                 'description' =>$request->description,
                 'attached_file' => $file_id,
-                'type' => 'announcement'
+                'type' => 'announcement',
+                'publish_date' => $publishdate
             ];
         }
         else
@@ -314,7 +341,8 @@ class AnnouncementController extends Controller
             $requ = [
                 'title' => $request->title,
                 'description' =>$request->description,
-                'type' => 'announcement'
+                'type' => 'announcement',
+                'publish_date' => $publishdate
             ];
         }
 
@@ -345,6 +373,7 @@ class AnnouncementController extends Controller
         $announcefinal['title'] = $announce->title;
         $announcefinal['type'] = 'announcement';
         $announcefinal['description'] = $announce->description;
+        $announcefinal['publish_date'] = $announce->publish_date;
         if($announce->attached_file != null)
         {
             $announcefinal['attached_file'] = $announce->attached_file;
@@ -387,7 +416,7 @@ class AnnouncementController extends Controller
         }
         //get general Announcements
         $all_ann=array();
-        $all_ann['General Announcements']=Announcement::where('assign','all')->get(['title','description','attached_file']);
+        $all_ann['General Announcements']=Announcement::where('assign','all')->where('publish_date','<',Carbon::now())->get(['title','description','attached_file']);
         $g=0;
         foreach($all_ann['General Announcements'] as $all)
         {
@@ -407,14 +436,14 @@ class AnnouncementController extends Controller
             $segmentname=Segment::find($segmentclass->segment_id);
             $all_ann['Segment'][$s]['name']=$segmentname->name;
             $all_ann['Segment'][$s]['id']=$segmentname->id;
-            $all_ann['Segment'][$s]['announcements']=Announcement::where('segment_id',$segmentclass->segment_id)->get(['title','description','attached_file']);
+            $all_ann['Segment'][$s]['announcements']=Announcement::where('segment_id',$segmentclass->segment_id)->where('publish_date','<',Carbon::now())->get(['title','description','attached_file']);
 
             foreach($segmentclass->classLevel as $scl)
             {
                 $classname=Classes::find($scl->class_id);
                 $all_ann['Class'][$cl]['name']=$classname->name;
                 $all_ann['Class'][$cl]['id']=$classname->id;
-                $all_ann['Class'][$cl]['announcements']=Announcement::where('class_id',$scl->class_id)->get(['title','description','attached_file']);
+                $all_ann['Class'][$cl]['announcements']=Announcement::where('class_id',$scl->class_id)->where('publish_date','<',Carbon::now())->get(['title','description','attached_file']);
 
                 $class_level_id[]=$scl->id;
                 $cl++;
@@ -448,7 +477,7 @@ class AnnouncementController extends Controller
                 $levelename=Level::find($yl->level_id);
                 $all_ann['Level'][$l]['name']=$levelename->name;
                 $all_ann['Level'][$l]['id']=$levelename->id;
-                $all_ann['Level'][$l]['announcements']=Announcement::where('level_id',$yl->level_id)->get(['title','description','attached_file']);
+                $all_ann['Level'][$l]['announcements']=Announcement::where('level_id',$yl->level_id)->where('publish_date','<',Carbon::now())->get(['title','description','attached_file']);
 
                 $year_level_id[]=$yl->id;
                 $l++;
@@ -459,7 +488,7 @@ class AnnouncementController extends Controller
         {
             foreach($le['announcements'] as $ann)
             {
-                $ann->attached_file=attachment::where('id',$ann->attached_file)->first();
+                $ann->attached_file=attachment::where('id',$ann->attached_file)->where('publish_date','<',Carbon::now())->first();
             }
         }
 
@@ -474,12 +503,12 @@ class AnnouncementController extends Controller
                 $typename=AcademicType::find($ayt->academic_type_id);
                 $all_ann['Type'][$t]['name']=$typename->name;
                 $all_ann['Type'][$t]['id']=$typename->id;
-                $all_ann['Type'][$t]['announcements']=Announcement::where('type_id',$ayt->academic_type_id)->get(['title','description','attached_file']);
+                $all_ann['Type'][$t]['announcements']=Announcement::where('type_id',$ayt->academic_type_id)->where('publish_date','<',Carbon::now())->get(['title','description','attached_file']);
 
                 $yearname=AcademicYear::find($ayt->academic_year_id);
                 $all_ann['Year'][$y]['name']=$yearname->name;
                 $all_ann['Year'][$y]['id']=$yearname->id;
-                $all_ann['Year'][$y]['announcements']=Announcement::where('year_id',$ayt->academic_year_id)->get(['title','description','attached_file']);
+                $all_ann['Year'][$y]['announcements']=Announcement::where('year_id',$ayt->academic_year_id)->where('publish_date','<',Carbon::now())->get(['title','description','attached_file']);
 
                 $t++;
                 $y++;
@@ -508,7 +537,7 @@ class AnnouncementController extends Controller
             $coursename=Course::find($cou);
             $all_ann['Courses'][$co]['name']=$coursename->name;
             $all_ann['Courses'][$co]['id']=$coursename->id;
-            $all_ann['Courses'][$co]['announcements']=Announcement::where('course_id',$cou)->get(['title','description','attached_file']);
+            $all_ann['Courses'][$co]['announcements']=Announcement::where('course_id',$cou)->where('publish_date','<',Carbon::now())->get(['title','description','attached_file']);
             $co++;
         }
 
@@ -534,13 +563,16 @@ class AnnouncementController extends Controller
             $not->data= json_decode($not->data, true);
             if($not->data['type'] == 'announcement')
             {
-                if(isset($not->data['attached_file']))
+                if($not->data['publish_date'] < Carbon::now())
                 {
-                    $not->data['attached_file']=attachment::where('id',$not->data['attached_file'])->first();
+                    if(isset($not->data['attached_file']))
+                    {
+                        $not->data['attached_file']=attachment::where('id',$not->data['attached_file'])->first();
+                    }
+                    $notif[$count]['id']=$not->id;
+                    $notif[$count]['data']=$not->data;
+                    $count++;
                 }
-                $notif[$count]['id']=$not->id;
-                $notif[$count]['data']=$not->data;
-                $count++;
             }
         }
         return $notif;

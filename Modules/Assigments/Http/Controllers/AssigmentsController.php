@@ -150,7 +150,8 @@ class AssigmentsController extends Controller
         $assigment->due_date = $request->closing_date;
         $assigment->visiable = $request->visiable;
         $assigment->save();
-        $data = array("course_segment" => $segments->id, "assignments_id" => $assigment->id, "submit_date" => $request->submit_date);
+        $data = array("course_segment" => $segments->id,
+        "assignments_id" => $assigment->id, "submit_date" => $request->submit_date,"publish_date"=>$request->opening_date);
          $this->assignAsstoUsers($data);
         AssignmentLesson::firstOrCreate(
             [
@@ -248,14 +249,14 @@ class AssigmentsController extends Controller
         }
 
         $courseID=CourseSegment::where('id',$request['course_segment'])->pluck('course_id')->first();
-
         user::notify([
                 'message' => 'A new Assignment is added',
                 'from' => Auth::user()->id,
                 'users' => $usersIDs,
                 'course_id' => $courseID,
                 'type' => 'assignment',
-                'link' => url(route('getAssignment')) . '?assignment_id=' . $request['assignments_id']
+                'link' => url(route('getAssignment')) . '?assignment_id=' . $request['assignments_id'],
+                'publish_date' => $request['publish_date']
             ]);
     }
     /*

@@ -28,9 +28,11 @@ class NotificationController extends Controller
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->get();
         $data=array();
         foreach ($noti as $not) {
-            foreach($not as $no)
-            $data[] = json_decode($no, true);
-
+            $not->data= json_decode($not->data, true);
+            if($not->data['publish_date'] < Carbon::now())
+            {
+                $data[] = $not->data;
+            }
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all users notifications');
     }
@@ -40,9 +42,11 @@ class NotificationController extends Controller
     {
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
         foreach ($noti as $not) {
-            foreach($not as $no)
-            $data[] = json_decode($no, true);
-
+            $not->data= json_decode($not->data, true);
+            if($not->data['publish_date'] < Carbon::now())
+            {
+                $data[] = $not->data;
+            }
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all user Unread notifications');
     }
@@ -58,9 +62,11 @@ class NotificationController extends Controller
     {
         $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->pluck('data');
         foreach ($noti as $not) {
-            foreach($not as $no)
-            $data[] = json_decode($no, true);
-
+            $not= json_decode($not, true);
+            if($not['publish_date'] < Carbon::now())
+            {
+                $data[] = $not;
+            }
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all user notifications');
     }

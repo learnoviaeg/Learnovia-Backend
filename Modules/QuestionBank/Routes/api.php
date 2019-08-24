@@ -28,7 +28,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('SortUp', 'QuizController@SortUp');
     //Quiz Lesson Routes
     Route::post('addQuizLesson', 'QuizLessonController@store')->middleware('permission:quiz/add-quiz-lesson');
-    Route::post('updateQuizLesson', 'QuizLessonController@update')->middleware('permission:quiz/update-quiz-lesson');
+    Route::post('updateQuizLesson', 'QuizLessonController@update');//->middleware('permission:quiz/update-quiz-lesson');
     Route::post('deleteQuizLesson', 'QuizLessonController@destroy')->middleware('permission:quiz/destroy-quiz-lesson');
     Route::get('types' , 'QuestionBankController@getAllTypes');//->middleware('permission:quiz/get-all-types');
     Route::get('categories' , 'QuestionBankController@getAllCategories');//->middleware('permission:quiz/get-all-categories');
