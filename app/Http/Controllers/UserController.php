@@ -323,7 +323,7 @@ class UserController extends Controller
             'userUnreadMessages'=>$userUnreadMessages,
             'userNotification'=>$userNotification,
         ]);
-       return HelperController::api_response_format(201,$return,'There is no data for you.');
+       return HelperController::api_response_format(201,$return,'Get All UserData .Quizzes , Assignment , UnreadMessege , UnseenNotification.');
 
     }
 }
