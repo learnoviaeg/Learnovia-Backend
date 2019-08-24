@@ -25,19 +25,19 @@ class CourseController extends Controller
         $request->validate([
             'name' => 'required',
             'category' => 'required|exists:categories,id',
-            'year'=>'array|required',
+            'year' => 'array|required',
             'year.*' => 'required|exists:academic_years,id',
-            'type'=>'array|required',
+            'type' => 'array|required',
             'type.*' => 'required|exists:academic_types,id',
-            'level'=>'array|required',
+            'level' => 'array|required',
             'level.*' => 'required|exists:levels,id',
-            'class'=>'array|required',
+            'class' => 'array|required',
             'class.*' => 'required|exists:classes,id',
-            'segment'=>'array|required',
+            'segment' => 'array|required',
             'segment.*' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
-            'description' =>'string'
+            'description' => 'string'
         ]);
         $no_of_lessons = 4;
         $course = Course::firstOrCreate([
@@ -45,12 +45,12 @@ class CourseController extends Controller
             'category_id' => $request->category,
         ]);
 
-        if($request->hasFile('image')){
-            $course->image = attachment::upload_attachment($request->image , 'course')->id;
+        if ($request->hasFile('image')) {
+            $course->image = attachment::upload_attachment($request->image, 'course')->id;
             $course->save();
         }
 
-        if($request->filled('description')){
+        if ($request->filled('description')) {
             $course->description = $request->description;
             $course->save();
         }
@@ -84,11 +84,8 @@ class CourseController extends Controller
                                 ]);
                             }
                         }
-
                     }
-
                 }
-
             }
         }
 
@@ -153,7 +150,7 @@ class CourseController extends Controller
         } else {
             $course = CourseController::get_course_by_year_type($request);
             if (!isset($course)) {
-                return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->get());
+                return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->get());
             } else {
                 $returncourse = array();
                 foreach ($course as $cc) {
@@ -184,19 +181,18 @@ class CourseController extends Controller
             $courses[$i] = $enroll->CourseSegment->courses[0];
             $enroll->CourseSegment->courses[0]->attachment;
             $courses[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
-            $courses[$i]['Teacher'] = User::whereId(Enroll::where('role_id','4')->where('course_segment',$enroll->CourseSegment->id)->pluck('user_id'))->get(['id' , 'username' , 'firstname' , 'lastname' , 'picture'])[0];
+            $courses[$i]['Teacher'] = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
             $courses[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
         }
-     return HelperController::api_response_format(200, $courses);
+        return HelperController::api_response_format(200, $courses);
     }
 
     public function course_with_teacher()
     {
-        $teachers=Enroll::where('role_id','4')->get(['username','course_segment']);
-        foreach($teachers as $tech)
-        {
-            $coursesegment=CourseSegment::find($tech->course_segment);
-            $tech['course']=$coursesegment->courses;
+        $teachers = Enroll::where('role_id', '4')->get(['username', 'course_segment']);
+        foreach ($teachers as $tech) {
+            $coursesegment = CourseSegment::find($tech->course_segment);
+            $tech['course'] = $coursesegment->courses;
         }
         return $teachers;
     }
@@ -220,8 +216,9 @@ class CourseController extends Controller
         $clase = array();
         $lessons = null;
         $i = 0;
+        $count = 'Counter';
         $lessoncounter = array();
-        $comp = Component::where('type', 1)->orWhere('type' , 3)->get();
+        $comp = Component::where('type', 1)->orWhere('type', 3)->get();
         foreach ($CourseSeg as $seg) {
             $lessons = $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
@@ -236,6 +233,9 @@ class CourseController extends Controller
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
                                 $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
+                                $lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
+                                if (isset($com->name))
+                                    $clase[$i][$com->name . $count] += $lessonn[$com->name][$com->name . $count];
                             }
                         }
                         $i++;
@@ -338,54 +338,50 @@ class CourseController extends Controller
         foreach ($course_segment['value'] as $cs) {
             array_push($optional, $cs->optionalCourses);
         }
-        return HelperController::api_response_format(200 , $optional);
+        return HelperController::api_response_format(200, $optional);
     }
 
     public function Assgin_course_to(Request $request)
     {
-        $rules =[
-                'year' => 'array',
-                'year.*' => 'exists:academic_years,id',
-                'type' => 'array',
-                'type.*' => 'required|exists:academic_types,id',
-                'level'=> 'array',
-                'level.*' => 'required|exists:levels,id',
-                'class'=> 'array',
-                'class.*' => 'required|exists:classes,id',
-                'segment'=> 'array',
-                'segment.*' => 'exists:segments,id',
-                'course' => 'required|exists:courses,id',
-            ];
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails())
-                return ['result' => false, 'value' => $validator->errors()];
+        $rules = [
+            'year' => 'array',
+            'year.*' => 'exists:academic_years,id',
+            'type' => 'array',
+            'type.*' => 'required|exists:academic_types,id',
+            'level' => 'array',
+            'level.*' => 'required|exists:levels,id',
+            'class' => 'array',
+            'class.*' => 'required|exists:classes,id',
+            'segment' => 'array',
+            'segment.*' => 'exists:segments,id',
+            'course' => 'required|exists:courses,id',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails())
+            return ['result' => false, 'value' => $validator->errors()];
 
-            $count=0;
-            if( (count($request->type) == count($request->level)) && (count($request->level) == count($request->class)))
-            {
-                while(isset($request->class[$count]))
-                {
-                    $year = AcademicYear::Get_current()->id;
-                    $segment = Segment::Get_current($request->type[$count])->id;
-                    if (isset($request->year[$count])) {
-                        $year = $request->year[$count];
-                    }
-                    if (isset($request->segment[$count])) {
-                        $segment = $request->segment[$count];
-                    }
-                    $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
-                    $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
-                    $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
-                    $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
-                    CourseSegment::checkRelation($segment_class->id,$request->course);
-                    $count++;
+        $count = 0;
+        if ((count($request->type) == count($request->level)) && (count($request->level) == count($request->class))) {
+            while (isset($request->class[$count])) {
+                $year = AcademicYear::Get_current()->id;
+                $segment = Segment::Get_current($request->type[$count])->id;
+                if (isset($request->year[$count])) {
+                    $year = $request->year[$count];
                 }
+                if (isset($request->segment[$count])) {
+                    $segment = $request->segment[$count];
+                }
+                $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
+                $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
+                $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
+                $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
+                CourseSegment::checkRelation($segment_class->id, $request->course);
+                $count++;
             }
-            else
-            {
-                return HelperController::api_response_format(201, 'Please Enter Equal number of array');
-            }
+        } else {
+            return HelperController::api_response_format(201, 'Please Enter Equal number of array');
+        }
 
-            return HelperController::api_response_format(201, 'Course Assigned Successfully');
+        return HelperController::api_response_format(201, 'Course Assigned Successfully');
     }
 }

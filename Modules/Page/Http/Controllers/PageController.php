@@ -30,19 +30,17 @@ class PageController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/add']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/update']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/delete']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/grade']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/override']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/delete']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/get']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/toggle']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/link-lesson']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/get']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
-        $role->givePermissionTo('assignment/add');
-        $role->givePermissionTo('assignment/update');
-        $role->givePermissionTo('assignment/submit');
-        $role->givePermissionTo('assignment/grade');
-        $role->givePermissionTo('assignment/override');
-        $role->givePermissionTo('assignment/delete');
-        $role->givePermissionTo('assignment/get');
+        $role->givePermissionTo('page/add');
+        $role->givePermissionTo('page/update');
+        $role->givePermissionTo('page/delete');
+        $role->givePermissionTo('page/toggle');
+        $role->givePermissionTo('page/link-lesson');
+        $role->givePermissionTo('page/get');
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
@@ -62,14 +60,6 @@ class PageController extends Controller
         $courseSegID=Lesson::where('id',$request->Lesson_id)->pluck('course_segment_id');
         $courseID=CourseSegment::where('id',$courseSegID)->pluck('course_id')->first();
         $usersIDs=Enroll::where('course_segment',$courseSegID)->pluck('user_id')->toarray();
-        User::notify([
-            'message' => 'A new Page is added',
-            'from' => Auth::user()->id,
-            'users' => $usersIDs,
-            'course_id' => $courseID,
-            'type' => 'Page',
-            'link' => url(route('getAssignment')) . '?assignment_id=' . $request['assignments_id']
-        ]);
 
         $page= new Page();
         $page->title=$request->title;
@@ -79,6 +69,15 @@ class PageController extends Controller
             $page->visible;
         }
         $page->save();
+
+        User::notify([
+            'message' => 'A new Page is added',
+            'from' => Auth::user()->id,
+            'users' => $usersIDs,
+            'course_id' => $courseID,
+            'type' => 'Page',
+            'link' => url(route('getPage')) . '?id=' . $page->id
+        ]);
 
         pageLesson::firstOrCreate(['page_id'=>$page->id,
             'lesson_id' => $request->Lesson_id]);
@@ -144,13 +143,9 @@ class PageController extends Controller
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
-            'type' => 'Page'
+            'type' => 'Page',
+            'link' => url(route('getPage')) . '?id=' . $page->id
         ]);
-
-
-
-
-
         return HelperController::api_response_format(200, $page,'Page Updated Successfully');
     }
 

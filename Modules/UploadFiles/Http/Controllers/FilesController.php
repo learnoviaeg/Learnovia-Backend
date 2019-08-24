@@ -11,12 +11,13 @@ use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
 use App\Lesson;
 use App\Classes;
-
-
 use Illuminate\Support\Facades\Storage;
 use URL;
 use Auth;
 use checkEnroll;
+use App\CourseSegment;
+use App\Enroll;
+use App\User;
 use App\Http\Controllers\HelperController;
 
 class FilesController extends Controller
@@ -229,6 +230,16 @@ class FilesController extends Controller
                 $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $request->lesson_id . '/' . $name);
                 $file->url2 = url('public/storage/files/' . $request->lesson_id . '/' . $name);
                 $file->save();
+                $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
+                $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
+                User::notify([
+                    'message' => 'new file is added',
+                    'from' => Auth::user()->id,
+                    'users' => $usersIDs,
+                    'course_id' => $courseID,
+                    'type' => 'file',
+                    'link' => $file->url
+                ]);
                 if ($check) {
                     $filesegment = new FileCourseSegment;
                     $filesegment->course_segment_id = $activeCourseSegments->id;
@@ -365,6 +376,7 @@ class FilesController extends Controller
 
             $file = file::find($request->fileID);
 
+
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
 
             // check Enroll
@@ -391,6 +403,17 @@ class FilesController extends Controller
             $file->attachment_name = $request->attachment_name;
             $file->description = $request->description;
             $check = $file->save();
+
+            $courseID=CourseSegment::where('id',$courseSegmentID)->pluck('course_id')->first();
+            $usersIDs=Enroll::where('course_segment',$courseSegmentID)->pluck('user_id')->toarray();
+            User::notify([
+                'message' => 'This file is Updated',
+                'from' => Auth::user()->id,
+                'users' => $usersIDs,
+                'course_id' => $courseID,
+                'type' => 'file',
+                'link' => $file->url
+            ]);
 
             if ($check) {
                 if (isset($request->Imported_file)) {
