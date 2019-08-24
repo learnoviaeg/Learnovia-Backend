@@ -313,10 +313,10 @@ class UserController extends Controller
     public function userEnroll(Request $request){
         $CurrentUser = Auth::user()->id;        
 
-        $userQuiz = userQuiz::where('user_id',$CurrentUser)->with('quiz_lesson')->pluck('quiz_lesson_id');
-        $userAssigmennt = UserAssigment::where('user_id',$CurrentUser)->with('assignment')->pluck('assignment_id');
-        $userUnreadMessages = Message::where('From',$CurrentUser)->where('seen',0)->pluck('seen');
-        $userNotification = DB::table('notifications')->where('notifiable_id',$CurrentUser)->where('read_at',null)->pluck('data');
+        $userQuiz = userQuiz::where('user_id',$CurrentUser)->with('quiz_lesson')->count();
+        $userAssigmennt = UserAssigment::where('user_id',$CurrentUser)->with('assignment')->count();
+        $userUnreadMessages = Message::where('From',$CurrentUser)->where('seen',0)->count();
+        $userNotification = DB::table('notifications')->where('notifiable_id',$CurrentUser)->where('read_at',null)->count();
         $return = collect([
             'userQuiz'=>$userQuiz,
             'userAssigmennt'=>$userAssigmennt,
