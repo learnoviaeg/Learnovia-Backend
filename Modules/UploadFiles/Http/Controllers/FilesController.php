@@ -149,7 +149,6 @@ class FilesController extends Controller
     {
         try {
             $request->validate([
-                'attachment_name' => 'required|string|max:190',
                 'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
@@ -224,7 +223,7 @@ class FilesController extends Controller
                 $file->description = $description;
                 $file->size = $size;
                 $file->visibility = 0;
-                $file->attachment_name = $request->attachment_name;
+                $file->attachment_name =$fileName;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();
                 $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $request->lesson_id . '/' . $name);
@@ -371,7 +370,6 @@ class FilesController extends Controller
                 'fileID' => 'required|integer|exists:files,id',
                 'attachment_name' => 'required|string|max:190',
                 'description' => 'required|string|min:1',
-                'Imported_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
             ]);
 
             $file = file::find($request->fileID);
@@ -398,9 +396,9 @@ class FilesController extends Controller
                 $file->type = $extension;
                 $file->name = $fileName;
                 $file->size = $size;
+                $file->attachment_name =$request->Imported_file->getClientOriginalName();
             }
 
-            $file->attachment_name = $request->attachment_name;
             $file->description = $request->description;
             $check = $file->save();
 
