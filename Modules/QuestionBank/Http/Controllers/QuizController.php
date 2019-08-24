@@ -13,9 +13,12 @@ use Illuminate\Routing\Controller;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\QuizQuestions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use Modules\QuestionBank\Entities\userQuiz;
+use Symfony\Component\Console\Question\Question;
 use Validator;
 
 use App\Lesson;
@@ -507,7 +510,6 @@ class QuizController extends Controller
         }
         return HelperController::api_response_format(200, $quizes);
     }
-
     public function getStudentinQuiz(Request $request)
     {
         $request->validate([
@@ -544,7 +546,6 @@ class QuizController extends Controller
         }
         return HelperController::api_response_format(200, $USERS);
     }
-
     public function getStudentAnswerinQuiz(Request $request)
     {
         $request->validate([
@@ -558,8 +559,6 @@ class QuizController extends Controller
         $userQuizes = userQuiz::with(['UserQuizAnswer.Question'])->where('quiz_lesson_id', $quizLesson->id)->where('user_id', $request->student_id)->get();
         return HelperController::api_response_format(200, $userQuizes);
     }
-
-
     public function getAllStudentsAnswerinQuiz(Request $request)
     {
         $request->validate([
@@ -567,24 +566,20 @@ class QuizController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id'
         ]);
         $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        $students = userQuiz::where('quiz_lesson_id', $quizLesson->id)->with(['quiz_lesson', 'quiz_lesson.quiz', 'quiz_lesson.quiz.Question'])->get();
-        //return $students;
-        $Sts = collect([]);
-        $count = 0;
-        while (isset($students[$count])) {
-            $userQuiz = userQuiz::where('user_id', $students[$count]->user_id)->where('quiz_lesson_id', $quizLesson->id)->pluck('id')->first();
-            foreach ($students[$count]['quiz_lesson']['quiz']['question'] as $question) {
-                $test = $question->userAnswer($userQuiz);
-                $question->Answers = $test;
+        $students = User::whereIn('id', Lesson::find($request->lesson_id)->courseSegment->Enroll->pluck('user_id'))->get();//userQuiz::where('quiz_lesson_id', $quizLesson->id)->with(['quiz_lesson', 'quiz_lesson.quiz'])->get();
+        $quizQuestion = QuizQuestions::where('quiz_id', $request->quiz_id)->pluck('question_id');
+        foreach ($students as $student) {
+            $userQuiz = userQuiz::where('user_id', '=', $student->id)->where('quiz_lesson_id', '=', $quizLesson->id)->first();
+            $student->question = Questions::whereIn('id', $quizQuestion)->get();
+            $student->question->answer = null;
+            $student->status = 0;
+            if (!$userQuiz == null) {
+                $student->status = 1;
+                foreach ($student->question as $question) {
+                    $question->answer = userQuizAnswer::whereUser_quiz_id($userQuiz->id)->whereQuestion_id($question->id)->first();
+                }
             }
-            $count += 1;
-
-
-            // return $students[0];
         }
-        return $students;
+        return HelperController::api_response_format(200, $students );
     }
-
-
-
 }
