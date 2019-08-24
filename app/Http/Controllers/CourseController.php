@@ -233,7 +233,7 @@ class CourseController extends Controller
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
                                 $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
-                                $lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
+                                //$lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
                                 if (isset($com->name))
                                     $clase[$i][$com->name . $count] += $lessonn[$com->name][$com->name . $count];
                             }
