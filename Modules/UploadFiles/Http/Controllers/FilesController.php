@@ -583,4 +583,12 @@ class FilesController extends Controller
         }
         return $fileLessons;
     }
+    Public function GetFileByID(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer|exists:media,id',
+        ]);
+        $File=file::find($request->id);
+        return HelperController::api_response_format(200, $File);
+    }
 }

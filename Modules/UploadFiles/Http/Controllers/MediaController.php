@@ -613,4 +613,12 @@ class MediaController extends Controller
         }
         return $MediaLessons;
     }
+    Public function GetMediaByID(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer|exists:media,id',
+        ]);
+        $Media=media::find($request->id);
+        return HelperController::api_response_format(200, $Media);
+    }
 }
