@@ -75,7 +75,7 @@ class LessonController extends Controller
             'name' => 'required',
             'id'  => 'required|exists:lessons,id',
             'image' => 'mimes:jpeg,jpg,png,gif|max:10000',
-            'description.*' => 'string'
+            'description' => 'string'
         ]);
         $lesson = Lesson::find($request->id);
         $lesson->name = $request->name;

@@ -15,5 +15,13 @@ class GradeCategory extends Model
         return $this->hasOne('App\GradeCategory','id','parent');
 
     }
-    
+    public function CourseSegment()
+    {
+        return $this->belongsTo('App\CourseSegment', 'course_segment_id', 'id');
+    }
+    public function GradeItems()
+    {
+        return $this->hasMany('App\GradeItems','grade_category','id');
+    }
+
 }
