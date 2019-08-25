@@ -570,7 +570,7 @@ class QuizController extends Controller
         $quizQuestion = QuizQuestions::where('quiz_id', $request->quiz_id)->pluck('question_id');
         foreach ($students as $student) {
             $userQuiz = userQuiz::where('user_id', '=', $student->id)->where('quiz_lesson_id', '=', $quizLesson->id)->first();
-            $student->question = Questions::whereIn('id', $quizQuestion)->get();
+            $student->question = Questions::whereIn('id', $quizQuestion)->get(['id' , 'text' , 'mark']);
             $student->question->answer = null;
             $student->status = 0;
             if (!$userQuiz == null) {

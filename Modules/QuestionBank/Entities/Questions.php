@@ -57,5 +57,43 @@ class Questions extends Model
             ->where('user_quiz_id',$id)->first();
     }
 
+    public function GradeQuestion($question , $answer_id){
+        $type=$question->question_type_id;
 
+        switch ($type){
+            case 1 : // true or false
+                $answer = QuestionsAnswer::find($answer_id);
+                $mark = 0;
+                if($answer->is_true){
+                    if ($question->And_why){
+                        $mark = $question->mark + $question->And_why_mark;
+                    }else {
+                        $mark = $question->mark ;
+                    }
+                }
+                return $mark;
+                break;
+            case 2 :
+                $answer = QuestionsAnswer::find($answer_id);
+                if($answer->is_true){
+                    return $question->mark;
+                }else {
+                    return 0;
+                }
+                break;
+            case 3 :
+                $count=0;
+                foreach ($answer_id as $answerId ){
+                    $answer = QuestionsAnswer::find($answerId);
+                    if($answer->is_true){
+                        $count+=1;
+                    }
+                }
+                $mark = $count * ($question->mark /count($answer_id ) );
+                    return $mark;
+
+                break;
+        }
+
+    }
 }
