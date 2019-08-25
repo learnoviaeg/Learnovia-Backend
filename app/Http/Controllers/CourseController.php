@@ -183,6 +183,7 @@ class CourseController extends Controller
             $courses[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
             $courses[$i]['Teacher'] = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
             $courses[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+            $i++;
         }
         return HelperController::api_response_format(200, $courses);
     }

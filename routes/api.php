@@ -208,15 +208,30 @@ Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
-    Route::post('add', 'GradeController@create')->name('addgrade');//->middleware('permission:grade/add');
-    Route::get('get', 'GradeController@list')->name('getgrade');//->middleware('permission:grade/get');
-    Route::post('delete', 'GradeController@delete')->name('deletegrade');//->middleware('permission:grade/delete');
-    Route::post('update', 'GradeController@update')->name('updategrade');//->middleware('permission:grade/update');
+
+    Route::group(['prefix' => 'category', 'middleware' => 'auth:api'], function () {
+        Route::post('add', 'GradeCategoryController@AddGradeCategory');
+        Route::get('get', 'GradeCategoryController@GetGradeCategory');
+        Route::post('delete', 'GradeCategoryController@deleteGradeCategory');
+        Route::post('update', 'GradeCategoryController@UpdateGradeCategory');
+        Route::post('move', 'GradeCategoryController@MoveToParentCategory');
+        //Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
+        Route::post('tree', 'GradeCategoryController@Get_Tree');
+    });
+
+    Route::group(['prefix' => 'item', 'middleware' => 'auth:api'], function () {
+        Route::post('add', 'GradeItemController@create')->name('addgrade');//->middleware('permission:grade-item/add');
+        Route::get('get', 'GradeItemController@list')->name('getgrade');//->middleware('permission:grade-item/get');
+        Route::post('delete', 'GradeItemController@delete')->name('deletegrade');//->middleware('permission:grade-item/delete');
+        Route::post('update', 'GradeItemController@update')->name('updategrade');//->middleware('permission:grade-item/update');
+        Route::post('movecategory', 'GradeItemController@Move_Category')->name('movecategory');//->middleware('permission:grade-item/move-category');
+    });
+
+    Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
+        Route::post('add', 'UserGradeController@create')->name('addusergrade');//->middleware('permission:user-grade/add');
+        Route::get('get', 'UserGradeController@list')->name('getusergrade');//->middleware('permission:user-grade/get');
+        Route::post('delete', 'UserGradeController@delete')->name('deleteusergrade');//->middleware('permission:user-grade/delete');
+        Route::post('update', 'UserGradeController@update')->name('updateusergrade');//->middleware('permission:user-grade/update');
+    });
 });
 
-
-Route::post('createCat', 'GradeCategoryController@AddGradeCategory');
-Route::get('GetGradeCategory', 'GradeCategoryController@GetGradeCategory');
-Route::post('deleteGradeCategory', 'GradeCategoryController@deleteGradeCategory');
-Route::post('UpdateGradeCategory', 'GradeCategoryController@UpdateGradeCategory');
-Route::post('MoveToParentCategory', 'GradeCategoryController@MoveToParentCategory');
