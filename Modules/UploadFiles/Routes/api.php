@@ -51,6 +51,6 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
     Route::get('getAllFiles','FilesController@getAllFiles');
 
     Route::get('getAllMedia','MediaController@getAllMedia');
-
+    Route::get('GetMediaByID','MediaController@GetMediaByID');
+    Route::get('GetFileByID','FilesController@GetFileByID');
 });
-
