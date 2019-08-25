@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use URL;
 use Auth;
 use checkEnroll;
+use Carbon\Carbon;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
@@ -162,6 +163,7 @@ class FilesController extends Controller
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
                 'lesson_id' => 'required|integer|exists:lessons,id',
+                'publish_date'=>'nullable|after:'.Carbon::now(),
                 //'year' => 'required|integer|exists:academic_years,id',
                 //'type' => 'required|integer|exists:academic_types,id',
                 //'level' => 'required|integer|exists:levels,id',
@@ -169,6 +171,14 @@ class FilesController extends Controller
                 //'class.*' => 'required|integer|exists:classes,id',
             ]);
 
+            if($request->filled('publish_date'))
+            {
+                $publishdate=$request->publish_date;
+            }
+            else
+            {
+                $publishdate=Carbon::now();
+            }
             // activeCourseSgement
             $activeCourseSegments = HelperController::Get_Course_segment_Course($request);
             if ($activeCourseSegments['result'] == false) {
@@ -246,7 +256,8 @@ class FilesController extends Controller
                     'users' => $usersIDs,
                     'course_id' => $courseID,
                     'type' => 'file',
-                    'link' => $file->url
+                    'link' => $file->url,
+                    'publish_date' => $publishdate,
                 ]);
                 if ($check) {
                     $filesegment = new FileCourseSegment;
@@ -419,7 +430,8 @@ class FilesController extends Controller
                 'users' => $usersIDs,
                 'course_id' => $courseID,
                 'type' => 'file',
-                'link' => $file->url
+                'link' => $file->url,
+                'publish_date' => Carbon::now(),
             ]);
 
             if ($check) {

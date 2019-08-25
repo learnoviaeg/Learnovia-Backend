@@ -88,7 +88,8 @@ class PageController extends Controller
             'users' => $usersIDs,
             'course_id' => $courseID,
             'type' => 'Page',
-            'link' => url(route('getPage')) . '?id=' . $page->id
+            'link' => url(route('getPage')) . '?id=' . $page->id,
+            'publish_date'=>$publishdate
         ]);
 
         pageLesson::firstOrCreate(['page_id'=>$page->id,
@@ -136,7 +137,7 @@ class PageController extends Controller
             'visible' => 'nullable|boolean',
             'publish_date'=>'nullable|after:'.Carbon::now()
         ]);
-        if(isset($request->publish_date))
+        if($request->filled('publish_date'))
         {
             $publishdate=$request->publish_date;
         }
@@ -166,7 +167,7 @@ class PageController extends Controller
             'course_id' => $courseID,
             'type' => 'Page',
             'link' => url(route('getPage')) . '?id=' . $page->id,
-            'publish_date'=>$publishdate
+            'publish_date' => $publishdate
         ]);
         return HelperController::api_response_format(200, $page,'Page Updated Successfully');
     }

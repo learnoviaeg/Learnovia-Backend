@@ -123,6 +123,15 @@ class MediaController extends Controller
                 //'class.*' => 'required|integer|exists:classes,id',
             ]);
 
+            if($request->filled('publish_date'))
+            {
+                $publishdate=$request->publish_date;
+            }
+            else
+            {
+                $publishdate=Carbon::now();
+            }
+
             // activeCourseSgement
             $activeCourseSegments = HelperController::Get_Course_segment_Course($request);
             if ($activeCourseSegments['result'] == false) {
@@ -199,6 +208,7 @@ class MediaController extends Controller
                     'users' => $usersIDs,
                     'course_id' => $courseID,
                     'type' => 'media',
+                    'publish_date' => $publishdate,
                 ]);
 
                 if ($check) {
@@ -290,6 +300,7 @@ class MediaController extends Controller
                 'users' => $usersIDs,
                 'course_id' => $courseID,
                 'type' => 'media',
+                'publish_date' => Carbon::now(),
             ]);
 
 
