@@ -99,6 +99,6 @@ class CourseSegment extends Model
         ->where('class_levels.class_id' , '=' , $class_id)
         ->where('course_segments.course_id' , '=' , $course_id)
         ->where('course_segments.is_active' , '=' , 1)
-        ->first();
+        ->first(['course_segments.id' , 'course_segments.course_id']);
     }
 }

@@ -131,16 +131,20 @@ class UsersImport implements ToModel, WithHeadingRow
                         break;
                     $userId =User::FindByName($user->username)->id;
 
-                    Enroll::firstOrCreate([
-                        'course_segment' => $courseSeg,
-                        'user_id' => $userId,
-                        'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                        'username'=> $user->username,
-                        'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                        'role_id'=> 3
-                    ]);
+                    foreach($courseSeg as $course_seg)
+                    {
+                        Enroll::firstOrCreate([
+                            'course_segment' => $course_seg,
+                            'user_id' => $userId,
+                            'start_date' => Date::excelToDateTimeObject($row['start_date']),
+                            'username'=> $user->username,
+                            'end_date' => Date::excelToDateTimeObject($row['end_date']),
+                            'role_id'=> 3
+                        ]);
 
-                    $enrollcounter++;
+                        $enrollcounter++;
+                    }
+
                 }
             }
             else{
@@ -152,16 +156,19 @@ class UsersImport implements ToModel, WithHeadingRow
                         break;
                     $userId =User::FindByName($user->username)->id;
 
-                    Enroll::create([
-                        'course_segment' => $courseSeg,
-                        'user_id' => $userId,
-                        'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                        'username'=> $user->username,
-                        'end_date' => Date::excelToDateTimeObject($row['end_date']),
-                        'role_id'=> 4
-                    ]);
+                    foreach($courseSeg as $course_seg)
+                    {
+                        Enroll::create([
+                            'course_segment' => $course_seg,
+                            'user_id' => $userId,
+                            'start_date' => Date::excelToDateTimeObject($row['start_date']),
+                            'username'=> $user->username,
+                            'end_date' => Date::excelToDateTimeObject($row['end_date']),
+                            'role_id'=> 4
+                        ]);
 
-                    $teachercounter++;
+                        $teachercounter++;
+                    }
                 }
             }
         }

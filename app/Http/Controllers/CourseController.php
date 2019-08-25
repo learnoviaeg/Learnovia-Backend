@@ -233,7 +233,11 @@ class CourseController extends Controller
                         foreach ($clase[$i]->lessons as $lessonn) {
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
-                                $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
+                                if (($request->user()->roles->first()->id) == 3 ||($request->user()->roles->first()->id) == 7) {
+                                    $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->where('visible' , '=' , 1)->get();
+                                }else{
+                                    $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
+                                }
                                 //$lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
                                 if (isset($com->name))
                                     $clase[$i][$com->name . $count] += count($lessonn[$com->name]);

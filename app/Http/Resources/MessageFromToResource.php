@@ -26,7 +26,8 @@ class MessageFromToResource extends JsonResource
             'Message' => $this->text,
             'about' => User::find($this->about),
             'From' => $from,
-            'To' => $To
+            'To' => $To,
+            'file' => url('/public/storage/' . $this->file),
         ];
         if ($this->deleted == 0) {
             return $arr;

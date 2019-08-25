@@ -29,7 +29,7 @@ class attachment extends Model
         $size = $singlefile->getSize();
 
         $attachment->name = $fileName;
-        $attachment->path = 'files/' . $type . '/' . $fileName;
+        $attachment->path = $type . '/' . $fileName;
         $attachment->description = $description;
         $attachment->type = $type;
         $attachment->extension = $extension;

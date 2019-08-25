@@ -124,7 +124,9 @@ class EnrollUserToCourseController extends Controller
             $userId = User::FindByName($user)->id;
             $x = HelperController::Get_segment_class($request);
             $segments = collect([]);
-            $x->courseSegment;
+            if(count($x->courseSegment) < 1){
+                return HelperController::api_response_format(400, [], 'No Courses belong to this class');
+            }
             foreach ($x->courseSegment as $key => $segment) {
                 $segment->courses;
                 foreach ($segment->courses as $key => $course) {

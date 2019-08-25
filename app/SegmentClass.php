@@ -18,7 +18,7 @@ class SegmentClass extends Model
 
     public function courseSegment()
     {
-        return $this->hasMany('App\CourseSegment');
+        return $this->hasMany('App\CourseSegment' , 'segment_class_id' , 'id');
     }
 
     public function segments(){

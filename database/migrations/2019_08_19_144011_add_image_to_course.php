@@ -15,7 +15,7 @@ class AddImageToCourse extends Migration
     {
         Schema::table('courses', function (Blueprint $table) {
             $table->unsignedBigInteger('image')->nullable();
-            $table->foreign('image')->references('id')->on('attachments')->onDelete('cascade')->onUpdate('cascade');
+            //$table->foreign('image')->references('id')->on('attachments')->onDelete('cascade')->onUpdate('cascade');
             $table->text('description')->nullable();
         });
     }
