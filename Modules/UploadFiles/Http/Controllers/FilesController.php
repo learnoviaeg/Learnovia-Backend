@@ -41,7 +41,9 @@ class FilesController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/update']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/sort']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/sort']);
-
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/upload']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get-all']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get-all']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('file/add');
@@ -50,6 +52,7 @@ class FilesController extends Controller
         $role->givePermissionTo('file/toggle');
         $role->givePermissionTo('media/add');
         $role->givePermissionTo('media/update');
+        $role->givePermissionTo('media/upload');
         $role->givePermissionTo('media/delete');
         $role->givePermissionTo('media/toggle');
         $role->givePermissionTo('file-media/get');
@@ -57,6 +60,8 @@ class FilesController extends Controller
         $role->givePermissionTo('link/update');
         $role->givePermissionTo('file/sort');
         $role->givePermissionTo('media/sort');
+        $role->givePermissionTo('file/get-all');
+        $role->givePermissionTo('media/get-all');
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }

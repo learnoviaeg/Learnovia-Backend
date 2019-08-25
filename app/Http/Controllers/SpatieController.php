@@ -36,6 +36,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/get-all']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/get-unread']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/mark-as-read']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/get-for-user']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/delete-duration']);
 
             //Spatie Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/add']);
@@ -77,6 +79,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/get-all']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/gets']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/delete']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/assign']);
 
             //Class Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/add']);
@@ -84,6 +87,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/get']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/update']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/delete']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/assign']);
 
             //Segment Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/add']);
@@ -108,6 +112,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/my-courses']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/layout']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/optional']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/assgin-course-to']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/course-with-teacher']);
 
             //Enroll Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/enroll-single-user']);
@@ -120,6 +126,7 @@ class SpatieController extends Controller
 
             //Contact Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/add']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/get']);
 
             //USER CRUD Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/add']);
@@ -144,6 +151,9 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/update']);
 
             //Calendar Permission
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'calendar/get']);
+
+            //Import Permission
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'import']);
 
             //Lesson Permissions
@@ -152,6 +162,27 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/delete']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/update']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/sort']);
+
+            //Grade Category Permissions
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-category/add']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-category/get']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-category/delete']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-category/update']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-category/move-category']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-category/get-tree']);
+
+            //Grade Item Permissions
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-item/add']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-item/get']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-item/delete']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-item/update']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade-item/move-category']);
+
+            //User Grade Permissions
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user-grade/add']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user-grade/get']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user-grade/delete']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user-grade/update']);
 
             //Add Roles
             $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin']);

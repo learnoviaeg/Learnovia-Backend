@@ -366,7 +366,6 @@ class AnnouncementController extends Controller
             }
         }
         $announce->delete();
-        $attch->delete();
         return HelperController::api_response_format(200, $announce,'Announcement Deleted Successfully');
     }
 

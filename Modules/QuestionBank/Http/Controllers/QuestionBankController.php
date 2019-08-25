@@ -38,6 +38,15 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-types']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-categories']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sort']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sort-up']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user-quiz/store-user-quiz']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user-quiz/store-user-quiz-answer']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-quiz']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-quiz-answer']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-student-quiz-answer']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-single-quiz']);
 
 
         $role = \Spatie\Permission\Models\Role::find(1);
@@ -57,6 +66,15 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/destroy-quiz-lesson');
         $role->givePermissionTo('quiz/get-all-types');
         $role->givePermissionTo('quiz/get-all-categories');
+        $role->givePermissionTo('quiz/sort');
+        $role->givePermissionTo('quiz/sort-up');
+        $role->givePermissionTo('user-quiz/store-user-quiz');
+        $role->givePermissionTo('user-quiz/store-user-quiz-answer');
+        $role->givePermissionTo('quiz/get-all');
+        $role->givePermissionTo('quiz/get-student-quiz');
+        $role->givePermissionTo('quiz/get-student-quiz-answer');
+        $role->givePermissionTo('quiz/get-all-student-quiz-answer');
+        $role->givePermissionTo('quiz/get-single-quiz');
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
 
@@ -264,7 +282,7 @@ class QuestionBankController extends Controller
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
         }
-        
+
 
         $cat = $this::CreateOrFirstQuestion($Question,$parent);
         if (isset($cat->id)) {
@@ -295,7 +313,7 @@ class QuestionBankController extends Controller
 
     public function MCQ($Question,$parent)
     {
-        
+
         $validator = Validator::make($Question, [
             'answers' => 'required|array|distinct|min:2',
             'answers.*' => 'required|string|distinct',

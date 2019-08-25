@@ -14,7 +14,10 @@ use Illuminate\Http\Request;
 */
 
 Route::group(['prefix' => 'page', 'middleware' => 'auth:api'] , function(){
+    //To install module permissions
     Route::get('install' , 'PageController@install')->name('installPage');
+
+    //Page permissions
     Route::post('add' , 'PageController@add')->name('addPage')->middleware('permission:page/add');
     Route::post('update' , 'PageController@update')->name('updatePage')->middleware('permission:page/update');
     Route::post('delete' , 'PageController@destroy')->name('deletePage')->middleware('permission:page/delete');
