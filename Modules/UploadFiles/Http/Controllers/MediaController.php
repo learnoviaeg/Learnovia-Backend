@@ -428,10 +428,10 @@ class MediaController extends Controller
                  return HelperController::api_response_format(400, null, 'No Course active in segment');
              }
              $activeCourseSegments = $activeCourseSegments['value'];
-             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegments->id);
-             if (!$checkTeacherEnroll == true) {
-                 return HelperController::api_response_format(400, null, 'You\'re unauthorize');
-             }
+            //  $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegments->id);
+            //  if (!$checkTeacherEnroll == true) {
+            //      return HelperController::api_response_format(400, null, 'You\'re unauthorize');
+            //  }
 
             // foreach ($request->class as $class) {
 
