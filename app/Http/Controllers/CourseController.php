@@ -175,9 +175,16 @@ class CourseController extends Controller
     {
         $i = 0;
         $courses = [];
+        $names = [];
         foreach ($request->user()->enroll as $enroll) {
             if (in_array($enroll->CourseSegment->courses[0], $courses))
                 continue;
+            $CHeckCourses[$i] = $enroll->CourseSegment->courses[0];
+            if(in_array($CHeckCourses[$i]['name'], $names))
+                continue;
+            else{
+                array_push($names,$CHeckCourses[$i]['name']);
+            }
             $courses[$i] = $enroll->CourseSegment->courses[0];
             $enroll->CourseSegment->courses[0]->attachment;
             $courses[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
@@ -185,7 +192,7 @@ class CourseController extends Controller
             $courses[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
             $i++;
         }
-        return HelperController::api_response_format(200, $courses);
+       return HelperController::api_response_format(200, $courses);
     }
 
     public function course_with_teacher()
