@@ -509,7 +509,7 @@ class AnnouncementController extends Controller
                 $annocument = announcement::find($announce_id);
                 if($annocument->publish_date < Carbon::now())
                 {
-                    $customize = announcement::whereId($announce_id)->get(['id','title','description','attached_file']);
+                    $customize = announcement::whereId($announce_id)->first(['id','title','description','attached_file']);
                     $notif->push($customize);
                 }
             }
