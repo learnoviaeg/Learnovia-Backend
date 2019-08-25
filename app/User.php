@@ -107,7 +107,7 @@ class User extends Authenticatable
             $touserid[] = User::find($user);
         }
 
-         Notification::send($touserid, new NewMessage($request));
+        Notification::send($touserid, new NewMessage($request));
         return 1;
     }
 

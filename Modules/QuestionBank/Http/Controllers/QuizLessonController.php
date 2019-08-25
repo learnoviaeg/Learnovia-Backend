@@ -9,9 +9,44 @@ use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
+use App\CourseSegment;
+use App\Enroll;
+use App\User;
+use Auth;
+
+
 
 class QuizLessonController extends Controller
 {
+
+    public function NotifyQuiz($quiz,$publishdate,$type)
+    {
+        $course_seg=CourseSegment::getidfromcourse($quiz->course_id);
+
+        if($type=='add')
+        {
+            $msg='A New Quiz is Added!';
+        }
+        else
+        {
+            $msg='Quiz is Updated!';
+        }
+
+        foreach($course_seg as $course_Segment)
+        {
+            $users = Enroll::where('course_segment', $course_Segment)->where('role_id',3)->pluck('user_id')->toarray();
+            user::notify([
+                'message' => $msg,
+                'from' => Auth::user()->id,
+                'users' => $users,
+                'course_id' => $quiz->course_id,
+                'type' =>'quiz',
+                'link' => url(route('getquiz')) . '?quiz_id=' . $quiz->id,
+                'publish_date'=> $publishdate
+            ]);
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      * @param Request $request
@@ -48,6 +83,7 @@ class QuizLessonController extends Controller
             'grade_category_id' => $request->grade_category_id
         ]);
 
+        $this->NotifyQuiz($quiz,$request->opening_time,'add');
         return HelperController::api_response_format(200, $quizLesson,'Quiz added to lesson Successfully');
     }
 
@@ -90,6 +126,7 @@ class QuizLessonController extends Controller
             'grade' => $request->grade,
             'grade_category_id' => $request->grade_category_id
         ]);
+        $this->NotifyQuiz($quiz,$request->opening_time,'update');
 
         return HelperController::api_response_format(200, $quizLesson,'Quiz updated atteched to lesson Successfully');
     }

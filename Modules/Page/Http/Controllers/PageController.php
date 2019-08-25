@@ -14,6 +14,7 @@ use App\User;
 use Illuminate\Routing\Controller;
 use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
+use Illuminate\Support\Carbon;
 
 class PageController extends Controller
 {
@@ -55,8 +56,18 @@ class PageController extends Controller
             'title' => 'required|string',
             'content' => 'required|string',
             'Lesson_id' => 'required|exists:lessons,id',
-            'visible' => 'nullable|boolean'
+            'visible' => 'nullable|boolean',
+            'publish_date'=>'nullable|after:'.Carbon::now()
         ]);
+        if(isset($request->publish_date))
+        {
+            $publishdate=$request->publish_date;
+        }
+        else
+        {
+            $publishdate=Carbon::now();
+        }
+
         $courseSegID=Lesson::where('id',$request->Lesson_id)->pluck('course_segment_id');
         $courseID=CourseSegment::where('id',$courseSegID)->pluck('course_id')->first();
         $usersIDs=Enroll::where('course_segment',$courseSegID)->pluck('user_id')->toarray();
@@ -64,6 +75,7 @@ class PageController extends Controller
         $page= new Page();
         $page->title=$request->title;
         $page->content=$request->content;
+        $page->publish_date=$publishdate;
         if(isset($request->visible))
         {
             $page->visible;
@@ -121,8 +133,17 @@ class PageController extends Controller
         $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
-            'visible' => 'nullable|boolean'
+            'visible' => 'nullable|boolean',
+            'publish_date'=>'nullable|after:'.Carbon::now()
         ]);
+        if(isset($request->publish_date))
+        {
+            $publishdate=$request->publish_date;
+        }
+        else
+        {
+            $publishdate=Carbon::now();
+        }
 
         $data=[
                 'title' => $request->title,
@@ -144,7 +165,8 @@ class PageController extends Controller
             'users' => $usersIDs,
             'course_id' => $courseID,
             'type' => 'Page',
-            'link' => url(route('getPage')) . '?id=' . $page->id
+            'link' => url(route('getPage')) . '?id=' . $page->id,
+            'publish_date'=>$publishdate
         ]);
         return HelperController::api_response_format(200, $page,'Page Updated Successfully');
     }

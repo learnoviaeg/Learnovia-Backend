@@ -50,13 +50,9 @@ class NewMessage extends Notification
     {
         if ($this->mess['type'] == 'announcement') {
             $returnobj = [
-                'title' => $this->mess['title'],
+                'id' => $this->mess['id'],
                 'type' => $this->mess['type'],
-                'description' => $this->mess['description'],
             ];
-            if (isset($this->mess['attached_file'])) {
-                $returnobj['attached_file'] = $this->mess['attached_file'];
-            }
             return $returnobj;
         } else {
             $array = [
@@ -64,6 +60,7 @@ class NewMessage extends Notification
                 'from' => $this->mess['from'],
                 'type' => $this->mess['type'],
                 'course_id' => $this->mess['course_id'],
+                'publish_date' => $this->mess['publish_date'],
             ];
             if(isset($this->mess['link']))
                 $array['link'] = $this->mess['link'];
