@@ -203,23 +203,15 @@ class MessageController extends Controller
     function SeenMessage(Request $req)
     {
         $session_id = Auth::User()->id;
-
-        $valid = Validator::make($req->all(), [
-            'id' => 'required | exists:messages,id',
+        $req->validate([
+            'from' => 'required|exists:users,id'
         ]);
-        if ($valid->fails()) {
-            return response()->json(['msg' => $valid->errors()], 404);
+        $messages = Message::where('From', $req->from)->where('To',$session_id)->where('seen',0)->get();
+        foreach($messages as $msg){
+            $msg->seen = 1;
+            $msg->save();
         }
-        $message = Message::find($req->id);
-        if ($message) {
-            if ($message->To == $session_id) {
-                $message->update(array('seen' => true));
-                $message->save();
-                return HelperController::api_response_format(201, null, 'message was seen');
-            } else {
-                return HelperController::api_response_format(404, null, 'You do not have permission Seen this message');
-            }
-        }
+        return HelperController::api_response_format(200, $messages, 'message was seen');
     }
 
     public
