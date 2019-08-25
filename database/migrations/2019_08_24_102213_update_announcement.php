@@ -14,7 +14,7 @@ class UpdateAnnouncement extends Migration
     public function up()
     {
         Schema::table('announcements', function (Blueprint $table) {
-            $table->dateTime('publish_date');
+            $table->dateTime('publish_date')->nullable();
         });
     }
 
