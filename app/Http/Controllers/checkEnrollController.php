@@ -20,7 +20,6 @@ class checkEnrollController extends Controller
         ->where('course_segment', $courseSegment)
         ->where('role_id', 4)
         ->exists();
-
         return $checkTeacherEnroll;
     }
 }

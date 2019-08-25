@@ -3,15 +3,14 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class scale extends Model
+class ItemType extends Model
 {
+    protected $fillable = ['name'];
     public function GradeItems()
     {
         return $this->hasMany('App\GradeItems');
     }
-    public function UserGrade()
-    {
-        return $this->hasMany('App\UserGrade');
-    }
 }
+

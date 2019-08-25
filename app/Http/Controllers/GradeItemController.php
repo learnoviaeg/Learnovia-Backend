@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\grade;
+use App\GradeItems;
+use App\ItemType;
+use DB;
 
-class GradeController extends Controller
+class GradeItemController extends Controller
 {
     public function create(Request $request)
     {
@@ -21,6 +23,9 @@ class GradeController extends Controller
             'plusfactor' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
+            'item_type'=> 'required|exists:item_types,id',
+            'item_Entity' => 'required',
+            'hidden' => 'nullable|boolean'
         ]);
 
         $data=[
@@ -32,7 +37,9 @@ class GradeController extends Controller
         'scale_id' =>$request->scale_id ,
         'grade_pass' =>$request->grade_pass,
         'aggregationcoef' =>$request->aggregationcoef,
-        'aggregationcoef2' =>$request->aggregationcoef2
+        'aggregationcoef2' =>$request->aggregationcoef2,
+        'item_type' => $request->item_type,
+        'item_Entity' => $request->item_Entity
         ];
         if(isset($request->multifactor)) {
             $data['multifactor']=$request->multifactor;
@@ -40,8 +47,11 @@ class GradeController extends Controller
         if(isset($request->plusfactor)) {
             $data['plusfactor']=$request->plusfactor;
         }
+        if(isset($request->hidden)) {
+            $data['hidden']=$request->hidden;
+        }
 
-        $grade=grade::create($data);
+        $grade=GradeItems::create($data);
 
         return HelperController::api_response_format(201,$grade,'Grade Created Successfully');
 
@@ -52,11 +62,10 @@ class GradeController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:grades,id',
+            'id' => 'required|exists:grade_items,id',
         ]);
 
-        $grade =grade::find($request->id);
-
+        $grade =GradeItems::find($request->id);
         $request->validate([
             'grade_category' => 'required|exists:grade_categories,id',
             'grademin'=> 'required|integer',
@@ -69,6 +78,9 @@ class GradeController extends Controller
             'plusfactor' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
+            'item_type'=> 'required|exists:item_types,id',
+            'item_Entity' => 'required',
+            'hidden' => 'nullable|integer'
         ]);
 
         $data=[
@@ -80,7 +92,9 @@ class GradeController extends Controller
             'scale_id' =>$request->scale_id ,
             'grade_pass' =>$request->grade_pass,
             'aggregationcoef' =>$request->aggregationcoef,
-            'aggregationcoef2' =>$request->aggregationcoef2
+            'aggregationcoef2' =>$request->aggregationcoef2,
+            'item_type' => $request->item_type,
+            'item_Entity' => $request->item_Entity
             ];
             if(isset($request->multifactor)) {
                 $data['multifactor']=$request->multifactor;
@@ -88,10 +102,14 @@ class GradeController extends Controller
             if(isset($request->plusfactor)) {
                 $data['plusfactor']=$request->plusfactor;
             }
+            if(isset($request->hidden)) {
+                $data['hidden']=$request->hidden;
+            }
 
             $update=$grade->update($data);
 
-        return HelperController::api_response_format(201, $grade, 'Grade Updated Successfully');
+
+        return HelperController::api_response_format(200, $grade, 'Grade Updated Successfully');
 
     }
 
@@ -100,10 +118,10 @@ class GradeController extends Controller
     public function delete(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:grades,id',
+            'id' => 'required|exists:grade_items,id',
         ]);
 
-        $grade = grade::find($request->id);
+        $grade = GradeItems::find($request->id);
         $grade->delete();
 
         return HelperController::api_response_format(201, null, 'Grade Deleted Successfully');
@@ -112,8 +130,29 @@ class GradeController extends Controller
 
 
     public function list()
-    {
-        $grade = grade::all();
-        return HelperController::api_response_format(200, $grade);
+    {   $grades=array();
+        $grade = GradeItems::all();
+        foreach($grade as $g){
+            $entity_id= $g['item_Entity'];
+            $type=ItemType::where('id',$g['item_type'])->pluck('name')->first();
+            $item_entity =DB::table($type)->where('id',$entity_id)->get(['id' , 'name']);
+            $g[$type]=$item_entity;
+            array_push($grades,$g);
+
+        }
+        return HelperController::api_response_format(200, $grades);
+    }
+
+    public function Move_Category(Request $request){
+        $request->validate([
+            'id' => 'required|exists:grade_items,id',
+            'newcategory'=>'required|exists:grade_categories,id',
+        ]);
+        $GardeCategory=GradeItems::find($request->id);
+        $GardeCategory->update([
+            'grade_category' => $request->newcategory,
+        ]);
+        return HelperController::api_response_format(200, $GardeCategory,'Grade item Category is moved successfully');
+
     }
 }
