@@ -21,7 +21,7 @@ class CreateGradeCategoriesTable extends Migration
             $table->unsignedBigInteger('parent')->nullable();
             $table->foreign('parent')->references('id')->on('grade_categories')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('aggregation')->nullable();
-            $table->boolean('aggregatedOnlyGraded')->nullable();
+            $table->integer('aggregatedOnlyGraded')->nullable();
             $table->boolean('hidden')->default(0);
             $table->timestamps();
         });

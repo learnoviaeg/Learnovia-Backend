@@ -19,20 +19,31 @@ class GradeCategoryController extends Controller
             'name' => 'required',
             'course_id' => 'required|exists:course_segments,course_id',
             'parent' => 'exists:grade_categories,id',
-            'aggregation' => 'integer',
-            'aggregatedOnlyGraded' => 'integer',
-            'hidden' => 'integer'
+            'aggregation' => 'nullable|integer',
+            'aggregatedOnlyGraded' => 'nullable|integer',
+            'hidden' => 'nullable|boolean',
+            'class_id'=>'required|exists:classes,id'
         ]);
-        $course_segment_id = CourseSegment::getActive_segmentfromcourse($request->course_id);
-        $grade_category = GradeCategory::create([
+        $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
+        $grade_category = [
             'name' => $request->name,
-            'course_segment_id' => $course_segment_id,
-            'parent' => $request->parent,
-            'aggregation' => $request->aggregation,
-            'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
-            'hidden' => $request->hidden,
-        ]);
-        return HelperController::api_response_format(200, $grade_category, 'Grade Category is created successfully');
+            'course_segment_id' => $course_segment_id->id,
+        ];
+        if($request->filled('parent')){
+            $grade_category['parent']=$request->parent;
+        }
+        if($request->filled('aggregation')){
+            $grade_category['aggregation']=$request->aggregation;
+        }
+        if($request->filled('aggregatedOnlyGraded')){
+            $grade_category['aggregatedOnlyGraded']=$request->aggregatedOnlyGraded;
+        }
+        if($request->filled('hidden')){
+            $grade_category['hidden']=$request->parent;
+        }
+        $GradeCat=GradeCategory::create($grade_category);
+        
+        return HelperController::api_response_format(200, $GradeCat, 'Grade Category is created successfully');
     }
 
 
@@ -49,20 +60,23 @@ class GradeCategoryController extends Controller
     public function UpdateGradeCategory(Request $request)
     {
         $request->validate([
+            'id'=>'required|exists:grade_categories,id',
             'name' => 'required',
             'course_segment_id' => 'exists:course_segments,id',
             'parent' => 'exists:grade_categories,id',
-            'aggregation' => 'integer',
-            'aggregatedOnlyGraded' => 'integer',
-            'hidden' => 'integer'
+            'hidden' => 'integer',
         ]);
         $grade_category = GradeCategory::find($request->id);
         $grade_category->name = $request->name;
         if ($request->filled('course_segment_id')) {
             $grade_category->course_segment_id = $request->course_segment_id;
         }
+        if ($request->filled('parent')) {
         $grade_category->parent = $request->parent;
+        }
+        if ($request->filled('hidden')) {
         $grade_category->hidden = $request->hidden;
+        }
         $grade_category->save();
         return HelperController::api_response_format(200, $grade_category, 'Grade Category is updated successfully');
     }
