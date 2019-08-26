@@ -36,37 +36,10 @@ class UsersImport implements ToModel, WithHeadingRow
         Validator::make($row,[
             'firstname'=>'required|alpha',
             'lastname'=>'required|alpha',
-            'role_id'=>'required|exists:roles,id',
-            'type' => 'required|exists:academic_types,id',
-            'level' => 'required|exists:levels,id',
-            'class' => 'required|exists:classes,id',
-            'segment' => 'exists:segments,id',
-            'year' => 'exists:academic_years,id'
+            'role_id'=>'required|exists:roles,id'
         ])->validate();
 
-        if (isset($row['year'])) {
 
-            Validator::make($row,[
-                'year' => 'exists:academic_years,id'
-            ])->validate();
-
-            $year = $row['year'];
-        }
-        else
-        {
-            $year = AcademicYear::Get_current()->id;
-        }
-        if (isset($row['segment'])) {
-
-            Validator::make($row,[
-                'segment' => 'exists:segments,id',
-            ])->validate();
-
-            $segment = $row['segment'];
-        }
-        else{
-            $segment = Segment::Get_current($row['type'])->id;
-        }
 
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
                         'language','timezone','religion','second language'];
@@ -95,6 +68,38 @@ class UsersImport implements ToModel, WithHeadingRow
 
         if (isset($row['start_date'])&&isset($row['end_date']))
         {
+            Validator::make($row,[
+                'type' => 'required|exists:academic_types,id',
+                'level' => 'required|exists:levels,id',
+                'class' => 'required|exists:classes,id',
+                'segment' => 'exists:segments,id',
+                'year' => 'exists:academic_years,id'
+            ])->validate();
+
+            if (isset($row['year'])) {
+
+                Validator::make($row,[
+                    'year' => 'exists:academic_years,id'
+                ])->validate();
+
+                $year = $row['year'];
+            }
+            else
+            {
+                $year = AcademicYear::Get_current()->id;
+            }
+            if (isset($row['segment'])) {
+
+                Validator::make($row,[
+                    'segment' => 'exists:segments,id',
+                ])->validate();
+
+                $segment = $row['segment'];
+            }
+            else{
+                $segment = Segment::Get_current($row['type'])->id;
+            }
+
             $time=['start_date'=>Date::excelToDateTimeObject($row['start_date']),'end_date' =>Date::excelToDateTimeObject($row['end_date'])];
 
             Validator::make($time,[

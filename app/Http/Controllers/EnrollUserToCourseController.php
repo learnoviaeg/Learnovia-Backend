@@ -38,7 +38,7 @@ class EnrollUserToCourseController extends Controller
         $rolecount = 0;
         $course_segment = [];
         foreach($request->course as $course){
-            $course_segment = CourseSegment::GetWithClassAndCourse($request->class , $course);
+            $course_segment[] = CourseSegment::GetWithClassAndCourse($request->class , $course);
         }
 
         foreach ($course_segment as $courses) {
