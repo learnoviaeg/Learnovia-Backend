@@ -20,6 +20,7 @@ use App\CourseSegment;
 use App\Enroll;
 use App\User;
 use App\Http\Controllers\HelperController;
+use App\Component;
 
 class FilesController extends Controller
 {
@@ -67,6 +68,22 @@ class FilesController extends Controller
         $role->givePermissionTo('media/get-all');
         $role->givePermissionTo('media/get');
         $role->givePermissionTo('file/get');
+
+        Component::create([
+            'name' => 'Media',
+            'module'=>'UploadFiles',
+            'model' => 'media',
+            'type' => 1,
+            'active' => 1
+        ]);
+
+        Component::create([
+            'name' => 'File',
+            'module'=>'UploadFiles',
+            'model' => 'file',
+            'type' => 1,
+            'active' => 1
+        ]);
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }

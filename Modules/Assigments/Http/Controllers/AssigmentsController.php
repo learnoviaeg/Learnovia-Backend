@@ -18,6 +18,8 @@ use Carbon\Carbon;
 use Modules\Assigments\Entities\assignment;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\UserAssigment;
+use App\Component;
+use App\status;
 
 class AssigmentsController extends Controller
 {
@@ -44,6 +46,25 @@ class AssigmentsController extends Controller
         $role->givePermissionTo('assignment/override');
         $role->givePermissionTo('assignment/delete');
         $role->givePermissionTo('assignment/get');
+
+        Component::create([
+            'name' => 'Assigments',
+            'module'=>'Assigments',
+            'model' => 'assignment',
+            'type' => 1,
+            'active' => 1
+        ]);
+
+        $status = status::all();
+
+        if($status->isEmpty())
+        {
+            $addstatus=array(
+                array('name'=>'Graded'),
+                array('name' => 'Not Graded')
+            );
+            status::insert($addstatus);
+        }
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }

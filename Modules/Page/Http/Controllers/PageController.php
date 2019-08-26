@@ -15,6 +15,7 @@ use Illuminate\Routing\Controller;
 use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
 use Illuminate\Support\Carbon;
+use App\Component;
 
 class PageController extends Controller
 {
@@ -42,6 +43,14 @@ class PageController extends Controller
         $role->givePermissionTo('page/toggle');
         $role->givePermissionTo('page/link-lesson');
         $role->givePermissionTo('page/get');
+
+        Component::create([
+            'name' => 'Page',
+            'module'=>'Page',
+            'model' => 'page',
+            'type' => 1,
+            'active' => 1
+        ]);
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
