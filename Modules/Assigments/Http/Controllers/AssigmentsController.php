@@ -114,7 +114,7 @@ class AssigmentsController extends Controller
             'is_graded' => 'required|boolean',
             'mark' => 'required|integer',
             'allow_attachment' => 'required|integer|min:0|max:3',
-            'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date|after:' . Carbon::now()->addMinutes(10),
+            'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date|after:' . Carbon::now()->subMinutes(10),
             'closing_date' => 'required|date|date_format:Y-m-d H:i:s',
             'visiable' => 'required|boolean',
             'class' => 'required|exists:classes,id',
