@@ -176,7 +176,6 @@ class UserQuizController extends Controller
                         ]);
                         $data['content'] = $question['content'];
                         break;
-
                 }
 
                 $allData->push($data);
