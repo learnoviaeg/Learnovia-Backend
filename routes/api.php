@@ -164,6 +164,7 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
     Route::get('Show_and_hide_real_password_with_permission', 'UserController@Show_and_hide_real_password_with_permission')->name('show/hiderealpass')->middleware('permission:user/show-hide-real-pass');
     Route::post('unsuspend', 'UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:user/un-suspend');
     Route::get('parentchild', 'UserController@parent_child')->name('parentchild')->middleware('permission:user/parent-child');
+    Route::get('getbyid', 'UserController@GetUserById')->name('getbyid')->middleware('permission:user/get-by-id');
 });
 
 //Enroll Routes
