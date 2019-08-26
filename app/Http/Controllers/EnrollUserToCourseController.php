@@ -28,17 +28,19 @@ class EnrollUserToCourseController extends Controller
             'role_id' => 'required|array|exists:roles,id',
             'start_date' => 'required|before:end_date|after:' . Carbon::now(),
             'end_date' => 'required|after:' . Carbon::now(),
-            'year' => 'exists:academic_years,id',
-            'type' => 'required|exists:academic_types,id',
-            'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
-            'segment' => 'exists:segments,id'
+            'course' => 'required|array',
+            'course.*' => 'required|exists:courses,id'
         ]);
 
         $data = array();
         $count = 0;
         $rolecount = 0;
-        $course_segment = HelperController::Get_Course_segment($request)['value'];
+        $course_segment = [];
+        foreach($request->course as $course){
+            $course_segment = CourseSegment::GetWithClassAndCourse($request->class , $course);
+        }
+
         foreach ($course_segment as $courses) {
             foreach ($request->users as $username) {
                 $user_id = User::FindByName($username)->id;
