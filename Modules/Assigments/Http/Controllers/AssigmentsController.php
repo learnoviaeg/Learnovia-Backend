@@ -421,6 +421,7 @@ class AssigmentsController extends Controller
         $assignment['user_assignment'] = $userassigments;
         foreach ($assignment['user_assignment'] as $value) {
             # code...
+            $value->user;
             $value['attachment'] = attachment::where('id', $value->attachment_id)->first();
         }
 
