@@ -393,8 +393,7 @@ class AnnouncementController extends Controller
                 $classname=Classes::find($scl->class_id);
                 $all_ann['Class'][$cl]['name']=$classname->name;
                 $all_ann['Class'][$cl]['id']=$classname->id;
-                $all_ann['Class'][$cl]['announcements']=Announcement::where('class_id',$scl->class_id)->where('publish_date','<',Carbon::now())->get(['id','title','description','attached_file']);
-
+                $all_ann['Class'][$cl]['announcements']=Announcement::where('class_id',$scl->class_id)->where('publish_date','>',Carbon::now())->get(['id','title','description','attached_file']);
                 $class_level_id[]=$scl->id;
                 $cl++;
             }
