@@ -223,6 +223,16 @@ class AnnouncementController extends Controller
            'publish_date' => $request->publish_date,
         ]);
 
+        if($request->filled('start_date')){
+            $ann->start_date = $request->start_date;
+            $ann->save();
+        }
+
+        if($request->filled('due_date')){
+            $ann->due_date = $request->due_date;
+            $ann->save();
+        }
+
         $requ =([
             'id' => "$ann->id",
             'type' => 'announcement',
