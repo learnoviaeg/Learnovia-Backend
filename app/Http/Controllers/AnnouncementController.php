@@ -220,7 +220,7 @@ class AnnouncementController extends Controller
            'year_id' => $request->year_id,
            'type_id' => $request->type_id,
            'segment_id' => $request->segment_id,
-           'publish_date' => $request->publish_date,
+           'publish_date' => $publishdate,
         ]);
 
         if($request->filled('start_date')){
