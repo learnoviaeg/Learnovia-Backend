@@ -9,6 +9,7 @@ use Auth;
 use Browser;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
+use Modules\QuestionBank\Entities\QuizLesson;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
@@ -20,14 +21,22 @@ class UserQuizController extends Controller
    public function store_user_quiz(Request $request){
 
         $request->validate([
-            'quiz_lesson_id' => 'required|integer|exists:quiz_lessons,id',
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
 
-        $max_attempt_index = userQuiz::where('quiz_lesson_id', $request->quiz_lesson_id)
+        $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)
+                ->where('lesson_id',$request->lesson_id)->first();
+
+        if(!isset($quiz_lesson)){
+            return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
+        }
+
+        $max_attempt_index = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
             ->where('user_id', Auth::user()->id)
             ->get()->max('attempt_index');
 
-        $userQuiz = userQuiz::where('quiz_lesson_id', $request->quiz_lesson_id)
+        $userQuiz = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
                     ->where('user_id', Auth::user()->id)
                     ->first();
 
@@ -67,7 +76,7 @@ class UserQuizController extends Controller
 
         $userQuiz = userQuiz::create([
             'user_id' => Auth::user()->id,
-            'quiz_lesson_id' => $request->quiz_lesson_id,
+            'quiz_lesson_id' => $quiz_lesson->id,
             'status_id' => 2,
             'feedback' => null,
             'grade' => null,
@@ -85,13 +94,16 @@ class UserQuizController extends Controller
 
    public function quiz_answer(Request $request){
         $request->validate([
-            'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
             'Questions' => 'required|array',
             'Questions.*.id' => 'required|integer|exists:questions,id',
         ]);
 
         // check that question exist in the Quiz
-        $user_quiz = userQuiz::find($request->user_quiz_id);
+        $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)
+                ->where('lesson_id',$request->lesson_id)->first();
+        $user_quiz = userQuiz::where('quiz_lesson_id' , '=' , $quiz_lesson->id)->where('user_id' , '=' , $request->user()->id)->first();
         $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
 
         $allData = collect([]);
@@ -176,12 +188,13 @@ class UserQuizController extends Controller
                         ]);
                         $data['content'] = $question['content'];
                         break;
+
                 }
 
                 $allData->push($data);
             }
             else{
-                return HelperController::api_response_format(400, null, 'Something went wrong');
+                return HelperController::api_response_format(400, null, 'No type determine to this question');
             }
 
         }
