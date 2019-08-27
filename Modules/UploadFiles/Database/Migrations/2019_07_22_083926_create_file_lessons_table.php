@@ -17,10 +17,9 @@ class CreateFileLessonsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('lesson_id');
             $table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade')->onUpdate('cascade');
-
             $table->unsignedBigInteger('file_id');
             $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade')->onUpdate('cascade');
-
+            $table->boolean('visible')->default(1);
             $table->integer("index")->nullable();
 
             $table->timestamps();

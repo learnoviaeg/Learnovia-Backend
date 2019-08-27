@@ -19,7 +19,7 @@ class CreateAssigmentLessonTable extends Migration
             $table->foreign('assignment_id')->references('id')->on('assignments')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('lesson_id');
             $table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade')->onUpdate('cascade');
-
+            $table->boolean('visible')->default(1);
             $table->timestamps();
         });
     }

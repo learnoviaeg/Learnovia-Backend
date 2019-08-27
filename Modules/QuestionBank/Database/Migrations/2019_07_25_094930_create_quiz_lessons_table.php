@@ -24,7 +24,7 @@ class CreateQuizLessonsTable extends Migration
 
             $table->timestamp('start_date');
             $table->timestamp('due_date')->nullable();
-
+            $table->boolean('visible')->default(1);
             $table->integer('max_attemp');
             $table->unsignedBigInteger('grading_method_id');
             $table->integer('grade');

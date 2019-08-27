@@ -21,9 +21,6 @@ class CreateMediaTable extends Migration
             $table->string('size')->nullable();
             $table->string('type')->nullable();
             $table->text('link')->nullable();
-
-            $table->boolean('visibility')->default(1);
-
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 
