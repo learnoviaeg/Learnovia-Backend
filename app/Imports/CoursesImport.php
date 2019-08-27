@@ -14,7 +14,7 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 
-class CoursesImport implements ToModel , WithHeadingRow 
+class CoursesImport implements ToModel , WithHeadingRow
 {
     /**
     * @param array $row
@@ -25,17 +25,17 @@ class CoursesImport implements ToModel , WithHeadingRow
     {
 
         $request = new Request([
-            'name' => $row['name'],
-            'category' => $row['category'],
-            'year' => $row['year'],
-            'type' => $row['type'],
-            'level' => $row['level'],
-            'class' => $row['class'],
-            'segment' => $row['segment'],
+            'name' => [$row['name']],
+            'category' => [$row['category']],
+            'year' => [$row['year']],
+            'type' => [$row['type']],
+            'level' => [$row['level']],
+            'class' => [$row['class']],
+            'segment' => [$row['segment']],
         ]);
 
         CourseController::add($request);
 
     }
-    
+
 }
