@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\User;
+use Spatie\Permission\Models\Permission;
 
 class AuthController extends Controller
 {
@@ -34,7 +35,6 @@ class AuthController extends Controller
         ]);
         $user->save();
         return HelperController::api_response_format(200, $user, 'User Created Successfully');
-
     }
 
     /**
@@ -103,5 +103,15 @@ class AuthController extends Controller
     public function userRole(Request $request)
     {
         return HelperController::api_response_format(200, $request->user()->roles);
+    }
+
+    public function getuserPermessionFlags(Request $request)
+    {
+        $permessions = Permission::all();
+        $result = [];
+        foreach ($permessions as $permession) {
+            $result[$permession->name] = $request->user()->hasPermissionTo($permession->name);
+        }
+        return HelperController::api_response_format(200, $result);
     }
 }
