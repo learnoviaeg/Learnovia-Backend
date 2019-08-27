@@ -39,8 +39,8 @@ class AnnouncementController extends Controller
             'title'=>'required',
             'description' => 'required',
             'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
-            'start_date'=>'required|before:due_date|after:'.Carbon::now(),
-            'due_date'=>'required|after:'.Carbon::now(),
+            'start_date'=>'before:due_date|after:'.Carbon::now(),
+            'due_date'=>'after:'.Carbon::now(),
             'publish_date'=> 'nullable|after:'.Carbon::now(),
             'assign'=> 'required'
         ]);
@@ -289,8 +289,8 @@ class AnnouncementController extends Controller
             'title'=>'required',
             'description' => 'required',
             'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
-            'start_date'=>'required|before:due_date|after:'.Carbon::now(),
-            'due_date'=>'required|after:'.Carbon::now(),
+            'start_date'=>'before:due_date|after:'.Carbon::now(),
+            'due_date'=>'after:'.Carbon::now(),
             'publish_date'=> 'nullable|after:'.Carbon::now(),
         ]);
 
