@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use App\YearLevel;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-
+use Validator;
 
 class CoursesImport implements ToModel , WithHeadingRow
 {
@@ -23,19 +23,51 @@ class CoursesImport implements ToModel , WithHeadingRow
     */
     public function model(array $row)
     {
+        $no_of_lessons = 4;
 
-        $request = new Request([
-            'name' => [$row['name']],
-            'category' => [$row['category']],
-            'year' => [$row['year']],
-            'type' => [$row['type']],
-            'level' => [$row['level']],
-            'class' => [$row['class']],
-            'segment' => [$row['segment']],
+        Validator::make($row,[
+            'name'=>'required',
+            'category'=>'required|exists:categories,id',
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+            'segment' => 'required|exists:segments,id',
+            'no_of_lessons' => 'integer',
+            'description' => 'string'
+        ])->validate();
+
+        $course = Course::firstOrCreate([
+            'name' => $row['name'],
+            'category_id' => $row['category'],
         ]);
 
-        CourseController::add($request);
+        if (isset($row['description'])) {
+            $course->description = $row['description'];
+            $course->save();
+        }
 
+        $yeartype = AcademicYearType::checkRelation($row['year'], $row['type']);
+        $yearlevel = YearLevel::checkRelation($yeartype->id, $row['level']);
+        $classLevel = ClassLevel::checkRelation($row['class'], $yearlevel->id);
+        $segmentClass = SegmentClass::checkRelation($classLevel->id, $row['segment']);
+        $courseSegment = CourseSegment::firstOrCreate([
+            'course_id' => $course->id,
+            'segment_class_id' => $segmentClass->id,
+            'is_active' => 1
+        ]);
+
+        if (isset($row['no_of_lessons'])) {
+            $no_of_lessons = $row['no_of_lessons'];
+        }
+
+        for ($i = 1; $i <= $no_of_lessons; $i++) {
+            $courseSegment->lessons()->firstOrCreate([
+                'name' => 'Lesson ' . $i,
+                'index' => $i,
+            ]);
+        }
+        return $course;
     }
 
 }
