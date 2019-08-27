@@ -213,8 +213,6 @@ class AnnouncementController extends Controller
            'title' => $request->title,
            'description' =>$request->description,
            'attached_file' => $file_id,
-           'start_date' => $request->start_date,
-           'due_date' => $request->due_date,
            'assign'=>$request->assign,
            'class_id' => $request->class_id,
            'course_id' => $request->course_id,
