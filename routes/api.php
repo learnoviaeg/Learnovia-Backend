@@ -13,7 +13,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('user', 'AuthController@user')->name('user');
     Route::post('CheckPermission' , 'SpatieController@checkPermessionOnCourse')->name('checkPermessionOnCourse');
-    Route::post('getMyLimits' , 'SpatieController@getuserPermessionFlags')->name('getuserPermessionFlags');
+    Route::get('getMyLimits' , 'SpatieController@getuserPermessionFlags')->name('getuserPermessionFlags');
     Route::post('comparepermissions','SpatieController@comparepermissions')->name('comparepermissions');
 
     //Spatie Routes
