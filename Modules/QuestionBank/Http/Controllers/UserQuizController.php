@@ -94,16 +94,13 @@ class UserQuizController extends Controller
 
    public function quiz_answer(Request $request){
         $request->validate([
-            'quiz_id' => 'required|integer|exists:quizzes,id',
-            'lesson_id' => 'required|integer|exists:lessons,id',
+            'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
             'Questions' => 'required|array',
             'Questions.*.id' => 'required|integer|exists:questions,id',
         ]);
 
         // check that question exist in the Quiz
-        $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)
-                ->where('lesson_id',$request->lesson_id)->first();
-        $user_quiz = userQuiz::where('quiz_lesson_id' , '=' , $quiz_lesson->id)->where('user_id' , '=' , $request->user()->id)->first();
+        $user_quiz = userQuiz::find($request->user_quiz_id);
         $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
 
         $allData = collect([]);
