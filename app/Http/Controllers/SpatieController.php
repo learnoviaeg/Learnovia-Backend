@@ -640,10 +640,13 @@ class SpatieController extends Controller
     {
         $request->validate([
             'course' => 'required|exists:courses,id',
+            'class'=> 'required|exists:courses,id',
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'required|string|exists:permissions,name'
         ]);
-        $activeSegment = Course::with('activeSegment')->whereId($request->course)->first();
+        $activeSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
+        if($activeSegment == null)
+            return HelperController::api_response_format(400, null , 'No Activ  segment on this course to check permession in');
         $enroll = Enroll::whereCourse_segment($activeSegment->activeSegment->id)->whereUser_id($request->user()->id)->first();
         $role = Role::find($enroll->role_id);
         $has = [];
