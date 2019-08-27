@@ -647,7 +647,8 @@ class SpatieController extends Controller
         $activeSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
         if($activeSegment == null)
             return HelperController::api_response_format(400, null , 'No Activ  segment on this course to check permession in');
-        $enroll = Enroll::whereCourse_segment($activeSegment->activeSegment->id)->whereUser_id($request->user()->id)->first();
+        $enroll = Enroll::whereCourse_segment($activeSegment->activeSegment->id)
+        ->whereUser_id($request->user()->id)->first();
         $role = Role::find($enroll->role_id);
         $has = [];
         foreach ($request->permissions as $permission) {
