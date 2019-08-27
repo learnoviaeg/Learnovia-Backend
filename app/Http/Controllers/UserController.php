@@ -243,7 +243,7 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
         ]);
         $user = User::find($request->id);
-
+        $user->roles;
         return HelperController::api_response_format(201, $user, null);
     }
 
