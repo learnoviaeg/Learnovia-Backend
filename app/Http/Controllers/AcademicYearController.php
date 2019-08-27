@@ -41,14 +41,14 @@ class AcademicYearController extends Controller
         ]);
         $year = AcademicYear::with('AC_Type');
         if ($request->filled('id')) {
-            $year->where('id', $request->id);
+            $year->where('id', $request->id)->first();
         }
         if ($request->filled('all')) {
             $year->get();
         } else {
             $year->paginate(HelperController::GetPaginate($request));
         }
-        return HelperController::api_response_format(201, $year);
+        return HelperController::api_response_forma(200, $year);
     }
 
     /**
