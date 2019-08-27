@@ -70,7 +70,7 @@ class AnnouncementController extends Controller
         {
             $toUser = User::get();
         }
-        else if ($request->assign == 'course')
+        else if ($request->assign == 'Course')
         {
             $request->validate([
                 'course_id'=>'required|exists:courses,id',
@@ -86,7 +86,7 @@ class AnnouncementController extends Controller
                 }
             }
         }
-        else if ($request->assign == 'class')
+        else if ($request->assign == 'Class')
         {
             $request->validate([
                 'class_id'=>'required|exists:classes,id',
@@ -111,7 +111,7 @@ class AnnouncementController extends Controller
                 }
             }
         }
-        else if ($request->assign == 'level')
+        else if ($request->assign == 'Level')
         {
             $request->validate([
                 'level_id'=>'required|exists:levels,id',
@@ -134,7 +134,7 @@ class AnnouncementController extends Controller
                 }
             }
         }
-        else if ($request->assign == 'year')
+        else if ($request->assign == 'Year')
         {
             $request->validate([
                 'year_id'=>'required|exists:academic_years,id',
@@ -160,7 +160,7 @@ class AnnouncementController extends Controller
                 }
             }
         }
-        else if ($request->assign == 'type')
+        else if ($request->assign == 'Type')
         {
             $request->validate([
                 'type_id'=>'required|exists:academic_types,id',
@@ -187,7 +187,7 @@ class AnnouncementController extends Controller
             }
 
         }
-        else if($request->assign == 'segment')
+        else if($request->assign == 'Segment')
         {
             $request->validate([
                 'segment_id'=>'required|exists:segments,id',
@@ -204,7 +204,7 @@ class AnnouncementController extends Controller
         }
         else
         {
-            return ('Operation Fails! Please Choose Correct Filter.');
+            return HelperController::api_response_format(400 , null , 'Something went wrong please check your data');
         }
 
 
