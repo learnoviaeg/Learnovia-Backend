@@ -300,7 +300,23 @@ class QuizController extends Controller
             $quiz = quiz::find($request->quiz_id);
             $Questions = $quiz->Question;
             foreach ($Questions as $Question) {
-                $Question->question_answer->shuffle();
+                if ($Question->question_type_id==3){
+                    $Match_A=collect([]);
+                    $Match_B=collect([]);
+
+                    foreach ($Question->question_answer as $answer ){
+                        $Match_A->push($answer->match_a);
+                        $Match_B->push($answer->match_b);
+                    }
+                    $Match_A= $Match_A->unique();
+                    $Match_B= $Match_B->unique();
+                    unset($Question->question_answer);
+                    $Question->Match_A_List = $Match_A->values()->all();
+                    $Question->Match_B_List= $Match_B->values()->all();
+                }
+
+                $Question->question_answer;
+
             }
             return HelperController::api_response_format(200, $Questions);
         } else {
@@ -315,6 +331,20 @@ class QuizController extends Controller
                     }
                     $question->childeren = $shuffledChildQuestion;
                     foreach ($shuffledChildQuestion as $childQuestion) {
+                        if ($childQuestion->question_type_id==3){
+                            $Match_A=collect([]);
+                            $Match_B=collect([]);
+
+                            foreach ($childQuestion->question_answer as $answer ){
+                                $Match_A->push($answer->match_a);
+                                $Match_B->push($answer->match_b);
+                            }
+                            $Match_A= $Match_A->unique()->shuffle();
+                            $Match_B= $Match_B->unique()->shuffle();
+                            unset($childQuestion->question_answer);
+                            $childQuestion->Match_A_List = $Match_A->values()->all();
+                            $childQuestion->Match_B_List= $Match_B->values()->all();
+                        }
                         $answers = $childQuestion->question_answer->shuffle();
                         $childQuestion->answers = $answers;
                         unset($childQuestion->question_answer);
@@ -323,6 +353,24 @@ class QuizController extends Controller
                 } else {
                     unset($question->childeren);
                 }
+
+                if ($question->question_type_id==3){
+                    $Match_A=collect([]);
+                    $Match_B=collect([]);
+
+                    foreach ($question->question_answer as $answer ){
+                        $Match_A->push($answer->match_a);
+                        $Match_B->push($answer->match_b);
+                    }
+                    $Match_A= $Match_A->unique()->shuffle();
+                    $Match_B= $Match_B->unique()->shuffle();
+                    $question->Match_A_List = $Match_A->values()->all();
+                    $question->Match_B_List= $Match_B->values()->all();
+                }
+
+                $question->question_answer->shuffle();
+
+
                 $answers = $question->question_answer->shuffle();
                 $question->answers = $answers;
                 $question->question_category;
