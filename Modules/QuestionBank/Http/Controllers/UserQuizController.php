@@ -135,7 +135,7 @@ class UserQuizController extends Controller
                         # code...
                         $request->validate([
                             'Questions.'.$index.'.answer_id' => 'required|integer|exists:questions_answers,id',
-                            'Questions.'.$index.'.and_why' => 'string',
+                            'Questions.'.$index.'.and_why' => 'nullable|string',
                         ]);
 
                         if(!$question_answers->contains($question['answer_id'])){
@@ -143,7 +143,8 @@ class UserQuizController extends Controller
                         }
 
                         $data['answer_id'] = $question['answer_id'];
-                        $data['and_why'] = $question['and_why'];
+                        if(isset($question['answer_id']))
+                            $data['and_why'] = $question['and_why'];
                         break;
 
                     case 2: // MCQ
