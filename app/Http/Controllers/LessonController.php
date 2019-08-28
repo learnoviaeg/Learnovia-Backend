@@ -137,7 +137,7 @@ class LessonController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
             'index' => 'required|integer'
         ]);
-        $lesson_index = Lesson::where('id', $request->Lesson_id)->pluck('index')->first();
+        $lesson_index = Lesson::where('id', $request->lesson_id)->pluck('index')->first();
 
         if ($lesson_index > $request->index) {
             $lessons = $this->sortDown($request->lesson_id, $request->index);
