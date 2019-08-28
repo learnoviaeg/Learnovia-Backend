@@ -107,7 +107,17 @@ class UserQuizController extends Controller
         foreach ($request->Questions as $index => $question) {
 
             if(!$questions_ids->contains($question['id'])){
-                return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+
+                $check_question = Questions::find($question['id']);
+
+                if(isset($check_question->parent)){
+                    if(!$questions_ids->contains($check_question->parent)){
+                        return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+                    }
+                }
+                else{
+                    return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+                }
             }
 
             $currentQuestion = Questions::find($question['id']);
@@ -155,15 +165,12 @@ class UserQuizController extends Controller
                         # code...
                         $request->validate([
                             'Questions.'.$index.'.choices_array' => 'required|array',
-                            'Questions.'.$index.'.choices_array.*' => 'required|array|min:2|max:2',
-                            'Questions.'.$index.'.choices_array.*.*' => 'required|integer|exists:questions_answers,id',
+                            'Questions.'.$index.'.choices_array.*' => 'required|integer|exists:questions_answers,id',
                         ]);
 
-                        foreach($question['choices_array'] as $choices_array){
-                            foreach($choices_array as $choice){
-                                if(!$question_answers->contains($choice)){
-                                    return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
-                                }
+                        foreach($question['choices_array'] as $choice){
+                            if(!$question_answers->contains($choice)){
+                                return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
                             }
                         }
 
@@ -180,12 +187,7 @@ class UserQuizController extends Controller
 
                     case 5: // Paragraph
                         # code...
-                        $request->validate([
-                            'Questions.'.$index.'.content' => 'required|string',
-                        ]);
-                        $data['content'] = $question['content'];
                         break;
-
                 }
 
                 $allData->push($data);
