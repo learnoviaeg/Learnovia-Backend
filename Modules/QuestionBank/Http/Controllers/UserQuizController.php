@@ -125,7 +125,7 @@ class UserQuizController extends Controller
                         # code...
                         $request->validate([
                             'Questions.'.$index.'.answer_id' => 'required|integer|exists:questions_answers,id',
-                            'Questions.'.$index.'.and_why' => 'required|string',
+                            'Questions.'.$index.'.and_why' => 'string',
                         ]);
 
                         if(!$question_answers->contains($question['answer_id'])){
