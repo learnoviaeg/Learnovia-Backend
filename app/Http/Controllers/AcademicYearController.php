@@ -48,7 +48,7 @@ class AcademicYearController extends Controller
         } else {
             $year->paginate(HelperController::GetPaginate($request));
         }
-        return HelperController::api_response_forma(200, $year);
+        return HelperController::api_response_format(200, $year);
     }
 
     /**
