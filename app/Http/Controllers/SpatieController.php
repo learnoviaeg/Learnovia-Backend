@@ -120,6 +120,7 @@ class SpatieController extends Controller
 
             //Contact Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/add']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/get']);
 
             //USER CRUD Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/add']);

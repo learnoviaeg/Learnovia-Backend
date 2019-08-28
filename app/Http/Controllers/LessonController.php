@@ -99,7 +99,7 @@ class LessonController extends Controller
             if ($lesson->index > $lesson_index || $lesson->index < $index) {
                 continue;
             }
-            if ($lesson->index  !=  $lesson_index) {
+            elseif ($lesson->index  !=  $lesson_index) {
                 $lesson->update([
                     'index' => $lesson->index + 1
                 ]);
