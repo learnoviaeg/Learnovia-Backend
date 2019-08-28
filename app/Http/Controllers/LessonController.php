@@ -96,10 +96,9 @@ class LessonController extends Controller
         $lesson_index = Lesson::where('id', $lesson_id)->pluck('index')->first();
         $all_lessons = Lesson::Get_lessons_per_CourseSegment_from_lessonID($lesson_id);
         foreach ($all_lessons as $lesson) {
-            if ($lesson->index > $lesson_index || $lesson->index < $index) {
+            if ($lesson->index < $index || $lesson->index > $lesson_index) {
                 continue;
-            }
-            elseif ($lesson->index  !=  $lesson_index) {
+            } elseif ($lesson->index  !=  $lesson_index) {
                 $lesson->update([
                     'index' => $lesson->index + 1
                 ]);
