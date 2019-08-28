@@ -143,7 +143,7 @@ class UserQuizController extends Controller
                         }
 
                         $data['answer_id'] = $question['answer_id'];
-                        if(isset($question['answer_id']))
+                        if(isset($question['and_why']))
                             $data['and_why'] = $question['and_why'];
                         break;
 
