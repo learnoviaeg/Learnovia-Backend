@@ -434,7 +434,7 @@ class AnnouncementController extends Controller
             if ($not->data['type'] == 'announcement') {
                 $announce_id = $not->data['id'];
                 $annocument = announcement::find($announce_id);
-                if(isset($annocument->publish_date)){
+                if($annocument!= null){
                     if ($annocument->publish_date < Carbon::now()) {
                         $customize = announcement::whereId($announce_id)->first(['id', 'title', 'description', 'attached_file']);
                         $notif->push($customize);
