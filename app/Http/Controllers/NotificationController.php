@@ -18,6 +18,7 @@ class NotificationController extends Controller
             'from' => 1,
             'users' => [2],
             'course_id' => 2,
+            'class_id'=>3,
             'type' => 'annoucn'
         ]);
     }

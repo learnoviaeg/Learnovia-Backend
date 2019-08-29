@@ -60,6 +60,7 @@ class NewMessage extends Notification
                 'from' => $this->mess['from'],
                 'type' => $this->mess['type'],
                 'course_id' => $this->mess['course_id'],
+                'class_id'=>$this->mess['class_id'],
                 'publish_date' => $this->mess['publish_date'],
             ];
             if(isset($this->mess['link']))

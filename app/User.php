@@ -94,6 +94,7 @@ class User extends Authenticatable
                 'message' => 'required',
                 'from' => 'required|integer|exists:users,id',
                 'course_id' => 'required|integer|exists:courses,id',
+                'class_id'=>'required|integer|exists:classes,id'
             ]);
 
             if ($validater->fails()) {
