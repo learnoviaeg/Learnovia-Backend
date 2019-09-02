@@ -57,8 +57,8 @@ class QuizLessonController extends Controller
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
-            'opening_time' => 'required|date |date_format:Y-m-d H:i:s',
-            'closing_time' => 'required|date |date_format:Y-m-d H:i:s|after:opening_time',
+            'opening_time' => 'required|date|date_format:Y-m-d H:i:s',
+            'closing_time' => 'required|date|date_format:Y-m-d H:i:s|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
             'grade' => 'required',
@@ -69,7 +69,14 @@ class QuizLessonController extends Controller
         $lesson = Lesson::find($request->lesson_id);
         $coueseSegment = $lesson->courseSegment;
         if($quiz->course_id != $coueseSegment->course_id){
-            return HelperController::api_response_format(404, null,'This lesson doesn\'t belongs to the course of this quiz');
+            return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
+        }
+
+        $check = QuizLesson::where('quiz_id',$request->quiz_id)
+            ->where('lesson_id',$request->quiz_id)->get();
+
+        if(count($check) > 0){
+            return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
         }
 
         $quizLesson = QuizLesson::create([
@@ -96,7 +103,6 @@ class QuizLessonController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'quiz_lesson_id' => 'required|integer|exists:quiz_lessons,id',
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
             'opening_time' => 'required|date|date_format:Y-m-d H:i:s',
@@ -114,7 +120,8 @@ class QuizLessonController extends Controller
             return HelperController::api_response_format(404, null,'This lesson doesn\'t belongs to the course of this quiz');
         }
 
-        $quizLesson = QuizLesson::find($request->quiz_lesson_id);
+        $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
+                        ->where('lesson_id',$request->quiz_id)->first();
 
         $quizLesson->update([
             'quiz_id' => $request->quiz_id,
@@ -139,10 +146,29 @@ class QuizLessonController extends Controller
     public function destroy(Request $request)
     {
         $request->validate([
-            'quiz_lesson_id' => 'required|integer|exists:quiz_lessons,id',
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
 
-        QuizLesson::destroy($request->quiz_lesson_id);
+        $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
+                ->where('lesson_id',$request->quiz_id)->first();
+
+        $quizLesson->delete();
+
         return HelperController::api_response_format(200, [],'Quiz lesson deleted Successfully');
+    }
+
+
+    public function getQuizInLesson(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+        ]);
+
+        $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
+                ->where('lesson_id',$request->quiz_id)->first();
+
+        return HelperController::api_response_format(200, $quizLesson);
     }
 }

@@ -9,8 +9,8 @@ class QuizLesson extends Model
     protected $fillable = [
         'quiz_id',
         'lesson_id',
-        'opening_time',
-        'closing_time',
+        'start_date',
+        'due_date',
         'max_attemp',
         'grading_method_id',
         'grade',

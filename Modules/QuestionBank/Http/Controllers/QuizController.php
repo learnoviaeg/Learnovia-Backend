@@ -233,15 +233,30 @@ class QuizController extends Controller
             'course_id' => 'required|integer|exists:courses,id',
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
+            /**
+             * type 0 => new Question and/or OLD
+             * type 1 => Old Questions
+             * type 2 => Without Question
+             */
+            'type' => 'required|in:0,1,2',
         ]);
 
         $quiz = quiz::find($request->quiz_id);
 
-        $newQuestionsIDs = $this->storeWithNewQuestions($request);
+        if($request->type == 0){
+            $newQuestionsIDs = $this->storeWithNewQuestions($request);
 
-        $oldQuestionsIDs = $this->storeWithOldQuestions($request);
+            $oldQuestionsIDs = $this->storeWithOldQuestions($request);
 
-        $questionsIDs = $newQuestionsIDs->merge($oldQuestionsIDs);
+            $questionsIDs = $newQuestionsIDs->merge($oldQuestionsIDs);
+        }
+        else if($request->type == 1){
+            $questionsIDs = $this->storeWithOldQuestions($request);
+        }
+        else{
+            $questionsIDs = [];
+        }
+
 
         if (count($questionsIDs) == 0) { // In case of delete all questions
 
@@ -265,7 +280,7 @@ class QuizController extends Controller
         ]);
 
         $quiz->Question()->detach();
-        $quiz->Question()->attach($questionsIDs[0]);
+        $quiz->Question()->attach($questionsIDs);
 
         $quiz->Question;
 
@@ -612,6 +627,7 @@ class QuizController extends Controller
                 foreach($question->childeren as $single){
                     $single->question_type;
                     $single->question_answer;
+                    $question->question_category;
                     unset($single->pivot);
                 }
             }
@@ -621,9 +637,6 @@ class QuizController extends Controller
             $question->question_answer;
             $question->question_category;
             $question->question_type;
-            foreach($question->question_answer as $answer){
-                unset($answer->is_true);
-            }
             unset($question->pivot);
         }
 
