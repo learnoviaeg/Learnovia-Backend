@@ -206,10 +206,15 @@ class AnnouncementController extends Controller
             $notificatin = User::notify($requ);
         }
 
-        if ($notificatin == '1') {
+       /* if ($notificatin == '1') {
+
             return HelperController::api_response_format(201, $ann, 'Announcement Sent Successfully');
         }
-        return HelperController::api_response_format(201, $notificatin, 'Announcement Sent Successfully');
+        return HelperController::api_response_format(201, $notificatin, 'Announcement Sent Successfully');*/
+
+        $anounce = AnnouncementController::get_announcement();
+        $anouncenew = AnnouncementController::new_user_announcements();
+        return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Sent Successfully');
     }
 
     public function update_announce(Request $request)
@@ -426,7 +431,7 @@ class AnnouncementController extends Controller
         $user_id = Auth::user()->id;
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
             ->orderBy('created_at')
-            ->get(['data']);
+            ->get(['data' , 'read_at']);
         $notif = collect([]);
         $count = 0;
         foreach ($noti as $not) {
@@ -437,6 +442,7 @@ class AnnouncementController extends Controller
                 if($annocument!= null){
                     if ($annocument->publish_date < Carbon::now()) {
                         $customize = announcement::whereId($announce_id)->first(['id', 'title', 'description', 'attached_file']);
+                        $customize->seen = $not->read_at;
                         $notif->push($customize);
                     }
                 }

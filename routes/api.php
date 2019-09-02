@@ -43,6 +43,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:notifications/mark-as-read');
         Route::get('user', 'NotificationController@GetNotifcations')->name('readnotification')->middleware('permission:notifications/get-for-user');
         Route::get('delete', 'NotificationController@DeletewithTime')->name('readnotification')->middleware('permission:notifications/delete-duration');
+        Route::post('seen', 'NotificationController@SeenNotifications')->name('seennotification')->middleware('permission:notifications/seen');
     });
 
     //Announcements Routes

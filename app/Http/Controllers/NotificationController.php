@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\User;
+use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
@@ -86,6 +88,21 @@ class NotificationController extends Controller
             ->where('created_at', '<', $request->enddate)
             ->delete();
         return HelperController::api_response_format(200, $body = [], $message = 'notifications deleted');
+
+    }
+
+    public function SeenNotifications(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:notifications,id'
+        ]);
+        $session_id = Auth::User()->id;
+        $note = DB::table('notifications')->where('id', $request->id)->first();
+        if ($note->notifiable_id == $session_id){
+            $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
+            return HelperController::api_response_format(200, $body = [], $message = 'this notification  is seened successfully ');
+        }
+        return HelperController::api_response_format(400, $body = [], $message = 'you cannot seen this notification');
 
     }
 }
