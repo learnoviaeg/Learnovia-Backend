@@ -612,6 +612,7 @@ class QuizController extends Controller
                 foreach($question->childeren as $single){
                     $single->question_type;
                     $single->question_answer;
+                    $question->question_category;
                     unset($single->pivot);
                 }
             }
