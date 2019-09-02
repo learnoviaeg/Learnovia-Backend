@@ -34,6 +34,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('deleteQuizLesson', 'QuizLessonController@destroy')->middleware('permission:quiz/destroy-quiz-lesson');
     Route::get('types', 'QuestionBankController@getAllTypes'); //->middleware('permission:quiz/get-all-types');
     Route::get('categories', 'QuestionBankController@getAllCategories'); //->middleware('permission:quiz/get-all-categories');
+    Route::get('getQuizInLesson', 'QuizLessonController@getQuizInLesson');
 
     //User Quiz
     Route::post('storeUserQuiz', 'UserQuizController@store_user_quiz');
@@ -44,4 +45,5 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('getStudentAnswerinQuiz', 'QuizController@getStudentAnswerinQuiz');
     Route::get('getAllStudentsAnswerinQuiz', 'QuizController@getAllStudentsAnswerinQuiz');
     Route::get('getSingleQuiz', 'QuizController@getSingleQuiz');
+
 });
