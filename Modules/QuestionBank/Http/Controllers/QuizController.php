@@ -621,9 +621,6 @@ class QuizController extends Controller
             $question->question_answer;
             $question->question_category;
             $question->question_type;
-            foreach($question->question_answer as $answer){
-                unset($answer->is_true);
-            }
             unset($question->pivot);
         }
 
