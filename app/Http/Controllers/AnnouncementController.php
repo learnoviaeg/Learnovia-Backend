@@ -431,7 +431,7 @@ class AnnouncementController extends Controller
         $user_id = Auth::user()->id;
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
             ->orderBy('created_at')
-            ->get(['data']);
+            ->get(['data' , 'read_at']);
         $notif = collect([]);
         $count = 0;
         foreach ($noti as $not) {
@@ -442,6 +442,7 @@ class AnnouncementController extends Controller
                 if($annocument!= null){
                     if ($annocument->publish_date < Carbon::now()) {
                         $customize = announcement::whereId($announce_id)->first(['id', 'title', 'description', 'attached_file']);
+                        $customize->seen = $not->read_at;
                         $notif->push($customize);
                     }
                 }
