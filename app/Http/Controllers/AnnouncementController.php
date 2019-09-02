@@ -206,10 +206,15 @@ class AnnouncementController extends Controller
             $notificatin = User::notify($requ);
         }
 
-        if ($notificatin == '1') {
+       /* if ($notificatin == '1') {
+
             return HelperController::api_response_format(201, $ann, 'Announcement Sent Successfully');
         }
-        return HelperController::api_response_format(201, $notificatin, 'Announcement Sent Successfully');
+        return HelperController::api_response_format(201, $notificatin, 'Announcement Sent Successfully');*/
+
+        $anounce = AnnouncementController::get_announcement();
+        $anouncenew = AnnouncementController::new_user_announcements();
+        return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Sent Successfully');
     }
 
     public function update_announce(Request $request)
