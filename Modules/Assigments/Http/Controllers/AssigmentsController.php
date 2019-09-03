@@ -237,7 +237,7 @@ class AssigmentsController extends Controller
 
     public function assignAsstoUsers($request)
     {
-        $usersIDs = Enroll::where('course_segment', $request['course_segment'])->pluck('user_id')->toarray();
+      $usersIDs = Enroll::where('course_segment', $request['course_segment'])->where('role_id' , 3)->pluck('user_id')->toarray();
         foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
             $userassigment->user_id = $userId;
