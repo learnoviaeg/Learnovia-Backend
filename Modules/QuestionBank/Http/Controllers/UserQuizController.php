@@ -12,6 +12,8 @@ use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\QuizLesson;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\QuestionsAnswer;
+
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use function Opis\Closure\serialize;
 
@@ -142,7 +144,9 @@ class UserQuizController extends Controller
                             return HelperController::api_response_format(400, $question['answer_id'], 'This answer didn\'t belongs to this question');
                         }
 
+                        $answer = QuestionsAnswer::find($question['answer_id']);
                         $data['answer_id'] = $question['answer_id'];
+                        $data['user_grade'] = ($answer->is_true == 1) ? $currentQuestion->mark : 0;
                         if(isset($question['and_why']))
                             $data['and_why'] = $question['and_why'];
                         break;
@@ -154,11 +158,18 @@ class UserQuizController extends Controller
                             'Questions.'.$index.'.mcq_answers_array.*' => 'required|integer|exists:questions_answers,id'
                         ]);
 
+                        $flag = 1;
                         foreach($question['mcq_answers_array'] as $mcq_answer){
                             if(!$question_answers->contains($mcq_answer)){
                                 return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
                             }
+                            $answer = QuestionsAnswer::find($mcq_answer);
+                            if($answer->is_true == 0){
+                                $flag = 0;
+                            }
                         }
+                        $data['user_grade'] = ($flag == 1) ? $currentQuestion->mark : 0;
+
                         $data['mcq_answers_array'] = serialize($question['mcq_answers_array']);
                         break;
 
@@ -169,11 +180,29 @@ class UserQuizController extends Controller
                             'Questions.'.$index.'.choices_array.*' => 'required|integer|exists:questions_answers,id',
                         ]);
 
+                        $trueAnswer = $currentQuestion->question_answer->where('is_true',1)->pluck('id');
+
+                        if(count($question['choices_array']) != count($trueAnswer)){
+                            return HelperController::api_response_format(400, null, 'Please submit all choices');
+                        }
+                        $true_counter = 0;
+                        $false_counter = 0;
                         foreach($question['choices_array'] as $choice){
                             if(!$question_answers->contains($choice)){
                                 return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
                             }
+                            $answer = QuestionsAnswer::find($choice);
+                            if($answer->is_true == 0){
+                                $false_counter++;
+                            }
+                            else{
+                                $true_counter++;
+                            }
                         }
+                        $question_mark = (float) $currentQuestion->mark;
+                        $multiple = (float) $true_counter * (float) $question_mark;
+                        $grade = (float) $multiple / (float) count($trueAnswer);
+                        $data['user_grade'] = $grade;
 
                         $data['choices_array'] = serialize($question['choices_array']);
                         break;
