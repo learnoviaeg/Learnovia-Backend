@@ -234,4 +234,105 @@ class UserQuizController extends Controller
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
 
    }
+
+   public function estimateEssayandAndWhy(Request $request){
+        $request->validate([
+            'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
+            'Questions' => 'required|array',
+            'Questions.*.id' => 'required|integer|exists:questions,id',
+            'Questions.*.mark' => 'required|numeric',
+        ]);
+
+        // check that question exist in the Quiz
+        $user_quiz = userQuiz::find($request->user_quiz_id);
+        $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
+
+        $allData = collect([]);
+        foreach ($request->Questions as $question) {
+
+            if(!$questions_ids->contains($question['id'])){
+
+                $check_question = Questions::find($question['id']);
+
+                if(isset($check_question->parent)){
+                    if(!$questions_ids->contains($check_question->parent)){
+                        return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+                    }
+                }
+                else{
+                    return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+                }
+            }
+
+            $currentQuestion = Questions::find($question['id']);
+            $question_type_id = $currentQuestion->question_type->id;
+
+            $data = [
+                'question_id' => $question['id']
+            ];
+
+            $userQuizAnswer = userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)
+                    ->where('question_id',$question['id'])->first();
+
+            if(!isset($userQuizAnswer)){
+                return HelperController::api_response_format(400, null, 'No User Answer found to this Question');
+            }
+
+            if(isset($question_type_id)){
+                switch ($question_type_id) {
+                    case 1: // True_false
+                        # code...
+
+                        if(isset($currentQuestion->And_why)){
+                            if($currentQuestion->And_why_mark < $question['mark']){
+                                return HelperController::api_response_format(400, null, 'Mark should be less than or equal the Question mark');
+                            }
+
+                            $user_grade = userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)
+                                ->where('question_id',$question['id'])->pluck('user_grade')->first();
+
+                            $data['user_grade'] = (float) $user_grade + (float) $question['mark'];
+                        }
+                        else{
+                            $data = null;
+                        }
+                        break;
+
+
+                    case 4: // Essay
+                        # code...
+
+                        if($currentQuestion->mark < $question['mark']){
+                            return HelperController::api_response_format(400, null, 'Mark should be less than or equal the Question mark');
+                        }
+
+                        $data['user_grade'] = $question['mark'];
+                        break;
+
+                    default:
+                        return HelperController::api_response_format(400, null, 'This Question isn\'t Essay or true and false');
+                        break;
+
+                }
+
+                if($data != null){
+                    $allData->push($data);
+                }
+            }
+            else{
+                return HelperController::api_response_format(400, null, 'No type determine to this question');
+            }
+
+        }
+        foreach($allData as $data){
+            $userAnswer = userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)
+                            ->where('question_id',$data['question_id'])->first();
+
+            $userAnswer->user_grade = $data['user_grade'];
+            $userAnswer->save();
+        }
+
+        return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
+}
+
 }
