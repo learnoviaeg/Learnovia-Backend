@@ -39,6 +39,8 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     //User Quiz
     Route::post('storeUserQuiz', 'UserQuizController@store_user_quiz');
     Route::post('storeUserQuizAnswer', 'UserQuizController@quiz_answer');
+    Route::post('user_Attemp', 'UserQuizController@user_Attemp');
+
 
     Route::get('getAllQuizes', 'QuizController@getAllQuizes');
     Route::get('getStudentinQuiz', 'QuizController@getStudentinQuiz');
