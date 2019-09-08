@@ -21,6 +21,7 @@ class CreateFileLessonsTable extends Migration
             $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade')->onUpdate('cascade');
             $table->boolean('visible')->default(1);
             $table->integer("index")->nullable();
+            $table->date('publish_date');
 
             $table->timestamps();
         });

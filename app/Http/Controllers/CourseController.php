@@ -16,6 +16,7 @@ use App\Segment;
 use App\AcademicYear;
 use App\attachment;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 class CourseController extends Controller
@@ -227,6 +228,7 @@ class CourseController extends Controller
         $count = 'Counter';
         $lessoncounter = array();
         $comp = Component::where('type', 1)->orWhere('type', 3)->get();
+
         foreach ($CourseSeg as $seg) {
             $lessons = $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
@@ -241,7 +243,9 @@ class CourseController extends Controller
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
                                 if (($request->user()->roles->first()->id) == 3 ||($request->user()->roles->first()->id) == 7) {
-                                    $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->where('visible' , '=' , 1)->get();
+                                    $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)
+                                                ->where('visible' , '=' , 1)
+                                                ->where('publish_date' , '>=' , Carbon::now())->get();
                                 }else{
                                     $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
                                 }

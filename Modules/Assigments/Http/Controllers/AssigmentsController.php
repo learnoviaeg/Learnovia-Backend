@@ -156,7 +156,8 @@ class AssigmentsController extends Controller
         AssignmentLesson::firstOrCreate(
             [
                 'assignment_id' => $assigment->id,
-                'lesson_id' => $request->Lesson_id
+                'lesson_id' => $request->Lesson_id,
+                'publish_date'=>$request->opening_date
             ]
         );
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');

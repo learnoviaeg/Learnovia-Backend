@@ -87,7 +87,8 @@ class QuizLessonController extends Controller
             'max_attemp' => $request->max_attemp,
             'grading_method_id' => $request->grading_method_id,
             'grade' => $request->grade,
-            'grade_category_id' => $request->grade_category_id
+            'grade_category_id' => $request->grade_category_id,
+            'publish_date' => $request->opening_time
         ]);
 
         $this->NotifyQuiz($quiz,$request->opening_time,'add');

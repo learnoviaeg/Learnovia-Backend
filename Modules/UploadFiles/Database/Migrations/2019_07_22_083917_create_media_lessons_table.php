@@ -22,7 +22,7 @@ class CreateMediaLessonsTable extends Migration
             $table->foreign('media_id')->references('id')->on('media')->onDelete('cascade')->onUpdate('cascade');
             $table->boolean('visible')->default(1);
             $table->integer("index")->nullable();
-
+            $table->date('publish_date');
             $table->timestamps();
         });
     }

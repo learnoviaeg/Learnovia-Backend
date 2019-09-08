@@ -14,7 +14,8 @@ class QuizLesson extends Model
         'max_attemp',
         'grading_method_id',
         'grade',
-        'grade_category_id'
+        'grade_category_id',
+        'publish_date'
     ];
     protected $table = 'quiz_lessons';
 

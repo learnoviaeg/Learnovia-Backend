@@ -199,6 +199,7 @@ class MediaController extends Controller
                 $file->attachment_name = $fileName;
                 $file->user_id = Auth::user()->id;
                 $file->link = url('public/storage/media/' . $request->lesson_id . '/' . $name);
+                $file->publish_date = $publishdate;
                 $check = $file->save();
                 $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
                 $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
