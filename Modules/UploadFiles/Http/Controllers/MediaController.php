@@ -267,6 +267,10 @@ class MediaController extends Controller
 
             $file = media::find($request->mediaId);
 
+            if(!isset($file->MediaCourseSegment)){
+                return HelperController::api_response_format(404, null,'No Media Found');
+            }
+
             //check Authotizing
 
             $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
@@ -344,6 +348,10 @@ class MediaController extends Controller
 
             $file = media::find($request->mediaId);
 
+            if(!isset($file->MediaCourseSegment)){
+                return HelperController::api_response_format(404, null,'No Media Found');
+            }
+
             //check Authotizing
             $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
 
@@ -387,6 +395,10 @@ class MediaController extends Controller
             ]);
 
             $media = media::find($request->mediaId);
+
+            if(!isset($media->MediaCourseSegment)){
+                return HelperController::api_response_format(404, null,'No Media Found');
+            }
 
             //check Authotizing
             $courseSegmentID = $media->MediaCourseSegment->course_segment_id;
@@ -534,6 +546,10 @@ class MediaController extends Controller
             $urlparts = parse_url($request->url);
             if (!$avaiableHosts->contains($urlparts['host'])) {
                 return HelperController::api_response_format(400, $request->url, 'Link is invalid');
+            }
+
+            if(!isset($file->MediaCourseSegment)){
+                return HelperController::api_response_format(404, null,'No Media Found');
             }
 
             //check Authotizing

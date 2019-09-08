@@ -396,6 +396,9 @@ class FilesController extends Controller
             $file = file::find($request->fileID);
 
 
+            if(!isset($file->FileCourseSegment)){
+                return HelperController::api_response_format(404, null,'No file Found');
+            }
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
 
             // check Enroll
@@ -474,6 +477,10 @@ class FilesController extends Controller
 
             $file = file::find($request->fileID);
 
+            if(!isset($file->FileCourseSegment)){
+                return HelperController::api_response_format(404, null,'No file Found');
+            }
+
             //check Authotizing
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
 
@@ -518,6 +525,10 @@ class FilesController extends Controller
             ]);
 
             $file = file::find($request->fileID);
+
+            if(!isset($file->FileCourseSegment)){
+                return HelperController::api_response_format(404, null,'No file Found');
+            }
 
             //check Authotizing
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;

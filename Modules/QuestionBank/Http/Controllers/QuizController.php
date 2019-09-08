@@ -264,7 +264,6 @@ class QuizController extends Controller
                 'name' => $request->name,
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
-                'index' => $request->index,
             ]);
 
             $quiz->Question()->detach();
@@ -276,7 +275,6 @@ class QuizController extends Controller
             'name' => $request->name,
             'is_graded' => $request->is_graded,
             'duration' => $request->duration,
-            'index' => $request->index,
         ]);
 
         $quiz->Question()->detach();
