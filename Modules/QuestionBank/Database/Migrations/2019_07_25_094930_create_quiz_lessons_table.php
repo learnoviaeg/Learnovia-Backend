@@ -28,6 +28,7 @@ class CreateQuizLessonsTable extends Migration
             $table->integer('max_attemp');
             $table->unsignedBigInteger('grading_method_id');
             $table->integer('grade');
+            $table->date('publish_date');
             $table->unsignedBigInteger('grade_category_id');
 
             $table->timestamps();

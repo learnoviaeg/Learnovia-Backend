@@ -247,6 +247,7 @@ class FilesController extends Controller
                 $check = $file->save();
                 $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $request->lesson_id . '/' . $name);
                 $file->url2 = url('public/storage/files/' . $request->lesson_id . '/' . $name);
+                $file->publish_date = $publishdate;
                 $file->save();
                 $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
                 $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
@@ -395,6 +396,9 @@ class FilesController extends Controller
             $file = file::find($request->fileID);
 
 
+            if(!isset($file->FileCourseSegment)){
+                return HelperController::api_response_format(404, null,'No file Found');
+            }
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
 
             // check Enroll
@@ -473,6 +477,10 @@ class FilesController extends Controller
 
             $file = file::find($request->fileID);
 
+            if(!isset($file->FileCourseSegment)){
+                return HelperController::api_response_format(404, null,'No file Found');
+            }
+
             //check Authotizing
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
 
@@ -517,6 +525,10 @@ class FilesController extends Controller
             ]);
 
             $file = file::find($request->fileID);
+
+            if(!isset($file->FileCourseSegment)){
+                return HelperController::api_response_format(404, null,'No file Found');
+            }
 
             //check Authotizing
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;

@@ -16,6 +16,7 @@ use App\Segment;
 use App\AcademicYear;
 use App\attachment;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 class CourseController extends Controller
@@ -227,6 +228,7 @@ class CourseController extends Controller
         $count = 'Counter';
         $lessoncounter = array();
         $comp = Component::where('type', 1)->orWhere('type', 3)->get();
+
         foreach ($CourseSeg as $seg) {
             $lessons = $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
@@ -241,10 +243,31 @@ class CourseController extends Controller
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
                                 if (($request->user()->roles->first()->id) == 3 ||($request->user()->roles->first()->id) == 7) {
-                                    $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->where('visible' , '=' , 1)->get();
+                                    $MEDIA = $lessoncounter->module($com->module, $com->model)
+                                        ->where('visible' , '=' , 1)
+                                        ->where('publish_date' , '<=' , Carbon::now())->get();
                                 }else{
-                                    $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
+                                    $MEDIA = $lessoncounter->module($com->module, $com->model)->get();
                                 }
+
+                                if($com->name == 'Media' && count($MEDIA)>0 ){
+                                    foreach($MEDIA as $media){
+                                        $userid = $media->user->id;
+                                        $firstname = $media->user->firstname;
+                                        $lastname = $media->user->lastname;
+                                        $user = collect([
+                                            'user_id' => $userid,
+                                            'firstname' => $firstname,
+                                            'lastname' => $lastname
+                                        ]);
+                                        unset($media->user);
+                                        $media->owner = $user;
+
+                                        $media->mediaType = ($media->type ==null)?'LINK':'MEDIA';
+                                    }
+                                }
+                                $lessonn[$com->name] = $MEDIA;
+
                                 //$lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
                                 if (isset($com->name))
                                     $clase[$i][$com->name . $count] += count($lessonn[$com->name]);

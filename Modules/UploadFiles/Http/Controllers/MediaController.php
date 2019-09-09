@@ -199,6 +199,7 @@ class MediaController extends Controller
                 $file->attachment_name = $fileName;
                 $file->user_id = Auth::user()->id;
                 $file->link = url('public/storage/media/' . $request->lesson_id . '/' . $name);
+                $file->publish_date = $publishdate;
                 $check = $file->save();
                 $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
                 $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
@@ -265,6 +266,10 @@ class MediaController extends Controller
             ]);
 
             $file = media::find($request->mediaId);
+
+            if(!isset($file->MediaCourseSegment)){
+                return HelperController::api_response_format(404, null,'No Media Found');
+            }
 
             //check Authotizing
 
@@ -343,6 +348,10 @@ class MediaController extends Controller
 
             $file = media::find($request->mediaId);
 
+            if(!isset($file->MediaCourseSegment)){
+                return HelperController::api_response_format(404, null,'No Media Found');
+            }
+
             //check Authotizing
             $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
 
@@ -386,6 +395,10 @@ class MediaController extends Controller
             ]);
 
             $media = media::find($request->mediaId);
+
+            if(!isset($media->MediaCourseSegment)){
+                return HelperController::api_response_format(404, null,'No Media Found');
+            }
 
             //check Authotizing
             $courseSegmentID = $media->MediaCourseSegment->course_segment_id;
@@ -433,6 +446,9 @@ class MediaController extends Controller
                 return HelperController::api_response_format(400, $request->url, 'Link is invalid');
             }
 
+            if(!isset($urlparts['path'])){
+                return HelperController::api_response_format(400, $request->url, 'Link is invalid');
+            }
              // activeCourseSgement
              $activeCourseSegments = HelperController::Get_Course_segment_Course($request);
              if ($activeCourseSegments['result'] == false || $activeCourseSegments['value'] == null) {
@@ -533,6 +549,14 @@ class MediaController extends Controller
             $urlparts = parse_url($request->url);
             if (!$avaiableHosts->contains($urlparts['host'])) {
                 return HelperController::api_response_format(400, $request->url, 'Link is invalid');
+            }
+
+            if(!isset($urlparts['path'])){
+                return HelperController::api_response_format(400, $request->url, 'Link is invalid');
+            }
+
+            if(!isset($file->MediaCourseSegment)){
+                return HelperController::api_response_format(404, null,'No Media Found');
             }
 
             //check Authotizing

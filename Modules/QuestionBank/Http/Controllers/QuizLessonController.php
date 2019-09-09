@@ -87,7 +87,8 @@ class QuizLessonController extends Controller
             'max_attemp' => $request->max_attemp,
             'grading_method_id' => $request->grading_method_id,
             'grade' => $request->grade,
-            'grade_category_id' => $request->grade_category_id
+            'grade_category_id' => $request->grade_category_id,
+            'publish_date' => $request->opening_time
         ]);
 
         $this->NotifyQuiz($quiz,$request->opening_time,'add');
@@ -123,6 +124,10 @@ class QuizLessonController extends Controller
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
                         ->where('lesson_id',$request->quiz_id)->first();
 
+        if(!isset($quizLesson)){
+            return HelperController::api_response_format(404, null,'This quiz doesn\'t belongs to the lesson');
+        }
+
         $quizLesson->update([
             'quiz_id' => $request->quiz_id,
             'lesson_id' => $request->lesson_id,
@@ -152,6 +157,10 @@ class QuizLessonController extends Controller
 
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
                 ->where('lesson_id',$request->quiz_id)->first();
+
+        if(!isset($quizLesson)){
+            return HelperController::api_response_format(404, null,'This quiz doesn\'t belongs to the lesson');
+        }
 
         $quizLesson->delete();
 
