@@ -243,12 +243,31 @@ class CourseController extends Controller
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
                                 if (($request->user()->roles->first()->id) == 3 ||($request->user()->roles->first()->id) == 7) {
-                                    $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)
-                                                ->where('visible' , '=' , 1)
-                                                ->where('publish_date' , '>=' , Carbon::now())->get();
+                                    $MEDIA = $lessoncounter->module($com->module, $com->model)
+                                        ->where('visible' , '=' , 1)
+                                        ->where('publish_date' , '<=' , Carbon::now())->get();
                                 }else{
-                                    $lessonn[$com->name] = $lessoncounter->module($com->module, $com->model)->get();
+                                    $MEDIA = $lessoncounter->module($com->module, $com->model)->get();
                                 }
+
+                                if($com->name == 'Media' && count($MEDIA)>0 ){
+                                    foreach($MEDIA as $media){
+                                        $userid = $media->user->id;
+                                        $firstname = $media->user->firstname;
+                                        $lastname = $media->user->lastname;
+                                        $user = collect([
+                                            'user_id' => $userid,
+                                            'firstname' => $firstname,
+                                            'lastname' => $lastname
+                                        ]);
+                                        unset($media->user);
+                                        $media->owner = $user;
+
+                                        $media->mediaType = ($media->type ==null)?'LINK':'MEDIA';
+                                    }
+                                }
+                                $lessonn[$com->name] = $MEDIA;
+
                                 //$lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
                                 if (isset($com->name))
                                     $clase[$i][$com->name . $count] += count($lessonn[$com->name]);

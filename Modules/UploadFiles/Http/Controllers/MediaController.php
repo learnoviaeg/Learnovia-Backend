@@ -446,6 +446,9 @@ class MediaController extends Controller
                 return HelperController::api_response_format(400, $request->url, 'Link is invalid');
             }
 
+            if(!isset($urlparts['path'])){
+                return HelperController::api_response_format(400, $request->url, 'Link is invalid');
+            }
              // activeCourseSgement
              $activeCourseSegments = HelperController::Get_Course_segment_Course($request);
              if ($activeCourseSegments['result'] == false || $activeCourseSegments['value'] == null) {
@@ -545,6 +548,10 @@ class MediaController extends Controller
 
             $urlparts = parse_url($request->url);
             if (!$avaiableHosts->contains($urlparts['host'])) {
+                return HelperController::api_response_format(400, $request->url, 'Link is invalid');
+            }
+
+            if(!isset($urlparts['path'])){
                 return HelperController::api_response_format(400, $request->url, 'Link is invalid');
             }
 

@@ -299,6 +299,11 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(400, $body = [], $message = 'you must enter both the content and the file');
         }
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_id', $request->assignment_id)->first();
+
+        if(!isset($userassigment)){
+            return HelperController::api_response_format(400, $body = [], $message = 'This user isn\'t assign to this assignment');
+        }
+
         if (((($assigment->start_date >  Carbon::now()) || (Carbon::now() > $assigment->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1) || ($assigment->visiable == 0)) {
             return HelperController::api_response_format(400, $body = [], $message = 'sorry you are not allowed to submit anymore');
         }
