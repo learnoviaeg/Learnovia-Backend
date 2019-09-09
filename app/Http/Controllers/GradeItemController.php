@@ -130,17 +130,9 @@ class GradeItemController extends Controller
 
 
     public function list()
-    {   $grades=array();
-        $grade = GradeItems::all();
-        foreach($grade as $g){
-            $entity_id= $g['item_Entity'];
-            $type=ItemType::where('id',$g['item_type'])->pluck('name')->first();
-            $item_entity =DB::table($type)->where('id',$entity_id)->get(['id' , 'name']);
-            $g[$type]=$item_entity;
-            array_push($grades,$g);
-
-        }
-        return HelperController::api_response_format(200, $grades);
+    {
+        $grade = GradeItems::with(['GradeCategory' , 'ItemType' , 'scale'])->get();
+        return HelperController::api_response_format(200, $grade);
     }
 
     public function Move_Category(Request $request){
