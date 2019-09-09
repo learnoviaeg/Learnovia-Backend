@@ -21,7 +21,7 @@ return [
 
         'allow_origins' => [
             'http://localhost:4200',
-            'http://35.238.30.213',
+            'http://159.8.28.132',
         ],
 
         'allow_methods' => [
