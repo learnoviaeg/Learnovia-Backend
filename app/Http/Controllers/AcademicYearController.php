@@ -38,15 +38,16 @@ class AcademicYearController extends Controller
         $request->validate([
             'id' => 'exists:academic_years,id',
             'all' => 'boolean',
+            'paginate' => 'integer'
         ]);
-        $year = AcademicYear::with('AC_Type');
+        //$year = AcademicYear::with('AC_Type');
         if ($request->filled('id')) {
-            $year->where('id', $request->id)->first();
+            $year = AcademicYear::with('AC_Type')->where('id', $request->id)->first();
         }
-        if ($request->filled('all')) {
-            $year->get();
+        else if ($request->filled('all')) {
+            $year = AcademicYear::with('AC_Type')->get();
         } else {
-            $year->paginate(HelperController::GetPaginate($request));
+            $year = AcademicYear::with('AC_Type')->paginate(HelperController::GetPaginate($request));
         }
         return HelperController::api_response_format(200, $year);
     }
