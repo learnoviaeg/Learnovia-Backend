@@ -246,7 +246,6 @@ class FilesController extends Controller
                 $check = $file->save();
                 $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $request->lesson_id . '/' . $name);
                 $file->url2 = url('public/storage/files/' . $request->lesson_id . '/' . $name);
-                $file->publish_date = $publishdate;
                 $file->save();
                 $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
                 $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
@@ -278,6 +277,8 @@ class FilesController extends Controller
                     $fileLesson->lesson_id = $request->lesson_id;
                     $fileLesson->file_id = $file->id;
                     $fileLesson->index = $newIndex;
+                    $fileLesson->publish_date = $publishdate;
+
                     $fileLesson->save();
 
                     Storage::disk('public')->putFileAs(
