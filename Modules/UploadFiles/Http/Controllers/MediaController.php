@@ -493,7 +493,6 @@ class MediaController extends Controller
             $file = new media;
             $file->name = $request->name;
             $file->description = $request->description;
-            $file->visibility = 0;
             $file->link = $request->url;
             $file->attachment_name = $request->attachment_name;
             $file->user_id = Auth::user()->id;
@@ -518,6 +517,7 @@ class MediaController extends Controller
                 $fileLesson->lesson_id = $request->lesson_id;
                 $fileLesson->media_id = $file->id;
                 $fileLesson->index = $newIndex;
+                $fileLesson->publish_date = Carbon::now();
                 $fileLesson->save();
             }
 
