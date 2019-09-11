@@ -272,7 +272,6 @@ class AssigmentsController extends Controller
     public function submitAssigment(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:user_assigments,user_id',
             'assignment_id' => 'required|exists:user_assigments,assignment_id',
         ]);
         $assigment = assignment::where('id', $request->assignment_id)->first();
@@ -298,7 +297,7 @@ class AssigmentsController extends Controller
         if ((($assigment->allow_attachment == 2)) && ((!isset($request->content)) || (!isset($request->file)))) {
             return HelperController::api_response_format(400, $body = [], $message = 'you must enter both the content and the file');
         }
-        $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_id', $request->assignment_id)->first();
+        $userassigment = UserAssigment::where('user_id', Auth::user()->id)->where('assignment_id', $request->assignment_id)->first();
 
         if(!isset($userassigment)){
             return HelperController::api_response_format(400, $body = [], $message = 'This user isn\'t assign to this assignment');
