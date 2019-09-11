@@ -147,13 +147,13 @@ class segment_class_Controller extends Controller
     public function Assign_to_anther_Class(Request $request)
     {
         $rules =[
-            'year' => 'array',
+            'year' => 'required|array',
             'year.*' => 'exists:academic_years,id',
-            'type' => 'array',
+            'type' => 'required|array',
             'type.*' => 'required|exists:academic_types,id',
-            'level'=> 'array',
+            'level'=> 'required|array',
             'level.*' => 'required|exists:levels,id',
-            'class'=> 'array',
+            'class'=> 'required|array',
             'class.*' => 'required|exists:classes,id',
             'segment' => 'required|exists:segments,id',
         ];

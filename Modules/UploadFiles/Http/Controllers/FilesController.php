@@ -241,7 +241,6 @@ class FilesController extends Controller
                 $file->name = $name;
                 $file->description = $description;
                 $file->size = $size;
-                $file->visibility = 0;
                 $file->attachment_name =$fileName;
                 $file->user_id = Auth::user()->id;
                 $check = $file->save();

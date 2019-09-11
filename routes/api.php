@@ -49,7 +49,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     //Announcements Routes
     Route::group(['prefix' => 'announcement'], function () {
         Route::post('delete', 'AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
-        Route::post('announce', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
+        Route::post('announce', 'AnnouncementController@announcement');//->name('announce')->middleware('permission:announcements/send');
         Route::get('get', 'AnnouncementController@get')->name('get');//->middleware('permission:announcements/get');
         Route::post('update', 'AnnouncementController@update_announce');//->name('updateannounce')->middleware('permission:announcements/update');
     });
@@ -65,7 +65,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 //Year Routes
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'AcademicYearController@store')->name('addyear')->middleware('permission:year/add');
-    Route::get('get', 'AcademicYearController@get')->name('getyear')->middleware('permission:year/get');
+    Route::get('get', 'AcademicYearController@get');//>name('getyear')->middleware('permission:year/get');
     Route::put('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
     Route::delete('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
    Route::post('current', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/set-current');
@@ -86,7 +86,7 @@ Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
     Route::get('getall', 'AC_year_type@get')->name('gettypes')->middleware('permission:type/get-all');
 
     //if you want to update type please,write updatetype in yours
-    Route::post('update', 'AC_year_type@updateType')->name('updatetype')->middleware('permission:type/update');
+    Route::post('update', 'AC_year_type@updateType');//->name('updatetype')->middleware('permission:type/update');
 
     //if you want to assign type to another year please,write assigntype in yours
     Route::post('assign', 'AC_year_type@Assign_to_anther_year')->name('assigntype')->middleware('permission:type/assign');

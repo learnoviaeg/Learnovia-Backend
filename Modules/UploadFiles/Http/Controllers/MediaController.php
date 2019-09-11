@@ -195,7 +195,6 @@ class MediaController extends Controller
                 $file->name = $name;
                 $file->description = $description;
                 $file->size = $size;
-                $file->visibility = 0;
                 $file->attachment_name = $fileName;
                 $file->user_id = Auth::user()->id;
                 $file->link = url('public/storage/media/' . $request->lesson_id . '/' . $name);
