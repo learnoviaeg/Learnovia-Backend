@@ -13,6 +13,7 @@ use Validator;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\QuestionsType;
+use App\Component;
 
 class QuestionBankController extends Controller
 {
@@ -39,7 +40,6 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-types']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-categories']);
 
-
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('question/add');
         $role->givePermissionTo('question/update');
@@ -58,8 +58,34 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/get-all-types');
         $role->givePermissionTo('quiz/get-all-categories');
 
-        return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
+        Component::create([
+            'name' => 'Quiz',
+            'module'=>'QuestionBank',
+            'model' => 'quiz',
+            'type' => 1,
+            'active' => 1
+        ]);
 
+        $QuesTypes=array(
+            array('name' => 'True/False'),
+            array('name' => 'MCQ'),
+            array('name' => 'Match'),
+            array('name' => 'Essay'),
+            array('name' => 'Paragraph'),
+
+        );
+        QuestionsType::insert($QuesTypes);
+
+        $QuesCateg=array(
+            array('name' => 'Lesson One'),
+            array('name' => 'Lesson Two'),
+            array('name' => 'Lesson Three'),
+            array('name' => 'Lesson Four'),
+            array('name' => 'Lesson Five'),
+        );
+        QuestionsCategory::insert($QuesCateg);
+
+        return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
 
 
@@ -264,7 +290,7 @@ class QuestionBankController extends Controller
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
         }
-        
+
 
         $cat = $this::CreateOrFirstQuestion($Question,$parent);
         if (isset($cat->id)) {
@@ -295,7 +321,7 @@ class QuestionBankController extends Controller
 
     public function MCQ($Question,$parent)
     {
-        
+
         $validator = Validator::make($Question, [
             'answers' => 'required|array|distinct|min:2',
             'answers.*' => 'required|string|distinct',
