@@ -129,16 +129,20 @@ class CalendarController extends Controller
         $Lessons=array();
         foreach ($CourseSeg as $cour) {
             $checkLesson=Lesson::where('course_segment_id',$cour)->get();
-            if($checkLesson!=null)
+            
+            if($checkLesson->isEmpty())
             {
-                $Lessons[]=$checkLesson;
+                continue;
             }
+            $Lessons[]=$checkLesson;
         }
+        
         $comp=Component::where('type',1)->get();
         foreach($Lessons as $less)
         {
             foreach($less as $les)
             {
+
                 foreach($comp as $com)
                 {
                     if($com->type == 3)
@@ -159,10 +163,7 @@ class CalendarController extends Controller
                         ->get();
                     }
                 }
-
-
             }
-
         }
         return $Lessons;
     }
