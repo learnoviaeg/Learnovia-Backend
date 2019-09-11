@@ -73,14 +73,14 @@ class HelperController extends Controller
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
-        $year = AcademicYear::Get_current()->id;
-        $segment = Segment::Get_current($request->type)->id;
-        if ($request->filled('year')) {
+        if ($request->filled('year'))
             $year = $request->year;
-        }
-        if ($request->filled('segment')) {
+        else
+            $year = AcademicYear::Get_current()->id;
+        if ($request->filled('segment'))
             $segment = $request->segment;
-        }
+        else
+            $segment = Segment::Get_current($request->type)->id;
         $academic_year_type = AcademicYearType::checkRelation($year, $request->type);
         $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
         $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
