@@ -270,8 +270,8 @@ class CourseController extends Controller
                                     foreach($Component as $assignment){
                                         if(isset($assignment->attachment)){
                                             $path = $assignment->attachment->path;
-                                            $assignment->url = 'https://docs.google.com/viewer?url=' . url('public/storage/' . $path);
-                                            $assignment->url2 = url('public/storage/' . $path);
+                                            $assignment->url = 'https://docs.google.com/viewer?url=' . $path;
+                                            $assignment->url2 = $path;
                                         }
                                     }
                                 }
