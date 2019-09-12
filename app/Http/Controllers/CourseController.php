@@ -268,9 +268,11 @@ class CourseController extends Controller
                                 }
                                 else if($com->name == 'Assigments' && count($Component)>0 ){
                                     foreach($Component as $assignment){
-                                        $path = $assignment->attachment->path;
-                                        $assignment->url = 'https://docs.google.com/viewer?url=' . url('public/storage/' . $path);
-                                        $assignment->url2 = url('public/storage/' . $path);
+                                        if(isset($assignment->attachment)){
+                                            $path = $assignment->attachment->path;
+                                            $assignment->url = 'https://docs.google.com/viewer?url=' . url('public/storage/' . $path);
+                                            $assignment->url2 = url('public/storage/' . $path);
+                                        }
                                     }
                                 }
                                 $lessonn[$com->name] = $Component;
