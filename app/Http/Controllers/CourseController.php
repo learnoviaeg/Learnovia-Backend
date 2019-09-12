@@ -243,15 +243,15 @@ class CourseController extends Controller
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
                                 if (($request->user()->roles->first()->id) == 3 ||($request->user()->roles->first()->id) == 7) {
-                                    $MEDIA = $lessoncounter->module($com->module, $com->model)
+                                    $Component = $lessoncounter->module($com->module, $com->model)
                                         ->where('visible' , '=' , 1)
                                         ->where('publish_date' , '<=' , Carbon::now())->get();
                                 }else{
-                                    $MEDIA = $lessoncounter->module($com->module, $com->model)->get();
+                                    $Component = $lessoncounter->module($com->module, $com->model)->get();
                                 }
 
-                                if($com->name == 'Media' && count($MEDIA)>0 ){
-                                    foreach($MEDIA as $media){
+                                if($com->name == 'Media' && count($Component)>0 ){
+                                    foreach($Component as $media){
                                         $userid = $media->user->id;
                                         $firstname = $media->user->firstname;
                                         $lastname = $media->user->lastname;
@@ -266,7 +266,14 @@ class CourseController extends Controller
                                         $media->mediaType = ($media->type ==null)?'LINK':'MEDIA';
                                     }
                                 }
-                                $lessonn[$com->name] = $MEDIA;
+                                else if($com->name == 'Assigments' && count($Component)>0 ){
+                                    foreach($Component as $assignment){
+                                        $path = $assignment->attachment->path;
+                                        $assignment->url = 'https://docs.google.com/viewer?url=' . url('public/storage/' . $path);
+                                        $assignment->url2 = url('public/storage/' . $path);
+                                    }
+                                }
+                                $lessonn[$com->name] = $Component;
 
                                 //$lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
                                 if (isset($com->name))
