@@ -183,13 +183,13 @@ Route::group(['prefix' => 'enroll' , 'middleware' => 'auth:api'], function () {
 
 //Messages Routes
 Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
-    Route::post('send', 'MessageController@Send_message_of_all_user')->name('sendMessage')->middleware('permission:messages/send');
+    Route::post('send', 'MessageController@Send_message_of_all_user');//->name('sendMessage')->middleware('permission:messages/send');
     Route::post('deleteForall', 'MessageController@deleteMessageForAll')->name('deleteMessageforall')->middleware('permission:messages/delete-for-all');
     Route::post('deleteForMe', 'MessageController@deleteMessageforMe')->name('deleteMessageforMe')->middleware('permission:messages/delete-for-me');
     Route::post('Seen', 'MessageController@SeenMessage')->name('SeenMessage')->middleware('permission:messages/seen');
     Route::get('ViewFromTo', 'MessageController@ViewAllMSG_from_to')->name('ViewFromTo')->middleware('permission:messages/get-from-to');
     Route::post('Message_add_send_Permission_for_role', 'MessageController@add_send_Permission_for_role')->name('Message_add_send_Permission_for_role')->middleware('permission:messages/add-send-permission-for-role');
-    Route::get('GetMyThreads', 'MessageController@GetMyThreads')->name('mythreads')->middleware('permission:messages/mythreads');
+    Route::get('GetMyThreads', 'MessageController@GetMyThreads');//->name('mythreads')->middleware('permission:messages/mythreads');
     //Contact Route
     Route::post('addContact', 'ContactController@addContact')->name('addContact')->middleware('permission:contact/add');
     Route::get('ViewMyContact', 'ContactController@ViewMyContact')->name('ViewMyContact')->middleware('permission:contact/get');

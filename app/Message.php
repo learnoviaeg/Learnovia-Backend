@@ -33,7 +33,7 @@ class Message extends Model
         $message = Message::where('From' , $auth_user)->Where('To' , $other_user)->orderBy('created_at' , 'desc')->first();
         if($message == null)
             $message = Message::where('From' , $other_user)->Where('To' , $auth_user)->orderBy('created_at' , 'desc')->first();
-        return ['message'=>$message->text , 'file' => $message->file];
+        return ['message'=>$message->text , 'file' => $message->file, 'seen'=>$message->seen];
     }
 
     private static function handleMessageView($users , $user_id){
