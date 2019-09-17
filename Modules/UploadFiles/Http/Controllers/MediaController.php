@@ -231,7 +231,7 @@ class MediaController extends Controller
                     $fileLesson->save();
 
                     Storage::disk('public')->putFileAs(
-                        'media/' . $request->lesson_id . '/',
+                        'media/' . $request->lesson_id ,
                         $singlefile,
                         $name
                     );
@@ -293,8 +293,8 @@ class MediaController extends Controller
                 $file->type = $extension;
                 $file->name = $fileName;
                 $file->size = $size;
-                $file->attachment_name =$request->attachment_name;
-                $lesson_id = $file->FileLesson->lesson_id;
+                $file->attachment_name = $request->attachment_name;
+                $lesson_id = $file->MediaLesson->lesson_id;
                 $file->link = url('public/storage/media/' . $lesson_id . '/' . $fileName);
             }
             $file->description = $request->description;
@@ -322,7 +322,7 @@ class MediaController extends Controller
                     }
 
                     Storage::disk('public')->putFileAs(
-                        'media/' . $lesson_id . '/' ,
+                        'media/' . $lesson_id,
                         $request->Imported_file,
                         $fileName
                     );
