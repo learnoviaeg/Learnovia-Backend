@@ -49,9 +49,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     //Announcements Routes
     Route::group(['prefix' => 'announcement'], function () {
         Route::post('delete', 'AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
-        Route::post('announce', 'AnnouncementController@announcement');//->name('announce')->middleware('permission:announcements/send');
-        Route::get('get', 'AnnouncementController@get')->name('get');//->middleware('permission:announcements/get');
-        Route::post('update', 'AnnouncementController@update_announce');//->name('updateannounce')->middleware('permission:announcements/update');
+        Route::post('announce', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
+        Route::get('get', 'AnnouncementController@get')->name('get')->middleware('permission:announcements/get');
+        Route::post('update', 'AnnouncementController@update_announce')->name('updateannounce')->middleware('permission:announcements/update');
     });
 
     //Calendar Route

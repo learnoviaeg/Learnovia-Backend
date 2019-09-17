@@ -294,7 +294,10 @@ class AnnouncementController extends Controller
                 ->delete();
         }
         $announce->delete();
-        return HelperController::api_response_format(200, $announce, 'Announcement Deleted Successfully');
+        $anounce = AnnouncementController::get_announcement();
+        $anouncenew = AnnouncementController::new_user_announcements();
+        return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Deleted Successfully');
+//        return HelperController::api_response_format(200, $announce, 'Announcement Deleted Successfully');
     }
 
     public function new_user_announcements()
