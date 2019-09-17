@@ -293,10 +293,10 @@ class MediaController extends Controller
                 $file->type = $extension;
                 $file->name = $fileName;
                 $file->size = $size;
-                $file->attachment_name = $request->attachment_name;
                 $lesson_id = $file->MediaLesson->lesson_id;
                 $file->link = url('public/storage/media/' . $lesson_id . '/' . $fileName);
             }
+            $file->attachment_name = $request->attachment_name;
             $file->description = $request->description;
             $check = $file->save();
             $courseID=CourseSegment::where('id',$courseSegmentID)->pluck('course_id')->first();
