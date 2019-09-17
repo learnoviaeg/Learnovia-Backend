@@ -9,7 +9,7 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
 
     /* File Routes */
     /* Upload array of files to specific course segment */
-    Route::post('uploadFile', 'FilesController@store')->name('uploadFile')->middleware('permission:file/add');
+    Route::post('uploadFile', 'FilesController@store');//->name('uploadFile')->middleware('permission:file/add');
 
     /* Update specific file */
     Route::post('updateFile', 'FilesController@update')->name('updateFile')->middleware('permission:file/update');

@@ -84,7 +84,6 @@ class PageController extends Controller
         $page= new Page();
         $page->title=$request->title;
         $page->content=$request->content;
-        $page->publish_date=$publishdate;
         if(isset($request->visible))
         {
             $page->visible;

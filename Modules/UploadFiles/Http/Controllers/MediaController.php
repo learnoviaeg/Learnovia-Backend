@@ -293,7 +293,9 @@ class MediaController extends Controller
                 $file->type = $extension;
                 $file->name = $fileName;
                 $file->size = $size;
-                $file->attachment_name =$request->Imported_file->getClientOriginalName();
+                $file->attachment_name =$request->attachment_name;
+                $lesson_id = $file->FileLesson->lesson_id;
+                $file->link = url('public/storage/media/' . $lesson_id . '/' . $fileName);
             }
             $file->description = $request->description;
             $check = $file->save();
@@ -314,13 +316,13 @@ class MediaController extends Controller
                     $fileId = $file->id;
                     $lesson_id = $file->MediaLesson->lesson_id;
 
-                    $filePath = 'storage\media\\' . $lesson_id . '\\' . $fileId . '\\' . $oldname;
+                    $filePath = 'storage\media\\' . $lesson_id . '\\' . $oldname;
                     if (file_exists($filePath)) {
                         unlink($filePath);
                     }
 
                     Storage::disk('public')->putFileAs(
-                        'media/' . $lesson_id . '/' . $fileId,
+                        'media/' . $lesson_id . '/' ,
                         $request->Imported_file,
                         $fileName
                     );
@@ -368,10 +370,10 @@ class MediaController extends Controller
             $check = $file->delete();
 
             if ($check) {
-                $filePath = 'storage\media\\' . $lesson_id . '\\' . $fileId . '\\' . $oldname;
+                $filePath = 'storage\media\\' . $lesson_id . '\\' . $oldname;
                 if (file_exists($filePath)) {
                     unlink($filePath);
-                    unlink('storage\media\\' . $lesson_id . '\\' . $fileId);
+                    unlink('storage\media\\' . $lesson_id);
                 }
             }
             return HelperController::api_response_format(200, null, 'Deleted Successfully');

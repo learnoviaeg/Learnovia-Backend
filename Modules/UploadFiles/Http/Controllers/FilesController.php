@@ -408,6 +408,7 @@ class FilesController extends Controller
                 'fileID' => 'required|integer|exists:files,id',
                 'attachment_name' => 'required|string|max:190',
                 'description' => 'required|string|min:1',
+                'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
             ]);
 
             $file = file::find($request->fileID);
@@ -437,7 +438,10 @@ class FilesController extends Controller
                 $file->type = $extension;
                 $file->name = $fileName;
                 $file->size = $size;
-                $file->attachment_name =$request->Imported_file->getClientOriginalName();
+                $file->attachment_name =$request->attachment_name;
+                $lesson_id = $file->FileLesson->lesson_id;
+                $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $lesson_id . '/' . $fileName);
+                $file->url2 = url('public/storage/files/' . $lesson_id . '/' . $fileName);
             }
 
             $file->description = $request->description;
@@ -460,13 +464,13 @@ class FilesController extends Controller
                     $fileId = $file->id;
                     $lesson_id = $file->FileLesson->lesson_id;
 
-                    $filePath = 'storage\files\\' . $lesson_id . '\\' . $fileId . '\\' . $oldname;
+                    $filePath = 'storage\files\\' . $lesson_id . '\\' . $oldname;
                     if (file_exists($filePath)) {
                         unlink($filePath);
                     }
 
                     Storage::disk('public')->putFileAs(
-                        'files/' . $lesson_id . '/' . $fileId,
+                        'files/' . $lesson_id . '/' . $file->name,
                         $request->Imported_file,
                         $fileName
                     );
@@ -515,10 +519,10 @@ class FilesController extends Controller
             $check = $file->delete();
 
             if ($check) {
-                $filePath = 'storage\files\\' . $lesson_id . '\\' . $fileId . '\\' . $oldname;
+                $filePath = 'storage\files\\' . $lesson_id . '\\' . $oldname;
                 if (file_exists($filePath)) {
                     unlink($filePath);
-                    unlink('storage\files\\' . $lesson_id . '\\' . $fileId);
+                    unlink('storage\files\\' . $lesson_id);
                 }
             }
             return HelperController::api_response_format(200, null, 'Deleted Successfully');
