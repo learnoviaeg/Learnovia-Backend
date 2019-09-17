@@ -41,14 +41,29 @@ class HelperController extends Controller
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
-        $year = AcademicYear::Get_current()->id;
-        $segment = Segment::Get_current($request->type)->id;
-        if ($request->filled('year')) {
-            $year = $request->year;
+            
+        if ($request->filled('year'))
+            $year = $request->year ;
+        else
+        {
+            $year = AcademicYear::Get_current();
+            if($year == null)
+                return null;
+            else
+                $year=$year->id;
         }
-        if ($request->filled('segment')) {
+            
+        if ($request->filled('segment'))
             $segment = $request->segment;
+        else
+        {
+            $segment = Segment::Get_current($request->type);
+            if($segment == null)
+                return null;
+            else
+                $segment=$segment->id;
         }
+
         $academic_year_type = AcademicYearType::checkRelation($year, $request->type);
         $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
         $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
@@ -73,19 +88,35 @@ class HelperController extends Controller
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
+
         if ($request->filled('year'))
-            $year = $request->year;
+            $year = $request->year ;
         else
-            $year = AcademicYear::Get_current()->id;
+        {
+            $year = AcademicYear::Get_current();
+            if($year == null)
+                return null;
+            else
+                $year=$year->id;
+        }
+            
         if ($request->filled('segment'))
             $segment = $request->segment;
         else
-            $segment = Segment::Get_current($request->type)->id;
+        {
+            $segment = Segment::Get_current($request->type);
+            if($segment == null)
+                return null;
+            else
+                $segment=$segment->id;
+        }
+
         $academic_year_type = AcademicYearType::checkRelation($year, $request->type);
         $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
         $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
         $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
         $course_segment = CourseSegment::checkRelation($segment_class->id, $request->course);
+
         return ['result' => true, 'value' => $course_segment];
     }
 
@@ -117,14 +148,29 @@ class HelperController extends Controller
         $validator = Validator::make($request->all() , $rules);
         if($validator->fails())
             return $validator->errors();
-        $year = AcademicYear::Get_current()->id ;
-        $segment = Segment::Get_current($request->type)->id;
-        if ($request->filled('year')) {
+
+        if ($request->filled('year'))
             $year = $request->year ;
+        else
+        {
+            $year = AcademicYear::Get_current();
+            if($year == null)
+                return null;
+            else
+                $year=$year->id;
         }
-        if ($request->filled('segment')) {
-            $segment = $request->segment ;
+            
+        if ($request->filled('segment'))
+            $segment = $request->segment;
+        else
+        {
+            $segment = Segment::Get_current($request->type);
+            if($segment == null)
+                return null;
+            else
+                $segment=$segment->id;
         }
+            
         $academic_year_type = AcademicYearType::checkRelation($year, $request->type);
         $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
         $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
