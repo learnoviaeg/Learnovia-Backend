@@ -37,7 +37,7 @@ class MessageController extends Controller
     {
         $session_id = Auth::User()->id;
         $valid = Validator::make($req->all(), [
-            'text' => 'required',
+            'text' => 'nullable',
             'about' => 'exists:users,id',
             'users' => 'required|array',
             'users.*' => 'required|integer|exists:users,id',
