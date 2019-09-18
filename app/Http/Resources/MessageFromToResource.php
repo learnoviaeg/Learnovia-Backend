@@ -28,7 +28,7 @@ class MessageFromToResource extends JsonResource
             'From' => $from,
             'To' => $To,
             'Seen'=>$this->seen,
-            'file' => url('/public/storage/' . $this->file),
+            'file' => $this->file,
         ];
         if ($this->deleted == 0) {
             return $arr;
