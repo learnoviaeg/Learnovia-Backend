@@ -219,7 +219,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('update', 'GradeCategoryController@UpdateGradeCategory');
         Route::post('move', 'GradeCategoryController@MoveToParentCategory');
         //Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
-        Route::post('tree', 'GradeCategoryController@Get_Tree');
+        Route::get('tree', 'GradeCategoryController@Get_Tree');
     });
 
     Route::group(['prefix' => 'item', 'middleware' => 'auth:api'], function () {
