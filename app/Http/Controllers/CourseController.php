@@ -373,16 +373,23 @@ class CourseController extends Controller
         }
         return $course_segment;
     }
+
     public function getCoursesOptional(Request $request)
     {
         $course_segment = HelperController::Get_Course_segment($request);
-        if (!$course_segment['result'])
-            return HelperController::api_response_format(400, $course_segment['value']);
-        $optional = array();
-        foreach ($course_segment['value'] as $cs) {
-            array_push($optional, $cs->optionalCourses);
+        if($course_segment == null)
+            return HelperController::api_response_format(404, 'There is no current segment or year');
+
+        else {
+            if (!$course_segment['result'])
+                return HelperController::api_response_format(400, $course_segment['value']);
+            foreach ($course_segment['value'] as $cs) {
+                if(count($cs->optionalCourses) <= 0)
+                    continue;
+                $optional[]=$cs->optionalCourses;
+            }
+            return HelperController::api_response_format(200, $optional);
         }
-        return HelperController::api_response_format(200, $optional);
     }
 
     public function Assgin_course_to(Request $request)
@@ -407,14 +414,29 @@ class CourseController extends Controller
         $count = 0;
         if ((count($request->type) == count($request->level)) && (count($request->level) == count($request->class))) {
             while (isset($request->class[$count])) {
-                $year = AcademicYear::Get_current()->id;
-                $segment = Segment::Get_current($request->type[$count])->id;
-                if (isset($request->year[$count])) {
+
+                if (isset($request->year[$count]))
                     $year = $request->year[$count];
+                else
+                {
+                    $year = AcademicYear::Get_current();
+                    if($year == null)
+                        return HelperController::api_response_format(404, 'There is no current segment or year');
+                    else
+                        $year=$year->id;
                 }
-                if (isset($request->segment[$count])) {
+                    
+                if (isset($request->segment[$count]))
                     $segment = $request->segment[$count];
+                else
+                {
+                    $segment = Segment::Get_current($request->type[$count])->id;
+                    if($segment == null)
+                        return HelperController::api_response_format(404, 'There is no current segment or year');
+                    else
+                        $segment=$segment->id;
                 }
+                
                 $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
                 $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
                 $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
@@ -425,7 +447,7 @@ class CourseController extends Controller
         } else {
             return HelperController::api_response_format(201, 'Please Enter Equal number of array');
         }
-
+        
         return HelperController::api_response_format(201, 'Course Assigned Successfully');
     }
 }
