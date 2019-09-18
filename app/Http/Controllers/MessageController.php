@@ -35,7 +35,6 @@ class MessageController extends Controller
 
     public function Send_message_of_all_user(Request $req)
     {
-        return response()->json($req->file->getClientOriginalExtension());
         $session_id = Auth::User()->id;
         $valid = Validator::make($req->all(), [
             'text' => 'nullable',
