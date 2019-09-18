@@ -177,7 +177,8 @@ class AssigmentsController extends Controller
             [
                 'assignment_id' => $assigment->id,
                 'lesson_id' => $request->Lesson_id,
-                'publish_date'=>$request->opening_date
+                'publish_date'=>$request->opening_date,
+                'visiable' => $request->visiable,
             ]
         );
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
