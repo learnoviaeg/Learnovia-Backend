@@ -41,7 +41,7 @@ class MessageController extends Controller
             'about' => 'exists:users,id',
             'users' => 'required|array',
             'users.*' => 'required|integer|exists:users,id',
-            'file' => 'file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,JPG,jpg,jpeg,png,PNG',
+            'file' => 'file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,jpg,jpeg,png,PNG',
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(404, null, $valid->errors());
@@ -66,7 +66,8 @@ class MessageController extends Controller
                                 'To' => $userId,
                             ));
                             if($req->hasFile('file')){
-                                $message->file = attachment::upload_attachment($req->file , 'message')->path;
+                                $attachment = attachment::upload_attachment($req->file , 'message');
+                                $message->file = $attachment->path;
                             }
                             $message->save();
                             $is_send = true;
