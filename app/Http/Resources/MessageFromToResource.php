@@ -22,10 +22,10 @@ class MessageFromToResource extends JsonResource
         $from = User::find($this->From);
         $To = User::find($this->To);
         if(isset($this->attachment)){
-            $type = $this->attachment->type;
+            $extension = $this->attachment->extension;
         }
         else{
-            $type = null;
+            $extension = null;
         }
         $arr = [
             'id' => $this->id,
@@ -35,7 +35,7 @@ class MessageFromToResource extends JsonResource
             'To' => $To,
             'Seen'=>$this->seen,
             'file' => $this->file,
-            'type' => $type,
+            'extension' => $extension,
         ];
         if ($this->deleted == 0) {
             return $arr;
