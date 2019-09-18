@@ -49,4 +49,9 @@ class Message extends Model
         }
         return $temp;
     }
+
+    public function attachment()
+    {
+        return $this->belongsTo('App\attachment', 'attachment_id', 'id');
+    }
 }

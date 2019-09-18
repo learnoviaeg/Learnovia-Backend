@@ -69,6 +69,7 @@ class MessageController extends Controller
                             if($req->hasFile('file')){
                                 $attachment = attachment::upload_attachment($req->file , 'message');
                                 $message->file = $attachment->path;
+                                $message->attachment_id = $attachment->id;
                             }
                             $message->save();
                             $is_send = true;
