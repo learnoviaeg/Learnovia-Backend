@@ -35,14 +35,14 @@ class MessageController extends Controller
 
     public function Send_message_of_all_user(Request $req)
     {
-        return response()->json($req->file->getClientOriginalExtension());
+        //return response()->json($req->file->getClientOriginalExtension());
         $session_id = Auth::User()->id;
         $valid = Validator::make($req->all(), [
             'text' => 'nullable',
             'about' => 'exists:users,id',
             'users' => 'required|array',
             'users.*' => 'required|integer|exists:users,id',
-            'file' => 'file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,jpg,jpeg,png,gif',
+            'file' => 'mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,jpeg,jpg,png,gif',
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(404, null, $valid->errors());
