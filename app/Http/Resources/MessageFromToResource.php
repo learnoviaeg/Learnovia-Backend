@@ -21,11 +21,40 @@ class MessageFromToResource extends JsonResource
         $session_id = Auth::User()->id;
         $from = User::find($this->From);
         $To = User::find($this->To);
+        $imageCollection = collect([
+            'jpg','JPG',
+            'jpeg','JPEG',
+            'png','PNG',
+            'git','GIF'
+        ]);
+
+        $fileCollection = collect([
+            'pdf','PDF',
+            'docx','DOCX',
+            'doc','DOC',
+            'xls','XLS',
+            'xlsx','XLSX',
+            'ppt','PPT',
+            'pptx','PPTX',
+            'zip','ZIP',
+            'rar','RAR',
+        ]);
+
         if(isset($this->attachment)){
             $extension = $this->attachment->extension;
+            if ($imageCollection->contains($extension)) {
+                $type = 'image';
+            }
+            else if($fileCollection->contains($extension)){
+                $type = 'file';
+            }
+            else{
+                $type = 'text';
+            }
         }
         else{
             $extension = null;
+            $type = 'text';
         }
         $arr = [
             'id' => $this->id,
@@ -35,7 +64,7 @@ class MessageFromToResource extends JsonResource
             'To' => $To,
             'Seen'=>$this->seen,
             'file' => $this->file,
-            'extension' => $extension,
+            'type' => $type,
         ];
         if ($this->deleted == 0) {
             return $arr;
