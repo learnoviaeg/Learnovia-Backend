@@ -89,7 +89,7 @@ class AssigmentsController extends Controller
 
                     foreach($courseSegment->lessons as $lesson){
                         foreach($lesson->AssignmentLesson as $AssignmentLesson){
-                            $assignments = $AssignmentLesson->Assignment;
+                            $assignments = $AssignmentLesson->where('visiable',1)->Assignment;
 
                             foreach ($assignments as $assignment) {
 
@@ -169,7 +169,6 @@ class AssigmentsController extends Controller
         $assigment->allow_attachment = $request->allow_attachment;
         $assigment->start_date = $request->opening_date;
         $assigment->due_date = $request->closing_date;
-        $assigment->visiable = $request->visiable;
         $assigment->save();
         $data = array("course_segment" => $segments->id,
         "assignments_id" => $assigment->id, "submit_date" => $request->submit_date,"publish_date"=>$request->opening_date);
@@ -231,7 +230,6 @@ class AssigmentsController extends Controller
         $assigment->allow_attachment = $request->allow_attachment;
         $assigment->start_date = $request->opening_date;
         $assigment->due_date = $request->closing_date;
-        $assigment->visiable = $request->visiable;
         $assigment->save();
 
         // $usersIDs = Enroll::where('course_segment', $assigment->course_segment)->pluck('user_id')->toarray();
@@ -324,7 +322,7 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(400, $body = [], $message = 'This user isn\'t assign to this assignment');
         }
 
-        if (((($assigment->start_date >  Carbon::now()) || (Carbon::now() > $assigment->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1) || ($assigment->visiable == 0)) {
+        if (((($assigment->start_date >  Carbon::now()) || (Carbon::now() > $assigment->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
             return HelperController::api_response_format(400, $body = [], $message = 'sorry you are not allowed to submit anymore');
         }
         if (isset($request->file)) {
@@ -463,9 +461,7 @@ class AssigmentsController extends Controller
                     return HelperController::api_response_format(400, $body = [], $message = 'you are not allowed to see the assignment at this moment');
                 }
             }
-            if ($assignment->visiable == 0) {
-                return HelperController::api_response_format(400, $body = [], $message = 'you are not allowed to see the assignment at this moment');
-            }
+
             $stuassignment = assignment::where('id', $request->assignment_id)->first();
             $stuassignment['attachment'] = attachment::where('id', $stuassignment->attachment_id)->first();
             $stuassignment['user_submit'] = $studentassigment;
@@ -479,9 +475,11 @@ class AssigmentsController extends Controller
         try {
             $request->validate([
                 'assignment_id' => 'required|exists:assignments,id',
+                'lesson_id' => 'required|exists:lessons,id'
             ]);
 
-            $assigment = assignment::find($request->assignment_id);
+            $assigment = AssignmentLesson::where('assignment_id',$request->assignment_id)
+                ->where('lesson_id',$request->lesson_id)->first();
 
             $assigment->visiable = ($assigment->visiable == 1) ? 0 : 1;
             $assigment->save();
