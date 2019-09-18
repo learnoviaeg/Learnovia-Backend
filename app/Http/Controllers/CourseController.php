@@ -386,7 +386,7 @@ class CourseController extends Controller
             foreach ($course_segment['value'] as $cs) {
                 if(count($cs->optionalCourses) <= 0)
                     continue;
-                $optional[]=$cs->optionalCourses;
+                $optional[]=$cs->optionalCourses[0];
             }
             return HelperController::api_response_format(200, $optional);
         }
