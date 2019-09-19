@@ -204,7 +204,13 @@ class AssigmentsController extends Controller
             'file_description' => 'string',
 
         ]);
+
         $assigment = assignment::find($request->id);
+
+        if (!isset($assigment->file) && !isset($assigment->content)) {
+            return HelperController::api_response_format(400, $body = [], $message = 'please enter file or content');
+        }
+
         if (isset($request->file)) {
 
             $request->validate([
