@@ -43,96 +43,97 @@ class QuizController extends Controller
         ]);
 
         $request->validate([
-            'Question' => 'required|array',
+            'Question' => 'nullable|array',
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
         ]);
 
-        foreach ($request->Question as $question) {
-            switch ($question['Question_Type_id']) {
-                case 1: // True/false
-                    $validator = Validator::make($question, [
-                        'answers' => 'required|array|distinct|min:2|max:2',
-                        'text' => 'required|string',
-                        'answers.*' => 'required|boolean|distinct',
-                        'And_why' => 'integer|required',
-                        'And_why_mark' => 'integer|min:1|required_if:And_why,==,1',
-                        'Is_True' => 'required|boolean',
-                        'Question_Type_id' => 'required|integer|exists:questions_types,id',
-                        'mark' => 'required|integer|min:1',
-                        'Question_Category_id' => 'required|exists:questions_categories,id',
-                        'Category_id' => 'required|exists:categories,id',
-                        'course_id' => 'required|exists:courses,id',
-                        'parent' => 'integer|exists:questions,id',
-                    ]);
-                    if ($validator->fails()) {
-                        return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
-                    }
-                    break;
+        if(isset($request->Question)){
+            foreach ($request->Question as $question) {
+                switch ($question['Question_Type_id']) {
+                    case 1: // True/false
+                        $validator = Validator::make($question, [
+                            'answers' => 'required|array|distinct|min:2|max:2',
+                            'text' => 'required|string',
+                            'answers.*' => 'required|boolean|distinct',
+                            'And_why' => 'integer|required',
+                            'And_why_mark' => 'integer|min:1|required_if:And_why,==,1',
+                            'Is_True' => 'required|boolean',
+                            'Question_Type_id' => 'required|integer|exists:questions_types,id',
+                            'mark' => 'required|integer|min:1',
+                            'Question_Category_id' => 'required|exists:questions_categories,id',
+                            'Category_id' => 'required|exists:categories,id',
+                            'course_id' => 'required|exists:courses,id',
+                            'parent' => 'integer|exists:questions,id',
+                        ]);
+                        if ($validator->fails()) {
+                            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+                        }
+                        break;
 
-                case 2: // MCQ
-                    $validator = Validator::make($question, [
-                        'answers' => 'required|array|distinct|min:2',
-                        'answers.*' => 'required|string|distinct',
-                        'Is_True' => 'required|integer',
-                        'text' => 'required|string',
-                        'Question_Type_id' => 'required|integer|exists:questions_types,id',
-                        'mark' => 'required|integer|min:1',
-                        'Question_Category_id' => 'required|exists:questions_categories,id',
-                        'Category_id' => 'required|exists:categories,id',
-                        'course_id' => 'required|exists:courses,id',
-                        'parent' => 'integer|exists:questions,id',
-                    ]);
+                    case 2: // MCQ
+                        $validator = Validator::make($question, [
+                            'answers' => 'required|array|distinct|min:2',
+                            'answers.*' => 'required|string|distinct',
+                            'Is_True' => 'required|integer',
+                            'text' => 'required|string',
+                            'Question_Type_id' => 'required|integer|exists:questions_types,id',
+                            'mark' => 'required|integer|min:1',
+                            'Question_Category_id' => 'required|exists:questions_categories,id',
+                            'Category_id' => 'required|exists:categories,id',
+                            'course_id' => 'required|exists:courses,id',
+                            'parent' => 'integer|exists:questions,id',
+                        ]);
 
-                    if ($question['Is_True'] > count($question['answers']) - 1) {
-                        return HelperController::api_response_format(400, $question, 'is True invalid');
-                    }
+                        if ($question['Is_True'] > count($question['answers']) - 1) {
+                            return HelperController::api_response_format(400, $question, 'is True invalid');
+                        }
 
-                    if ($validator->fails()) {
-                        return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
-                    }
-                    break;
+                        if ($validator->fails()) {
+                            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+                        }
+                        break;
 
-                case 3: // Match
-                    $validator = Validator::make($question, [
-                        'match_A' => 'required|array|min:2|distinct',
-                        'match_A.*' => 'required|distinct',
-                        'match_B' => 'required|array|distinct',
-                        'match_B.*' => 'required|distinct',
-                        'Question_Type_id' => 'required|integer|exists:questions_types,id',
-                        'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-                        'mark' => 'required|integer|min:1',
-                        'Question_Category_id' => 'required|exists:questions_categories,id',
-                        'Category_id' => 'required|exists:categories,id',
-                        'course_id' => 'required|exists:courses,id',
-                        'parent' => 'integer|exists:questions,id',
-                    ]);
-                    if ($validator->fails()) {
-                        return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
-                    }
-                    if (count($question['match_A']) > count($question['match_B'])) {
-                        return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
-                    }
-                    break;
-                case 5: // para
-                    $validator = Validator::make($question, [
-                        'Question_Type_id' => 'required|integer|exists:questions_types,id',
-                        'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-                        'mark' => 'required|integer|min:1',
-                        'Question_Category_id' => 'required|exists:questions_categories,id',
-                        'Category_id' => 'required|exists:categories,id',
-                        'course_id' => 'required|exists:courses,id',
-                        'parent' => 'integer|exists:questions,id',
-                        'subQuestions' => 'required|array|distinct'/*|min:2*/,
-                        'subQuestions.*' => 'required|distinct',
-                        'subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
-                    ]);
-                    if ($validator->fails()) {
-                        return HelperController::api_response_format(400, $validator->errors());
-                    }
-                    break;
+                    case 3: // Match
+                        $validator = Validator::make($question, [
+                            'match_A' => 'required|array|min:2|distinct',
+                            'match_A.*' => 'required|distinct',
+                            'match_B' => 'required|array|distinct',
+                            'match_B.*' => 'required|distinct',
+                            'Question_Type_id' => 'required|integer|exists:questions_types,id',
+                            'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
+                            'mark' => 'required|integer|min:1',
+                            'Question_Category_id' => 'required|exists:questions_categories,id',
+                            'Category_id' => 'required|exists:categories,id',
+                            'course_id' => 'required|exists:courses,id',
+                            'parent' => 'integer|exists:questions,id',
+                        ]);
+                        if ($validator->fails()) {
+                            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+                        }
+                        if (count($question['match_A']) > count($question['match_B'])) {
+                            return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
+                        }
+                        break;
+                    case 5: // para
+                        $validator = Validator::make($question, [
+                            'Question_Type_id' => 'required|integer|exists:questions_types,id',
+                            'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
+                            'mark' => 'required|integer|min:1',
+                            'Question_Category_id' => 'required|exists:questions_categories,id',
+                            'Category_id' => 'required|exists:categories,id',
+                            'course_id' => 'required|exists:courses,id',
+                            'parent' => 'integer|exists:questions,id',
+                            'subQuestions' => 'required|array|distinct'/*|min:2*/,
+                            'subQuestions.*' => 'required|distinct',
+                            'subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+                        ]);
+                        if ($validator->fails()) {
+                            return HelperController::api_response_format(400, $validator->errors());
+                        }
+                        break;
+                }
             }
         }
-
         $index = Quiz::whereCourse_id($request->course_id)->get()->max('index');
         $Next_index = $index + 1;
         if ($request->type == 0) { // new or new
