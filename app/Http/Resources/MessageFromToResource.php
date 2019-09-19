@@ -40,6 +40,19 @@ class MessageFromToResource extends JsonResource
             'rar','RAR',
         ]);
 
+        $videoCollection = collect([
+            'mp4','MP4',
+            'avi','AVI',
+            'flv','FLV',
+        ]);
+
+        $audioCollection = collect([
+            'mpga','MPGA',
+            'ogg','OGG',
+            'ogv','OGV',
+            'oga','OGA',
+        ]);
+
         if(isset($this->attachment)){
             $extension = $this->attachment->extension;
             if ($imageCollection->contains($extension)) {
@@ -47,6 +60,12 @@ class MessageFromToResource extends JsonResource
             }
             else if($fileCollection->contains($extension)){
                 $type = 'file';
+            }
+            else if($videoCollection->contains($extension)){
+                $type = 'video';
+            }
+            else if($audioCollection->contains($extension)){
+                $type = 'audio';
             }
             else{
                 $type = 'text';

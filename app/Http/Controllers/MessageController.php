@@ -42,7 +42,7 @@ class MessageController extends Controller
             'about' => 'exists:users,id',
             'users' => 'required|array',
             'users.*' => 'required|integer|exists:users,id',
-            'file' => 'mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,jpeg,jpg,png,gif',
+            'file' => 'mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,jpeg,jpg,png,gif,mp4,avi,flv,mpga,ogg,ogv,oga',
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(404, null, $valid->errors());
