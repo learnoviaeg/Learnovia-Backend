@@ -204,9 +204,6 @@ class AssigmentsController extends Controller
             'file_description' => 'string',
 
         ]);
-        if (!isset($request->file) && !isset($request->content)) {
-            return HelperController::api_response_format(400, $body = [], $message = 'please enter file or content');
-        }
         $assigment = assignment::find($request->id);
         if (isset($request->file)) {
 
@@ -219,8 +216,6 @@ class AssigmentsController extends Controller
                 $description = Null;
             }
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
-        } else {
-            $assigment->attachment_id = null;
         }
         if (isset($request->content)) {
             $assigment->content = $request->content;
