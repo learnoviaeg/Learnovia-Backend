@@ -43,7 +43,7 @@ class UserQuizController extends Controller
                     ->first();
 
         $attempt_index = 0;
-        if(!isset($max_attempt_index)){
+        if($max_attempt_index == null){
             $attempt_index = 1;
         }
         else if(isset($userQuiz)){
