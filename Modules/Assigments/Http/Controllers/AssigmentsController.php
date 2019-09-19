@@ -207,7 +207,7 @@ class AssigmentsController extends Controller
 
         $assigment = assignment::find($request->id);
 
-        if (!isset($assigment->file) && !isset($assigment->content)) {
+        if (!isset($assigment->attachment_id) && !isset($assigment->content)) {
             return HelperController::api_response_format(400, $body = [], $message = 'please enter file or content');
         }
 
