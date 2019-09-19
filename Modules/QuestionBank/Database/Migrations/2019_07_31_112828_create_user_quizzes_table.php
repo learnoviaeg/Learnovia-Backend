@@ -37,11 +37,11 @@ class CreateUserQuizzesTable extends Migration
 
             $table->dateTime('submit_time')->nullable();
 
-            $table->string('device_data');
+            $table->text('device_data');
 
             $table->string('ip',15);
 
-            $table->string('browser_data');
+            $table->text('browser_data');
 
             $table->timestamps();
         });
