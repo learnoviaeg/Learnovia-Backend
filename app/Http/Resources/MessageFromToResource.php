@@ -25,7 +25,7 @@ class MessageFromToResource extends JsonResource
             'jpg','JPG',
             'jpeg','JPEG',
             'png','PNG',
-            'git','GIF'
+            'gif','GIF'
         ]);
 
         $fileCollection = collect([
