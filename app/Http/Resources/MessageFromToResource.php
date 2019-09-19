@@ -47,7 +47,7 @@ class MessageFromToResource extends JsonResource
         ]);
 
         $audioCollection = collect([
-            'mpga','MPGA',
+            'mp3','MP3',
             'ogg','OGG',
             'ogv','OGV',
             'oga','OGA',
