@@ -46,4 +46,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('getAllStudentsAnswerinQuiz', 'QuizController@getAllStudentsAnswerinQuiz');
     Route::get('getSingleQuiz', 'QuizController@getSingleQuiz');
 
+    Route::post('correctUserQuiz', 'UserQuizController@estimateEssayandAndWhy');
+
+
 });
