@@ -41,7 +41,8 @@ class UserQuizController extends Controller
                     ->first();
 
         $attempt_index = 0;
-        if($max_attempt_index == null){
+        return response()->json($max_attempt_index);
+        if(!isset($max_attempt_index)){
             $attempt_index = 1;
         }
         else if(isset($userQuiz)){
