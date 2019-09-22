@@ -11,6 +11,7 @@ use App\Enroll;
 use Carbon\Carbon;
 use App\ClassLevel;
 use App\CourseSegment;
+use App\Course;
 use App\SegmentClass;
 use DB;
 use App\Imports\UsersImport;
@@ -126,8 +127,9 @@ class EnrollUserToCourseController extends Controller
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
-            'segment' => 'exists:segments,id'
-        ]);
+            'segment' => 'exists:segments,id',
+            'course' => 'array|exists:courses,id'
+        ]);            
 
         $count = 0;
         foreach ($request->username as $user) {
@@ -153,7 +155,7 @@ class EnrollUserToCourseController extends Controller
                 $check = Enroll::where('user_id', $userId)->where('course_segment', $segments)->pluck('id');
                 if (count($check) == 0) {
                     foreach ($segments as $segment) {
-                        Enroll::firstOrCreate([
+                        Enroll::Create([
                             'username' => $user,
                             'user_id' => $userId,
                             'course_segment' => $segment,
@@ -162,14 +164,33 @@ class EnrollUserToCourseController extends Controller
                             'role_id' => 3,
                         ]);
                     }
-                } else {
+                }
+                if(isset($request->course))
+                {
+                    $mand=Course::where('id',$request->course)->pluck('mandatory')->first();
+                    if($mand == 1)
+                        return HelperController::api_response_format(400, [], 'This Course not Optional_Course');     
+
+                    foreach($request->course as $course){
+                        $courseSegment=HelperController::Get_Course_segment_course($request);
+                        Enroll::Create([
+                            'username' => $user,
+                            'user_id' => $userId,
+                            'course_segment' => $courseSegment['value']['id'],
+                            'start_date' => $request->start_date,
+                            'end_date' => $request->end_date,
+                            'role_id' => 3,
+                        ]);
+                    }
+                }
+                else {
                     $count++;
                 }
             }
             else 
                 return HelperController::api_response_format(400, [], 'No Current segment or year');            
         }
-       //($count);
+        //($count);
         if ($count > 0) {
             return HelperController::api_response_format(200, [], 'those users added before');
         }
