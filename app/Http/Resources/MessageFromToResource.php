@@ -51,6 +51,7 @@ class MessageFromToResource extends JsonResource
             'ogg','OGG',
             'ogv','OGV',
             'oga','OGA',
+            'wav','WAV',
         ]);
 
         if(isset($this->attachment)){
