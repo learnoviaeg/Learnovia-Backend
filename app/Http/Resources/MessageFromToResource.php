@@ -69,7 +69,7 @@ class MessageFromToResource extends JsonResource
                 $type = 'audio';
             }
             else{
-                $type = 'text';
+                $type = null;
             }
         }
         else{
