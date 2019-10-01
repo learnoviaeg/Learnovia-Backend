@@ -37,6 +37,9 @@ class AssigmentsController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/override']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/delete']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/get']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/toggle']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/get-all']);
+
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('assignment/add');
@@ -46,6 +49,9 @@ class AssigmentsController extends Controller
         $role->givePermissionTo('assignment/override');
         $role->givePermissionTo('assignment/delete');
         $role->givePermissionTo('assignment/get');
+        $role->givePermissionTo('assignment/toggle');
+        $role->givePermissionTo('assignment/get-all');
+
 
         Component::create([
             'name' => 'Assigments',

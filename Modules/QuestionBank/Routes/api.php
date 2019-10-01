@@ -25,28 +25,28 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     //Quiz Routes
     Route::post('deleteQuiz', 'QuizController@destroy')->middleware('permission:quiz/delete');
     Route::get('getQuiz', 'QuizController@get')->name('getquiz')->middleware('permission:quiz/get');
-    Route::get('sort', 'QuizController@sort');
-    Route::get('SortUp', 'QuizController@SortUp');
+    Route::get('sort', 'QuizController@sort')->middleware('permission:quiz/sort');
+    Route::get('SortUp', 'QuizController@SortUp')->middleware('permission:quiz/sortup');
 
     //Quiz Lesson Routes
     Route::post('addQuizLesson', 'QuizLessonController@store')->middleware('permission:quiz/add-quiz-lesson');
-    Route::post('updateQuizLesson', 'QuizLessonController@update');//->middleware('permission:quiz/update-quiz-lesson');
+    Route::post('updateQuizLesson', 'QuizLessonController@update')->middleware('permission:quiz/update-quiz-lesson');
     Route::post('deleteQuizLesson', 'QuizLessonController@destroy')->middleware('permission:quiz/destroy-quiz-lesson');
-    Route::get('types', 'QuestionBankController@getAllTypes'); //->middleware('permission:quiz/get-all-types');
-    Route::get('categories', 'QuestionBankController@getAllCategories'); //->middleware('permission:quiz/get-all-categories');
-    Route::get('getQuizInLesson', 'QuizLessonController@getQuizInLesson');
+    Route::get('types', 'QuestionBankController@getAllTypes')->middleware('permission:quiz/get-all-types');
+    Route::get('categories', 'QuestionBankController@getAllCategories')->middleware('permission:quiz/get-all-categories');
+    Route::get('getQuizInLesson', 'QuizLessonController@getQuizInLesson')->middleware('permission:quiz/get-quiz-lesson');
 
     //User Quiz
-    Route::post('storeUserQuiz', 'UserQuizController@store_user_quiz');
-    Route::post('storeUserQuizAnswer', 'UserQuizController@quiz_answer');
+    Route::post('storeUserQuiz', 'UserQuizController@store_user_quiz')->middleware('permission:quiz/sort-user-quiz');
+    Route::post('storeUserQuizAnswer', 'UserQuizController@quiz_answer')->middleware('permission:quiz/sort-user-quiz-answer');
 
-    Route::get('getAllQuizes', 'QuizController@getAllQuizes');
-    Route::get('getStudentinQuiz', 'QuizController@getStudentinQuiz');
-    Route::get('getStudentAnswerinQuiz', 'QuizController@getStudentAnswerinQuiz');
-    Route::get('getAllStudentsAnswerinQuiz', 'QuizController@getAllStudentsAnswerinQuiz');
-    Route::get('getSingleQuiz', 'QuizController@getSingleQuiz');
+    Route::get('getAllQuizes', 'QuizController@getAllQuizes')->middleware('permission:quiz/get-all-quizes');
+    Route::get('getStudentinQuiz', 'QuizController@getStudentinQuiz')->middleware('permission:quiz/get-student-in-quiz');
+    Route::get('getStudentAnswerinQuiz', 'QuizController@getStudentAnswerinQuiz')->middleware('permission:quiz/get-student-answer-quiz');
+    Route::get('getAllStudentsAnswerinQuiz', 'QuizController@getAllStudentsAnswerinQuiz')->middleware('permission:quiz/get-all-students-answer');
+    Route::get('getSingleQuiz', 'QuizController@getSingleQuiz')->middleware('permission:quiz/get-single-quiz');
 
-    Route::post('correctUserQuiz', 'UserQuizController@estimateEssayandAndWhy');
+    Route::post('correctUserQuiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
 
 
 });

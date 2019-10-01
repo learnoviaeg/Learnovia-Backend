@@ -39,6 +39,19 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-types']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-categories']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sort']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sortup']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-quiz-lesson']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sort-user-quiz']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sort-user-quiz-answer']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-quizes']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-in-quiz']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-answer-quiz']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-students-answer']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-single-quiz']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/correct-user-quiz']);
+
+
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('question/add');
@@ -51,12 +64,24 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('question/delete-answer');
         $role->givePermissionTo('quiz/add');
         $role->givePermissionTo('quiz/update');
+        $role->givePermissionTo('quiz/sort');
+        $role->givePermissionTo('quiz/sortup');
         $role->givePermissionTo('quiz/delete');
         $role->givePermissionTo('quiz/add-quiz-lesson');
         $role->givePermissionTo('quiz/update-quiz-lesson');
         $role->givePermissionTo('quiz/destroy-quiz-lesson');
         $role->givePermissionTo('quiz/get-all-types');
         $role->givePermissionTo('quiz/get-all-categories');
+        $role->givePermissionTo('quiz/get-quiz-lesson');
+        $role->givePermissionTo('quiz/sort-user-quiz');
+        $role->givePermissionTo('quiz/sort-user-quiz-answer');
+        $role->givePermissionTo('quiz/get-all-quizes');
+        $role->givePermissionTo('quiz/get-student-in-quiz');
+        $role->givePermissionTo('quiz/get-student-answer-quiz');
+        $role->givePermissionTo('quiz/get-all-students-answer');
+        $role->givePermissionTo('quiz/get-single-quiz');
+        $role->givePermissionTo('quiz/correct-user-quiz');
+
 
         Component::create([
             'name' => 'Quiz',
