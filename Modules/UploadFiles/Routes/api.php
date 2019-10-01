@@ -9,7 +9,7 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
 
     /* File Routes */
     /* Upload array of files to specific course segment */
-    Route::post('uploadFile', 'FilesController@store');//->name('uploadFile')->middleware('permission:file/add');
+    Route::post('uploadFile', 'FilesController@store')->name('uploadFile')->middleware('permission:file/add');
 
     /* Update specific file */
     Route::post('updateFile', 'FilesController@update')->name('updateFile')->middleware('permission:file/update');
@@ -22,7 +22,7 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
     /* Media Routes */
     /* Upload array of Media to specific course segment */
    // Route::post('uploadMedia', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
-    Route::post('uploadMedia', 'MediaController@store')->name('uploadMedia');
+    Route::post('uploadMedia', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
     /* Update specific Media */
     Route::post('updateMedia', 'MediaController@update')->name('updateMedia')->middleware('permission:media/update');
 
@@ -34,7 +34,7 @@ Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
 
     /* Attach link as media */
     //Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink')->middleware('permission:link/add');
-    Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink');
+    Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink')->middleware('permission:link/add');
 
     /* update link as media */
     Route::post('updateMediaLink', 'MediaController@updateMediaLink')->name('updateMediaLink')->middleware('permission:link/update');
