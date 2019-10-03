@@ -297,10 +297,13 @@ class QuizController extends Controller
     public function destroy(Request $request)
     {
         $request->validate([
-            'quiz_id' => 'required|integer|exists:quizzes,id'
+            'quiz_id' => 'required|integer|exists:quiz_lessons,quiz_id',
+            'lesson_id' => 'required|exists:quiz_lessons,lesson_id'
         ]);
 
-        quiz::destroy($request->quiz_id);
+        $quiz=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+        // destroy($request->quiz_id);
+        $quiz->delete();
         return HelperController::api_response_format(200, [], 'Quiz deleted Successfully');
     }
 

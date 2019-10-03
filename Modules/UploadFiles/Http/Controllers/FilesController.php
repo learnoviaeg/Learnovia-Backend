@@ -490,44 +490,16 @@ class FilesController extends Controller
      */
     public function destroy(Request $request)
     {
-        try {
             $request->validate([
-                'fileID' => 'required|integer|exists:files,id',
-            ]);
+                'fileID' => 'required|integer|exists:file_lessons,file_id',
+                'lesson_id' => 'required|exists:file_lessons,lesson_id'
+                ]);
 
-            $file = file::find($request->fileID);
+            $file = FileLesson::where('file_id', $request->fileID)->where('lesson_id',$request->lesson_id)->first();
+            $file->delete();
 
-            if(!isset($file->FileCourseSegment)){
-                return HelperController::api_response_format(404, null,'No file Found');
-            }
+            return HelperController::api_response_format(200, $body = [], $message = 'File deleted succesfully');
 
-            //check Authotizing
-            $courseSegmentID = $file->FileCourseSegment->course_segment_id;
-
-            // check Enroll
-            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
-
-            if ($checkTeacherEnroll == false) {
-                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
-            }
-
-            $oldname = $file->name;
-            $fileId = $file->id;
-            $lesson_id = $file->FileLesson->lesson_id;
-
-            $check = $file->delete();
-
-            if ($check) {
-                $filePath = 'storage\files\\' . $lesson_id . '\\' . $oldname;
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                    unlink('storage\files\\' . $lesson_id);
-                }
-            }
-            return HelperController::api_response_format(200, null, 'Deleted Successfully');
-        } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
-        }
     }
 
     /**

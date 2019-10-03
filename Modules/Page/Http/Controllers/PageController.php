@@ -188,10 +188,11 @@ class PageController extends Controller
     public function destroy(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:pages,id',
+            'page_id' => 'required|exists:page_lessons,page_id',
+            'lesson_id' => 'required|exists:page_lessons,lesson_id'
         ]);
 
-        $page =Page::find($request->id);
+        $page =PageLesson::where('page_id', $request->page_id)->where('lesson_id',$request->lesson_id)->first();
         if ($page->delete()) {
             return HelperController::api_response_format(200, $page,'Page Deleted Successfully');
         }
