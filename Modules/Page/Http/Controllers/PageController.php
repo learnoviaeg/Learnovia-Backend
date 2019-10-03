@@ -198,26 +198,7 @@ class PageController extends Controller
         return HelperController::api_response_format(404, [], 'Not Found');
     }
 
-    public function toggle(Request $request)
-    {
-        $request->validate([
-            'id' => 'required|exists:pages,id',
-        ]);
 
-        $page =Page::find($request->id);
-        if($page->visible == 0)
-        {
-            $page->update([
-                'visible' => 1
-            ]);
-        }
-        else{
-            $page->update([
-                'visible' => 0
-            ]);
-        }
-        return HelperController::api_response_format(200, $page,'Page Toggled Successfully');
-    }
 
     public function get(Request $request)
     {
@@ -228,5 +209,28 @@ class PageController extends Controller
         if($page == null)
             return HelperController::api_response_format(200 , null , 'This Page is not Visible');
         return HelperController::api_response_format(200 , $page);
+    }
+
+    public function togglePageVisibity(Request $request)
+    {
+        try {
+            $request->validate([
+                'page_id' => 'required|exists:pages,id',
+                'lesson_id' => 'required|exists:page_lessons,lesson_id'
+            ]);
+
+            $page_lesson = pageLesson::where('page_id',$request->page_id)
+                ->where('lesson_id',$request->lesson_id)->first();
+            if(!isset($page_lesson)){
+                return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+            }
+
+            $page_lesson->visible = ($page_lesson->visible == 1) ? 0 : 1;
+            $page_lesson->save();
+
+            return HelperController::api_response_format(200, $page_lesson, 'Toggle Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
+        }
     }
 }

@@ -143,7 +143,6 @@ class AssigmentsController extends Controller
             'allow_attachment' => 'required|integer|min:0|max:3',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'required|date|date_format:Y-m-d H:i:s',
-            'visiable' => 'required|boolean',
             'class' => 'required|exists:classes,id',
             'course' => 'required|exists:courses,id',
         ]);
@@ -184,7 +183,6 @@ class AssigmentsController extends Controller
                 'assignment_id' => $assigment->id,
                 'lesson_id' => $request->Lesson_id,
                 'publish_date'=>$request->opening_date,
-                'visible' => $request->visiable,
             ]
         );
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
@@ -483,13 +481,16 @@ class AssigmentsController extends Controller
         try {
             $request->validate([
                 'assignment_id' => 'required|exists:assignments,id',
-                'lesson_id' => 'required|exists:lessons,id'
+                'lesson_id' => 'required|exists:assignment_lessons,lesson_id'
             ]);
 
             $assigment = AssignmentLesson::where('assignment_id',$request->assignment_id)
                 ->where('lesson_id',$request->lesson_id)->first();
+            if(!isset($assigment)){
+                return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+            }
 
-            $assigment->visiable = ($assigment->visiable == 1) ? 0 : 1;
+            $assigment->visible = ($assigment->visible == 1) ? 0 : 1;
             $assigment->save();
 
             return HelperController::api_response_format(200, $assigment, 'Toggle Successfully');
