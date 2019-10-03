@@ -674,7 +674,7 @@ class SpatieController extends Controller
     {
         $request->validate([
             'course' => 'required|exists:courses,id',
-            'class'=> 'required|exists:courses,id',
+            'class'=> 'required|exists:classes,id',
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'required|string|exists:permissions,name'
         ]);
@@ -683,12 +683,17 @@ class SpatieController extends Controller
             return HelperController::api_response_format(400, null , 'No Activ  segment on this course to check permession in');
         $enroll = Enroll::whereCourse_segment($activeSegment->id)
         ->whereUser_id($request->user()->id)->first();
-        $role = Role::find($enroll->role_id);
-        $has = [];
-        foreach ($request->permissions as $permission) {
-            $has[$permission] = $role->hasPermissionTo($permission);
+        if($enroll)
+        {
+            $role = Role::find($enroll->role_id);
+            $has = [];
+            foreach ($request->permissions as $permission) {
+                $has[$permission] = $role->hasPermissionTo($permission);
+            }
+            return HelperController::api_response_format(200, $has);
         }
-        return HelperController::api_response_format(200, $has);
+        else
+            return HelperController::api_response_format(200, 'you are not enrolled this course');
     }
 
     public function comparepermissions(Request $request)

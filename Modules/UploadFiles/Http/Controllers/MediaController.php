@@ -343,43 +343,15 @@ class MediaController extends Controller
      */
     public function destroy(Request $request)
     {
-        try {
             $request->validate([
-                'mediaId' => 'required|integer|exists:media,id',
-            ]);
+                'mediaId' => 'required|integer|exists:media_lessons,media_id',
+                'lesson_id' => 'required|exists:media_lessons,lesson_id'
+                ]);
 
-            $file = media::find($request->mediaId);
+            $file = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id',$request->lesson_id)->first();
+            $file->delete();
 
-            if(!isset($file->MediaCourseSegment)){
-                return HelperController::api_response_format(404, null,'No Media Found');
-            }
-
-            //check Authotizing
-            $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
-
-            // check Enroll
-            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
-            if ($checkTeacherEnroll == false) {
-                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
-            }
-
-            $oldname = $file->name;
-            $fileId = $file->id;
-            $lesson_id = $file->MediaLesson->lesson_id;
-
-            $check = $file->delete();
-
-            if ($check) {
-                $filePath = 'storage\media\\' . $lesson_id . '\\' . $oldname;
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                    unlink('storage\media\\' . $lesson_id);
-                }
-            }
-            return HelperController::api_response_format(200, null, 'Deleted Successfully');
-        } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
-        }
+            return HelperController::api_response_format(200, $body = [], $message = 'File deleted succesfully');            
     }
 
     /**

@@ -433,12 +433,15 @@ class AssigmentsController extends Controller
     public function deleteAssigment(Request $request)
     {
         $request->validate([
-            'assignment_id' => 'required|exists:user_assigments,assignment_id',
+            'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
+            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'
         ]);
-        $assigment = assignment::where('id', $request->assignment_id)->first();
+        $assigment = AssignmentLesson::where('assignment_id', $request->assignment_id)
+                                            ->where('lesson_id',$request->lesson_id)->first();
         $assigment->delete();
         return HelperController::api_response_format(200, $body = [], $message = 'Assigment deleted succesfully');
     }
+    
     public function GetAssignment(Request $request)
     {
         $request->validate([
