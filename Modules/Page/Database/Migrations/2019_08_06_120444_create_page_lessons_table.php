@@ -19,6 +19,7 @@ class CreatePageLessonsTable extends Migration
             $table->foreign('page_id')->references('id')->on('pages')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('lesson_id');
             $table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade')->onUpdate('cascade');
+            $table->boolean('visible')->default(1);
             $table->timestamps();
         });
     }

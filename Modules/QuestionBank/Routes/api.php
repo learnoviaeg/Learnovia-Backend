@@ -45,6 +45,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('getStudentAnswerinQuiz', 'QuizController@getStudentAnswerinQuiz')->middleware('permission:quiz/get-student-answer-quiz');
     Route::get('getAllStudentsAnswerinQuiz', 'QuizController@getAllStudentsAnswerinQuiz')->middleware('permission:quiz/get-all-students-answer');
     Route::get('getSingleQuiz', 'QuizController@getSingleQuiz')->middleware('permission:quiz/get-single-quiz');
+    Route::post('toggleQuizVisibity', 'QuizController@toggleQuizVisibity')->middleware('permission:quiz/toggleQuizVisibity');
 
     Route::post('correctUserQuiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
 

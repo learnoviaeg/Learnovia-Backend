@@ -394,6 +394,8 @@ class MediaController extends Controller
         try {
             $request->validate([
                 'mediaId' => 'required|integer|exists:media,id',
+                'LessonID' => 'required|integer|exists:media_lessons,lesson_id',
+
             ]);
 
             $media = media::find($request->mediaId);
@@ -410,9 +412,13 @@ class MediaController extends Controller
             if ($checkTeacherEnroll == false) {
                 return HelperController::api_response_format(400, null, 'You\'re unauthorize');
             }
+            $mediaLesson= MediaLesson::where('media_id',$request->mediaId)->where('lesson_id','=',$request->LessonID)->first();
+            if(!isset($mediaLesson)){
+                return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+            }
 
-            $media->visibility = ($media->visibility == 1) ? 0 : 1;
-            $media->save();
+            $mediaLesson->visible = ($mediaLesson->visible == 1) ? 0 : 1;
+            $mediaLesson->save();
 
             return HelperController::api_response_format(200, $media, 'Toggle Successfully');
         } catch (Exception $ex) {

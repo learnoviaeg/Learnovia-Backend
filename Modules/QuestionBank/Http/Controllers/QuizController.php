@@ -641,4 +641,26 @@ class QuizController extends Controller
 
         return HelperController::api_response_format(200,$quiz);
     }
+    public function toggleQuizVisibity(Request $request)
+    {
+        try {
+            $request->validate([
+                'quiz_id' => 'required|exists:quizzes,id',
+                'lesson_id' => 'required|exists:quiz_lessons,lesson_id'
+            ]);
+
+            $Quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)
+                ->where('lesson_id',$request->lesson_id)->first();
+            if(!isset($Quiz_lesson)){
+                return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+            }
+
+            $Quiz_lesson->visible = ($Quiz_lesson->visible == 1) ? 0 : 1;
+            $Quiz_lesson->save();
+
+            return HelperController::api_response_format(200, $Quiz_lesson, 'Toggle Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
+        }
+    }
 }

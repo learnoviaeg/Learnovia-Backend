@@ -22,7 +22,6 @@ class CreateAssignmentsTable extends Migration
             $table->timestamp('start_date');
             $table->timestamp('due_date')->nullable();
             $table->boolean('is_graded');
-            $table->boolean('visiable');
             $table->unsignedBigInteger('grade_category')->nullable();
             $table->integer('mark');
             $table->unsignedBigInteger('scale_id')->nullable();

@@ -542,6 +542,7 @@ class FilesController extends Controller
         try {
             $request->validate([
                 'fileID' => 'required|integer|exists:files,id',
+                'LessonID' => 'required|integer|exists:file_lessons,lesson_id',
             ]);
 
             $file = file::find($request->fileID);
@@ -552,15 +553,18 @@ class FilesController extends Controller
 
             //check Authotizing
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
-
             // check Enroll
             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
+
             if ($checkTeacherEnroll == false) {
                 return HelperController::api_response_format(400, null, 'You\'re unauthorize');
             }
-
-            $file->visibility = ($file->visibility == 1) ? 0 : 1;
-            $file->save();
+            $fileLesson= FileLesson::where('file_id',$request->fileID)->where('lesson_id','=',$request->LessonID)->first();
+            if(!isset($fileLesson)){
+                return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+            }
+            $fileLesson->visible = ($fileLesson->visible == 1) ? 0 : 1;
+            $fileLesson->save();
 
             return HelperController::api_response_format(200, $file, 'Toggle Successfully');
         } catch (Exception $ex) {

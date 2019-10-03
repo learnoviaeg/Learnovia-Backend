@@ -18,7 +18,7 @@ Route::group(['prefix' => 'page', 'middleware' => 'auth:api'] , function(){
     Route::post('add' , 'PageController@add')->name('addPage')->middleware('permission:page/add');
     Route::post('update' , 'PageController@update')->name('updatePage')->middleware('permission:page/update');
     Route::post('delete' , 'PageController@destroy')->name('deletePage')->middleware('permission:page/delete');
-    Route::post('toggle' , 'PageController@toggle')->name('togglePage')->middleware('permission:page/toggle');
+    Route::post('toggle' , 'PageController@togglePageVisibity')->name('togglePage')->middleware('permission:page/toggle');
     Route::post('linklesson' , 'PageController@linkpagelesson')->name('linklessonPage')->middleware('permission:page/link-lesson');
     Route::get('get' , 'PageController@get')->name('getPage')->middleware('permission:page/get');
 });
