@@ -451,8 +451,15 @@ class AssigmentsController extends Controller
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assignment['attachment'] = attachment::where('id', $assignment->attachment_id)->first();
         $userassigments = UserAssigment::where('assignment_id', $assignment->id)->get();
+        if (count($userassigments)>0){
+            $assignment['allow_edit']= false;
+        }
+    else{
+            $assignment['allow_edit']= true;
 
+        }
         $assignment['user_assignment'] = $userassigments;
+
         foreach ($assignment['user_assignment'] as $value) {
             # code...
             $value->user;
