@@ -334,7 +334,7 @@ class AnnouncementController extends Controller
             $segmentname = Segment::find($segmentclass->segment_id);
             $all_ann['Segment'][$s]['name'] = $segmentname->name;
             $all_ann['Segment'][$s]['id'] = $segmentname->id;
-            $all_ann['Segment'][$s]['announcements'] = Announcement::where('segment_id', $segmentclass->segment_id)->where('publish_date', '<', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+            $all_ann['Segment'][$s]['announcements'] = Announcement::where('segment_id', $segmentclass->segment_id)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
             foreach ($all_ann['Segment'][$s]['announcements'] as $ann) {
                 $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
             }
@@ -343,7 +343,7 @@ class AnnouncementController extends Controller
                 $classname = Classes::find($scl->class_id);
                 $all_ann['Class'][$cl]['name'] = $classname->name;
                 $all_ann['Class'][$cl]['id'] = $classname->id;
-                $all_ann['Class'][$cl]['announcements'] = Announcement::where('class_id', $scl->class_id)->where('publish_date', '<', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                $all_ann['Class'][$cl]['announcements'] = Announcement::where('class_id', $scl->class_id)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
 
                 foreach ($all_ann['Class'][$cl]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
@@ -363,7 +363,7 @@ class AnnouncementController extends Controller
                 $levelename = Level::find($yl->level_id);
                 $all_ann['Level'][$l]['name'] = $levelename->name;
                 $all_ann['Level'][$l]['id'] = $levelename->id;
-                $all_ann['Level'][$l]['announcements'] = Announcement::where('level_id', $yl->level_id)->where('publish_date', '<', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                $all_ann['Level'][$l]['announcements'] = Announcement::where('level_id', $yl->level_id)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
                 foreach ($all_ann['Level'][$l]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
                 }
@@ -407,7 +407,7 @@ class AnnouncementController extends Controller
             $coursename = Course::find($cou);
             $all_ann['Courses'][$co]['name'] = $coursename->name;
             $all_ann['Courses'][$co]['id'] = $coursename->id;
-            $all_ann['Courses'][$co]['announcements'] = Announcement::where('course_id', $cou)->where('publish_date', '<', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+            $all_ann['Courses'][$co]['announcements'] = Announcement::where('course_id', $cou)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
 
             foreach ($all_ann['Courses'][$co]['announcements'] as $couann) {
                 $couann->attached_file = attachment::where('id', $couann->attached_file)->first();
