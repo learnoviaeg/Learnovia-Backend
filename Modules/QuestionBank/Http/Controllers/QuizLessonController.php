@@ -11,6 +11,7 @@ use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
 use App\CourseSegment;
 use App\Enroll;
+use App\LessonComponent;
 use App\User;
 use Auth;
 
@@ -92,6 +93,13 @@ class QuizLessonController extends Controller
         ]);
 
         $this->NotifyQuiz($quiz,$request->opening_time,'add');
+        LessonComponent::create([
+            'lesson_id' => $request->lesson_id,
+            'comp_id'   => $request->quiz_id,
+            'module'    => 'QuestionBank',
+            'model'     => 'quiz',
+            'index'     => LessonComponent::getNextIndex($request->lesson_id)
+        ]);
         return HelperController::api_response_format(200, $quizLesson,'Quiz added to lesson Successfully');
     }
 

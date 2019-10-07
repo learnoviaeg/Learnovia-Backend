@@ -16,6 +16,7 @@ use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
 use Illuminate\Support\Carbon;
 use App\Component;
+use App\LessonComponent;
 
 class PageController extends Controller
 {
@@ -68,7 +69,7 @@ class PageController extends Controller
             'visible' => 'nullable|boolean',
             'publish_date'=>'nullable|after:'.Carbon::now()
         ]);
-        if(isset($request->publish_date))
+        if($request->filled('publish_date'))
         {
             $publishdate=$request->publish_date;
         }
@@ -84,6 +85,7 @@ class PageController extends Controller
         $page= new Page();
         $page->title=$request->title;
         $page->content=$request->content;
+        $page->publish_date = $publishdate;
         if(isset($request->visible))
         {
             $page->visible;
@@ -102,7 +104,13 @@ class PageController extends Controller
 
         pageLesson::firstOrCreate(['page_id'=>$page->id,
             'lesson_id' => $request->Lesson_id]);
-
+        LessonComponent::create([
+            'lesson_id' => $request->Lesson_id,
+            'comp_id'   => $page->id,
+            'module'    => 'Page',
+            'model'     => 'page',
+            'index'     => LessonComponent::getNextIndex($request->Lesson_id)
+        ]);
         return HelperController::api_response_format(200, $page,'Page added Successfully');
 
     }

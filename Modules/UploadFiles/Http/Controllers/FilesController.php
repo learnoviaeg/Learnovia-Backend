@@ -21,6 +21,7 @@ use App\Enroll;
 use App\User;
 use App\Http\Controllers\HelperController;
 use App\Component;
+use App\LessonComponent;
 
 class FilesController extends Controller
 {
@@ -297,7 +298,13 @@ class FilesController extends Controller
                     $fileLesson->publish_date = $publishdate;
 
                     $fileLesson->save();
-
+                    LessonComponent::create([
+                        'lesson_id' => $fileLesson->lesson_id,
+                        'comp_id'   => $fileLesson->file_id,
+                        'module'    => 'UploadFiles',
+                        'model'     => 'file',
+                        'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                    ]);
                     Storage::disk('public')->putFileAs(
                         'files/' . $request->lesson_id ,
                         $singlefile,
