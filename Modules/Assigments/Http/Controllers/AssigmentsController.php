@@ -451,6 +451,7 @@ class AssigmentsController extends Controller
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assignment['attachment'] = attachment::where('id', $assignment->attachment_id)->first();
         $userassigments = UserAssigment::where('assignment_id', $assignment->id)->get();
+
         $assignment['user_assignment'] = $userassigments;
         foreach ($assignment['user_assignment'] as $value) {
             # code...
@@ -474,7 +475,12 @@ class AssigmentsController extends Controller
             $stuassignment = assignment::where('id', $request->assignment_id)->first();
             $stuassignment['attachment'] = attachment::where('id', $stuassignment->attachment_id)->first();
             $stuassignment['user_submit'] = $studentassigment;
-            $stuassignment['user_submit']->attachment = attachment::where('id', $stuassignment['user_submit']->attachment_id)->first();
+            if(isset($stuassignment['user_submit']->attachment_id)) {
+                $stuassignment['user_submit']->attachment = attachment::where('id', $stuassignment['user_submit']->attachment_id)->first();
+            }
+            else{
+                $stuassignment['user_submit']->attachment =null;
+            }
             return HelperController::api_response_format(200, $body = $stuassignment, $message = []);
         }
     }
