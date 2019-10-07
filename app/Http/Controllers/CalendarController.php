@@ -63,6 +63,10 @@ class CalendarController extends Controller
         {
             return HelperController::api_response_format(201, null,'There is no data for you');
         }
+        else
+        {
+            return HelperController::api_response_format(201, null,'Something Went Wrong!');
+        }
 
     }
 
@@ -77,14 +81,8 @@ class CalendarController extends Controller
             $counter=0;
             foreach($allannounce as $announ)
             {
-                $announcefinal[$counter]['title'] = $announ->title;
+                $announcefinal[$counter]['id'] = "$announ->id" ;
                 $announcefinal[$counter]['type'] = 'announcement';
-                $announcefinal[$counter]['description'] = $announ->description;
-                if($announ->attached_file!=null)
-                {
-                    $announcefinal[$counter]['attached_file'] = $announ->attached_file;
-
-                }
                 $counter++;
             }
             $dataencode=array();
@@ -110,8 +108,7 @@ class CalendarController extends Controller
             $withdatesannounce=collect([]);
             foreach ($decodedannounce as $an)
             {
-                $withdatesannounce->push(Announcement::where('title',$an['title'])
-                ->where('description',$an['description'])
+                $withdatesannounce->push(Announcement::where('id',$an['id'])
                 ->whereMonth('start_date','=', $date)
                 ->orderBy('start_date')
                 ->first());
@@ -129,14 +126,14 @@ class CalendarController extends Controller
         $Lessons=array();
         foreach ($CourseSeg as $cour) {
             $checkLesson=Lesson::where('course_segment_id',$cour)->get();
-            
+
             if($checkLesson->isEmpty())
             {
                 continue;
             }
             $Lessons[]=$checkLesson;
         }
-        
+
         $comp=Component::where('type',1)->get();
         foreach($Lessons as $less)
         {
