@@ -19,6 +19,7 @@ use Modules\Assigments\Entities\assignment;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\UserAssigment;
 use App\Component;
+use App\LessonComponent;
 use App\status;
 
 class AssigmentsController extends Controller
@@ -185,6 +186,13 @@ class AssigmentsController extends Controller
                 'publish_date'=>$request->opening_date,
             ]
         );
+        LessonComponent::create([
+            'lesson_id' => $request->Lesson_id,
+            'comp_id' => $assigment->id,
+            'module' => 'Assigments',
+            'model' =>'assignment',
+            'index' => LessonComponent::getNextIndex($request->Lesson_id)
+        ]);
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
     }
     /*
@@ -462,7 +470,7 @@ class AssigmentsController extends Controller
         $assigment->delete();
         return HelperController::api_response_format(200, $body = [], $message = 'Assigment deleted succesfully');
     }
-    
+
     public function GetAssignment(Request $request)
     {
         $request->validate([

@@ -156,6 +156,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::get('optional', 'CourseController@getCoursesOptional')->name('optional')->middleware('permission:course/optional');
     Route::post('assign', 'CourseController@Assgin_course_to')->name('assgincourseto')->middleware('permission:course/assgin-course-to');
     Route::get('coursewithteacher', 'CourseController@course_with_teacher')->name('coursewithteacher')->middleware('permission:course/course-with-teacher');
+    Route::get('GetUserCourseLessonsSorted' , 'CourseController@GetUserCourseLessonsSorted')->middleware('permission:course/sorted-componenets');
 });
 
 //USER CRUD ROUTES

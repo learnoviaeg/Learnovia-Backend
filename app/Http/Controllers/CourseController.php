@@ -15,6 +15,7 @@ use App\Enroll;
 use App\Segment;
 use App\AcademicYear;
 use App\attachment;
+use App\LessonComponent;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
@@ -396,7 +397,7 @@ class CourseController extends Controller
             if($test > 0)
                 return HelperController::api_response_format(200, $optional);
             else
-                return HelperController::api_response_format(200,'there is no course optional here');   
+                return HelperController::api_response_format(200,'there is no course optional here');
         }
     }
 
@@ -433,7 +434,6 @@ class CourseController extends Controller
                     else
                         $year=$year->id;
                 }
-                    
                 if (isset($request->segment[$count]))
                     $segment = $request->segment[$count];
                 else
@@ -444,7 +444,6 @@ class CourseController extends Controller
                     else
                         $segment=$segment->id;
                 }
-                
                 $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
                 $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
                 $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
@@ -455,7 +454,27 @@ class CourseController extends Controller
         } else {
             return HelperController::api_response_format(201, 'Please Enter Equal number of array');
         }
-        
         return HelperController::api_response_format(201, 'Course Assigned Successfully');
+    }
+
+    public function GetUserCourseLessonsSorted(Request $request){
+        $request->validate([
+            'course_id' => 'required|exists:course_segments,course_id',
+            'class_id'  => 'required|exists:classes,id'
+        ]);
+        $result = [];
+        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class_id , $request->course_id);
+        if($courseSegment != null){
+            foreach ($courseSegment->lessons as $lesson) {
+                $components = LessonComponent::whereLesson_id($lesson->id)->get();
+                $result[$lesson->name] = [];
+                foreach($components as $component){
+                    eval('$res = \Modules\\'.$component->module.'\Entities\\'.$component->model.'::find('.$component->comp_id.');');
+                    $res->type = $component->model;
+                    $result[$lesson->name][] = $res;
+                }
+            }
+        }
+       return $result;
     }
 }

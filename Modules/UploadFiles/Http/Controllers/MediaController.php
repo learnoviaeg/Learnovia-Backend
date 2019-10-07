@@ -16,6 +16,7 @@ use App\CourseSegment;
 use App\Enroll;
 use App\User;
 use App\Http\Controllers\HelperController;
+use App\LessonComponent;
 use Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -229,7 +230,13 @@ class MediaController extends Controller
                     $fileLesson->publish_date = $publishdate;
 
                     $fileLesson->save();
-
+                    LessonComponent::create([
+                        'lesson_id' => $fileLesson->lesson_id,
+                        'comp_id'   => $fileLesson->media_id,
+                        'module'    => 'UploadFiles',
+                        'model'     => 'media',
+                        'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                    ]);
                     Storage::disk('public')->putFileAs(
                         'media/' . $request->lesson_id ,
                         $singlefile,
@@ -351,7 +358,7 @@ class MediaController extends Controller
             $file = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id',$request->lesson_id)->first();
             $file->delete();
 
-            return HelperController::api_response_format(200, $body = [], $message = 'File deleted succesfully');            
+            return HelperController::api_response_format(200, $body = [], $message = 'File deleted succesfully');
     }
 
     /**
