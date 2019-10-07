@@ -215,7 +215,7 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(400, $body = [], $message = 'please enter file or content');
         }
 
-        if (isset($request->file)) {
+        if ($request->hasFile('file')) {
 
             $request->validate([
                 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg',
@@ -383,6 +383,27 @@ class AssigmentsController extends Controller
         $userassigment->save();
         return HelperController::api_response_format(200, $body = [], $message = 'assigment graded sucess');
     }
+    public function editGradeAssignment(Request $request){
+        $request->validate([
+            'user_id' => 'required|exists:user_assigments,user_id',
+            'assignment_id' => 'required|exists:user_assigments,assignment_id',
+            'grade' => 'required|integer',
+            'feedback' => 'string'
+        ]);
+
+        $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_id', $request->assignment_id)->first();
+        $assigment = assignment::where('id', $request->assignment_id)->first();
+        if ($assigment->mark < $request->grade) {
+            return HelperController::api_response_format(400, $body = [], $message = 'please put grade less than ' . $assigment->mark);
+        }
+        if (isset($request->feedback)) {
+            $userassigment->feedback = $request->feedback;
+        }
+        $userassigment->grade = $request->grade;
+        $userassigment->save();
+        return HelperController::api_response_format(200, $body = [], $message = 'assigment graded sucess');
+
+    }
     /*
 
 
@@ -451,8 +472,15 @@ class AssigmentsController extends Controller
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assignment['attachment'] = attachment::where('id', $assignment->attachment_id)->first();
         $userassigments = UserAssigment::where('assignment_id', $assignment->id)->get();
+        if (count($userassigments)>0){
+            $assignment['allow_edit']= false;
+        }
+    else{
+            $assignment['allow_edit']= true;
 
+        }
         $assignment['user_assignment'] = $userassigments;
+
         foreach ($assignment['user_assignment'] as $value) {
             # code...
             $value->user;
