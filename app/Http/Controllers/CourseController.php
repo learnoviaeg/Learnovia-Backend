@@ -376,6 +376,7 @@ class CourseController extends Controller
 
     public function getCoursesOptional(Request $request)
     {
+        $test=0;
         $course_segment = HelperController::Get_Course_segment($request);
         if($course_segment == null)
             return HelperController::api_response_format(404, 'There is no current segment or year');
@@ -386,9 +387,16 @@ class CourseController extends Controller
             foreach ($course_segment['value'] as $cs) {
                 if(count($cs->optionalCourses) <= 0)
                     continue;
-                $optional[]=$cs->optionalCourses[0];
+                else
+                {
+                    $optional[]=$cs->optionalCourses[0];
+                    $test+=1;
+                }
             }
-            return HelperController::api_response_format(200, $optional);
+            if($test > 0)
+                return HelperController::api_response_format(200, $optional);
+            else
+                return HelperController::api_response_format(200,'there is no course optional here');   
         }
     }
 
