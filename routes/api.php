@@ -203,6 +203,8 @@ Route::group(['prefix' => 'Component', 'middleware' => 'auth:api'], function () 
     Route::post('install', 'ComponentController@Install')->name('installcomponenet')->middleware('permission:component/install');
     Route::post('uninstall', 'ComponentController@Uninstall')->name('uninstallcomponenet')->middleware('permission:component/uninstall');
     Route::put('toggle', 'ComponentController@ToggleActive')->name('togglecomponenet')->middleware('permission:component/toggle');
+    Route::post('sort', 'ComponentController@sort')->name('sortcomponenet')->middleware('permission:component/sort');
+
 });
 
 Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Component;
+use App\LessonComponent;
 use Chumper\Zipper\Facades\Zipper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -47,5 +48,71 @@ class ComponentController extends Controller
         $componenet->active = ($componenet->active == 1)? 0 : 1;
         $componenet->save();
         return HelperController::api_response_format(200 , $componenet , 'Component Updated Successfully');
+    }
+
+    public function sortDown($com_id, $index,$lesson_id)
+    {
+
+        $com_index = LessonComponent::where('comp_id', $com_id)->where('lesson_id',$lesson_id)->pluck('index')->first();
+
+        $Comps = LessonComponent::where('lesson_id', $lesson_id)->get();
+        foreach ($Comps as $com) {
+            if ($com->index > $com_index || $com->index < $index) {
+                continue;
+            }
+            if ($com->index != $com_index) {
+                $com->update([
+                    'index' => $com->index + 1
+                ]);
+            } else {
+                $com->update([
+                    'index' => $index
+                ]);
+            }
+        }
+        return $Comps;
+    }
+
+    public function SortUp($com_id, $index,$lesson_id)
+    {
+        $com_index = LessonComponent::where('comp_id', $com_id)->where('lesson_id',$lesson_id)->pluck('index')->first();
+
+        $Comps = LessonComponent::where('lesson_id', $lesson_id)->get();
+        foreach ($Comps as $com) {
+            if ($com->index > $index || $com->index < $com_index) {
+                continue;
+            } elseif ($com->index != $com_index) {
+                $com->update([
+                    'index' => $com->index - 1
+                ]);
+            } else {
+                $com->update([
+                    'index' => $index
+                ]);
+            }
+        }
+        return $Comps;
+    }
+
+    public function sort(Request $request)
+    {
+        $request->validate([
+            'component_id' => 'required|integer|exists:lesson_components,comp_id',
+            'index' => 'required|integer',
+            'lesson_id'=>'required|integer|exists:lesson_components,lesson_id'
+        ]);
+        $Com_index = LessonComponent::where('comp_id', $request->component_id)->where('lesson_id',$request->lesson_id)->pluck('index')->first();
+        $max =LessonComponent ::where('lesson_id',$request->lesson_id)->max('index');
+        if($request->index <=$max){
+        if ($Com_index > $request->index  ) {
+            $Components = $this->sortDown($request->component_id, $request->index,$request->lesson_id);
+        } else {
+            $Components = $this->SortUp($request->component_id, $request->index,$request->lesson_id);
+        }
+            return HelperController::api_response_format(200, $Components, ' Successfully');
+
+        }
+
+        return HelperController::api_response_format(400, null, 'invalid index');
     }
 }
