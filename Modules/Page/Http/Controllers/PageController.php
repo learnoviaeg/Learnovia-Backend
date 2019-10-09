@@ -88,7 +88,6 @@ class PageController extends Controller
         $page= new Page();
         $page->title=$request->title;
         $page->content=$request->content;
-        $page->publish_date = $publishdate;
         if(isset($request->visible))
         {
             $page->visible;
@@ -105,8 +104,11 @@ class PageController extends Controller
             'publish_date'=>$publishdate
         ]);
 
-        pageLesson::firstOrCreate(['page_id'=>$page->id,
-            'lesson_id' => $request->Lesson_id]);
+        pageLesson::firstOrCreate([
+            'page_id'=>$page->id,
+            'lesson_id' => $request->Lesson_id,
+            'publish_date' => $publishdate
+        ]);
         LessonComponent::create([
             'lesson_id' => $request->Lesson_id,
             'comp_id'   => $page->id,
