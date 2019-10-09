@@ -62,7 +62,7 @@ class AnnouncementController extends Controller
         //Assign Conditions
         if ($request->assign == 'all') {
             $toUser = User::get();
-        } else if ($request->assign == 'Course') {
+        } else if ($request->assign == 'course') {
             $request->validate([
                 'course_id' => 'required|exists:courses,id',
             ]);
@@ -74,7 +74,7 @@ class AnnouncementController extends Controller
                     $users[] = $enroll->user_id;
                 }
             }
-        } else if ($request->assign == 'Class') {
+        } else if ($request->assign == 'class') {
             $request->validate([
                 'class_id' => 'required|exists:classes,id',
             ]);
@@ -93,7 +93,7 @@ class AnnouncementController extends Controller
                     }
                 }
             }
-        } else if ($request->assign == 'Level') {
+        } else if ($request->assign == 'level') {
             $request->validate([
                 'level_id' => 'required|exists:levels,id',
             ]);
@@ -110,7 +110,7 @@ class AnnouncementController extends Controller
                     }
                 }
             }
-        } else if ($request->assign == 'Year') {
+        } else if ($request->assign == 'year') {
             $request->validate([
                 'year_id' => 'required|exists:academic_years,id',
             ]);
@@ -129,7 +129,7 @@ class AnnouncementController extends Controller
                     }
                 }
             }
-        } else if ($request->assign == 'Type') {
+        } else if ($request->assign == 'type') {
             $request->validate([
                 'type_id' => 'required|exists:academic_types,id',
             ]);
@@ -148,7 +148,7 @@ class AnnouncementController extends Controller
                     }
                 }
             }
-        } else if ($request->assign == 'Segment') {
+        } else if ($request->assign == 'segment') {
             $request->validate([
                 'segment_id' => 'required|exists:segments,id',
             ]);

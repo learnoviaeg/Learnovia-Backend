@@ -36,11 +36,15 @@ class QuizLessonController extends Controller
         foreach($course_seg as $course_Segment)
         {
             $users = Enroll::where('course_segment', $course_Segment)->where('role_id',3)->pluck('user_id')->toarray();
+            $segmentClass=CourseSegment::where('id',$course_Segment)->pluck('segment_class_id')->first();
+            $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
+            $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
             user::notify([
                 'message' => $msg,
                 'from' => Auth::user()->id,
                 'users' => $users,
                 'course_id' => $quiz->course_id,
+                'class_id'=> $classId,
                 'type' =>'quiz',
                 'link' => url(route('getquiz')) . '?quiz_id=' . $quiz->id,
                 'publish_date'=> $publishdate
