@@ -51,6 +51,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::post('delete', 'AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
         Route::post('announce', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
         Route::get('get', 'AnnouncementController@get')->name('get')->middleware('permission:announcements/get');
+        Route::get('getByID', 'AnnouncementController@getAnnounceByID')->name('getbyid')->middleware('permission:announcements/getbyid');
         Route::post('update', 'AnnouncementController@update_announce')->name('updateannounce')->middleware('permission:announcements/update');
     });
 

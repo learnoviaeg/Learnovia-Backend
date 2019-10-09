@@ -452,4 +452,13 @@ class AnnouncementController extends Controller
         $anouncenew = AnnouncementController::new_user_announcements();
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew]);
     }
+    public function getAnnounceByID(Request $request){
+        $request->validate([
+        'announce_id' => 'required|integer|exists:announcements,id',
+        ]);
+
+        $announce=Announcement::find($request->announce_id)->first();
+        return $announce;
+
+    }
 }
