@@ -151,11 +151,14 @@ class PageController extends Controller
             'title' => 'required|string',
             'content' => 'required|string',
             'visible' => 'nullable|boolean',
-            'publish_date'=>'nullable|after:'.Carbon::now()
+            'publish_date'=>'nullable|'
         ]);
         if($request->filled('publish_date'))
         {
             $publishdate=$request->publish_date;
+            if(Carbon::parse($request->publish_date)->isPast()){
+                $publishdate=Carbon::now();
+            }
         }
         else
         {

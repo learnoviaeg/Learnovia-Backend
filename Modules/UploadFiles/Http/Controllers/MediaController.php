@@ -115,7 +115,7 @@ class MediaController extends Controller
             $request->validate([
                 'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
-                'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
+                'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc',
                 'lesson_id' => 'required|integer|exists:lessons,id',
                 //'year' => 'required|integer|exists:academic_years,id',
                 //'type' => 'required|integer|exists:academic_types,id',
@@ -127,6 +127,9 @@ class MediaController extends Controller
             if($request->filled('publish_date'))
             {
                 $publishdate=$request->publish_date;
+                if(Carbon::parse($request->publish_date)->isPast()){
+                    $publishdate=Carbon::now();
+                }
             }
             else
             {
