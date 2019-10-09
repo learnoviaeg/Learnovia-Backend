@@ -54,7 +54,6 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::post('update', 'AnnouncementController@update_announce')->name('updateannounce')->middleware('permission:announcements/update');
         Route::get('getByID', 'AnnouncementController@getAnnounceByID')->name('getbyid')->middleware('permission:announcements/getbyid');
     });
-    Route::get('getByID', 'AnnouncementController@getAnnounceByID');
 
     //Calendar Route
     Route::post('calendar','CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
