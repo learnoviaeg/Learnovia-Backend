@@ -181,7 +181,7 @@ class FilesController extends Controller
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
                 'lesson_id' => 'required|integer|exists:lessons,id',
-                'publish_date'=>'nullable|after:'.Carbon::now(),
+                'publish_date'=>'nullable',
                 //'year' => 'required|integer|exists:academic_years,id',
                 //'type' => 'required|integer|exists:academic_types,id',
                 //'level' => 'required|integer|exists:levels,id',
