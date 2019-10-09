@@ -153,6 +153,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/send']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/get']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/update']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/getbyid']);
 
             //Calendar Permission
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'calendar/get']);
