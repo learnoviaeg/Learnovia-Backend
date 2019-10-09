@@ -457,8 +457,40 @@ class AnnouncementController extends Controller
         'announce_id' => 'required|integer|exists:announcements,id',
         ]);
 
-        $announce=Announcement::find($request->announce_id)->first();
-        return $announce;
+        $announce=Announcement::where ('id',$request->announce_id)->first(['id','title','description','start_date','due_date','assign',
+            'class_id','year_id','level_id','course_id','type_id','segment_id']);
+       // if(isset($announce->))
+
+        switch ($announce->assign){
+            case 'class':
+                $class = Classes::where('id',$announce->class_id)->first(['name','id']);
+               $announce['type']=$class;
+                break;
+            case 'year':
+                $year = AcademicYear::where('id',$announce->year_id)->first(['name','id']);
+                $announce['type']=$year;
+                break;
+            case 'level':
+                $level= Level::where('id',$announce->level_id)->first(['name','id']);
+                $announce['type']=$level;
+                break;
+            case 'course':
+                $course= Course::where('id',$announce->course_id)->first(['name','id']);
+                $announce['type']=$course;
+                break;
+            case 'type':
+                $type= AcademicType::where('id',$announce->type_id)->first(['name','id']);
+                $announce['type']=$type;
+                break;
+            case 'segment':
+                $segment= Segment::where('id',$announce->segment_id)->first(['name','id']);
+                $announce['type']=$segment;
+                break;
+            default:
+                $announce['type']="General Announcement";
+        }
+        return HelperController::api_response_format(200, $announce);
+
 
     }
 }
