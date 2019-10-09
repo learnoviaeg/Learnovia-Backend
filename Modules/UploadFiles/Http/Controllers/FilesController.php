@@ -192,7 +192,7 @@ class FilesController extends Controller
             if($request->filled('publish_date'))
             {
                 $publishdate=$request->publish_date;
-                if($request->publish_date->isPast()){
+                if(Carbon::parse($request->publish_date)->isPast()){
                     $publishdate=Carbon::now();
                 }
             }
