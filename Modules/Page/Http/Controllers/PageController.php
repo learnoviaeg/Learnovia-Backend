@@ -67,11 +67,14 @@ class PageController extends Controller
             'content' => 'required|string',
             'Lesson_id' => 'required|exists:lessons,id',
             'visible' => 'nullable|boolean',
-            'publish_date'=>'nullable|after:'.Carbon::now()
+            'publish_date'=>'nullable'
         ]);
         if($request->filled('publish_date'))
         {
             $publishdate=$request->publish_date;
+            if(Carbon::parse($request->publish_date)->isPast()){
+                $publishdate=Carbon::now();
+            }
         }
         else
         {
