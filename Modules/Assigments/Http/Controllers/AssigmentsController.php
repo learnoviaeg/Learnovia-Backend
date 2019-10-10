@@ -265,7 +265,6 @@ class AssigmentsController extends Controller
         $segmentClass=CourseSegment::where('id',$courseSegment)->pluck('segment_class_id')->first();
         $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
         $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
-        dd($classId);
 
         user::notify([
             'message' => 'Assignment is updated hend',
