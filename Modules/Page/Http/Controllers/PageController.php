@@ -69,12 +69,7 @@ class PageController extends Controller
             'content' => 'required|string',
             'Lesson_id' => 'required|exists:lessons,id',
             'visible' => 'nullable|boolean',
-<<<<<<< Updated upstream
             'publish_date'=>'nullable'
-=======
-
-            'publish_date'=>'nullable|after:'.Carbon::now()
->>>>>>> Stashed changes
         ]);
         if($request->filled('publish_date'))
         {
