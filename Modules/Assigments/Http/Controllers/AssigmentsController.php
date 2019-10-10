@@ -6,6 +6,9 @@ use App\attachment;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
+use App\Lesson;
+use App\SegmentClass;
+use App\ClassLevel;
 use App\Classes;
 use URL;
 
@@ -176,9 +179,14 @@ class AssigmentsController extends Controller
         $assigment->start_date = $request->opening_date;
         $assigment->due_date = $request->closing_date;
         $assigment->save();
-        $data = array("course_segment" => $segments->id,
-        "assignments_id" => $assigment->id, "submit_date" => $request->submit_date,"publish_date"=>$request->opening_date);
-         $this->assignAsstoUsers($data);
+        $data = array(
+            "course_segment" => $segments->id,
+            "assignments_id" => $assigment->id,
+            "submit_date" => $request->submit_date,
+            "publish_date"=>$request->opening_date,
+            "class"=>$request->class
+        );
+        $this->assignAsstoUsers($data);
         AssignmentLesson::firstOrCreate(
             [
                 'assignment_id' => $assigment->id,
@@ -247,18 +255,28 @@ class AssigmentsController extends Controller
         $assigment->save();
 
         // $usersIDs = Enroll::where('course_segment', $assigment->course_segment)->pluck('user_id')->toarray();
+        $usersIDs = UserAssigment::where('assignment_id', $assigment->id)->pluck('user_id')->toarray();
 
         // $courseID=CourseSegment::where('id',$assigment->course_segment)->pluck('course_id')->first();
+        $lessonId=AssignmentLesson::where('id',$assigment->id)->pluck('lesson_id')->first();
+        $courseSegment=Lesson::where('id',$lessonId)->pluck('course_segment_id')->first();
+        $courseID=CourseSegment::where('id',$courseSegment)->pluck('course_id')->first();
+        // $classId=HelperController::GetClassIdFromCourseSegment($courseSegment);
+        $segmentClass=CourseSegment::where('id',$courseSegment)->pluck('segment_class_id')->first();
+        $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
+        $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
+        dd($classId);
 
-        // return  $usersIDs;
-        // user::notify([
-        //     'message' => 'Assignment is Updated in course ' . $courseID->name,
-        //     'from' => Auth::user()->id,
-        //     'users' => $usersIDs,
-        //     'course_id' => $courseID,
-        //     'type' => 'assignment',
-        //     'link' => url(route('getAssignment')) . '?assignment_id=' . $assigment->id
-        // ]);
+        user::notify([
+            'message' => 'Assignment is updated hend',
+            'from' => Auth::user()->id,
+            'users' => $usersIDs,
+            'course_id' => $courseID,
+            'class_id'=>$classId,
+            'type' => 'assignment',
+            'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
+            'publish_date' => $request['publish_date']
+        ]);
 
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment edited');
     }
@@ -281,13 +299,13 @@ class AssigmentsController extends Controller
             $userassigment->save();
 
         }
-
         $courseID=CourseSegment::where('id',$request['course_segment'])->pluck('course_id')->first();
         user::notify([
                 'message' => 'A new Assignment is added',
                 'from' => Auth::user()->id,
                 'users' => $usersIDs,
                 'course_id' => $courseID,
+                'class_id'=>$request['class'],
                 'type' => 'assignment',
                 'link' => url(route('getAssignment')) . '?assignment_id=' . $request['assignments_id'],
                 'publish_date' => $request['publish_date']

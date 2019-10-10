@@ -177,4 +177,13 @@ class HelperController extends Controller
         $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
         return $segment_class;
     }
+
+    // public static function GetClassIdFromCourseSegment($CourseSegment)
+    // {
+    //     $segmentClass=CourseSegment::where('id',$courseSegment)->pluck('segment_class_id')->first();
+    //     $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
+    //     $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
+
+    //     return $classId;
+    // }
 }

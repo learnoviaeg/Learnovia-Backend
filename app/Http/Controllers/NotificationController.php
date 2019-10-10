@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
+use App\Announcement;
 
 class NotificationController extends Controller
 {
@@ -30,15 +31,26 @@ class NotificationController extends Controller
     {
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->get();
         $data=array();
+
         foreach ($noti as $not) {
             $not->data= json_decode($not->data, true);
             if(isset($not->data['publish_date'])){
-                if($not->data['publish_date'] < Carbon::now())
+                if($not->data['publish_date'] < Carbon::now() && $not->data['type'] != 'announcement')
                 {
                     $data[] = $not->data;
                 }
             }else{
-                $data[] = $not->data;
+                if ($not->data['type'] == 'announcement')
+                    {
+                        $announce_id = $not->data['id'];
+                        $annocument = announcement::find($announce_id);
+                        if($annocument!= null){
+                            if ($annocument->publish_date <= Carbon::now()) {
+                                $customize = announcement::whereId($announce_id)->first(['id', 'title', 'description']);
+                                $data[]=$customize;
+                            }
+                        }
+                    }
             }
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all users notifications');

@@ -10,6 +10,8 @@ use App\Lesson;
 use App\Enroll;
 use App\Course;
 use App\CourseSegment;
+use App\SegmentClass;
+use App\ClassLevel;
 use App\User;
 use Illuminate\Routing\Controller;
 use Modules\Page\Entities\Page;
@@ -67,7 +69,12 @@ class PageController extends Controller
             'content' => 'required|string',
             'Lesson_id' => 'required|exists:lessons,id',
             'visible' => 'nullable|boolean',
+<<<<<<< Updated upstream
             'publish_date'=>'nullable'
+=======
+
+            'publish_date'=>'nullable|after:'.Carbon::now()
+>>>>>>> Stashed changes
         ]);
         if($request->filled('publish_date'))
         {
@@ -81,13 +88,17 @@ class PageController extends Controller
             $publishdate=Carbon::now();
         }
 
-        $courseSegID=Lesson::where('id',$request->Lesson_id)->pluck('course_segment_id');
+        $courseSegID=Lesson::where('id',$request->Lesson_id)->pluck('course_segment_id')->first();
+        $segmentClass=CourseSegment::where('id',$courseSegID)->pluck('segment_class_id')->first();
+        $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
+        $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
         $courseID=CourseSegment::where('id',$courseSegID)->pluck('course_id')->first();
         $usersIDs=Enroll::where('course_segment',$courseSegID)->pluck('user_id')->toarray();
 
         $page= new Page();
         $page->title=$request->title;
         $page->content=$request->content;
+        $page->publish_date=$publishdate;
         if(isset($request->visible))
         {
             $page->visible;
@@ -99,6 +110,7 @@ class PageController extends Controller
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
+            'class_id'=>$classId,
             'type' => 'Page',
             'link' => url(route('getPage')) . '?id=' . $page->id,
             'publish_date'=>$publishdate
@@ -182,6 +194,9 @@ class PageController extends Controller
         $page->update($data);
 
         $courseSegID=Lesson::where('id',$lessonID)->pluck('course_segment_id');
+        $segmentClass=CourseSegment::where('id',$courseSegID)->pluck('segment_class_id')->first();
+        $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
+        $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
         $courseID=CourseSegment::where('id',$courseSegID)->pluck('course_id')->first();
         $usersIDs=Enroll::where('course_segment',$courseSegID)->pluck('user_id')->toarray();
         User::notify([
@@ -189,6 +204,7 @@ class PageController extends Controller
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
+            'class_id'=>$classId,
             'type' => 'Page',
             'link' => url(route('getPage')) . '?id=' . $page->id,
             'publish_date' => $publishdate
