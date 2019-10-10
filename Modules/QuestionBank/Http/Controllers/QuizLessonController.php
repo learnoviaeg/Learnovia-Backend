@@ -9,6 +9,8 @@ use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
+use App\SegmentClass;
+use App\ClassLevel;
 use App\CourseSegment;
 use App\Enroll;
 use App\LessonComponent;
