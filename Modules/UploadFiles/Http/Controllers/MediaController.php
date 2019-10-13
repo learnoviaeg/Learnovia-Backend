@@ -413,7 +413,7 @@ class MediaController extends Controller
     {
         try {
             $request->validate([
-                'name' => 'required|string|max:130',
+                'name' => 'nullable|string|max:130',
                 'description' => 'nullable|string|min:1',
                 'url' => 'required|active_url',
                 'lesson_id' => 'required|integer|exists:lessons,id',

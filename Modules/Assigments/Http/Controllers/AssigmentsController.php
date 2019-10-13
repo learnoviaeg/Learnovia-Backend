@@ -27,7 +27,6 @@ use App\status;
 
 class AssigmentsController extends Controller
 {
-
     public function install_Assignment()
     {
         if (\Spatie\Permission\Models\Permission::whereName('assignment/add')->first() != null) {
@@ -136,7 +135,6 @@ class AssigmentsController extends Controller
     }
 
     //Create assignment
-
     public function createAssigment(Request $request)
     {
         $request->validate([
@@ -203,13 +201,10 @@ class AssigmentsController extends Controller
         ]);
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
     }
+
     /*
-
-
-            update Assigment
-
-
-*/
+        update Assigment
+    */
     public function updateAssigment(Request $request)
     {
         $request->validate([
@@ -234,7 +229,7 @@ class AssigmentsController extends Controller
         if ($request->hasFile('file')) {
 
             $request->validate([
-                'file' => 'file|distinct|mimes:txt,pdf,docs,jpg',
+                'file' => 'file|distinct|mimes:txt,pdf,docs,DOC,doc',
             ]);
             if (isset($request->file_description)) {
                 $description = $request->file_description;
@@ -261,14 +256,14 @@ class AssigmentsController extends Controller
         $lessonId=AssignmentLesson::where('id',$assigment->id)->pluck('lesson_id')->first();
         $courseSegment=Lesson::where('id',$lessonId)->pluck('course_segment_id')->first();
         $courseID=CourseSegment::where('id',$courseSegment)->pluck('course_id')->first();
+
         // $classId=HelperController::GetClassIdFromCourseSegment($courseSegment);
         $segmentClass=CourseSegment::where('id',$courseSegment)->pluck('segment_class_id')->first();
         $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
         $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
-        dd($classId);
 
         user::notify([
-            'message' => 'Assignment is updated hend',
+            'message' => 'Assignment is updated',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
@@ -280,13 +275,10 @@ class AssigmentsController extends Controller
 
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment edited');
     }
+
     /*
-
-            assign Assigment to users
-
-*/
-
-
+        assign Assigment to users
+    */
     public function assignAsstoUsers($request)
     {
       $usersIDs = Enroll::where('course_segment', $request['course_segment'])->where('role_id' , 3)->pluck('user_id')->toarray();
@@ -311,15 +303,10 @@ class AssigmentsController extends Controller
                 'publish_date' => $request['publish_date']
             ]);
     }
+
     /*
-
-
-            submit Assigment from user
-
-
-*/
-
-
+        submit Assigment from user
+    */
     public function submitAssigment(Request $request)
     {
         $request->validate([
@@ -328,13 +315,12 @@ class AssigmentsController extends Controller
         $assigment = assignment::where('id', $request->assignment_id)->first();
 
         /*
+            0===================>content
+            1===================>attached_file
+            2===================>both
+            3===================>can submit content or file
+        */
 
-        0===================>content
-        1===================>attached_file
-        2===================>both
-        3===================>can submit content or file
-
-    */
         if ((($assigment->allow_attachment == 3)) && ((!isset($request->content)) && (!isset($request->file)))) {
             return HelperController::api_response_format(400, $body = [], $message = 'you must enter the content or the file');
         }
@@ -382,12 +368,8 @@ class AssigmentsController extends Controller
     }
 
     /*
-
-
-            grade assigment
-
-
-*/
+        grade assigment
+    */
     public function gradeAssigment(Request $request)
     {
         $request->validate([
@@ -430,13 +412,10 @@ class AssigmentsController extends Controller
         return HelperController::api_response_format(200, $body = [], $message = 'assigment graded sucess');
 
     }
+
     /*
-
-
-            override assigment users
-
-
-*/
+        override assigment users
+    */
     public function override(Request $request)
     {
         $request->validate([
@@ -470,13 +449,10 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200, $body =  $usersIDs, $message = 'those users now can submit');
         }
     }
+
     /*
-
-
-            delete assigment
-
-
-*/
+        delete assigment
+    */
     public function deleteAssigment(Request $request)
     {
         $request->validate([
