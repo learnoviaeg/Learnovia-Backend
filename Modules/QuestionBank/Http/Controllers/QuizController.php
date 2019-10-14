@@ -4,6 +4,7 @@ namespace Modules\QuestionBank\Http\Controllers;
 
 use App\CourseSegment;
 use App\Enroll;
+use App\GradeCategory;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -313,8 +314,17 @@ class QuizController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id'
         ]);
         $quiz = Quiz::where('id', $request->quiz_id)->pluck('shuffle')->first();
+        $qq = Quiz::where('id', $request->quiz_id)->first();
+        $max_attemp= $qq->quizLessson[0]->max_attemp;
+        $grade_category_id= $qq->quizLessson[0]->grade_category_id;
+
+        $gradecat=GradeCategory::where('id',$grade_category_id)->first();
+        //return $quizLesson;
         if ($quiz == 0) {
             $quiz = quiz::find($request->quiz_id);
+            $quiz['max_attemp']=$max_attemp;
+            $quiz['grade_category']=$gradecat;
+
             $Questions = $quiz->Question;
             foreach ($Questions as $Question) {
                 if ($Question->question_type_id==3){
@@ -338,6 +348,8 @@ class QuizController extends Controller
             return HelperController::api_response_format(200, $Questions);
         } else {
             $quiz = quiz::find($request->quiz_id);
+            $quiz['max_attemp']=$max_attemp;
+            $quiz['grade_category']=$gradecat;
             $shuffledQuestion = $quiz->Question->shuffle();
             foreach ($shuffledQuestion as $question) {
                 if (count($question->childeren) > 0) {
