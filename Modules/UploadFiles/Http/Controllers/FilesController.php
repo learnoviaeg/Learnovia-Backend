@@ -429,11 +429,10 @@ class FilesController extends Controller
             }
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
 
-            // check Enroll
-            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
+            $user = Auth::User();
+            if($user->roles->first()->id!=4){
+                return HelperController::api_response_format(400, null, 'only teachers are allowed to edit ');
 
-            if ($checkTeacherEnroll == false) {
-                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
             }
 
             if (isset($request->Imported_file)) {
@@ -455,7 +454,6 @@ class FilesController extends Controller
             $file->attachment_name = $request->attachment_name;
             $file->description = $request->description;
             $check = $file->save();
-
             $courseID=CourseSegment::where('id',$courseSegmentID)->pluck('course_id')->first();
             $usersIDs=Enroll::where('course_segment',$courseSegmentID)->pluck('user_id')->toarray();
             User::notify([
@@ -467,7 +465,6 @@ class FilesController extends Controller
                 'link' => $file->url,
                 'publish_date' => Carbon::now(),
             ]);
-
             if ($check) {
                 if (isset($request->Imported_file)) {
                     $fileId = $file->id;

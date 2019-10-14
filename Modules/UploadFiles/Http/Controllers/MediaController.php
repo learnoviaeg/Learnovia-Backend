@@ -285,10 +285,10 @@ class MediaController extends Controller
 
             $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
 
-            // check Enroll
-            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
-            if ($checkTeacherEnroll == false) {
-                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
+            $user = Auth::User();
+            if($user->roles->first()->id!=4){
+                return HelperController::api_response_format(400, null, 'only teachers are allowed to edit ');
+
             }
 
             if (isset($request->Imported_file)) {
