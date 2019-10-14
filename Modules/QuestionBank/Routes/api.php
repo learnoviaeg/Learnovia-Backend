@@ -35,6 +35,8 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('types', 'QuestionBankController@getAllTypes')->middleware('permission:quiz/get-all-types');
     Route::get('categories', 'QuestionBankController@getAllCategories')->middleware('permission:quiz/get-all-categories');
     Route::get('getQuizInLesson', 'QuizLessonController@getQuizInLesson')->middleware('permission:quiz/get-quiz-lesson');
+    Route::get('getGradeCategory', 'QuizLessonController@getGradeCategory')->middleware('permission:quiz/getGradeCategory');
+
 
     //User Quiz
     Route::post('storeUserQuiz', 'UserQuizController@store_user_quiz')->middleware('permission:quiz/sort-user-quiz');

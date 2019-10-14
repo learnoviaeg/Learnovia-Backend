@@ -177,6 +177,17 @@ class QuizLessonController extends Controller
         return HelperController::api_response_format(200, $quizLesson,'Quiz updated atteched to lesson Successfully');
     }
 
+    public function getGradeCategory(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|integer|exists:courses,id',
+            'class_id' => 'required|integer|exists:classes,id',
+        ]);
+         $couse_segment_id= CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id)->id;
+        $course_segment = CourseSegment::find($couse_segment_id);
+        return $course_segment->GradeCategory;
+
+    }
     /**
      * Remove the specified resource from storage.
      * @param int $id
