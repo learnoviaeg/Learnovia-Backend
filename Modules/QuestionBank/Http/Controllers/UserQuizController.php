@@ -82,7 +82,7 @@ class UserQuizController extends Controller
             'feedback' => null,
             'grade' => null,
 
-            'attempt_index' => ($user->roles->first()->id!=1) ?$attempt_index:0,
+            'attempt_index' => ($user->roles->first()->id==3) ?$attempt_index:0,
 
             'ip' => $request->ip(),
             'device_data' => $deviceData,
