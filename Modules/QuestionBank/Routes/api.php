@@ -24,7 +24,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
     //Quiz Routes
     Route::post('deleteQuiz', 'QuizController@destroy')->middleware('permission:quiz/delete');
-    Route::get('getQuiz', 'QuizController@get')->name('getquiz');//->middleware('permission:quiz/get');
+    Route::get('getQuiz', 'QuizController@get')->name('getquiz')->middleware('permission:quiz/get');
     Route::get('sort', 'QuizController@sort')->middleware('permission:quiz/sort');
     Route::get('SortUp', 'QuizController@SortUp')->middleware('permission:quiz/sortup');
 
