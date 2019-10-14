@@ -635,6 +635,13 @@ class QuizController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id'
         ]);
         $quiz = Quiz::find($request->quiz_id);
+        $qq = Quiz::where('id', $request->quiz_id)->first();
+        $max_attemp= $qq->quizLessson[0]->max_attemp;
+        $grade_category_id= $qq->quizLessson[0]->grade_category_id;
+
+        $gradecat=GradeCategory::where('id',$grade_category_id)->first();
+            $quiz['max_attemp']=$max_attemp;
+            $quiz['grade_category']=$gradecat;
 
         foreach($quiz->Question as $question){
             if(count($question->childeren) > 0){
