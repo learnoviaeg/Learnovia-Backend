@@ -21,8 +21,9 @@ class UserQuizController extends Controller
 {
 
    public function store_user_quiz(Request $request){
+       $user = Auth::User();
 
-        $request->validate([
+       $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
@@ -42,18 +43,16 @@ class UserQuizController extends Controller
                     ->where('user_id', Auth::user()->id)
                     ->first();
 
-        $attempt_index = 0;
-        if($max_attempt_index == null){
-            $attempt_index = 1;
-        }
-        else if(isset($userQuiz)){
-            if($max_attempt_index < $userQuiz->quiz_lesson->max_attemp){
-                $attempt_index = ++$max_attempt_index;
-            }
-            else{
-                return HelperController::api_response_format(400, null, 'Max Attempt number reached');
-            }
-        }
+           $attempt_index = 0;
+           if ($max_attempt_index == null) {
+               $attempt_index = 1;
+           } else if (isset($userQuiz)) {
+               if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp) {
+                   $attempt_index = ++$max_attempt_index;
+               } else {
+                   return HelperController::api_response_format(400, null, 'Max Attempt number reached');
+               }
+           }
 
         $deviceData = collect([]);
         $deviceData->put('isDesktop',Browser::isDesktop());
@@ -82,7 +81,9 @@ class UserQuizController extends Controller
             'status_id' => 2,
             'feedback' => null,
             'grade' => null,
-            'attempt_index' => $attempt_index,
+
+            'attempt_index' => ($user->roles->first()->id!=1) ?$attempt_index:0,
+
             'ip' => $request->ip(),
             'device_data' => $deviceData,
             'browser_data' => $browserData,
