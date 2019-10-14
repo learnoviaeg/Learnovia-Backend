@@ -240,6 +240,8 @@ class AssigmentsController extends Controller
         }
         if (isset($request->content)) {
             $assigment->content = $request->content;
+        }else {
+            $assigment->content = null;
         }
         $assigment->name = $request->name;
         $assigment->is_graded = $request->is_graded;
