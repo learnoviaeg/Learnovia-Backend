@@ -2,6 +2,7 @@
 
 namespace Modules\QuestionBank\Http\Controllers;
 
+use App\Course;
 use App\CourseSegment;
 use App\Enroll;
 use App\GradeCategory;
@@ -47,7 +48,8 @@ class QuizController extends Controller
             'Question' => 'nullable|array',
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
         ]);
-
+          $course=  Course::where('id',$request->course_id)->first();
+//          return $course->courseSegments[0]->GradeCategory;
         if(isset($request->Question)){
             foreach ($request->Question as $question) {
                 switch ($question['Question_Type_id']) {
