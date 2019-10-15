@@ -106,11 +106,17 @@ class CourseController extends Controller
             'level' => 'exists:levels,id|required_with:year',
             'class' => 'exists:classes,id|required_with:year',
             'segment' => 'exists:segments,id|required_with:year',
+            'image' => 'nullable'
         ]);
 
         $course = Course::find($request->id);
         $course->name = $request->name;
         $course->category_id = $request->category;
+        
+        if ($request->hasFile('image')) {
+            $imageId=Course::where('id',$request->id)->pluck('image')->first();            
+            $course->image=attachment::upload_attachment($request->image, 'course')->id;
+        }
         $course->save();
         if ($request->filled('year')) {
             $oldyearType = AcademicYearType::checkRelation($course->courseSegments[0]->segmentClasses[0]->segments[0]->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academicyear[0]->id, $course->courseSegments[0]->segmentClasses[0]->segments[0]->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academictype[0]->id);

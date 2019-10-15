@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
+use App\Attachment;
 use App\SegmentClass;
 use DB;
 
@@ -43,6 +44,7 @@ class UserController extends Controller
             'course' => 'array',
             'role.*' => 'required|exists:roles,id',
             'class_id' => 'required|array',
+            'picture' => 'nullable'
         ]);
         $users = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
@@ -55,13 +57,23 @@ class UserController extends Controller
                 'lastname' => $request->lastname[$key],
                 'username' => User::generateUsername(),
                 'password' => bcrypt($request->password[$key]),
-                'real_password'=> $request->password[$key]
+                'real_password'=> $request->password[$key],
+                'class_id' => $request->class_id[$key]
             ]);
 
-            foreach ($optionals as $optional) {
-                if ($request->filled($optional))
-                    $user->$optional = $request->$optional;
+            if($request->picture != null )
+            {
+                $user->picture=attachment::upload_attachment($request->picture, 'User')->id;
             }
+
+            foreach ($optionals as $optional) {           
+                if ($request->filled($optional))
+                {
+                    $user->$optional = $request->$optional;
+                }
+                    
+            }
+            
             $user->save();
             $role = Role::find($request->role[$key]);
             $user->assignRole($role);

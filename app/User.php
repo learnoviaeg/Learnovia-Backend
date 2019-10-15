@@ -26,7 +26,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'firstname', 'email', 'password', 'real_password', 'lastname', 'username','suspend'
+        'firstname', 'email', 'password', 'real_password', 'lastname', 'username','suspend','class_id','picture'
     ];
 
     /**
@@ -141,6 +141,10 @@ class User extends Authenticatable
        return $this->hasMany('App\Enroll' , 'user_id');
     }
 
+    public function attachment()
+    {
+        return $this->hasOne('App\attachment', 'id', 'picture');
+    }
 
     public function userQuiz()
     {
