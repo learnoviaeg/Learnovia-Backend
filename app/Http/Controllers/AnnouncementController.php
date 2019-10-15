@@ -25,6 +25,7 @@ use App\AcademicYear;
 use App\attachment;
 use Auth;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class AnnouncementController extends Controller
 {
@@ -492,30 +493,39 @@ class AnnouncementController extends Controller
         switch ($announce->assign){
             case 'class':
                 $class = Classes::where('id',$announce->class_id)->first(['name','id']);
-               $announce['type']=$class;
+                $class->type = 'class';
+                $announce['type']=$class;
                 break;
             case 'year':
                 $year = AcademicYear::where('id',$announce->year_id)->first(['name','id']);
+                $year->type = 'year';
                 $announce['type']=$year;
                 break;
             case 'level':
                 $level= Level::where('id',$announce->level_id)->first(['name','id']);
+                $level->type = 'level';
                 $announce['type']=$level;
                 break;
             case 'course':
                 $course= Course::where('id',$announce->course_id)->first(['name','id']);
+                $course->type = 'course';
                 $announce['type']=$course;
                 break;
             case 'type':
                 $type= AcademicType::where('id',$announce->type_id)->first(['name','id']);
+                $type->type = 'type';
                 $announce['type']=$type;
                 break;
             case 'segment':
                 $segment= Segment::where('id',$announce->segment_id)->first(['name','id']);
+                $segment->type = 'segment';
                 $announce['type']=$segment;
                 break;
             default:
-                $announce['type']="General Announcement";
+                $type = new stdClass();
+                $type->type = 'All';
+                $type->name = "General Announcement";
+                $announce['type']=$type;
         }
         return HelperController::api_response_format(200, $announce);
 
