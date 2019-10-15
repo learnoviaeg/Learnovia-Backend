@@ -510,9 +510,6 @@ class AssigmentsController extends Controller
             if(isset($stuassignment['user_submit']->attachment_id)) {
                 $stuassignment['user_submit']->attachment = attachment::where('id', $stuassignment['user_submit']->attachment_id)->first();
             }
-            else{
-                $stuassignment['user_submit']->attachment =null;
-            }
             return HelperController::api_response_format(200, $body = $stuassignment, $message = []);
         }
     }
