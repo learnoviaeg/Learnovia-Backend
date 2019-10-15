@@ -118,9 +118,7 @@ class CalendarController extends Controller
 
     public function Component_calendar($auth,$date)
     {
-        $CourseSeg=Enroll::where('user_id',$auth)->whereMonth('start_date','=', $date)
-        ->orderBy('start_date')
-        ->pluck('course_segment');
+        $CourseSeg=Enroll::where('user_id',$auth)->pluck('course_segment');
 
         $Lessons=array();
         foreach ($CourseSeg as $cour) {
