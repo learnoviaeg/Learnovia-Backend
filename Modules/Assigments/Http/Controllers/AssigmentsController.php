@@ -248,6 +248,7 @@ class AssigmentsController extends Controller
         $assigment->mark = $request->mark;
         $assigment->allow_attachment = $request->allow_attachment;
         $assigment->start_date = $request->opening_date;
+        $assigment->publish_date = $request->opening_date;
         $assigment->due_date = $request->closing_date;
         $assigment->save();
 
