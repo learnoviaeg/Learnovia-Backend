@@ -70,12 +70,20 @@ class AuthController extends Controller
         else
             $token->expires_at = Carbon::now()->addWeeks(6);
         $token->save();
+        $user = Auth::user();
+        $allpermission= array();
+        $allRole =  $user->roles;
+            foreach($allRole as $role){
+               array_push($allpermission ,  $role->getAllPermissions());
+            }
         return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
+            'permission' => $allpermission,
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
-            )->toDateTimeString()
+            )->toDateTimeString() ,
+
         ], 'User Login Successfully , Don`t share this token with any one they are hackers.');
     }
 
