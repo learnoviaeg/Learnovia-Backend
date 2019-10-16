@@ -16,6 +16,8 @@ class UpdateUsersTable extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->unsignedBigInteger('class_id')->nullable();
             $table->foreign('class_id')->references('id')->on('classes')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('picture')->nullable();
+            $table->foreign('picture')->references('id')->on('attachments')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
