@@ -71,15 +71,19 @@ class AuthController extends Controller
             $token->expires_at = Carbon::now()->addWeeks(6);
         $token->save();
         $user = Auth::user();
-        $allpermission= array();
+        $permissions= array();
         $allRole =  $user->roles;
             foreach($allRole as $role){
-               array_push($allpermission ,  $role->getAllPermissions());
+                $pers = $role->getAllPermissions();
+                foreach ($pers as $permission){
+                    $key =  explode ("/", $permission->name)[0];
+                    $permissions[$key][]=$permission->name;
+                }
             }
         return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
-            'permission' => $allpermission,
+            'permission' => $permissions,
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString() ,
