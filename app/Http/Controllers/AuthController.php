@@ -102,6 +102,20 @@ class AuthController extends Controller
         return HelperController::api_response_format(200, [], 'Successfully logged out');
     }
 
+    public function getuserPermession()
+    {
+        $user = Auth::user();
+        $permissions= array();
+        $allRole =  $user->roles;
+        foreach($allRole as $role){
+            $pers = $role->getAllPermissions();
+            foreach ($pers as $permission){
+                $key =  explode ("/", $permission->name)[0];
+                $permissions[$key][]=$permission->name;
+            }
+        }
+        return HelperController::api_response_format(200 , $permissions, 'your permissions is ..');
+    }
     /**
      * Get the authenticated User
      *
