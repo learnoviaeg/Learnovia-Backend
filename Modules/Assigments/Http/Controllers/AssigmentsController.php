@@ -158,7 +158,7 @@ class AssigmentsController extends Controller
         $assigment = new assignment;
         if (isset($request->file)) {
             $request->validate([
-                'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx',
+                'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             ]);
             if (isset($request->file_description)) {
                 $description = $request->file_description;
@@ -229,7 +229,7 @@ class AssigmentsController extends Controller
         if ($request->hasFile('file')) {
 
             $request->validate([
-                'file' => 'file|distinct|mimes:txt,pdf,docs,DOC,doc,docx',
+                'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             ]);
             if (isset($request->file_description)) {
                 $description = $request->file_description;
@@ -349,7 +349,7 @@ class AssigmentsController extends Controller
         if (isset($request->file)) {
 
             $request->validate([
-                'file' => 'file|distinct|mimes:txt,pdf,docs,doc,docx,jpg',
+                'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             ]);
             if (isset($request->file_description)) {
                 $description = $request->file_description;
