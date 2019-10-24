@@ -109,24 +109,38 @@ class BigbluebuttonController extends Controller
 
             //Notify students for the Meeting
             $courseseg=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
-            $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
+            if(isset($courseseg))
+            {
+                $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
 
-            User::notify([
-                'message' => 'A new Meeting is created',
-                'from' => Auth::user()->id,
-                'users' => $usersIDs,
-                'course_id' => $request->course_id,
-                'class_id'=>$request->class_id,
-                'type' => 'meeting',
-                'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
-                'publish_date'=>Carbon::now()
-            ]);
+                User::notify([
+                    'message' => 'A new Meeting is created',
+                    'from' => Auth::user()->id,
+                    'users' => $usersIDs,
+                    'course_id' => $request->course_id,
+                    'class_id'=>$request->class_id,
+                    'type' => 'meeting',
+                    'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
+                    'publish_date'=>Carbon::now()
+                ]);
 
-            // moderator join the meeting
-            $joinMeetingParams = new JoinMeetingParameters($bigbb->id, $request->name, $request->moderator_password);
-            $joinMeetingParams->setRedirect(true);
-            $url = $bbb->getJoinMeetingURL($joinMeetingParams);
-            return HelperController::api_response_format(200, $url,'Meeting created Successfully, Click on the link to join');
+                // moderator join the meeting
+                $joinMeetingParams = new JoinMeetingParameters($bigbb->id, $request->name, $request->moderator_password);
+                $joinMeetingParams->setRedirect(true);
+                $url = $bbb->getJoinMeetingURL($joinMeetingParams);
+
+                $output = array(
+                    'name' => $request->name,
+                    'duration' => $duration,
+                    'link'=> $url
+                );
+
+                return HelperController::api_response_format(200, $output,'Meeting created Successfully');
+            }
+            else
+            {
+                return HelperController::api_response_format(200, null ,'Please check active course segments');
+            }
         }
     }
 
@@ -145,7 +159,13 @@ class BigbluebuttonController extends Controller
         $joinMeetingParams = new JoinMeetingParameters($request->id, $bigbb->name, $bigbb->attendee_password);
         $joinMeetingParams->setRedirect(true);
         $url = $bbb->getJoinMeetingURL($joinMeetingParams);
-        return HelperController::api_response_format(200, $url,'Click on the Link to Join');
+
+        $output = array(
+            'name' => $request->name,
+            'duration' => $bigbb->duration,
+            'link'=> $url
+        );
+        return HelperController::api_response_format(200, $output,'Join The Meeting');
     }
 
     /**
