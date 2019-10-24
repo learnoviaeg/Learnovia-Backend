@@ -1,0 +1,29 @@
+{
+    "name": "nwidart/bigbluebutton",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Bigbluebutton\\Providers\\BigbluebuttonServiceProvider"
+            ],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Bigbluebutton\\": ""
+        }
+    },
+
+    "require": {
+            "bigbluebutton/bigbluebutton-api-php": "~2.0.0"
+    }
+}
