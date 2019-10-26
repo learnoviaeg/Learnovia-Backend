@@ -107,7 +107,9 @@ class User extends Authenticatable
         {
             $touserid[] = User::find($user);
         }
-
+        foreach ($touserid as $u){
+            event(new \App\Events\notify($u->id , $u->unreadNotifications->count()));
+        }
         Notification::send($touserid, new NewMessage($request));
         return 1;
     }
