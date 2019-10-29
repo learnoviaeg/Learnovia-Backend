@@ -99,9 +99,9 @@ Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
 //Level Routes
 Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'LevelsController@AddLevelWithYear')->name('addlevel')->middleware('permission:level/add');
-    Route::get('getall', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get-all');
+    Route::get('get', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get-all');
     //without year or type request
-    Route::get('gets', 'LevelsController@get')->name('getlevels')->middleware('permission:level/gets');
+    Route::get('getall', 'LevelsController@get')->name('getlevels')->middleware('permission:level/gets');
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
     Route::post('assign', 'LevelsController@Assign_level_to')->name('assignlevel')->middleware('permission:level/assign');
