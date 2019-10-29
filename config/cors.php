@@ -21,6 +21,11 @@ return [
 
         'allow_origins' => [
             'http://localhost:4200',
+            'http://localhost:4201',
+            'http://localhost:4202',
+            'http://localhost:4203',
+            'http://localhost:4204',
+            'http://localhost:4205',
             'http://159.8.28.132',
         ],
 
