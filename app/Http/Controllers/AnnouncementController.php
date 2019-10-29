@@ -201,6 +201,7 @@ class AnnouncementController extends Controller
         $requ = ([
             'id' => "$ann->id",
             'type' => 'announcement',
+            'publish_date'=>$publishdate
         ]);
 
         //sending announcements
@@ -237,7 +238,7 @@ class AnnouncementController extends Controller
         $announce = Announcement::whereId($request->id)->first();
         $data = ([
             'id' => $request->id,
-            'type' => 'announcement'
+            'type' => 'announcement',
         ]);
         $encode = json_encode($data);
         $deleted = DB::table('notifications')->where('data', $encode)->get();

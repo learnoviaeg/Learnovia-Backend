@@ -14,18 +14,19 @@ class notify implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     public $user_id;
-    public $count;
+    public $message;
+    public $publish_date;
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($user_id , $count)
+    public function __construct($user_id , $message,$publish_date)
     {
         $this->user_id=$user_id;
-        $this->count=$count;
+        $this->message=$message;
+        $this->publish_date=$publish_date;
     }
-
     /**
      * Get the channels the event should broadcast on.
      *

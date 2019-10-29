@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -96,7 +97,6 @@ class User extends Authenticatable
                 'course_id' => 'required|integer|exists:courses,id',
                 'class_id'=>'required|integer|exists:classes,id'
             ]);
-
             if ($validater->fails()) {
                 $errors = $validater->errors();
                 return response()->json($errors, 400);
@@ -107,9 +107,17 @@ class User extends Authenticatable
         {
             $touserid[] = User::find($user);
         }
-        foreach ($touserid as $u){
-            event(new \App\Events\notify($u->id , $u->unreadNotifications->count()));
+        $date=Carbon::parse($request['publish_date']);
+        $seconds = $date->diffInSeconds(Carbon::now());
+        if($seconds < 0) {
+            $seconds = 0 ;
         }
+        if($request['type']=='announcement'){
+            $request['message']="A new announcement will be published";
+        }
+
+        $jop = (new \App\Jobs\Sendnotify($touserid,$request['message'],$request['publish_date']))->delay($seconds);
+        dispatch($jop);
         Notification::send($touserid, new NewMessage($request));
         return 1;
     }

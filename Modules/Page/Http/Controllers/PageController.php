@@ -57,7 +57,6 @@ class PageController extends Controller
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
-
     /**
      * Display a listing of the resource.
      * @return Response
@@ -82,7 +81,6 @@ class PageController extends Controller
         {
             $publishdate=Carbon::now();
         }
-
         $courseSegID=Lesson::where('id',$request->Lesson_id)->pluck('course_segment_id')->first();
         $segmentClass=CourseSegment::where('id',$courseSegID)->pluck('segment_class_id')->first();
         $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
