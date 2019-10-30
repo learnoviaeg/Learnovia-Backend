@@ -126,6 +126,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/bulk-of-exist-users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/add-and-enroll-bulk-of-new-users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/enrolled-users']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-unenroll-users']);
 
             //Contact Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/add']);
@@ -343,8 +344,7 @@ class SpatieController extends Controller
 
             $findrole = Role::find($request->roleid);
 
-            foreach($request->permissionid as $per)
-            {
+            foreach ($request->permissionid as $per) {
                 $findPer = Permission::find($per);
                 $findrole->givePermissionTo($findPer);
 
@@ -676,25 +676,23 @@ class SpatieController extends Controller
     {
         $request->validate([
             'course' => 'required|exists:courses,id',
-            'class'=> 'required|exists:classes,id',
+            'class' => 'required|exists:classes,id',
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'required|string|exists:permissions,name'
         ]);
-        $activeSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
-        if($activeSegment == null)
-            return HelperController::api_response_format(400, null , 'No Activ  segment on this course to check permession in');
+        $activeSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
+        if ($activeSegment == null)
+            return HelperController::api_response_format(400, null, 'No Activ  segment on this course to check permession in');
         $enroll = Enroll::whereCourse_segment($activeSegment->id)
-        ->whereUser_id($request->user()->id)->first();
-        if($enroll)
-        {
+            ->whereUser_id($request->user()->id)->first();
+        if ($enroll) {
             $role = Role::find($enroll->role_id);
             $has = [];
             foreach ($request->permissions as $permission) {
                 $has[$permission] = $role->hasPermissionTo($permission);
             }
             return HelperController::api_response_format(200, $has);
-        }
-        else
+        } else
             return HelperController::api_response_format(200, 'you are not enrolled this course');
     }
 
@@ -705,42 +703,69 @@ class SpatieController extends Controller
             'permissions.*' => 'required|string|min:3|max:50|exists:permissions,name',
         ]);
 
-        $user_id=Auth::user()->id;
-        $user_role=DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id');
+        $user_id = Auth::user()->id;
+        $user_role = DB::table('model_has_roles')->where('model_id', $user_id)->pluck('role_id');
 
-        $user_permissions=array();
-        foreach ($user_role as $role)
-        {
-            $findrole=Role::find($role);
-            $user_permissions[]= $findrole->permissions;
+        $user_permissions = array();
+        foreach ($user_role as $role) {
+            $findrole = Role::find($role);
+            $user_permissions[] = $findrole->permissions;
         }
 
-        $userpermissions_name=collect([]);
-        foreach($user_permissions as $uper)
-        {
-            foreach($uper as $per)
-            {
+        $userpermissions_name = collect([]);
+        foreach ($user_permissions as $uper) {
+            foreach ($uper as $per) {
                 $userpermissions_name->push($per->name);
             }
         }
-        $uniquepername= $userpermissions_name->unique();
+        $uniquepername = $userpermissions_name->unique();
 
-        $results=array();
-        $trueper=array();
-        $count=0;
-        foreach ($request->permissions as  $value)
-        {
-            foreach($uniquepername as $per)
-            {
-                $results[]= isset($per) && $value == $per ? 'true' : 'false';
-                if($results[$count] == 'true')
-                {
-                    $trueper[]=$value;
+        $results = array();
+        $trueper = array();
+        $count = 0;
+        foreach ($request->permissions as $value) {
+            foreach ($uniquepername as $per) {
+                $results[] = isset($per) && $value == $per ? 'true' : 'false';
+                if ($results[$count] == 'true') {
+                    $trueper[] = $value;
                 }
                 $count++;
             }
 
         }
         return HelperController::api_response_format(201, $trueper);
+    }
+
+    public function Toggle_dashboard(Request $request)
+    {
+
+        try {
+            $request->validate([
+                'permission_id' => 'required|exists:permissions,id',
+            ]);
+            $permission = Permission::findById($request->permission_id);
+            $permission->dashboard = ($permission->dashboard == 1) ? 0 : 1;
+            $permission->save();
+            return HelperController::api_response_format(200, $permission, 'Toggle Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        $dashbordPermission = array();
+        $user = Auth::user();
+        $allRole = $user->roles;
+        foreach ($allRole as $role) {
+            $pers = $role->getAllPermissions();
+            foreach ($pers as $permission) {
+                if ($permission->dashboard) {
+                    $key = explode("/", $permission->name)[0];
+                    $dashbordPermission[$key][] = ['route' =>$permission->name, 'title'=>$permission->title];
+                }
+            }
+        }
+        return HelperController::api_response_format(200, ['permissions' => $dashbordPermission], 'Successfully');
     }
 }

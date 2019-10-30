@@ -16,6 +16,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('CheckPermission' , 'SpatieController@checkPermessionOnCourse')->name('checkPermessionOnCourse');
     Route::get('getMyLimits' , 'AuthController@getuserPermessionFlags')->name('getuserPermessionFlags');
     Route::post('comparepermissions','SpatieController@comparepermissions')->name('comparepermissions');
+    Route::post('toggleDashboard','SpatieController@Toggle_dashboard')->name('toggleDashboard');
+    Route::post('dashboard','SpatieController@dashboard')->name('dashboard');
 
     //Spatie Routes
     Route::get('spatie', 'SpatieController@index')->name('spatie');
@@ -183,6 +185,7 @@ Route::group(['prefix' => 'enroll' , 'middleware' => 'auth:api'], function () {
     Route::post('enrollexcel', 'EnrollUserToCourseController@EnrollExistUsersFromExcel')->name('enrollexcel')->middleware('permission:enroll/bulk-of-exist-users');
     Route::post('usertech', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
     Route::get('GetEnrolledStudent', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');
+    Route::post('get-unenroll-users', 'EnrollUserToCourseController@getUnEnroll')->name('getUnEnroll')->middleware('permission:enroll/get-unenroll-users');
 });
 
 
