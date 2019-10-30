@@ -176,7 +176,7 @@ class CourseController extends Controller
         ]);
         $course = Course::find($request->id);
         $course->delete();
-        return HelperController::api_response_format(200, $course, 'Course Updated Successfully');
+        return HelperController::api_response_format(200, Course::get(), 'Course Updated Successfully');
     }
 
     public function MyCourses(Request $request)

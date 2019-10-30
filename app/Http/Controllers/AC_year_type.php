@@ -60,7 +60,7 @@ class AC_year_type extends Controller
         $type = AcademicType::find($req->id);
         if ($type) {
             $type->delete();
-            return HelperController::api_response_format(200, $type, 'Type Deleted Successfully');
+            return HelperController::api_response_format(200, AcademicType::get(), 'Type Deleted Successfully');
         }
         return HelperController::api_response_format(400, [], 'Type Deleted Fail');
     }

@@ -70,8 +70,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'AcademicYearController@store')->name('addyear')->middleware('permission:year/add');
     Route::get('getall', 'AcademicYearController@get')->name('getyear')->middleware('permission:year/get');
-    Route::put('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
-    Route::delete('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
+    Route::post('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
+    Route::post('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
    Route::post('current', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/set-current');
 });
 
@@ -113,8 +113,8 @@ Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::get('get', 'ClassController@index')->name('getallclasses')->middleware('permission:class/get-all');
     //without any parameters
     Route::get('getall', 'ClassController@show')->name('getallclass')->middleware('permission:class/get');
-    Route::put('update', 'ClassController@update')->name('updateclass')->middleware('permission:class/update');
-    Route::delete('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:class/delete');
+    Route::post('update', 'ClassController@update')->name('updateclass')->middleware('permission:class/update');
+    Route::post('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:class/delete');
     Route::post('assign', 'ClassController@Assign_class_to')->name('assignclass')->middleware('permission:class/assign');
 });
 
