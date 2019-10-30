@@ -289,4 +289,20 @@ class EnrollUserToCourseController extends Controller
 
     }
 
+    public function unEnrolledUsersBulk(Request $request)
+    {
+        $courseSegments = HelperController::Get_Course_segment($request);
+        if ($courseSegments['result'] == false) {
+            return HelperController::api_response_format(400, null, $courseSegments['value']);
+        }
+        if ($courseSegments['value'] == null) {
+            return HelperController::api_response_format(400, null, 'No Course active in segment');
+        }
+
+        $ids = Enroll::whereIn('course_segment', $courseSegments['value']->pluck('id'))->pluck('user_id');
+        $userUnenrolls = User::whereNotIn('id', $ids)->get();
+        return HelperController::api_response_format(200, $userUnenrolls, 'students are ... ');
+
+
+    }
 }

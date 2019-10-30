@@ -59,7 +59,7 @@ class HelperController extends Controller
         {
             $segment = Segment::Get_current($request->type);
             if($segment == null)
-                return null;
+                return ['result' => true, 'value' => $course_segment];
             else
                 $segment=$segment->id;
         }
