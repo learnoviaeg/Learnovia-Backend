@@ -218,22 +218,19 @@ class EnrollUserToCourseController extends Controller
         $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
 
         if ($request->class_id == null) {
-            foreach($course_seg_id as $course_seg)
+            foreach ($course_seg_id as $course_seg)
                 $users_id[] = Enroll::GetUsers_id($course_seg);
-                foreach ($users_id as $users)
-                {
-                    if($users->isEmpty())
-                        return HelperController::api_response_format(200, null ,'There is No student enrolled');    
-                    else                
-                        foreach ($users as $user)
-                            $UsersIds[] = User::findOrFail($user);
-                }
-                
-            //return all users that enrolled in this course
-            return HelperController::api_response_format(200, $UsersIds ,'students are ... ');
-        }
+            foreach ($users_id as $users) {
+                if ($users->isEmpty())
+                    return HelperController::api_response_format(200, null, 'There is No student enrolled');
+                else
+                    foreach ($users as $user)
+                        $UsersIds[] = User::findOrFail($user);
+            }
 
-        //if was send class_id and course_id
+            //return all users that enrolled in this course
+            return HelperController::api_response_format(200, $UsersIds, 'students are ... ');
+        } //if was send class_id and course_id
         else {
             $request->validate([
                 'class_id' => 'required|exists:classes,id'
@@ -242,27 +239,46 @@ class EnrollUserToCourseController extends Controller
             //$usersByClass is an array that have all users in this class
             $usersByClass = User::GetUsersByClass_id($request->class_id);
 
-            if($usersByClass->isEmpty())
+            if ($usersByClass->isEmpty())
                 return HelperController::api_response_format(200, null, 'There is no student in This class ');
 
-            foreach($usersByClass as $users)
+            foreach ($usersByClass as $users)
                 $UsersClassIds[] = User::findOrFail($users);
 
-            foreach($course_seg_id as $course_seg)
-            {
-                $users_id = Enroll::GetUsers_id($course_seg);  
-    
+            foreach ($course_seg_id as $course_seg) {
+                $users_id = Enroll::GetUsers_id($course_seg);
+
                 // $result is an array of users enrolled this course in this class
                 $result[] = array_intersect($usersByClass->toArray(), $users_id->toArray());
             }
-            
+
             foreach ($result as $users)
                 $Usersenrolled[] = User::findOrFail($users);
-                foreach($Usersenrolled as $use)
-                    if($use->isEmpty())
-                        return HelperController::api_response_format(200, null, 'there is no student ');
+            foreach ($Usersenrolled as $use)
+                if ($use->isEmpty())
+                    return HelperController::api_response_format(200, null, 'there is no student ');
 
             return HelperController::api_response_format(200, $Usersenrolled, 'students are ... ');
         }
     }
+        public function getUnEnroll(Request $request)
+    {
+        $request->validate([
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+            'segment' => 'required|exists:segments,id',
+            'course' => 'required|exists:courses,id'
+        ]);
+        $courseSegment = HelperController::Get_Course_segment_Course($request);
+        if ($courseSegment == null)
+            return HelperController::api_response_format(200, null, 'No current segment or year');
+        $ids= Enroll::where('course_segment',$courseSegment)->pluck('user_id');
+
+        $userUnenrolls=User::whereNotIn('id',$ids)->get();
+        return HelperController::api_response_format(200, $userUnenrolls, 'students are ... ');
+
+    }
+
 }
