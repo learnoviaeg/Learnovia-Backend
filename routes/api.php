@@ -110,7 +110,7 @@ Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
 //Class Routes
 Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'ClassController@AddClassWithYear')->name('addclass')->middleware('permission:class/add');
-    Route::get('getall', 'ClassController@index')->name('getallclasses')->middleware('permission:class/get-all');
+    Route::get('get', 'ClassController@index')->name('getallclasses')->middleware('permission:class/get-all');
     //without any parameters
     Route::get('getall', 'ClassController@show')->name('getallclass')->middleware('permission:class/get');
     Route::put('update', 'ClassController@update')->name('updateclass')->middleware('permission:class/update');
