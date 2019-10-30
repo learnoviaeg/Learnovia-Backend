@@ -187,9 +187,7 @@ Route::group(['prefix' => 'enroll' , 'middleware' => 'auth:api'], function () {
     Route::get('GetEnrolledStudent', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');
     Route::get('get-unenroll-users', 'EnrollUserToCourseController@getUnEnroll')->name('getUnEnroll')->middleware('permission:enroll/get-unenroll-users');
     Route::get('get-unenrolled-users-Bulk', 'EnrollUserToCourseController@unEnrolledUsersBulk')->name('getUnEnrolleduser')->middleware('permission:enroll/get-unenrolled-users-Bulk');
-
 });
-
 
 //Messages Routes
 Route::group(['prefix' => 'Messages', 'middleware' => 'auth:api'], function () {
