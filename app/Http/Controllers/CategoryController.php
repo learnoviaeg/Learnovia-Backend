@@ -38,7 +38,7 @@ class CategoryController extends Controller
         $cat = Category::find($request->id);
 
         $cat->delete();
-        return HelperController::api_response_format(200, $cat, 'Category Deleted Successfully');
+        return HelperController::api_response_format(200, Category::get(), 'Category Deleted Successfully');
     }
 
     public function get(Request $request)

@@ -169,7 +169,7 @@ class ClassController extends Controller
         $request->validate(['id' => 'required|exists:classes,id']);
         $class = Classes::find($request->id);
         $class->delete();
-        return HelperController::api_response_format(200, new Classs($class));
+        return HelperController::api_response_format(200, Classes::get(), 'Class Deleted Successfully');
     }
 
 

@@ -132,7 +132,7 @@ class segment_class_Controller extends Controller
         $segment = Segment::find($req->id);
         if ($segment) {
             $segment->delete();
-            return HelperController::api_response_format(200, $segment, 'Segment Deleted Successfully');
+            return HelperController::api_response_format(200, Segment::get(), 'Segment Deleted Successfully');
         }
         return HelperController::NOTFOUND();
     }

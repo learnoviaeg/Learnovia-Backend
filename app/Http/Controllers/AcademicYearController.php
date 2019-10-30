@@ -84,7 +84,7 @@ class AcademicYearController extends Controller
 
         $year = AcademicYear::whereId($request->id)->first();
         if ($year->delete()) {
-            return HelperController::api_response_format(200, $year);
+            return HelperController::api_response_format(200, AcademicYear::get(), 'Year Deleted Successfully');            
         }
         return HelperController::api_response_format(404, [], 'Not Found');
     }

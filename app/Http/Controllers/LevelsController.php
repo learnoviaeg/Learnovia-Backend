@@ -49,7 +49,7 @@ class LevelsController extends Controller
         $level = Level::find($request->level);
         if ($level)
             $level->delete();
-        return HelperController::api_response_format(203, $level, 'Level Deleted Successfully');
+        return HelperController::api_response_format(203, Level::get(), 'Level Deleted Successfully');
     }
 
 
@@ -57,11 +57,7 @@ class LevelsController extends Controller
     {
         $valid = Validator::make($request->all(), [
             'name' => 'required',
-            'id' => 'required|exists:levels,id',
-            'year' => 'exists:academic_years,id',
-            'oldyear' => 'exists:academic_years,id|required_with:year|exists:academic_year_types,academic_year_id',
-            'type' => 'exists:academic_types,id|required_with:year',
-            'oldtype' => 'exists:academic_years,id|required_with:year|exists:academic_year_types,academic_type_id'
+            'id' => 'required|exists:levels,id'
         ]);
 
         if ($valid->fails())
@@ -70,14 +66,6 @@ class LevelsController extends Controller
         $level = Level::find($request->id);
         $level->name = $request->name;
         $level->save();
-        if ($request->filled('year')){
-            $oldyearType = AcademicYearType::checkRelation($request->oldyear , $request->oldtype);
-            $yearLevel = YearLevel::checkRelation($oldyearType->id , $request->id);
-            $yearLevel->delete();
-            $newyearType = AcademicYearType::checkRelation($request->year , $request->type);
-            YearLevel::checkRelation($newyearType->id , $level->id);
-        }
-        $level->years[0]->academictype[0]->AC_year;
         return HelperController::api_response_format(200 , $level,'Level Updated Successfully');
     }
 
@@ -125,15 +113,12 @@ class LevelsController extends Controller
                     YearLevel::checkRelation($academic_year_type->id, $request->level);
                     $count++;
                 }
-
         return HelperController::api_response_format(201, 'Level Assigned Successfully');
-
     }
 
     public function get(Request $request)
     {
         $levels=Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(200,$levels);
-
     }
 }
