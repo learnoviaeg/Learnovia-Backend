@@ -160,6 +160,7 @@ class CourseController extends Controller
         }
         if (isset($request->id))
             return HelperController::api_response_format(200, Course::with('category')->whereId($request->id)->first());
+        return HelperController::api_response_format(200, Course::paginate(HelperController::GetPaginate($request)));
     }
 
     public function delete(Request $request)
