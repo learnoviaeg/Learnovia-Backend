@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\AcademicYearType;
 use App\Http\Controllers\HelperController;
+use App\YearLevel;
 use Illuminate\Http\Request;
 use App\User;
 use Excel;
@@ -38,12 +40,11 @@ class EnrollUserToCourseController extends Controller
         $count = 0;
         $rolecount = 0;
         $course_segment = [];
-        foreach($request->course as $course){
-            $course_segment[] = CourseSegment::GetWithClassAndCourse($request->class , $course);
+        foreach ($request->course as $course) {
+            $course_segment[] = CourseSegment::GetWithClassAndCourse($request->class, $course);
         }
 
-        if(! in_array(null,$course_segment) == true)
-        {
+        if (!in_array(null, $course_segment) == true) {
             foreach ($course_segment as $courses) {
                 foreach ($request->users as $username) {
                     $user_id = User::FindByName($username)->id;
@@ -69,8 +70,7 @@ class EnrollUserToCourseController extends Controller
                 return HelperController::api_response_format(200, $data, 'those users already enrolled');
             }
             return HelperController::api_response_format(200, [], 'added successfully');
-        }
-        else{
+        } else {
             return HelperController::api_response_format(200, [], 'invalid class data or not active course');
         }
     }
@@ -88,13 +88,13 @@ class EnrollUserToCourseController extends Controller
             'course' => 'exists:courses,id'
         ]);
         $courseSegment = HelperController::Get_Course_segment_Course($request);
-        if($courseSegment == null)
-            return HelperController::api_response_format(200, null, 'No current segment or year');            
+        if ($courseSegment == null)
+            return HelperController::api_response_format(200, null, 'No current segment or year');
 
         foreach ($request->username as $users)
-            $course_segment = Enroll::where('course_segment',$courseSegment['value']->id)->where('username', $users)->delete();
+            $course_segment = Enroll::where('course_segment', $courseSegment['value']->id)->where('username', $users)->delete();
 
-        if($course_segment > 0)
+        if ($course_segment > 0)
             return HelperController::api_response_format(200, $course_segment, 'users UnEnrolled Successfully');
 
         return HelperController::api_response_format(200, $course_segment, 'NOT FOUND USER IN THIS COURSE/invalid data');
@@ -129,16 +129,15 @@ class EnrollUserToCourseController extends Controller
             'class' => 'required|exists:classes,id',
             'segment' => 'exists:segments,id',
             'course' => 'array|exists:courses,id'
-        ]);            
+        ]);
 
         $count = 0;
         foreach ($request->username as $user) {
             $userId = User::FindByName($user)->id;
             $x = HelperController::Get_segment_class($request);
-            if($x != null)
-            {
+            if ($x != null) {
                 $segments = collect([]);
-                if(count($x->courseSegment) < 1){
+                if (count($x->courseSegment) < 1) {
                     return HelperController::api_response_format(400, [], 'No Courses belong to this class');
                 }
                 foreach ($x->courseSegment as $key => $segment) {
@@ -149,9 +148,9 @@ class EnrollUserToCourseController extends Controller
                         }
                     }
                 }
-                if($segments == null)
+                if ($segments == null)
                     break;
-    
+
                 $check = Enroll::where('user_id', $userId)->where('course_segment', $segments)->pluck('id');
                 if (count($check) == 0) {
                     foreach ($segments as $segment) {
@@ -165,14 +164,13 @@ class EnrollUserToCourseController extends Controller
                         ]);
                     }
                 }
-                if(isset($request->course))
-                {
-                    $mand=Course::where('id',$request->course)->pluck('mandatory')->first();
-                    if($mand == 1)
-                        return HelperController::api_response_format(400, [], 'This Course not Optional_Course');     
+                if (isset($request->course)) {
+                    $mand = Course::where('id', $request->course)->pluck('mandatory')->first();
+                    if ($mand == 1)
+                        return HelperController::api_response_format(400, [], 'This Course not Optional_Course');
 
-                    foreach($request->course as $course){
-                        $courseSegment=HelperController::Get_Course_segment_course($request);
+                    foreach ($request->course as $course) {
+                        $courseSegment = HelperController::Get_Course_segment_course($request);
                         Enroll::Create([
                             'username' => $user,
                             'user_id' => $userId,
@@ -182,13 +180,11 @@ class EnrollUserToCourseController extends Controller
                             'role_id' => 3,
                         ]);
                     }
-                }
-                else {
+                } else {
                     $count++;
                 }
-            }
-            else 
-                return HelperController::api_response_format(400, [], 'No Current segment or year');            
+            } else
+                return HelperController::api_response_format(400, [], 'No Current segment or year');
         }
         //($count);
         if ($count > 0) {
@@ -261,7 +257,8 @@ class EnrollUserToCourseController extends Controller
             return HelperController::api_response_format(200, $Usersenrolled, 'students are ... ');
         }
     }
-        public function getUnEnroll(Request $request)
+
+    public function getUnEnroll(Request $request)
     {
         $request->validate([
             'year' => 'required|exists:academic_years,id',
@@ -269,14 +266,25 @@ class EnrollUserToCourseController extends Controller
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
             'segment' => 'required|exists:segments,id',
-            'course' => 'required|exists:courses,id'
+            'courses' => 'required|array',
+            'courses.*' => 'required|exists:courses,id'
         ]);
-        $courseSegment = HelperController::Get_Course_segment_Course($request);
-        if ($courseSegment == null)
-            return HelperController::api_response_format(200, null, 'No current segment or year');
-        $ids= Enroll::where('course_segment',$courseSegment)->pluck('user_id');
 
-        $userUnenrolls=User::whereNotIn('id',$ids)->get();
+        $academic_year_type = AcademicYearType::checkRelation($request->year, $request->type);
+        $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
+        $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
+        $segment_class = SegmentClass::checkRelation($class_level->id, $request->segment);
+
+        $course_segment = collect([]);
+        foreach ($request->courses as $c)
+            $course_segment[] = CourseSegment::checkRelation($segment_class->id, $c);
+
+        if ($course_segment == null)
+            return HelperController::api_response_format(200, null, 'No current segment or year');
+
+        $ids = Enroll::whereIn('course_segment', $course_segment->pluck('id'))->pluck('user_id');
+        $userUnenrolls = User::whereNotIn('id', $ids)->get();
+
         return HelperController::api_response_format(200, $userUnenrolls, 'students are ... ');
 
     }
