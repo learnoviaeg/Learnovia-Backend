@@ -144,29 +144,22 @@ class CourseController extends Controller
         $request->validate([
             'id' => 'exists:courses,id',
             'category_id' => 'nullable|exists:categories,id',
-            'year_id' => 'nullable|exists:academic_years,id',
-            'type_id' => 'nullable|exists:academic_types,id',
-            'level_id' => 'nullable|exists:levels,id',
-            'class_id' => 'nullable|exists:classes,id',
-            'segment_id' => 'nullable|exists:segments,id',
+            'year' => 'nullable|exists:academic_years,id',
+            'type' => 'nullable|exists:academic_types,id|required_with:year',
+            'level' => 'nullable|exists:levels,id|required_with:year',
+            'class' => 'nullable|exists:classes,id|required_with:year',
+            'segment' => 'nullable|exists:segments,id|required_with:year',
         ]);
-        if (isset($request->id)) {
-            return HelperController::api_response_format(200, Course::with('category')->whereId($request->id)->first());
-        } else if (isset($request->category_id)) {
-            $courses = Course::where('category_id', $request->category_id)->with('attachment')->get();
-            return HelperController::api_response_format(200, $courses);
-        } else {
-            $course = CourseController::get_course_by_year_type($request);
-            if (!isset($course)) {
-                return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->get());
-            } else {
-                $returncourse = array();
-                foreach ($course as $cc) {
-                    $returncourse[] = Course::where('id', $cc)->with('attachment')->first();
-                }
-                return HelperController::api_response_format(200, $returncourse);
-            }
+        if($request->filled('year')){
+            $academic_year_type = AcademicYearType::checkRelation($request->year, $request->type);
+            $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
+            $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
+            $segment_class = SegmentClass::checkRelation($class_level->id, $request->segment);
+            $courseSegment = $segment_class->courseSegment->pluck('course_id');
+            return HelperController::api_response_format(200, Course::whereIn('id' , $courseSegment)->paginate(HelperController::GetPaginate($request)));
         }
+        if (isset($request->id))
+            return HelperController::api_response_format(200, Course::with('category')->whereId($request->id)->first());
     }
 
     public function delete(Request $request)
