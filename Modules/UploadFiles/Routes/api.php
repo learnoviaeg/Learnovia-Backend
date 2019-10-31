@@ -2,55 +2,41 @@
 
 use Illuminate\Http\Request;
 
-Route::group(['prefix' => 'attach', 'middleware' => 'auth:api'], function () {
+/* File Routes */
+
+Route::group(['prefix' => 'file', 'middleware' => 'auth:api'], function () {
 
     //install Files permissions
     Route::get('install' ,'FilesController@install_file');
 
-    /* File Routes */
-    /* Upload array of files to specific course segment */
-    Route::post('uploadFile', 'FilesController@store')->name('uploadFile')->middleware('permission:file/add');
+    Route::get('/media/get', 'FilesController@show')->name('getFileMedia')->middleware('permission:file/media/get');
 
-    /* Update specific file */
-    Route::post('updateFile', 'FilesController@update')->name('updateFile')->middleware('permission:file/update');
+    Route::post('add', 'FilesController@store')->name('uploadFile')->middleware('permission:file/add');
+    Route::post('update', 'FilesController@update')->name('updateFile')->middleware('permission:file/update');
+    Route::post('delete', 'FilesController@destroy')->name('deleteFile')->middleware('permission:file/delete');
+    Route::post('toggle', 'FilesController@toggleVisibility')->name('toggleFileVisibility')->middleware('permission:file/toggle');
+    Route::post('sort', 'FilesController@sortLessonFile')->name('sortLessonFile')->middleware('permission:file/sort');
+    Route::get('get-all','FilesController@getAllFiles')->name('getAllFiles')->middleware('permission:file/get-all');
+    Route::get('get','FilesController@GetFileByID')->name('GetFileByID')->middleware('permission:file/get');
 
-    /* Delete specific file */
-    Route::post('deleteFile', 'FilesController@destroy')->name('deleteFile')->middleware('permission:file/delete');
 
-    /* Toggle Visibility of specific file */
-    Route::post('toggleFileVisibility', 'FilesController@toggleVisibility')->name('toggleFileVisibility')->middleware('permission:file/toggle');
-    /* Media Routes */
-    /* Upload array of Media to specific course segment */
-   // Route::post('uploadMedia', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
-    Route::post('uploadMedia', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
-    /* Update specific Media */
-    Route::post('updateMedia', 'MediaController@update')->name('updateMedia')->middleware('permission:media/update');
+});
 
-    /* Delete specific Media */
-    Route::post('deleteMedia', 'MediaController@destroy')->name('deleteMedia')->middleware('permission:media/delete');
+/* Media Routes */
+Route::group(['prefix' => 'media', 'middleware' => 'auth:api'], function () {
 
-    /* Toggle Visibility of specific Media */
-    Route::post('toggleMediaVisibility', 'MediaController@toggleVisibility')->name('toggleMediaVisibility')->middleware('permission:media/toggle');
+    Route::post('add', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
+    Route::post('update', 'MediaController@update')->name('updateMedia')->middleware('permission:media/update');
+    Route::post('delete', 'MediaController@destroy')->name('deleteMedia')->middleware('permission:media/delete');
+    Route::post('toggle', 'MediaController@toggleVisibility')->name('toggleMediaVisibility')->middleware('permission:media/toggle');
+    Route::post('sort', 'MediaController@sortLessonMedia')->name('sortLessonMedia')->middleware('permission:media/sort');
+    Route::get('get-all','MediaController@getAllMedia')->name('getAllMedia')->middleware('permission:media/get-all');
+    Route::get('get','MediaController@GetMediaByID')->name('GetMediaByID')->middleware('permission:media/get');
+});
 
-    /* Attach link as media */
-    //Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink')->middleware('permission:link/add');
-    Route::post('storeMediaLink', 'MediaController@storeMediaLink')->name('storeMediaLink')->middleware('permission:link/add');
+/* Attach link as media */
+Route::group(['prefix' => 'link', 'middleware' => 'auth:api'], function () {
 
-    /* update link as media */
-    Route::post('updateMediaLink', 'MediaController@updateMediaLink')->name('updateMediaLink')->middleware('permission:link/update');
-
-    /* Get All files and Media assigned to specific course segment */
-    Route::get('getFileMedia', 'FilesController@show')->name('getFileMedia')->middleware('permission:file-media/get');
-
-    /* sortLessonFile */
-    Route::post('sortLessonFile', 'FilesController@sortLessonFile')->name('sortLessonFile')->middleware('permission:file/sort');
-
-    /* sortLessonMedia */
-    Route::post('sortLessonMedia', 'MediaController@sortLessonMedia')->name('sortLessonMedia')->middleware('permission:media/sort');
-
-    Route::get('getAllFiles','FilesController@getAllFiles')->name('getAllFiles')->middleware('permission:file/get-all');
-    Route::get('getAllMedia','MediaController@getAllMedia')->name('getAllMedia')->middleware('permission:media/get-all');
-
-    Route::get('GetMediaByID','MediaController@GetMediaByID')->name('GetMediaByID')->middleware('permission:media/get');
-    Route::get('GetFileByID','FilesController@GetFileByID')->name('GetFileByID')->middleware('permission:file/get');
+    Route::post('add', 'MediaController@storeMediaLink')->name('storeMediaLink')->middleware('permission:link/add');
+    Route::post('update', 'MediaController@updateMediaLink')->name('updateMediaLink')->middleware('permission:link/update');
 });

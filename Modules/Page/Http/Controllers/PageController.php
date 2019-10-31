@@ -32,12 +32,12 @@ class PageController extends Controller
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
 
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/add']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/update']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/delete']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/toggle']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/link-lesson']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/get']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/add','title' => 'add page']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/update','title' => 'update page']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/delete','title' => 'delete page']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/toggle','title' => 'toggle page']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/link-lesson','title' => 'link lesson page']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/get','title' => 'get page']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('page/add');

@@ -31,23 +31,23 @@ class FilesController extends Controller
         if (\Spatie\Permission\Models\Permission::whereName('file/add')->first() != null) {
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/add']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/update']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/delete']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/toggle']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file-media/get']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/add']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/update']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/sort']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/sort']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get-all']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get-all']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add','title' => 'add file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update','title' => 'update file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete','title' => 'delete file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle','title' => 'toggle file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/add','title' => 'add media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/update','title' => 'update media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/delete','title' => 'delete media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/toggle','title' => 'toggle media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/media/get','title' => 'get file and media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/add','title' => 'add link']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/update','title' => 'update link']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/sort','title' => 'sort file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/sort','title' => 'sort media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get-all','title' => 'get all files']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get-all','title' => 'get all media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get','title' => 'get media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get','title' => 'get file']);
 
 
 
@@ -60,7 +60,7 @@ class FilesController extends Controller
         $role->givePermissionTo('media/update');
         $role->givePermissionTo('media/delete');
         $role->givePermissionTo('media/toggle');
-        $role->givePermissionTo('file-media/get');
+        $role->givePermissionTo('file/media/get');
         $role->givePermissionTo('link/add');
         $role->givePermissionTo('link/update');
         $role->givePermissionTo('file/sort');
