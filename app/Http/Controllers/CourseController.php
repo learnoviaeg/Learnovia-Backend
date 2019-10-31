@@ -39,7 +39,8 @@ class CourseController extends Controller
             'segment.*' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
-            'description' => 'string'
+            'description' => 'string',
+            'mandatory' => 'nullable'
         ]);
         $no_of_lessons = 4;
         $course = Course::firstOrCreate([
@@ -54,6 +55,10 @@ class CourseController extends Controller
 
         if ($request->filled('description')) {
             $course->description = $request->description;
+            $course->save();
+        }
+        if ($request->filled('mandatory')) {
+            $course->mandatory = $request->mandatory;
             $course->save();
         }
         foreach ($request->year as $year) {
