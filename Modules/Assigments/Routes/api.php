@@ -19,15 +19,15 @@ Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function ()
     Route::get('install','AssigmentsController@install_Assignment');
 
     //Assignment Routes
-    Route::post('create', 'AssigmentsController@createAssigment')->middleware('permission:assignment/add');
+    Route::post('add', 'AssigmentsController@createAssigment')->middleware('permission:assignment/add');
     Route::post('update', 'AssigmentsController@updateAssigment')->middleware('permission:assignment/update');
     Route::post('submit', 'AssigmentsController@submitAssigment')->middleware('permission:assignment/submit');
     Route::post('grade', 'AssigmentsController@gradeAssigment')->middleware('permission:assignment/grade');
-    Route::post('editGrade', 'AssigmentsController@editGradeAssignment')->middleware('permission:assignment/editgrade');
+    Route::post('editgrade', 'AssigmentsController@editGradeAssignment')->middleware('permission:assignment/editgrade');
     Route::post('override', 'AssigmentsController@override')->middleware('permission:assignment/override');
     Route::post('delete', 'AssigmentsController@deleteAssigment')->middleware('permission:assignment/delete');
-    Route::get('GetAssignment','AssigmentsController@GetAssignment')->name('getAssignment')->middleware('permission:assignment/get');
-    Route::post('toggleVisiblity', 'AssigmentsController@toggleAssignmentVisibity')->middleware('permission:assignment/toggle');
-    Route::get('getAllAssigment', 'AssigmentsController@getAllAssigment')->middleware('permission:assignment/get-all');
+    Route::get('get','AssigmentsController@GetAssignment')->name('getAssignment')->middleware('permission:assignment/get');
+    Route::post('toggle', 'AssigmentsController@toggleAssignmentVisibity')->middleware('permission:assignment/toggle');
+    Route::get('get-all', 'AssigmentsController@getAllAssigment')->middleware('permission:assignment/get-all');
 
 });

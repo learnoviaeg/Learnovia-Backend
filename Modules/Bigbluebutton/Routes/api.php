@@ -13,17 +13,13 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/bigbluebutton', function (Request $request) {
-    return $request->user();
-});
-
 Route::group(['prefix' => 'bigbluebutton', 'middleware' => 'auth:api'], function () {
 
     //install Bigbluebutton Routes
     Route::get('install','BigbluebuttonController@install');
 
     //Bigbluebutton Routes
-    Route::get('createmeeting', 'BigbluebuttonController@create')->middleware('permission:bigbluebutton/create');
-    Route::get('joinmeeting', 'BigbluebuttonController@join')->middleware('permission:bigbluebutton/join');
-    Route::get('getmeeting', 'BigbluebuttonController@get')->name('getmeeting')->middleware('permission:bigbluebutton/get');
+    Route::get('create', 'BigbluebuttonController@create')->middleware('permission:bigbluebutton/create');
+    Route::get('join', 'BigbluebuttonController@join')->middleware('permission:bigbluebutton/join');
+    Route::get('get', 'BigbluebuttonController@get')->name('getmeeting')->middleware('permission:bigbluebutton/get');
 });
