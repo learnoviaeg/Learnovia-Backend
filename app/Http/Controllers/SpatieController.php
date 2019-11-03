@@ -490,7 +490,7 @@ class SpatieController extends Controller
                 $role->count = User::role($role)->count();
                 $role->permissions;
             }
-            return HelperController::api_response_format(200, $roles);
+            return HelperController::api_response_format(200, $roles->paginate(HelperController::GetPaginate(\request())));
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
         }
