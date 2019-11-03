@@ -481,6 +481,7 @@ class SpatieController extends Controller
         try {
             $roles = Role::all();
             foreach ($roles as $role) {
+                $role->count = User::role($role)->count();
                 $role->permissions;
             }
             return HelperController::api_response_format(200, $roles);
