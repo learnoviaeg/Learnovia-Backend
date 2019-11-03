@@ -1,6 +1,6 @@
 <?php
 //install all permissions and roles of system Route
-Route::get('install','SpatieController@install');
+Route::get('install', 'SpatieController@install');
 //Login and Signup
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
@@ -13,15 +13,15 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('getuserPermession', 'AuthController@getuserPermession');
     Route::get('user', 'AuthController@user')->name('user');
-    Route::post('CheckPermission' , 'SpatieController@checkPermessionOnCourse')->name('checkPermessionOnCourse');
-    Route::get('getMyLimits' , 'AuthController@getuserPermessionFlags')->name('getuserPermessionFlags');
-    Route::post('comparepermissions','SpatieController@comparepermissions')->name('comparepermissions');
-    Route::post('dashboard','SpatieController@dashboard')->name('dashboard');
+    Route::post('CheckPermission', 'SpatieController@checkPermessionOnCourse')->name('checkPermessionOnCourse');
+    Route::get('getMyLimits', 'AuthController@getuserPermessionFlags')->name('getuserPermessionFlags');
+    Route::post('comparepermissions', 'SpatieController@comparepermissions')->name('comparepermissions');
+    Route::post('dashboard', 'SpatieController@dashboard')->name('dashboard');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
-    Route::post('comparepermissions','SpatieController@comparepermissions');
+    Route::post('comparepermissions', 'SpatieController@comparepermissions');
 
     //dashboard routes
-    Route::post('dashboard/toggle','SpatieController@Toggle_dashboard')->name('toggleDashboard')->middleware('permission:dashboard/toggle');
+    Route::post('dashboard/toggle', 'SpatieController@Toggle_dashboard')->name('toggleDashboard')->middleware('permission:dashboard/toggle');
 
     //Spatie Routes
     Route::group(['prefix' => 'spatie'], function () {
@@ -71,8 +71,18 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('getbyid', 'AnnouncementController@getAnnounceByID')->name('getbyid')->middleware('permission:announcements/getbyid');
     });
 
+    //languages routes
+    Route::group(['prefix' => 'languages'], function () {
+        Route::get('get-active', 'SystemSettingsController@GetActiveLanguages')->name('getActiveLanguages');
+        Route::get('get-default', 'SystemSettingsController@GetDefaultLanguage')->name('getDefaultLanguages');
+        Route::post('activate', 'SystemSettingsController@ActivateLanguage')->name('activateLanguage')->middleware('permission:languages/activate');
+        Route::post('deactivate', 'SystemSettingsController@DeActivateLanguage')->name('deactivateLanguage')->middleware('permission:languages/deactivate');
+        Route::post('add', 'SystemSettingsController@AddLanguage')->name('addLanguage')->middleware('permission:languages/add');
+        Route::post('set-default', 'SystemSettingsController@SetDefaultLanguage')->name('setDefaultLanguage')->middleware('permission:languages/set-default');
+    });
+
     //Calendar Route
-    Route::post('calendar/get','CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
+    Route::post('calendar/get', 'CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
 
     //Import Excel Route
     Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:import');
@@ -84,7 +94,7 @@ Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::get('get', 'AcademicYearController@get')->name('getyear')->middleware('permission:year/get');
     Route::post('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
     Route::post('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
-   Route::post('set-current', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/set-current');
+    Route::post('set-current', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/set-current');
 });
 
 //Type Routes
@@ -145,11 +155,11 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:course/delete');
     Route::get('get-all', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
     Route::get('my-courses', 'CourseController@MyCourses')->name('mycourses')->middleware('permission:course/my-courses');
-    Route::get('layout','CourseController@GetUserCourseLessons')->name('layout')->middleware('permission:course/layout');
+    Route::get('layout', 'CourseController@GetUserCourseLessons')->name('layout')->middleware('permission:course/layout');
     Route::get('optional', 'CourseController@getCoursesOptional')->name('optional')->middleware('permission:course/optional');
     Route::post('assgin-course-to', 'CourseController@Assgin_course_to')->name('assgincourseto')->middleware('permission:course/assgin-course-to');
     Route::get('course-with-teacher', 'CourseController@course_with_teacher')->name('coursewithteacher')->middleware('permission:course/course-with-teacher');
-    Route::get('sorted-componenets' , 'CourseController@GetUserCourseLessonsSorted')->middleware('permission:course/sorted-componenets');
+    Route::get('sorted-componenets', 'CourseController@GetUserCourseLessonsSorted')->middleware('permission:course/sorted-componenets');
 });
 
 //USER CRUD ROUTES
@@ -166,7 +176,7 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
 });
 
 //Enroll Routes
-Route::group(['prefix' => 'enroll' , 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'enroll', 'middleware' => 'auth:api'], function () {
     Route::post('enroll-single-user', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/enroll-single-user');
     Route::post('un-enroll-single-user', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
     Route::get('get-enrolled-courses', 'EnrollUserToCourseController@ViewAllCoursesThatUserEnrollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
@@ -202,7 +212,6 @@ Route::group(['prefix' => 'component', 'middleware' => 'auth:api'], function () 
     Route::post('uninstall', 'ComponentController@Uninstall')->name('uninstallcomponenet')->middleware('permission:component/uninstall');
     Route::put('toggle', 'ComponentController@ToggleActive')->name('togglecomponenet')->middleware('permission:component/toggle');
     Route::post('sort', 'ComponentController@sort')->name('sortcomponenet')->middleware('permission:component/sort');
-
 });
 
 //lesson routes
@@ -242,4 +251,3 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
     });
 });
-

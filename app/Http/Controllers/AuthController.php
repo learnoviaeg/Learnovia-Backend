@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -71,23 +72,29 @@ class AuthController extends Controller
             $token->expires_at = Carbon::now()->addWeeks(6);
         $token->save();
         $user = Auth::user();
-        $permissions= array();
+        $permissions = array();
         $allRole =  $user->roles;
-            foreach($allRole as $role){
-                $pers = $role->getAllPermissions();
-                foreach ($pers as $permission){
-                    $key =  explode ("/", $permission->name)[0];
-                    $permissions[$key][]=$permission->name;
-                }
+        foreach ($allRole as $role) {
+            $pers = $role->getAllPermissions();
+            foreach ($pers as $permission) {
+                $key =  explode("/", $permission->name)[0];
+                $permissions[$key][] = $permission->name;
             }
+        }
+        $languages = SystemSetting::where('key', 'languages')->first();
+        $languages = unserialize($languages->data);
+        foreach ($languages as $index => $language) {
+            if ($language['default'])
+                $result = $language;
+        }
         return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
             'permission' => $permissions,
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
-            )->toDateTimeString() ,
-
+            )->toDateTimeString(),
+            'language' => $result
         ], 'User Login Successfully , Don`t share this token with any one they are hackers.');
     }
 
@@ -105,16 +112,16 @@ class AuthController extends Controller
     public function getuserPermession()
     {
         $user = Auth::user();
-        $permissions= array();
+        $permissions = array();
         $allRole =  $user->roles;
-        foreach($allRole as $role){
+        foreach ($allRole as $role) {
             $pers = $role->getAllPermissions();
-            foreach ($pers as $permission){
-                $key =  explode ("/", $permission->name)[0];
-                $permissions[$key][]=$permission->name;
+            foreach ($pers as $permission) {
+                $key =  explode("/", $permission->name)[0];
+                $permissions[$key][] = $permission->name;
             }
         }
-        return HelperController::api_response_format(200 , $permissions, 'your permissions is ..');
+        return HelperController::api_response_format(200, $permissions, 'your permissions is ..');
     }
     /**
      * Get the authenticated User
