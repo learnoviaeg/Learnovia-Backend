@@ -36,7 +36,7 @@ class AC_year_type extends Controller
         }
         else {
             $cat = AcademicYear::whereId($request->year)->first()->AC_Type;
-            return HelperController::api_response_format(200, $cat);
+            return HelperController::api_response_format(200, $cat->paginate(HelperController::GetPaginate($request)));
         }
     }
 

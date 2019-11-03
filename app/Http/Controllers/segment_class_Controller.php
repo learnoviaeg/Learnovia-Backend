@@ -35,11 +35,11 @@ class segment_class_Controller extends Controller
             $yeartype = AcademicYearType::checkRelation($request->year, $request->type);
             $yearlevel = YearLevel::checkRelation($yeartype->id, $request->level);
             $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
-            $segments = [];
+            $segments = collect([]);
             foreach ($classLevel->segmentClass as $segmentClass) {
                 $segments[] = $segmentClass->segments[0];
             }
-            return HelperController::api_response_format(200, $segments);
+            return HelperController::api_response_format(200, $segments->paginate(HelperController::GetPaginate($request)));
         } else {
             $request->validate([
                 'id' => 'exists:academic_years,id',
@@ -53,7 +53,7 @@ class segment_class_Controller extends Controller
             }
             $segmentscoll = collect($segments);
             $allsegments = $segmentscoll->where('id', $request->id);
-            return HelperController::api_response_format(200, $allsegments);
+            return HelperController::api_response_format(200, $allsegments->paginate(HelperController::GetPaginate($request)));
         }
     }
 

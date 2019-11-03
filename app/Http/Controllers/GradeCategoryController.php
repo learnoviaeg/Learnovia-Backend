@@ -43,6 +43,22 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(404,null , 'this class didnot have course segment');
 
     }
+    public function addBulkGradeCategories(Request $request)
+    {
+        $request->validate([
+            'grades' => 'required|array',
+            'grades.*.name' => 'required|string',
+            'grades.*.parent' => 'integer|exists:grade_categories,id',
+            'grades.*.aggregation' => 'integer',
+            'grades.*.aggregatedOnlyGraded' => 'boolean',
+            'grades.*.hidden' => 'boolean',
+        ]);
+
+        $jop = (new \App\Jobs\addgradecategory([1,2,3],$request->grades));
+        dispatch($jop);
+        return HelperController::api_response_format(200, null, 'Grade Category is created successfully');
+
+    }
 
 
     public function GetGradeCategory(Request $request)

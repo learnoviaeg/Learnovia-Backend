@@ -41,7 +41,6 @@ class AcademicYearType extends Model
     {
         return self::where('academic_type_id', $academic_type)->pluck('id');
     }
-
     protected $hidden = [
         'created_at','updated_at'
     ];

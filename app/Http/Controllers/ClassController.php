@@ -29,17 +29,17 @@ class ClassController extends Controller
         {
             $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
             $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
-            $class =[];
+            $class =collect([]);
             foreach ($yearlevel->classLevels as $classLevel){
                 $class[] = $classLevel->classes[0];
             }
-            return HelperController::api_response_format(200, $class);
+            return HelperController::api_response_format(200, $class->paginate(HelperController::GetPaginate($request)));
         }
         else
         {
             $class = Classes::find($request->id);
             if ($class)
-                return HelperController::api_response_format(200, new Classes($class));
+                return HelperController::api_response_format(200, new Classes($class->paginate(HelperController::GetPaginate($request))));
             return HelperController::NOTFOUND();
         }
 
