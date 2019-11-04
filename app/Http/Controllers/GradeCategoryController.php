@@ -11,6 +11,7 @@ use App\YearLevel;
 use App\SegmentClass;
 use Illuminate\Http\Request;
 use App\Segment;
+
 class GradeCategoryController extends Controller
 {
 
@@ -25,25 +26,26 @@ class GradeCategoryController extends Controller
             'aggregatedOnlyGraded' => 'integer',
             'hidden' => 'integer'
         ]);
-        $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
-        if(isset($course_segment_id)){
-        $grade_category = GradeCategory::create([
-            'name' => $request->name,
-            'course_segment_id' => $course_segment_id->id,
-            'parent' => $request->parent,
-            'aggregation' => $request->aggregation,
-            'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
-            'hidden' =>(isset($request->hidden))?$request->hidden :0 ,
-        ]);
-       /* if($request->filled('hidden')){
-            $grade_category->hidden = $request->hidden;
-            $grade_category->save();
-        }*/
-        return HelperController::api_response_format(200, $grade_category, 'Grade Category is created successfully');
-    }
-        return HelperController::api_response_format(404,null , 'this class didnot have course segment');
+        $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class_id, $request->course_id);
+        if (isset($course_segment_id)) {
+            $grade_category = GradeCategory::create([
+                'name' => $request->name,
+                'course_segment_id' => $course_segment_id->id,
+                'parent' => $request->parent,
+                'aggregation' => $request->aggregation,
+                'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
+                'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
+            ]);
+            /* if($request->filled('hidden')){
+                 $grade_category->hidden = $request->hidden;
+                 $grade_category->save();
+             }*/
+            return HelperController::api_response_format(200, $grade_category, 'Grade Category is created successfully');
+        }
+        return HelperController::api_response_format(404, null, 'this class didnot have course segment');
 
     }
+
     public function addBulkGradeCategories(Request $request)
     {
         $request->validate([
@@ -54,12 +56,22 @@ class GradeCategoryController extends Controller
             'grades.*.aggregatedOnlyGraded' => 'boolean',
             'grades.*.hidden' => 'boolean',
         ]);
-        $jop = (new \App\Jobs\addgradecategory( $this->getCourseSegment($request),$request->grades));
+        $jop = (new \App\Jobs\addgradecategory($this->getCourseSegment($request), $request->grades));
         dispatch($jop);
         return HelperController::api_response_format(200, null, 'Grade Category is created successfully');
 
     }
-
+    public function deleteBulkGradeCategories(Request $request)
+    {
+        $request->validate([
+            'id_number' => 'required|exists:year_levels,id',
+            'name' => 'required|string|exists:grade_categories,name']);
+        $course_segments = $this->getCourseSegment($request);
+        GradeCategory::whereIn('course_segment_id', $course_segments)
+            ->where('id_number', $request->id_number)
+            ->where('name', $request->name)->delete();
+        return HelperController::api_response_format(200, null, 'Grade Category is deleted successfully');
+    }
 
     public function GetGradeCategory(Request $request)
     {
@@ -74,7 +86,7 @@ class GradeCategoryController extends Controller
     public function UpdateGradeCategory(Request $request)
     {
         $request->validate([
-            'id'=>'required|exists:grade_categories,id',
+            'id' => 'required|exists:grade_categories,id',
             'name' => 'required',
             'course_segment_id' => 'exists:course_segments,id',
             'parent' => 'exists:grade_categories,id',
@@ -88,7 +100,7 @@ class GradeCategoryController extends Controller
             $grade_category->course_segment_id = $request->course_segment_id;
         }
         $grade_category->parent = $request->parent;
-        if($request->filled('hidden')){
+        if ($request->filled('hidden')) {
             $grade_category->hidden = $request->hidden;
         }
         $grade_category->save();
@@ -104,6 +116,7 @@ class GradeCategoryController extends Controller
         $gradeCategory->delete();
         return HelperController::api_response_format(200, null, 'Grade Category is deleted successfully');
     }
+
     public function MoveToParentCategory(Request $request)
     {
         $request->validate([
@@ -116,6 +129,7 @@ class GradeCategoryController extends Controller
         ]);
         return HelperController::api_response_format(200, $GardeCategory, 'Grade Category is moved successfully');
     }
+
     public function GetCategoriesFromCourseSegments(Request $request)
     {
         $grade = CourseSegment::GradeCategoryPerSegmentbyId($request->id);
@@ -139,36 +153,36 @@ class GradeCategoryController extends Controller
     public function getCourseSegment(Request $request)
     {
         $year = AcademicYear::Get_current();
-        if($request->filled('year'))
+        if ($request->filled('year'))
             $year = AcademicYear::find($request->year);
-        $YearTypes = $year->where('id' , $year->id)->with(['YearType' => function($query) use ($request){
-            if($request->filled('type'))
-                $query->where('academic_type_id' , $request->type);
-        } , 'YearType.yearLevel' => function($query)  use ($request){
-            if($request->filled('level'))
-                $query->where('level_id' , $request->level);
-        } , 'YearType.yearLevel.classLevels' => function($query)  use ($request){
-            if($request->filled('class'))
-                $query->where('class_id' , $request->class);
-        } , 'YearType.yearLevel.classLevels.segmentClass' => function($query)  use ($request){
-            if($request->filled('type')){
+        $YearTypes = $year->where('id', $year->id)->with(['YearType' => function ($query) use ($request) {
+            if ($request->filled('type'))
+                $query->where('academic_type_id', $request->type);
+        }, 'YearType.yearLevel' => function ($query) use ($request) {
+            if ($request->filled('level'))
+                $query->where('level_id', $request->level);
+        }, 'YearType.yearLevel.classLevels' => function ($query) use ($request) {
+            if ($request->filled('class'))
+                $query->where('class_id', $request->class);
+        }, 'YearType.yearLevel.classLevels.segmentClass' => function ($query) use ($request) {
+            if ($request->filled('type')) {
                 $segment_id = Segment::Get_current($request->type)->id;
-                if($request->filled('segment'))
+                if ($request->filled('segment'))
                     $segment_id = $request->segment;
-                $query->where('segment_id' , $segment_id);
+                $query->where('segment_id', $segment_id);
             }
-        } , 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function($query)  use ($request){
-            if($request->filled('course'))
-                $query->where('course_id' , $request->course);
+        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function ($query) use ($request) {
+            if ($request->filled('course'))
+                $query->where('course_id', $request->course);
         }])->get()->pluck('YearType')[0];
         $array = collect();
-        if(count($YearTypes) > 0){
+        if (count($YearTypes) > 0) {
             $YearTypes = $YearTypes->pluck('yearLevel');
-            if(count($YearTypes) > 0){
+            if (count($YearTypes) > 0) {
                 $YearTypes = $YearTypes[0]->pluck('classLevels');
-                if(count($YearTypes) > 0){
+                if (count($YearTypes) > 0) {
                     $YearTypes = $YearTypes[0]->pluck('segmentClass');
-                    if(count($YearTypes) > 0){
+                    if (count($YearTypes) > 0) {
                         $YearTypes = $YearTypes[0]->pluck('courseSegment');
                         foreach ($YearTypes as $courseSegment) {
                             foreach ($courseSegment as $value) {
@@ -178,7 +192,7 @@ class GradeCategoryController extends Controller
                     }
                 }
             }
-                
+
         }
         return $array;
     }
