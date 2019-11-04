@@ -54,8 +54,7 @@ class GradeCategoryController extends Controller
             'grades.*.aggregatedOnlyGraded' => 'boolean',
             'grades.*.hidden' => 'boolean',
         ]);
-
-        $jop = (new \App\Jobs\addgradecategory([1,2,3],$request->grades));
+        $jop = (new \App\Jobs\addgradecategory( $this->getCourseSegment($request),$request->grades));
         dispatch($jop);
         return HelperController::api_response_format(200, null, 'Grade Category is created successfully');
 

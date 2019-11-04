@@ -30,6 +30,8 @@ class addgradecategory implements ShouldQueue
     public function handle()
     {
         foreach ($this->course_segments_id as $course_segment) {
+
+            $course = CourseSegment::find($course_segment);
             foreach ($this->grade_category as $grade_cat) {
                 GradeCategory::create([
                     'name' => $grade_cat['name'],
@@ -38,6 +40,7 @@ class addgradecategory implements ShouldQueue
                     'aggregation' => (isset($grade_cat['aggregation'])) ? $grade_cat['aggregation'] : null,
                     'aggregatedOnlyGraded' => (isset($grade_cat['aggregatedOnlyGraded'])) ? $grade_cat['aggregatedOnlyGraded'] : 0,
                     'hidden' => (isset($grade_cat['hidden'])) ? $grade_cat['hidden '] : 0,
+                    'id_number'=>(isset($course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id))?$course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id:null,
                 ]);
             }
         }
