@@ -183,7 +183,7 @@ class GradeCategoryController extends Controller
         return $array;
     }
 
-    public function update(Request $request)
+    public function bulkupdate(Request $request)
     {
         $request->validate([
             'name' => 'required|exists:grade_categories,name',
