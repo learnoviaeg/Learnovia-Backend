@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name','course_segment_id','parent','aggregation','aggregatedOnlyGraded','hidden'];
+    protected $fillable = ['name','course_segment_id','parent','aggregation','aggregatedOnlyGraded','hidden' , 'id_number'];
     Public Function Child(){
         return $this->hasMany('App\GradeCategory','parent','id');
 

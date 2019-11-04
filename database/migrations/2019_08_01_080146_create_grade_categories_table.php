@@ -18,6 +18,8 @@ class CreateGradeCategoriesTable extends Migration
             $table->string('name');
             $table->unsignedBigInteger('course_segment_id');
             $table->foreign('course_segment_id')->references('id')->on('course_segments')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('id_number')->nullable();
+            $table->foreign('id_number')->references('id')->on('year_levels')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('parent')->nullable();
             $table->foreign('parent')->references('id')->on('grade_categories')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('aggregation')->nullable();
