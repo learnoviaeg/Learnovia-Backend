@@ -123,6 +123,14 @@ class GradeCategoryController extends Controller
 
     public function getCourseSegment(Request $request)
     {
+        $request->validate([
+            'year' => 'nullable|exists:academic_years,id',
+            'type' => 'nullable|exists:academic_types,id|required_with:level',
+            'level' => 'nullable|exists:levels,id|required_with:class',
+            'class' => 'nullable|exists:classes,id|required_with:segment',
+            'segment' => 'nullable|exists:segments,id'
+        ]);
+
         $year = AcademicYear::Get_current();
         if($request->filled('year'))
             $year = AcademicYear::find($request->year);
@@ -145,6 +153,8 @@ class GradeCategoryController extends Controller
         } , 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function($query)  use ($request){
             if($request->filled('course'))
                 $query->where('course_id' , $request->course);
+            if($request->filled('typical'))
+                $query->where('typical',$request->typical);
         }])->get()->pluck('YearType')[0];
         $array = collect();
         if(count($YearTypes) > 0){
@@ -166,5 +176,16 @@ class GradeCategoryController extends Controller
                 
         }
         return $array;
+    }
+
+    public function GetGradeCategoryTree(Request $request)
+    {
+        $courses_segment=self::getCourseSegment($request);
+        // return $courses_segment;
+        foreach ($courses_segment as $courses_seg) {
+            $course = CourseSegment::find($courses_seg);
+            $gradeCategories[]=$course->GradeCategory;      
+        }
+        return $gradeCategories;
     }
 }
