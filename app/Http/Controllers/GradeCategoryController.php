@@ -196,4 +196,27 @@ class GradeCategoryController extends Controller
         }
         return $array;
     }
+
+    public function bulkupdate(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|exists:grade_categories,name',
+            'id_number' => 'required|exists:grade_categories,id_number',
+            'newname' => 'required|string'
+        ]);
+
+        $data=array();
+        $course_segment=self::getCourseSegment($request);
+        if(isset($course_segment)){
+
+            GradeCategory::whereIn('course_segment_id',$course_segment)->where('name',$request->name)->where('id_number',$request->id_number)->update(array('name' => $request->newname));
+            $data= GradeCategory::whereIn('course_segment_id',$course_segment)->where('name',$request->newname)->where('id_number',$request->id_number)->get();
+            return HelperController::api_response_format(200, $data,'Updated Grade categories');
+        }
+        else{
+              return HelperController::api_response_format(200, 'There is Course segment available.');
+        }
+
+
+    }
 }
