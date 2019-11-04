@@ -67,7 +67,8 @@ class AcademicYearController extends Controller
         ]);
         $year = AcademicYear::whereId($request->id)->first();
         $year->update($request->all());
-        return HelperController::api_response_format(200, $year);
+        $years=AcademicYear::get()->paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(200, $years);
     }
 
     /**
@@ -84,7 +85,7 @@ class AcademicYearController extends Controller
 
         $year = AcademicYear::whereId($request->id)->first();
         if ($year->delete()) {
-            return HelperController::api_response_format(200, AcademicYear::get(), 'Year Deleted Successfully');            
+            return HelperController::api_response_format(200, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), 'Year Deleted Successfully');            
         }
         return HelperController::api_response_format(404, [], 'Not Found');
     }

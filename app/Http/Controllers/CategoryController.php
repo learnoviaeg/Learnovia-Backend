@@ -27,7 +27,8 @@ class CategoryController extends Controller
         $cat = Category::find($request->id);
         $cat->name = $request->name;
         $cat->save();
-        return HelperController::api_response_format(200, $cat, 'Category Updated Successfully');
+        $cats=Category::get()->paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(200, $cats, 'Category Updated Successfully');
     }
 
     public function delete(Request $request)
@@ -38,7 +39,8 @@ class CategoryController extends Controller
         $cat = Category::find($request->id);
 
         $cat->delete();
-        return HelperController::api_response_format(200, Category::get(), 'Category Deleted Successfully');
+        $cats=Category::get()->paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(200, $cats, 'Category Deleted Successfully');
     }
 
     public function get(Request $request)
