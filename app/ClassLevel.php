@@ -38,7 +38,7 @@ class ClassLevel extends Model
 
     public function segmentClass()
     {
-        return $this->hasMany('App\SegmentClass');
+        return $this->hasMany('App\SegmentClass' , 'class_level_id' , 'id');
     }
 
     public static function checkRelation($class, $yearlevel)

@@ -25,4 +25,9 @@ class AcademicYear extends Model
     {
         return $this->belongsTo('App\AcademicYearType', 'id', 'academic_year_id');
     }
+    
+    public function YearType()
+    {
+        return $this->hasMany('App\AcademicYearType', 'academic_year_id' , 'id');
+    }
 }

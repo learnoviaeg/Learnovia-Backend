@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\GradeCategory;
 use App\CourseSegment;
+use App\AcademicYear;
 use App\AcademicYearType;
 use App\ClassLevel;
 use App\YearLevel;
 use App\SegmentClass;
 use Illuminate\Http\Request;
-
+use App\Segment;
 class GradeCategoryController extends Controller
 {
 
@@ -118,5 +119,52 @@ class GradeCategoryController extends Controller
         $course_segment = $course_segment['value'];
         $grade_category = GradeCategory::with(['Child', 'GradeItems', 'Child.GradeItems'])->where('course_segment_id', $course_segment->id)->get();
         return HelperController::api_response_format(200, $grade_category);
+    }
+
+    public function getCourseSegment(Request $request)
+    {
+        $year = AcademicYear::Get_current();
+        if($request->filled('year'))
+            $year = AcademicYear::find($request->year);
+        $YearTypes = $year->where('id' , $year->id)->with(['YearType' => function($query) use ($request){
+            if($request->filled('type'))
+                $query->where('academic_type_id' , $request->type);
+        } , 'YearType.yearLevel' => function($query)  use ($request){
+            if($request->filled('level'))
+                $query->where('level_id' , $request->level);
+        } , 'YearType.yearLevel.classLevels' => function($query)  use ($request){
+            if($request->filled('class'))
+                $query->where('class_id' , $request->class);
+        } , 'YearType.yearLevel.classLevels.segmentClass' => function($query)  use ($request){
+            if($request->filled('type')){
+                $segment_id = Segment::Get_current($request->type)->id;
+                if($request->filled('segment'))
+                    $segment_id = $request->segment;
+                $query->where('segment_id' , $segment_id);
+            }
+        } , 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function($query)  use ($request){
+            if($request->filled('course'))
+                $query->where('course_id' , $request->course);
+        }])->get()->pluck('YearType')[0];
+        $array = collect();
+        if(count($YearTypes) > 0){
+            $YearTypes = $YearTypes->pluck('yearLevel');
+            if(count($YearTypes) > 0){
+                $YearTypes = $YearTypes[0]->pluck('classLevels');
+                if(count($YearTypes) > 0){
+                    $YearTypes = $YearTypes[0]->pluck('segmentClass');
+                    if(count($YearTypes) > 0){
+                        $YearTypes = $YearTypes[0]->pluck('courseSegment');
+                        foreach ($YearTypes as $courseSegment) {
+                            foreach ($courseSegment as $value) {
+                                $array->push($value->id);
+                            }
+                        }
+                    }
+                }
+            }
+                
+        }
+        return $array;
     }
 }
