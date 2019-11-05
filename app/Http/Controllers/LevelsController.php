@@ -50,7 +50,8 @@ class LevelsController extends Controller
         $level = Level::find($request->level);
         if ($level)
             $level->delete();
-        return HelperController::api_response_format(203, Level::get(), 'Level Deleted Successfully');
+            $levels = Level::paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(203, $levels, 'Level Deleted Successfully');
     }
 
 
@@ -66,7 +67,8 @@ class LevelsController extends Controller
         $level = Level::find($request->id);
         $level->name = $request->name;
         $level->save();
-        return HelperController::api_response_format(200, $level, 'Level Updated Successfully');
+        $levels=Level::paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(200, $levels, 'Level Updated Successfully');
     }
 
     public function GetAllLevelsInYear(Request $request)
