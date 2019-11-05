@@ -6,6 +6,8 @@ use Closure;
 use App\Enroll;
 use  App\CourseSegment;
 use App\Http\Controllers\HelperController;
+use Illuminate\Support\Facades\Auth;
+
 class Restrict
 {
     /**
@@ -18,10 +20,9 @@ class Restrict
     public function handle($request, Closure $next)
     {
         $request->validate([
-            'course_id' => 'required|exists:courses,id'
+            'course_id' => 'required|exists:courses,id',
+            'class_id' => 'required|exists:classes,id',
         ]);
-
-
         if ($request->user() == null){
             return HelperController::api_response_format(401, [], 'User not logged in');
         }
@@ -29,15 +30,12 @@ class Restrict
         if($request->user()->hasRole('Super Admin')){
             return $next($request);
         }
-
-        $session_id = $request->user()->id;
-        $course_segment_ids = Enroll::where('user_id', $session_id)->where('role_id', 4)->pluck('course_segment');
-        foreach ($course_segment_ids as $course_segment_id) {
-            $couse_id = CourseSegment::where('id', $course_segment_id)->pluck('course_id')->first();
-            if ($couse_id == $request->course_id) {
+            $course_segment_ids = CourseSegment::GetWithClassAndCourse($request->class_id , $request->course_id);
+            $session_id = $request->user()->id;
+            $course_ids = Enroll::whereIn('course_segment',$course_segment_ids)->where('user_id', $session_id)->get();
+            if($course_ids){
                 return $next($request);
             }
-        }
         return HelperController::api_response_format(403 , null , 'This Course is not yours...');
         }
 }
