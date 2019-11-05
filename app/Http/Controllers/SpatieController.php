@@ -445,7 +445,12 @@ class SpatieController extends Controller
     public function List_Roles_Permissions()
     {
         $roles = Role::all();
-        $permissions = Permission::all();
+        $permissions=array();
+        $pers = Permission::all();
+        foreach ($pers as $permission) {
+            $key =  explode("/", $permission->name)[0];
+            $permissions[$key][] = $permission->name;
+        }
         return HelperController::api_response_format(200, ['roles' => $roles, 'permissions' => $permissions]);
     }
 
