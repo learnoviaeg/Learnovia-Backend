@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\GradeCategory;
 use App\CourseSegment;
 use App\AcademicYear;
+use App\Course;
+use App\Classes;
 use App\AcademicYearType;
 use App\ClassLevel;
 use App\YearLevel;
@@ -192,7 +194,6 @@ class GradeCategoryController extends Controller
                     }
                 }
             }
-
         }
         return $array;
     }
@@ -214,9 +215,72 @@ class GradeCategoryController extends Controller
             return HelperController::api_response_format(200, $data,'Updated Grade categories');
         }
         else{
-              return HelperController::api_response_format(200, 'There is Course segment available.');
+              return HelperController::api_response_format(200, 'There is No Course segment available.');
         }
+    }
 
+    public function GetGradeCategoryTree(Request $request)
+    {
+        $gradeCategories=collect();
+        $courses_segment=self::getCourseSegment($request);
+        if(isset($courses_segment))
+        {
+            $names=collect();
+            foreach ($courses_segment as $courses_seg) {
+                $course = CourseSegment::find($courses_seg);
+                $gradeCategories->push($course->GradeCategory);
+                foreach($gradeCategories as $gradecategory)
+                    foreach($gradecategory as $GC)
+                    {
+                        $level=YearLevel::find($GC->id_number);
+                        $lev=$level->levels[0]->name;
+                        $names->push(['name'=>$GC->name,'id_number'=>$GC->id_number,'level'=>$lev]);
+                    }
+            }    
+        $all = $names->unique()->sortBy('id_number');
+        $alls=$all->values();
+        return HelperController::api_response_format(200, $alls);
+        }
+        return HelperController::api_response_format(200, 'There is No Course segment available.');   
+    }
 
+    public function GetAllGradeCategory(Request $request)
+    {
+        $gradeCategories=collect();
+        $courses_segment=self::getCourseSegment($request);
+        if(isset($courses_segment))
+        {
+            $names=collect();
+            foreach ($courses_segment as $courses_seg) {
+                $course = CourseSegment::find($courses_seg);
+                $gradeCategories->push($course->GradeCategory);
+                foreach($gradeCategories as $grades)
+                {
+                    if($grades->isEmpty())
+                        continue;
+                    foreach($grades as $grade)
+                    {
+                        $level=YearLevel::find($grade->id_number);
+                        $yearlevels=$level->classLevels;
+                        foreach($yearlevels as $Yclass)
+                        {
+                            $classes[]=Classes::find($Yclass->class_id);
+                            foreach($classes as $class)
+                                $ClassesName[]=$class->name;
+                        }
+                        $lev=$level->levels[0]->name;
+                        $course = CourseSegment::find($courses_seg);
+                        
+                        $course_id=$course->course_id;
+                        $course=Course::find($course_id);
+
+                        $names->push(['name'=>$grade->name,'id_number'=>$grade->id_number,'level'=>$lev,'course'=>$course->name,'class'=>array_values(array_unique($ClassesName))]);
+                    }
+                }   
+            }
+
+        return HelperController::api_response_format(200, $names);
+        }
+        return HelperController::api_response_format(200, 'There is No Course segment available.');
     }
 }

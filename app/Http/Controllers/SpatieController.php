@@ -66,6 +66,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/update', 'title' => 'update year']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/delete', 'title' => 'delete year']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/set-current', 'title' => 'set current year']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/get-all', 'title' => 'get all years']);
 
             //Type Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/delete', 'title' => 'delete type']);
@@ -187,6 +188,9 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/bulk-update', 'title' => 'bulk update grade category']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/bulk-delete', 'title' => 'delete bulk grade category']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/bulk', 'title' => 'add bulk grade category']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/bulk-get', 'title' => 'get bulk grade category']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/bulk-all-get', 'title' => 'get all bulk grade category']);
+
             //Grade Item
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/item/add', 'title' => 'add grade item']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/item/get', 'title' => 'get grade item']);

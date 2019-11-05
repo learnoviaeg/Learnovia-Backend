@@ -92,6 +92,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'AcademicYearController@store')->name('addyear')->middleware('permission:year/add');
     Route::get('get', 'AcademicYearController@get')->name('getyear')->middleware('permission:year/get');
+    Route::get('get-all', 'AcademicYearController@getall')->name('getallyear')->middleware('permission:year/get-all');
     Route::post('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
     Route::post('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
     Route::post('set-current', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/set-current');
@@ -237,6 +238,8 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         //Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
         Route::get('tree', 'GradeCategoryController@Get_Tree')->middleware('permission:grade/category/tree');
         Route::post('bulk-update', 'GradeCategoryController@bulkupdate')->middleware('permission:grade/category/bulk-update');
+        Route::get('bulk-get', 'GradeCategoryController@GetAllGradeCategory')->middleware('permission:grade/category/bulk-get');
+        Route::get('bulk-all-get', 'GradeCategoryController@GetGradeCategoryTree')->middleware('permission:grade/category/bulk-all-get');
     });
 
     Route::group(['prefix' => 'item', 'middleware' => 'auth:api'], function () {
@@ -254,4 +257,5 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
     });
 });
+
 
