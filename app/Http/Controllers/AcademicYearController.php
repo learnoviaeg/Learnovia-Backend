@@ -32,6 +32,11 @@ class AcademicYearController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
+    public function getall(Request $request)
+    {
+        $years = AcademicYear::paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(202, $years);
+    }
 
     public function get(Request $request)
     {
