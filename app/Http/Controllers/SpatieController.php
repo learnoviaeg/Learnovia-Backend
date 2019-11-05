@@ -243,9 +243,12 @@ class SpatieController extends Controller
     public function Add_Role(Request $request)
     {
         $request->validate([
-            'name' => 'required'
+            'name' => 'required',
+            'descripion'=>'string',
         ]);
-        $role = Role::create(['name' => $request->name]);
+        $role = Role::create(['name' => $request->name,
+            'description'=>$request->description
+            ]);
         return HelperController::api_response_format(201, $role, 'Role Added!');
     }
 
@@ -545,11 +548,18 @@ class SpatieController extends Controller
             $validater = Validator::make($request->all(), [
                 'name' => 'required|string|min:1|unique:roles,name',
                 "permissions" => "required|array|min:1",
-                'permissions.*' => 'required|distinct|exists:permissions,id'
+                'permissions.*' => 'required|distinct|exists:permissions,id',
+                'description'=>'string'
             ]);
             if ($validater->fails()) {
                 $errors = $validater->errors();
                 return response()->json($errors, 400);
+            }
+            if(!$request->filled('permissions')){
+                $role = Role::create(['name' => $request->name,
+                'description'=>$request->description,
+                ]);
+            return HelperController::api_response_format(201, $role, 'Role Added!');            
             }
 
             $createrole = Role::create(['name' => $request->name]);

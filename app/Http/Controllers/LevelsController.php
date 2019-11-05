@@ -44,10 +44,10 @@ class LevelsController extends Controller
     public function Delete(Request $request)
     {
         $request->validate([
-            'level' => 'required|exists:levels,id',
+            'id' => 'required|exists:levels,id',
         ]);
 
-        $level = Level::find($request->level);
+        $level = Level::find($request->id);
         if ($level)
             $level->delete();
         return HelperController::api_response_format(203, Level::get(), 'Level Deleted Successfully');
