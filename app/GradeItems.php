@@ -25,4 +25,10 @@ class GradeItems extends Model
     {
         return $this->hasMany('App\UserGrade');
     }
+
+    public function weight(){
+        if($this->override != 0)
+            return $this->override;
+        return ($this->grademax * $this->GradeCategory->percentage) / $this->GradeCategory->naturalTotal ;
+    }
 }

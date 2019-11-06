@@ -23,5 +23,12 @@ class GradeCategory extends Model
     {
         return $this->hasMany('App\GradeItems','grade_category','id');
     }
-
+    public function total(){
+        $result = 0 ;
+        $gradeitems = $this->GradeItems;
+        foreach($gradeitems as $item){
+            $result += $item->grademax;
+        }
+        return $result;
+    }
 }
