@@ -244,11 +244,12 @@ class SpatieController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'descripion'=>'string',
+            'descripion' => 'string',
         ]);
-        $role = Role::create(['name' => $request->name,
-            'description'=>$request->description
-            ]);
+        $role = Role::create([
+            'name' => $request->name,
+            'description' => $request->description
+        ]);
         return HelperController::api_response_format(201, $role, 'Role Added!');
     }
 
@@ -307,7 +308,6 @@ class SpatieController extends Controller
             return HelperController::api_response_format(200, $find, 'Role Deleted!');
         }
         return HelperController::NOTFOUND();
-
     }
 
     /*
@@ -336,7 +336,6 @@ class SpatieController extends Controller
             $finduser->assignRole($findrole->name);
 
             return HelperController::api_response_format(201, [], 'Role Assigned Successfully');
-
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
         }
@@ -369,11 +368,9 @@ class SpatieController extends Controller
             foreach ($request->permissionid as $per) {
                 $findPer = Permission::find($per);
                 $findrole->givePermissionTo($findPer);
-
             }
 
             return HelperController::api_response_format(201, [], 'Permission/s Assigned to Role Successfully');
-
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
         }
@@ -434,7 +431,6 @@ class SpatieController extends Controller
             $findrole->revokePermissionTo($findPer->name);
 
             return HelperController::api_response_format(201, [], 'Permission Revoked from Role Successfully');
-
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
         }
@@ -481,7 +477,6 @@ class SpatieController extends Controller
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
         }
-
     }
 
     /*
@@ -503,7 +498,6 @@ class SpatieController extends Controller
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
         }
-
     }
 
     /*
@@ -531,7 +525,6 @@ class SpatieController extends Controller
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
         }
-
     }
 
     /*
@@ -543,38 +536,24 @@ class SpatieController extends Controller
 
     public function Add_Role_With_Permissions(Request $request)
     {
+        $validater = Validator::make($request->all(), [
+            'name' => 'required|string|min:1|unique:roles,name',
+            "permissions" => "required|array|min:1",
+            'permissions.*' => 'required|distinct|exists:permissions,id',
+            'description' => 'string'
+        ]);
+        if ($validater->fails())
+            return HelperController::api_response_format(400, $validater->errors());
 
-        try {
-            $validater = Validator::make($request->all(), [
-                'name' => 'required|string|min:1|unique:roles,name',
-                "permissions" => "required|array|min:1",
-                'permissions.*' => 'required|distinct|exists:permissions,id',
-                'description'=>'string'
-            ]);
-            if ($validater->fails()) {
-                $errors = $validater->errors();
-                return response()->json($errors, 400);
-            }
-            if(!$request->filled('permissions')){
-                $role = Role::create(['name' => $request->name,
-                'description'=>$request->description,
-                ]);
-            return HelperController::api_response_format(201, $role, 'Role Added!');            
-            }
-
-            $createrole = Role::create(['name' => $request->name]);
-            if ($createrole) {
-                foreach ($request->permissions as $per) {
-                    $createrole->givePermissionTo($per);
-                }
-                return HelperController::api_response_format(200, $createrole->permissions);
-            }
-            return HelperController::NOTFOUND();
-
-        } catch (Exception $ex) {
-            return HelperController::NOTFOUND();
+        $role = Role::create(['name' => $request->name]);
+        if ($request->filled('description')) {
+            $role->description = $request->description;
+            $role->save();
         }
-
+        foreach ($request->permissions as $per) {
+            $role->givePermissionTo($per);
+        }
+        return HelperController::api_response_format(200, $createrole->permissions);
     }
 
     /*
@@ -639,7 +618,6 @@ class SpatieController extends Controller
                 return HelperController::api_response_format(200, [], 'Added succes');
             }
             return HelperController::NOTFOUND();
-
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
         }
@@ -696,7 +674,6 @@ class SpatieController extends Controller
             ]);
 
             $user_per = SpatieController::Get_Individual_Role($req);
-
         }
 
         return HelperController::api_response_format(200, $user_per);
@@ -761,7 +738,6 @@ class SpatieController extends Controller
                 }
                 $count++;
             }
-
         }
         return HelperController::api_response_format(201, $trueper);
     }
@@ -792,7 +768,7 @@ class SpatieController extends Controller
             foreach ($pers as $permission) {
                 if ($permission->dashboard) {
                     $key = explode("/", $permission->name)[0];
-                    $dashbordPermission[$key][] = ['route' =>$permission->name, 'title'=>$permission->title];
+                    $dashbordPermission[$key][] = ['route' => $permission->name, 'title' => $permission->title];
                 }
             }
         }
