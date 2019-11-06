@@ -255,3 +255,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
     });
 });
 
+Route::post('add', 'ScaleController@AddScale');
+Route::post('update', 'ScaleController@UpdateScale');
+Route::post('delete', 'ScaleController@DeleteScale');
+Route::post('get', 'ScaleController@GetScale');
