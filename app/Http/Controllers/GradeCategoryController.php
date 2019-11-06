@@ -283,4 +283,9 @@ class GradeCategoryController extends Controller
         }
         return HelperController::api_response_format(200, 'There is No Course segment available.');
     }
+
+    public function test(){
+        $grade=GradeCategory::where('id',19)->first();
+        return  $grade->naturalTotal()   ;
+    }
 }
