@@ -23,7 +23,8 @@ class AcademicYearController extends Controller
         $year = AcademicYear::create([
             'name' => $request->name
         ]);
-        return HelperController::api_response_format(201, $year, 'Year Created Successfully');
+        $years = AcademicYear::paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(201, $years, 'Year Created Successfully');
     }
 
     /**

@@ -95,7 +95,7 @@ class ClassController extends Controller
             }
 
         }
-        return HelperController::api_response_format(200, new  Classs($class), 'Class Created Successfully');
+        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), 'Class Created Successfully');
     }
 
     /**
