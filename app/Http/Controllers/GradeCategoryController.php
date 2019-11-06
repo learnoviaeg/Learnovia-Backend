@@ -236,12 +236,12 @@ class GradeCategoryController extends Controller
                         $lev=$level->levels[0]->name;
                         $names->push(['name'=>$GC->name,'id_number'=>$GC->id_number,'level'=>$lev]);
                     }
-            }    
+            }
         $all = $names->unique()->sortBy('id_number');
         $alls=$all->values();
         return HelperController::api_response_format(200, $alls);
         }
-        return HelperController::api_response_format(200, 'There is No Course segment available.');   
+        return HelperController::api_response_format(200, 'There is No Course segment available.');
     }
 
     public function GetAllGradeCategory(Request $request)
@@ -270,22 +270,17 @@ class GradeCategoryController extends Controller
                         }
                         $lev=$level->levels[0]->name;
                         $course = CourseSegment::find($courses_seg);
-                        
+
                         $course_id=$course->course_id;
                         $course=Course::find($course_id);
 
                         $names->push(['name'=>$grade->name,'id_number'=>$grade->id_number,'level'=>$lev,'course'=>$course->name,'class'=>array_values(array_unique($ClassesName))]);
                     }
-                }   
+                }
             }
 
         return HelperController::api_response_format(200, $names);
         }
         return HelperController::api_response_format(200, 'There is No Course segment available.');
-    }
-
-    public function test(){
-        $grade=GradeCategory::where('id',19)->first();
-        return  $grade->naturalTotal()   ;
     }
 }
