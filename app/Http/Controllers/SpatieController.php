@@ -558,7 +558,7 @@ class SpatieController extends Controller
         foreach ($request->permissions as $per) {
             $role->givePermissionTo($per);
         }
-        return HelperController::api_response_format(200, $createrole->permissions);
+        return HelperController::api_response_format(200, $role);
     }
 
     /*
