@@ -544,7 +544,7 @@ class SpatieController extends Controller
         $validater = Validator::make($request->all(), [
             'name' => 'required|string|min:1|unique:roles,name',
             "permissions" => "required|array|min:1",
-            'permissions.*' => 'required|distinct|exists:permissions,id',
+            'permissions.*' => 'required|distinct|exists:permissions,name',
             'description' => 'string'
         ]);
         if ($validater->fails())
