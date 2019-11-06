@@ -31,4 +31,20 @@ class GradeCategory extends Model
         }
         return $result;
     }
+    public function percentage(){
+        $grade_items= $this->GradeItems;
+        $result=100;
+        foreach ($grade_items as $Item){
+            $result -=  $Item->override;
+        }
+        return $result;
+    }
+    public function naturalTotal(){
+        $grade_items= $this->GradeItems->where('override','!=',0);
+        $total=$this->total();
+        foreach ($grade_items as $grades){
+            $total-=$grades->grademax;
+        }
+        return $total;
+    }
 }
