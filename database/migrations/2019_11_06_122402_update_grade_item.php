@@ -14,7 +14,7 @@ class UpdateGradeItem extends Migration
     public function up()
     {
         Schema::table('grade_items', function (Blueprint $table) {
-            $table->integer('override')->default(0);
+            $table->double('override')->default(0);
 
         });
     }

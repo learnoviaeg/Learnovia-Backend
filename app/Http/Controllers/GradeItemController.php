@@ -150,12 +150,19 @@ class GradeItemController extends Controller
     public function override(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:grade_items,id',
-            'override' => 'required|integer|min:0|max:100',
+            'id' => 'required|array',
+            'id.*' => 'required|exists:grade_items,id',
+            'override' => 'required|array',
+            'override.*' => 'required|min:0|max:100',
         ]);
-        $messaage = null ;
-        $grade_item = GradeItems::find($request->id);
-        $grade_item->update(['override' => $request->override]);
+        $message = null ;
+        $gradeCategory = GradeItems::whereIn('id' , $request->id)->groupBy('grade_category')->pluck('grade_category');
+        if(count($gradeCategory) != 1)
+            return HelperController::api_response_format(400 , null , 'This grade items not belong to the same grade category');
+        foreach ($request->id as $index => $id) {
+            $grade_item = GradeItems::find($id);
+            $grade_item->update(['override' => round($request->override[$index] , 3 )]);
+        }
         $grade_items = $grade_item->GradeCategory->GradeItems;
         $allWeight = 0;
         foreach ($grade_items as $grade_item) {
@@ -171,7 +178,7 @@ class GradeItemController extends Controller
             $calculations=(100/ array_sum($devitions));
             $count=0;
             foreach ($grade_items as $grade_item) {
-                $grade_item->update(['override' =>round( $devitions[$count]*$calculations)]);
+                $grade_item->update(['override' =>round($devitions[$count]*$calculations , 3)]);
                 $count++;
             }
         }
