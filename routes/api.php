@@ -259,3 +259,5 @@ Route::post('add', 'ScaleController@AddScale');
 Route::post('update', 'ScaleController@UpdateScale');
 Route::post('delete', 'ScaleController@DeleteScale');
 Route::post('get', 'ScaleController@GetScale');
+
+Route::post('toggleletter', 'CourseController@ToggleCourseLetter');

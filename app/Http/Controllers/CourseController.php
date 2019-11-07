@@ -18,6 +18,7 @@ use App\attachment;
 use App\LessonComponent;
 use App\User;
 use Carbon\Carbon;
+use App\Letter;
 use Illuminate\Support\Facades\Validator;
 
 class CourseController extends Controller
@@ -481,5 +482,31 @@ class CourseController extends Controller
             }
         }
        return $result;
+    }
+
+    public function ToggleCourseLetter(Request $request)
+    {
+        $request->validate([
+            'letter' => 'required|boolean',
+            'letter_id' => 'exists:letters,id|required_if:letter,==,1',
+            'course'  => 'required|exists:courses,id',
+            'class'  => 'required|exists:classes,id',
+        ]);
+
+        $coursesSegment=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+        if(isset($coursesSegment))
+        {
+            $course =CourseSegment::find($coursesSegment->id);
+            $course->update([
+                'letter'=> $request->letter,
+                'letter_id'=> $request->letter_id,
+            ]);
+
+            return HelperController::api_response_format(201, $course,'Toggled Success');            
+        }
+        else
+        {
+            return HelperController::api_response_format(201, 'There is no Active Course Segment');
+        }
     }
 }

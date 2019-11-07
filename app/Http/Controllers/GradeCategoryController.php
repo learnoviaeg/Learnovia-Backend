@@ -152,6 +152,16 @@ class GradeCategoryController extends Controller
 
     public function getCourseSegment(Request $request)
     {
+        // $request->validate([
+        //     'year' => 'exists:academic_years,id',
+        //     'type' => 'exists:academic_types,id',
+        //     'level' => 'exists:levels,id|required_with:type',
+        //     'class' => 'exists:classes,id|required_with:level',
+        //     'segment' => 'exists:segments,id|required_with:class',
+        //     'course' => 'exists:courses,id'
+        // ]);
+
+       
         $year = AcademicYear::Get_current();
         if ($request->filled('year'))
             $year = AcademicYear::find($request->year);
