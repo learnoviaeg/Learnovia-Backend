@@ -13,7 +13,7 @@ class GradeItemController extends Controller
     {
         $request->validate([
             'grade_category' => 'required|exists:grade_categories,id',
-            'grademin'=> 'required|integer',
+            'grademin' => 'required|integer',
             'grademax' => 'required|integer',
             'calculation' => 'required|string',
             'item_no' => 'nullable|integer',
@@ -23,40 +23,39 @@ class GradeItemController extends Controller
             'plusfactor' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
-            'item_type'=> 'required|exists:item_types,id',
+            'item_type' => 'required|exists:item_types,id',
             'item_Entity' => 'required',
             'hidden' => 'nullable|boolean'
         ]);
 
-        $data=[
-        'grade_category' => $request->grade_category ,
-        'grademin'=> $request->grademin,
-        'grademax' =>$request->grademax,
-        'calculation' =>$request->calculation ,
-        'item_no' => $request->item_no,
-        'scale_id' =>$request->scale_id ,
-        'grade_pass' =>$request->grade_pass,
-        'aggregationcoef' =>$request->aggregationcoef,
-        'aggregationcoef2' =>$request->aggregationcoef2,
-        'item_type' => $request->item_type,
-        'item_Entity' => $request->item_Entity
+        $data = [
+            'grade_category' => $request->grade_category,
+            'grademin' => $request->grademin,
+            'grademax' => $request->grademax,
+            'calculation' => $request->calculation,
+            'item_no' => $request->item_no,
+            'scale_id' => $request->scale_id,
+            'grade_pass' => $request->grade_pass,
+            'aggregationcoef' => $request->aggregationcoef,
+            'aggregationcoef2' => $request->aggregationcoef2,
+            'item_type' => $request->item_type,
+            'item_Entity' => $request->item_Entity
         ];
-        if(isset($request->multifactor)) {
-            $data['multifactor']=$request->multifactor;
+        if (isset($request->multifactor)) {
+            $data['multifactor'] = $request->multifactor;
         }
-        if(isset($request->plusfactor)) {
-            $data['plusfactor']=$request->plusfactor;
+        if (isset($request->plusfactor)) {
+            $data['plusfactor'] = $request->plusfactor;
         }
-        if(isset($request->hidden)) {
-            $data['hidden']=$request->hidden;
+        if (isset($request->hidden)) {
+            $data['hidden'] = $request->hidden;
         }
 
-        $grade=GradeItems::create($data);
+        $grade = GradeItems::create($data);
 
-        return HelperController::api_response_format(201,$grade,'Grade Created Successfully');
+        return HelperController::api_response_format(201, $grade, 'Grade Created Successfully');
 
     }
-
 
 
     public function update(Request $request)
@@ -65,10 +64,10 @@ class GradeItemController extends Controller
             'id' => 'required|exists:grade_items,id',
         ]);
 
-        $grade =GradeItems::find($request->id);
+        $grade = GradeItems::find($request->id);
         $request->validate([
             'grade_category' => 'required|exists:grade_categories,id',
-            'grademin'=> 'required|integer',
+            'grademin' => 'required|integer',
             'grademax' => 'required|integer',
             'calculation' => 'required|string',
             'item_no' => 'nullable|integer',
@@ -78,41 +77,40 @@ class GradeItemController extends Controller
             'plusfactor' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
-            'item_type'=> 'required|exists:item_types,id',
+            'item_type' => 'required|exists:item_types,id',
             'item_Entity' => 'required',
             'hidden' => 'nullable|integer'
         ]);
 
-        $data=[
-            'grade_category' => $request->grade_category ,
-            'grademin'=> $request->grademin,
-            'grademax' =>$request->grademax,
-            'calculation' =>$request->calculation ,
+        $data = [
+            'grade_category' => $request->grade_category,
+            'grademin' => $request->grademin,
+            'grademax' => $request->grademax,
+            'calculation' => $request->calculation,
             'item_no' => $request->item_no,
-            'scale_id' =>$request->scale_id ,
-            'grade_pass' =>$request->grade_pass,
-            'aggregationcoef' =>$request->aggregationcoef,
-            'aggregationcoef2' =>$request->aggregationcoef2,
+            'scale_id' => $request->scale_id,
+            'grade_pass' => $request->grade_pass,
+            'aggregationcoef' => $request->aggregationcoef,
+            'aggregationcoef2' => $request->aggregationcoef2,
             'item_type' => $request->item_type,
             'item_Entity' => $request->item_Entity
-            ];
-            if(isset($request->multifactor)) {
-                $data['multifactor']=$request->multifactor;
-            }
-            if(isset($request->plusfactor)) {
-                $data['plusfactor']=$request->plusfactor;
-            }
-            if(isset($request->hidden)) {
-                $data['hidden']=$request->hidden;
-            }
+        ];
+        if (isset($request->multifactor)) {
+            $data['multifactor'] = $request->multifactor;
+        }
+        if (isset($request->plusfactor)) {
+            $data['plusfactor'] = $request->plusfactor;
+        }
+        if (isset($request->hidden)) {
+            $data['hidden'] = $request->hidden;
+        }
 
-            $update=$grade->update($data);
+        $update = $grade->update($data);
 
 
         return HelperController::api_response_format(200, $grade, 'Grade Updated Successfully');
 
     }
-
 
 
     public function delete(Request $request)
@@ -131,20 +129,69 @@ class GradeItemController extends Controller
 
     public function list()
     {
-        $grade = GradeItems::with(['GradeCategory' , 'ItemType' , 'scale'])->get();
+        $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale'])->get();
         return HelperController::api_response_format(200, $grade);
     }
 
-    public function Move_Category(Request $request){
+    public function Move_Category(Request $request)
+    {
         $request->validate([
             'id' => 'required|exists:grade_items,id',
-            'newcategory'=>'required|exists:grade_categories,id',
+            'newcategory' => 'required|exists:grade_categories,id',
         ]);
-        $GardeCategory=GradeItems::find($request->id);
+        $GardeCategory = GradeItems::find($request->id);
         $GardeCategory->update([
             'grade_category' => $request->newcategory,
         ]);
-        return HelperController::api_response_format(200, $GardeCategory,'Grade item Category is moved successfully');
+        return HelperController::api_response_format(200, $GardeCategory, 'Grade item Category is moved successfully');
 
+    }
+
+    public function override(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:grade_items,id',
+            'override' => 'required|integer|min:0|max:100',
+        ]);
+        $messaage = null ;
+        $grade_item = GradeItems::find($request->id);
+        $grade_item->update(['override' => $request->override]);
+        $grade_items = $grade_item->GradeCategory->GradeItems;
+        $allWeight = 0;
+        foreach ($grade_items as $grade_item) {
+            $allWeight += $grade_item->weight();
+            $weight[] = $grade_item->weight();
+        }
+        if ($allWeight != 100) {
+            $message = "Your grades adjusted to get 100!";
+            $gcd = self::findGCD($weight, sizeof($weight));
+            foreach ($weight as $w) {
+                $devitions[]= $w/$gcd;
+            }
+            $calculations=(100/ array_sum($devitions));
+            $count=0;
+            foreach ($grade_items as $grade_item) {
+                $grade_item->update(['override' =>round( $devitions[$count]*$calculations)]);
+                $count++;
+            }
+        }
+        return HelperController::api_response_format(200, $grade_items, $message);
+
+    }
+
+    public static function gcd($a, $b)
+    {
+        if ($a == 0)
+            return $b;
+        return self::gcd($b % $a, $a);
+    }
+
+    public static function findGCD($arr, $n)
+    {
+        $result = $arr[0];
+        for ($i = 1; $i < $n; $i++)
+            $result = self::gcd($arr[$i], $result);
+
+        return $result;
     }
 }
