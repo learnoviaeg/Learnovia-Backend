@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Letter extends Model
 {
-    protected $fillable = ['letter','lowerBoundary','course_id'];
+    protected $fillable = ['name' , 'formate'];
     public function UserGrade()
     {
         return $this->hasMany('App\UserGrade');

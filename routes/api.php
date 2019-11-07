@@ -257,4 +257,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
     });
 });
 
-
+Route::post('letter', 'LetterController@letterScale');
+Route::post('delete', 'LetterController@deleteLetter');
+Route::post('update', 'LetterController@updateLetter');
+Route::get('get', 'LetterController@getLetter');

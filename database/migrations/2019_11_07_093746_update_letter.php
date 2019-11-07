@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateLettersTable extends Migration
+class UpdateLetter extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,8 @@ class CreateLettersTable extends Migration
      */
     public function up()
     {
-        Schema::create('letters', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('name');
-            $table->timestamps();
+        Schema::table('letters', function (Blueprint $table) {
+            $table->text('formate');
         });
     }
 
@@ -27,6 +25,6 @@ class CreateLettersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('letters');
+        //
     }
 }
