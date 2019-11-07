@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateGradeItem extends Migration
+class AlterNameToGradeItems extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,7 @@ class UpdateGradeItem extends Migration
     public function up()
     {
         Schema::table('grade_items', function (Blueprint $table) {
-            $table->double('override')->default(0);
-
+            $table->string('name')->default('Grade Item');
         });
     }
 

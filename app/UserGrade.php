@@ -26,4 +26,14 @@ class UserGrade extends Model
     {
         return $this->belongsTo('App\Letter', 'letter_id', 'id');
     }
+
+    public function calculateNaturalGrade()
+    {
+        $gradeitems = $this->GradeItems->GradeCategory->GradeItems;
+        $result = 0;
+        foreach ($gradeitems as $item) {
+            $result += ($this->final_grade / $item->grademax) * $item->weight();
+        }
+        return $result;
+    }
 }

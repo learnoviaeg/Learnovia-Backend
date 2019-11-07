@@ -256,6 +256,10 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('delete', 'UserGradeController@delete')->name('deleteusergrade')->middleware('permission:grade/user/delete');
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
     });
+
+    Route::group(['prefix' => 'report'] , function(){
+        Route::get('grader' ,'UserGradeController@graderReport')->name('graderReport')->middleware('permission:grade/report/grader');
+    });
 });
 
 
