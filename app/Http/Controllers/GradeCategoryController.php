@@ -9,6 +9,7 @@ use App\Course;
 use App\Classes;
 use App\AcademicYearType;
 use App\ClassLevel;
+use App\GradeItems;
 use App\YearLevel;
 use App\SegmentClass;
 use Illuminate\Http\Request;
@@ -283,5 +284,4 @@ class GradeCategoryController extends Controller
         }
         return HelperController::api_response_format(200, 'There is No Course segment available.');
     }
-
 }
