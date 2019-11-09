@@ -254,6 +254,8 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::get('get', 'UserGradeController@list')->name('getusergrade')->middleware('permission:grade/user/get');
         Route::post('delete', 'UserGradeController@delete')->name('deleteusergrade')->middleware('permission:grade/user/delete');
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
+        Route::post('bulk_add', 'UserGradeController@Add');
+
     });
 });
 
