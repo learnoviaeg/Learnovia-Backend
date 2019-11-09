@@ -317,24 +317,27 @@ class SpatieController extends Controller
               'else' -> 'please try again,
    */
 
-    public static function Assign_Role_to_user(Request $request)
+  public static function Assign_Role_to_user(Request $request)
     {
         try {
             $validater = Validator::make($request->all(), [
-                'userid' => 'required|integer|exists:users,id',
-                'roleid' => 'required|integer|exists:roles,id'
+                'users' => 'required|array',
+                'users.*' => 'required|integer|exists:users,id',
+                'roles' => 'required|array',
+                'roles.*' => 'required|integer|exists:roles,id'
 
             ]);
             if ($validater->fails()) {
                 $errors = $validater->errors();
                 return HelperController::api_response_format(400, $errors);
             }
-
-            $finduser = User::find($request->userid);
-            $findrole = Role::find($request->roleid);
-
-            $finduser->assignRole($findrole->name);
-
+            if (count($request->users) != count($request->roles))
+                return HelperController::api_response_format(400, null, 'You must enter equal arrays');
+            foreach ($request->users as $index => $user) {
+                $finduser = User::find($user);
+                $findrole = Role::find($request->roles[$index]);
+                $finduser->assignRole($findrole->name);
+            }
             return HelperController::api_response_format(201, [], 'Role Assigned Successfully');
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();
