@@ -108,6 +108,15 @@ class ClassController extends Controller
     {
         if($request->id == null)
         {
+            $request->validate([
+                'search' => 'nullable'
+            ]);
+            if($request->filled('search'))
+            {
+                $Classes = Classes::where('name', 'LIKE' , "%$request->search%")->get()
+                ->paginate(HelperController::GetPaginate($request));
+                return HelperController::api_response_format(202, $Classes);   
+            }
             $classes = Classes::paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(200,$classes);
         }
