@@ -16,7 +16,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('CheckPermission', 'SpatieController@checkPermessionOnCourse')->name('checkPermessionOnCourse');
     Route::get('getMyLimits', 'AuthController@getuserPermessionFlags')->name('getuserPermessionFlags');
     Route::post('comparepermissions', 'SpatieController@comparepermissions')->name('comparepermissions');
-    Route::post('dashboard', 'SpatieController@dashboard')->name('dashboard');
+    Route::get('dashboard', 'SpatieController@dashboard')->name('dashboard');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('comparepermissions', 'SpatieController@comparepermissions');
 
