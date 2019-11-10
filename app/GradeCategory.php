@@ -47,4 +47,17 @@ class GradeCategory extends Model
         }
         return $total;
     }
-}
+    public function grade_category_total()
+    {
+        $weight=0;
+        $grade_items =$this->GradeItems;
+        foreach ($grade_items as $grade_item) {
+            $weight+=$grade_item->weight();
+        }
+        $childs=$this->Child;
+        foreach ($childs as $child){
+            $weight +=$child->grade_category_total();
+        }
+        return $weight;
+    }
+    }
