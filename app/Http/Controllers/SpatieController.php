@@ -323,19 +323,15 @@ class SpatieController extends Controller
             $validater = Validator::make($request->all(), [
                 'users' => 'required|array',
                 'users.*' => 'required|integer|exists:users,id',
-                'roles' => 'required|array',
-                'roles.*' => 'required|integer|exists:roles,id'
-
+                'role' => 'required|integer|exists:roles,id',
             ]);
             if ($validater->fails()) {
                 $errors = $validater->errors();
                 return HelperController::api_response_format(400, $errors);
             }
-            if (count($request->users) != count($request->roles))
-                return HelperController::api_response_format(400, null, 'You must enter equal arrays');
-            foreach ($request->users as $index => $user) {
+            $findrole = Role::find($request->role);
+            foreach ($request->users as $user) {
                 $finduser = User::find($user);
-                $findrole = Role::find($request->roles[$index]);
                 $finduser->assignRole($findrole->name);
             }
             return HelperController::api_response_format(201, [], 'Role Assigned Successfully');
