@@ -152,7 +152,7 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(200, $grade_category);
     }
 
-    public function getCourseSegment(Request $request)
+    public  static function getCourseSegment(Request $request)
     {
         $year = AcademicYear::Get_current();
         if ($request->filled('year'))
