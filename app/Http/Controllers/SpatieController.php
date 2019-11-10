@@ -501,13 +501,13 @@ class SpatieController extends Controller
 
     public function List_Roles_With_Permission()
     {
-
         try {
             $roles = Role::all();
             foreach ($roles as $role) {
                 $role->count = User::role($role)->count();
                 $role->permissions;
             }
+            $roles->toArray();
             return HelperController::api_response_format(200, $roles->paginate(HelperController::GetPaginate(\request())));
         } catch (Exception $ex) {
             return HelperController::NOTFOUND();

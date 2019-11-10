@@ -20,14 +20,13 @@ class AppServiceProvider extends ServiceProvider
 
     }
 
-
     public function boot()
     {
         Schema::defaultStringLength(191);
         Collection::macro('paginate', function($perPage, $total = null, $page = null, $pageName = 'page') {
             $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
             return new LengthAwarePaginator(
-                $this->forPage($page, $perPage),
+                array_values($this->forPage($page, $perPage)->toArray()),
                 $total ?: $this->count(),
                 $perPage,
                 $page,
@@ -37,6 +36,5 @@ class AppServiceProvider extends ServiceProvider
                 ]
             );
         });
-
     }
 }
