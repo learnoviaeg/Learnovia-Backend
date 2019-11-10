@@ -271,17 +271,27 @@ class SpatieController extends Controller
     public function Update_Role(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:roles,id'
+            'id' => 'required|exists:roles,id',
+            'name' => 'required|string',
+            'permissionid' => 'nullable|array',
+            'permissionid.*' => 'nullable|integer|exists:permissions,id',
         ]);
         $role = Role::find($request->id);
-
-        $request->validate([
-            'name' => 'required|string'
-        ]);
 
         $update = $role->update([
             'name' => $request->name,
         ]);
+
+        if(isset($request->permissionid))
+        {
+            $findper=array();
+            foreach($request->permissionid as $permission)
+            {
+                $per= Permission::find($permission);
+                $findper[]=$per->name;
+            }
+            $role->syncPermissions($findper);
+        }
 
         unset($role->guard_name);
         unset($role->created_at);
