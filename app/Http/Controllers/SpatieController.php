@@ -144,6 +144,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/show-hide-real-pass', 'title' => 'shor and hide real password']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/parent-child', 'title' => 'user parent/child']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-by-id', 'title' => 'get user by id']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-with-role-cs', 'title' => 'get users  in couse segment with filter role_id ']);
 
             //Components Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/get', 'title' => 'get component']);
@@ -273,24 +274,20 @@ class SpatieController extends Controller
         $request->validate([
             'id' => 'required|exists:roles,id',
             'name' => 'required|string',
-            'permissionid' => 'nullable|array',
-            'permissionid.*' => 'nullable|integer|exists:permissions,id',
+            'description' => 'required|string',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'nullable|string|exists:permissions,name',
         ]);
         $role = Role::find($request->id);
 
         $update = $role->update([
             'name' => $request->name,
+            'description' => $request->description
         ]);
 
-        if(isset($request->permissionid))
+        if(isset($request->permissions))
         {
-            $findper=array();
-            foreach($request->permissionid as $permission)
-            {
-                $per= Permission::find($permission);
-                $findper[]=$per->name;
-            }
-            $role->syncPermissions($findper);
+            $role->syncPermissions($request->permissions);
         }
 
         unset($role->guard_name);
