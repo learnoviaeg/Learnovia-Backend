@@ -204,9 +204,6 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/delete', 'title' => 'delete user grade']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/update', 'title' => 'update user grade']);
 
-            //Grade Reports
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/report/grader', 'title' => 'Grader Report']);
-
             //dashboard
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'dashboard/toggle', 'title' => 'toggle dashboard']);
 
@@ -320,25 +317,21 @@ class SpatieController extends Controller
               'else' -> 'please try again,
    */
 
-    public static function Assign_Role_to_user(Request $request)
+  public static function Assign_Role_to_user(Request $request)
     {
         try {
             $validater = Validator::make($request->all(), [
                 'users' => 'required|array',
                 'users.*' => 'required|integer|exists:users,id',
-                'roles' => 'required|array',
-                'roles.*' => 'required|integer|exists:roles,id'
-
+                'role' => 'required|integer|exists:roles,id',
             ]);
             if ($validater->fails()) {
                 $errors = $validater->errors();
                 return HelperController::api_response_format(400, $errors);
             }
-            if (count($request->users) != count($request->roles))
-                return HelperController::api_response_format(400, null, 'You must enter equal arrays');
-            foreach ($request->users as $index => $user) {
+            $findrole = Role::find($request->role);
+            foreach ($request->users as $user) {
                 $finduser = User::find($user);
-                $findrole = Role::find($request->roles[$index]);
                 $finduser->assignRole($findrole->name);
             }
             return HelperController::api_response_format(201, [], 'Role Assigned Successfully');
@@ -450,7 +443,7 @@ class SpatieController extends Controller
     public function List_Roles_Permissions()
     {
         $roles = Role::all();
-        $permissions = array();
+        $permissions=array();
         $pers = Permission::all();
         foreach ($pers as $permission) {
             $key =  explode("/", $permission->name)[0];
