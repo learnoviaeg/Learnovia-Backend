@@ -42,7 +42,7 @@ class UserGrade extends Model
             $result += ($temp->final_grade / $item->grademax) * $item->weight();
         }
         $result = ($result * $total) / 100;
-        return $result;
+        return round($result,3);
     }
 
     public function calculateGrade()

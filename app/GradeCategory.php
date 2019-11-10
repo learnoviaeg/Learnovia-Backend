@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name','course_segment_id','parent','aggregation','aggregatedOnlyGraded','hidden' , 'id_number'];
-    Public Function Child(){
-        return $this->hasMany('App\GradeCategory','parent','id');
-
+    protected $fillable = ['name', 'course_segment_id', 'parent', 'aggregation', 'aggregatedOnlyGraded', 'hidden', 'id_number'];
+    public function Child()
+    {
+        return $this->hasMany('App\GradeCategory', 'parent', 'id');
     }
-    Public Function Parents(){
-        return $this->hasOne('App\GradeCategory','id','parent');
-
+    public function Parents()
+    {
+        return $this->hasOne('App\GradeCategory', 'id', 'parent');
     }
     public function CourseSegment()
     {
@@ -21,43 +21,46 @@ class GradeCategory extends Model
     }
     public function GradeItems()
     {
-        return $this->hasMany('App\GradeItems','grade_category','id');
+        return $this->hasMany('App\GradeItems', 'grade_category', 'id');
     }
-    public function total(){
-        $result = 0 ;
+    public function total()
+    {
+        $result = 0;
         $gradeitems = $this->GradeItems;
-        foreach($gradeitems as $item){
+        foreach ($gradeitems as $item) {
             $result += $item->grademax;
         }
         return $result;
     }
-    public function percentage(){
-        $grade_items= $this->GradeItems;
-        $result=100;
-        foreach ($grade_items as $Item){
+    public function percentage()
+    {
+        $grade_items = $this->GradeItems;
+        $result = 100;
+        foreach ($grade_items as $Item) {
             $result -=  $Item->override;
         }
         return $result;
     }
-    public function naturalTotal(){
-        $grade_items= $this->GradeItems->where('override','!=',0);
-        $total=$this->total();
-        foreach ($grade_items as $grades){
-            $total-=$grades->grademax;
+    public function naturalTotal()
+    {
+        $grade_items = $this->GradeItems->where('override', '!=', 0);
+        $total = $this->total();
+        foreach ($grade_items as $grades) {
+            $total -= $grades->grademax;
         }
         return $total;
     }
     public function grade_category_total()
     {
-        $weight=0;
-        $grade_items =$this->GradeItems;
+        $weight = 0;
+        $grade_items = $this->GradeItems;
         foreach ($grade_items as $grade_item) {
-            $weight+=$grade_item->weight();
+            $weight += $grade_item->weight();
         }
-        $childs=$this->Child;
-        foreach ($childs as $child){
-            $weight +=$child->grade_category_total();
+        $childs = $this->Child;
+        foreach ($childs as $child) {
+            $weight += $child->grade_category_total();
         }
         return $weight;
     }
-    }
+}
