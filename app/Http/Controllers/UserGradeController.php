@@ -144,7 +144,7 @@ class UserGradeController extends Controller
                 foreach ($category->GradeItems as $item) {
                     $temp = UserGrade::where('user_id', $user->id)->where('grade_item_id', $item->id)->first();
                     if ($temp != null && $first) {
-                        $user->grades[$category->name]['total'] = $temp->calculateNaturalGrade();
+                        $user->grades[$category->name]['total'] = $temp->calculateGrade();
                         $first = false;
                         $temp->grade_items = null;
                     }
@@ -157,6 +157,7 @@ class UserGradeController extends Controller
                     $grades[$category->name]->push($item->name);
                 }
                 $grades[$category->name]->push($category->name . ' Total');
+                $first = true;
             }
         }
         return HelperController::api_response_format(200, ['schema' => $grades, 'users' => $users]);

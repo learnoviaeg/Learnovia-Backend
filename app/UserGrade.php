@@ -31,9 +31,23 @@ class UserGrade extends Model
     {
         $gradeitems = $this->GradeItems->GradeCategory->GradeItems;
         $result = 0;
+        $total = 0;
+        $temp = self::where('user_id', $this->user_id)->whereIn('grade_item_id', $gradeitems->pluck('id'))->pluck('grade_item_id');
+        $items = GradeItems::wherein('id', $temp)->pluck('grademax');
+        $total = array_sum($items->toArray());
         foreach ($gradeitems as $item) {
-            $result += ($this->final_grade / $item->grademax) * $item->weight();
+            $temp = self::where('user_id', $this->user_id)->where('grade_item_id', $item->id)->first();
+            if ($temp == null)
+                continue;
+            $result += ($temp->final_grade / $item->grademax) * $item->weight();
         }
+        $result = ($result * $total) / 100;
         return $result;
+    }
+
+    public function calculateGrade()
+    {
+        if ($this->GradeItems->GradeCategory->aggregation)
+            return $this->calculateNaturalGrade();
     }
 }
