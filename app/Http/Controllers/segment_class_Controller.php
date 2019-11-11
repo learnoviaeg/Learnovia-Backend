@@ -119,7 +119,7 @@ class segment_class_Controller extends Controller
         ]);
 
         if ($segment) {
-            return HelperController::api_response_format(200, $segment, 'Type insertion sucess');
+            return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), 'Type insertion sucess');
         }
         return HelperController::NOTFOUND();
 

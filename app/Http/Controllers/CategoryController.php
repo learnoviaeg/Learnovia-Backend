@@ -15,7 +15,8 @@ class CategoryController extends Controller
         $cat = Category::create([
             'name' => $request->name
         ]);
-        return HelperController::api_response_format(201, $cat, 'Category Created Successfully');
+        $cats=Category::get()->paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(201, $cats, 'Category Created Successfully');
     }
 
     public function edit(Request $request)
