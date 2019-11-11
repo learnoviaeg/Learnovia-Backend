@@ -38,7 +38,8 @@ class LevelsController extends Controller
             }
 
         }
-        return HelperController::api_response_format(201, $level, 'Level Created Successfully');
+        $levels = Level::paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(201, $levels, 'Level Created Successfully');
     }
 
     public function Delete(Request $request)
