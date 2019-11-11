@@ -216,6 +216,11 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'scale/delete', 'title' => 'Delete Scale']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'scale/get', 'title' => 'Get Scale']);
 
+            //scale
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/add', 'title' => 'Add Letter']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/update', 'title' => 'Update Letter']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/delete', 'title' => 'Delete Letter']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/get', 'title' => 'Get Letter']);
 
             //Add Roles
             $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin']);

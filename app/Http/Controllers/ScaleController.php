@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\scale;
-use App\GradeItems;
 
 class ScaleController extends Controller
 {
@@ -23,7 +22,7 @@ class ScaleController extends Controller
         ]);
         $newScale->formate = unserialize($newScale->formate);
 
-        return HelperController::api_response_format(200,$newScale, 'Scale Created Succefully' );
+        return HelperController::api_response_format(200,$newScale, 'Scale Created Successfully' );
     }
 
     public function UpdateScale(Request $request)
@@ -68,7 +67,7 @@ class ScaleController extends Controller
         if(!isset($check))
         {
             $scale_id->delete();
-            return HelperController::api_response_format(200,$scale_id, 'Scale Deleted Succefully' );
+            return HelperController::api_response_format(200,$scale_id, 'Scale Deleted Successfully' );
         }
         else
             return HelperController::api_response_format(200,$scale_id, 'This Scale Used Before ' );
@@ -84,7 +83,7 @@ class ScaleController extends Controller
         {
             $scale_id=scale::find($request->id);
             $scale_id->formate = unserialize($scale_id->formate);
-            return HelperController::api_response_format(200,$scale_id );    
+            return HelperController::api_response_format(200,$scale_id );
         }
         $scales=scale::get();
         foreach($scales as $scale)
