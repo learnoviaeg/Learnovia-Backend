@@ -261,3 +261,10 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
     });
 });
+
+Route::group(['prefix' => 'scale', 'middleware' => 'auth:api'], function () {
+    Route::post('add', 'ScaleController@AddScale')->name('addscale')->middleware('permission:scale/add');
+    Route::get('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
+    Route::post('delete', 'ScaleController@DeleteScale')->name('deletescale')->middleware('permission:scale/delete');
+    Route::post('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
+});

@@ -210,6 +210,11 @@ class SpatieController extends Controller
             //dashboard
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'dashboard/toggle', 'title' => 'toggle dashboard']);
 
+            //scale
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'scale/add', 'title' => 'Add Scale']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'scale/update', 'title' => 'Update Scale']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'scale/delete', 'title' => 'Delete Scale']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'scale/get', 'title' => 'Get Scale']);
 
 
             //Add Roles
@@ -287,8 +292,7 @@ class SpatieController extends Controller
             'description' => $request->description
         ]);
 
-        if(isset($request->permissions))
-        {
+        if (isset($request->permissions)) {
             $role->syncPermissions($request->permissions);
         }
 
@@ -326,7 +330,7 @@ class SpatieController extends Controller
               'else' -> 'please try again,
    */
 
-  public static function Assign_Role_to_user(Request $request)
+    public static function Assign_Role_to_user(Request $request)
     {
         try {
             $validater = Validator::make($request->all(), [
@@ -452,7 +456,7 @@ class SpatieController extends Controller
     public function List_Roles_Permissions()
     {
         $roles = Role::all();
-        $permissions=array();
+        $permissions = array();
         $pers = Permission::all();
         foreach ($pers as $permission) {
             $key =  explode("/", $permission->name)[0];
@@ -505,11 +509,10 @@ class SpatieController extends Controller
         ]);
 
         try {
-            if($request->filled('search'))
-            {
-                $roles = Role::where('name', 'LIKE' , "%$request->search%")->get()
-                ->paginate(HelperController::GetPaginate($request));
-                return HelperController::api_response_format(202, $roles);   
+            if ($request->filled('search')) {
+                $roles = Role::where('name', 'LIKE', "%$request->search%")->get()
+                    ->paginate(HelperController::GetPaginate($request));
+                return HelperController::api_response_format(202, $roles);
             }
             $roles = Role::all();
             foreach ($roles as $role) {
