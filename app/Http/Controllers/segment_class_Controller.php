@@ -60,6 +60,15 @@ class segment_class_Controller extends Controller
     public function get(Request $request)
     {
         if ($request->id == null) {
+            $request->validate([
+                'search' => 'nullable'
+            ]);
+            if($request->filled('search'))
+            {
+                $segments = Segment::where('name', 'LIKE' , "%$request->search%")->get()
+                ->paginate(HelperController::GetPaginate($request));
+                return HelperController::api_response_format(202, $segments);   
+            }
             $segments = Segment::paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(200, $segments);
         } else {

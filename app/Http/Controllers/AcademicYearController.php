@@ -34,6 +34,15 @@ class AcademicYearController extends Controller
      */
     public function getall(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable'
+        ]);
+        if($request->filled('search'))
+        {
+            $years = AcademicYear::where('name', 'LIKE' , "%$request->search%")->get()
+            ->paginate(HelperController::GetPaginate($request));
+            return HelperController::api_response_format(202, $years);   
+        }
         $years = AcademicYear::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(202, $years);
     }

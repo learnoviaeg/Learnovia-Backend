@@ -496,9 +496,19 @@ class SpatieController extends Controller
 
     */
 
-    public function List_Roles_With_Permission()
+    public function List_Roles_With_Permission(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable'
+        ]);
+
         try {
+            if($request->filled('search'))
+            {
+                $roles = Role::where('name', 'LIKE' , "%$request->search%")->get()
+                ->paginate(HelperController::GetPaginate($request));
+                return HelperController::api_response_format(202, $roles);   
+            }
             $roles = Role::all();
             foreach ($roles as $role) {
                 $role->count = User::role($role)->count();

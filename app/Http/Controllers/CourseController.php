@@ -138,6 +138,7 @@ class CourseController extends Controller
             'level' => 'nullable|exists:levels,id|required_with:year',
             'class' => 'nullable|exists:classes,id|required_with:year',
             'segment' => 'nullable|exists:segments,id|required_with:year',
+            'search' => 'nullable'
         ]);
         if($request->filled('year')){
             $academic_year_type = AcademicYearType::checkRelation($request->year, $request->type);
@@ -149,7 +150,8 @@ class CourseController extends Controller
         }
         if (isset($request->id))
             return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->whereId($request->id)->first());
-        return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200, Course::where('name', 'LIKE' , "%$request->search%")->get()
+        ->paginate(HelperController::GetPaginate($request)));
     }
 
     public function delete(Request $request)

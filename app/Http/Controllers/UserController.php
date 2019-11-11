@@ -193,16 +193,34 @@ class UserController extends Controller
 
     public function list(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable'
+        ]);
+
         $user_id = Auth::user()->id;
-        $role_id = DB::table('model_has_roles')->where('model_id', $user_id)->pluck('role_id')->first();
-        if ($role_id == 1 || $role_id == 2) {
-            $user = User::with('roles')->paginate(HelperController::GetPaginate($request));
+        $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
+        if($role_id == 1 || $role_id == 2)
+        {
+            if($request->filled('search'))
+            {
+                $user = User::with('roles')->where('username', 'LIKE' , "%$request->search%")->get()
+                ->paginate(HelperController::GetPaginate($request));
+                return HelperController::api_response_format(202, $user);
+            }
+            $user =User::with('roles')->paginate(HelperController::GetPaginate($request));
             foreach ($user->items() as $value) {
                 $value->setHidden(['password']);
             }
             return HelperController::api_response_format(200, $user);
-        } else {
-            $user = User::paginate(HelperController::GetPaginate($request));
+        }
+        else {
+            if($request->filled('search'))
+            {
+                $user = User::with('roles')->where('name', 'LIKE' , "%$request->search%")->get()
+                ->paginate(HelperController::GetPaginate($request));
+                return HelperController::api_response_format(202, $user);
+            }
+            $user = User::with('roles')->paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(200, $user);
         }
     }

@@ -119,6 +119,15 @@ class LevelsController extends Controller
 
     public function get(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable'
+        ]);
+        if($request->filled('search'))
+        {
+            $levels = Level::where('name', 'LIKE' , "%$request->search%")->get()
+            ->paginate(HelperController::GetPaginate($request));
+            return HelperController::api_response_format(202, $levels);   
+        }
         $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(200, $levels);
     }
