@@ -329,6 +329,6 @@ class UserController extends Controller
             'roles' => 'required|array',
             'roles.*' => 'required|exists:roles,id'
         ]);
-        return HelperController::api_response_format(200 , User::whereHas("roles", function($q) use ($request){ $q->whereIn("id", $request->roles); })->get());
+        return HelperController::api_response_format(200 , User::whereHas("roles", function($q) use ($request){ $q->whereIn("id", $request->roles); })->paginate(HelperController::GetPaginate($request)));
     }
 }
