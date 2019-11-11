@@ -97,50 +97,34 @@ class CourseController extends Controller
         }
 
         $course->attachment;
-        return HelperController::api_response_format(201, $course, 'Course Created Successfully');
+        return HelperController::api_response_format(201, Course::with(['category' , 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Created Successfully');
     }
 
     public function update(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'category' => 'required|exists:categories,id',
+            'name' => 'nullable',
+            'category_id' => 'nullable|exists:categories,id',
             'id' => 'required|exists:courses,id',
-            'year' => 'exists:academic_years,id',
-            'type' => 'exists:academic_types,id|required_with:year',
-            'level' => 'exists:levels,id|required_with:year',
-            'class' => 'exists:classes,id|required_with:year',
-            'segment' => 'exists:segments,id|required_with:year',
-            'image' => 'nullable'
+            'image' => 'nullable',
+            'description' => 'nullable',
+            'mandatory' => 'nullable|in:0,1'
         ]);
-
+        $editable = ['name' , 'category_id' ,'description' , 'mandatory'];
         $course = Course::find($request->id);
         $course->name = $request->name;
         $course->category_id = $request->category;
 
         if ($request->hasFile('image')) {
-            $imageId=Course::where('id',$request->id)->pluck('image')->first();
             $course->image=attachment::upload_attachment($request->image, 'course')->id;
         }
-        $course->save();
-        if ($request->filled('year')) {
-            $oldyearType = AcademicYearType::checkRelation($course->courseSegments[0]->segmentClasses[0]->segments[0]->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academicyear[0]->id, $course->courseSegments[0]->segmentClasses[0]->segments[0]->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->yearType[0]->academictype[0]->id);
-            $newyearType = AcademicYearType::checkRelation($request->year, $request->type);
-
-            $oldyearLevel = YearLevel::checkRelation($oldyearType->id, $course->courseSegments[0]->segmentClasses[0]->segments[0]->Segment_class[0]->classes[0]->classlevel->yearLevels[0]->levels[0]->id);
-            $newyearLevel = YearLevel::checkRelation($newyearType->id, $request->level);
-
-            $oldClassLevel = ClassLevel::checkRelation($course->courseSegments[0]->segmentClasses[0]->segments[0]->Segment_class[0]->classes[0]->id, $oldyearLevel->id);
-            $newClassLevel = ClassLevel::checkRelation($course->courseSegments[0]->segmentClasses[0]->segments[0]->Segment_class[0]->classes[0]->id, $newyearLevel->id);
-
-            $oldsegmentClass = SegmentClass::checkRelation($oldClassLevel->id, $course->courseSegments[0]->segmentClasses[0]->segments[0]->id);
-            $newsegmentClass = SegmentClass::checkRelation($newClassLevel->id, $course->courseSegments[0]->segmentClasses[0]->segments[0]->id);
-
-            $oldCourseSegment = CourseSegment::checkRelation($oldsegmentClass->id, $course->id);
-            $oldCourseSegment->delete();
-            $newCourseSegment = CourseSegment::checkRelation($newsegmentClass->id, $course->id);
+        foreach ($editable as $key) {
+            if($request->filled($key)){
+                $course->$key = $request->$key;
+            }
         }
-        return HelperController::api_response_format(200, $course, 'Course Updated Successfully');
+        $course->save();
+        return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
     }
 
     public function get(Request $request)
@@ -161,10 +145,10 @@ class CourseController extends Controller
             $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
             $segment_class = SegmentClass::checkRelation($class_level->id, $request->segment);
             $courseSegment = $segment_class->courseSegment->pluck('course_id');
-            return HelperController::api_response_format(200, Course::whereIn('id' , $courseSegment)->paginate(HelperController::GetPaginate($request)));
+            return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->whereIn('id' , $courseSegment)->paginate(HelperController::GetPaginate($request)));
         }
         if (isset($request->id))
-            return HelperController::api_response_format(200, Course::with('category')->whereId($request->id)->first());
+            return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->whereId($request->id)->first());
         return HelperController::api_response_format(200, Course::paginate(HelperController::GetPaginate($request)));
     }
 
@@ -175,7 +159,7 @@ class CourseController extends Controller
         ]);
         $course = Course::find($request->id);
         $course->delete();
-        return HelperController::api_response_format(200, Course::get(), 'Course Updated Successfully');
+        return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Deleted Successfully');
     }
 
     public function MyCourses(Request $request)
