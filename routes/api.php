@@ -261,4 +261,3 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
     });
 });
-

@@ -154,6 +154,14 @@ class GradeCategoryController extends Controller
 
     public  static function getCourseSegment(Request $request)
     {
+        $request->validate([
+            'year' => 'nullable|exists:academic_years,id',
+            'type' => 'nullable|exists:academic_types,id|required_with:level',
+            'level' => 'nullable|exists:levels,id|required_with:class',
+            'class' => 'nullable|exists:classes,id|required_with:segment',
+            'segment' => 'nullable|exists:segments,id'
+        ]);
+
         $year = AcademicYear::Get_current();
         if ($request->filled('year'))
             $year = AcademicYear::find($request->year);
@@ -173,9 +181,11 @@ class GradeCategoryController extends Controller
                     $segment_id = $request->segment;
                 $query->where('segment_id', $segment_id);
             }
-        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function ($query) use ($request) {
-            if ($request->filled('course'))
-                $query->where('course_id', $request->course);
+        } , 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function($query)  use ($request){
+            if($request->filled('course'))
+                $query->where('course_id' , $request->course);
+            if($request->filled('typical'))
+                $query->where('typical',$request->typical);
         }])->get()->pluck('YearType')[0];
         $array = collect();
         if (count($YearTypes) > 0) {
@@ -236,12 +246,12 @@ class GradeCategoryController extends Controller
                         $lev=$level->levels[0]->name;
                         $names->push(['name'=>$GC->name,'id_number'=>$GC->id_number,'level'=>$lev]);
                     }
-            }    
+            }
         $all = $names->unique()->sortBy('id_number');
         $alls=$all->values();
         return HelperController::api_response_format(200, $alls);
         }
-        return HelperController::api_response_format(200, 'There is No Course segment available.');   
+        return HelperController::api_response_format(200, 'There is No Course segment available.');
     }
 
     public function GetAllGradeCategory(Request $request)
@@ -270,13 +280,13 @@ class GradeCategoryController extends Controller
                         }
                         $lev=$level->levels[0]->name;
                         $course = CourseSegment::find($courses_seg);
-                        
+
                         $course_id=$course->course_id;
                         $course=Course::find($course_id);
 
                         $names->push(['name'=>$grade->name,'id_number'=>$grade->id_number,'level'=>$lev,'course'=>$course->name,'class'=>array_values(array_unique($ClassesName))]);
                     }
-                }   
+                }
             }
 
         return HelperController::api_response_format(200, $names);

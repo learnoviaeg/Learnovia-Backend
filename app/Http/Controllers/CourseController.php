@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Enroll;
 use App\Segment;
 use App\AcademicYear;
+use App\GradeCategory;
 use App\attachment;
 use App\LessonComponent;
 use App\User;
@@ -40,7 +41,8 @@ class CourseController extends Controller
             'no_of_lessons' => 'integer',
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
             'description' => 'string',
-            'mandatory' => 'nullable'
+            'mandatory' => 'nullable',
+            'typical' => 'nullable|boolean'
         ]);
         $no_of_lessons = 4;
         $course = Course::firstOrCreate([
@@ -78,7 +80,12 @@ class CourseController extends Controller
                             $courseSegment = CourseSegment::firstOrCreate([
                                 'course_id' => $course->id,
                                 'segment_class_id' => $segmentClass->id,
-                                'is_active' => 1
+                                'is_active' => 1,
+                                'typical' => $request->typical
+                            ]);
+                            $gradeCat = GradeCategory::firstOrCreate([
+                                'name' => 'Course Total',
+                                'course_segment_id' => $courseSegment->id,
                             ]);
                             if ($request->filled('no_of_lessons')) {
                                 $no_of_lessons = $request->no_of_lessons;
@@ -439,7 +446,11 @@ class CourseController extends Controller
                 $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
                 $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
                 $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
-                CourseSegment::checkRelation($segment_class->id, $request->course);
+                $course_Segment=CourseSegment::checkRelation($segment_class->id, $request->course);
+                $gradeCat = GradeCategory::firstOrCreate([
+                    'name' => 'Course Total',
+                    'course_segment_id' => $course_Segment->id,
+                ]);
                 $count++;
             }
         } else {
@@ -468,4 +479,5 @@ class CourseController extends Controller
         }
         return HelperController::api_response_format(200, $result);
     }
+
 }
