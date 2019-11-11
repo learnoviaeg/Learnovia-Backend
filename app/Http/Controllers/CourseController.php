@@ -117,9 +117,9 @@ class CourseController extends Controller
         $course = Course::find($request->id);
         $course->name = $request->name;
         $course->category_id = $request->category;
-        
+
         if ($request->hasFile('image')) {
-            $imageId=Course::where('id',$request->id)->pluck('image')->first();            
+            $imageId=Course::where('id',$request->id)->pluck('image')->first();
             $course->image=attachment::upload_attachment($request->image, 'course')->id;
         }
         $course->save();
@@ -480,6 +480,6 @@ class CourseController extends Controller
                 }
             }
         }
-       return $result;
+        return HelperController::api_response_format(200, $result);
     }
 }
