@@ -149,7 +149,7 @@ class CourseController extends Controller
         }
         if (isset($request->id))
             return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->whereId($request->id)->first());
-        return HelperController::api_response_format(200, Course::paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->paginate(HelperController::GetPaginate($request)));
     }
 
     public function delete(Request $request)
