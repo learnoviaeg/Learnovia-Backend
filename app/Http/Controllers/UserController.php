@@ -341,4 +341,12 @@ class UserController extends Controller
         $users = User::whereIn('id', $user_ids)->with(['parents'])->get();
         return HelperController::api_response_format(201, $users);
     }
+
+    public function allUserFilterRole(Request $request){
+        $request->validate([
+            'roles' => 'required|array',
+            'roles.*' => 'required|exists:roles,id'
+        ]);
+        return HelperController::api_response_format(200 , User::whereHas("roles", function($q) use ($request){ $q->whereIn("id", $request->roles); })->paginate(HelperController::GetPaginate($request)));
+    }
 }

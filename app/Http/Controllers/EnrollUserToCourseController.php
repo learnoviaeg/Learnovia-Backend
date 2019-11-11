@@ -302,7 +302,54 @@ class EnrollUserToCourseController extends Controller
         $ids = Enroll::whereIn('course_segment', $courseSegments['value']->pluck('id'))->pluck('user_id');
         $userUnenrolls = User::whereNotIn('id', $ids)->get();
         return HelperController::api_response_format(200, $userUnenrolls, 'students are ... ');
+    }
 
+    public function enrollWithChain(Request $request)
+    {
+        $request->validate([
+            'users' => 'required|array',
+            'users.*' => 'required|string|exists:users,username',
+            'role_id' => 'required|array|exists:roles,id',
+            'start_date' => 'required|before:end_date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
+            'end_date' => 'required|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:level',
+            'level' => 'exists:levels,id|required_with:class',
+            'class' => 'exists:classes,id|required_with:segment',
+            'segment' => 'exists:segments,id',
+            'course' => 'exists:courses,id'
+        ]);
 
+        $courseSeg=GradeCategoryController::getCourseSegment($request);
+        if(isset($courseSeg))
+        {
+            $count=0;
+            foreach($request->users as $user[$count])
+            {
+                $user_id = User::FindByName($user[$count])->id;
+                foreach ($courseSeg as $course) {
+                $check = Enroll::IsExist($course, $user_id);
+                if($check==null)
+                {
+                    Enroll::Create([
+                        'username' => $user[$count],
+                        'user_id' => $user_id,
+                        'course_segment' => $course,
+                        'start_date' => $request->start_date,
+                        'end_date' => $request->end_date,
+                        'role_id' => $request->role_id[$count],
+                    ]);
+                }
+                else
+                    $EnrolledBefore[]=$user[$count];
+                }
+                $count++;
+            }
+            if(isset($EnrolledBefore))
+                return HelperController::api_response_format(200, array_values(array_unique($EnrolledBefore)), 'Success and theses users added before');
+            else
+                return HelperController::api_response_format(200, 'Enrolled Successfully');   
+        }
+        return HelperController::api_response_format(200, 'No Course Segment here');        
     }
 }
