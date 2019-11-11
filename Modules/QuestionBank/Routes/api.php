@@ -40,8 +40,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('toggle', 'QuizController@toggleQuizVisibity')->middleware('permission:quiz/toggle');
     Route::post('correct-user-quiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
     Route::post('get-attempts', 'UserQuizController@get_user_quiz')->middleware('permission:quiz/get-attempts');
-
-
+    Route::post('grade-user-quiz', 'UserQuizController@gradeUserQuiz');//->middleware('permission:quiz/grade-user-quiz');
 });
 
 Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {

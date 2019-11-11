@@ -2,6 +2,10 @@
 
 namespace Modules\QuestionBank\Http\Controllers;
 
+use App\GradeCategory;
+use App\GradeItems;
+use App\User;
+use App\UserGrade;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -20,18 +24,19 @@ use function Opis\Closure\serialize;
 class UserQuizController extends Controller
 {
 
-   public function store_user_quiz(Request $request){
-       $user = Auth::User();
+    public function store_user_quiz(Request $request)
+    {
+        $user = Auth::User();
 
-       $request->validate([
+        $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
 
-        $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)
-                ->where('lesson_id',$request->lesson_id)->first();
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)
+            ->where('lesson_id', $request->lesson_id)->first();
 
-        if(!isset($quiz_lesson)){
+        if (!isset($quiz_lesson)) {
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
         }
 
@@ -40,40 +45,40 @@ class UserQuizController extends Controller
             ->get()->max('attempt_index');
 
         $userQuiz = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
-                    ->where('user_id', Auth::user()->id)
-                    ->first();
+            ->where('user_id', Auth::user()->id)
+            ->first();
 
-           $attempt_index = 0;
-           if ($max_attempt_index == null) {
-               $attempt_index = 1;
-           } else if (isset($userQuiz)) {
-               if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp) {
-                   $attempt_index = ++$max_attempt_index;
-               } else {
-                   return HelperController::api_response_format(400, null, 'Max Attempt number reached');
-               }
-           }
+        $attempt_index = 0;
+        if ($max_attempt_index == null) {
+            $attempt_index = 1;
+        } else if (isset($userQuiz)) {
+            if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp) {
+                $attempt_index = ++$max_attempt_index;
+            } else {
+                return HelperController::api_response_format(400, null, 'Max Attempt number reached');
+            }
+        }
 
         $deviceData = collect([]);
-        $deviceData->put('isDesktop',Browser::isDesktop());
-        $deviceData->put('isMobile',Browser::isMobile());
-        $deviceData->put('isTablet',Browser::isTablet());
-        $deviceData->put('isBot',Browser::isBot());
+        $deviceData->put('isDesktop', Browser::isDesktop());
+        $deviceData->put('isMobile', Browser::isMobile());
+        $deviceData->put('isTablet', Browser::isTablet());
+        $deviceData->put('isBot', Browser::isBot());
 
-        $deviceData->put('platformName',Browser::platformName());
-        $deviceData->put('platformFamily',Browser::platformFamily());
-        $deviceData->put('platformVersion',Browser::platformVersion());
+        $deviceData->put('platformName', Browser::platformName());
+        $deviceData->put('platformFamily', Browser::platformFamily());
+        $deviceData->put('platformVersion', Browser::platformVersion());
 
-        $deviceData->put('deviceFamily',Browser::deviceFamily());
-        $deviceData->put('deviceModel',Browser::deviceModel());
-        $deviceData->put('mobileGrade',Browser::mobileGrade());
+        $deviceData->put('deviceFamily', Browser::deviceFamily());
+        $deviceData->put('deviceModel', Browser::deviceModel());
+        $deviceData->put('mobileGrade', Browser::mobileGrade());
 
 
         $browserData = collect([]);
-        $browserData->put('browserName',Browser::browserName());
-        $browserData->put('browserFamily',Browser::browserFamily());
-        $browserData->put('browserVersion',Browser::browserVersion());
-        $browserData->put('browserEngine',Browser::browserEngine());
+        $browserData->put('browserName', Browser::browserName());
+        $browserData->put('browserFamily', Browser::browserFamily());
+        $browserData->put('browserVersion', Browser::browserVersion());
+        $browserData->put('browserEngine', Browser::browserEngine());
 
         $userQuiz = userQuiz::create([
             'user_id' => Auth::user()->id,
@@ -81,21 +86,21 @@ class UserQuizController extends Controller
             'status_id' => 2,
             'feedback' => null,
             'grade' => null,
-
-            'attempt_index' => ($user->roles->first()->id==3) ?$attempt_index:0,
-
+            'attempt_index' => ($user->roles->first()->id == 3) ? $attempt_index : 0,
             'ip' => $request->ip(),
             'device_data' => $deviceData,
             'browser_data' => $browserData,
             'open_time' => Carbon::now()
         ]);
 
+
         return HelperController::api_response_format(200, $userQuiz);
 
-   }
+    }
 
 
-   public function quiz_answer(Request $request){
+    public function quiz_answer(Request $request)
+    {
         $request->validate([
             'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
             'Questions' => 'required|array',
@@ -109,16 +114,15 @@ class UserQuizController extends Controller
         $allData = collect([]);
         foreach ($request->Questions as $index => $question) {
 
-            if(!$questions_ids->contains($question['id'])){
+            if (!$questions_ids->contains($question['id'])) {
 
                 $check_question = Questions::find($question['id']);
 
-                if(isset($check_question->parent)){
-                    if(!$questions_ids->contains($check_question->parent)){
+                if (isset($check_question->parent)) {
+                    if (!$questions_ids->contains($check_question->parent)) {
                         return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
                     }
-                }
-                else{
+                } else {
                     return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
                 }
             }
@@ -132,40 +136,40 @@ class UserQuizController extends Controller
                 'question_id' => $question['id']
             ];
 
-            if(isset($question_type_id)){
+            if (isset($question_type_id)) {
                 switch ($question_type_id) {
                     case 1: // True_false
                         # code...
                         $request->validate([
-                            'Questions.'.$index.'.answer_id' => 'required|integer|exists:questions_answers,id',
-                            'Questions.'.$index.'.and_why' => 'nullable|string',
+                            'Questions.' . $index . '.answer_id' => 'required|integer|exists:questions_answers,id',
+                            'Questions.' . $index . '.and_why' => 'nullable|string',
                         ]);
 
-                        if(!$question_answers->contains($question['answer_id'])){
+                        if (!$question_answers->contains($question['answer_id'])) {
                             return HelperController::api_response_format(400, $question['answer_id'], 'This answer didn\'t belongs to this question');
                         }
 
                         $answer = QuestionsAnswer::find($question['answer_id']);
                         $data['answer_id'] = $question['answer_id'];
                         $data['user_grade'] = ($answer->is_true == 1) ? $currentQuestion->mark : 0;
-                        if(isset($question['and_why']))
+                        if (isset($question['and_why']))
                             $data['and_why'] = $question['and_why'];
                         break;
 
                     case 2: // MCQ
                         # code...
                         $request->validate([
-                            'Questions.'.$index.'.mcq_answers_array' => 'required|array',
-                            'Questions.'.$index.'.mcq_answers_array.*' => 'required|integer|exists:questions_answers,id'
+                            'Questions.' . $index . '.mcq_answers_array' => 'required|array',
+                            'Questions.' . $index . '.mcq_answers_array.*' => 'required|integer|exists:questions_answers,id'
                         ]);
 
                         $flag = 1;
-                        foreach($question['mcq_answers_array'] as $mcq_answer){
-                            if(!$question_answers->contains($mcq_answer)){
+                        foreach ($question['mcq_answers_array'] as $mcq_answer) {
+                            if (!$question_answers->contains($mcq_answer)) {
                                 return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
                             }
                             $answer = QuestionsAnswer::find($mcq_answer);
-                            if($answer->is_true == 0){
+                            if ($answer->is_true == 0) {
                                 $flag = 0;
                             }
                         }
@@ -177,32 +181,31 @@ class UserQuizController extends Controller
                     case 3: // Match
                         # code...
                         $request->validate([
-                            'Questions.'.$index.'.choices_array' => 'required|array',
-                            'Questions.'.$index.'.choices_array.*' => 'required|integer|exists:questions_answers,id',
+                            'Questions.' . $index . '.choices_array' => 'required|array',
+                            'Questions.' . $index . '.choices_array.*' => 'required|integer|exists:questions_answers,id',
                         ]);
 
-                        $trueAnswer = $currentQuestion->question_answer->where('is_true',1)->pluck('id');
+                        $trueAnswer = $currentQuestion->question_answer->where('is_true', 1)->pluck('id');
 
-                        if(count($question['choices_array']) != count($trueAnswer)){
+                        if (count($question['choices_array']) != count($trueAnswer)) {
                             return HelperController::api_response_format(400, null, 'Please submit all choices');
                         }
                         $true_counter = 0;
                         $false_counter = 0;
-                        foreach($question['choices_array'] as $choice){
-                            if(!$question_answers->contains($choice)){
+                        foreach ($question['choices_array'] as $choice) {
+                            if (!$question_answers->contains($choice)) {
                                 return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
                             }
                             $answer = QuestionsAnswer::find($choice);
-                            if($answer->is_true == 0){
+                            if ($answer->is_true == 0) {
                                 $false_counter++;
-                            }
-                            else{
+                            } else {
                                 $true_counter++;
                             }
                         }
-                        $question_mark = (float) $currentQuestion->mark;
-                        $multiple = (float) $true_counter * (float) $question_mark;
-                        $grade = (float) $multiple / (float) count($trueAnswer);
+                        $question_mark = (float)$currentQuestion->mark;
+                        $multiple = (float)$true_counter * (float)$question_mark;
+                        $grade = (float)$multiple / (float)count($trueAnswer);
                         $data['user_grade'] = $grade;
 
                         $data['choices_array'] = serialize($question['choices_array']);
@@ -211,7 +214,7 @@ class UserQuizController extends Controller
                     case 4: // Essay
                         # code...
                         $request->validate([
-                            'Questions.'.$index.'.content' => 'required|string',
+                            'Questions.' . $index . '.content' => 'required|string',
                         ]);
                         $data['content'] = $question['content'];
                         break;
@@ -222,21 +225,21 @@ class UserQuizController extends Controller
                 }
 
                 $allData->push($data);
-            }
-            else{
+            } else {
                 return HelperController::api_response_format(400, null, 'No type determine to this question');
             }
 
         }
-        foreach($allData as $data){
+        foreach ($allData as $data) {
             userQuizAnswer::create($data);
         }
 
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
 
-   }
+    }
 
-   public function estimateEssayandAndWhy(Request $request){
+    public function estimateEssayandAndWhy(Request $request)
+    {
         $request->validate([
             'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
             'Questions' => 'required|array',
@@ -251,16 +254,15 @@ class UserQuizController extends Controller
         $allData = collect([]);
         foreach ($request->Questions as $question) {
 
-            if(!$questions_ids->contains($question['id'])){
+            if (!$questions_ids->contains($question['id'])) {
 
                 $check_question = Questions::find($question['id']);
 
-                if(isset($check_question->parent)){
-                    if(!$questions_ids->contains($check_question->parent)){
+                if (isset($check_question->parent)) {
+                    if (!$questions_ids->contains($check_question->parent)) {
                         return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
                     }
-                }
-                else{
+                } else {
                     return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
                 }
             }
@@ -272,29 +274,28 @@ class UserQuizController extends Controller
                 'question_id' => $question['id']
             ];
 
-            $userQuizAnswer = userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)
-                    ->where('question_id',$question['id'])->first();
+            $userQuizAnswer = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
+                ->where('question_id', $question['id'])->first();
 
-            if(!isset($userQuizAnswer)){
+            if (!isset($userQuizAnswer)) {
                 return HelperController::api_response_format(400, null, 'No User Answer found to this Question');
             }
 
-            if(isset($question_type_id)){
+            if (isset($question_type_id)) {
                 switch ($question_type_id) {
                     case 1: // True_false
                         # code...
 
-                        if(isset($currentQuestion->And_why)){
-                            if($currentQuestion->And_why_mark < $question['mark']){
+                        if (isset($currentQuestion->And_why)) {
+                            if ($currentQuestion->And_why_mark < $question['mark']) {
                                 return HelperController::api_response_format(400, null, 'Mark should be less than or equal the Question mark');
                             }
 
-                            $user_grade = userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)
-                                ->where('question_id',$question['id'])->pluck('user_grade')->first();
+                            $user_grade = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
+                                ->where('question_id', $question['id'])->pluck('user_grade')->first();
 
-                            $data['user_grade'] = (float) $user_grade + (float) $question['mark'];
-                        }
-                        else{
+                            $data['user_grade'] = (float)$user_grade + (float)$question['mark'];
+                        } else {
                             $data = null;
                         }
                         break;
@@ -303,7 +304,7 @@ class UserQuizController extends Controller
                     case 4: // Essay
                         # code...
 
-                        if($currentQuestion->mark < $question['mark']){
+                        if ($currentQuestion->mark < $question['mark']) {
                             return HelperController::api_response_format(400, null, 'Mark should be less than or equal the Question mark');
                         }
 
@@ -316,25 +317,25 @@ class UserQuizController extends Controller
 
                 }
 
-                if($data != null){
+                if ($data != null) {
                     $allData->push($data);
                 }
-            }
-            else{
+            } else {
                 return HelperController::api_response_format(400, null, 'No type determine to this question');
             }
 
         }
-        foreach($allData as $data){
-            $userAnswer = userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)
-                            ->where('question_id',$data['question_id'])->first();
+        foreach ($allData as $data) {
+            $userAnswer = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
+                ->where('question_id', $data['question_id'])->first();
 
             $userAnswer->user_grade = $data['user_grade'];
             $userAnswer->save();
         }
 
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
-}
+    }
+
     public function get_user_quiz(Request $request)
     {
         $user_id = Auth::User()->id;
@@ -344,14 +345,52 @@ class UserQuizController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
 
-        $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)
-            ->where('lesson_id',$request->lesson_id)->first();
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)
+            ->where('lesson_id', $request->lesson_id)->first();
 
-        if(!isset($quiz_lesson)){
+        if (!isset($quiz_lesson)) {
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
         }
-        $attemps= userQuiz::where('user_id',$user_id)->where('quiz_lesson_id',$request->lesson_id)->get();
+        $attemps = userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $request->lesson_id)->get();
         return HelperController::api_response_format(200, $attemps, 'your attempts are ...');
 
+    }
+
+    public function gradeUserQuiz(Request $request)
+    {
+        $request->validate([
+            'user_quiz_id' =>'required|integer|exists:user_quizzes,id',
+            'grade' => 'required|integer',
+            'feedback' => 'string'
+        ]);
+        $userQuiz = userQuiz::find($request->user_quiz_id);
+        $quiz_lesson = QuizLesson::find($userQuiz->quiz_lesson_id);
+        if ($quiz_lesson->grade < $request->grade) {
+            return HelperController::api_response_format(400, $body = [], $message = 'please put grade less than ' . $quiz_lesson->grade);
+        }
+
+        $userQuiz->grade = $request->grade;
+        $userQuiz->status_id = 1;
+        $userQuiz->save();
+        $grade = userQuiz::calculate_grade_of_attempts_with_method($quiz_lesson->id);
+         $grade_item= GradeItems::where('item_type',1)->where('item_Entity',$quiz_lesson->id)->first();
+        if (isset($request->feedback)) {
+            $userQuiz->feedback = $request->feedback;
+        }
+         $user_grade =UserGrade::create([
+            'grade_item_id'=>$grade_item->id,
+             'user_id'=>$userQuiz->user_id,
+             'raw_grade_max'=>$grade_item->grademax,
+             'raw_grade_min'=>$grade_item->grademin,
+             'raw_scale_id'=>$grade_item->scale_id,
+             'final_grade'=>$grade
+
+         ]);
+        if (isset($request->feedback)) {
+            $userQuiz->feedback = $request->feedback;
+            $user_grade->update(['feedback'=> $request->feedback]);
+        }
+
+        return HelperController::api_response_format(200, $body = $user_grade, $message = 'Quiz graded sucess');
     }
 }
