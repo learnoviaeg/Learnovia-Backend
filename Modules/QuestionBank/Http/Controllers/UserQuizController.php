@@ -335,5 +335,23 @@ class UserQuizController extends Controller
 
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
 }
+    public function get_user_quiz(Request $request)
+    {
+        $user_id = Auth::User()->id;
 
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+        ]);
+
+        $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)
+            ->where('lesson_id',$request->lesson_id)->first();
+
+        if(!isset($quiz_lesson)){
+            return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
+        }
+        $attemps= userQuiz::where('user_id',$user_id)->where('quiz_lesson_id',$request->lesson_id)->get();
+        return HelperController::api_response_format(200, $attemps, 'your attempts are ...');
+
+    }
 }

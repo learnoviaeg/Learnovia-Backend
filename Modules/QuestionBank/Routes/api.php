@@ -8,10 +8,9 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('install', 'QuestionBankController@install_question_bank');
 
     //Add/Update Question and Quiz
-    Route::group(['middleware' => 'Restrict'], function () {
         Route::post('add', 'QuizController@store')->middleware('permission:quiz/add');
         Route::post('update', 'QuizController@update')->middleware('permission:quiz/update');
-    });
+
 
     //Quiz Routes
     Route::post('delete', 'QuizController@destroy')->middleware('permission:quiz/delete');
@@ -40,6 +39,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('get-single-quiz', 'QuizController@getSingleQuiz')->middleware('permission:quiz/get-single-quiz');
     Route::post('toggle', 'QuizController@toggleQuizVisibity')->middleware('permission:quiz/toggle');
     Route::post('correct-user-quiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
+    Route::post('get-attempts', 'UserQuizController@get_user_quiz');//->middleware('permission:quiz/get-attempts');
 
 
 });

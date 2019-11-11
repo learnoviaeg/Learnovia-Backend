@@ -28,4 +28,8 @@ class QuizLesson extends Model
     {
         return $this->belongsTo('App\Lesson', 'lesson_id', 'id');
     }
+    public function grading_method()
+    {
+        return $this->belongsTo('Modules\QuestionBank\Entities\GradingMethod', 'grading_method_id', 'id');
+    }
 }
