@@ -2,6 +2,8 @@
 
 namespace Modules\QuestionBank\Http\Controllers;
 
+use App\GradeCategory;
+use App\Http\Controllers\GradeCategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -69,7 +71,11 @@ class QuizLessonController extends Controller
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
             'grade' => 'required',
-            'grade_category_id' => 'required|integer|exists:grade_categories,id'
+            'grade_category_id' => 'required|integer|exists:grade_categories,id',
+            'grade_min' => 'required|integer',
+            'grade_max' => 'required|integer',
+            'scale_id' => 'required|integer|exists:scales,id',
+            'grade_to_pass' => 'required|integer',
         ]);
 
         $quiz = quiz::find($request->quiz_id);
@@ -109,6 +115,15 @@ class QuizLessonController extends Controller
         ]);
 
         $this->NotifyQuiz($quiz,$request->opening_time,'add');
+        $grade_category=GradeCategory::find($request->grade_category_id);
+        $grade_item = $grade_category->GradeItems()->create([
+            'grademin'=>$request->grade_min,
+            'grademax'=>$request->grade_max,
+            'scale_id'=>$request->scale_id,
+            'grade_pass'=>$request->grade_to_pass,
+            'item_type'=>1,
+            'item_Entity'=>$quizLesson->id
+        ]);
         LessonComponent::create([
             'lesson_id' => $request->lesson_id,
             'comp_id'   => $request->quiz_id,
@@ -219,10 +234,8 @@ class QuizLessonController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
-
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
                 ->where('lesson_id',$request->quiz_id)->first();
-
         return HelperController::api_response_format(200, $quizLesson);
     }
 }
