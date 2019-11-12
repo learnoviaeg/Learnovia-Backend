@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\AcademicYearType;
 use App\ClassLevel;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Classes;
 use App\Course;
 use App\CourseSegment;
@@ -175,34 +176,97 @@ class CourseController extends Controller
         return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Deleted Successfully');
     }
 
-    public function MyCourses(Request $request)
+    public function CurrentCourses(Request $request)
     {
         $i=0;
         foreach ($request->user()->enroll as $enroll) {
-            $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
+            if($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
+                $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
+                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
+                $segment=SegmentClass::where('id',$segment_Class_id)->get(['segment_id','class_level_id'])->first();
 
-            $test=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
-            $segment=SegmentClass::where('id',$test)->get(['segment_id','class_level_id'])->first();
-            $all[$i]['segment']=Segment::find($segment->segment_id)->name;
+                $all[$i]['segment']=Segment::find($segment->segment_id)->name;
 
-            $class_id=ClassLevel::where('id',$segment->class_level_id)->get(['class_id','year_level_id'])->first();
-            $all[$i]['class']=Classes::find($class_id->class_id)->name;
+                $class_id=ClassLevel::where('id',$segment->class_level_id)->get(['class_id','year_level_id'])->first();
+                $all[$i]['class']=Classes::find($class_id->class_id)->name;
 
-            $level_id=YearLevel::where('id',$class_id->year_level_id)->get(['level_id','academic_year_type_id'])->first();
-            $all[$i]['level']=Level::find($level_id->level_id)->name;
+                $level_id=YearLevel::where('id',$class_id->year_level_id)->get(['level_id','academic_year_type_id'])->first();
+                $all[$i]['level']=Level::find($level_id->level_id)->name;
 
-            $AC_type=AcademicYearType::where('id',$level_id->academic_year_type_id)->get(['academic_year_id','academic_type_id'])->first();
-            $all[$i]['type']=AcademicType::find($AC_type->academic_year_id)->name;
+                $AC_type=AcademicYearType::where('id',$level_id->academic_year_type_id)->get(['academic_year_id','academic_type_id'])->first();
+                $all[$i]['type']=AcademicType::find($AC_type->academic_year_id)->name;
+                $all[$i]['year']=AcademicYear::find($AC_type->academic_type_id)->name;
 
-            $all[$i]['year']=AcademicYear::find($AC_type->academic_type_id)->name;
-
-            $all[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
-            $all[$i]['Teacher'] = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
-            $all[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
-
-            $i++;
+                $all[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
+                $all[$i]['Teacher'] = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
+                $all[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+                $i++;
+            }
         }
        return HelperController::api_response_format(200, $all);
+    }
+
+    public function PastCourses(Request $request)
+    {
+        $i=0;
+        foreach ($request->user()->enroll as $enroll) {
+            if($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
+                $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
+                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
+//            return Date::excelToDateTimeObject( Carbon::now());//->getTimestamp();
+                $segment=SegmentClass::where('id',$segment_Class_id)->get(['segment_id','class_level_id'])->first();
+
+                $all[$i]['segment']=Segment::find($segment->segment_id)->name;
+
+                $class_id=ClassLevel::where('id',$segment->class_level_id)->get(['class_id','year_level_id'])->first();
+                $all[$i]['class']=Classes::find($class_id->class_id)->name;
+
+                $level_id=YearLevel::where('id',$class_id->year_level_id)->get(['level_id','academic_year_type_id'])->first();
+                $all[$i]['level']=Level::find($level_id->level_id)->name;
+
+                $AC_type=AcademicYearType::where('id',$level_id->academic_year_type_id)->get(['academic_year_id','academic_type_id'])->first();
+                $all[$i]['type']=AcademicType::find($AC_type->academic_year_id)->name;
+                $all[$i]['year']=AcademicYear::find($AC_type->academic_type_id)->name;
+
+                $all[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
+                $all[$i]['Teacher'] = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
+                $all[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+                $i++;
+            }
+
+        }
+        return HelperController::api_response_format(200, $all);
+    }
+    public function FutureCourses(Request $request)
+    {
+        $i=0;
+        foreach ($request->user()->enroll as $enroll) {
+            if($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
+                $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
+                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
+//            return Date::excelToDateTimeObject( Carbon::now());//->getTimestamp();
+                $segment=SegmentClass::where('id',$segment_Class_id)->get(['segment_id','class_level_id'])->first();
+
+                $all[$i]['segment']=Segment::find($segment->segment_id)->name;
+
+                $class_id=ClassLevel::where('id',$segment->class_level_id)->get(['class_id','year_level_id'])->first();
+                $all[$i]['class']=Classes::find($class_id->class_id)->name;
+
+                $level_id=YearLevel::where('id',$class_id->year_level_id)->get(['level_id','academic_year_type_id'])->first();
+                $all[$i]['level']=Level::find($level_id->level_id)->name;
+
+                $AC_type=AcademicYearType::where('id',$level_id->academic_year_type_id)->get(['academic_year_id','academic_type_id'])->first();
+                $all[$i]['type']=AcademicType::find($AC_type->academic_year_id)->name;
+                $all[$i]['year']=AcademicYear::find($AC_type->academic_type_id)->name;
+
+                $all[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
+                $all[$i]['Teacher'] = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
+                $all[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+                $i++;
+            }
+
+        }
+        return HelperController::api_response_format(200, $all);
     }
 
     public function course_with_teacher()

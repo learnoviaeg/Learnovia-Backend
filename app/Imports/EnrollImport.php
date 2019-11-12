@@ -34,12 +34,9 @@ class EnrollImport implements ToModel,WithHeadingRow
         $courseSegment = HelperController::Get_Course_segment_Course($request);
 
         return new Enroll([
-            'username' => $row['username'],
             'user_id'=>$user_id,
             'course_segment' => $courseSegment[0],
-            'role_id'=>$row['role_id'],
-            'start_date'=>Date::excelToDateTimeObject($row['start_date']),
-            'end_date'=>Date::excelToDateTimeObject($row['end_date']),
+            'role_id'=>$row['role_id']
         ]);
     }
 }

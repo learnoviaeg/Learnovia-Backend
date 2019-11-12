@@ -15,18 +15,12 @@ class CreateEnrollsTable extends Migration
     {
         Schema::create('enrolls', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('course_segment');
             $table->foreign('course_segment')->references('id')->on('course_segments')->onDelete('cascade')->onUpdate('cascade');
-            $table->timestamp('start_date');
-            $table->timestamp('end_date')->nullable();
             $table->unsignedInteger('role_id');
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
-
-            
-            
             $table->timestamps();
             
         });

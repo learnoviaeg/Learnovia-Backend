@@ -27,10 +27,8 @@ class EnrollUserToCourseController extends Controller
     {
         $request->validate([
             'users' => 'required|array',
-            'users.*' => 'required|string|exists:users,username',
+            'users.*' => 'required|string|exists:users,id',
             'role_id' => 'required|array|exists:roles,id',
-            'start_date' => 'required|before:end_date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
-            'end_date' => 'required|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
             'class' => 'required|exists:classes,id',
             'course' => 'required|array',
             'course.*' => 'required|exists:courses,id'
@@ -46,15 +44,13 @@ class EnrollUserToCourseController extends Controller
 
         if (!in_array(null, $course_segment) == true) {
             foreach ($course_segment as $courses) {
-                foreach ($request->users as $username) {
-                    $user_id = User::FindByName($username)->id;
+                foreach ($request->users as $user_id) {
+                    $username = User::find($user_id)->username;
                     $check = Enroll::IsExist($courses->id, $user_id);
                     if (!$check) {
                         $enroll = new Enroll;
                         $enroll->setAttribute('user_id', $user_id);
                         $enroll->setAttribute('course_segment', $courses->id);
-                        $enroll->setAttribute('start_date', $request->start_date);
-                        $enroll->setAttribute('end_date', $request->end_date);
                         $enroll->setAttribute('role_id', $request->role_id[$rolecount]);
                         $enroll->setAttribute('username', $username);
                         $enroll->save();
@@ -120,9 +116,7 @@ class EnrollUserToCourseController extends Controller
     public static function EnrollInAllMandatoryCourses(Request $request)
     {
         $request->validate([
-            'username' => 'required|array|exists:users,username',
-            'start_date' => 'required|before:end_date|after:' . Carbon::now(),
-            'end_date' => 'required|after:' . Carbon::now(),
+            'users' => 'required|array|exists:users,id',
             'year' => 'exists:academic_years,id',
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
@@ -132,8 +126,7 @@ class EnrollUserToCourseController extends Controller
         ]);
 
         $count = 0;
-        foreach ($request->username as $user) {
-            $userId = User::FindByName($user)->id;
+        foreach ($request->users as $user) {
             $x = HelperController::Get_segment_class($request);
             if ($x != null) {
                 $segments = collect([]);
@@ -151,20 +144,17 @@ class EnrollUserToCourseController extends Controller
                 if ($segments == null)
                     break;
 
-                $check = Enroll::where('user_id', $userId)->where('course_segment', $segments)->pluck('id');
+                $check = Enroll::where('user_id', $user)->where('course_segment', $segments)->pluck('id');
                 if (count($check) == 0) {
                     foreach ($segments as $segment) {
                         Enroll::Create([
-                            'username' => $user,
-                            'user_id' => $userId,
+                            'user_id' => $user,
                             'course_segment' => $segment,
-                            'start_date' => $request->start_date,
-                            'end_date' => $request->end_date,
                             'role_id' => 3,
                         ]);
                     }
                 }
-                if (isset($request->course)) {
+                elseif  (isset($request->course)) {
                     $mand = Course::where('id', $request->course)->pluck('mandatory')->first();
                     if ($mand == 1)
                         return HelperController::api_response_format(400, [], 'This Course not Optional_Course');
@@ -172,11 +162,8 @@ class EnrollUserToCourseController extends Controller
                     foreach ($request->course as $course) {
                         $courseSegment = HelperController::Get_Course_segment_course($request);
                         Enroll::Create([
-                            'username' => $user,
-                            'user_id' => $userId,
+                            'user_id' => user,
                             'course_segment' => $courseSegment['value']['id'],
-                            'start_date' => $request->start_date,
-                            'end_date' => $request->end_date,
                             'role_id' => 3,
                         ]);
                     }
@@ -308,35 +295,29 @@ class EnrollUserToCourseController extends Controller
     {
         $request->validate([
             'users' => 'required|array',
-            'users.*' => 'required|string|exists:users,username',
+            'users.*' => 'required|string|exists:users,id',
             'role_id' => 'required|array|exists:roles,id',
-            'start_date' => 'required|before:end_date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
-            'end_date' => 'required|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id|required_with:level',
             'level' => 'exists:levels,id|required_with:class',
             'class' => 'exists:classes,id|required_with:segment',
             'segment' => 'exists:segments,id',
-            'course' => 'exists:courses,id'
+            'courses' => 'array|exists:courses,id'
         ]);
 
         $courseSeg=GradeCategoryController::getCourseSegment($request);
         if(isset($courseSeg))
         {
             $count=0;
-            foreach($request->users as $user[$count])
+            foreach($request->users as $user)
             {
-                $user_id = User::FindByName($user[$count])->id;
                 foreach ($courseSeg as $course) {
-                $check = Enroll::IsExist($course, $user_id);
+                $check = Enroll::IsExist($course, $user);
                 if($check==null)
                 {
                     Enroll::Create([
-                        'username' => $user[$count],
-                        'user_id' => $user_id,
+                        'user_id' => $user,
                         'course_segment' => $course,
-                        'start_date' => $request->start_date,
-                        'end_date' => $request->end_date,
                         'role_id' => $request->role_id[$count],
                     ]);
                 }

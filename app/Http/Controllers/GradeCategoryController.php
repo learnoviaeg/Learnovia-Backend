@@ -174,8 +174,8 @@ class GradeCategoryController extends Controller
                 $query->where('segment_id', $segment_id);
             }
         } , 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function($query)  use ($request){
-            if($request->filled('course'))
-                $query->where('course_id' , $request->course);
+            if($request->filled('courses'))
+                $query->whereIn('course_id' , $request->courses);
             if($request->filled('typical'))
                 $query->where('typical',$request->typical);
         }])->get()->pluck('YearType')[0];

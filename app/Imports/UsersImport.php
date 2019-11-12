@@ -66,7 +66,7 @@ class UsersImport implements ToModel, WithHeadingRow
         }
         $user->save();
 
-        if (isset($row['start_date'])&&isset($row['end_date']))
+        if (isset($row['type'])&&isset($row['level'])&&isset($row['class']))
         {
             Validator::make($row,[
                 'type' => 'required|exists:academic_types,id',
@@ -100,13 +100,6 @@ class UsersImport implements ToModel, WithHeadingRow
                 $segment = Segment::Get_current($row['type'])->id;
             }
 
-            $time=['start_date'=>Date::excelToDateTimeObject($row['start_date']),'end_date' =>Date::excelToDateTimeObject($row['end_date'])];
-
-            Validator::make($time,[
-                'start_date'=> 'required|before:end_date|after:' . Carbon::now(),
-                'end_date' => 'required|after:' . Carbon::now()
-            ])->validate();
-
             Validator::make($row,[
                 'role_id'=>'required|exists:roles,id',
             ])->validate();
@@ -115,9 +108,6 @@ class UsersImport implements ToModel, WithHeadingRow
             $user->assignRole($role);
             if ($row['role_id'] == 3) {
                 $request = new Request([
-                    'username' => array($user->username),
-                    'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                    'end_date' => Date::excelToDateTimeObject($row['end_date']),
                     'year' => $year,
                     'type' => $row['type'],
                     'level' => $row['level'],
@@ -141,9 +131,6 @@ class UsersImport implements ToModel, WithHeadingRow
                         Enroll::firstOrCreate([
                             'course_segment' => $course_seg,
                             'user_id' => $userId,
-                            'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                            'username'=> $user->username,
-                            'end_date' => Date::excelToDateTimeObject($row['end_date']),
                             'role_id'=> 3
                         ]);
 
@@ -166,9 +153,6 @@ class UsersImport implements ToModel, WithHeadingRow
                         Enroll::create([
                             'course_segment' => $course_seg,
                             'user_id' => $userId,
-                            'start_date' => Date::excelToDateTimeObject($row['start_date']),
-                            'username'=> $user->username,
-                            'end_date' => Date::excelToDateTimeObject($row['end_date']),
                             'role_id'=> 4
                         ]);
 

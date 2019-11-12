@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateCourseSegments extends Migration
+class AlterCourseSegment extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,8 @@ class UpdateCourseSegments extends Migration
     public function up()
     {
         Schema::table('course_segments', function (Blueprint $table) {
-            $table->boolean('typical')->default(1);
+            $table->timestamp('start_date')->nullable();
+            $table->timestamp('end_date')->nullable();
         });
     }
 
