@@ -26,9 +26,13 @@ class GradeCategory extends Model
     public function total()
     {
         $result = 0;
-        $gradeitems = $this->GradeItems;
+        $gradeitems = $this->GradeItems->where('override' ,'!=' , -1);
         foreach ($gradeitems as $item) {
             $result += $item->grademax;
+        }
+        $child = $this->Child;
+        foreach ($child as $item) {
+            $result += $item->total();
         }
         return $result;
     }

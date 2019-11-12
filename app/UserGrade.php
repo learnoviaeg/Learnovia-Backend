@@ -42,12 +42,31 @@ class UserGrade extends Model
             $result += ($temp->final_grade / $item->grademax) * $item->weight();
         }
         $result = ($result * $total) / 100;
-        return round($result,3);
+        return round($result, 3);
+    }
+
+    public function calculateSWMGrade()
+    {
+        $gradeitems = $this->GradeItems->GradeCategory->GradeItems;
+        $temp = self::where('user_id', $this->user_id)->whereIn('grade_item_id', $gradeitems->pluck('id'))->pluck('grade_item_id');
+        $finals = array_sum(self::where('user_id', $this->user_id)->whereIn('grade_item_id', $gradeitems->pluck('id'))->pluck('final_grade'));
+        $categoryTotal = $this->GradeItems->GradeCategory->total();
+        $max = array_sum(GradeItems::wherein('id', $temp)->pluck('grademax'));
+        return ($finals * $categoryTotal) / $max;
     }
 
     public function calculateGrade()
     {
-        if ($this->GradeItems->GradeCategory->aggregation)
-            return $this->calculateNaturalGrade();
+        switch ($this->GradeItems->GradeCategory->aggregation) {
+            case 1:
+                return $this->calculateNaturalGrade();
+                break;
+            case 2:
+                return $this->calculateSWMGrade();
+                break;
+            default:
+                return null;
+                break;
+        }
     }
 }
