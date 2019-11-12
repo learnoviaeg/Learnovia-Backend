@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\AcademicYearType;
 use App\ClassLevel;
+use App\Classes;
 use App\Course;
 use App\CourseSegment;
 use App\Lesson;
+use App\Level;
 use App\SegmentClass;
 use App\Component;
 use App\YearLevel;
@@ -15,6 +17,7 @@ use App\Enroll;
 use App\Segment;
 use App\AcademicYear;
 use App\GradeCategory;
+use App\AcademicType;
 use App\attachment;
 use App\LessonComponent;
 use App\User;
@@ -174,26 +177,32 @@ class CourseController extends Controller
 
     public function MyCourses(Request $request)
     {
-        $i = 0;
-        $courses = [];
-        $names = [];
+        $i=0;
         foreach ($request->user()->enroll as $enroll) {
-            if (in_array($enroll->CourseSegment->courses[0], $courses))
-                continue;
-            $CHeckCourses[$i] = $enroll->CourseSegment->courses[0];
-            if(in_array($CHeckCourses[$i]['name'], $names))
-                continue;
-            else{
-                array_push($names,$CHeckCourses[$i]['name']);
-            }
-            $courses[$i] = $enroll->CourseSegment->courses[0];
-            $enroll->CourseSegment->courses[0]->attachment;
-            $courses[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
-            $courses[$i]['Teacher'] = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
-            $courses[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+            $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
+
+            $test=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
+            $segment=SegmentClass::where('id',$test)->get(['segment_id','class_level_id'])->first();
+            $all[$i]['segment']=Segment::find($segment->segment_id)->name;
+
+            $class_id=ClassLevel::where('id',$segment->class_level_id)->get(['class_id','year_level_id'])->first();
+            $all[$i]['class']=Classes::find($class_id->class_id)->name;
+
+            $level_id=YearLevel::where('id',$class_id->year_level_id)->get(['level_id','academic_year_type_id'])->first();
+            $all[$i]['level']=Level::find($level_id->level_id)->name;
+
+            $AC_type=AcademicYearType::where('id',$level_id->academic_year_type_id)->get(['academic_year_id','academic_type_id'])->first();
+            $all[$i]['type']=AcademicType::find($AC_type->academic_year_id)->name;
+
+            $all[$i]['year']=AcademicYear::find($AC_type->academic_type_id)->name;
+
+            $all[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
+            $all[$i]['Teacher'] = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
+            $all[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+
             $i++;
         }
-       return HelperController::api_response_format(200, $courses);
+       return HelperController::api_response_format(200, $all);
     }
 
     public function course_with_teacher()
