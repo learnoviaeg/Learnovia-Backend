@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CourseSegment extends Model
 {
-    protected $fillable = ['course_id', 'segment_class_id' , 'is_active','letter','letter_id'];
+    protected $fillable = ['course_id', 'segment_class_id' , 'is_active','letter','letter_id','start_date','end_date'];
 
     public static function GetCoursesByCourseSegment($user_id)
     {

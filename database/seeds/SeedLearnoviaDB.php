@@ -136,12 +136,12 @@ class SeedLearnoviaDB extends Seeder
             SegmentClass::create($SegmentClas);
         }
         $CourseSegment = [
-            ['course_id' => 1, 'segment_class_id' => 1],
+            ['course_id' => 1, 'segment_class_id' => 1, 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27'],
             ['course_id' => 2, 'segment_class_id' => 1, 'is_active' => 1],
-            ['course_id' => 2, 'segment_class_id' => 2],
+            ['course_id' => 2, 'segment_class_id' => 2, 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27'],
             ['course_id' => 2, 'segment_class_id' => 3, 'is_active' => 1],
             ['course_id' => 3, 'segment_class_id' => 3, 'is_active' => 1],
-            ['course_id' => 1, 'segment_class_id' => 2],
+            ['course_id' => 1, 'segment_class_id' => 2, 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27'],
 
         ];
         foreach ($CourseSegment as $CourseSegmen) {
@@ -232,20 +232,13 @@ class SeedLearnoviaDB extends Seeder
         }
 
         $Enrolls = [
-            ['user_id' => 2, 'username' => 'Learn0002', 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27',
-                'course_segment' => 1, 'role_id' => 4],
-            ['user_id' => 3, 'username' => 'Learn0003', 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27',
-                'course_segment' => 1, 'role_id' => 3],
-            ['user_id' => 4, 'username' => 'Learn0004', 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27',
-                'course_segment' => 2, 'role_id' => 4],
-            ['user_id' => 5, 'username' => 'Learn0005', 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27',
-                'course_segment' => 1, 'role_id' => 3],
-            ['user_id' => 6, 'username' => 'Learn0006', 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27',
-                'course_segment' => 2, 'role_id' => 3],
-            ['user_id' => 6, 'username' => 'Learn0006', 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27',
-                'course_segment' => 3, 'role_id' => 3],
-            ['user_id' => 6, 'username' => 'Learn0006', 'start_date' => '2019-07-28 13:23:27', 'end_date' => '2019-07-28 13:23:27',
-                'course_segment' => 1, 'role_id' => 3],
+            ['user_id' => 2,'course_segment' => 1, 'role_id' => 4],
+            ['user_id' => 3,'course_segment' => 1, 'role_id' => 3],
+            ['user_id' => 4,'course_segment' => 2, 'role_id' => 4],
+            ['user_id' => 5,'course_segment' => 1, 'role_id' => 3],
+            ['user_id' => 6,'course_segment' => 2, 'role_id' => 3],
+            ['user_id' => 6,'course_segment' => 3, 'role_id' => 3],
+            ['user_id' => 6, 'course_segment' => 1, 'role_id' => 3],
 
         ];
         foreach ($Enrolls as $user) {
