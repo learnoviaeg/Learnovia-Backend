@@ -51,10 +51,14 @@ class User extends Authenticatable
     private static function getUserCounter($lastid)
     {
         if ($lastid < 10) {
-            return "000" . $lastid;
+            return "00000" . $lastid;
         } elseif ($lastid < 100 && $lastid >= 10) {
-            return "00" . $lastid;
+            return "0000" . $lastid;
         } elseif ($lastid < 1000 && $lastid >= 100) {
+            return "000" . $lastid;
+        } elseif ($lastid < 10000 && $lastid >= 1000) {
+            return "00" . $lastid;
+        } elseif ($lastid < 100000 && $lastid >= 10000) {
             return "0" . $lastid;
         }
     }
