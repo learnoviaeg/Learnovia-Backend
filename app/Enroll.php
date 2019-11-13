@@ -7,7 +7,7 @@ use DB;
 
 class Enroll extends Model
 {
-    protected $fillable = ['user_id', 'username', 'course_segment', 'role_id', 'start_date', 'end_date'];
+    protected $fillable = ['user_id', 'username', 'course_segment', 'role_id'];
 
     public static function getroleid($user_id, $course_segment)
     {

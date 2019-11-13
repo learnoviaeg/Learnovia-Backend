@@ -85,9 +85,6 @@ class UserController extends Controller
                 $classSegID=SegmentClass::GetClasseLevel($classLevID);
 
                 $option = new Request([
-                    'username' => $user->username,
-                    'start_date' => $request->start_date[$key],
-                    'end_date' => $request->end_date[$key],
                     'SegmentClassId' => $classSegID
                 ]);
                 EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
@@ -97,9 +94,7 @@ class UserController extends Controller
                     $segmentid= CourseSegment::getidfromcourse($course_id);
                     $option = new Request([
                         'course_segment' => array($segmentid),
-                        'start_date' => $request->start_date[$key],
-                        'users'=> array($user->username),
-                        'end_date' => $request->end_date[$key],
+                        'users'=> array($user->id),
                         'role_id'=>array(3)
                     ]);
                     EnrollUserToCourseController::EnrollCourses($option);
@@ -115,9 +110,7 @@ class UserController extends Controller
                     $segmentid= CourseSegment::getidfromcourse($course_id);
                     $option = new Request([
                         'course_segment' => array($segmentid),
-                        'start_date' => $request->start_date[$key],
-                        'users'=> array($user->username),
-                        'end_date' => $request->end_date[$key],
+                        'users'=> array($user->id),
                         'role_id'=>array($role->id)
                     ]);
                     EnrollUserToCourseController::EnrollCourses($option);
