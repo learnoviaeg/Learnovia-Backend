@@ -52,7 +52,6 @@ class EnrollUserToCourseController extends Controller
                         $enroll->setAttribute('user_id', $user_id);
                         $enroll->setAttribute('course_segment', $courses->id);
                         $enroll->setAttribute('role_id', $request->role_id[$rolecount]);
-                        $enroll->setAttribute('username', $username);
                         $enroll->save();
                     } else {
                         $count++;
