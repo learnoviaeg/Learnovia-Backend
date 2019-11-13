@@ -108,7 +108,12 @@ class AuthController extends Controller
         $request->user()->token()->revoke();
         return HelperController::api_response_format(200, [], 'Successfully logged out');
     }
-
+ /**
+     *
+     * @Description :getuserPermession gets all permissions for logged in user. 
+     * @param : No parameters.
+     * @return : return an array of permissions of this user .  
+     */
     public function getuserPermession()
     {
         $user = Auth::user();
@@ -137,7 +142,12 @@ class AuthController extends Controller
     {
         return HelperController::api_response_format(200, $request->user()->roles);
     }
-
+ /**
+     *
+     * @Description :getuserPermessionFlags gets all permissions for logged in user. 
+     * @param : No parameters.
+     * @return : return an array of permissions as keys and True/False as a values for this user .  
+     */
     public function getuserPermessionFlags(Request $request)
     {
         $permessions = Permission::all();

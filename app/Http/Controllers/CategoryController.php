@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+     /**
+     *
+     * @Description :creates new grade category. 
+     * @param : name of grade category.
+     * @return : returns all grade categories.
+     */
     public function add(Request $request)
     {
         $request->validate([
@@ -18,7 +24,12 @@ class CategoryController extends Controller
         $cats=Category::get()->paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(201, $cats, 'Category Created Successfully');
     }
-
+     /**
+     *
+     * @Description :updates a grade category. 
+     * @param : id and name of grade category.
+     * @return : returns all grade categories.
+     */
     public function edit(Request $request)
     {
         $request->validate([
@@ -31,7 +42,12 @@ class CategoryController extends Controller
         $cats=Category::get()->paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(200, $cats, 'Category Updated Successfully');
     }
-
+     /**
+     *
+     * @Description :delete a grade category. 
+     * @param : id of grade category.
+     * @return : returns all grade categories.
+     */
     public function delete(Request $request)
     {
         $request->validate([
@@ -43,7 +59,12 @@ class CategoryController extends Controller
         $cats=Category::get()->paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(200, $cats, 'Category Deleted Successfully');
     }
-
+    /**
+     *
+     * @Description :list all grade categories or select one by id. 
+     * @param : id of grade category as an optional parameter.
+     * @return : returns all grade categories or a selected one.
+     */
     public function get(Request $request)
     {
         $request->validate([
