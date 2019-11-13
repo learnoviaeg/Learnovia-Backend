@@ -121,10 +121,10 @@ class AnnouncementController extends Controller
             }
         } else if ($request->assign == 'year') {
             $request->validate([
-                'year_id' => 'required|exists:academic_years,id',
+                'year' => 'required|exists:academic_years,id',
             ]);
 
-            $year = AcademicYear::find($request->year_id);
+            $year = AcademicYear::find($request->year);
             $year_level = $year->Acyeartype->yearLevel;
 
             foreach ($year_level as $yea) {
@@ -182,7 +182,7 @@ class AnnouncementController extends Controller
             'class_id' => $request->class_id,
             'course_id' => $request->course_id,
             'level_id' => $request->level_id,
-            'year_id' => $request->year_id,
+            'year_id' => $request->year,
             'type_id' => $request->type_id,
             'segment_id' => $request->segment_id,
             'publish_date' => $publishdate,
