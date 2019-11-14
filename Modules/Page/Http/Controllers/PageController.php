@@ -215,4 +215,5 @@ class PageController extends Controller
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
+    
 }
