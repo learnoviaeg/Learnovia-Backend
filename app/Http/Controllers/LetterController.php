@@ -9,6 +9,14 @@ use App\Letter;
 
 class LetterController extends Controller
 {
+    /**
+     * Add letter
+     * 
+     * @param  [string] name 
+     * @param  [array] formate
+     * @param  [string] formate[name], formate[boundary]
+     * @return [object] Letter Created Successfully
+    */
     public function add(Request $request)
     {
         $request->validate([
@@ -29,6 +37,13 @@ class LetterController extends Controller
 
     }
 
+    /**
+     * update letter
+     * 
+     * @param  [string] name, formate[name], formate[boundary]
+     * @param  [int] id 
+     * @return [object] Letter updated Successfully
+    */
     public function update(Request $request)
     {
         $request->validate([
@@ -53,6 +68,13 @@ class LetterController extends Controller
         return HelperController::api_response_format(200,null, 'This Letter Used Before ' );
     }
 
+    /**
+     * delete letter
+     * 
+     * @param  [int] id 
+     * @return if letter used in course segment [string] This Letter Used Before
+     * @return [object] Letter deleted Successfully
+    */
     public function delete(Request $request)
     {
         $request->validate([
@@ -69,6 +91,12 @@ class LetterController extends Controller
         return HelperController::api_response_format(200, Letter::get()->paginate(HelperController::GetPaginate($request)), 'Letter Deleted Successfully');
     }
 
+    /**
+     * get letter
+     * 
+     * @param  [int] id 
+     * @return [object] Letter
+    */
     public function get(Request $request)
     {
         $request->validate([

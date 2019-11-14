@@ -7,6 +7,14 @@ use App\UserGrade;
 
 class UserGradeController extends Controller
 {
+    /**
+     * create User grade
+     * 
+     * @param  [int] grade_item_id, user_id, raw_grade, raw_grade_max, raw_grade_min, raw_scale_id, final_grade, letter_id
+     * @param  [boolean] hidden, locked
+     * @param  [string] feedback
+     * @return [object] and [string] User Grade Created Successfully
+    */
     public function create(Request $request)
     {
         $request->validate([
@@ -49,8 +57,15 @@ class UserGradeController extends Controller
 
     }
 
-
-
+    /**
+     * update User grade
+     * 
+     * @param  [int] id, grade_item_id, user_id, raw_grade, raw_grade_max, raw_grade_min, raw_scale_id, final_grade, 
+     *              letter_id 
+     * @param  [boolean] hidden, locked
+     * @param  [string] feedback
+     * @return [object] and [string] User Grade updated Successfully
+    */
     public function update(Request $request)
     {
         $request->validate([
@@ -95,13 +110,15 @@ class UserGradeController extends Controller
 
         $update=$grade->update($data);
 
-
         return HelperController::api_response_format(200, $grade, 'User Grade Updated Successfully');
-
     }
 
-
-
+    /**
+     * delete User grade
+     * 
+     * @param  [int] id
+     * @return [string] User Grade deleted Successfully
+    */
     public function delete(Request $request)
     {
         $request->validate([
@@ -112,10 +129,13 @@ class UserGradeController extends Controller
         $grade->delete();
 
         return HelperController::api_response_format(201, null, 'User Grade Deleted Successfully');
-
     }
 
-
+    /**
+     * list User grades
+     * 
+     * @return [objects] grades
+    */
     public function list()
     {
         $grade = UserGrade::all();

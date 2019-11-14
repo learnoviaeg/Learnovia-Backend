@@ -60,6 +60,16 @@ class GradeCategoryController extends Controller
 
     }
 
+    /**
+     * Add bulk Grade Category
+     * 
+     * @param  [array] grades[name]
+     * @param  [array] grades[parent]
+     * @param  [array] grades[aggregation]
+     * @param  [array] grades[aggregatedOnlyGraded]
+     * @param  [array] grades[hidden]
+     * @return [string] Grade Category is created successfully
+    */
     public function addBulkGradeCategories(Request $request)
     {
         $request->validate([
@@ -75,6 +85,14 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(200, null, 'Grade Category is created successfully');
 
     }
+
+    /**
+     * delete bulk Grade Category
+     * 
+     * @param  [string] name
+     * @param  [int] id_number
+     * @return [string] Grade Category is deleted successfully
+    */
     public function deleteBulkGradeCategories(Request $request)
     {
         $request->validate([
@@ -87,6 +105,12 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(200, null, 'Grade Category is deleted successfully');
     }
 
+    /**
+     * get Grade Category
+     * 
+     * @param  [int] id
+     * @return [object] Grade Categories with child
+    */
     public function GetGradeCategory(Request $request)
     {
         if ($request->filled('id')) {
@@ -97,6 +121,18 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(200, $gradeCategory);
     }
 
+    /**
+     * update Grade Category
+     * 
+     * @param  [int] id
+     * @param  [string] name
+     * @param  [int] course_segment_id
+     * @param  [int] aggregation
+     * @param  [int] aggregatedOnlyGraded
+     * @param  [int] hidden
+     * @param  [int] parent
+     * @return [string] Grade Category is updated successfully and the object
+    */
     public function UpdateGradeCategory(Request $request)
     {
         $request->validate([
@@ -121,6 +157,12 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(200, $grade_category, 'Grade Category is updated successfully');
     }
 
+    /**
+     * delete Grade Category
+     * 
+     * @param  [int] id
+     * @return [string] Grade Category is deleted successfully
+    */
     public function deleteGradeCategory(Request $request)
     {
         $request->validate([
@@ -131,6 +173,13 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(200, null, 'Grade Category is deleted successfully');
     }
 
+    /**
+     * Move Category
+     * 
+     * @param  [int] id
+     * @param  [int] parent
+     * @return [string] Grade Category is moved successfully
+    */
     public function MoveToParentCategory(Request $request)
     {
         $request->validate([
@@ -144,12 +193,30 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(200, $GardeCategory, 'Grade Category is moved successfully');
     }
 
+    /**
+     * get Category from course_segments
+     * 
+     * @param  [int] id
+     * @return [object] Grade Categories In Segments
+    */
     public function GetCategoriesFromCourseSegments(Request $request)
     {
         $grade = CourseSegment::GradeCategoryPerSegmentbyId($request->id);
         return $grade;
     }
 
+    /**
+     * get Category with Tree
+     * 
+     * @param  [int] year
+     * @param  [int] type
+     * @param  [int] level
+     * @param  [int] class
+     * @param  [int] course
+     * @param  [int] segment
+     * @return if there is no course segment or disactives [string] No Course active in segment
+     * @return if there is [string] Get grade category with child
+    */
     public function Get_Tree(Request $request)
     {
         $course_segment = HelperController::Get_Course_segment_Course($request);
@@ -164,6 +231,17 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(200, $grade_category);
     }
 
+    /**
+     * get course_segments with/without any param chain
+     * 
+     * @param  [int] year
+     * @param  [int] type
+     * @param  [int] level
+     * @param  [int] class
+     * @param  [int] course
+     * @param  [int] segment
+     * @return [object] Grade Categories In Segments
+    */
     public  static function getCourseSegment(Request $request)
     {
         $year = AcademicYear::Get_current();
@@ -212,6 +290,20 @@ class GradeCategoryController extends Controller
         return $array;
     }
 
+    /**
+     * bulk update grade 
+     * 
+     * @param  [string] name
+     * @param  [int] id_number
+     * @param  [string] newname
+     * @param  [int] year
+     * @param  [int] type
+     * @param  [int] level
+     * @param  [int] class
+     * @param  [int] course
+     * @param  [int] segment
+     * @return [object] Updated Grade categories
+    */
     public function bulkupdate(Request $request)
     {
         $request->validate([
@@ -233,6 +325,18 @@ class GradeCategoryController extends Controller
         }
     }
 
+    /**
+     * Get grade category with chain 
+     * 
+     * @param  [int] year
+     * @param  [int] type
+     * @param  [int] level
+     * @param  [int] class
+     * @param  [int] course
+     * @param  [int] segment
+     * @return if there is no course segment [string] There is No Course segment available.
+     * @return [objects] grade categories
+    */
     public function GetGradeCategoryTree(Request $request)
     {
         $gradeCategories=collect();
@@ -258,6 +362,18 @@ class GradeCategoryController extends Controller
         return HelperController::api_response_format(200, 'There is No Course segment available.');
     }
 
+    /**
+     * Get all grade category with chain 
+     * 
+     * @param  [int] year
+     * @param  [int] type
+     * @param  [int] level
+     * @param  [int] class
+     * @param  [int] course
+     * @param  [int] segment
+     * @return if there is no course segment [string] There is No Course segment available.
+     * @return [objects] grade categories
+    */
     public function GetAllGradeCategory(Request $request)
     {
         $gradeCategories=collect();

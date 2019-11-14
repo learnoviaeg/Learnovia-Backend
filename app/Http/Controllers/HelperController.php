@@ -13,6 +13,14 @@ use Validator;
 
 class HelperController extends Controller
 {
+    /**
+     * response formate
+     * 
+     * @param  [array/object] body
+     * @param  [int] $code
+     * @param  [string] message
+     * @return [objects] all params
+    */
     public static function api_response_format($code, $body = [], $message = [])
     {
         return response()->json([
@@ -21,6 +29,11 @@ class HelperController extends Controller
         ], $code);
     }
 
+    /**
+     * NOT Found
+     * 
+     * @return [string] NOTFound, [] body, 404
+    */
     public static function NOTFOUND()
     {
         return response()->json([
@@ -29,6 +42,12 @@ class HelperController extends Controller
         ], 404);
     }
 
+    /**
+     * get course segment
+     * 
+     * @param  [int] year, type, level, class, segment
+     * @return [objects] course segments in this tree
+    */
     public static function Get_Course_segment($request)
     {
         $rules = [
@@ -72,6 +91,13 @@ class HelperController extends Controller
         return ['result' => true, 'value' => $course_segment];
     }
 
+
+    /**
+     * get course segment by course
+     * 
+     * @param  [int] year, course, type, level, class, segment
+     * @return [objects] course segments in this tree
+    */
     public static function Get_Course_segment_Course($request)
     {
         $rules = [
@@ -120,6 +146,12 @@ class HelperController extends Controller
         return ['result' => true, 'value' => $course_segment];
     }
 
+    /**
+     * get class level
+     * 
+     * @param  [int] year, type, level, class
+     * @return [objects] clas0slevels in this tree
+    */
     public static function Get_class_LEVELS($request)
     {
         $academic_year_type = AcademicYearType::checkRelation($request->year,$request->type);
@@ -128,6 +160,12 @@ class HelperController extends Controller
         return $class_level;
     }
 
+    /**
+     * get paginate
+     * 
+     * @param  [int] paginate
+     * @return [int] if there is no paginate by default return 10
+    */
     public static function GetPaginate($request)
     {
         if($request->filled('paginate')){
@@ -136,6 +174,12 @@ class HelperController extends Controller
         return 10 ;
     }
 
+    /**
+     * get segment class
+     * 
+     * @param  [int] year, course, type, level, class, segment
+     * @return [objects] segment classes in this tree
+    */
     public static function Get_segment_class($request)
     {
         $rules = [

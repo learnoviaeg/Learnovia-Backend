@@ -42,9 +42,9 @@ class SeedLearnoviaDB extends Seeder
             AcademicType::create($AcademicType);
         }
         $AcademicYears = [
-            ['name' => '2015'],
-            ['name' => '2016'],
-            ['name' => '2017']
+            ['name' => '2015','current' =>'1'],
+            ['name' => '2016','current' =>'0'],
+            ['name' => '2017','current' =>'0']
         ];
         foreach ($AcademicYears as $AcademicYear) {
             AcademicYear::create($AcademicYear);

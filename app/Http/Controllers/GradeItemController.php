@@ -9,6 +9,15 @@ use DB;
 
 class GradeItemController extends Controller
 {
+    /**
+     * create grade item 
+     * 
+     * @param  [int] grade_category, grademin, grademax, item_no, scale_id, aggregationcoef, grade_pass, multifactor,
+     *              plusfactor, aggregationcoef2, item_type
+     * @param  [boolean] hidden
+     * @param  [string] calculation, item_Entity
+     * @return [objects] and [message] Grade Created Successfully
+    */
     public function create(Request $request)
     {
         $request->validate([
@@ -57,8 +66,16 @@ class GradeItemController extends Controller
 
     }
 
-
-
+    /**
+     * update grade item 
+     * 
+     * @param  [int] id, grade_category, grademin, grademax, item_no, scale_id, aggregationcoef, grade_pass, multifactor,
+     *              plusfactor, aggregationcoef2, item_type
+     * @param  [boolean] hidden
+     * @param  [string] calculation, item_Entity
+     * @param  [boolean] hidden
+     * @return [objects] and [message] Grade updated Successfully
+    */
     public function update(Request $request)
     {
         $request->validate([
@@ -113,8 +130,12 @@ class GradeItemController extends Controller
 
     }
 
-
-
+    /**
+     * delete grade item 
+     * 
+     * @param  [int] id
+     * @return [objects] and [message] Grade deleted Successfully
+    */
     public function delete(Request $request)
     {
         $request->validate([
@@ -128,13 +149,23 @@ class GradeItemController extends Controller
 
     }
 
-
+    /**
+     * list/get grade item 
+     * 
+     * @return [objects] all grade items with Grade category and item type and scale
+    */
     public function list()
     {
         $grade = GradeItems::with(['GradeCategory' , 'ItemType' , 'scale'])->get();
         return HelperController::api_response_format(200, $grade);
     }
 
+    /**
+     * move  grade item to new category
+     * 
+     * @param  [int] id, newcategory
+     * @return [objects] and [message] Grade item Category is moved successfully
+    */
     public function Move_Category(Request $request){
         $request->validate([
             'id' => 'required|exists:grade_items,id',
