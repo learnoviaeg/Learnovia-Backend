@@ -67,7 +67,6 @@ class PageController extends Controller
             'title' => 'required|string',
             'content' => 'required|string',
             'Lesson_id' => 'required|exists:lessons,id',
-            'visible' => 'nullable|boolean',
             'publish_date'=>'nullable'
         ]);
         if($request->filled('publish_date'))
@@ -159,7 +158,6 @@ class PageController extends Controller
         $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
-            'visible' => 'nullable|boolean',
             'publish_date'=>'nullable|'
         ]);
         if($request->filled('publish_date'))
@@ -178,9 +176,7 @@ class PageController extends Controller
                 'title' => $request->title,
                 'content' => $request->content
             ];
-            if(isset($request->visible)) {
-                $data['visible']=$request->visible;
-            }
+           
             $lessonID=pageLesson::where('page_id',$request->id)->pluck('lesson_id')->first();
 
         $page->update($data);
