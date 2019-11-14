@@ -67,7 +67,6 @@ class PageController extends Controller
             'title' => 'required|string',
             'content' => 'required|string',
             'Lesson_id' => 'required|exists:lessons,id',
-            'visible' => 'nullable|boolean',
             'publish_date'=>'nullable'
         ]);
         if($request->filled('publish_date'))
