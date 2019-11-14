@@ -194,7 +194,12 @@ class segment_class_Controller extends Controller
 
         return HelperController::api_response_format(201, 'Segment Assigned Successfully');
     }
-
+     /**
+     *
+     * @Description :update a segment
+     * @param : id and name are required parameters.
+     * @return : string message which indicates if segment set to be current or not.
+     */
     public function update(Request $request)
     {
         $valid = Validator::make($request->all(), [
@@ -211,7 +216,12 @@ class segment_class_Controller extends Controller
         $segment->save();
         return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)));
     }
-
+     /**
+     *
+     * @Description :set a segment to be current
+     * @param : segment_id and type_id are required parameters.
+     * @return : string message which indicates if segment set to be current or not.
+     */
     public function setCurrent_segmant(Request $request)
     {
         $request->validate([

@@ -25,8 +25,11 @@ class NotificationController extends Controller
             'type' => 'annoucn'
         ]);
     }
-
-    //  get all Notification From data base From Notifcation Table
+   /**
+    * @description: get all Notifications From database From Notifcation Table of this user.
+    * @param no required parameters
+    * @return all notifications.
+    */
     public function getallnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->get();
@@ -55,8 +58,11 @@ class NotificationController extends Controller
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all users notifications');
     }
-
-    //  the unread Notification From data base From Notifcation Table
+   /**
+    * @description: get unread Notifications From database From Notifcation Table
+    * @param no required parameters
+    * @return all unread notifications.
+    */
     public function unreadnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
@@ -69,14 +75,21 @@ class NotificationController extends Controller
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all user Unread notifications');
     }
-
-    //  make all the Notification Readto the user id
+   /**
+    * @description: mark all the notifications of this user as read.
+    * @param no required parameters
+    * @return all notifications.
+    */
     public function markasread(Request $request)
     {
         $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
         return HelperController::api_response_format(200, null, 'Read');
     }
-
+   /**
+    * @description: gets all the notifications of this user.
+    * @param no required parameters
+    * @return all notifications.
+    */
     public function GetNotifcations(Request $request)
     {
         $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->pluck('data');
@@ -89,7 +102,11 @@ class NotificationController extends Controller
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all user notifications');
     }
-
+   /**
+    * @description: delete all the notifications within a time.
+    * @param startdate and enddate are required parameters
+    * @return string message which indicates that deletion done successfully.
+    */
     public function DeletewithTime(Request $request)
     {
         $request->validate([
@@ -102,7 +119,11 @@ class NotificationController extends Controller
         return HelperController::api_response_format(200, $body = [], $message = 'notifications deleted');
 
     }
-
+   /**
+    * @description: mark a notification as seen.
+    * @param id of notification
+    * @return a string message which indicates that seeing notification done successfully.
+    */
     public function SeenNotifications(Request $request)
     {
         $request->validate([

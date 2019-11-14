@@ -7,6 +7,12 @@ use App\scale;
 
 class ScaleController extends Controller
 {
+     /**
+     *
+     * @Description :creates new scale. 
+     * @param : name and format of scale.
+     * @return : return scale.
+     */
     public function AddScale(Request $request)
     {
         $request->validate([
@@ -24,7 +30,13 @@ class ScaleController extends Controller
 
         return HelperController::api_response_format(200,$newScale, 'Scale Created Successfully' );
     }
-
+     /**
+     *
+     * @Description :update a scale. 
+     * @param : id of scale is a required parameter
+     *          name and format of scale are optional parameters.
+     * @return : return scale.
+     */
     public function UpdateScale(Request $request)
     {
         $request->validate([
@@ -54,7 +66,12 @@ class ScaleController extends Controller
         else
             return HelperController::api_response_format(200,$scale_id, 'This Scale Used Before ' );
     }
-
+     /**
+     *
+     * @Description :delete a scale. 
+     * @param : id of scale.
+     * @return : return scale and a string message which indicates whether the scale is deleted or not.
+     */
     public function DeleteScale(Request $request)
     {
         $request->validate([
@@ -72,7 +89,12 @@ class ScaleController extends Controller
         else
             return HelperController::api_response_format(200,$scale_id, 'This Scale Used Before ' );
     }
-
+     /**
+     *
+     * @Description :list all scales or select a scale by id.
+     * @param : id is an aoptional parameter.
+     * @return : return scale.
+     */
     public function GetScale(Request $request)
     {
         $request->validate([
