@@ -10,7 +10,7 @@ class SystemSettingsController extends Controller
 {
     public static  function GetActiveLanguages()
     {
-        $languages=collect([]);
+        $languages=collect();
         $languages->push(SystemSetting::where('key', 'languages')->first());
         if ($languages == null)
             return HelperController::api_response_format(200, 'System does not installed to have languages');
