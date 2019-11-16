@@ -149,14 +149,18 @@ class CourseController extends Controller
             'type' => 'nullable|exists:academic_types,id|required_with:year',
             'level' => 'nullable|exists:levels,id|required_with:year',
             'class' => 'nullable|exists:classes,id|required_with:year',
-            'segment' => 'nullable|exists:segments,id|required_with:year',
+            'segment' => 'nullable|exists:segments,id',
             'search' => 'nullable'
         ]);
         if($request->filled('year')){
             $academic_year_type = AcademicYearType::checkRelation($request->year, $request->type);
             $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
             $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
-            $segment_class = SegmentClass::checkRelation($class_level->id, $request->segment);
+            if ($request->filled('segment'))
+                    $segment = $request->segment;
+                else
+                    $segment = Segment::Get_current($request->type)->id;
+            $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
             $courseSegment = $segment_class->courseSegment->pluck('course_id');
             return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->whereIn('id' , $courseSegment)->paginate(HelperController::GetPaginate($request)));
         }
