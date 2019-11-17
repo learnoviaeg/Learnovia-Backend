@@ -186,7 +186,7 @@ class CourseController extends Controller
         $i=0;
         foreach ($request->user()->enroll as $enroll) {
             if($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
+                $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->course_id)->pluck('name')->first();
                 $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
                 $segment=SegmentClass::where('id',$segment_Class_id)->get(['segment_id','class_level_id'])->first();
 
