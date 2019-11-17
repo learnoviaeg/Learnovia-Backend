@@ -26,16 +26,15 @@ class GradeCategory extends Model
     public function total()
     {
         $result = 0;
-        $gradeitems = $this->GradeItems->where('override' ,'!=' , -1);
-        foreach ($gradeitems as $item) {
+        $gradeitems = $this->GradeItems;
+        foreach ($gradeitems as $item)
             $result += $item->grademax;
-        }
         $child = $this->Child;
-        foreach ($child as $item) {
+        foreach ($child as $item)
             $result += $item->total();
-        }
         return $result;
     }
+
     public function percentage()
     {
         $grade_items = $this->GradeItems;
@@ -56,15 +55,24 @@ class GradeCategory extends Model
     }
     public function grade_category_total()
     {
-        $weight = 0;
+        $total = 0;
         $grade_items = $this->GradeItems;
         foreach ($grade_items as $grade_item) {
-            $weight += $grade_item->weight();
+            $total += $grade_item->weight();
         }
         $childs = $this->Child;
         foreach ($childs as $child) {
-            $weight += $child->grade_category_total();
+            $total += $child->grade_category_total();
         }
-        return $weight;
+        return $total;
+    }
+
+    public function weight()
+    {
+        if ($this->override != 0)
+            return $this->override;
+        if(!$this->Parents)
+            return 100;
+        return ($this->total() / $this->Parents->total()) * 100 ;
     }
 }
