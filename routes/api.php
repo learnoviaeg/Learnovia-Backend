@@ -179,6 +179,7 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
     Route::get('get-by-id', 'UserController@GetUserById')->name('getbyid')->middleware('permission:user/get-by-id');
     Route::get('get-with-role-cs', 'UserController@get_users_with_filter_role');//->name('getbyroleid')->middleware('permission:user/get-with-role-cs');
     Route::get('filter-with-role', 'UserController@allUserFilterRole')->name('filterallbyrole')->middleware('permission:user/filter-with-role');
+    Route::get('search-all-users', 'UserController@getAllUsersInCourseSegment')->name('searchusers')->middleware('permission:user/search-all-users');
 });
 //Enroll Routes
 Route::group(['prefix' => 'enroll', 'middleware' => 'auth:api'], function () {
