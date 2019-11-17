@@ -66,8 +66,8 @@ class MessageController extends Controller
                                 'deleted' => 0,
                                 'To' => $userId,
                             ));
-                            if($req->hasFile('file')){
-                                $attachment = attachment::upload_attachment($req->file , 'message');
+                            if ($req->hasFile('file')) {
+                                $attachment = attachment::upload_attachment($req->file, 'message');
                                 $message->file = $attachment->path;
                                 $message->attachment_id = $attachment->id;
                             }
@@ -209,8 +209,8 @@ class MessageController extends Controller
         $req->validate([
             'from' => 'required|exists:users,id'
         ]);
-        $messages = Message::where('From', $req->from)->where('To',$session_id)->where('seen',0)->get();
-        foreach($messages as $msg){
+        $messages = Message::where('From', $req->from)->where('To', $session_id)->where('seen', 0)->get();
+        foreach ($messages as $msg) {
             $msg->seen = 1;
             $msg->save();
         }
@@ -265,10 +265,10 @@ class MessageController extends Controller
         return HelperController::api_response_format(404, null, 'Message Role insertion Fail');
 
     }
-
-    public function GetMyThreads(Request $request){
-        $messages = Message::where('From', $request->user()->id)->orWhere('To', $request->user()->id)->orderBy('created_at','desc')->get();
-        $users = Message::GetMessageDetails($messages , $request->user()->id);
-        return HelperController::api_response_format(200 , $users);
+    public function GetMyThreads(Request $request)
+    {
+        $messages = Message::where('From', $request->user()->id)->orWhere('To', $request->user()->id)->orderBy('created_at', 'desc')->get();
+        $users = Message::GetMessageDetails($messages, $request->user()->id);
+        return HelperController::api_response_format(200, $users);
     }
 }
