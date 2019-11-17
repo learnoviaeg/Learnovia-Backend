@@ -277,3 +277,4 @@ Route::group(['prefix' => 'letter', 'middleware' => 'auth:api'], function () {
 });
 Route::post('search-contacts', 'ContactController@SearchMyContacts');
 Route::post('search-messages', 'MessageController@SearchMessage');
+Route::post('change-color', 'ComponentController@ChangeColor');
