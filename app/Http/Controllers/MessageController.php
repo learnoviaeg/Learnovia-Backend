@@ -271,4 +271,17 @@ class MessageController extends Controller
         $users = Message::GetMessageDetails($messages , $request->user()->id);
         return HelperController::api_response_format(200 , $users);
     }
+    
+    public function SearchMessage(Request $request){
+        $request->validate([
+            'search' => 'required'
+        ]);
+        $current_user = Auth::id();
+        $msgs = Message::where(function ($query) use ($request, $current_user) {
+            $query->where('From', $current_user)->orWhere('To', $current_user);
+        })->where(function ($query) use ($request) {
+            $query->where('text', 'LIKE' , "%$request->search%");
+        })->get();
+        return HelperController::api_response_format(200 , $msgs,'Messages are....');
+    }
 }
