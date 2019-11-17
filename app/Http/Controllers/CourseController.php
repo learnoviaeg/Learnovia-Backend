@@ -185,9 +185,9 @@ class CourseController extends Controller
         $i=0;
         foreach ($request->user()->enroll as $enroll) {
             if($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
-                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
-                $segment=SegmentClass::where('id',$segment_Class_id)->get(['segment_id','class_level_id'])->first();
+                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->get(['segment_class_id','course_id'])->first();
+                $all[$i]['Course']=Course::where('id',$segment_Class_id->course_id)->pluck('name')->first();
+                $segment=SegmentClass::where('id',$segment_Class_id->segment_class_id)->get(['segment_id','class_level_id'])->first();
 
                 $all[$i]['segment']=Segment::find($segment->segment_id)->name;
 
@@ -207,7 +207,10 @@ class CourseController extends Controller
                 $i++;
             }
         }
-       return HelperController::api_response_format(200, $all);
+        if(isset($all))
+            return HelperController::api_response_format(200, $all);
+
+        return HelperController::api_response_format(200, null,'there is no courses');
     }
 
     public function PastCourses(Request $request)
@@ -215,10 +218,9 @@ class CourseController extends Controller
         $i=0;
         foreach ($request->user()->enroll as $enroll) {
             if($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
-                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
-//            return Date::excelToDateTimeObject( Carbon::now());//->getTimestamp();
-                $segment=SegmentClass::where('id',$segment_Class_id)->get(['segment_id','class_level_id'])->first();
+                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->get(['segment_class_id','course_id'])->first();
+                $all[$i]['Course']=Course::where('id',$segment_Class_id->course_id)->pluck('name')->first();
+                $segment=SegmentClass::where('id',$segment_Class_id->segment_class_id)->get(['segment_id','class_level_id'])->first();
 
                 $all[$i]['segment']=Segment::find($segment->segment_id)->name;
 
@@ -237,19 +239,20 @@ class CourseController extends Controller
                 $all[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $i++;
             }
-
         }
-        return HelperController::api_response_format(200, $all);
+        if(isset($all))
+            return HelperController::api_response_format(200, $all);
+
+        return HelperController::api_response_format(200, null,'there is no courses');
     }
     public function FutureCourses(Request $request)
     {
         $i=0;
         foreach ($request->user()->enroll as $enroll) {
             if($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
-                $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
-                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
-//            return Date::excelToDateTimeObject( Carbon::now());//->getTimestamp();
-                $segment=SegmentClass::where('id',$segment_Class_id)->get(['segment_id','class_level_id'])->first();
+                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->get(['segment_class_id','course_id'])->first();
+                $all[$i]['Course']=Course::where('id',$segment_Class_id->course_id)->pluck('name')->first();
+                $segment=SegmentClass::where('id',$segment_Class_id->segment_class_id)->get(['segment_id','class_level_id'])->first();
 
                 $all[$i]['segment']=Segment::find($segment->segment_id)->name;
 
@@ -268,9 +271,11 @@ class CourseController extends Controller
                 $all[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $i++;
             }
-
         }
-        return HelperController::api_response_format(200, $all);
+        if(isset($all))
+            return HelperController::api_response_format(200, $all);
+
+        return HelperController::api_response_format(200, null,'there is no courses');
     }
 
     public function course_with_teacher()
@@ -582,5 +587,24 @@ class CourseController extends Controller
         {
             return HelperController::api_response_format(201, 'There is no Active Course Segment');
         }
+    }
+
+    public function EnrolledCourses(Request $request)
+    {
+        $i=0;
+        foreach ($request->user()->enroll as $enroll) {
+                $all[$i]['id']=$enroll->CourseSegment->id;
+                $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->get(['segment_class_id','course_id'])->first();
+                $all[$i]['Course']=Course::where('id',$segment_Class_id->course_id)->pluck('name')->first();
+                $segment=SegmentClass::where('id',$segment_Class_id->segment_class_id)->get(['segment_id','class_level_id'])->first();
+
+                $class_id=ClassLevel::where('id',$segment->class_level_id)->get(['class_id','year_level_id'])->first();
+                $all[$i]['class']=Classes::find($class_id->class_id)->name;
+                $i++;
+        }
+        if(isset($all))
+            return HelperController::api_response_format(200, $all);
+
+        return HelperController::api_response_format(200, null,'there is no courses');
     }
 }

@@ -247,19 +247,26 @@ class EnrollUserToCourseController extends Controller
     public function getUnEnroll(Request $request)
     {
         $request->validate([
-            'year' => 'required|exists:academic_years,id',
+            'year' => 'exists:academic_years,id',
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
-            'segment' => 'required|exists:segments,id',
+            'segment' => 'exists:segments,id',
             'courses' => 'required|array',
             'courses.*' => 'required|exists:courses,id'
         ]);
-
-        $academic_year_type = AcademicYearType::checkRelation($request->year, $request->type);
+        $year = AcademicYear::Get_current()->id;
+        if (isset($request->year[$count])) {
+            $year = $request->year;
+        }
+        $academic_year_type = AcademicYearType::checkRelation($year, $request->type);
         $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
         $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
-        $segment_class = SegmentClass::checkRelation($class_level->id, $request->segment);
+        $segment = AcademicYear::Get_current()->id;
+        if (isset($request->segment)) {
+            $segment = $request->segment;
+        }
+        $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
 
         $course_segment = collect([]);
         foreach ($request->courses as $c)
