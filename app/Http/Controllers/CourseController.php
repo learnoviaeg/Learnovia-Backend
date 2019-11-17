@@ -182,6 +182,7 @@ class CourseController extends Controller
 
     public function CurrentCourses(Request $request)
     {
+    $all = [];
         $i=0;
         foreach ($request->user()->enroll as $enroll) {
             if($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
