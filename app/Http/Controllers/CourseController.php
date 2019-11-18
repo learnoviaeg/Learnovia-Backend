@@ -31,18 +31,11 @@ class CourseController extends Controller
     /**
      * Add course
      *
-     * @param  [string] name
-     * @param  [int] category
-     * @param  [array..id] year 
-     * @param  [array..id] type
-     * @param  [array..id] level
-     * @param  [array..id] class
-     * @param  [array..id] segment
+     * @param  [string] name, description
+     * @param  [int] category, no_of_lessons
+     * @param  [array..id] year, type, level, class, segment
      * @param  [string..path] image
-     * @param [int] no_of_lessons
-     * @param [string] description
-     * @param [boolean] mandatory
-     * @param [boolean] typical
+     * @param [boolean] mandatory, typical
      * @return [object] course with attachment and category in paginate
     */
     public static function add(Request $request)
@@ -136,15 +129,12 @@ class CourseController extends Controller
     /**
      * update course
      *
-     * @param  [string] name
-     * @param  [int] category_id
-     * @param  [int] id
+     * @param  [string] name, description
+     * @param  [int] category_id, id
      * @param  [string..path] image
-     * @param  [string] description
      * @param  [boolean] mandatory
      * @return [object] course with attachment and category in paginate 
     */
-
     public function update(Request $request)
     {
         $request->validate([
@@ -176,13 +166,8 @@ class CourseController extends Controller
     /**
      * get course
      *
-     * @param  [int] id
-     * @param  [int] category_id
-     * @param  [array..id] year 
-     * @param  [array..id] type
-     * @param  [array..id] level
-     * @param  [array..id] class
-     * @param  [array..id] segment
+     * @param  [int] id, category_id
+     * @param  [array..id] year, type, level, class, segment
      * @param  [string] search
      * @return [object] course with attachment and category in paginate with search
      * @return [object] course with attachment and category in paginate if id
@@ -268,7 +253,10 @@ class CourseController extends Controller
                 $i++;
             }
         }
-       return HelperController::api_response_format(200, $all);
+        if(isset($all))
+            return HelperController::api_response_format(200, $all);
+
+        return HelperController::api_response_format(200, null,'there is no courses');
     }
 
     /**
@@ -304,7 +292,10 @@ class CourseController extends Controller
             }
 
         }
-        return HelperController::api_response_format(200, $all);
+        if(isset($all))
+            return HelperController::api_response_format(200, $all);
+
+        return HelperController::api_response_format(200, null,'there is no courses');
     }
 
     /**
@@ -340,7 +331,10 @@ class CourseController extends Controller
             }
 
         }
-        return HelperController::api_response_format(200, $all);
+        if(isset($all))
+            return HelperController::api_response_format(200, $all);
+
+        return HelperController::api_response_format(200, null,'there is no courses');
     }
 
     /**
@@ -535,11 +529,7 @@ class CourseController extends Controller
      * get optional course
      * 
      * // Request
-     * @param  [int..id] year 
-     * @param  [int..id] type
-     * @param  [int..id] level
-     * @param  [int..id] class
-     * @param  [int..id] segment
+     * @param  [int..id] year, type, level, class, segment
      * @return if No current segment or year [string] There is no current segment or year
      * @return if No optional COurse in these corse_segment  [string] There is no optional coures here
      * @return [object] courses optional
@@ -573,12 +563,7 @@ class CourseController extends Controller
     /**
      * ToggleCourseLetter .. update course IS letter or not
      *
-     * @param  [array..id] year 
-     * @param  [array..id] type
-     * @param  [array..id] level
-     * @param  [array..id] class
-     * @param  [array..id] segment
-     * @param  [array..id] course
+     * @param  [array..id] year, type, level, class, segment, course
      * @return [object] course Assigned
     */
     public function Assgin_course_to(Request $request)
@@ -644,8 +629,7 @@ class CourseController extends Controller
     /**
      * get sorted lessons of user
      *
-     * @param  [int] course_id
-     * @param  [int] class_id
+     * @param  [int] course_id, class_id
      * @return [object] sorted lessons
     */
     public function GetUserCourseLessonsSorted(Request $request){
@@ -673,9 +657,7 @@ class CourseController extends Controller
      * ToggleCourseLetter .. update course IS letter or not
      *
      * @param [boolean] letter
-     * @param [int] letter_id
-     * @param [int .. id] course
-     * @param [int .. if] class
+     * @param [int] letter_id, course, class
      * @return [object] course with toggled or not
     */
     public function ToggleCourseLetter(Request $request)

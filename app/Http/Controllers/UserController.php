@@ -24,11 +24,16 @@ use DB;
 
 class UserController extends Controller
 {
-    /*
-        @Description:: This Function is for creating new user.
-        @Param:: name, email [must be correct and unique], password[must be more than or equal 8].
-        @Output:: 'if every thing correct' -> User Created Successfully.
-                  'else' -> Error.
+    /**
+     * create User - and Enroll to optional if there and enroll mandatory if there is class
+     * 
+     * //required
+     * @param  [array] firstname, lastname, password, role, optional, course, class_id
+     * //optional
+     * @param  [atring..path] picture
+     * @param  [string] arabicname, country, birthdate, gender, phone, address, nationality, notes, email, language,
+     *              timezone, religion, second language
+     * @return [object] and [string] User Created Successfully
     */
     public function create(Request $request)
     {
@@ -123,13 +128,18 @@ class UserController extends Controller
 
     }
 
-    /*
-        @Description:: This Function is for Update user.
-        @Param::id, name, email [must be correct and unique], password[must be more than or equal 8].
-        @Output:: 'if every thing correct' -> User Updated Successfully.
-                  'else' -> Error.
+    /**
+     * update User
+     * 
+     * //required
+     * @param [int] id
+     * @param  [array] firstname, lastname, password, role, optional, course, class_id
+     * //optional
+     * @param  [atring..path] picture
+     * @param  [string] arabicname, country, birthdate, gender, phone, address, nationality, notes, email, language,
+     *              timezone, religion, second language
+     * @return [object] and [string] User updated Successfully
     */
-
     public function update(Request $request)
     {
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
@@ -161,13 +171,13 @@ class UserController extends Controller
 
     }
 
-    /*
-       @Description:: This Function is for Delete user.
-       @Param:: id.
-       @Output:: 'if User Exist' -> User Deleted Successfully.
-                 'else' -> Error.
-   */
-
+    /**
+     * Delete User
+     * 
+     * //required
+     * @param  [int] id
+     * @return [object] and [string] User deleted Successfully
+    */
     public function delete(Request $request)
     {
         $request->validate([
@@ -181,11 +191,12 @@ class UserController extends Controller
 
     }
 
-    /*
-       @Description:: This Function is for List All users.
-       @Output:: All users in system.
-   */
-
+    /**
+     * Get User
+     * 
+     * @param  [atring] search
+     * @return if search|id [object] user
+    */
     public function list(Request $request)
     {
         $request->validate([
@@ -220,13 +231,12 @@ class UserController extends Controller
         }
     }
 
-    /*
-       @Description:: This Function is for Block a user.
-       @Param::id.
-       @Output:: 'if user found' -> User Blocked Successfully.
-                 'else' -> Error.
-   */
-
+    /**
+     * Block User
+     * 
+     * @param  [int] id
+     * @return [object] user and [string] User Blocked Successfully
+    */
     public function suspend_user(Request $request)
     {
         $request->validate([
@@ -241,13 +251,12 @@ class UserController extends Controller
 
     }
 
-    /*
-       @Description:: This Function is for un Block a user.
-       @Param::id.
-       @Output:: 'if user found' -> User un Blocked Successfully.
-                'else' -> Error.
-   */
-
+    /**
+     * UnBlock User
+     * 
+     * @param  [int] id
+     * @return [object] user and [string] User Un Blocked Successfully
+    */
     public function unsuspend_user(Request $request)
     {
         $request->validate([
@@ -260,6 +269,12 @@ class UserController extends Controller
         return HelperController::api_response_format(201, $user, 'User Un Blocked Successfully');
     }
 
+    /**
+     * get User by id
+     * 
+     * @param  [int] id
+     * @return [object] user 
+    */
     public function GetUserById(Request $request)
     {
         $request->validate([
@@ -270,6 +285,13 @@ class UserController extends Controller
         return HelperController::api_response_format(201, $user, null);
     }
 
+    /**
+     * update User password
+     * 
+     * @param  [int] id
+     * @param  [string] password
+     * @return [object] user and [string] User Updated Successfully
+    */
     public function UpdateUserPassword(Request $request)
     {
         $request->validate([
@@ -285,6 +307,11 @@ class UserController extends Controller
         return HelperController::api_response_format(201, $user, 'User Updated Successfully');
     }
 
+    /**
+     * get user but hide password
+     * 
+     * @return [object] user --without real password--
+    */
     public function Show_and_hide_real_password_with_permission(){
         $user_id = Auth::user()->id;
         $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
@@ -302,34 +329,38 @@ class UserController extends Controller
         }
     }
 
-    public function parent_child(Request $request)
+    /**
+     * paresnt with child
+     * 
+     * @return [object] users with parents and children
+    */
+    public function parent_child()
     {
         $user_id = Auth::user()->id;
         $user=User::find($user_id);
+
         $parent=array();
         foreach($user->parents as $p)
-        {
-            $parent[]=$p;
-        }
+            $parent[]=$p; 
+
         $child=array();
         foreach($user->childs as $c)
-        {
             $child[]=$c;
-        }
+            
         if($parent == null && $child != null)
-        {
             return HelperController::api_response_format(201, ['Childs' => $child]);
-        }
         else if($child == null && $parent != null)
-        {
             return HelperController::api_response_format(201, ['Parent'=>$parent]);
-        }
         else
-        {
             return HelperController::api_response_format(201,null,'There is no data for you.');
-        }
-
     }
+
+    /**
+     * get Users filtered by role
+     * 
+     * @param  [int] role_id
+     * @return [object] users with parents and filtered by role
+    */
     public function get_users_with_filter_role(Request $request){
         $request->validate([
             'role_id' => 'exists:roles,id'
@@ -342,9 +373,14 @@ class UserController extends Controller
         $user_ids = $user_ids->pluck('user_id');
         $users=User::whereIn('id',$user_ids)->with(['parents'])->get();
         return HelperController::api_response_format(201,$users);
-
     }
 
+    /**
+     * update User password
+     * 
+     * @param  [array] roles
+     * @return [object] users
+    */
     public function allUserFilterRole(Request $request){
         $request->validate([
             'roles' => 'required|array',

@@ -8,7 +8,15 @@ use App\attachment;
 
 class LessonController extends Controller
 {
-
+    /**
+     * Add lesson
+     * 
+     * @param  [string] name 
+     * @param  [array] image
+     * @param  [array/string] description
+     * @return if no course segment [string] Something went wrong or no active segments on this class
+     * @return [string] added successfully
+    */
     public function AddLesson(Request $request)
     {
         $request->validate([
@@ -38,10 +46,15 @@ class LessonController extends Controller
             }
             $lesson->save();
         }
-        return HelperController::api_response_format(200, $segments['value']->lessons);
+        return HelperController::api_response_format(200, $segments['value']->lessons,'added sucessfully');
     }
 
-
+    /**
+     * show lesson
+     * 
+     * @param  [int] id 
+     * @return [object] lesson
+    */
     public function ShowLesson(Request $request)
     {
         $request->validate([
@@ -51,7 +64,13 @@ class LessonController extends Controller
         return HelperController::api_response_format(200, $lesson);
     }
 
-
+    /**
+     * delete lesson
+     * 
+     * @param  [int] id 
+     * @return [string] Lesson is deleted Successfully
+     * 
+    */
     public function deleteLesson(Request $request)
     {
         $request->validate([
@@ -68,7 +87,14 @@ class LessonController extends Controller
         return HelperController::api_response_format(200, null, 'Lesson is deleted Successfully');
     }
 
-
+    /**
+     * update lesson
+     * 
+     * @param  [string] name, description
+     * @param  [int] id 
+     * @param  [string..path] image
+     * @return [string] Lesson is updated Successfully
+    */
     public function updateLesson(Request $request)
     {
         $request->validate([
@@ -90,7 +116,12 @@ class LessonController extends Controller
         return HelperController::api_response_format(200, $lesson, 'Lesson is updated Successfully');
     }
 
-
+    /**
+     * sort lesson down
+     * 
+     * @param  [int] lesson_id, index
+     * @return [array] all Lessons
+    */
     public function sortDown($lesson_id, $index)
     {
         $lesson_index = Lesson::where('id', $lesson_id)->pluck('index')->first();
@@ -110,6 +141,13 @@ class LessonController extends Controller
         }
         return $all_lessons;
     }
+
+    /**
+     * sort lesson up
+     * 
+     * @param  [int] lesson_id, index
+     * @return [array] all Lessons
+    */
     public function SortUp($lesson_id, $index)
     {
 
@@ -131,6 +169,12 @@ class LessonController extends Controller
         return $all_lessons;
     }
 
+    /**
+     * sorting
+     * 
+     * @param  [int] lesson_id, index
+     * @return [array] all Lessons sorted Successfully
+    */
     public function Sorting(Request $request)
     {
         $request->validate([
@@ -144,6 +188,6 @@ class LessonController extends Controller
         } else {
             $lessons = $this->SortUp($request->lesson_id, $request->index);
         }
-        return HelperController::api_response_format(200, $lessons, ' Successfully');
+        return HelperController::api_response_format(200, $lessons, 'all Lessons sorted Successfully');
     }
 }

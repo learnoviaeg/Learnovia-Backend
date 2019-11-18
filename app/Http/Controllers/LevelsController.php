@@ -12,6 +12,13 @@ use Validator;
 
 class LevelsController extends Controller
 {
+    /**
+     * Add level with year
+     * 
+     * @param  [string] name 
+     * @param  [array] year, type
+     * @return [object] levels, Level Created Successfully
+    */
     public function AddLevelWithYear(Request $request)
     {
         $request->validate([
@@ -36,12 +43,17 @@ class LevelsController extends Controller
                     ]);
                 }
             }
-
         }
         $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(201, $levels, 'Level Created Successfully');
     }
 
+    /**
+     * delete level with year
+     * 
+     * @param  [int] id 
+     * @return [object] levels, Level deleted Successfully
+    */
     public function Delete(Request $request)
     {
         $request->validate([
@@ -55,7 +67,13 @@ class LevelsController extends Controller
         return HelperController::api_response_format(203, $levels, 'Level Deleted Successfully');
     }
 
-
+    /**
+     * update level with year
+     * 
+     * @param  [int] id 
+     * @param  [string] name 
+     * @return [object] levels, Level updated Successfully
+    */
     public function UpdateLevel(Request $request)
     {
         $valid = Validator::make($request->all(), [
@@ -72,6 +90,12 @@ class LevelsController extends Controller
         return HelperController::api_response_format(200, $levels, 'Level Updated Successfully');
     }
 
+    /**
+     * Get levels in year
+     * 
+     * @param  [int] id, type, year
+     * @return [object] level
+    */
     public function GetAllLevelsInYear(Request $request)
     {
         $request->validate([
@@ -91,6 +115,13 @@ class LevelsController extends Controller
         return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)));
     }
 
+    /**
+     * Assign level to year
+     * 
+     * @param  [int] level 
+     * @param  [array] year, type
+     * @return [string] Level Assigned Successfully
+    */
     public function Assign_level_to(Request $request)
     {
         $rules = [
@@ -118,6 +149,12 @@ class LevelsController extends Controller
         return HelperController::api_response_format(201, 'Level Assigned Successfully');
     }
 
+    /**
+     * get levels
+     * 
+     * @param  [string] search
+     * @return [string] Levels
+    */
     public function get(Request $request)
     {
         $request->validate([

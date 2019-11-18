@@ -13,9 +13,15 @@ use DB;
 
 class CalendarController extends Controller
 {
+    /**
+     * get calender
+     * 
+     * @param  [int] month
+     * @return if month [objects] all assignments/quizes/announcements... in this month
+     * @return [objects] all assignments/quizes/announcements... in current month
+    */
     public function calendar (Request $request)
     {
-
         //Validtaion
         $request->validate([
             'month'=>'nullable|integer'
@@ -24,8 +30,7 @@ class CalendarController extends Controller
         //get auth user id
         $auth=Auth::user()->id;
 
-        if($request->month == null)
-        {
+        if($request->month == null) {
             //get the current month
             $date = \Carbon\Carbon::now()->month;
 
@@ -34,8 +39,6 @@ class CalendarController extends Controller
 
             //Components calendar function
             $components=CalendarController::Component_calendar($auth,$date);
-
-
         }
         else {
 
@@ -48,74 +51,70 @@ class CalendarController extends Controller
 
         //returning data
         if($components != null && $decodedannounce != null)
-        {
             return HelperController::api_response_format(201, ['Announcements'=>$decodedannounce, 'Lessons' => $components]);
-        }
         else if ($decodedannounce == null && $components != null )
-        {
             return HelperController::api_response_format(201, ['Lessons' => $components]);
-        }
         else if ($components == null && $decodedannounce != null)
-        {
             return HelperController::api_response_format(201, ['Announcements'=>$decodedannounce]);
-        }
         else if ($components == null && $decodedannounce == null)
-        {
             return HelperController::api_response_format(201, null,'There is no data for you');
-        }
         else
-        {
             return HelperController::api_response_format(201, null,'Something Went Wrong!');
-        }
-
     }
 
+    /**
+     * announce in calendar
+     * 
+     * @param  [int] auth
+     * @param  [date] date
+     * @return [objects] all announcements with his dates belongs to this user
+    */
     public function announcement_calendar($auth,$date)
     {
+        //Announcements in Calendar
+        $allannounce=Announcement::whereMonth('start_date','=', $date)
+                                    ->orderBy('start_date')
+                                    ->get();
+        $announcefinal=array();
+        $counter=0;
+        foreach($allannounce as $announ) {
+            $announcefinal[$counter]['id'] = "$announ->id" ;
+            $announcefinal[$counter]['type'] = 'announcement';
+            $counter++;
+        }
 
-            //Announcements in Calendar
-            $allannounce=Announcement::whereMonth('start_date','=', $date)
-            ->orderBy('start_date')
-            ->get();
-            $announcefinal=array();
-            $counter=0;
-            foreach($allannounce as $announ)
-            {
-                $announcefinal[$counter]['id'] = "$announ->id" ;
-                $announcefinal[$counter]['type'] = 'announcement';
-                $counter++;
-            }
-            $dataencode=array();
-            foreach($announcefinal as $try)
-            {
+        $dataencode=array();
+        foreach($announcefinal as $try)
                 $dataencode[] = json_encode($try);
-            }
-            $anounce=array();
-            $decodedannounce=array();
-            $id=array();
-            foreach($dataencode as $encode )
-            {
-                $anounce[] = DB::table('notifications')->where('notifiable_id', $auth)->where('data',$encode)->pluck('data')->first();
-            }
 
-            foreach($anounce as $decode)
-            {
-                if(isset($decode))
-                {
+        $anounce=array();
+        $decodedannounce=array();
+        $id=array();
+        foreach($dataencode as $encode )
+            $anounce[] = DB::table('notifications')->where('notifiable_id', $auth)->where('data',$encode)->pluck('data')->first();
+
+        foreach($anounce as $decode) {
+            if(isset($decode))
                 $decodedannounce[]=json_decode($decode, true);
-                }
-            }
-            $withdatesannounce=collect([]);
-            foreach ($decodedannounce as $an)
-            {
-                $withdatesannounce->push(Announcement::where('id',$an['id'])
-                ->whereMonth('start_date','=', $date)
-                ->orderBy('start_date')
-                ->first());
-            }
-         return  $withdatesannounce;
+        }
+
+        $withdatesannounce=collect([]);
+        foreach ($decodedannounce as $an) {
+            $withdatesannounce->push(Announcement::where('id',$an['id'])
+                                ->whereMonth('start_date','=', $date)
+                                ->orderBy('start_date')
+                                ->first());
+        }
+        return  $withdatesannounce;
     }
 
+    /**
+     * components in calendar
+     * 
+     * @param  [int] auth
+     * @param  [date] date
+     * @return [objects] all components belongs to this user
+    */
     public function Component_calendar($auth,$date)
     {
         $CourseSeg=Enroll::where('user_id',$auth)->pluck('course_segment');
@@ -125,40 +124,32 @@ class CalendarController extends Controller
             $checkLesson=Lesson::where('course_segment_id',$cour)->get();
 
             if($checkLesson->isEmpty())
-            {
                 continue;
-            }
+
             $Lessons[]=$checkLesson;
         }
 
         $comp=Component::where('type',1)->get();
         foreach($Lessons as $less)
-        {
             foreach($less as $les)
-            {
-
                 foreach($comp as $com)
                 {
                     if($com->type == 3)
                         continue;
-                    if($com->name=='Quiz')
-                    {
+                    if($com->name=='Quiz') {
                         $les[$com->name]= $les->module($com->module,$com->model)
-                        ->whereMonth('start_date','=', $date)
-                        ->orderBy('start_date')
-                        ->withPivot('start_date')
-                        ->get();
+                                                ->whereMonth('start_date','=', $date)
+                                                ->orderBy('start_date')
+                                                ->withPivot('start_date')
+                                                ->get();
                     }
-                    else
-                    {
+                    else {
                         $les[$com->name]= $les->module($com->module,$com->model)
-                        ->whereMonth('start_date','=', $date)
-                        ->orderBy('start_date')
-                        ->get();
+                                                ->whereMonth('start_date','=', $date)
+                                                ->orderBy('start_date')
+                                                ->get();
                     }
                 }
-            }
-        }
         return $Lessons;
     }
 }
