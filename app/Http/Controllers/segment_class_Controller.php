@@ -164,7 +164,7 @@ class segment_class_Controller extends Controller
             'level.*' => 'required|exists:levels,id',
             'class'=> 'required|array',
             'class.*' => 'required|exists:classes,id',
-            'segment' => 'required|exists:segments,id',
+            'segment' => 'exists:segments,id',
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
@@ -183,7 +183,12 @@ class segment_class_Controller extends Controller
                 $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
                 $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
                 $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
-                SegmentClass::checkRelation($class_level->id,$request->segment);
+
+                $segment = Segment::Get_current($request->type[$count])->id;
+                if (isset($request->segment[$count])) {
+                    $segment = $request->segment[$count];
+                }
+                SegmentClass::checkRelation($class_level->id,$segment);
                 $count++;
             }
         }

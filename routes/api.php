@@ -155,7 +155,8 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'CourseController@update')->name('editcourse')->middleware('permission:course/update');
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:course/delete');
     Route::get('get-all', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
-    Route::get('my-courses', 'CourseController@CurrentCourses')->name('mycourses')->middleware('permission:course/my-courses');
+    Route::get('my-courses', 'CourseController@CurrentCourses');//->name('mycourses')->middleware('permission:course/my-courses');
+    Route::get('all-courses', 'CourseController@EnrolledCourses');//->name('enrolledcourses')->middleware('permission:course/all-courses');
     Route::get('past-courses', 'CourseController@PastCourses');//->name('pastcourses')->middleware('permission:course/past-courses');
     Route::get('future-courses', 'CourseController@FutureCourses');//->name('futurecourses')->middleware('permission:course/future-courses');
     Route::get('layout', 'CourseController@GetUserCourseLessons')->name('layout')->middleware('permission:course/layout');
