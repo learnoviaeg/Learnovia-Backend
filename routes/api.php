@@ -276,3 +276,6 @@ Route::group(['prefix' => 'letter', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'ScaleController@delete')->name('deletescale')->middleware('permission:letter/delete');
     Route::post('get', 'ScaleController@get')->name('getscale')->middleware('permission:letter/get');
 });
+Route::post('search-contacts', 'ContactController@SearchMyContacts');
+Route::post('search-messages', 'MessageController@SearchMessage');
+Route::post('change-color', 'ComponentController@ChangeColor');

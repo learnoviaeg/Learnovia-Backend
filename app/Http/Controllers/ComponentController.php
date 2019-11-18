@@ -131,4 +131,15 @@ class ComponentController extends Controller
 
         return HelperController::api_response_format(400, null, 'invalid index');
     }
+    public function ChangeColor(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer|exists:components,id',
+            'color'=>'required'
+        ]);
+        $component = Component::find($request->id);
+        $component->color=$request->color;
+        $component->save();
+        return HelperController::api_response_format(200, $component, 'Color is changed Successfully');
+    }
 }
