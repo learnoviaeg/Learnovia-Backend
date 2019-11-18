@@ -55,15 +55,8 @@ class ContactController extends Controller
      * @return: List of my friends
      *
      * */
-    public function ViewMyContact()
+    public function ViewMyContact(Request $request)
     {
-        $session_id = Auth::User()->id;
-        $user=User::find($session_id);
-        $contacts = $user->contacts;
-        return HelperController::api_response_format(200, Contactresource::Collection($contacts), 'My Contact ');
-    }
-
-    public function SearchMyContacts(Request $request){
         $request->validate([
             'search' => 'required'
         ]);
@@ -79,6 +72,8 @@ class ContactController extends Controller
             ->with(['contacts' => function($query) use ($id_search){
                 $query->whereIn('Person_id', $id_search)->orwhereIn('Friend_id', $id_search);
             }])->get();
-        return HelperController::api_response_format(200 , $contacts[0]->contacts);
+            return $contacts;
+        return HelperController::api_response_format(200, Contactresource::Collection($contacts), 'My Contact ');
     }
+
 }
