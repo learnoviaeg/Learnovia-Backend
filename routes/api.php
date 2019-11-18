@@ -219,6 +219,7 @@ Route::group(['prefix' => 'component', 'middleware' => 'auth:api'], function () 
     Route::post('uninstall', 'ComponentController@Uninstall')->name('uninstallcomponenet')->middleware('permission:component/uninstall');
     Route::put('toggle', 'ComponentController@ToggleActive')->name('togglecomponenet')->middleware('permission:component/toggle');
     Route::post('sort', 'ComponentController@sort')->name('sortcomponenet')->middleware('permission:component/sort');
+    Route::post('change-color', 'ComponentController@ChangeColor')->name('changecolor')->middleware('permission:component/change-color');
 });
 
 //lesson routes
@@ -276,6 +277,3 @@ Route::group(['prefix' => 'letter', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'ScaleController@delete')->name('deletescale')->middleware('permission:letter/delete');
     Route::post('get', 'ScaleController@get')->name('getscale')->middleware('permission:letter/get');
 });
-Route::post('search-contacts', 'ContactController@SearchMyContacts');
-Route::post('search-messages', 'MessageController@SearchMessage');
-Route::post('change-color', 'ComponentController@ChangeColor');

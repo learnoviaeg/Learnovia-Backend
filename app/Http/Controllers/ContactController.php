@@ -62,23 +62,4 @@ class ContactController extends Controller
         $contacts = $user->contacts;
         return HelperController::api_response_format(200, Contactresource::Collection($contacts), 'My Contact ');
     }
-
-    public function SearchMyContacts(Request $request){
-        $request->validate([
-            'search' => 'required'
-        ]);
-        $current_user = Auth::id();
-        $id_search = User::where(function ($query) use ($request, $current_user) {
-            $query->where('firstname', 'like', '%'.$request->search.'%')->orwhere('lastname', 'like', '%'.$request->search.'%');
-        })->where(function ($query) use ($current_user) {
-            $query->where('id','!=',$current_user);
-        })->pluck('id');
-        $contacts = User::where(function ($query) use ($current_user) {
-            $query->where('id', $current_user);
-        })
-            ->with(['contacts' => function($query) use ($id_search){
-                $query->whereIn('Person_id', $id_search)->orwhereIn('Friend_id', $id_search);
-            }])->get();
-        return HelperController::api_response_format(200 , $contacts[0]->contacts);
-    }
 }
