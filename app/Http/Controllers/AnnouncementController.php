@@ -51,7 +51,8 @@ class AnnouncementController extends Controller
             'start_date' => 'required|before:due_date',
             'due_date' => 'required|after:' . Carbon::now(),
             'publish_date' => 'nullable|after:' . Carbon::now(),
-            'assign' => 'required'
+            'assign' => 'required',
+            'role' => 'nullable'
         ]);
 
         if (isset($request->publish_date)) {
@@ -212,15 +213,43 @@ class AnnouncementController extends Controller
             'publish_date'=>$publishdate
         ]);
 
+        // return $toUser;
         //sending announcements
         if ($request->assign == 'all') {
             foreach ($toUser as $use) {
-                $requ['users'][] = $use->id;
+                if($request->filled('role'))
+                {
+                    $role_id=$use->roles->pluck('id')->first();
+                    if($role_id == $request->role)
+                        $requ['users'][] = $use->id;
+                    else
+                        continue;
+                }
+
+                else
+                    $requ['users'][] = $use->id;
             }
+            if(!isset($requ['users']))
+                return HelperController::api_response_format(201,'No User');
             $notificatin = User::notify($requ);
         } else {
             $user = array_unique($users);
-            $requ['users'] = $user;
+            if($request->filled('role'))
+            {
+                foreach($user as $use)
+                {
+                    $user_obj=User::where('id',$use)->get()->first();
+                    $role_id=$user_obj->roles->pluck('id')->first();
+                    if($role_id == $request->role)
+                        $requ['users'][] = $use;
+                    else
+                        continue;
+                }
+                if(!isset($requ['users']))
+                    return HelperController::api_response_format(201,'No User');
+            }
+            else
+                $requ['users'] = $user;
             $notificatin = User::notify($requ);
         }
 

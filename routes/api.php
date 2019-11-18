@@ -244,7 +244,6 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('delete', 'GradeCategoryController@deleteGradeCategory')->middleware('permission:grade/category/delete');
         Route::post('update', 'GradeCategoryController@UpdateGradeCategory')->middleware('permission:grade/category/update');
         Route::post('move', 'GradeCategoryController@MoveToParentCategory')->middleware('permission:grade/category/move');
-        //Route::post('GetCategoriesFromCourseSegments', 'GradeCategoryController@GetCategoriesFromCourseSegments');
         Route::get('tree', 'GradeCategoryController@Get_Tree')->middleware('permission:grade/category/tree');
         Route::post('bulk-update', 'GradeCategoryController@bulkupdate')->middleware('permission:grade/category/bulk-update');
         Route::get('bulk-get', 'GradeCategoryController@GetAllGradeCategory')->middleware('permission:grade/category/bulk-get');
