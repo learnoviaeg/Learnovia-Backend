@@ -233,6 +233,9 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Supervisor']);
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Parent']);
 
+            //site internal permessions
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/search-all-users', 'title' => 'Search all users assigned to my course segments and search all site wide for users give permission to search site wide']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'show/real-password', 'title' => 'Get Letter']);
             $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
 
             $user = new User([
@@ -291,8 +294,8 @@ class SpatieController extends Controller
      *
      * @Description :update a role
      * @param : id, name and description  of role required parameters
-     *          permissions is an optional parameter.  
-     * @return : the updated role 
+     *          permissions is an optional parameter.
+     * @return : the updated role
      */
     public function Update_Role(Request $request)
     {
@@ -670,7 +673,7 @@ class SpatieController extends Controller
      *
      * @Description :check if user have certain permission.
      * @param : requires permission
-     * @return : the updated role 
+     * @return : the updated role
      */
     public function checkUserHavePermession(Request $request)
     {
@@ -679,7 +682,7 @@ class SpatieController extends Controller
     }
     /**
      * @Description :get permissions of a user according to it's role.
-     * @param : type is an optional parameter 
+     * @param : type is an optional parameter
      *          if type -> course therefore course id is required
      *          if type -> quiz therefore quiz id is required
      * @return : permissions of user.
@@ -736,7 +739,7 @@ class SpatieController extends Controller
     /**
      * @Description :check permissions of a user on a course.
      * @param : course, class, permissions are required parameters.
-     * @return : if this user on course -> true 
+     * @return : if this user on course -> true
      *           if no active segment in this course -> 'No Activ  segment on this course to check permession in'
      *           if this user is not enrolled in course -> you are not enrolled this course
      */
@@ -838,8 +841,10 @@ class SpatieController extends Controller
             foreach ($pers as $permission) {
                 if ($permission->dashboard) {
                     $key = explode("/", $permission->name)[0];
-                    $dashbordPermission[$key][] = ['route' => $permission->name, 'title' => $permission->title];
+                    $dashbordPermission[$key]['icon']= $permission->icon;
+                    $dashbordPermission[$key]['routes'][] = ['route' => $permission->name, 'title' => $permission->title];
                 }
+
             }
         }
         return HelperController::api_response_format(200, ['permissions' => $dashbordPermission], 'Successfully');

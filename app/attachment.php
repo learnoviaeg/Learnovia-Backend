@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class attachment extends Model
 {
     //
-    protected $fillable = ['name', 'path', 'description', 'type', 'extension'];
+    protected $fillable = ['name', 'path', 'description', 'type', 'extension','mime_type'];
     public function assignment()
     {
         return $this->belongsTo('Modules\Assigments\Entities\assignment', 'attachment_id', 'id');
@@ -26,15 +26,17 @@ class attachment extends Model
         $extension = $singlefile->getClientOriginalExtension();
 
         $fileName = uniqid() . $singlefile->getClientOriginalName();
-        $size = $singlefile->getSize();
 
+        $size = $singlefile->getSize();
         $attachment->name = $fileName;
         $attachment->path = $type . '/' . $fileName;
         $attachment->description = $description;
         $attachment->type = $type;
         $attachment->extension = $extension;
+       $attachment->mime_type = $file->getClientMimeType();
         $attachment->save();
         Storage::disk('public')->putFileAs($type, $singlefile, $fileName);
+
         return $attachment;
     }
     public function getPathAttribute() {

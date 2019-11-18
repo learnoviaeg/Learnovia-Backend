@@ -66,8 +66,8 @@ class MessageController extends Controller
                                 'deleted' => 0,
                                 'To' => $userId,
                             ));
-                            if($req->hasFile('file')){
-                                $attachment = attachment::upload_attachment($req->file , 'message');
+                            if ($req->hasFile('file')) {
+                                $attachment = attachment::upload_attachment($req->file, 'message');
                                 $message->file = $attachment->path;
                                 $message->attachment_id = $attachment->id;
                             }
@@ -209,8 +209,8 @@ class MessageController extends Controller
         $req->validate([
             'from' => 'required|exists:users,id'
         ]);
-        $messages = Message::where('From', $req->from)->where('To',$session_id)->where('seen',0)->get();
-        foreach($messages as $msg){
+        $messages = Message::where('From', $req->from)->where('To', $session_id)->where('seen', 0)->get();
+        foreach ($messages as $msg) {
             $msg->seen = 1;
             $msg->save();
         }

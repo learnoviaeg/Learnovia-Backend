@@ -87,6 +87,9 @@ class AuthController extends Controller
             if ($language['default'])
                 $result = $language;
         }
+        $job=(new \App\Jobs\MessageDelivered(Auth::User()->id));
+        dispatch($job);
+
         return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
