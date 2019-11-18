@@ -7,6 +7,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ExcelController extends Controller
 {
+    /**
+     * Import enroll/courses/users depended on type of import
+     * 
+     * @param  [string] type
+     * @param  [string .. path] file
+     * @return [string] Data Imported Successfully
+    */
     public function import(Request $request)
     {
         $request->validate([

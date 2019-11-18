@@ -16,19 +16,31 @@ use App\Segment;
 
 class GradeCategoryController extends Controller
 {
-
+    /**
+     * Add Grade Category
+     * 
+     * @param  [string] name
+     * @param  [int] course
+     * @param  [int] class
+     * @param  [int] parent
+     * @param  [int] aggregation
+     * @param  [int] hidden
+     * @param  [int] aggregatedOnlyGraded
+     * @return [string] Grade Category is created successfully and the object
+     * @return if there is no course[string] this class didnot have course segment
+    */
     public function AddGradeCategory(Request $request)
     {
         $request->validate([
             'name' => 'required',
-            'course_id' => 'required|exists:course_segments,course_id',
-            'class_id' => 'required|exists:classes,id',
+            'course' => 'required|exists:course_segments,course_id',
+            'class' => 'required|exists:classes,id',
             'parent' => 'exists:grade_categories,id',
             'aggregation' => 'integer',
             'aggregatedOnlyGraded' => 'integer',
             'hidden' => 'integer'
         ]);
-        $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class_id, $request->course_id);
+        $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (isset($course_segment_id)) {
             $grade_category = GradeCategory::create([
                 'name' => $request->name,

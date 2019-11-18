@@ -28,6 +28,23 @@ use Illuminate\Support\Facades\Validator;
 
 class CourseController extends Controller
 {
+    /**
+     * Add course
+     *
+     * @param  [string] name
+     * @param  [int] category
+     * @param  [array..id] year 
+     * @param  [array..id] type
+     * @param  [array..id] level
+     * @param  [array..id] class
+     * @param  [array..id] segment
+     * @param  [string..path] image
+     * @param [int] no_of_lessons
+     * @param [string] description
+     * @param [boolean] mandatory
+     * @param [boolean] typical
+     * @return [object] course with attachment and category in paginate
+    */
     public static function add(Request $request)
     {
         $request->validate([
@@ -55,15 +72,19 @@ class CourseController extends Controller
             'category_id' => $request->category,
         ]);
 
+        // if course has an image
         if ($request->hasFile('image')) {
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
             $course->save();
         }
 
+        // if course has description 
         if ($request->filled('description')) {
             $course->description = $request->description;
             $course->save();
         }
+
+        // if course is mandatory
         if ($request->filled('mandatory')) {
             $course->mandatory = $request->mandatory;
             $course->save();
@@ -112,6 +133,18 @@ class CourseController extends Controller
         return HelperController::api_response_format(201, Course::with(['category' , 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Created Successfully');
     }
 
+    /**
+     * update course
+     *
+     * @param  [string] name
+     * @param  [int] category_id
+     * @param  [int] id
+     * @param  [string..path] image
+     * @param  [string] description
+     * @param  [boolean] mandatory
+     * @return [object] course with attachment and category in paginate 
+    */
+
     public function update(Request $request)
     {
         $request->validate([
@@ -127,6 +160,7 @@ class CourseController extends Controller
         $course->name = $request->name;
         $course->category_id = $request->category;
 
+        // if course has an image
         if ($request->hasFile('image')) {
             $course->image=attachment::upload_attachment($request->image, 'course')->id;
         }
@@ -139,6 +173,20 @@ class CourseController extends Controller
         return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
     }
 
+    /**
+     * get course
+     *
+     * @param  [int] id
+     * @param  [int] category_id
+     * @param  [array..id] year 
+     * @param  [array..id] type
+     * @param  [array..id] level
+     * @param  [array..id] class
+     * @param  [array..id] segment
+     * @param  [string] search
+     * @return [object] course with attachment and category in paginate with search
+     * @return [object] course with attachment and category in paginate if id
+    */
     public function get(Request $request)
     {
 
@@ -169,7 +217,13 @@ class CourseController extends Controller
         return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->where('name', 'LIKE' , "%$request->search%")->get()
         ->paginate(HelperController::GetPaginate($request)));
     }
-
+    
+    /**
+     * delete course
+     *
+     * @param  [int] id
+     * @return [object] course with attachment and category in paginate 
+    */
     public function delete(Request $request)
     {
         $request->validate([
@@ -180,6 +234,12 @@ class CourseController extends Controller
         return HelperController::api_response_format(200, Course::with(['category' , 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Deleted Successfully');
     }
 
+    
+    /**
+     * get current enrolledCourses
+     *
+     * @return [object] currenr course_name with teacher and category with all chain
+    */
     public function CurrentCourses(Request $request)
     {
     $all = [];
@@ -211,6 +271,11 @@ class CourseController extends Controller
        return HelperController::api_response_format(200, $all);
     }
 
+    /**
+     * get past enrolledCourses
+     *
+     * @return [object] past courses_name with teacher and category with all chain
+    */
     public function PastCourses(Request $request)
     {
         $i=0;
@@ -218,7 +283,6 @@ class CourseController extends Controller
             if($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
                 $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
-//            return Date::excelToDateTimeObject( Carbon::now());//->getTimestamp();
                 $segment=SegmentClass::where('id',$segment_Class_id)->get(['segment_id','class_level_id'])->first();
 
                 $all[$i]['segment']=Segment::find($segment->segment_id)->name;
@@ -242,6 +306,12 @@ class CourseController extends Controller
         }
         return HelperController::api_response_format(200, $all);
     }
+
+    /**
+     * get future enrolledCourses
+     *
+     * @return [object] future courses_name with teacher and category with all chain
+    */
     public function FutureCourses(Request $request)
     {
         $i=0;
@@ -249,7 +319,6 @@ class CourseController extends Controller
             if($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
                 $all[$i]['Course Name']=Course::where('id',$enroll->CourseSegment->id)->pluck('name')->first();
                 $segment_Class_id=CourseSegment::where('id',$enroll->CourseSegment->id)->pluck('segment_class_id')->first();
-//            return Date::excelToDateTimeObject( Carbon::now());//->getTimestamp();
                 $segment=SegmentClass::where('id',$segment_Class_id)->get(['segment_id','class_level_id'])->first();
 
                 $all[$i]['segment']=Segment::find($segment->segment_id)->name;
@@ -274,6 +343,11 @@ class CourseController extends Controller
         return HelperController::api_response_format(200, $all);
     }
 
+    /**
+     * get course with teacher
+     *
+     * @return [object] course with teacher
+    */
     public function course_with_teacher()
     {
         $teachers = Enroll::where('role_id', '4')->get(['username', 'course_segment']);
@@ -283,6 +357,13 @@ class CourseController extends Controller
         }
         return $teachers;
     }
+
+    /**
+     * get UserCourseLessons
+     *
+     * @param [int] course_id
+     * @return [object] course with lessons[all attachments; assignments,....]
+    */
     public function GetUserCourseLessons(Request $request)
     {
         $request->validate([
@@ -369,7 +450,11 @@ class CourseController extends Controller
         return HelperController::api_response_format(200, $clase);
     }
 
-
+    /**
+     * get course by year type
+     *
+     * @return [object] course by year_type then year_level then class_level then segment_class then course_segment
+    */
     public function get_course_by_year_type(Request $request)
     {
         $academic_year_type = array();
@@ -383,7 +468,6 @@ class CourseController extends Controller
         }
         return CourseController::get_year_level($request, $academic_year_type);
     }
-
     public static function get_year_level(Request $request, $academic_year_type)
     {
         $year_level = array();
@@ -399,10 +483,8 @@ class CourseController extends Controller
                 $year_level[] = YearLevel::checkRelation($ac, $request->level_id)->id;
             }
         }
-
         return CourseController::get_class_level($request, $year_level);
     }
-
     public static function get_class_level(Request $request, $year_level)
     {
         $class_level = array();
@@ -420,7 +502,6 @@ class CourseController extends Controller
         }
         return CourseController::get_segment_class_level($request, $class_level);
     }
-
     public static function get_segment_class_level(Request $request, $class_level)
     {
         $segment_class = array();
@@ -436,10 +517,8 @@ class CourseController extends Controller
                 $segment_class[] = SegmentClass::checkRelation($ac, $request->segment_id)->id;
             }
         }
-
         return CourseController::get_course_segment_level($segment_class);
     }
-
     public static function get_course_segment_level($segment_class)
     {
         $course_segment = array();
@@ -452,6 +531,19 @@ class CourseController extends Controller
         return $course_segment;
     }
 
+    /**
+     * get optional course
+     * 
+     * // Request
+     * @param  [int..id] year 
+     * @param  [int..id] type
+     * @param  [int..id] level
+     * @param  [int..id] class
+     * @param  [int..id] segment
+     * @return if No current segment or year [string] There is no current segment or year
+     * @return if No optional COurse in these corse_segment  [string] There is no optional coures here
+     * @return [object] courses optional
+    */
     public function getCoursesOptional(Request $request)
     {
         $test=0;
@@ -478,6 +570,17 @@ class CourseController extends Controller
         }
     }
 
+    /**
+     * ToggleCourseLetter .. update course IS letter or not
+     *
+     * @param  [array..id] year 
+     * @param  [array..id] type
+     * @param  [array..id] level
+     * @param  [array..id] class
+     * @param  [array..id] segment
+     * @param  [array..id] course
+     * @return [object] course Assigned
+    */
     public function Assgin_course_to(Request $request)
     {
         $rules = [
@@ -538,6 +641,13 @@ class CourseController extends Controller
         return HelperController::api_response_format(201, 'Course Assigned Successfully');
     }
 
+    /**
+     * get sorted lessons of user
+     *
+     * @param  [int] course_id
+     * @param  [int] class_id
+     * @return [object] sorted lessons
+    */
     public function GetUserCourseLessonsSorted(Request $request){
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id',
@@ -559,6 +669,15 @@ class CourseController extends Controller
         return HelperController::api_response_format(200, $result);
     }
 
+    /**
+     * ToggleCourseLetter .. update course IS letter or not
+     *
+     * @param [boolean] letter
+     * @param [int] letter_id
+     * @param [int .. id] course
+     * @param [int .. if] class
+     * @return [object] course with toggled or not
+    */
     public function ToggleCourseLetter(Request $request)
     {
         $request->validate([
@@ -580,8 +699,6 @@ class CourseController extends Controller
             return HelperController::api_response_format(201, $course,'Toggled Success');
         }
         else
-        {
             return HelperController::api_response_format(201, 'There is no Active Course Segment');
-        }
     }
 }
