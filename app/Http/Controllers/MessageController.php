@@ -284,4 +284,18 @@ class MessageController extends Controller
         })->get();
         return HelperController::api_response_format(200 , $msgs,'Messages are....');
     }
+    public function SearchSpecificThread(Request $request)
+    {
+        $request->validate([
+            'search' => 'required',
+            'user_id'     => 'required|exists:users,id'
+        ]);
+        $current_user = Auth::id();
+        $msgs = Message::where(function ($query) use ($request, $current_user) {
+            $query->whereIn('From', [$request->user_id, $current_user])->whereIn('To', [$request->user_id, $current_user]);
+        })->where(function ($query) use ($request) {
+            $query->where('text', 'LIKE' , "%$request->search%");
+        })->get();
+        return HelperController::api_response_format(200 , $msgs,'Messages are....');
+    }
 }
