@@ -22,6 +22,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     //dashboard routes
     Route::post('dashboard/toggle', 'SpatieController@Toggle_dashboard')->name('toggleDashboard')->middleware('permission:dashboard/toggle');
+    Route::post('dashboard/dashboard', 'SpatieController@dashboard');//->name('toggleDashboard')->middleware('permission:dashboard/toggle');
 
     //Spatie Routes
     Route::group(['prefix' => 'spatie'], function () {

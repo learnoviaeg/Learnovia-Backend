@@ -802,8 +802,10 @@ class SpatieController extends Controller
             foreach ($pers as $permission) {
                 if ($permission->dashboard) {
                     $key = explode("/", $permission->name)[0];
-                    $dashbordPermission[$key][] = ['route' => $permission->name, 'title' => $permission->title];
+                    $dashbordPermission[$key]['icon']= $permission->icon;
+                    $dashbordPermission[$key]['routes'][] = ['route' => $permission->name, 'title' => $permission->title];
                 }
+
             }
         }
         return HelperController::api_response_format(200, ['permissions' => $dashbordPermission], 'Successfully');
