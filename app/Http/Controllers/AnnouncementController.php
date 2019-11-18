@@ -29,9 +29,17 @@ use stdClass;
 
 class AnnouncementController extends Controller
 {
-    /*
-
-    */
+  /**
+     *
+     * @Description : create an announcement. 
+     * @param : Title, description, start_date, due_date and assign are required parameters.
+     *          assign has 4 cases : all => announcement for all users.
+     *                               level => announcement for all users in a specific level.
+     *                               class => announcement for all users in a specific class.
+     *                               year => announcement for all users in a specific year.
+     *          attached_file and publish_date as optional parameters.
+     * @return : return all announcement of this user.  
+     */
     public function announcement(Request $request)
     {
 
@@ -228,6 +236,14 @@ class AnnouncementController extends Controller
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Sent Successfully');
     }
 
+  /**
+     *
+     * @Description : update an announcement. 
+     * @param : id, title and description required parameters.
+     *          attached_file, publish_date, start_date and due_date as optional parameters.
+     * @return : return all announcement of this user.  
+     */
+
     public function update_announce(Request $request)
     {
         $request->validate([
@@ -303,6 +319,14 @@ class AnnouncementController extends Controller
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Sent Successfully');
 
     }
+
+  /**
+     *
+     * @Description : delete_announcement deletes an announcement. 
+     * @param : id of the announcement as a required parameter.
+     * @return : return all announcement of this user.  
+     */
+
     public function delete_announcement(Request $request)
     {
         $request->validate([
@@ -330,6 +354,13 @@ class AnnouncementController extends Controller
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Deleted Successfully');
 //        return HelperController::api_response_format(200, $announce, 'Announcement Deleted Successfully');
     }
+
+ /**
+     *
+     * @Description :new_user_announcements gets all announcements for a new user. 
+     * @param : No parameters.
+     * @return : return all announcement for this user.  
+     */
 
     public function new_user_announcements()
     {
@@ -448,6 +479,12 @@ class AnnouncementController extends Controller
 
         return $all_ann;
     }
+ /**
+     *
+     * @Description :get_announcement gets all announcements for logged in user. 
+     * @param : No parameters.
+     * @return : return all currently published announcement for this user .  
+     */
 
     public function get_announcement()
     {
@@ -475,6 +512,12 @@ class AnnouncementController extends Controller
         }
         return $notif;
     }
+ /**
+     *
+     * @Description :get all announcements for logged in user. 
+     * @param : No parameters.
+     * @return : return all currently published announcement for this user .  
+     */
 
     public function get()
     {
@@ -482,6 +525,14 @@ class AnnouncementController extends Controller
         $anouncenew = AnnouncementController::new_user_announcements();
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew]);
     }
+
+ /**
+     *
+     * @Description :get an announcement  for logged in user. 
+     * @param : No parameters.
+     * @return : return all currently published announcement for this user .  
+     */
+
     public function getAnnounceByID(Request $request){
         $request->validate([
         'announce_id' => 'required|integer|exists:announcements,id',

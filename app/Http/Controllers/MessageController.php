@@ -216,9 +216,12 @@ class MessageController extends Controller
         }
         return HelperController::api_response_format(200, $messages, 'message was seen');
     }
-
-    public
-    function ViewAllMSG_from_to(Request $req)
+    /**
+     * @description:  view all messages 'from and to' between current user and a specific user.
+     * @param Request $req => id of a user.
+     * @return all messages.
+     */
+    public function ViewAllMSG_from_to(Request $req)
     {
         $req->validate([
             'id' => 'required|exists:users,id'
@@ -265,7 +268,11 @@ class MessageController extends Controller
         return HelperController::api_response_format(404, null, 'Message Role insertion Fail');
 
     }
-
+    /**
+     * @description: view all threads of a user.
+     * @param Request $req => id of a user.
+     * @return all threads.
+     */
     public function GetMyThreads(Request $request){
         $messages = Message::where('From', $request->user()->id)->orWhere('To', $request->user()->id)->orderBy('created_at','desc')->get();
         $users = Message::GetMessageDetails($messages , $request->user()->id);

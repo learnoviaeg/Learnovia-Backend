@@ -9,11 +9,11 @@ use App\Http\Resources\Academic_Year as Academic_YearResource;
 
 class AcademicYearController extends Controller
 {
-    /**
-     * Store a newly created resource in storage.
+ /**
+     * @Description :Creates new academic year.
+     * @param : Name of the year is required.
+     * @return : All Years in database.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
@@ -27,11 +27,12 @@ class AcademicYearController extends Controller
         return HelperController::api_response_format(201, $years, 'Year Created Successfully');
     }
 
-    /**
-     * Display the specified resource.
+ /**
+     * @Description :Get all years in database or get years with a given filter.
+     * @param : 'search' as an optional parameter.
+     * @return: If request contains search :returns years according to the search,
+     *          else: returns all years in database.
      *
-     * @param int $id
-     * @return \Illuminate\Http\Response
      */
     public function getall(Request $request)
     {
@@ -67,12 +68,11 @@ class AcademicYearController extends Controller
         return HelperController::api_response_format(200, $year);
     }
 
-    /**
-     * Update the specified resource in storage.
+ /**
+     * @Description :Updates name of a year.
+     * @param : id and new name of the year.
+     * @return: returns all years in database.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
      */
     public function update(Request $request)
     {
@@ -87,10 +87,10 @@ class AcademicYearController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @Description :Delete a year.
+     * @param : id of the year.
+     * @return: returns all years in database.
      *
-     * @param int $id
-     * @return \Illuminate\Http\Response
      */
     public function destroy(Request $request)
     {

@@ -12,11 +12,12 @@ use Validator;
 use App\AcademicYear;
 class ClassController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+  /*
+    * @Description :list all classes or select a class by id.
+    * @param :year, type, level of class as required parameters
+              id of class as an optional parameter.
+    * @return : returns all classes or a selected class.
+    */
     public function index(Request $request)
     {
         $request->validate([
@@ -45,12 +46,11 @@ class ClassController extends Controller
 
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
+   /*
+    * @Description :creates a new class.
+    * @param :name of class as required parameters.
+    * @return : returns the created class.
+    */
     public function store(Request $request)
     {
         $request->validate([
@@ -61,7 +61,12 @@ class ClassController extends Controller
         $class->save();
         return HelperController::api_response_format(200, new Classs($class), 'Class Created Successfully');
     }
-
+   /*
+    * @Description :creates a new class to a given year, type and level.
+    * @param :name of class as required parameters.
+              year, level and type are optional parameters but required to each other.
+    * @return : returns all the classes.
+    */
     public function AddClassWithYear(Request $request)
     {
         $request->validate([
@@ -99,10 +104,9 @@ class ClassController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @Description :list all classes or select one by id or a filter . 
+     * @param : id of classes or search as an optional parameter.
+     * @return : returns all classes or filtered ones or a class selected by id.
      */
     public function show(Request $request)
     {
@@ -132,11 +136,9 @@ class ClassController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @Description :update a class .
+     * @param : id and new name of class.
+     * @return : returns all classes .
      */
     public function update(Request $request)
     {
@@ -153,10 +155,9 @@ class ClassController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @Description :delete a class .
+     * @param : id of class.
+     * @return : returns all classes .
      */
     public function destroy(Request $request)
     {
@@ -165,8 +166,11 @@ class ClassController extends Controller
         $class->delete();
         return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), 'Class Deleted Successfully');
     }
-
-
+    /**
+     * @Description :assigns a class to certain year, type and level.
+     * @param : year, type, level and class.
+     * @return : A string message which indicates if class assigned successfully or not.
+     */
     public function Assign_class_to(Request $request)
     {
         $rules =[

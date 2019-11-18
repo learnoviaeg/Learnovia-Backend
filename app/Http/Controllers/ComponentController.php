@@ -14,7 +14,11 @@ class ComponentController extends Controller
     {
         return HelperController::api_response_format(200, Component::whereActive(1)->get());
     }
-
+    /**
+     * @Description :install a component
+     * @param : file in zip form as a required parameter.
+     * @return : return component.
+     */
     public function Install(Request $request)
     {
         $request->validate([
@@ -28,7 +32,11 @@ class ComponentController extends Controller
         ]);
         return HelperController::api_response_format(201, $componenet, 'Component Installed Successfully');
     }
-
+    /**
+     * @Description :uninstall a component.
+     * @param : id of component.
+     * @return : return component.
+     */
     public function Uninstall(Request $request)
     {
         $request->validate([
@@ -39,7 +47,11 @@ class ComponentController extends Controller
         $componenet->delete();
         return HelperController::api_response_format(200, $componenet, 'Component Deleted Successfully');
     }
-
+    /**
+     * @Description :toggles activity f components.
+     * @param : id of component.
+     * @return : return component.
+     */
     public function ToggleActive(Request $request){
         $request->validate([
             'id' => 'required|exists:components,id'
@@ -93,7 +105,11 @@ class ComponentController extends Controller
         }
         return $Comps;
     }
-
+    /**
+     * @Description :interface to sort components up and down.
+     * @param : component_id, index and lesson id of component.
+     * @return : return all components sorted.
+     */
     public function sort(Request $request)
     {
         $request->validate([

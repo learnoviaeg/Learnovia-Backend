@@ -267,7 +267,12 @@ class SpatieController extends Controller
         ]);
         return HelperController::api_response_format(201, $role, 'Role Added!');
     }
-
+    /**
+     *
+     * @Description :get role by id
+     * @param : id of role required parameters.
+     * @return : string message which indicates if segment set to be current or not.
+     */
     public function Get_Role(Request $request)
     {
         $request->validate([
@@ -282,7 +287,13 @@ class SpatieController extends Controller
 
         return HelperController::api_response_format(201, $role);
     }
-
+    /**
+     *
+     * @Description :update a role
+     * @param : id, name and description  of role required parameters
+     *          permissions is an optional parameter.  
+     * @return : the updated role 
+     */
     public function Update_Role(Request $request)
     {
         $request->validate([
@@ -655,13 +666,24 @@ class SpatieController extends Controller
             return HelperController::NOTFOUND();
         }
     }
-
+    /**
+     *
+     * @Description :check if user have certain permission.
+     * @param : requires permission
+     * @return : the updated role 
+     */
     public function checkUserHavePermession(Request $request)
     {
         $request->validate(['permission' => 'required|exists:permissions,name']);
         return HelperController::api_response_format(200, $request->user()->hasPermissionTo($request->permission));
     }
-
+    /**
+     * @Description :get permissions of a user according to it's role.
+     * @param : type is an optional parameter 
+     *          if type -> course therefore course id is required
+     *          if type -> quiz therefore quiz id is required
+     * @return : permissions of user.
+     */
     public function Get_permission_of_user(Request $request)
     {
 
@@ -711,7 +733,13 @@ class SpatieController extends Controller
 
         return HelperController::api_response_format(200, $user_per);
     }
-
+    /**
+     * @Description :check permissions of a user on a course.
+     * @param : course, class, permissions are required parameters.
+     * @return : if this user on course -> true 
+     *           if no active segment in this course -> 'No Activ  segment on this course to check permession in'
+     *           if this user is not enrolled in course -> you are not enrolled this course
+     */
     public function checkPermessionOnCourse(Request $request)
     {
         $request->validate([
@@ -774,7 +802,12 @@ class SpatieController extends Controller
         }
         return HelperController::api_response_format(201, $trueper);
     }
-
+    /**
+     * @Description :toggles dashboard of a permission in database.
+     * @param  : permission_id.
+     * @return : if succeded -> return permission and a string message 'toggle successfuly'
+     *           if fails   ->string message 'Please Try again'
+     */
     public function Toggle_dashboard(Request $request)
     {
 
@@ -790,7 +823,11 @@ class SpatieController extends Controller
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
-
+    /**
+     * @Description :list dashboard permissions.
+     * @param  : permission_id.
+     * @return : returns dashboard permissions
+     */
     public function dashboard(Request $request)
     {
         $dashbordPermission = array();
