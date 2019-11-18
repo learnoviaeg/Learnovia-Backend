@@ -21,10 +21,7 @@ class CreateAttendanceSessionsTable extends Migration
             $table->foreign('taker_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->dateTime('date');
             $table->dateTime('last_time_taken');
-            $table->dateTime('duration');
-
-
-
+            $table->dateTime('duration')->nullable();
             $table->timestamps();
         });
     }
