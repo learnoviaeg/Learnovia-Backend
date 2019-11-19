@@ -19,8 +19,10 @@ class CreateAttendanceSessionsTable extends Migration
             $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('taker_id');
             $table->foreign('taker_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('course_segment_id')->nullable();
+            $table->foreign('course_segment_id')->references('id')->on('course_segments')->onDelete('cascade')->onUpdate('cascade');
             $table->dateTime('date');
-            $table->dateTime('last_time_taken');
+            $table->dateTime('last_time_taken')->nullable();
             $table->dateTime('duration')->nullable();
             $table->timestamps();
         });

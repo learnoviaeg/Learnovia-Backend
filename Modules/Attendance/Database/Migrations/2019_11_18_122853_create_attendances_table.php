@@ -6,7 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateAttendancesTable extends Migration
 {
-    /**
+    /*
      * Run the migrations.
      *
      * @return void
@@ -18,7 +18,6 @@ class CreateAttendancesTable extends Migration
             $table->string('name');
             $table->integer('type');
             $table->integer('grade')->nullable();
-
             $table->timestamps();
         });
     }
