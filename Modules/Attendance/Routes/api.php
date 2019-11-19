@@ -12,7 +12,10 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::group(['prefix' => 'attendance', 'middleware' => 'auth:api'] , function(){
 
-Route::middleware('auth:api')->get('/attendance', function (Request $request) {
-    return $request->user();
+
+    Route::post('add' , 'AttendanceController@create');//->name('addattendance')->middleware('permission:attendance/add');
+
+
 });
