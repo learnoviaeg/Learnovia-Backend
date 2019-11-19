@@ -3,20 +3,83 @@
 namespace Modules\Attendance\Http\Controllers;
 
 use App\Http\Controllers\HelperController;
-use Carbon\Carbon;
 use App\Http\Controllers\GradeCategoryController;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
 use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceSession;
-use Modules\Attendance\Jobs\Attendance_sessions;
-use ParagonIE\Sodium\Core\Curve25519\H;
+
+use App\Enroll;
 
 class AttendanceController extends Controller
 {
-    /**
+
+    public function install()
+    {
+        if (\Spatie\Permission\Models\Permission::whereName('attendance/add')->first() != null) {
+            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        }
+
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add', 'title' => 'add attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'add attendance log']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-attendence', 'title' => 'get  all users in attendence']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'get all users in session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get_all_taken_users_in_session', 'title' => 'get all taken users in session']);
+
+
+        $role = \Spatie\Permission\Models\Role::find(1);
+        $role->givePermissionTo('attendance/add');
+
+
+        Component::create([
+            'name' => 'Attendance',
+            'module' => 'Attendance',
+            'model' => 'Attendance',
+            'type' => 1,
+            'active' => 1
+        ]);
+
+        return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
+    }
+    public function get_all_users_in_attendence(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:attendances,id',
+        ]);
+        $Course_Segments=Attendance::get_CourseSegments_by_AttendenceID($request->id);
+        $users=Enroll::whereIn('course_segment',$Course_Segments)->with('user')->get();
+        return $users;
+    }
+
+    public function get_all_users_in_session(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|exists:attendance_sessions,id',
+            'year'=>'exists:academic_years,id',
+            'type'=>'exists:academic_types,id',
+            'level'=>'exists:levels,id',
+            'class'=>'exists:classes,id',
+
+        ]);
+        $session = AttendanceSession::where('id',$request->session_id)->first();
+        $users=Enroll::where('course_segment',$session->course_segment_id)->with('user')->get();
+        if(is_null($session->course_segment_id)){
+            $course_segments = GradeCategoryController::getCourseSegment($request);
+            $users=Enroll::whereIn('course_segment',$course_segments)->with('user')->get();
+        }
+        return $users;
+        
+    }
+    public function get_all_taken_users_in_session(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|exists:attendance_sessions,id',
+        ]);
+        $users =AttendanceSession::with('logs.User')->where('id',$request->session_id)->get();
+        return $users[0]['logs'];
+
+    }
+/**
      * @param  \Illuminate\Http\Request  $request
      * @return message to tell that all session with or without course segments  are created
      */

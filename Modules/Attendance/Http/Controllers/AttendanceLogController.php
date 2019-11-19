@@ -5,9 +5,9 @@ namespace Modules\Attendance\Http\Controllers;
 use App\Http\Controllers\HelperController;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Modules\Attendance\Entities\AttendanceLog;
 use Modules\Attendance\Entities\AttendanceSession;
 
@@ -26,15 +26,12 @@ class AttendanceLogController extends Controller
             'status_ids' => 'required|exists:attendance_statuses,id|array',
         ]);
         if(count($request->student_ids) !=count($request->status_ids) ){
-            return HelperController::api_response_format(404, null , 'size of students array not equal size of status');
-
+            return HelperController::api_response_format(400, null , 'size of students array not equal size of status');
         }
-        $allowed_status = AttendanceSession::find($request->session_id)->attendance;
-        dd($allowed_status);
+        $allowed_status = AttendanceSession::find($request->session_id)->Attendence->status->pluck('id');
         $request->validate([
-            'status_ids.*' => 'required|in:' . implode(),
+            'status_ids.*' =>[ 'required', Rule::in($allowed_status)],
         ]);
-
         AttendanceSession::find($request->session_id)->update(['last_time_taken' => $date]);
         for ($i = 0; $i < count($request->student_ids); $i++) {
             $AttendanceLog[] = AttendanceLog::create([
