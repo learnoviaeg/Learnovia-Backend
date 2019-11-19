@@ -18,7 +18,7 @@ class AttendanceController extends Controller
 {
     /**
      * @param  \Illuminate\Http\Request  $request
-     * @return message to tell that all session with or without course segments  are created 
+     * @return message to tell that all session with or without course segments  are created
      */
     public function create(Request $request)
     {

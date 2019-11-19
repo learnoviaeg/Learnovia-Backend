@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class AttendanceLog extends Model
 {
-    protected $fillable = [];
+    protected $fillable = ['ip_address','session_id','student_id','status_id','taker_id','taken_at'];
 }

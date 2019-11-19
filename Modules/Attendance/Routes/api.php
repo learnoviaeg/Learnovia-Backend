@@ -16,6 +16,7 @@ Route::group(['prefix' => 'attendance', 'middleware' => 'auth:api'] , function()
 
 
     Route::post('add' , 'AttendanceController@create');//->name('addattendance')->middleware('permission:attendance/add');
+    Route::post('log/add' , 'AttendanceLogController@create');//->name('addattendance')->middleware('permission:attendance/add');
 
 
 });

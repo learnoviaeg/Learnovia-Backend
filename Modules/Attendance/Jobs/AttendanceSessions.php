@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceSession;
+use Modules\Attendance\Entities\AttendanceStatus;
 
 class Attendance_sessions implements ShouldQueue
 {
@@ -24,7 +25,7 @@ class Attendance_sessions implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($request, $user_id,$course_segment)
+    public function __construct($request, $user_id, $course_segment)
     {
         $this->request = $request;
         $this->user_id = $user_id;
@@ -47,15 +48,15 @@ class Attendance_sessions implements ShouldQueue
                 $alldays[] = $date->format('Y-m-d');
             }
         }
+        $attendance = Attendance::create(['name' => $this->request['name'],
+            'type' => $this->request['attendance_type'],
+            'grade' => (isset($this->request['grade'])) ? $this->request['grade'] : null
+        ]);
         switch ($this->request['attendance_type']) {
             case 1 :
-                $attendance = Attendance::create(['name' => $this->request['name'],
-                    'type' => $this->request['attendance_type'],
-                    'grade' => (isset($this->request['grade'])) ? $this->request['grade'] : null
-                ]);
-                foreach ( $this->course_segments as $courseSegment) {
+                foreach ($this->course_segments as $courseSegment) {
                     foreach ($alldays as $day) {
-                        $AttendanceSessions[]= AttendanceSession::create(['attendance_id' => $attendance->id,
+                        $AttendanceSessions[] = AttendanceSession::create(['attendance_id' => $attendance->id,
                             'taker_id' => $this->user_id,
                             'date' => $day,
                             'course_segment_id' => $courseSegment
@@ -64,13 +65,9 @@ class Attendance_sessions implements ShouldQueue
                 }
                 break;
             case 2:
-                $attendance = Attendance::create(['name' => $this->request['name'],
-                    'type' => $this->request['attendance_type'],
-                    'grade' => (isset($this->request['grade'])) ? $this->request['grade'] : null
-                ]);
                 foreach ($alldays as $day) {
-                    for ($i=1;$i<=$this->request['times'];$i++) {
-                        $AttendanceSessions[]= AttendanceSession::create(['attendance_id' => $attendance->id,
+                    for ($i = 1; $i <= $this->request['times']; $i++) {
+                        $AttendanceSessions[] = AttendanceSession::create(['attendance_id' => $attendance->id,
                             'taker_id' => $this->user_id,
                             'date' => $day,
                             'course_segment_id' => null
@@ -78,6 +75,11 @@ class Attendance_sessions implements ShouldQueue
                     }
                 }
                 break;
+        }
+        $defult = AttendanceStatus::defaultStatus();
+        foreach ($defult as $status){
+            $status['attendance_id'] = $attendance->id;
+            AttendanceStatus::create($status);
         }
     }
 }
