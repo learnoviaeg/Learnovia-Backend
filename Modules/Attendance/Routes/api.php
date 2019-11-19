@@ -16,3 +16,6 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/attendance', function (Request $request) {
     return $request->user();
 });
+Route::post('get-users-in-attendence', 'AttendanceController@get_all_users_in_attendence')->middleware('auth:api');
+Route::post('get-users-in-session', 'AttendanceController@get_all_users_in_session')->middleware('auth:api');
+Route::post('get-users-taken-in-session', 'AttendanceController@get_all_taken_users_in_session')->middleware('auth:api');
