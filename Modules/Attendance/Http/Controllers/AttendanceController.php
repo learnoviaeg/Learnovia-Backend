@@ -5,10 +5,12 @@ namespace Modules\Attendance\Http\Controllers;
 use App\Component;
 use App\Http\Controllers\HelperController;
 use App\Http\Controllers\GradeCategoryController;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\Attendance\Entities\Attendance;
+use Modules\Attendance\Entities\AttendanceLog;
 use Modules\Attendance\Entities\AttendanceSession;
 
 use App\Enroll;
