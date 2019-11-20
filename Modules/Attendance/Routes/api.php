@@ -21,3 +21,8 @@ Route::group(['prefix' => 'attendance', 'middleware' => 'auth:api'], function ()
     Route::post('get-users-taken-in-session', 'AttendanceController@get_all_taken_users_in_session')->name('getuserstakeninsession')->middleware('permission:get-users-taken-in-session');
     Route::post('add-session', 'AttendanceController@createSession')->name('getuserstakeninsession')->middleware('permission:get-users-taken-in-session');
 });
+Route::group(['prefix' => 'status', 'middleware' => 'auth:api'], function () {
+    Route::post('AddStatus','StatusController@Add');
+    Route::post('UpdateStatus','StatusController@Update');
+    Route::post('DeleteStatus','StatusController@Delete');
+});
