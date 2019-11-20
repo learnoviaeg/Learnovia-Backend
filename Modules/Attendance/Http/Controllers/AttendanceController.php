@@ -60,7 +60,7 @@ class AttendanceController extends Controller
         ]);
         $Course_Segments = Attendance::get_CourseSegments_by_AttendenceID($request->id);
         $users = Enroll::whereIn('course_segment', $Course_Segments)->with('user')->get();
-        return $users;
+        return HelperController::api_response_format(200,$users , 'Users are.....');
     }
 
     public function get_all_users_in_session(Request $request)
@@ -82,7 +82,7 @@ class AttendanceController extends Controller
         $users=Enroll::whereIn('course_segment',$course_segments)->with(['users' => function($query)use ($AlreadyTakenUsers){
             $query->whereNotIn('id' , $AlreadyTakenUsers);
         }])->get()->pluck('users');
-        return $users;        
+        return HelperController::api_response_format(200,$users , 'Users are.....');
     }
     
     public function get_all_taken_users_in_session(Request $request)
@@ -92,8 +92,7 @@ class AttendanceController extends Controller
         ]);
         $AlreadyTakenUsers=AttendanceLog::where('session_id',$request->session_id)->pluck('student_id');
         $users = User::whereIn('id' , $AlreadyTakenUsers)->get();
-        return $users;
-
+        return HelperController::api_response_format(200,$users , 'Users are....');
     }
 
     /**
