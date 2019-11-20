@@ -35,24 +35,28 @@ class AttendanceController extends Controller
             'type'=>'exists:academic_types,id',
             'level'=>'exists:levels,id',
             'class'=>'exists:classes,id',
-
         ]);
         $session = AttendanceSession::where('id',$request->session_id)->first();
-        $users=Enroll::where('course_segment',$session->course_segment_id)->with('user')->get();
-        if(is_null($session->course_segment_id)){
+        $AlreadyTakenUsers=AttendanceLog::where('session_id',$request->session_id)->pluck('student_id');
+        $course_segments = [];
+        $course_segments[] = $session->course_segment_id;
+        if(is_null($course_segments[0])){
             $course_segments = GradeCategoryController::getCourseSegment($request);
-            $users=Enroll::whereIn('course_segment',$course_segments)->with('user')->get();
         }
-        return $users;
-        
+        $users=Enroll::whereIn('course_segment',$course_segments)->with(['users' => function($query)use ($AlreadyTakenUsers){
+            $query->whereNotIn('id' , $AlreadyTakenUsers);
+        }])->get()->pluck('users');
+        return $users;        
     }
+    
     public function get_all_taken_users_in_session(Request $request)
     {
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
         ]);
-        $users =AttendanceSession::with('logs.User')->where('id',$request->session_id)->get();
-        return $users[0]['logs'];
+        $AlreadyTakenUsers=AttendanceLog::where('session_id',$request->session_id)->pluck('student_id');
+        $users = User::whereIn('id' , $AlreadyTakenUsers)->get();
+        return $users;
 
     }
 /**
