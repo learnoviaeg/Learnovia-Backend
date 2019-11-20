@@ -48,15 +48,12 @@ class Attendance_sessions implements ShouldQueue
                 $alldays[] = $date->format('Y-m-d');
             }
         }
-        $attendance = Attendance::create(['name' => $this->request['name'],
-            'type' => $this->request['attendance_type'],
-            'grade' => (isset($this->request['grade'])) ? $this->request['grade'] : null
-        ]);
+
         switch ($this->request['attendance_type']) {
             case 1 :
                 foreach ($this->course_segments as $courseSegment) {
                     foreach ($alldays as $day) {
-                        $AttendanceSessions[] = AttendanceSession::create(['attendance_id' => $attendance->id,
+                        $AttendanceSessions[] = AttendanceSession::create(['attendance_id' => $this->request['attendance_id'],
                             'taker_id' => $this->user_id,
                             'date' => $day,
                             'course_segment_id' => $courseSegment
@@ -67,7 +64,7 @@ class Attendance_sessions implements ShouldQueue
             case 2:
                 foreach ($alldays as $day) {
                     for ($i = 1; $i <= $this->request['times']; $i++) {
-                        $AttendanceSessions[] = AttendanceSession::create(['attendance_id' => $attendance->id,
+                        $AttendanceSessions[] = AttendanceSession::create(['attendance_id' => $this->request['attendance_id'],
                             'taker_id' => $this->user_id,
                             'date' => $day,
                             'course_segment_id' => null
@@ -75,11 +72,6 @@ class Attendance_sessions implements ShouldQueue
                     }
                 }
                 break;
-        }
-        $defult = AttendanceStatus::defaultStatus();
-        foreach ($defult as $status){
-            $status['attendance_id'] = $attendance->id;
-            AttendanceStatus::create($status);
         }
     }
 }
