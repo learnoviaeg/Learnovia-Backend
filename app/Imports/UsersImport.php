@@ -34,8 +34,8 @@ class UsersImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         Validator::make($row,[
-            'firstname'=>'required|alpha',
-            'lastname'=>'required|alpha',
+            'firstname'=>'required',
+            'lastname'=>'required',
             'role_id'=>'required|exists:roles,id'
         ])->validate();
 
