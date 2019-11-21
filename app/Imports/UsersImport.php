@@ -121,21 +121,20 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$enrollOptional.$enrollcounter])) {
 
                     $course_id=Course::findById($row[$enrollOptional.$enrollcounter]);
+                    // $courseSeg=CourseSegment::getidfromcourse($course_id);
                     $courseSeg=CourseSegment::GetWithClassAndCourse($row['class'],$course_id);
                     if($courseSeg == null)
                         break;
                     $userId =User::FindByName($user->username)->id;
 
-                    foreach($courseSeg as $course_seg)
-                    {
                         Enroll::firstOrCreate([
-                            'course_segment' => $course_seg,
+                            'course_segment' => $courseSeg->id,
                             'user_id' => $userId,
                             'role_id'=> 3
                         ]);
 
                         $enrollcounter++;
-                    }
+
                 }
             }
             else{
