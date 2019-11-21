@@ -39,8 +39,6 @@ class UsersImport implements ToModel, WithHeadingRow
             'role_id'=>'required|exists:roles,id'
         ])->validate();
 
-
-
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
                         'language','timezone','religion','second language'];
         $enrollOptional = 'optional';
@@ -77,7 +75,6 @@ class UsersImport implements ToModel, WithHeadingRow
             ])->validate();
 
             if (isset($row['year'])) {
-
                 Validator::make($row,[
                     'year' => 'exists:academic_years,id'
                 ])->validate();
@@ -105,14 +102,17 @@ class UsersImport implements ToModel, WithHeadingRow
             ])->validate();
 
             $role = Role::find($row['role_id']);
+            $userId[] =User::FindByName($user->username)->id;
             $user->assignRole($role);
+
             if ($row['role_id'] == 3) {
                 $request = new Request([
                     'year' => $year,
                     'type' => $row['type'],
                     'level' => $row['level'],
                     'class' => $row['class'],
-                    'segment' => $segment
+                    'segment' => $segment,
+                    'users' => $userId
                 ]);
 
                 EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
@@ -136,7 +136,6 @@ class UsersImport implements ToModel, WithHeadingRow
 
                         $enrollcounter++;
                     }
-
                 }
             }
             else{
