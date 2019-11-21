@@ -86,7 +86,7 @@ class UserQuizController extends Controller
             'status_id' => 2,
             'feedback' => null,
             'grade' => null,
-            'attempt_index' => ($user->roles->first()->id == 3) ? $attempt_index : 0,
+            'attempt_index' => ($user->can('site/quiz/store_user_quiz')) ? $attempt_index : 0,
             'ip' => $request->ip(),
             'device_data' => $deviceData,
             'browser_data' => $browserData,

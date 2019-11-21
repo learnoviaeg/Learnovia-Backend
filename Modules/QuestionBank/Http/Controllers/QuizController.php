@@ -16,6 +16,7 @@ use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use Modules\QuestionBank\Entities\userQuiz;
+use Spatie\Permission\Models\Permission;
 use Validator;
 use App\Classes;
 use Auth;
@@ -568,7 +569,8 @@ class QuizController extends Controller
         $quiz = quiz::find($request->quiz_id);
         $quizLessons = $check->id;
         $courseSegment = $check->lesson->courseSegment; //$quiz->course->courseSegments->where('is_active',1)->first();
-        $enroll = $courseSegment->Enroll->where('role_id', 3);
+        $roles_id=  Permission::where('name','site/quiz/getStudentinQuiz')->roles->pluck('id');
+        $enroll = $courseSegment->Enroll->whereIn('role_id', $roles_id);
         foreach ($enroll as $enrollment) {
             $userData = collect([]);
             $currentUser = $enrollment->user;

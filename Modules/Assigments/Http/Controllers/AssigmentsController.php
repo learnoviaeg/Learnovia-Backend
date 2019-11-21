@@ -10,6 +10,7 @@ use App\Lesson;
 use App\SegmentClass;
 use App\ClassLevel;
 use App\Classes;
+use Spatie\Permission\Models\Permission;
 use URL;
 
 use Illuminate\Support\Facades\Auth;
@@ -43,8 +44,9 @@ class AssigmentsController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/toggle', 'title' => 'toggle assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/get-all', 'title' => 'get all assignments']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/editgrade', 'title' => 'edit assignments grades']);
-
-
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/assignment/assigned-users', 'title' => 'assign Assignment to Users']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/assignment/getAssignment', 'title' => 'get Assignment']);
+        
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('assignment/add');
         $role->givePermissionTo('assignment/update');
@@ -56,6 +58,8 @@ class AssigmentsController extends Controller
         $role->givePermissionTo('assignment/toggle');
         $role->givePermissionTo('assignment/get-all');
         $role->givePermissionTo('assignment/editgrade');
+        $role->givePermissionTo('site/assignment/assigned-users');
+        $role->givePermissionTo('site/assignment/getAssignment');
 
 
 
@@ -286,7 +290,10 @@ class AssigmentsController extends Controller
     */
     public function assignAsstoUsers($request)
     {
-      $usersIDs = Enroll::where('course_segment', $request['course_segment'])->where('role_id' , 3)->pluck('user_id')->toarray();
+        $roles = Permission::where('name','site/assignment/assigned-users')->roles->pluck('id');
+
+      $usersIDs = Enroll::where('course_segment', $request['course_segment'])->whereIn('role_id' , $roles)->pluck('user_id')->toarray();
+
         foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
             $userassigment->user_id = $userId;
@@ -494,12 +501,13 @@ class AssigmentsController extends Controller
             $value['attachment'] = attachment::where('id', $value->attachment_id)->first();
         }
 
-        if (($user->roles->first()->id) == 4 || ($user->roles->first()->id) == 1) {
+//        if (($user->roles->first()->id) == 4 || ($user->roles->first()->id) == 1) {
+        if (!($user->can('site/assignment/getAssignment'))) {
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
-
         ///////////////student
-        if (($user->roles->first()->id) == 3) {
+//        if (($user->roles->first()->id) == 3) {
+        if (($user->can('site/assignment/getAssignment')) {
             $studentassigment = UserAssigment::where('assignment_id', $assignment->id)->where('user_id', $user->id)->first();
             if ($assignment->start_date > Carbon::now() || $assignment->due_date < Carbon::now()) {
                 if ($studentassigment->override == 0) {

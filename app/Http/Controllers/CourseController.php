@@ -203,7 +203,9 @@ class CourseController extends Controller
                 $all[$i]['year']=AcademicYear::find($AC_type->academic_type_id)->name;
 
                 $all[$i]['category'] = $enroll->CourseSegment->courses[0]->category;
-                $all[$i]['Teacher'] = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
+                $roles = Permission::where('name','site/course/current_courses')->roles->pluck('id');
+
+                $all[$i]['Teacher'] = User::whereId(Enroll::whereIn('role_id', $roles)->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
                 $all[$i]['Teacher']['class'] = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $i++;
             }
@@ -320,7 +322,8 @@ class CourseController extends Controller
                         foreach ($clase[$i]->lessons as $lessonn) {
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
-                                if (($request->user()->roles->first()->id) == 3 ||($request->user()->roles->first()->id) == 7) {
+//                                if (($request->user()->roles->first()->id) == 3 ||($request->user()->roles->first()->id) == 7) {
+                                if (($request->user()->can('site/course/getUserCourseLessons')) ){
                                     $Component = $lessoncounter->module($com->module, $com->model)
                                         ->where('visible' , '=' , 1)
                                         ->where('publish_date' , '<=' , Carbon::now())->get();

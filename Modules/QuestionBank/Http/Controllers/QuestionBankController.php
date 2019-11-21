@@ -53,11 +53,17 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-grade-category','title' => 'get quiz grade category']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/toggle','title' => 'toggle quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-attempts','title' => 'get all attempts of user']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/getStudentinQuiz','title' => 'get Student in Quiz']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/notify_quiz','title' => 'notify quiz']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/store_user_quiz','title' => 'notify quiz']);
 
 
 
 
         $role = \Spatie\Permission\Models\Role::find(1);
+        $role->givePermissionTo('site/quiz/getStudentinQuiz');
+        $role->givePermissionTo('site/quiz/notify_quiz');
+        $role->givePermissionTo('site/quiz/store_user_quiz');
         $role->givePermissionTo('question/add');
         $role->givePermissionTo('question/update');
         $role->givePermissionTo('question/delete');

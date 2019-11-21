@@ -48,6 +48,8 @@ class FilesController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get-all','title' => 'get all media']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get','title' => 'get media']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get','title' => 'get file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/file/edit','title' => 'update file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/media/edit','title' => 'update media']);
 
 
 
@@ -69,6 +71,8 @@ class FilesController extends Controller
         $role->givePermissionTo('media/get-all');
         $role->givePermissionTo('media/get');
         $role->givePermissionTo('file/get');
+        $role->givePermissionTo('site/file/edit');
+        $role->givePermissionTo('site/media/edit');
 
         Component::create([
             'name' => 'Media',
@@ -430,9 +434,8 @@ class FilesController extends Controller
             $courseSegmentID = $file->FileCourseSegment->course_segment_id;
 
             $user = Auth::User();
-            if($user->roles->first()->id!=4){
+            if(!$user->can('site/file/edit')){
                 return HelperController::api_response_format(400, null, 'only teachers are allowed to edit ');
-
             }
 
             if (isset($request->Imported_file)) {

@@ -286,7 +286,8 @@ class MediaController extends Controller
             $courseSegmentID = $file->MediaCourseSegment->course_segment_id;
 
             $user = Auth::User();
-            if($user->roles->first()->id!=4){
+//            if($user->roles->first()->id!=4){
+            if(!$user->can('site/media/edit')){
                 return HelperController::api_response_format(400, null, 'only teachers are allowed to edit ');
 
             }

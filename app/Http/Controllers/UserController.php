@@ -192,7 +192,8 @@ class UserController extends Controller
 
         $user_id = Auth::user()->id;
         $role_id = DB::table('model_has_roles')->where('model_id', $user_id)->pluck('role_id')->first();
-        if ($role_id == 1 || $role_id == 2) {
+//        if ($role_id == 1 || $role_id == 2) {
+        if (Auth::user()->can('site/user/list') || Auth::user()->can('user/list')) {
             if ($request->filled('search')) {
                 $user = User::with('roles')->where('username', 'LIKE', "%$request->search%")->get()
                     ->paginate(HelperController::GetPaginate($request));
@@ -283,7 +284,8 @@ class UserController extends Controller
     {
         $user_id = Auth::user()->id;
         $role_id = DB::table('model_has_roles')->where('model_id', $user_id)->pluck('role_id')->first();
-        if ($role_id == 1 || $role_id == 2) {
+//        if ($role_id == 1 || $role_id == 2) {
+        if ( Auth::user()->can('site/user/Show_and_hide_real_password_with_permission')) {
             $user = User::all()->each(function ($row) {
                 $row->setHidden(['password']);
             });
