@@ -14,7 +14,7 @@ class AlterPermissions extends Migration
     public function up()
     {
         Schema::table('permissions', function (Blueprint $table) {
-            $table->string('icon');
+            $table->string('icon')->nullable();
 
         });
     }

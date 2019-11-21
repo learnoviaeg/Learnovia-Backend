@@ -234,8 +234,10 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Parent']);
 
             //site internal permessions
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/search-all-users', 'title' => 'Search all users assigned to my course segments and search all site wide for users give permission to search site wide']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'show/real-password', 'title' => 'Get Letter']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/user/search-all-users', 'title' => 'Search all users assigned to my course segments and search all site wide for users give permission to search site wide']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/show/real-password', 'title' => 'Show Real Password']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/course/teacher', 'title' => 'detect the course teacher']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/course/student', 'title' => 'detect the course student']);
             $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
 
             $user = new User([
@@ -261,7 +263,7 @@ class SpatieController extends Controller
     public function Add_Role(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|unique:roles,name',
             'descripion' => 'string',
         ]);
         $role = Role::create([
@@ -562,8 +564,7 @@ class SpatieController extends Controller
                 'roleid' => 'required|integer|exists:roles,id',
             ]);
             if ($validater->fails()) {
-                $errors = $validater->errors();
-                return response()->json($errors, 400);
+                return HelperController::api_response_format(200, $validater->errors());
             }
 
             $findrole = Role::find($request->roleid);

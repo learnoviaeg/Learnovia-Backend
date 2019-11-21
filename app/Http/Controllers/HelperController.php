@@ -15,7 +15,7 @@ class HelperController extends Controller
 {
     /**
      * response formate
-     * 
+     *
      * @param  [array/object] body
      * @param  [int] $code
      * @param  [string] message
@@ -31,7 +31,7 @@ class HelperController extends Controller
 
     /**
      * NOT Found
-     * 
+     *
      * @return [string] NOTFound, [] body, 404
     */
     public static function NOTFOUND()
@@ -44,7 +44,7 @@ class HelperController extends Controller
 
     /**
      * get course segment
-     * 
+     *
      * @param  [int] year, type, level, class, segment
      * @return [objects] course segments in this tree
     */
@@ -60,7 +60,7 @@ class HelperController extends Controller
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
-            
+
         if ($request->filled('year'))
             $year = $request->year ;
         else
@@ -71,14 +71,14 @@ class HelperController extends Controller
             else
                 $year=$year->id;
         }
-            
+
         if ($request->filled('segment'))
             $segment = $request->segment;
         else
         {
             $segment = Segment::Get_current($request->type);
             if($segment == null)
-                return ['result' => true, 'value' => $course_segment];
+                return ['result' => false, 'value' => null];
             else
                 $segment=$segment->id;
         }
@@ -94,7 +94,7 @@ class HelperController extends Controller
 
     /**
      * get course segment by course
-     * 
+     *
      * @param  [int] year, course, type, level, class, segment
      * @return [objects] course segments in this tree
     */
@@ -125,7 +125,7 @@ class HelperController extends Controller
             else
                 $year=$year->id;
         }
-            
+
         if ($request->filled('segment'))
             $segment = $request->segment;
         else
@@ -148,7 +148,7 @@ class HelperController extends Controller
 
     /**
      * get class level
-     * 
+     *
      * @param  [int] year, type, level, class
      * @return [objects] clas0slevels in this tree
     */
@@ -162,7 +162,7 @@ class HelperController extends Controller
 
     /**
      * get paginate
-     * 
+     *
      * @param  [int] paginate
      * @return [int] if there is no paginate by default return 10
     */
@@ -176,7 +176,7 @@ class HelperController extends Controller
 
     /**
      * get segment class
-     * 
+     *
      * @param  [int] year, course, type, level, class, segment
      * @return [objects] segment classes in this tree
     */
@@ -203,7 +203,7 @@ class HelperController extends Controller
             else
                 $year=$year->id;
         }
-            
+
         if ($request->filled('segment'))
             $segment = $request->segment;
         else
@@ -214,7 +214,7 @@ class HelperController extends Controller
             else
                 $segment=$segment->id;
         }
-            
+
         $academic_year_type = AcademicYearType::checkRelation($year, $request->type);
         $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
         $class_level = ClassLevel::checkRelation($request->class, $year_level->id);

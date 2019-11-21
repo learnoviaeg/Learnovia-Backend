@@ -9,7 +9,7 @@ class ScaleController extends Controller
 {
      /**
      *
-     * @Description :creates new scale. 
+     * @Description :creates new scale.
      * @param : name and format of scale.
      * @return : return scale.
      */
@@ -32,7 +32,7 @@ class ScaleController extends Controller
     }
      /**
      *
-     * @Description :update a scale. 
+     * @Description :update a scale.
      * @param : id of scale is a required parameter
      *          name and format of scale are optional parameters.
      * @return : return scale.
@@ -68,7 +68,7 @@ class ScaleController extends Controller
     }
      /**
      *
-     * @Description :delete a scale. 
+     * @Description :delete a scale.
      * @param : id of scale.
      * @return : return scale and a string message which indicates whether the scale is deleted or not.
      */
@@ -111,6 +111,6 @@ class ScaleController extends Controller
         foreach($scales as $scale)
             $scale->formate = unserialize($scale->formate);
 
-        return HelperController::api_response_format(200,$scale);
+        return HelperController::api_response_format(200,$scales);
     }
 }

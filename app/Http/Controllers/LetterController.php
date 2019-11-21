@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\scale;
 use App\CourseSegment;
 use App\Letter;
 
@@ -11,8 +10,8 @@ class LetterController extends Controller
 {
     /**
      * Add letter
-     * 
-     * @param  [string] name 
+     *
+     * @param  [string] name
      * @param  [array] formate
      * @param  [string] formate[name], formate[boundary]
      * @return [object] Letter Created Successfully
@@ -39,9 +38,9 @@ class LetterController extends Controller
 
     /**
      * update letter
-     * 
+     *
      * @param  [string] name, formate[name], formate[boundary]
-     * @param  [int] id 
+     * @param  [int] id
      * @return [object] Letter updated Successfully
     */
     public function update(Request $request)
@@ -70,8 +69,8 @@ class LetterController extends Controller
 
     /**
      * delete letter
-     * 
-     * @param  [int] id 
+     *
+     * @param  [int] id
      * @return if letter used in course segment [string] This Letter Used Before
      * @return [object] Letter deleted Successfully
     */
@@ -93,8 +92,8 @@ class LetterController extends Controller
 
     /**
      * get letter
-     * 
-     * @param  [int] id 
+     *
+     * @param  [int] id
      * @return [object] Letter
     */
     public function get(Request $request)

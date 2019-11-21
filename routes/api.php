@@ -274,7 +274,7 @@ Route::group(['prefix' => 'scale', 'middleware' => 'auth:api'], function () {
 
 Route::group(['prefix' => 'letter', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'LetterController@add')->name('addscale')->middleware('permission:letter/add');
-    Route::get('update', 'ScaleController@update')->name('updatescale')->middleware('permission:letter/update');
-    Route::post('delete', 'ScaleController@delete')->name('deletescale')->middleware('permission:letter/delete');
-    Route::post('get', 'ScaleController@get')->name('getscale')->middleware('permission:letter/get');
+    Route::get('update', 'LetterController@update')->name('updatescale')->middleware('permission:letter/update');
+    Route::post('delete', 'LetterController@delete')->name('deletescale')->middleware('permission:letter/delete');
+    Route::post('get', 'LetterController@get')->name('getscale')->middleware('permission:letter/get');
 });
