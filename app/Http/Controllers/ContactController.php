@@ -29,21 +29,18 @@ class ContactController extends Controller
             'Friend_id' => 'required | exists:users,id',
         ]);
         if ($valid->fails()) {
-            return response()->json(['msg' => $valid->errors()], 404);
+            return HelperController::api_response_format(200, $valid->errors());
         }
         if ($req->Friend_id != $req->Person_id) {
             $contacts = Contacts::firstOrCreate([
                 'Friend_id' => $req->Friend_id,
                 'Person_id' => $session_id,
             ]);
-            if ($contacts) {
-              //  return response()->json(['msg' => 'Contact insertion sucess'], 200);
+            if ($contacts)
                 return HelperController::api_response_format(200, null, 'Contact insertion sucess');
-
-            }
         }
 
-        return HelperController::api_response_format(404, null, 'Contact insertion Fail');
+        return HelperController::api_response_format(200, null, 'Contact insertion Fail');
 
 //        return response()->json(['msg' => 'Contact insertion Fail'], 404);
 

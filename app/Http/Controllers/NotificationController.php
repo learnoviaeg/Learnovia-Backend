@@ -65,6 +65,7 @@ class NotificationController extends Controller
     */
     public function unreadnotifications(Request $request)
     {
+        $data = [];
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
         foreach ($noti as $not) {
             $not->data= json_decode($not->data, true);
@@ -73,7 +74,7 @@ class NotificationController extends Controller
                 $data[] = $not->data;
             }
         }
-        return HelperController::api_response_format(200, $body = $data, $message = 'all user Unread notifications');
+        return HelperController::api_response_format(200, $data,'all user Unread notifications');
     }
    /**
     * @description: mark all the notifications of this user as read.

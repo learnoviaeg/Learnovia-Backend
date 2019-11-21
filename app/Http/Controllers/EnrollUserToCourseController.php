@@ -16,6 +16,7 @@ use App\CourseSegment;
 use App\Course;
 use App\SegmentClass;
 use DB;
+
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
@@ -24,7 +25,7 @@ class EnrollUserToCourseController extends Controller
 {
     /**
      * Enroll uses/s to course/s
-     * 
+     *
      * @param  [array] users .. id
      * @param  [array] role_id
      * @param  [array] course .. id
@@ -82,15 +83,15 @@ class EnrollUserToCourseController extends Controller
 
     /**
      * UnEnroll uses/s to course/s
-     * 
+     *
      * @param  [array] user_id .. id
-     * @param  [int..id] year 
+     * @param  [int..id] year
      * @param  [int..id] type
      * @param  [int..id] level
      * @param  [int..id] class
      * @param  [int..id] segment
      * @param  [int..id] course
-     * @return if No current segment or year [string] There is no current segment or year 
+     * @return if No current segment or year [string] There is no current segment or year
      * @return if No user in this course [string] NOT FOUND USER IN THIS COURSE/invalid data
      * @return [object] courses that users unenrolled successfully
     */
@@ -120,7 +121,7 @@ class EnrollUserToCourseController extends Controller
 
     /**
      * view all courses that user enrolled in
-     * 
+     *
      * @param  [int] user_id .. id
      * @return [ids] courses that users enrolled in
     */
@@ -130,7 +131,7 @@ class EnrollUserToCourseController extends Controller
             'user_id' => 'required|exists:users,id'
         ]);
 
-        $users = Enroll::GetCourseSegment($user_id);
+        $users = Enroll::GetCourseSegment($request->user_id);
         $courseID = array();
         foreach ($users as $test) {
             $courseID[] = CourseSegment::GetCoursesByCourseSegment($test)->pluck('course_id')->first();
@@ -141,9 +142,9 @@ class EnrollUserToCourseController extends Controller
 
     /**
      * Enroll uses/s to Mandatory course/s
-     * 
+     *
      * @param  [array] users .. id
-     * @param  [int..id] year 
+     * @param  [int..id] year
      * @param  [int..id] type
      * @param  [int..id] level
      * @param  [int..id] class
@@ -151,7 +152,7 @@ class EnrollUserToCourseController extends Controller
      * @param  [array..id] course
      * @return if the course that user entered not optional [string] This Course not Optional_Course
      * @return if these users enrolled before [string] those users already enrolled
-     * @return if No current segment or year [string] There is no current segment or year 
+     * @return if No current segment or year [string] There is no current segment or year
      * @return [string] added successfully
     */
     public static function EnrollInAllMandatoryCourses(Request $request)
@@ -223,8 +224,8 @@ class EnrollUserToCourseController extends Controller
 
     /**
      * Enroll bulk of users from excel sheet
-     * 
-     * @param  [excel] all data of user 
+     *
+     * @param  [excel] all data of user
      * @return [string] done depended on Import files {enroll/users/courses}
     */
     public function EnrollExistUsersFromExcel(Request $request)
@@ -241,7 +242,7 @@ class EnrollUserToCourseController extends Controller
 
     /**
      * Get Enrolled student in this course
-     * 
+     *
      * @param  [int] course .. id
      * @param  [int] class .. id
      * @return if given class [string] filtered just students in this class
@@ -303,15 +304,15 @@ class EnrollUserToCourseController extends Controller
 
     /**
      * Get UnEnroll uses/s in these course/s
-     * 
+     *
      * @param  [array] users .. id
-     * @param  [int..id] year 
+     * @param  [int..id] year
      * @param  [int..id] type
      * @param  [int..id] level
      * @param  [int..id] class
      * @param  [int..id] segment
      * @param  [array..id] course
-     * @return if No current segment or year [string] There is no current segment or year 
+     * @return if No current segment or year [string] There is no current segment or year
      * @return [objects] students
     */
     public function getUnEnroll(Request $request)
@@ -354,21 +355,21 @@ class EnrollUserToCourseController extends Controller
 
     /**
      * get UnEnrolled students in this tree
-     * 
-     * @param  [int..id] year 
+     *
+     * @param  [int..id] year
      * @param  [int..id] type
      * @param  [int..id] level
      * @param  [int..id] class
      * @param  [int..id] segment
-     * @return if course not active and invalid class [string] invalid class data or not active course 
-     * @return if there is no courses [string] false and null 
+     * @return if course not active and invalid class [string] invalid class data or not active course
+     * @return if there is no courses [string] false and null
      * @return [objects] students
     */
     public function unEnrolledUsersBulk(Request $request)
     {
         $courseSegments = HelperController::Get_Course_segment($request);
         if ($courseSegments['result'] == false) {
-            return HelperController::api_response_format(400, null, $courseSegments['value']);
+            return HelperController::api_response_format(400, $courseSegments['value']);
         }
         if ($courseSegments['value'] == null) {
             return HelperController::api_response_format(400, null, 'No Course active in segment');
@@ -381,16 +382,16 @@ class EnrollUserToCourseController extends Controller
 
     /**
      * Enroll uses/s to course/s with chain
-     * 
+     *
      * @param  [array] users .. id
      * @param  [array] role_id
      * @param  [array] courses .. id
-     * @param  [int..id] year 
+     * @param  [int..id] year
      * @param  [int..id] type
      * @param  [int..id] level
      * @param  [int..id] class
      * @param  [int..id] segment
-     * @return if these users enrolled before [string] those users already enrolled     * 
+     * @return if these users enrolled before [string] those users already enrolled     *
      * @return if there is no courses [string] there is no course segment here
      * @return [objects] Enrolled successfilly
     */
@@ -432,8 +433,8 @@ class EnrollUserToCourseController extends Controller
             if(isset($EnrolledBefore))
                 return HelperController::api_response_format(200, array_values(array_unique($EnrolledBefore)), 'Success and theses users added before');
             else
-                return HelperController::api_response_format(200, 'Enrolled Successfully');   
+                return HelperController::api_response_format(200, 'Enrolled Successfully');
         }
-        return HelperController::api_response_format(200, 'No Course Segment here');        
+        return HelperController::api_response_format(200, 'No Course Segment here');
     }
 }

@@ -26,6 +26,8 @@ use App\User;
 use Carbon\Carbon;
 use App\Letter;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use stdClass;
 
 class CourseController extends Controller
@@ -335,12 +337,13 @@ class CourseController extends Controller
     */
     public function course_with_teacher()
     {
-        $teachers = Enroll::where('role_id', '4')->get(['username', 'course_segment']);
+        $teacherrole  = Permission::whereName('site/course/teacher')->first()->roles->pluck('id');
+        $teachers = Enroll::whereIn('role_id', $teacherrole)->get(['course_segment']);
         foreach ($teachers as $tech) {
             $coursesegment = CourseSegment::find($tech->course_segment);
             $tech['course'] = $coursesegment->courses;
         }
-        return $teachers;
+        return HelperController::api_response_format(200, $teachers);
     }
 
     /**
@@ -386,14 +389,12 @@ class CourseController extends Controller
                         foreach ($clase[$i]->lessons as $lessonn) {
                             $lessoncounter = Lesson::find($lessonn->id);
                             foreach ($comp as $com) {
-                                if (($request->user()->roles->first()->id) == 3 ||($request->user()->roles->first()->id) == 7) {
-                                    $Component = $lessoncounter->module($com->module, $com->model)
-                                        ->where('visible' , '=' , 1)
-                                        ->where('publish_date' , '<=' , Carbon::now())->get();
-                                }else{
-                                    $Component = $lessoncounter->module($com->module, $com->model)->get();
+                                $Component = $lessoncounter->module($com->module, $com->model);
+                                if ($request->user()->can('site/course/student')) {
+                                    $Component->where('visible' , '=' , 1)
+                                        ->where('publish_date' , '<=' , Carbon::now());
                                 }
-
+                                $Component->get();
                                 if($com->name == 'Media' && count($Component)>0 ){
                                     foreach($Component as $media){
                                         $userid = $media->user->id;
@@ -531,7 +532,6 @@ class CourseController extends Controller
         $course_segment = HelperController::Get_Course_segment($request);
         if($course_segment == null)
             return HelperController::api_response_format(404, 'There is no current segment or year');
-
         else {
             if (!$course_segment['result'])
                 return HelperController::api_response_format(400, $course_segment['value']);

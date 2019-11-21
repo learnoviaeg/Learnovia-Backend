@@ -107,7 +107,7 @@ class MessageController extends Controller
             'id' => 'required|exists:messages,id',
         ]);
         if ($valid->fails()) {
-            return HelperController::api_response_format(404, null, $valid->errors());
+            return HelperController::api_response_format(404, $valid->errors());
         }
         $message = Message::find($req->id);
         if ($message->From == $session_id || $message->To == $session_id) {
@@ -145,7 +145,7 @@ class MessageController extends Controller
 
         ]);
         if ($valid->fails()) {
-            return response()->json(['msg' => $valid->errors()], 404);
+            return HelperController::api_response_format(201,  $valid->errors());
         }
 
         $message = Message::find($req->id);
