@@ -49,13 +49,13 @@ class CourseController extends Controller
             'category' => 'required|exists:categories,id',
             'year' => 'array|required',
             'year.*' => 'required|exists:academic_years,id',
-            'type' => 'array|required',
-            'type.*' => 'required|exists:academic_types,id',
-            'level' => 'array|required',
+            'type' => 'array|required_with:year',
+            'type.*' => 'exists:academic_types,id',
+            'level' => 'array|required_with:year',
             'level.*' => 'required|exists:levels,id',
-            'class' => 'array|required',
+            'class' => 'array|required_with:year',
             'class.*' => 'required|exists:classes,id',
-            'segment' => 'array|required',
+            'segment' => 'array|required_with:year',
             'segment.*' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
@@ -68,7 +68,6 @@ class CourseController extends Controller
             'name' => $request->name,
             'category_id' => $request->category,
         ]);
-
         // if course has an image
         if ($request->hasFile('image')) {
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
@@ -575,11 +574,10 @@ class CourseController extends Controller
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
-
-        $count = 0;
-        if ((count($request->type) == count($request->level)) && (count($request->level) == count($request->class))) {
-            while (isset($request->class[$count])) {
-
+        if ((count($request->type) == count($request->level)) && (count($request->level) == count($request->segment))) {
+            foreach ($request->class as $class){
+                $count = 0;
+                while (isset($request->segment[$count])) {
                 if (isset($request->year[$count]))
                     $year = $request->year[$count];
                 else
@@ -602,7 +600,7 @@ class CourseController extends Controller
                 }
                 $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
                 $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
-                $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
+                $class_level = ClassLevel::checkRelation($class, $year_level->id);
                 $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
                 $course_Segment=CourseSegment::checkRelation($segment_class->id, $request->course);
                 $gradeCat = GradeCategory::firstOrCreate([
@@ -610,6 +608,7 @@ class CourseController extends Controller
                     'course_segment_id' => $course_Segment->id,
                 ]);
                 $count++;
+            }
             }
         } else {
             return HelperController::api_response_format(201, 'Please Enter Equal number of array');
