@@ -35,7 +35,7 @@ class EnrollImport implements ToModel,WithHeadingRow
 
         return new Enroll([
             'user_id'=>$user_id,
-            'course_segment' => $courseSegment[0],
+            'course_segment' => $courseSegment['value']['id'],
             'role_id'=>$row['role_id']
         ]);
     }
