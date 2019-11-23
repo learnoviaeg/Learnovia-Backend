@@ -423,7 +423,7 @@ class CourseController extends Controller
                                 $lessonn[$com->name] = $Component;
 
                                 //$lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
-                                if (isset($com->name))
+                                //if (isset($com->name))
                                     //$clase[$i][$com->name . $count] += count($lessonn[$com->name]);
                             }
                         }
