@@ -33,7 +33,7 @@ Route::group(['prefix' => 'media', 'middleware' => 'auth:api'], function () {
     Route::post('sort', 'MediaController@sortLessonMedia')->name('sortLessonMedia')->middleware('permission:media/sort');
     Route::get('get-all','MediaController@getAllMedia')->name('getAllMedia')->middleware('permission:media/get-all');
     Route::get('get','MediaController@GetMediaByID')->name('GetMediaByID')->middleware('permission:media/get');
-    Route::post('assign','MediaController@AssignMediaToLesson');//->name('assigntolesson')->middleware('permission:media/assign');
+    Route::post('assign','MediaController@AssignMediaToLesson')->name('assigntolesson')->middleware('permission:media/assign');
 
 });
 
