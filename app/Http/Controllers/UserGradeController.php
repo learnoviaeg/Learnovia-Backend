@@ -151,11 +151,10 @@ class UserGradeController extends Controller
             'course' => 'required|exists:courses,id',
             'class' => 'required|exists:classes,id'
         ]);
-        
-        $user_grades=array();
-        $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
 
+        $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
         $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->pluck('id');
+
         foreach($gradeCat as $gradeCategory)
             $gradeitems[]=GradeItems::where('grade_category',$gradeCategory)->pluck('id');
 
@@ -170,5 +169,30 @@ class UserGradeController extends Controller
             }
 
         return HelperController::api_response_format(201, $userGradeObj);
+    }
+
+    public function AllUserInCourse(Request $request)
+    {
+        $request->validate([
+            'course' => 'required|exists:courses,id',
+            'class' => 'required|exists:classes,id'
+        ]);
+        $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+
+        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->pluck('id');
+        foreach($gradeCat as $gradeCategory)
+            $gradeitems[]=GradeItems::where('grade_category',$gradeCategory)->pluck('id');
+
+        foreach($gradeitems as $items)
+            foreach($items as $item)
+            {
+                if(!isset($item))
+                    continue;
+
+                $userGrade=UserGrade::where('grade_item_id',$item)->pluck('id')->first();
+                $userGradeObj[]=UserGrade::where('id',$userGrade)->with('GradeItems','GradeItems.GradeCategory')->get()->first();
+            }
+
+        return HelperController::api_response_format(201, $userGradeObj);   
     }
 }
