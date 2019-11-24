@@ -21,7 +21,7 @@ class SystemSettingsController extends Controller
         if ($languages == null)
             return HelperController::api_response_format(200, 'System does not installed to have languages');
 
-        $languages = unserialize($languages->data);
+        $languages = unserialize($languages[0]->data);
         foreach ($languages as $index => $language) {
             if (!$language['active'])
                 unset($languages[$index]);
