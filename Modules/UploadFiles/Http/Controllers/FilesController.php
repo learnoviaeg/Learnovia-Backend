@@ -209,45 +209,6 @@ class FilesController extends Controller
                 return HelperController::api_response_format(400, null, 'No Course active in segment');
             }
             $activeCourseSegments =  $activeCourseSegments['value'];
-            // $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegments->id);
-            // if (!$checkTeacherEnroll == true) {
-            //     return HelperController::api_response_format(400, null, 'You\'re unauthorize');
-            // }
-
-            //to be refactor but this in phase 1
-            // foreach($request->class as $class){
-
-            //     $newRequest = new Request();
-            //     $newRequest->setMethod('POST');
-            //     $newRequest->request->add(['year' => $request->year]);
-            //     $newRequest->request->add(['type' => $request->type]);
-            //     $newRequest->request->add(['level' => $request->level]);
-            //     $newRequest->request->add(['class' => $class]);
-
-            //     $class_level = HelperController::Get_class_LEVELS($newRequest);
-
-            //     $activeSegmentClass = $class_level->segmentClass->where('is_active',1)->first();
-            //     if(isset($activeSegmentClass)){
-            //         $activeCourseSegment = $activeSegmentClass->courseSegment->where('is_active',1)->first();
-            //         if(isset($activeCourseSegment)){
-            //             // check Enroll
-            //             $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($activeCourseSegment->id);
-            //             if($checkTeacherEnroll == true){
-            //                 $activeCourseSegments->push($activeCourseSegment);
-            //             }
-            //             else{
-            //                 return HelperController::api_response_format(400,null,'You\'re unauthorize');
-            //             }
-            //         }
-            //         else{
-            //             return HelperController::api_response_format(400,null,'No Course active in segment');
-            //         }
-            //     }
-            //     else{
-            //         return HelperController::api_response_format(400,null,'No Class active in segment');
-            //     }
-            // }
-
             foreach ($request->Imported_file as $singlefile) {
                 $extension = $singlefile->getClientOriginalExtension();
 
@@ -626,5 +587,21 @@ class FilesController extends Controller
         ]);
         $File=file::find($request->id);
         return HelperController::api_response_format(200, $File);
+    }
+    public function AssignFileToLesson(Request $request)
+    {
+        try {
+            $request->validate([
+                'file_id' => 'required|exists:files,id',
+                'lesson_id' => 'required|exists:lessons,id',
+                'publish_date' => 'required|date'
+            ]);
+            $file_lessons = FileLesson::create(['lesson_id' => $request->lesson_id
+                ,'file_id'=>$request->file_id
+                ,'publish_date'=>$request->publish_date]);
+            return HelperController::api_response_format(200, $file_lessons, 'Assigned Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
+        }
     }
 }

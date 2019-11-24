@@ -646,4 +646,21 @@ class MediaController extends Controller
         $Media=media::find($request->id);
         return HelperController::api_response_format(200, $Media);
     }
+    public function AssignMediaToLesson(Request $request)
+    {
+        try {
+            $request->validate([
+                'media_id' => 'required|exists:media,id',
+                'lesson_id' => 'required|exists:lessons,id',
+                'publish_date' => 'required|date'
+            ]);
+            $media_lessons = MediaLesson::create([
+                'lesson_id' => $request->lesson_id
+                ,'media_id'=>$request->media_id
+                ,'publish_date'=>$request->publish_date]);
+            return HelperController::api_response_format(200, $media_lessons, 'Assigned Successfully');
+        } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
+        }
+    }
 }

@@ -539,4 +539,21 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
+    public function AssignAssignmentToLesson(Request $request)
+    {
+        try {
+            $request->validate([
+                'assignment_id' => 'required|exists:assignments,id',
+                'lesson_id' => 'required|exists:lessons,id'
+            ]);
+            $assigment = assignment::find($request->assignment_id);
+
+            $assignment_lesson = AssignmentLesson::create(['lesson_id' => $request->lesson_id
+            ,'assignment_id'=>$request->assignment_id
+            ,'publish_date'=>$assigment->start_date]);
+            return HelperController::api_response_format(200, $assignment_lesson, 'Assigned Successfully');
+    } catch (Exception $ex) {
+            return HelperController::api_response_format(400, null, 'Please Try again');
+        }
+    }
 }

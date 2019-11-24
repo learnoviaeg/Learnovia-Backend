@@ -20,6 +20,7 @@ Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function ()
 
     //Assignment Routes
     Route::post('add', 'AssigmentsController@createAssigment')->middleware('permission:assignment/add');
+    Route::post('assign', 'AssigmentsController@AssignAssignmentToLesson')->middleware('permission:assignment/assign');
     Route::post('update', 'AssigmentsController@updateAssigment')->middleware('permission:assignment/update');
     Route::post('submit', 'AssigmentsController@submitAssigment')->middleware('permission:assignment/submit');
     Route::post('grade', 'AssigmentsController@gradeAssigment')->middleware('permission:assignment/grade');
