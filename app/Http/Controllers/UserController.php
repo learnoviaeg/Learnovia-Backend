@@ -200,26 +200,16 @@ class UserController extends Controller
         $request->validate([
             'search' => 'nullable'
         ]);
+        $users = User::with('roles');
+        if ($request->filled('search'))
+            $users->where('username', 'LIKE', "%$request->search%");
+        $users = $users->paginate(HelperController::GetPaginate($request));
         if (Auth::user()->can('show/real-password')) {
-            if ($request->filled('search')) {
-                $user = User::with('roles')->where('username', 'LIKE', "%$request->search%")->get()
-                    ->paginate(HelperController::GetPaginate($request));
-                return HelperController::api_response_format(202, $user);
-            }
-            $user = User::with('roles')->paginate(HelperController::GetPaginate($request));
-            foreach ($user->items() as $value) {
+            foreach ($users->items() as $value) {
                 $value->setHidden(['password']);
             }
-            return HelperController::api_response_format(200, $user);
-        } else {
-            if ($request->filled('search')) {
-                $user = User::with('roles')->where('name', 'LIKE', "%$request->search%")->get()
-                    ->paginate(HelperController::GetPaginate($request));
-                return HelperController::api_response_format(202, $user);
-            }
-            $user = User::with('roles')->paginate(HelperController::GetPaginate($request));
-            return HelperController::api_response_format(200, $user);
         }
+        HelperController::api_response_format(200 , $users);
     }
 
     /**

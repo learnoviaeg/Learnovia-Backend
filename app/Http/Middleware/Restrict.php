@@ -26,8 +26,7 @@ class Restrict
         if ($request->user() == null){
             return HelperController::api_response_format(401, [], 'User not logged in');
         }
-
-        if($request->user()->hasRole('Super Admin')){
+        if($request->user()->can('site/guard_name')){
             return $next($request);
         }
             $course_segment_ids = CourseSegment::GetWithClassAndCourse($request->class_id , $request->course_id);
