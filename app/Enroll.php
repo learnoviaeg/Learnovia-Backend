@@ -57,5 +57,8 @@ class Enroll extends Model
         return $this->belongsTo('App\User','user_id','id');
     }
 
-
+    public function users()
+    {
+        return $this->hasMany('App\User','id' , 'user_id');
+    }
 }
