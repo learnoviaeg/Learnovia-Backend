@@ -52,13 +52,17 @@ class UserController extends Controller
             'course' => 'array',
             'role.*' => 'required|exists:roles,id',
             'class_id' => 'required|array',
-            'picture' => 'nullable'
+            'picture' => 'nullable',
+            'arabicname' => 'array', 'gender' => 'array', 'phone' => 'array', 'address' => 'array', 'nationality' => 'array',
+            'country' => 'array', 'birthdate' => 'array', 'notes' => 'array', 'email' => 'array', 'language' => 'array',
+            'timezone' => 'array', 'religion' => 'array', 'second language' => 'array'
         ]);
         $users = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
             'language', 'timezone', 'religion', 'second language'];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
+        $i=0;
         foreach ($request->firstname as $key => $firstname) {
             $user = User::create([
                 'firstname' => $firstname,
@@ -74,11 +78,11 @@ class UserController extends Controller
             }
 
             foreach ($optionals as $optional) {
-                if ($request->filled($optional)) {
-                    $user->$optional = $request->$optional;
+                if ($request->filled($optional)){
+                    $user->$optional =$request->$optional[$i];
                 }
-
             }
+            $i++;
 
             $user->save();
             $role = Role::find($request->role[$key]);
