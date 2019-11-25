@@ -153,22 +153,19 @@ class UserGradeController extends Controller
         ]);
 
         $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
-        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->pluck('id');
-
-        foreach($gradeCat as $gradeCategory)
-            $gradeitems[]=GradeItems::where('grade_category',$gradeCategory)->pluck('id');
-
-        foreach($gradeitems as $items)
-            foreach($items as $item)
-            {
-                if(!isset($item))
-                    continue;
-
-                $userGrade=UserGrade::where('grade_item_id',$item)->where('user_id',$request->user_id)->pluck('id')->first();
-                $userGradeObj[]=UserGrade::where('id',$userGrade)->with('GradeItems','GradeItems.GradeCategory')->get()->first();
-            }
-
-        return HelperController::api_response_format(201, $userGradeObj);
+        if(!$courseSeg)
+            return HelperController::api_response_format(201, 'this course haven\'t course segment'); 
+            
+        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->with('GradeItems')->get();
+        $gradeitems=$gradeCat->pluck('GradeItems');
+        $userGrade=[];
+        foreach($gradeitems as $items){
+            $temp = UserGrade::where('user_id',$request->user_id)->whereIn('grade_item_id',$items)
+                                ->with('GradeItems','GradeItems.GradeCategory')->first();
+            if($temp != null)
+                $userGrade[]=$temp;
+        }   
+        return HelperController::api_response_format(201, $userGrade); 
     }
 
     public function AllUserInCourse(Request $request)
@@ -177,22 +174,23 @@ class UserGradeController extends Controller
             'course' => 'required|exists:courses,id',
             'class' => 'required|exists:classes,id'
         ]);
+
         $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+        if(!$courseSeg)
+            return HelperController::api_response_format(201, 'this course haven\'t course segment'); 
 
-        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->pluck('id');
-        foreach($gradeCat as $gradeCategory)
-            $gradeitems[]=GradeItems::where('grade_category',$gradeCategory)->pluck('id');
-
+        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->with('GradeItems')->get();
+        $gradeitems=$gradeCat->pluck('GradeItems');
+        $userGrade = [];
         foreach($gradeitems as $items)
             foreach($items as $item)
             {
                 if(!isset($item))
                     continue;
-
-                $userGrade=UserGrade::where('grade_item_id',$item)->pluck('id')->first();
-                $userGradeObj[]=UserGrade::where('id',$userGrade)->with('GradeItems','GradeItems.GradeCategory')->get()->first();
+                $temp = UserGrade::where('grade_item_id',$item->id)->with('GradeItems','GradeItems.GradeCategory')->get();
+                if(count($temp) > 0)
+                    $userGrade[]=$temp;
             }
-
-        return HelperController::api_response_format(201, $userGradeObj);   
+        return HelperController::api_response_format(201, $userGrade);   
     }
 }

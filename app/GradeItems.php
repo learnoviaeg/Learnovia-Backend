@@ -23,6 +23,6 @@ class GradeItems extends Model
 
     public function UserGrade()
     {
-        return $this->hasMany('App\UserGrade');
+        return $this->hasMany('App\UserGrade','grade_item_id','id');
     }
 }
