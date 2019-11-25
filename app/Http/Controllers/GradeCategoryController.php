@@ -9,6 +9,7 @@ use App\Course;
 use App\Classes;
 use App\AcademicYearType;
 use App\ClassLevel;
+use App\GradeItems;
 use App\YearLevel;
 use App\SegmentClass;
 use Illuminate\Http\Request;

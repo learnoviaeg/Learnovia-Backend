@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GradeItems extends Model
 {
-    protected $fillable = ['grade_category','grademin','grademax','calculation','item_no','scale_id','grade_pass','multifactor','plusfactor','aggregationcoef','aggregationcoef2','item_type','item_Entity','hidden'];
+    protected $fillable = ['grade_category','grademin','grademax','calculation','item_no','scale_id','grade_pass','multifactor','plusfactor','aggregationcoef','aggregationcoef2','item_type','item_Entity','hidden','override'];
 
     public function GradeCategory()
     {
@@ -24,5 +24,11 @@ class GradeItems extends Model
     public function UserGrade()
     {
         return $this->hasMany('App\UserGrade');
+    }
+
+    public function weight(){
+        if($this->override != 0)
+            return $this->override;
+        return ($this->grademax * $this->GradeCategory->percentage()) / $this->GradeCategory->total();
     }
 }

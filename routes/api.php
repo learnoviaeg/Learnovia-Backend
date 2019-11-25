@@ -256,6 +256,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('delete', 'GradeItemController@delete')->name('deletegrade')->middleware('permission:grade/item/delete');
         Route::post('update', 'GradeItemController@update')->name('updategrade')->middleware('permission:grade/item/update');
         Route::post('move-category', 'GradeItemController@Move_Category')->name('movecategory')->middleware('permission:grade/item/move-category');
+        Route::post('override', 'GradeItemController@override');//->name('overridegradeitem')->middleware('permission:grade/item/override');
     });
 
     Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
@@ -263,6 +264,10 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::get('get', 'UserGradeController@list')->name('getusergrade')->middleware('permission:grade/user/get');
         Route::post('delete', 'UserGradeController@delete')->name('deleteusergrade')->middleware('permission:grade/user/delete');
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
+    });
+
+    Route::group(['prefix' => 'report'] , function(){
+        Route::get('grader' ,'UserGradeController@graderReport')->name('graderReport')->middleware('permission:grade/report/grader');
     });
 });
 Route::group(['prefix' => 'scale', 'middleware' => 'auth:api'], function () {
