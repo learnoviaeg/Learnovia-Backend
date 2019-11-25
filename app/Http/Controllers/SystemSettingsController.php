@@ -16,6 +16,7 @@ class SystemSettingsController extends Controller
     */
     public static  function GetActiveLanguages()
     {
+        $result = collect();
         $languages=collect();
         $languages->push(SystemSetting::where('key', 'languages')->first());
         if ($languages == null)
@@ -23,10 +24,10 @@ class SystemSettingsController extends Controller
 
         $languages = unserialize($languages[0]->data);
         foreach ($languages as $index => $language) {
-            if (!$language['active'])
-                unset($languages[$index]);
+            if ($language['active'])
+                $result->push($language);
         }
-        return HelperController::api_response_format(200, $languages);
+        return HelperController::api_response_format(200, $result);
     }
 
     /**
