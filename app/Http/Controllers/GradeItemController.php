@@ -178,4 +178,21 @@ class GradeItemController extends Controller
         return HelperController::api_response_format(200, $GardeCategory,'Grade item Category is moved successfully');
 
     }
+    public function gradeing_method()
+    {
+        return[
+            [
+                'id' => 1,
+                'name' =>'Natural'
+            ],
+            [
+                'id' => 2,
+                'name' =>'Simple weighted mean'
+            ],
+            [
+                'id' => 3,
+                'name' =>'Weighted mean'
+            ]
+        ];
+}
 }

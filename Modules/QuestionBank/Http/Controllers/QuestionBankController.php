@@ -23,6 +23,7 @@ class QuestionBankController extends Controller
         if (\Spatie\Permission\Models\Permission::whereName('question/add')->first() != null) {
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
+        
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add','title' => 'add question']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/update','title' => 'update question']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/get','title' => 'get question']);
@@ -35,6 +36,7 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/delete','title' => 'delete quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get','title' => 'get quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add-quiz-lesson','title' => 'add quiz lesson']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grading-method','title' => 'get grading method']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update-quiz-lesson','title' => 'update quiz lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson','title' => 'destroy quiz lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-types','title' => 'get all quiz types']);
