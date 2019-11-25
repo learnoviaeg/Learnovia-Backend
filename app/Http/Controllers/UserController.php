@@ -77,11 +77,9 @@ class UserController extends Controller
                 $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
             }
 
-            foreach ($optionals as $optional) {
-                if ($request->filled($optional)){
+            foreach ($optionals as $optional)
+                if ($request->filled($optional))
                     $user->$optional =$request->$optional[$i];
-                }
-            }
             $i++;
 
             $user->save();
