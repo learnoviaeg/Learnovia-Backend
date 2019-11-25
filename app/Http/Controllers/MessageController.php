@@ -216,23 +216,21 @@ class MessageController extends Controller
         }
         return HelperController::api_response_format(200, $messages, 'message was seen');
     }
-    /**
-     * @description:  view all messages 'from and to' between current user and a specific user.
-     * @param Request $req => id of a user.
-     * @return all messages.
-     */
-    public function ViewAllMSG_from_to(Request $req)
+
+    public
+    function ViewAllMSG_from_to(Request $request)
     {
-        $req->validate([
-            'id' => 'required|exists:users,id'
+        $request->validate([
+            'search' => 'required',
+            'user_id'     => 'required|exists:users,id'
         ]);
-        $session_id = Auth::User()->id;
-        $check = Message::where('From', $req->id)->orWhere('To', $req->id)->first();
-        if ($check) {
-            $messages = Message::where(function ($query) use ($req, $session_id) {
-                $query->where('From', $req->id)->orWhere('To', $req->id);
-            })->where(function ($query) use ($session_id) {
-                $query->where('From', $session_id)->orWhere('To', $session_id);
+         $check = Message::where('From', $request->user_id)->orWhere('To', $request->user_id)->first();
+            if ($check) {
+            $current_user = Auth::id();
+            $messages = Message::where(function ($query) use ($request, $current_user) {
+                $query->whereIn('From', [$request->user_id, $current_user])->whereIn('To', [$request->user_id, $current_user]);
+            })->where(function ($query) use ($request) {
+                $query->where('text', 'LIKE' , "%$request->search%");
             })->get();
             $msg = MessageFromToResource::collection($messages);
             return HelperController::api_response_format(200, $msg);
@@ -278,4 +276,18 @@ class MessageController extends Controller
         $users = Message::GetMessageDetails($messages , $request->user()->id);
         return HelperController::api_response_format(200 , $users);
     }
+
+    public function SearchMessage(Request $request){
+        $request->validate([
+            'search' => 'required'
+        ]);
+        $current_user = Auth::id();
+        $msgs = Message::where(function ($query) use ($request, $current_user) {
+            $query->where('From', $current_user)->orWhere('To', $current_user);
+        })->where(function ($query) use ($request) {
+            $query->where('text', 'LIKE' , "%$request->search%");
+        })->get();
+        return HelperController::api_response_format(200 , $msgs,'Messages are....');
+    }
+
 }

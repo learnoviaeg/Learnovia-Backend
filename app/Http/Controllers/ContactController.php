@@ -52,10 +52,13 @@ class ContactController extends Controller
      * @return: List of my friends
      *
      * */
-    public function ViewMyContact()
+    public function ViewMyContact(Request $request)
     {
         $session_id = Auth::User()->id;
-        $user=User::find($session_id);
+        $user = User::whereId($session_id)->with(['contacts' => function($query)use ($request){
+            if($request->filled('search'))
+                $query->where('firstname', 'like', '%'.$request->search.'%')->orwhere('lastname', 'like', '%'.$request->search.'%');
+        }])->first();
         $contacts = $user->contacts;
         return HelperController::api_response_format(200, Contactresource::Collection($contacts), 'My Contact ');
     }
