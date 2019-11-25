@@ -21,8 +21,12 @@ class GradeItems extends Model
         return $this->belongsTo('App\scale', 'scale_id', 'id');
     }
 
+    // public function UserGrade()
+    // {
+    //     return $this->hasMany('App\UserGrade');
+    // }
     public function UserGrade()
     {
-        return $this->hasMany('App\UserGrade');
+        return $this->hasMany('App\UserGrade','grade_item_id','id');
     }
 }
