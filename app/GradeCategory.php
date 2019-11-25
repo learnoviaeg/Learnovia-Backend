@@ -75,4 +75,24 @@ class GradeCategory extends Model
             return 100;
         return ($this->total() / $this->Parents->total()) * 100 ;
     }
+
+    public function depth(){
+        if($this->Parents == null)
+            return 1;
+        return 1 + $this->Parents->depth();
+    }
+
+    public function path(){
+        if($this->Parents == null)
+            return $this;
+        $result = collect();
+        $category = $this;
+        while(true){
+            $result->push($category);
+            if($category->Parents == null)
+                break;
+            $category = $category->Parents;
+        }
+        return $result;
+    }
 }
