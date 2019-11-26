@@ -164,6 +164,8 @@ class UserGradeController extends Controller
             foreach ($gradeCategories as $category) {
                 $grades[$i]['items'] = collect();
                 $grades[$i]['name'] = $category->name;
+                $grades[$i]['id'] = $category->id;
+                $grades[$i]['max'] = $category->total();
                 $user->grades[$i] = collect();
                 $user->grades[$i]['total'] = 0;
                 $user->grades[$i]['name'] = $category->name;
@@ -180,17 +182,16 @@ class UserGradeController extends Controller
                     $usergrade->name = $item->name;
                     $usergrade->id = $item->id;
                     $usergrade->final_grade = ' - ';
-                    if ($temp != null) {
+                    $usergrade->max = $item->grademax;
+                    if ($temp != null)
                         $usergrade->final_grade = $temp->final_grade;
-                    }
                     $user->grades[$i]['data']->push($usergrade);
-                    $grades[$i]['items']->push($item->name);
+                    $grades[$i]['items']->push(collect(['name' => $item->name , 'id' => $item->id , 'max' => $item->grademax]));
                 }
                 $grades[$i]['items']->push($category->name . ' Total');
                 $first = true;
                 $i++;
             }
-
         }
         return HelperController::api_response_format(200, ['schema' => $grades, 'users' => $users]);
     }
