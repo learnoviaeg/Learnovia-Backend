@@ -265,6 +265,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
         Route::post('getGrades', 'UserGradeController@SingleUserInSingleCourse')->name('getallusergrades')->middleware('permission:grade/user/getallusergrades');
         Route::post('getallGrades', 'UserGradeController@AllUserInCourse')->name('getallusersgrades')->middleware('permission:grade/user/getallusersgrades');
+        Route::post('getalluserGrades', 'UserGradeController@AllUserInAllCourses')->name('getalluserscoursesgrades')->middleware('permission:grade/user/getalluserscoursesgrades');
     });
 });
 Route::group(['prefix' => 'scale', 'middleware' => 'auth:api'], function () {

@@ -327,7 +327,7 @@ class EnrollUserToCourseController extends Controller
             'courses.*' => 'required|exists:courses,id'
         ]);
         $year = AcademicYear::Get_current()->id;
-        if (isset($request->year[$count])) {
+        if (isset($request->year)) {
             $year = $request->year;
         }
         $academic_year_type = AcademicYearType::checkRelation($year, $request->type);
@@ -402,9 +402,9 @@ class EnrollUserToCourseController extends Controller
             'users.*' => 'required|string|exists:users,id',
             'role_id' => 'required|array|exists:roles,id',
             'year' => 'exists:academic_years,id',
-            'type' => 'exists:academic_types,id|required_with:level',
-            'level' => 'exists:levels,id|required_with:class',
-            'class' => 'exists:classes,id|required_with:segment',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id|required_with:type',
+            'class' => 'exists:classes,id|required_with:level',
             'segment' => 'exists:segments,id',
             'courses' => 'array|exists:courses,id'
         ]);

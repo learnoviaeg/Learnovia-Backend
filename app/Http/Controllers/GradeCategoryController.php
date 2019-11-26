@@ -28,7 +28,7 @@ class GradeCategoryController extends Controller
      * @param  [int] aggregatedOnlyGraded
      * @return [string] Grade Category is created successfully and the object
      * @return if there is no course[string] this class didnot have course segment
-    */
+     */
     public function AddGradeCategory(Request $request)
     {
         $request->validate([
@@ -57,7 +57,6 @@ class GradeCategoryController extends Controller
             return HelperController::api_response_format(200, $grade_category, 'Grade Category is created successfully');
         }
         return HelperController::api_response_format(404, null, 'this class didnot have course segment');
-
     }
 
     /**
@@ -69,7 +68,7 @@ class GradeCategoryController extends Controller
      * @param  [array] grades[aggregatedOnlyGraded]
      * @param  [array] grades[hidden]
      * @return [string] Grade Category is created successfully
-    */
+     */
     public function addBulkGradeCategories(Request $request)
     {
         $request->validate([
@@ -83,7 +82,6 @@ class GradeCategoryController extends Controller
         $jop = (new \App\Jobs\addgradecategory($this->getCourseSegment($request), $request->grades));
         dispatch($jop);
         return HelperController::api_response_format(200, null, 'Grade Category is created successfully');
-
     }
 
     /**
@@ -92,12 +90,13 @@ class GradeCategoryController extends Controller
      * @param  [string] name
      * @param  [int] id_number
      * @return [string] Grade Category is deleted successfully
-    */
+     */
     public function deleteBulkGradeCategories(Request $request)
     {
         $request->validate([
             'id_number' => 'required|exists:year_levels,id',
-            'name' => 'required|string|exists:grade_categories,name']);
+            'name' => 'required|string|exists:grade_categories,name'
+        ]);
         $course_segments = $this->getCourseSegment($request);
         GradeCategory::whereIn('course_segment_id', $course_segments)
             ->where('id_number', $request->id_number)
@@ -110,7 +109,7 @@ class GradeCategoryController extends Controller
      * 
      * @param  [int] id
      * @return [object] Grade Categories with child
-    */
+     */
     public function GetGradeCategory(Request $request)
     {
         if ($request->filled('id')) {
@@ -132,7 +131,7 @@ class GradeCategoryController extends Controller
      * @param  [int] hidden
      * @param  [int] parent
      * @return [string] Grade Category is updated successfully and the object
-    */
+     */
     public function UpdateGradeCategory(Request $request)
     {
         $request->validate([
@@ -162,7 +161,7 @@ class GradeCategoryController extends Controller
      * 
      * @param  [int] id
      * @return [string] Grade Category is deleted successfully
-    */
+     */
     public function deleteGradeCategory(Request $request)
     {
         $request->validate([
@@ -179,7 +178,7 @@ class GradeCategoryController extends Controller
      * @param  [int] id
      * @param  [int] parent
      * @return [string] Grade Category is moved successfully
-    */
+     */
     public function MoveToParentCategory(Request $request)
     {
         $request->validate([
@@ -198,7 +197,7 @@ class GradeCategoryController extends Controller
      * 
      * @param  [int] id
      * @return [object] Grade Categories In Segments
-    */
+     */
     public function GetCategoriesFromCourseSegments(Request $request)
     {
         $grade = CourseSegment::GradeCategoryPerSegmentbyId($request->id);
@@ -216,7 +215,7 @@ class GradeCategoryController extends Controller
      * @param  [int] segment
      * @return if there is no course segment or disactives [string] No Course active in segment
      * @return if there is [string] Get grade category with child
-    */
+     */
     public function Get_Tree(Request $request)
     {
         $course_segment = HelperController::Get_Course_segment_Course($request);
@@ -241,7 +240,7 @@ class GradeCategoryController extends Controller
      * @param  [int] course
      * @param  [int] segment
      * @return [object] Grade Categories In Segments
-    */
+     */
     public  static function getCourseSegment(Request $request)
     {
         $year = AcademicYear::Get_current();
@@ -263,24 +262,31 @@ class GradeCategoryController extends Controller
                     $segment_id = $request->segment;
                 $query->where('segment_id', $segment_id);
             }
-        } , 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function($query)  use ($request){
-            if($request->filled('courses'))
-                $query->whereIn('course_id' , $request->courses);
-            if($request->filled('typical'))
-                $query->where('typical',$request->typical);
+        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function ($query)  use ($request) {
+            if ($request->filled('courses'))
+                $query->whereIn('course_id', $request->courses);
+            if ($request->filled('typical'))
+                $query->where('typical', $request->typical);
         }])->get()->pluck('YearType')[0];
         $array = collect();
         if (count($YearTypes) > 0) {
             $YearTypes = $YearTypes->pluck('yearLevel');
             if (count($YearTypes) > 0) {
-                $YearTypes = $YearTypes[0]->pluck('classLevels');
-                if (count($YearTypes) > 0) {
-                    $YearTypes = $YearTypes[0]->pluck('segmentClass');
-                    if (count($YearTypes) > 0) {
-                        $YearTypes = $YearTypes[0]->pluck('courseSegment');
-                        foreach ($YearTypes as $courseSegment) {
-                            foreach ($courseSegment as $value) {
-                                $array->push($value->id);
+                for ($i = 0; $i < count($YearTypes); $i++) {
+                    $classes = $YearTypes[$i]->pluck('classLevels');
+                    if (count($classes) > 0) {
+                        for ($j = 0; $j < count($classes); $j++) {
+                            $segments = $classes[$j]->pluck('segmentClass');
+                            if (count($segments) > 0) {
+                                for ($k = 0; $k < count($segments); $k++) {
+                                    $courseSegments = $segments[$k]->pluck('courseSegment');
+
+                                    foreach ($courseSegments as $courseSegment) {
+                                        foreach ($courseSegment as $value) {
+                                            $array->push($value->id);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -303,7 +309,7 @@ class GradeCategoryController extends Controller
      * @param  [int] course
      * @param  [int] segment
      * @return [object] Updated Grade categories
-    */
+     */
     public function bulkupdate(Request $request)
     {
         $request->validate([
@@ -312,16 +318,15 @@ class GradeCategoryController extends Controller
             'newname' => 'required|string'
         ]);
 
-        $data=array();
-        $course_segment=self::getCourseSegment($request);
-        if(isset($course_segment)){
+        $data = array();
+        $course_segment = self::getCourseSegment($request);
+        if (isset($course_segment)) {
 
-            GradeCategory::whereIn('course_segment_id',$course_segment)->where('name',$request->name)->where('id_number',$request->id_number)->update(array('name' => $request->newname));
-            $data= GradeCategory::whereIn('course_segment_id',$course_segment)->where('name',$request->newname)->where('id_number',$request->id_number)->get();
-            return HelperController::api_response_format(200, $data,'Updated Grade categories');
-        }
-        else{
-              return HelperController::api_response_format(200, 'There is No Course segment available.');
+            GradeCategory::whereIn('course_segment_id', $course_segment)->where('name', $request->name)->where('id_number', $request->id_number)->update(array('name' => $request->newname));
+            $data = GradeCategory::whereIn('course_segment_id', $course_segment)->where('name', $request->newname)->where('id_number', $request->id_number)->get();
+            return HelperController::api_response_format(200, $data, 'Updated Grade categories');
+        } else {
+            return HelperController::api_response_format(200, 'There is No Course segment available.');
         }
     }
 
@@ -336,28 +341,26 @@ class GradeCategoryController extends Controller
      * @param  [int] segment
      * @return if there is no course segment [string] There is No Course segment available.
      * @return [objects] grade categories
-    */
+     */
     public function GetGradeCategoryTree(Request $request)
     {
-        $gradeCategories=collect();
-        $courses_segment=self::getCourseSegment($request);
-        if(isset($courses_segment))
-        {
-            $names=collect();
+        $gradeCategories = collect();
+        $courses_segment = self::getCourseSegment($request);
+        if (isset($courses_segment)) {
+            $names = collect();
             foreach ($courses_segment as $courses_seg) {
                 $course = CourseSegment::find($courses_seg);
                 $gradeCategories->push($course->GradeCategory);
-                foreach($gradeCategories as $gradecategory)
-                    foreach($gradecategory as $GC)
-                    {
-                        $level=YearLevel::find($GC->id_number);
-                        $lev=$level->levels[0]->name;
-                        $names->push(['name'=>$GC->name,'id_number'=>$GC->id_number,'level'=>$lev]);
+                foreach ($gradeCategories as $gradecategory)
+                    foreach ($gradecategory as $GC) {
+                        $level = YearLevel::find($GC->id_number);
+                        $lev = $level->levels[0]->name;
+                        $names->push(['name' => $GC->name, 'id_number' => $GC->id_number, 'level' => $lev]);
                     }
             }
-        $all = $names->unique()->sortBy('id_number');
-        $alls=$all->values();
-        return HelperController::api_response_format(200, $alls);
+            $all = $names->unique()->sortBy('id_number');
+            $alls = $all->values();
+            return HelperController::api_response_format(200, $alls);
         }
         return HelperController::api_response_format(200, 'There is No Course segment available.');
     }
@@ -373,43 +376,39 @@ class GradeCategoryController extends Controller
      * @param  [int] segment
      * @return if there is no course segment [string] There is No Course segment available.
      * @return [objects] grade categories
-    */
+     */
     public function GetAllGradeCategory(Request $request)
     {
-        $gradeCategories=collect();
-        $courses_segment=self::getCourseSegment($request);
-        if(isset($courses_segment))
-        {
-            $names=collect();
+        $gradeCategories = collect();
+        $courses_segment = self::getCourseSegment($request);
+        if (isset($courses_segment)) {
+            $names = collect();
             foreach ($courses_segment as $courses_seg) {
                 $course = CourseSegment::find($courses_seg);
                 $gradeCategories->push($course->GradeCategory);
-                foreach($gradeCategories as $grades)
-                {
-                    if($grades->isEmpty())
+                foreach ($gradeCategories as $grades) {
+                    if ($grades->isEmpty())
                         continue;
-                    foreach($grades as $grade)
-                    {
-                        $level=YearLevel::find($grade->id_number);
-                        $yearlevels=$level->classLevels;
-                        foreach($yearlevels as $Yclass)
-                        {
-                            $classes[]=Classes::find($Yclass->class_id);
-                            foreach($classes as $class)
-                                $ClassesName[]=$class->name;
+                    foreach ($grades as $grade) {
+                        $level = YearLevel::find($grade->id_number);
+                        $yearlevels = $level->classLevels;
+                        foreach ($yearlevels as $Yclass) {
+                            $classes[] = Classes::find($Yclass->class_id);
+                            foreach ($classes as $class)
+                                $ClassesName[] = $class->name;
                         }
-                        $lev=$level->levels[0]->name;
+                        $lev = $level->levels[0]->name;
                         $course = CourseSegment::find($courses_seg);
 
-                        $course_id=$course->course_id;
-                        $course=Course::find($course_id);
+                        $course_id = $course->course_id;
+                        $course = Course::find($course_id);
 
-                        $names->push(['name'=>$grade->name,'id_number'=>$grade->id_number,'level'=>$lev,'course'=>$course->name,'class'=>array_values(array_unique($ClassesName))]);
+                        $names->push(['name' => $grade->name, 'id_number' => $grade->id_number, 'level' => $lev, 'course' => $course->name, 'class' => array_values(array_unique($ClassesName))]);
                     }
                 }
             }
 
-        return HelperController::api_response_format(200, $names);
+            return HelperController::api_response_format(200, $names);
         }
         return HelperController::api_response_format(200, 'There is No Course segment available.');
     }
