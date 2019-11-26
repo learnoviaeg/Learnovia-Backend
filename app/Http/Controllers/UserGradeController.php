@@ -175,6 +175,7 @@ class UserGradeController extends Controller
                         $temp->grade_items = null;
                     }
                     $usergrade = new stdClass();
+                    $usergrade->name = $item->name;
                     $usergrade->final_grade = ' - ';
                     if ($temp != null) {
                         $usergrade->final_grade = $temp->final_grade;
