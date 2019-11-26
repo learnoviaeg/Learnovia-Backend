@@ -159,7 +159,7 @@ class UserGradeController extends Controller
         $first = true;
         $grades = [];
         foreach ($users as $user) {
-            $user->grades = array();
+            $user->grades = collect();
             $i = 0 ;
             foreach ($gradeCategories as $category) {
                 $grades[$i]['items'] = collect();
