@@ -183,6 +183,7 @@ class UserGradeController extends Controller
                     $user->grades[$category->name]['data']->push($usergrade);
                     $grades[$i]['items']->push($item->name);
                 }
+                $user->grades->toArray();
                 $grades[$i]['items']->push($category->name . ' Total');
                 $first = true;
                 $i++;
