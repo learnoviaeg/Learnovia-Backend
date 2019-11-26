@@ -689,4 +689,30 @@ class QuizController extends Controller
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
+    public function gradeing_method()
+    {
+        return[
+            [
+                'id' => 1,
+                'name' =>'First'
+            ],
+            [
+                'id' => 2,
+                'name' =>'Last'
+            ],
+            [
+                'id' => 3,
+                'name' =>'Average'
+            ],
+            [
+                'id' => 4,
+                'name' =>'Highest'
+            ],
+            [
+                'id' => 5,
+                'name' =>'Lowest'
+            ]
+    ];
+
+    }
 }

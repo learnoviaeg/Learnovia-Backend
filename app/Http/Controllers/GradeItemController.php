@@ -233,4 +233,21 @@ class GradeItemController extends Controller
 
         return $result;
     }
+    public function gradeing_method()
+    {
+        return[
+            [
+                'id' => 1,
+                'name' =>'Natural'
+            ],
+            [
+                'id' => 2,
+                'name' =>'Simple weighted mean'
+            ],
+            [
+                'id' => 3,
+                'name' =>'Weighted mean'
+            ]
+        ];
+}
 }
