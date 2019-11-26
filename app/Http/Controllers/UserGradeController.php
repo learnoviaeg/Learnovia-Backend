@@ -154,7 +154,7 @@ class UserGradeController extends Controller
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if($courseSegment == null)
             return HelperController::api_response_format(200, null , 'This Course not assigned to this class');
-        $users = User::whereIn('id', Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('id'))->get();
+        $users = User::whereIn('id', Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('id'))->get(['id' ,'firstname' , 'lastname' , 'username' , 'arabicname' , 'picture']);
         $gradeCategories = $courseSegment->where('id', $courseSegment->id)->with('GradeCategory.GradeItems')->get()->pluck('GradeCategory')[0];
         $first = true;
         $grades = [];
