@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class assignment extends Model
 {
-    protected $fillable = ['name', 'content', 'attachment_id', 'opening_date', 'closing_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment'];
+    protected $fillable = ['name', 'content', 'attachment_id'];
     public function attachment()
     {
         return $this->belongsTo('App\attachment', 'attachment_id', 'id');
@@ -17,6 +17,6 @@ class assignment extends Model
     }
     public function Lesson()
     {
-        return $this->belongsToMany('App\Lesson', 'assigment_lesson', 'assigment_id', 'lesson_id');
+        return $this->belongsToMany('App\Lesson', 'assignment_lessons', 'assignment_id', 'lesson_id');
     }
 }

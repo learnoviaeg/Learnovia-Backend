@@ -1,3 +1,8 @@
 {
-    "Attendance": true
+    "Attendance": true,
+    "Page": true,
+    "Assigments": true,
+    "Bigbluebutton": true,
+    "QuestionBank": true,
+    "UploadFiles": true
 }
