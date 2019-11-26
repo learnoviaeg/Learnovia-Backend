@@ -13,7 +13,7 @@ class UserGradeController extends Controller
 {
     /**
      * create User grade
-     * 
+     *
      * @param  [int] grade_item_id, user_id, raw_grade, raw_grade_max, raw_grade_min, raw_scale_id, final_grade, letter_id
      * @param  [boolean] hidden, locked
      * @param  [string] feedback
@@ -62,9 +62,9 @@ class UserGradeController extends Controller
 
     /**
      * update User grade
-     * 
-     * @param  [int] id, grade_item_id, user_id, raw_grade, raw_grade_max, raw_grade_min, raw_scale_id, final_grade, 
-     *              letter_id 
+     *
+     * @param  [int] id, grade_item_id, user_id, raw_grade, raw_grade_max, raw_grade_min, raw_scale_id, final_grade,
+     *              letter_id
      * @param  [boolean] hidden, locked
      * @param  [string] feedback
      * @return [object] and [string] User Grade updated Successfully
@@ -118,7 +118,7 @@ class UserGradeController extends Controller
 
     /**
      * delete User grade
-     * 
+     *
      * @param  [int] id
      * @return [string] User Grade deleted Successfully
     */
@@ -136,7 +136,7 @@ class UserGradeController extends Controller
 
     /**
      * list User grades
-     * 
+     *
      * @return [objects] grades
     */
     public function list()
@@ -152,6 +152,8 @@ class UserGradeController extends Controller
             'class'  => 'required|exists:classes,id'
         ]);
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
+        if($courseSegment == null)
+            return HelperController::api_response_format(200, null , 'This Course not assigned to this class');
         $users = User::whereIn('id', Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('id'))->get();
         $gradeCategories = $courseSegment->where('id', $courseSegment->id)->with('GradeCategory.GradeItems')->get()->pluck('GradeCategory')[0];
         $first = true;
