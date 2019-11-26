@@ -164,29 +164,33 @@ class UserGradeController extends Controller
             foreach ($gradeCategories as $category) {
                 $grades[$i]['items'] = collect();
                 $grades[$i]['name'] = $category->name;
-                $user->grades[$category->name] = collect();
-                $user->grades[$category->name]['total'] = 0;
-                $user->grades[$category->name]['data'] = collect();
+                $user->grades[$i] = collect();
+                $user->grades[$i]['total'] = 0;
+                $user->grades[$i]['name'] = $category->name;
+                $user->grades[$i]['id'] = $category->id;
+                $user->grades[$i]['data'] = collect();
                 foreach ($category->GradeItems as $item) {
                     $temp = UserGrade::where('user_id', $user->id)->where('grade_item_id', $item->id)->first();
                     if ($temp != null && $first) {
-                        $user->grades[$category->name]['total'] = $temp->calculateGrade();
+                        $user->grades[$i]['total'] = $temp->calculateGrade();
                         $first = false;
                         $temp->grade_items = null;
                     }
                     $usergrade = new stdClass();
                     $usergrade->name = $item->name;
+                    $usergrade->id = $item->id;
                     $usergrade->final_grade = ' - ';
                     if ($temp != null) {
                         $usergrade->final_grade = $temp->final_grade;
                     }
-                    $user->grades[$category->name]['data']->push($usergrade);
+                    $user->grades[$i]['data']->push($usergrade);
                     $grades[$i]['items']->push($item->name);
                 }
                 $grades[$i]['items']->push($category->name . ' Total');
                 $first = true;
                 $i++;
             }
+
         }
         return HelperController::api_response_format(200, ['schema' => $grades, 'users' => $users]);
     }
