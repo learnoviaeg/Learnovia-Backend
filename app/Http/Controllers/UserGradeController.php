@@ -164,7 +164,7 @@ class UserGradeController extends Controller
             foreach ($gradeCategories as $category) {
                 $grades[$i]['items'] = collect();
                 $grades[$i]['name'] = $category->name;
-                $user->grades[$category->name] = collect();
+                $user->grades[$category->name] = collect([]);
                 $user->grades[$category->name]['total'] = 0;
                 $user->grades[$category->name]['data'] = collect();
                 foreach ($category->GradeItems as $item) {
