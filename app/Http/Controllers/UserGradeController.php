@@ -164,9 +164,9 @@ class UserGradeController extends Controller
             foreach ($gradeCategories as $category) {
                 $grades[$i]['items'] = collect();
                 $grades[$i]['name'] = $category->name;
-                $user->grades[$category->name] = collect();
-                $user->grades[$category->name]['total'] = 0;
-                $user->grades[$category->name]['data'] = collect();
+                $user->grades[$i][$category->name] = collect();
+                $user->grades[$i][$category->name]['total'] = 0;
+                $user->grades[$i][$category->name]['data'] = collect();
                 foreach ($category->GradeItems as $item) {
                     $temp = UserGrade::where('user_id', $user->id)->where('grade_item_id', $item->id)->first();
                     if ($temp != null && $first) {
@@ -180,7 +180,7 @@ class UserGradeController extends Controller
                     if ($temp != null) {
                         $usergrade->final_grade = $temp->final_grade;
                     }
-                    $user->grades[$category->name]['data']->push($usergrade);
+                    $user->grades[$i][$category->name]['data']->push($usergrade);
                     $grades[$i]['items']->push($item->name);
                 }
                 $grades[$i]['items']->push($category->name . ' Total');
