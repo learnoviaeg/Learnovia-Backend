@@ -20,7 +20,7 @@ class Classes extends Model
 
     public function Segment_class()
     {
-        return $this->belongsToMany('App\SegmentClass', 'ClassLevel', 'class_id','id');
+        return $this->hasMany('App\SegmentClass', 'ClassLevel', 'class_id','id');
     }
 
     public static function Validate($data)
