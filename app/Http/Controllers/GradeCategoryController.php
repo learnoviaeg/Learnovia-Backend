@@ -19,7 +19,7 @@ class GradeCategoryController extends Controller
 {
     /**
      * Add Grade Category
-     * 
+     *
      * @param  [string] name
      * @param  [int] course
      * @param  [int] class
@@ -62,7 +62,7 @@ class GradeCategoryController extends Controller
 
     /**
      * Add bulk Grade Category
-     * 
+     *
      * @param  [array] grades[name]
      * @param  [array] grades[parent]
      * @param  [array] grades[aggregation]
@@ -87,7 +87,7 @@ class GradeCategoryController extends Controller
 
     /**
      * delete bulk Grade Category
-     * 
+     *
      * @param  [string] name
      * @param  [int] id_number
      * @return [string] Grade Category is deleted successfully
@@ -107,7 +107,7 @@ class GradeCategoryController extends Controller
 
     /**
      * get Grade Category
-     * 
+     *
      * @param  [int] id
      * @return [object] Grade Categories with child
      */
@@ -123,7 +123,7 @@ class GradeCategoryController extends Controller
 
     /**
      * update Grade Category
-     * 
+     *
      * @param  [int] id
      * @param  [string] name
      * @param  [int] course_segment_id
@@ -159,7 +159,7 @@ class GradeCategoryController extends Controller
 
     /**
      * delete Grade Category
-     * 
+     *
      * @param  [int] id
      * @return [string] Grade Category is deleted successfully
      */
@@ -175,7 +175,7 @@ class GradeCategoryController extends Controller
 
     /**
      * Move Category
-     * 
+     *
      * @param  [int] id
      * @param  [int] parent
      * @return [string] Grade Category is moved successfully
@@ -195,7 +195,7 @@ class GradeCategoryController extends Controller
 
     /**
      * get Category from course_segments
-     * 
+     *
      * @param  [int] id
      * @return [object] Grade Categories In Segments
      */
@@ -207,7 +207,7 @@ class GradeCategoryController extends Controller
 
     /**
      * get Category with Tree
-     * 
+     *
      * @param  [int] year
      * @param  [int] type
      * @param  [int] level
@@ -219,21 +219,16 @@ class GradeCategoryController extends Controller
      */
     public function Get_Tree(Request $request)
     {
-        $course_segment = HelperController::Get_Course_segment_Course($request);
-        if ($course_segment['result'] == false) {
-            return HelperController::api_response_format(400, null, $course_segment['value']);
-        }
-        if ($course_segment['value'] == null) {
-            return HelperController::api_response_format(400, null, 'No Course active in segment');
-        }
-        $course_segment = $course_segment['value'];
-        $grade_category = GradeCategory::with(['Child', 'GradeItems', 'Child.GradeItems'])->where('course_segment_id', $course_segment->id)->get();
+        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
+        if($courseSegment == null)
+            return HelperController::api_response_format(200, null , 'This Course not assigned to this class');
+        $grade_category = GradeCategory::with(['Child', 'GradeItems', 'Child.GradeItems'])->where('course_segment_id', $courseSegment->id)->get();
         return HelperController::api_response_format(200, $grade_category);
     }
 
     /**
      * get course_segments with/without any param chain
-     * 
+     *
      * @param  [int] year
      * @param  [int] type
      * @param  [int] level
@@ -298,8 +293,8 @@ class GradeCategoryController extends Controller
     }
 
     /**
-     * bulk update grade 
-     * 
+     * bulk update grade
+     *
      * @param  [string] name
      * @param  [int] id_number
      * @param  [string] newname
@@ -332,8 +327,8 @@ class GradeCategoryController extends Controller
     }
 
     /**
-     * Get grade category with chain 
-     * 
+     * Get grade category with chain
+     *
      * @param  [int] year
      * @param  [int] type
      * @param  [int] level
@@ -367,8 +362,8 @@ class GradeCategoryController extends Controller
     }
 
     /**
-     * Get all grade category with chain 
-     * 
+     * Get all grade category with chain
+     *
      * @param  [int] year
      * @param  [int] type
      * @param  [int] level
