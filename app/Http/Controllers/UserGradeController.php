@@ -196,7 +196,7 @@ class UserGradeController extends Controller
                 $i++;
             }
         }
-        return HelperController::api_response_format(200, ['schema' => $grades, 'users' => $users]);
+        return HelperController::api_response_format(200, ['schema' => $grades, 'users' => $users , 'ids' => $ids]);
     }
 
     public function SingleUserInSingleCourse(Request $request)
