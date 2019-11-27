@@ -73,7 +73,7 @@ class GradeCategory extends Model
             return $this->override;
         if(!$this->Parents)
             return 100;
-        return ($this->total() / $this->Parents->total()) * 100 ;
+        return round(($this->total() / $this->Parents->total()) * 100  , 3);
     }
 
     public function depth(){
