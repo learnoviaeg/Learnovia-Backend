@@ -383,6 +383,15 @@ class UserController extends Controller
         $users = $users ->get();
         return HelperController::api_response_format(200, $users, 'all users are  ...');
     }
+    Public Function Overview_Report()
+    {
+        $user_id=Auth::id();
+        $course_segments=Enroll::where('user_id',$user_id)->with(['courseSegment.courses','courseSegment.GradeCategory.GradeItems.UserGrade'
+        =>function ($query) use ($user_id) {
+            $query->where('user_id',$user_id);
+        }])->get();
+        return $course_segments;
+    }
 
 
 }
