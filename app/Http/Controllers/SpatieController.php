@@ -24,7 +24,7 @@ class SpatieController extends Controller
             return "This Site is Installed before go and ask admin";
         } else {
             // restrict
-            \Spatie\Permission\Models\Permission::create(['site/guard_name' => 'api', 'name' => 'restrict', 'title' => 'restrict middleware']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/restrict', 'title' => 'restrict middleware']);
 
             //Message Permissiosns
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/send', 'title' => 'send messages']);
