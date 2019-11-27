@@ -159,6 +159,7 @@ class UserGradeController extends Controller
         $gradeCategories = $courseSegment->where('id', $courseSegment->id)->with('GradeCategory.GradeItems')->get()->pluck('GradeCategory')[0];
         $first = true;
         $grades = [];
+        $ids = [];
         foreach ($users as $user) {
             $user->grades = collect();
             $i = 0 ;
@@ -182,6 +183,7 @@ class UserGradeController extends Controller
                     $usergrade = new stdClass();
                     $usergrade->name = $item->name;
                     $usergrade->id = $item->id;
+                    $ids[] = $item->id;
                     $usergrade->final_grade = ' - ';
                     $usergrade->max = $item->grademax;
                     if ($temp != null)
