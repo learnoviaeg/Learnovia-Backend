@@ -167,6 +167,7 @@ class UserGradeController extends Controller
                 $grades[$i]['items'] = collect();
                 $grades[$i]['name'] = $category->name;
                 $grades[$i]['id'] = $category->id;
+                $grades[$i]['weight'] = $category->weight();
                 $grades[$i]['max'] = $category->total();
                 $user->grades[$i] = collect();
                 $user->grades[$i]['total'] = 0;
@@ -189,7 +190,7 @@ class UserGradeController extends Controller
                     if ($temp != null)
                         $usergrade->final_grade = $temp->final_grade;
                     $user->grades[$i]['data']->push($usergrade);
-                    $grades[$i]['items']->push(collect(['name' => $item->name , 'id' => $item->id , 'max' => $item->grademax]));
+                    $grades[$i]['items']->push(collect(['name' => $item->name , 'id' => $item->id , 'max' => $item->grademax , 'weight' => $item->weight()]));
                 }
                 $first = true;
                 $i++;
