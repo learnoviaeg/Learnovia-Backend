@@ -191,7 +191,6 @@ class UserGradeController extends Controller
                     $user->grades[$i]['data']->push($usergrade);
                     $grades[$i]['items']->push(collect(['name' => $item->name , 'id' => $item->id , 'max' => $item->grademax]));
                 }
-                $grades[$i]['items']->push($category->name . ' Total');
                 $first = true;
                 $i++;
             }
