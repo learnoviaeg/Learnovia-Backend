@@ -8,7 +8,8 @@ use App\User;
 use Illuminate\Http\Request;
 use App\UserGrade;
 use stdClass;
-
+use App\GradeCategory;
+use App\GradeItems;
 class UserGradeController extends Controller
 {
     /**
@@ -194,5 +195,84 @@ class UserGradeController extends Controller
             }
         }
         return HelperController::api_response_format(200, ['schema' => $grades, 'users' => $users]);
+    }
+
+    public function SingleUserInSingleCourse(Request $request)
+    {
+        $request->validate([
+            'user_id'=> 'required|exists:users,id',
+            'course' => 'required|exists:courses,id',
+            'class' => 'required|exists:classes,id'
+        ]);
+
+        $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+        if(!$courseSeg)
+            return HelperController::api_response_format(201, 'this course haven\'t course segment');
+
+        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->with('GradeItems')->get();
+        $gradeitems=$gradeCat->pluck('GradeItems');
+        $userGrade=[];
+        foreach($gradeitems as $items){
+            $temp = UserGrade::where('user_id',$request->user_id)->whereIn('grade_item_id',$items)
+                                ->with('GradeItems','GradeItems.GradeCategory')->first();
+            if($temp != null)
+                $userGrade[]=$temp;
+        }
+        return HelperController::api_response_format(201, $userGrade);
+    }
+
+    public function AllUserInCourse(Request $request)
+    {
+        $request->validate([
+            'course' => 'required|exists:courses,id',
+            'class' => 'required|exists:classes,id'
+        ]);
+
+        $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+        if(!$courseSeg)
+            return HelperController::api_response_format(201, 'this course haven\'t course segment');
+
+        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->with('GradeItems')->get();
+        $gradeitems=$gradeCat->pluck('GradeItems');
+        $userGrade = [];
+        foreach($gradeitems as $items)
+            foreach($items as $item)
+            {
+                if(!isset($item))
+                    continue;
+                $temp = UserGrade::where('grade_item_id',$item->id)->with('GradeItems','GradeItems.GradeCategory')->get();
+                if(count($temp) > 0)
+                    $userGrade[]=$temp;
+            }
+        return HelperController::api_response_format(201, $userGrade);
+    }
+
+    public function AllUserInAllCourses(Request $request)
+    {
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id|required_with:type',
+            'class' => 'exists:classes,id|required_with:level',
+        ]);
+
+        $courses_segment=GradeCategoryController::getCourseSegment($request);
+        if(isset($courses_segment))
+        {
+            $gradeCat=GradeCategory::whereIn('course_segment_id',$courses_segment)->with('GradeItems')->get();
+            $gradeitems=$gradeCat->pluck('GradeItems');
+            $userGrade = [];
+            foreach($gradeitems as $items)
+                foreach($items as $item)
+                {
+                    if(!isset($item))
+                        continue;
+                    $temp = UserGrade::where('grade_item_id',$item->id)->with('GradeItems','GradeItems.GradeCategory')->get();
+                    if(count($temp) > 0)
+                        $userGrade[]=$temp;
+                }
+            return HelperController::api_response_format(201, $userGrade);
+        }
+        return HelperController::api_response_format(200, 'There is No Course segment available.');
     }
 }

@@ -11,6 +11,7 @@ namespace App\Http\Controllers;
 use App\Enroll;
 use App\GradeCategory;
 use App\User;
+use Carbon\Carbon;
 use App\Course;
 use App\CourseSegment;
 use Auth;
@@ -52,13 +53,17 @@ class UserController extends Controller
             'course' => 'array',
             'role.*' => 'required|exists:roles,id',
             'class_id' => 'required|array',
-            'picture' => 'nullable'
+            'picture' => 'nullable|array','arabicname' => 'nullable|array', 'gender' => 'nullable|array', 'phone' => 'nullable|array',
+            'address' => 'nullable|array','nationality' => 'nullable|array','country' => 'nullable|array', 'birthdate' => 'nullable|array',
+            'notes' => 'nullable|array','email' => 'nullable|array', 'language' => 'nullable|array','timezone' => 'nullable|array',
+            'religion' => 'nullable|array','second language' => 'nullable|array'
         ]);
         $users = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
-            'language', 'timezone', 'religion', 'second language'];
+            'language', 'timezone', 'religion', 'second language','picture'];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
+        $i=0;
         foreach ($request->firstname as $key => $firstname) {
             $user = User::create([
                 'firstname' => $firstname,
@@ -69,16 +74,14 @@ class UserController extends Controller
                 'class_id' => $request->class_id[$key]
             ]);
 
-            if ($request->picture != null) {
-                $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
-            }
-
-            foreach ($optionals as $optional) {
-                if ($request->filled($optional)) {
-                    $user->$optional = $request->$optional;
-                }
-
-            }
+            foreach ($optionals as $optional)
+                if ($optional == 'picture') 
+                    $user->$optional = attachment::upload_attachment($request->$optional[$i], 'User')->id;
+                else if($optional =='birthdate')
+                    $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
+                if ($request->filled($optional))
+                    $user->$optional =$request->$optional[$i];
+            $i++;
 
             $user->save();
             $role = Role::find($request->role[$key]);
