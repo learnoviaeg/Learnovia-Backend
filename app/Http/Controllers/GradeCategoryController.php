@@ -207,22 +207,23 @@ class GradeCategoryController extends Controller
 
     /**
      * get Category with Tree
-     *
-     * @param  [int] year
-     * @param  [int] type
-     * @param  [int] level
      * @param  [int] class
      * @param  [int] course
-     * @param  [int] segment
      * @return if there is no course segment or disactives [string] No Course active in segment
      * @return if there is [string] Get grade category with child
      */
     public function Get_Tree(Request $request)
     {
+        set_time_limit(0);
+        $request->validate([
+            'course' => 'required|exists:courses,id',
+            'class'  => 'required|exists:classes,id'
+        ]);
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if($courseSegment == null)
             return HelperController::api_response_format(200, null , 'This Course not assigned to this class');
-        $grade_category = GradeCategory::with(['Child', 'GradeItems', 'Child.GradeItems'])->where('course_segment_id', $courseSegment->id)->get();
+        $grade_category = GradeCategory::where('course_segment_id', $courseSegment->id)->with('Children' , 'GradeItems')
+        ->first();
         return HelperController::api_response_format(200, $grade_category);
     }
 

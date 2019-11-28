@@ -27,8 +27,8 @@ class GradeItems extends Model
     }
 
     public function weight(){
-        if($this->override != 0)
-            return $this->override;
+        if($this->attributes['override'] != 0)
+            return $this->attributes['override'];
         return round(($this->grademax * $this->GradeCategory->percentage()) / $this->GradeCategory->total() , 3);
     }
 }
