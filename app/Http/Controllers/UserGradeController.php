@@ -246,7 +246,7 @@ class UserGradeController extends Controller
                 if(count($temp) > 0)
                     $userGrade[]=$temp;
             }
-        return HelperController::api_response_format(201, $userGrade);
+        return $userGrade;
     }
 
     public function AllUserInAllCourses(Request $request)
@@ -276,5 +276,50 @@ class UserGradeController extends Controller
             return HelperController::api_response_format(201, $userGrade);
         }
         return HelperController::api_response_format(200, 'There is No Course segment available.');
+    }
+
+    public function TopStudent(Request $request)
+    {
+        $request->validate([
+            'course' => 'required|exists:courses,id',
+            'class' => 'required|exists:classes,id'
+        ]); 
+        $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+        if(!$courseSeg)
+            return HelperController::api_response_format(201, 'this course haven\'t course segment');
+
+        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->with('GradeItems')->first();
+        foreach($gradeCat['GradeItems'] as $items)
+        {
+            if(!isset($items))
+                continue;
+            $temp = UserGrade::where('grade_item_id',$items->id)->with('GradeItems','GradeItems.GradeCategory')->get();
+            if(count($temp) > 0)
+                $userGrade[]=$temp;
+        }
+        
+        $i=0;
+        $useGradesss=array();
+        foreach($userGrade as $userGra)
+            foreach($userGra as $useG)
+            {
+                $useGradesss[$i]['id']=$useG->user_id;
+                $useGradesss[$i]['grade']=$useG->calculateGrade();
+                $i++;
+            }   
+
+        $col=collect($useGradesss);
+        $return=$col->sortByDesc('grade');
+        $r=$return->values()->take(5);
+        $top=$r->all();
+        $topusers=array();
+        $j=0;
+        foreach($top as $t)
+        {
+            $topusers[$j]=User::find($t['id']);
+            $topusers[$j]['grade']=$t['grade'];
+            $j++;
+        }
+        return HelperController::api_response_format(200,$topusers, 'There is the Top Students');
     }
 }
