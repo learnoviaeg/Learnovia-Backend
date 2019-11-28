@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name', 'course_segment_id', 'parent', 'aggregation', 'aggregatedOnlyGraded', 'hidden', 'id_number'];
+    protected $fillable = ['name', 'course_segment_id', 'parent', 'aggregation', 'aggregatedOnlyGraded', 'hidden', 'id_number' , 'override'];
     public function Child()
     {
         return $this->hasMany('App\GradeCategory', 'parent', 'id');
@@ -29,9 +29,10 @@ class GradeCategory extends Model
         $gradeitems = $this->GradeItems;
         foreach ($gradeitems as $item)
             $result += $item->grademax;
-        $child = $this->Child;
+        $child = $this->Children;
         foreach ($child as $item)
             $result += $item->total();
+        if($result == 0)$result = 1;
         return $result;
     }
 
@@ -71,28 +72,34 @@ class GradeCategory extends Model
     {
         if ($this->override != 0)
             return $this->override;
-        if(!$this->Parents)
+        if (!$this->Parents)
             return 100;
-        return round(($this->total() / $this->Parents->total()) * 100  , 3);
+        return round(($this->total() / $this->Parents->total()) * 100, 3);
     }
 
-    public function depth(){
-        if($this->Parents == null)
+    public function depth()
+    {
+        if ($this->Parents == null)
             return 1;
         return 1 + $this->Parents->depth();
     }
 
-    public function path(){
-        if($this->Parents == null)
+    public function path()
+    {
+        if ($this->Parents == null)
             return $this;
         $result = collect();
         $category = $this;
-        while(true){
+        while (true) {
             $result->push($category);
-            if($category->Parents == null)
+            if ($category->Parents == null)
                 break;
             $category = $category->Parents;
         }
         return $result;
+    }
+    public function Children()
+    {
+        return $this->Child()->with(['Children', 'GradeItems']);
     }
 }
