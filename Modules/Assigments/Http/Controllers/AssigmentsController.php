@@ -311,7 +311,7 @@ class AssigmentsController extends Controller
       $roles = Permission::where('name','site/assignment/assigned-users')->first();
       $roles_id= $roles->roles->pluck('id');
 
-      $usersIDs = Enroll::where('course_segment', $request['course_segment'])->whereIn('role_id' , $roles)->pluck('user_id')->toarray();
+      $usersIDs = Enroll::where('course_segment', $request['course_segment'])->whereIn('role_id' , $roles_id)->pluck('user_id')->toarray();
         foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
             $userassigment->user_id = $userId;
