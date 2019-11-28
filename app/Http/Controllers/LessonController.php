@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Lesson;
+use App\CourseSegment;
 use App\attachment;
 
 class LessonController extends Controller
@@ -179,7 +180,8 @@ class LessonController extends Controller
     {
         $request->validate([
             'lesson_id' => 'required|integer|exists:lessons,id',
-            'index' => 'required|integer'
+            'index' => 'required|integer',
+            'count' => 'integer'
         ]);
         $lesson_index = Lesson::where('id', $request->lesson_id)->pluck('index')->first();
 
@@ -189,5 +191,27 @@ class LessonController extends Controller
             $lessons = $this->SortUp($request->lesson_id, $request->index);
         }
         return HelperController::api_response_format(200, $lessons, 'all Lessons sorted Successfully');
+    }
+
+    public function AddNumberOfLessons(Request $request)
+    {
+        $request->validate([
+            'course' => 'required|exists:courses,id',
+            'class' => 'required|exists:classes,id',
+            'count' => 'integer|min:1'
+        ]);
+
+        $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+        $maxIndx=Lesson::where('course_segment_id',$courseSeg->id)->orderBy('index', 'desc')->first();
+        for($i=1; $i<=$request->count; $i++)
+        {
+            $lessons[] = Lesson::create([
+                'name' => 'Lesson '.($maxIndx->index+1),
+                'course_segment_id' => $courseSeg->id,
+                'index' => ++$maxIndx->index
+            ]);
+        }
+
+        return HelperController::api_response_format(200, $lessons, 'added Successfully');
     }
 }
