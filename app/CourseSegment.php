@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CourseSegment extends Model
 {
-    protected $fillable = ['course_id', 'segment_class_id' , 'is_active','letter','letter_id','start_date','end_date'];
+    protected $fillable = ['course_id', 'segment_class_id', 'is_active', 'letter', 'letter_id', 'start_date', 'end_date'];
 
     public static function GetCoursesByCourseSegment($user_id)
     {
@@ -33,7 +33,7 @@ class CourseSegment extends Model
 
     public static function getActive_segmentfromcourse($course_id)
     {
-        return self::where('course_id', $course_id)->where('is_active','1')->pluck('id')->first();
+        return self::where('course_id', $course_id)->where('is_active', '1')->pluck('id')->first();
     }
 
     public function courses()
@@ -45,6 +45,7 @@ class CourseSegment extends Model
     {
         return $this->hasMany('App\Course', 'id', 'course_id')->whereMandatory(0);
     }
+
     public function users()
     {
         return $this->hasMany('App\User');
@@ -76,14 +77,16 @@ class CourseSegment extends Model
         }
         return $courseSegment;
     }
+
     Public function GradeCategory()
     {
         return $this->hasMany('App\GradeCategory');
     }
+
     Public static function GradeCategoryPerSegmentbyId($id)
     {
-        $GradeCategoriesInSegment=self::find($id)->with('GradeCategory')->first();
-        foreach($GradeCategoriesInSegment->GradeCategory as $cat){
+        $GradeCategoriesInSegment = self::find($id)->with('GradeCategory')->first();
+        foreach ($GradeCategoriesInSegment->GradeCategory as $cat) {
             $cat->Child;
         }
         return $GradeCategoriesInSegment;
@@ -93,12 +96,13 @@ class CourseSegment extends Model
         'created_at', 'updated_at'
     ];
 
-    public static function GetWithClassAndCourse($class_id , $course_id){
-        return CourseSegment::Join('segment_classes' , 'segment_classes.id' , 'course_segments.segment_class_id')
-        ->Join('class_levels' , 'class_levels.id' , 'segment_classes.class_level_id')
-        ->where('class_levels.class_id' , '=' , $class_id)
-        ->where('course_segments.course_id' , '=' , $course_id)
-        ->where('course_segments.is_active' , '=' , 1)
-        ->first(['course_segments.id' , 'course_segments.course_id']);
+    public static function GetWithClassAndCourse($class_id, $course_id)
+    {
+        return CourseSegment::Join('segment_classes', 'segment_classes.id', 'course_segments.segment_class_id')
+            ->Join('class_levels', 'class_levels.id', 'segment_classes.class_level_id')
+            ->where('class_levels.class_id', '=', $class_id)
+            ->where('course_segments.course_id', '=', $course_id)
+            ->where('course_segments.is_active', '=', 1)
+            ->first(['course_segments.id', 'course_segments.course_id']);
     }
 }
