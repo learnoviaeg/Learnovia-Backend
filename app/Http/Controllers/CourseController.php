@@ -109,6 +109,7 @@ class CourseController extends Controller
                             $gradeCat = GradeCategory::firstOrCreate([
                                 'name' => 'Course Total',
                                 'course_segment_id' => $courseSegment->id,
+                                'id_number' => $yearlevel->id
                             ]);
                             if ($request->filled('no_of_lessons')) {
                                 $no_of_lessons = $request->no_of_lessons;
