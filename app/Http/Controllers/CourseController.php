@@ -607,6 +607,7 @@ class CourseController extends Controller
                 $gradeCat = GradeCategory::firstOrCreate([
                     'name' => 'Course Total',
                     'course_segment_id' => $course_Segment->id,
+                    'id_number'=>$year_level->id
                 ]);
                 $count++;
             }
