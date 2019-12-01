@@ -393,37 +393,6 @@ class CourseController extends Controller
                                     $Component->where('visible' , '=' , 1)
                                         ->where('publish_date' , '<=' , Carbon::now());
                                 }
-                                $Component->get();
-                                if($com->name == 'Media' && count($Component)>0 ){
-                                    foreach($Component as $media){
-                                        $userid = $media->user->id;
-                                        $firstname = $media->user->firstname;
-                                        $lastname = $media->user->lastname;
-                                        $user = collect([
-                                            'user_id' => $userid,
-                                            'firstname' => $firstname,
-                                            'lastname' => $lastname
-                                        ]);
-                                        unset($media->user);
-                                        $media->owner = $user;
-
-                                        $media->mediaType = ($media->type ==null)?'LINK':'MEDIA';
-                                    }
-                                }
-                                else if($com->name == 'Assigments' && count($Component)>0 ){
-                                    foreach($Component as $assignment){
-                                        if(isset($assignment->attachment)){
-                                            $path = $assignment->attachment->path;
-                                            $assignment->url = 'https://docs.google.com/viewer?url=' . $path;
-                                            $assignment->url2 = $path;
-                                        }
-                                    }
-                                }
-                                $lessonn[$com->name] = $Component;
-
-                                //$lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
-                                //if (isset($com->name))
-                                    //$clase[$i][$com->name . $count] += count($lessonn[$com->name]);
                             }
                         }
                         $i++;
@@ -431,7 +400,6 @@ class CourseController extends Controller
                 }
             }
         }
-        //$clase['course'] = Course::find($request->course_id);
         return HelperController::api_response_format(200, $clase);
     }
 
