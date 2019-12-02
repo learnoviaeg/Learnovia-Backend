@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\AcademicYearType;
 use App\ClassLevel;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Classes;
 use Nwidart\Modules\Collection;
@@ -659,5 +660,26 @@ class CourseController extends Controller
             return HelperController::api_response_format(200, $all);
 
         return HelperController::api_response_format(200, null,'there is no courses');
+    }
+    public function Count_Components(Request $request){
+        $request->validate([
+            'course'  => 'required|exists:courses,id',
+            'class'  => 'integer|exists:classes,id',
+        ]);
+        if(isset($request->class)){
+            $course_segments = [CourseSegment::GetWithClassAndCourse($request->class,$request->course)->id];
+        }else{
+            $course_segments = CourseSegment::where('course_id', $request->course)->where('is_active', '1')->pluck('id');
+        }
+        if(!isset($course_segments)){
+            return HelperController::api_response_format(400, null,'doesn\'t have course segment ');
+        }
+         $lessons_id = Lesson::whereIn('course_segment_id',$course_segments)->pluck('id');
+         $components =  LessonComponent::whereIn('lesson_id',$lessons_id)
+             ->select('model as name', DB::raw('count(*) as total'))
+             ->groupBy('model')
+             ->get();
+        return HelperController::api_response_format(200, $components,'component are ...');
+
     }
 }
