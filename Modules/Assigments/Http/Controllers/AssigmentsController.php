@@ -148,7 +148,7 @@ class AssigmentsController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'Lesson_id' => 'required|exists:lessons,id',
+            'Lesson_id' => 'required|array|exists:lessons,id',
             'is_graded' => 'required|boolean',
             'mark' => 'required|integer',
             'allow_attachment' => 'required|integer|min:0|max:3',
@@ -190,26 +190,30 @@ class AssigmentsController extends Controller
         );
         $this->assignAsstoUsers($data);
 
-        $assilesson=AssignmentLesson::firstOrCreate(
-            [
-                'assignment_id' => $assigment->id,
-                'lesson_id' => $request->Lesson_id,
-                'publish_date'=>$request->opening_date,
-                'is_graded' => $request->is_graded,
-                'mark' => $request->mark,
-                'allow_attachment' => $request->allow_attachment,
-                'start_date' => $request->opening_date,
-                'due_date' => $request->closing_date,
-            ]
-        );        
-
-        LessonComponent::create([
-            'lesson_id' => $request->Lesson_id,
-            'comp_id' => $assigment->id,
-            'module' => 'Assigments',
-            'model' =>'assignment',
-            'index' => LessonComponent::getNextIndex($request->Lesson_id)
-        ]);
+        foreach($request->Lesson_id as $lessons)
+        {
+            $assilesson=AssignmentLesson::firstOrCreate(
+                [
+                    'assignment_id' => $assigment->id,
+                    'lesson_id' => $lessons,
+                    'publish_date'=>$request->opening_date,
+                    'is_graded' => $request->is_graded,
+                    'mark' => $request->mark,
+                    'allow_attachment' => $request->allow_attachment,
+                    'start_date' => $request->opening_date,
+                    'due_date' => $request->closing_date,
+                ]
+            );        
+    
+            LessonComponent::create([
+                'lesson_id' => $lessons,
+                'comp_id' => $assigment->id,
+                'module' => 'Assigments',
+                'model' =>'assignment',
+                'index' => LessonComponent::getNextIndex($lessons)
+            ]);
+        }
+        
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
     }
 

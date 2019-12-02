@@ -184,7 +184,7 @@ class FilesController extends Controller
                 'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-                'lesson_id' => 'required|integer|exists:lessons,id',
+                'lesson_id' => 'required|array|exists:lessons,id',
                 'publish_date'=>'nullable',
                 //'year' => 'required|integer|exists:academic_years,id',
                 //'type' => 'required|integer|exists:academic_types,id',
@@ -251,72 +251,73 @@ class FilesController extends Controller
             //         return HelperController::api_response_format(400,null,'No Class active in segment');
             //     }
             // }
-
-            foreach ($request->Imported_file as $singlefile) {
-                $extension = $singlefile->getClientOriginalExtension();
-
-                $fileName = $singlefile->getClientOriginalName();
-                $size = $singlefile->getSize();
-                $description = $request->description;
-
-                $name = uniqid() . '.' . $extension;
-
-                $file = new file;
-                $file->type = $extension;
-                $file->name = $name;
-                $file->description = $description;
-                $file->size = $size;
-                $file->attachment_name =$fileName;
-                $file->user_id = Auth::user()->id;
-                $check = $file->save();
-                $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $request->lesson_id . '/' . $name);
-                $file->url2 = url('public/storage/files/' . $request->lesson_id . '/' . $name);
-                $file->save();
-                $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
-                $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
-                User::notify([
-                    'message' => 'new file is added',
-                    'from' => Auth::user()->id,
-                    'users' => $usersIDs,
-                    'course_id' => $courseID,
-                    'type' => 'file',
-                    'link' => $file->url,
-                    'publish_date' => $publishdate,
-                ]);
-                if ($check) {
-                    $filesegment = new FileCourseSegment;
-                    $filesegment->course_segment_id = $activeCourseSegments->id;
-                    $filesegment->file_id = $file->id;
-                    $filesegment->save();
-
-
-                    $maxIndex = FileLesson::where('lesson_id', $request->lesson_id)->max('index');
-
-                    if ($maxIndex == null) {
-                        $newIndex = 1;
-                    } else {
-                        $newIndex = ++$maxIndex;
-                    }
-
-                    $fileLesson = new FileLesson;
-                    $fileLesson->lesson_id = $request->lesson_id;
-                    $fileLesson->file_id = $file->id;
-                    $fileLesson->index = $newIndex;
-                    $fileLesson->publish_date = $publishdate;
-
-                    $fileLesson->save();
-                    LessonComponent::create([
-                        'lesson_id' => $fileLesson->lesson_id,
-                        'comp_id'   => $fileLesson->file_id,
-                        'module'    => 'UploadFiles',
-                        'model'     => 'file',
-                        'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+            foreach($request->lesson_id as $lesson)
+            {
+                foreach ($request->Imported_file as $singlefile) {
+                    $extension = $singlefile->getClientOriginalExtension();
+    
+                    $fileName = $singlefile->getClientOriginalName();
+                    $size = $singlefile->getSize();
+                    $description = $request->description;
+    
+                    $name = uniqid() . '.' . $extension;
+    
+                    $file = new file;
+                    $file->type = $extension;
+                    $file->name = $name;
+                    $file->description = $description;
+                    $file->size = $size;
+                    $file->attachment_name =$fileName;
+                    $file->user_id = Auth::user()->id;
+                    $check = $file->save();
+                    $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $lesson . '/' . $name);
+                    $file->url2 = url('public/storage/files/' . $lesson . '/' . $name);
+                    $file->save();
+                    $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
+                    $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
+                    User::notify([
+                        'message' => 'new file is added',
+                        'from' => Auth::user()->id,
+                        'users' => $usersIDs,
+                        'course_id' => $courseID,
+                        'type' => 'file',
+                        'link' => $file->url,
+                        'publish_date' => $publishdate,
                     ]);
-                    Storage::disk('public')->putFileAs(
-                        'files/' . $request->lesson_id ,
-                        $singlefile,
-                        $name
-                    );
+                    if ($check) {
+                        $filesegment = new FileCourseSegment;
+                        $filesegment->course_segment_id = $activeCourseSegments->id;
+                        $filesegment->file_id = $file->id;
+                        $filesegment->save();
+    
+                        $maxIndex = FileLesson::where('lesson_id', $lesson)->max('index');
+
+                        if ($maxIndex == null) {
+                            $newIndex = 1;
+                        } else {
+                            $newIndex = ++$maxIndex;
+                        }
+    
+                        $fileLesson = new FileLesson;
+                        $fileLesson->lesson_id =$lesson;
+                        $fileLesson->file_id = $file->id;
+                        $fileLesson->index = $newIndex;
+                        $fileLesson->publish_date = $publishdate;
+    
+                        $fileLesson->save();
+                        LessonComponent::create([
+                            'lesson_id' => $fileLesson->lesson_id,
+                            'comp_id'   => $fileLesson->file_id,
+                            'module'    => 'UploadFiles',
+                            'model'     => 'file',
+                            'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                        ]);
+                        Storage::disk('public')->putFileAs(
+                            'files/' . $request->$lesson ,
+                            $singlefile,
+                            $name
+                        );
+                    }
                 }
             }
             return HelperController::api_response_format(200, $file, 'Upload Successfully');

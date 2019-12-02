@@ -25,6 +25,11 @@ class quiz extends Model
         return $this->belongsTo('App\Course', 'course_id', 'id');
     }
 
+    // public function course()
+    // {
+    //     return $this->belongsTo('App\CourseSegment', 'course_id', 'course_segment_id');
+    // }
+
     public function quizLessson()
     {
         return $this->hasMany('Modules\QuestionBank\Entities\QuizLesson', 'quiz_id', 'id');
