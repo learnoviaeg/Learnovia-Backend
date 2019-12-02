@@ -20,46 +20,59 @@ class UserGradeController extends Controller
      * @param  [string] feedback
      * @return [object] and [string] User Grade Created Successfully
     */
-    public function create(Request $request)
-    {
-        $request->validate([
-            'grade_item_id' => 'required|exists:grade_items,id',
-            'user_id' => 'required|exists:users,id',
-            'raw_grade' => 'required|numeric|between:0,99.99',
-            'raw_grade_max' => 'required|numeric|between:0,99.99',
-            'raw_grade_min' => 'nullable|numeric|between:0,99.99',
-            'raw_scale_id' => 'required|exists:scales,id',
-            'final_grade' => 'required|numeric|between:0,99.99',
-            'hidden' => 'nullable|boolean',
-            'locked' => 'nullable|boolean',
-            'feedback' => 'required|string',
-            'letter_id' => 'required|exists:letters,id',
-        ]);
+   public function create(Request $request)
+        {
 
-        $data = [
-            'grade_item_id' => $request->grade_item_id,
-            'user_id' => $request->user_id,
-            'raw_grade' => $request->raw_grade,
-            'raw_grade_max' => $request->raw_grade_max,
-            'raw_scale_id' => $request->raw_scale_id,
-            'final_grade' => $request->final_grade,
-            'feedback' => $request->feedback,
-            'letter_id' => $request->letter_id
-        ];
-        if (isset($request->hidden)) {
-            $data['hidden'] = $request->hidden;
-        }
-        if (isset($request->locked)) {
-            $data['locked'] = $request->locked;
-        }
-        if (isset($request->raw_grade_min)) {
-            $data['raw_grade_min'] = $request->raw_grade_min;
-        }
+            $request->validate([
+                'user'=>'required|array',
+                'user.*.id'=> 'required|exists:users,id',
+                'user.*.grade_item_id' => 'required|array',
+                'user.*.grade_item_id.*' => 'required|exists:grade_items,id',
+                'user.*.raw_grade' => 'required|array',
+                'user.*.raw_grade.*' => 'required|numeric|between:0,99.99',
+                'user.*.raw_grade_max' => 'required|array',
+                'user.*.raw_grade_max.*' => 'required|numeric|between:0,99.99',
+                'user.*.raw_grade_min' => 'nullable|array',
+                'user.*.raw_grade_min.*' => 'nullable|numeric|between:0,99.99',
+                'user.*.raw_scale_id' => 'required|array',
+                'user.*.raw_scale_id.*' => 'required|exists:scales,id',
+                'user.*.final_grade' => 'required|array',
+                'user.*.hidden' => 'nullable|array',
+                'user.*.hidden.*' => 'nullable|boolean',
+                'user.*.locked' => 'nullable|array',
+                'user.*.locked.*' => 'nullable|boolean',
+                'user.*.feedback' => 'required|array',
+                'user.*.letter_id' => 'required|array',
+                'user.*.letter_id.*' => 'required|exists:letters,id',
+            ]);
 
-        $grade = UserGrade::create($data);
+            foreach ($request->user as $key => $user) {
+                foreach($user['raw_grade'] as $keys => $rawgrade){
+                    $data=[
+                        'grade_item_id' => $request->user[$key]['grade_item_id'][$keys],
+                        'user_id'=> $request->user[$key]['id'],
+                        'raw_grade' => $request->user[$key]['raw_grade'][$keys],
+                        'raw_grade_max' =>$request->user[$key]['raw_grade_max'][$keys],
+                        'raw_scale_id' => $request->user[$key]['raw_scale_id'][$keys],
+                        'final_grade' =>$request->user[$key]['final_grade'][$keys],
+                        'feedback' => $request->user[$key]['feedback'][$keys],
+                        'letter_id' => $request->user[$key]['letter_id'][$keys],
+                    ];
+                    if(isset($request->user[$key]['hidden'][$keys])) {
+                        $data['hidden']=$request->user[$key]['hidden'][$keys];
+                    }
+                    if(isset($request->user[$key]['locked'][$keys])) {
+                        $data['locked']=$request->user[$key]['locked'][$keys];
+                    }
+                    if(isset($request->user[$key]['raw_grade_min'][$keys])) {
+                        $data['raw_grade_min']=$request->user[$key]['raw_grade_min'][$keys];
+                    }
+                    $grade=UserGrade::create($data);
+                }
+            }
+            return HelperController::api_response_format(201,$grade,'Users Grades are Created Successfully');
 
-        return HelperController::api_response_format(201, $grade, 'User Grade Created Successfully');
-    }
+        }
 
     /**
      * update User grade
@@ -283,7 +296,7 @@ class UserGradeController extends Controller
         $request->validate([
             'course' => 'required|exists:courses,id',
             'class' => 'required|exists:classes,id'
-        ]); 
+        ]);
         $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
         if(!$courseSeg)
             return HelperController::api_response_format(201, 'this course haven\'t course segment');
@@ -297,7 +310,7 @@ class UserGradeController extends Controller
             if(count($temp) > 0)
                 $userGrade[]=$temp;
         }
-        
+
         $i=0;
         $useGradesss=array();
         foreach($userGrade as $userGra)
@@ -306,7 +319,7 @@ class UserGradeController extends Controller
                 $useGradesss[$i]['id']=$useG->user_id;
                 $useGradesss[$i]['grade']=$useG->calculateGrade();
                 $i++;
-            }   
+            }
 
         $col=collect($useGradesss);
         $return=$col->sortByDesc('grade');
