@@ -695,6 +695,7 @@ class CourseController extends Controller
             $item->level    = $item->segmentClasses[0]->classLevel[0]->yearLevels[0]->levels[0]->name;
             $item->class    = $item->segmentClasses[0]->classLevel[0]->classes[0]->name;
             $item->segment  = $item->segmentClasses[0]->segments[0]->name;
+            $item->attachment = $item->courses[0]->attachment;
             unset($item->courses);
             unset($item->segmentClasses);
         }
