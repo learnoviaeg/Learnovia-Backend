@@ -269,14 +269,13 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::get('get', 'UserGradeController@list')->name('getusergrade')->middleware('permission:grade/user/get');
         Route::post('delete', 'UserGradeController@delete')->name('deleteusergrade')->middleware('permission:grade/user/delete');
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
-        Route::post('getGrades', 'UserGradeController@SingleUserInSingleCourse')->name('getallusergrades')->middleware('permission:grade/user/getallusergrades');
-        Route::post('getallGrades', 'UserGradeController@AllUserInCourse')->name('getallusersgrades')->middleware('permission:grade/user/getallusersgrades');
-        Route::post('getalluserGrades', 'UserGradeController@AllUserInAllCourses')->name('getalluserscoursesgrades')->middleware('permission:grade/user/getalluserscoursesgrades');
-        Route::get('top-student', 'UserGradeController@TopStudent')->name('gettopstudent')->middleware('permission:grade/user/top-student');
     });
 
     Route::group(['prefix' => 'report'] , function(){
         Route::get('grader' ,'UserGradeController@graderReport')->name('graderReport')->middleware('permission:grade/report/grader');
+        Route::post('user', 'UserGradeController@SingleUserInSingleCourse')->name('getallusergrades')->middleware('permission:grade/report/user');
+        //Route::post('getallGrades', 'UserGradeController@AllUserInCourse')->name('getallusersgrades')->middleware('permission:grade/report/overview');
+        Route::post('over-all', 'UserGradeController@AllUserInAllCourses')->name('getalluserscoursesgrades')->middleware('permission:grade/report/over-all');
     });
 });
 Route::group(['prefix' => 'scale', 'middleware' => 'auth:api'], function () {
