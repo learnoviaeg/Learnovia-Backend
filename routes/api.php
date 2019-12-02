@@ -232,6 +232,8 @@ Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'LessonController@deleteLesson')->name('deleteLesson')->middleware('permission:lesson/delete');
     Route::post('update', 'LessonController@updateLesson')->name('updateLesson')->middleware('permission:lesson/update');
     Route::post('sort', 'LessonController@Sorting')->name('sortlesson')->middleware('permission:lesson/sort');
+    Route::post('sort', 'LessonController@Sorting')->name('sortlesson')->middleware('permission:lesson/sort');
+    Route::post('addLessons', 'LessonController@AddNumberOfLessons')->name('addnumberoflessons')->middleware('permission:lesson/addBulk');
 });
 
 //grade routes
@@ -269,6 +271,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('getGrades', 'UserGradeController@SingleUserInSingleCourse')->name('getallusergrades')->middleware('permission:grade/user/getallusergrades');
         Route::post('getallGrades', 'UserGradeController@AllUserInCourse')->name('getallusersgrades')->middleware('permission:grade/user/getallusersgrades');
         Route::post('getalluserGrades', 'UserGradeController@AllUserInAllCourses')->name('getalluserscoursesgrades')->middleware('permission:grade/user/getalluserscoursesgrades');
+        Route::get('topstudent', 'UserGradeController@TopStudent');//->name('gettopstudent')->middleware('permission:grade/user/gettopstudents');
     });
 
     Route::group(['prefix' => 'report'] , function(){

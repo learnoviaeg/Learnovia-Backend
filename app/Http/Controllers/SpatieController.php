@@ -189,6 +189,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/delete', 'title' => 'delete lesson']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/update', 'title' => 'update lesson']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/sort', 'title' => 'sort lesson']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/addBulk', 'title' => 'add bulk lesson']);
 
             //Grade Ctegory
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/add', 'title' => 'add grade category']);
@@ -218,6 +219,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/getallusergrades', 'title' => 'get all user grades']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/getallusersgrades', 'title' => 'get all users grades']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/getalluserscoursesgrades', 'title' => 'get all users grades in courses']);
+            // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/gettopstudents', 'title' => 'get top student']);
 
             //Grades Reports
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/report/grader', 'title' => 'Grader Report']);
