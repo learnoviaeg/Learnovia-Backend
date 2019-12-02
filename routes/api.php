@@ -166,7 +166,8 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::get('course-with-teacher', 'CourseController@course_with_teacher')->name('coursewithteacher')->middleware('permission:course/course-with-teacher');
     Route::get('sorted-componenets', 'CourseController@GetUserCourseLessonsSorted')->middleware('permission:course/sorted-componenets');
     Route::post('toggle/letter', 'CourseController@ToggleCourseLetter')->middleware('permission:course/toggle/letter');
-    Route::post('count-components', 'CourseController@Count_Components')->middleware('permission:course/count-components');
+    Route::get('count-components', 'CourseController@Count_Components')->middleware('permission:course/count-components');
+    Route::get('chain', 'CourseController@getAllCoursesWithChain')->middleware('permission:course/chain');
 });
 
 //USER CRUD ROUTES
