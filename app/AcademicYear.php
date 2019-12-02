@@ -25,9 +25,27 @@ class AcademicYear extends Model
     {
         return $this->belongsTo('App\AcademicYearType', 'id', 'academic_year_id');
     }
-    
+
     public function YearType()
     {
         return $this->hasMany('App\AcademicYearType', 'academic_year_id' , 'id');
+    }
+
+    public static function getAllYearLevel($year = null ,$level = null){
+        $result = collect();
+        $start = self::Get_current();
+        if($year)
+            $start = self::find($year);
+        $YearLevels = $start->where('id', $start->id)->with(['YearType.yearLevel' => function ($query) use ($level) {
+            if($level != null)
+                $query->where('level_id', $level);
+        }])->first();
+        $types = $YearLevels->YearType;
+        foreach($types as $type){
+            foreach ($type->yearLevel as $yearLevel) {
+                $result->push($yearLevel);
+            }
+        }
+        return $result->pluck('id');
     }
 }
