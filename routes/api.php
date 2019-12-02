@@ -271,7 +271,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('getGrades', 'UserGradeController@SingleUserInSingleCourse')->name('getallusergrades')->middleware('permission:grade/user/getallusergrades');
         Route::post('getallGrades', 'UserGradeController@AllUserInCourse')->name('getallusersgrades')->middleware('permission:grade/user/getallusersgrades');
         Route::post('getalluserGrades', 'UserGradeController@AllUserInAllCourses')->name('getalluserscoursesgrades')->middleware('permission:grade/user/getalluserscoursesgrades');
-        Route::get('topstudent', 'UserGradeController@TopStudent');//->name('gettopstudent')->middleware('permission:grade/user/gettopstudents');
+        Route::get('top-student', 'UserGradeController@TopStudent')->name('gettopstudent')->middleware('permission:grade/user/top-student');
     });
 
     Route::group(['prefix' => 'report'] , function(){

@@ -219,7 +219,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/getallusergrades', 'title' => 'get all user grades']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/getallusersgrades', 'title' => 'get all users grades']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/getalluserscoursesgrades', 'title' => 'get all users grades in courses']);
-            // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/gettopstudents', 'title' => 'get top student']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/top-student', 'title' => 'get top student']);
 
             //Grades Reports
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/report/grader', 'title' => 'Grader Report']);
