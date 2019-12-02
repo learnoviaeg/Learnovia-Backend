@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\GradeItems;
 use App\ItemType;
 use DB;
+use Illuminate\Database\Eloquent\Collection;
 
 class GradeItemController extends Controller
 {
@@ -21,19 +22,21 @@ class GradeItemController extends Controller
     public function create(Request $request)
     {
         $request->validate([
+            'name' => 'nullable|string',
+            'override' => 'nullable|boolean',
             'grade_category' => 'required|exists:grade_categories,id',
             'grademin' => 'required|integer',
             'grademax' => 'required|integer',
-            'calculation' => 'required|string',
+            'calculation' => 'nullable|string',
             'item_no' => 'nullable|integer',
-            'scale_id' => 'required|exists:scales,id',
+            'scale_id' => 'nullable|exists:scales,id',
             'grade_pass' => 'required|integer',
             'multifactor' => 'nullable|numeric|between:0,99.99',
             'plusfactor' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
-            'item_type' => 'required|exists:item_types,id',
-            'item_Entity' => 'required',
+            'item_type' => 'nullable|exists:item_types,id',
+            'item_Entity' => 'nullable',
             'hidden' => 'nullable|boolean'
         ]);
 
@@ -48,22 +51,68 @@ class GradeItemController extends Controller
             'aggregationcoef' => $request->aggregationcoef,
             'aggregationcoef2' => $request->aggregationcoef2,
             'item_type' => $request->item_type,
-            'item_Entity' => $request->item_Entity
+            'item_Entity' => $request->item_Entity,
+            'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
+            'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
+            'name' => (isset($request->name)) ? $request->name : 'Grade Item',
+            'override' => (isset($request->override)) ? $request->override : 0,
+            'plusfactor' => (isset($request->plusfactor)) ? $request->plusfactor : 1,
         ];
-        if (isset($request->multifactor)) {
-            $data['multifactor'] = $request->multifactor;
-        }
-        if (isset($request->plusfactor)) {
-            $data['plusfactor'] = $request->plusfactor;
-        }
-        if (isset($request->hidden)) {
-            $data['hidden'] = $request->hidden;
-        }
 
         $grade = GradeItems::create($data);
 
-        return HelperController::api_response_format(201, $grade, 'Grade Created Successfully');
+        return HelperController::api_response_format(201, $grade, 'Grade item Created Successfully');
+    }
 
+    public function AddBulk(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.name' => 'string',
+            'items.*.override' => 'boolean',
+            'items.*.grade_category' => 'required|exists:grade_categories,id',
+            'items.*.grademin' => 'required|integer',
+            'items.*.grademax' => 'required|integer',
+            'items.*.calculation' => 'string',
+            'items.*.item_no' => 'integer',
+            'items.*.scale_id' => 'exists:scales,id',
+            'items.*.grade_pass' => 'required|integer',
+            'items.*.multifactor' => 'numeric|between:0,99.99',
+            'items.*.plusfactor' => 'numeric|between:0,99.99',
+            'items.*.aggregationcoef' => 'numeric|between:0,99.99',
+            'items.*.aggregationcoef2' => 'numeric|between:0,99.99',
+            'items.*.item_type' => 'exists:item_types,id',
+            'items.*.item_Entity' => 'nullable',
+            'items.*.hidden' => 'boolean'
+        ]);
+
+        $items=collect($request->items);
+        $grade_cat=$items->pluck('grade_category');
+        foreach($grade_cat as $grade)
+        {
+            foreach($items as $item)
+            {
+                $x = GradeItems::create([
+                    'grade_category' => $grade,
+                    'grademin' => $item['grademin'],
+                    'grademax' => $item['grademax'],
+                    'grade_pass' => $item['grade_pass'],
+                    'name' => (isset($item['name'])) ? $item['name'] : 'Grade Item',
+                    'override' => (isset($item['override'])) ? $item['override'] : 0,
+                    'item_Entity' => (isset($item['item_Entity'])) ? $item['item_Entity'] : null,
+                    'item_type' => (isset($item['item_type'])) ? $item['item_type'] : null,
+                    'aggregationcoef2' => (isset($item['aggregationcoef2'])) ? $item['aggregationcoef2'] : null,
+                    'aggregationcoef' => (isset($item['aggregationcoef'])) ? $item['aggregationcoef'] : null,
+                    'plusfactor' => (isset($item['plusfactor'])) ? $item['plusfactor'] : 1,
+                    'multifactor' => (isset($item['multifactor'])) ? $item['multifactor'] : 1,
+                    'calculation' => (isset($item['calculation'])) ? $item['calculation'] : null,
+                    'hidden' => (isset($item['hidden'])) ? $item['hidden'] : 0,
+                    'item_no' => (isset($item['item_no'])) ? $item['item_no']: null,
+                    'scale_id' => (isset($item['scale_id'])) ? $item['scale_id']: null,
+                ]);
+            }
+        }
+        return HelperController::api_response_format(200, null, 'Grade items are created successfully');
     }
 
     /**

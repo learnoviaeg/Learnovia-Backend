@@ -259,6 +259,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('grading-method', 'GradeItemController@gradeing_method');//->name('gradingmethod')->middleware('permission:grade/item/grading-method');
         Route::post('move-category', 'GradeItemController@Move_Category')->name('movecategory')->middleware('permission:grade/item/move-category');
         Route::post('override', 'GradeItemController@override');//->name('overridegradeitem')->middleware('permission:grade/item/override');
+        Route::post('AddBulk', 'GradeItemController@AddBulk')->name('AddBulkgradeitem')->middleware('permission:grade/item/AddBulk');
     });
 
     Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {

@@ -39,7 +39,11 @@ class GradeCategoryController extends Controller
             'parent' => 'exists:grade_categories,id',
             'aggregation' => 'integer',
             'aggregatedOnlyGraded' => 'integer',
-            'hidden' => 'integer'
+            'hidden' => 'integer',
+            'grademin' => 'required_if:type,==,1|integer',
+            'grademax' => 'required_if:type,==,1|integer',
+            'type' => 'boolean|required',
+            'exclude_flag' => 'boolean'
         ]);
         $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (isset($course_segment_id)) {
@@ -50,11 +54,12 @@ class GradeCategoryController extends Controller
                 'aggregation' => $request->aggregation,
                 'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
                 'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
+                'grademax' => ($request->type==1) ? $request->grademax : null,
+                'grademin' => ($request->type==1) ? $request->grademin : null,
+                'type' => $request->type,
+                'exclude_flag' => (isset($request->exclude_flag)) ? $request->exclude_flag : 0
             ]);
-            /* if($request->filled('hidden')){
-                 $grade_category->hidden = $request->hidden;
-                 $grade_category->save();
-             }*/
+
             return HelperController::api_response_format(200, $grade_category, 'Grade Category is created successfully');
         }
         return HelperController::api_response_format(404, null, 'this class didnot have course segment');
@@ -79,6 +84,10 @@ class GradeCategoryController extends Controller
             'grades.*.aggregation' => 'integer',
             'grades.*.aggregatedOnlyGraded' => 'boolean',
             'grades.*.hidden' => 'boolean',
+            'grades.*.grademin' => 'required_if:grades.*.type,==,1|integer',
+            'grades.*.grademax' => 'required_if:grades.*.type,==,1|integer',
+            'grades.*.type' => 'boolean|required',
+            'grades.*.exclude_flag' => 'boolean'
         ]);
         $jop = (new \App\Jobs\addgradecategory($this->getCourseSegment($request), $request->grades));
         dispatch($jop);
@@ -142,7 +151,11 @@ class GradeCategoryController extends Controller
             'parent' => 'exists:grade_categories,id',
             'aggregation' => 'integer',
             'aggregatedOnlyGraded' => 'integer',
-            'hidden' => 'integer'
+            'hidden' => 'integer',
+            'grademin' => 'required_if:type,==,1|integer',
+            'grademax' => 'required_if:type,==,1|integer',
+            'type' => 'boolean|required',
+            'exclude_flag' => 'boolean'
         ]);
         $grade_category = GradeCategory::find($request->id);
         $grade_category->name = $request->name;
@@ -152,6 +165,14 @@ class GradeCategoryController extends Controller
         $grade_category->parent = $request->parent;
         if ($request->filled('hidden')) {
             $grade_category->hidden = $request->hidden;
+        }
+        if ($request->filled('exclude_flag')) {
+            $grade_category->exclude_flag = $request->exclude_flag;
+        }
+        if(isset($request->type) && $request->type==1)
+        {
+            $grade_category->grademin = $request->grademin;
+            $grade_category->grademax = $request->grademax;
         }
         $grade_category->save();
         return HelperController::api_response_format(200, $grade_category, 'Grade Category is updated successfully');
@@ -318,7 +339,6 @@ class GradeCategoryController extends Controller
         $data = array();
         $course_segment = self::getCourseSegment($request);
         if (isset($course_segment)) {
-
             GradeCategory::whereIn('course_segment_id', $course_segment)->where('name', $request->name)->where('id_number', $request->id_number)->update(array('name' => $request->newname));
             $data = GradeCategory::whereIn('course_segment_id', $course_segment)->where('name', $request->newname)->where('id_number', $request->id_number)->get();
             return HelperController::api_response_format(200, $data, 'Updated Grade categories');
