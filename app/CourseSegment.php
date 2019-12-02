@@ -101,4 +101,11 @@ class CourseSegment extends Model
         ->where('course_segments.is_active' , '=' , 1)
         ->first(['course_segments.id' , 'course_segments.course_id']);
     }
+    public static function GetWithClass($class_id ){
+        return CourseSegment::Join('segment_classes' , 'segment_classes.id' , 'course_segments.segment_class_id')
+            ->Join('class_levels' , 'class_levels.id' , 'segment_classes.class_level_id')
+            ->where('class_levels.class_id' , '=' , $class_id)
+            ->where('course_segments.is_active' , '=' , 1)
+            ->first(['course_segments.id' , 'course_segments.course_id']);
+    }
 }
