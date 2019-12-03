@@ -836,7 +836,14 @@ class SpatieController extends Controller
                 'permission_id' => 'required|exists:permissions,id',
             ]);
             $permission = Permission::findById($request->permission_id);
-            $permission->dashboard = ($permission->dashboard == 1) ? 0 : 1;
+
+            if($permission->dashboard == 1) {
+                $permission->dashboard =0;
+            }  elseif(isset($permission->front_route)){
+                $permission->dashboard =1;
+            }else{
+                return HelperController::api_response_format(400, null, 'Please Try again this permissions doesn\'t have front url');
+            }
             $permission->save();
             return HelperController::api_response_format(200, $permission, 'Toggle Successfully');
         } catch (Exception $ex) {
