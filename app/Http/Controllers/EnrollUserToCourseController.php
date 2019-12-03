@@ -402,9 +402,9 @@ class EnrollUserToCourseController extends Controller
             'users.*' => 'required|string|exists:users,id',
             'role_id' => 'required|array|exists:roles,id',
             'year' => 'exists:academic_years,id',
-            'type' => 'exists:academic_types,id',
-            'level' => 'exists:levels,id|required_with:type',
-            'class' => 'exists:classes,id|required_with:level',
+            'type' => 'exists:academic_types,id|required_with:level',
+            'level' => 'exists:levels,id|required_with:class',
+            'class' => 'exists:classes,id',
             'segment' => 'exists:segments,id',
             'courses' => 'array|exists:courses,id'
         ]);

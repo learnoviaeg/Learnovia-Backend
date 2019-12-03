@@ -4,9 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\GradeItems;
+use App\CourseSegment;
+use App\GradeCategory;
 use App\ItemType;
+use App\YearLevel;
+use App\AcademicType;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
+use stdClass;
+
 
 class GradeItemController extends Controller
 {
@@ -40,6 +46,9 @@ class GradeItemController extends Controller
             'hidden' => 'nullable|boolean'
         ]);
 
+        $id_number=GradeCategory::find($request->grade_category);
+        // return $id_number;
+
         $data = [
             'grade_category' => $request->grade_category,
             'grademin' => $request->grademin,
@@ -51,6 +60,7 @@ class GradeItemController extends Controller
             'aggregationcoef' => $request->aggregationcoef,
             'aggregationcoef2' => $request->aggregationcoef2,
             'item_type' => $request->item_type,
+            'id_number' => $id_number->id_number,
             'item_Entity' => $request->item_Entity,
             'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
@@ -70,7 +80,7 @@ class GradeItemController extends Controller
             'items' => 'required|array',
             'items.*.name' => 'string',
             'items.*.override' => 'boolean',
-            'items.*.grade_category' => 'required|exists:grade_categories,id',
+            'items.*.grade_category' => 'required|exists:grade_categories,name',
             'items.*.grademin' => 'required|integer',
             'items.*.grademax' => 'required|integer',
             'items.*.calculation' => 'string',
@@ -83,36 +93,89 @@ class GradeItemController extends Controller
             'items.*.aggregationcoef2' => 'numeric|between:0,99.99',
             'items.*.item_type' => 'exists:item_types,id',
             'items.*.item_Entity' => 'nullable',
-            'items.*.hidden' => 'boolean'
+            'items.*.hidden' => 'boolean',
+            'year' => 'nullable|exists:academic_years,id',
+            'level'=> 'nullable|exists:levels,id',
+            'type' => 'nullable|exists:academic_types,id',
+            'segment' => 'exists:segments,id',
+            'class' => 'exists:classes,id',
+            'courses' => 'array|exists:courses,id'
         ]);
 
-        $items=collect($request->items);
-        $grade_cat=$items->pluck('grade_category');
-        foreach($grade_cat as $grade)
-        {
-            foreach($items as $item)
-            {
-                $x = GradeItems::create([
-                    'grade_category' => $grade,
-                    'grademin' => $item['grademin'],
-                    'grademax' => $item['grademax'],
-                    'grade_pass' => $item['grade_pass'],
-                    'name' => (isset($item['name'])) ? $item['name'] : 'Grade Item',
-                    'override' => (isset($item['override'])) ? $item['override'] : 0,
-                    'item_Entity' => (isset($item['item_Entity'])) ? $item['item_Entity'] : null,
-                    'item_type' => (isset($item['item_type'])) ? $item['item_type'] : null,
-                    'aggregationcoef2' => (isset($item['aggregationcoef2'])) ? $item['aggregationcoef2'] : null,
-                    'aggregationcoef' => (isset($item['aggregationcoef'])) ? $item['aggregationcoef'] : null,
-                    'plusfactor' => (isset($item['plusfactor'])) ? $item['plusfactor'] : 1,
-                    'multifactor' => (isset($item['multifactor'])) ? $item['multifactor'] : 1,
-                    'calculation' => (isset($item['calculation'])) ? $item['calculation'] : null,
-                    'hidden' => (isset($item['hidden'])) ? $item['hidden'] : 0,
-                    'item_no' => (isset($item['item_no'])) ? $item['item_no']: null,
-                    'scale_id' => (isset($item['scale_id'])) ? $item['scale_id']: null,
-                ]);
-            }
-        }
+        $jop = (new \App\Jobs\AddGradeItemJob($request->items,GradeCategoryController::getCourseSegment($request)));
+        dispatch($jop);
         return HelperController::api_response_format(200, null, 'Grade items are created successfully');
+    }
+
+    public function AssignBulk(Request $request)
+    {
+        $request->validate([
+            'item_name' => 'required|exists:grade_items,name',
+            'grade_category_name' => 'required|exists:grade_categories,name',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:level',
+            'level' => 'exists:levels,id|required_with:class',
+            'class' => 'exists:classes,id',
+            'segment' => 'exists:segments,id',
+            'courses' => 'array|exists:courses,id'
+        ]);
+
+        $coursesegment=GradeCategoryController::getCourseSegment($request);
+        if(!$coursesegment)
+            return HelperController::api_response_format(200, 'There is No Course segment available.');
+            
+        // return $coursesegment;
+        foreach($coursesegment as $courseseg)
+        {
+                // $year_level_tree=CourseSegment::where('id',$courseseg)->with(['segmentClasses.classLevel.yearLevels' => function ($query) use ($request){
+                //     $query->pluck('id')->first();
+                // }])->get();
+                $segclass=CourseSegment::find($courseseg)->segmentClasses;
+                $classlevel=$segclass[0]->classLevel;
+                $year_level= $classlevel[0]->yearLevels;
+                $gradeitem=GradeItems::where('name',$request->item_name)->first();
+                $gradecat=GradeCategory::where('name',$request->grade_category_name)->where('course_segment_id',$courseseg)->pluck('id')->first();
+                if($gradecat)
+                {
+                    $grade_category[] = GradeItems::firstOrCreate([
+                        'grade_category' => $gradecat,
+                        'grademin' => $gradeitem->grademin,
+                        'grademax' => $gradeitem->grademax,
+                        'calculation' => $gradeitem->calculation,
+                        'item_no' => $gradeitem->item_no,
+                        'scale_id' => $gradeitem->scale_id,
+                        'grade_pass' => $gradeitem->grade_pass,
+                        'aggregationcoef' => $gradeitem->aggregationcoef,
+                        'aggregationcoef2' => $gradeitem->aggregationcoef2,
+                        'item_type' => $gradeitem->item_type,
+                        'id_number' => $gradeitem->id_number,
+                        'item_Entity' => $gradeitem->item_Entity,
+                        'hidden' => $gradeitem->hidden,
+                        'multifactor' => $gradeitem->multifactor,
+                        'name' =>  $gradeitem->name ,
+                        'override' => $gradeitem->override ,
+                        'plusfactor' => $gradeitem->plusfactor ,
+                        'id_number' =>  $year_level[0]->id
+                    ]); 
+                }
+        }
+        return HelperController::api_response_format(200, $grade_category,'Grade Item Assigned.');
+
+    }
+
+
+    public function deleteBulkGradeitems(Request $request)
+    {
+        $request->validate([
+            'id' => 'nullable|exists:year_levels,id',
+            'name' => 'required|exists:grade_items,name',
+        ]);
+        $gradeItem = GradeItems::whereNotNull('id_number');
+        if($request->filled('id'))
+            $gradeItem->where('id_number', $request->id);
+        $gradeItem->where('name', $request->name);
+        $gradeItem->delete();
+        return HelperController::api_response_format(200, null, 'Grade Items is deleted successfully');
     }
 
     /**
@@ -207,6 +270,24 @@ class GradeItemController extends Controller
     {
         $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale'])->get();
         return HelperController::api_response_format(200, $grade);
+    }
+
+    public function GetAllGradeItems(Request $request)
+    {
+        $result = [];
+        $gradeItems = GradeItems::whereNotNull('id_number')->get();
+        foreach ($gradeItems as $item) {
+            if (!isset($result[$item->name])) {
+                $result[$item->name] = $item;
+                $result[$item->name]->levels = collect();
+            }
+            $temp = new stdClass();
+            $temp->name = YearLevel::find($item->id_number)->levels[0]->name;
+            $temp->id = $item->id_number;
+            if (!$result[$item->name]->levels->contains($temp))
+                $result[$item->name]->levels->push($temp);
+        }
+        return HelperController::api_response_format(200, $result);
     }
 
     /**

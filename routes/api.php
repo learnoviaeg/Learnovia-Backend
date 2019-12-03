@@ -258,12 +258,16 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'item', 'middleware' => 'auth:api'], function () {
         Route::post('add', 'GradeItemController@create')->name('addgrade')->middleware('permission:grade/item/add');
         Route::get('get', 'GradeItemController@list')->name('getgrade')->middleware('permission:grade/item/get');
+        Route::get('get-bulk', 'GradeItemController@GetAllGradeItems')->name('getbulkgrade')->middleware('permission:grade/item/get-bulk');
         Route::post('delete', 'GradeItemController@delete')->name('deletegrade')->middleware('permission:grade/item/delete');
         Route::post('update', 'GradeItemController@update')->name('updategrade')->middleware('permission:grade/item/update');
-        Route::post('grading-method', 'GradeItemController@gradeing_method');//->name('gradingmethod')->middleware('permission:grade/item/grading-method');
+        Route::post('grading-method', 'GradeItemController@gradeing_method')->name('gradingmethod')->middleware('permission:grade/item/grading-method');
         Route::post('move-category', 'GradeItemController@Move_Category')->name('movecategory')->middleware('permission:grade/item/move-category');
-        Route::post('override', 'GradeItemController@override');//->name('overridegradeitem')->middleware('permission:grade/item/override');
+        Route::post('override', 'GradeItemController@override')->name('overridegradeitem')->middleware('permission:grade/item/override');
         Route::post('AddBulk', 'GradeItemController@AddBulk')->name('AddBulkgradeitem')->middleware('permission:grade/item/AddBulk');
+        Route::post('bulk-delete', 'GradeItemController@deleteBulkGradeitems')->middleware('permission:grade/item/bulk-delete');
+        Route::post('bulk-assign', 'GradeItemController@AssignBulk')->middleware('permission:grade/item/bulk-assign');
+
     });
 
     Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
