@@ -148,7 +148,6 @@ class GradeItemController extends Controller
                         'aggregationcoef' => $gradeitem->aggregationcoef,
                         'aggregationcoef2' => $gradeitem->aggregationcoef2,
                         'item_type' => $gradeitem->item_type,
-                        'id_number' => $gradeitem->id_number,
                         'item_Entity' => $gradeitem->item_Entity,
                         'hidden' => $gradeitem->hidden,
                         'multifactor' => $gradeitem->multifactor,
