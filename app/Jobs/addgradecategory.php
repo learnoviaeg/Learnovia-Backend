@@ -42,8 +42,8 @@ class addgradecategory implements ShouldQueue
                     'parent' => (isset($grade_cat['parent'])) ? $grade_cat['parent'] : null,
                     'aggregation' => (isset($grade_cat['aggregation'])) ? $grade_cat['aggregation'] : null,
                     'aggregatedOnlyGraded' => (isset($grade_cat['aggregatedOnlyGraded'])) ? $grade_cat['aggregatedOnlyGraded'] : 0,
-                    'exclude_flag' => (isset($grade_cat['exclude_flag'])) ? $grade_cat['exclude_flag '] : 0,
-                    'hidden' => (isset($grade_cat['hidden'])) ? $grade_cat['hidden '] : 0,
+                    'exclude_flag' => (isset($grade_cat['exclude_flag'])) ? $grade_cat['exclude_flag'] : 0,
+                    'hidden' => (isset($grade_cat['hidden'])) ? $grade_cat['hidden'] : 0,
                     'id_number' => (isset($course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id)) ? $course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id : null,
                 ]);
             }
