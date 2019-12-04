@@ -266,6 +266,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('override', 'GradeItemController@override')->name('overridegradeitem')->middleware('permission:grade/item/override');
         Route::post('AddBulk', 'GradeItemController@AddBulk')->name('AddBulkgradeitem')->middleware('permission:grade/item/AddBulk');
         Route::post('bulk-delete', 'GradeItemController@deleteBulkGradeitems')->middleware('permission:grade/item/bulk-delete');
+        Route::post('bulk-update', 'GradeItemController@bulkupdate')->middleware('permission:grade/item/bulk-update');
         Route::post('bulk-assign', 'GradeItemController@AssignBulk')->middleware('permission:grade/item/bulk-assign');
 
     });

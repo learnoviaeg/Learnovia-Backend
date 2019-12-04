@@ -6,11 +6,7 @@ use Illuminate\Http\Request;
 use App\GradeItems;
 use App\CourseSegment;
 use App\GradeCategory;
-use App\ItemType;
 use App\YearLevel;
-use App\AcademicType;
-use DB;
-use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
 
@@ -239,6 +235,89 @@ class GradeItemController extends Controller
 
         return HelperController::api_response_format(200, $grade, 'Grade Updated Successfully');
 
+    }
+
+    
+    /**
+     * bulk update grade
+     *
+     * @param  [string] name
+     * @param  [int] id_number
+     * @param  [string] newname
+     * @param  [int] year
+     * @param  [int] type
+     * @param  [int] level
+     * @param  [int] class
+     * @param  [int] course
+     * @param  [int] segment
+     * @return [object] Updated Grade items
+     */
+    public function bulkupdate(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|exists:grade_items,name',
+            'newname' => 'required|string',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:level',
+            'level' => 'exists:levels,id|required_with:class',
+            'class' => 'exists:classes,id',
+            'segment' => 'exists:segments,id',
+            'courses' => 'array|exists:courses,id',
+            'override' => 'nullable|boolean',
+            'grade_category' => 'nullable|exists:grade_categories,id',
+            'grademin' => 'required|integer',
+            'grademax' => 'required|integer',
+            'calculation' => 'nullable|string',
+            'item_no' => 'nullable|integer',
+            'scale_id' => 'nullable|exists:scales,id',
+            'grade_pass' => 'nullable|integer',
+            'multifactor' => 'nullable|numeric|between:0,99.99',
+            'plusfactor' => 'nullable|numeric|between:0,99.99',
+            'aggregationcoef' => 'nullable|numeric|between:0,99.99',
+            'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
+            'item_type' => 'nullable|exists:item_types,id',
+            'item_Entity' => 'nullable',
+            'hidden' => 'nullable|boolean'
+        ]);
+
+        $grade_category=[];
+        $course_segment = GradeCategoryController::getCourseSegment($request);
+        if (isset($course_segment)) {
+                foreach($course_segment as $course)
+                {
+                    $segclass=CourseSegment::find($course)->segmentClasses;
+                    $classlevel=$segclass[0]->classLevel;
+                    $year_level= $classlevel[0]->yearLevels;
+                    $gradeCat=GradeItems::where('name',$request->name)->whereNotNull('id_number')->first();
+                    // return $gradeCat;
+
+                    if(isset($gradeCat))
+                    {
+                        $gradeCat->update([
+                            'grade_category' => (isset($request->grade_category)) ? $request->grade_category : $gradeCat->grade_category,
+                            'grademin' => (isset($request->grademin)) ? $request->grademin : $gradeCat->grademin,
+                            'grademax' => (isset($request->grademax)) ? $request->grademax : $gradeCat->grademax,
+                            'calculation' => (isset($request->calculation)) ? $request->calculation : $gradeCat->calculation,
+                            'item_no' => (isset($request->item_no)) ? $request->item_no : $gradeCat->item_no,
+                            'scale_id' => (isset($request->scale_id)) ? $request->scale_id : $gradeCat->scale_id,
+                            'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : $gradeCat->grade_pass,
+                            'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : $gradeCat->aggregationcoef,
+                            'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : $gradeCat->aggregationcoef2,
+                            'item_type' => (isset($request->item_type)) ? $request->item_type : $gradeCat->item_type,
+                            'id_number' => $year_level[0]->id,
+                            'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : $gradeCat->item_Entity,
+                            'hidden' => (isset($request->hidden)) ? $request->hidden : $gradeCat->hidden,
+                            'multifactor' => (isset($request->multifactor)) ? $request->multifactor : $gradeCat->item_Entity,
+                            'name' => $request->newname,
+                            'override' => (isset($request->override)) ? $request->override : $gradeCat->override,
+                            'plusfactor' => (isset($request->plusfactor)) ? $request->plusfactor : $gradeCat->plusfactor,
+                        ]); 
+                    }
+                }                
+            return HelperController::api_response_format(200, 'Grade categories updated');
+        } else {
+            return HelperController::api_response_format(200, 'There is No Course segment available.');
+        }
     }
 
     /**

@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class GradeItems extends Model
 {
-    protected $fillable = ['grade_category','grademin','grademax','calculation','item_no','scale_id','grade_pass','multifactor','plusfactor','aggregationcoef','aggregationcoef2','item_type','item_Entity','hidden','override','id_number'];
+    protected $fillable = ['grade_category','grademin','grademax','calculation','item_no','scale_id','grade_pass','multifactor',
+        'plusfactor','aggregationcoef','aggregationcoef2','item_type','name','item_Entity','hidden','override','id_number'];
 
     public function GradeCategory()
     {
