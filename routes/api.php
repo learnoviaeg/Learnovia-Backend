@@ -243,6 +243,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
 
     Route::group(['prefix' => 'category', 'middleware' => 'auth:api'], function () {
         Route::post('add', 'GradeCategoryController@AddGradeCategory')->middleware('permission:grade/category/add');
+        Route::post('assign-bulk', 'GradeCategoryController@AssignBulkGradeCategory');//->middleware('permission:grade/category/assign-bulk');
         Route::post('bulk', 'GradeCategoryController@addBulkGradeCategories')->middleware('permission:grade/category/bulk');
         Route::post('bulk-delete', 'GradeCategoryController@deleteBulkGradeCategories')->middleware('permission:grade/category/bulk-delete');
         Route::get('get', 'GradeCategoryController@GetGradeCategory')->middleware('permission:grade/category/get');
