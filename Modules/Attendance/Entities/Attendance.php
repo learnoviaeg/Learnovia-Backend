@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Attendance extends Model
 {
-    protected $fillable = ['name','type','grade'];
+    protected $fillable = ['name','type','graded','allowed_courses','allowed_classes','allowed_levels'];
 
     public function session()
     {

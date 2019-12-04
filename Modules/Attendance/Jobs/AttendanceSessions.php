@@ -53,7 +53,7 @@ class Attendance_sessions implements ShouldQueue
             case 1 :
                 foreach ($this->course_segments as $courseSegment) {
                     foreach ($alldays as $day) {
-                        $AttendanceSessions[] = AttendanceSession::create(['attendance_id' => $this->request['attendance_id'],
+                            $AttendanceSessions[] = AttendanceSession::create(['attendance_id' => $this->request['attendance_id'],
                             'taker_id' => $this->user_id,
                             'date' => $day,
                             'course_segment_id' => $courseSegment
