@@ -116,7 +116,7 @@ class MediaController extends Controller
                 'description' => 'string|min:1',
                 'Imported_file' => 'required|array',
                 'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc',
-                'lesson_id' => 'required|integer|exists:lessons,id',
+                'lesson_id' => 'required|array|exists:lessons,id',
                 //'year' => 'required|integer|exists:academic_years,id',
                 //'type' => 'required|integer|exists:academic_types,id',
                 //'level' => 'required|integer|exists:levels,id',
@@ -185,69 +185,71 @@ class MediaController extends Controller
             //     }
             // }
 
-            foreach ($request->Imported_file as $singlefile) {
-                $extension = $singlefile->getClientOriginalExtension();
+            foreach($request->lesson_id as $lesson)
+            {
+                foreach ($request->Imported_file as $singlefile) {
+                    $extension = $singlefile->getClientOriginalExtension();
 
-                $fileName = $singlefile->getClientOriginalName();
-                $size = $singlefile->getSize();
-                $description = $request->description;
+                    $fileName = $singlefile->getClientOriginalName();
+                    $size = $singlefile->getSize();
+                    $description = $request->description;
 
-                $name = uniqid() . '.' . $extension;
+                    $name = uniqid() . '.' . $extension;
 
-                $file = new media;
-                $file->type = $extension;
-                $file->name = $name;
-                $file->description = $description;
-                $file->size = $size;
-                $file->attachment_name = $fileName;
-                $file->user_id = Auth::user()->id;
-                $file->link = url('public/storage/media/' . $request->lesson_id . '/' . $name);
-                $check = $file->save();
-                $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
-                $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
-                User::notify([
-                    'message' => 'This media is added',
-                    'from' => Auth::user()->id,
-                    'users' => $usersIDs,
-                    'course_id' => $courseID,
-                    'type' => 'media',
-                    'publish_date' => $publishdate,
-                ]);
-
-                if ($check) {
-                    $filesegment = new MediaCourseSegment;
-                    $filesegment->course_segment_id = $activeCourseSegments->id;
-                    $filesegment->media_id = $file->id;
-                    $filesegment->save();
-                    $maxIndex = MediaLesson::where('lesson_id', $request->lesson_id)->max('index');
-                    if ($maxIndex == null) {
-                        $newIndex = 1;
-                    } else {
-                        $newIndex = ++$maxIndex;
-                    }
-
-                    $fileLesson = new MediaLesson;
-                    $fileLesson->lesson_id = $request->lesson_id;
-                    $fileLesson->media_id = $file->id;
-                    $fileLesson->index = $newIndex;
-                    $fileLesson->publish_date = $publishdate;
-
-                    $fileLesson->save();
-                    LessonComponent::create([
-                        'lesson_id' => $fileLesson->lesson_id,
-                        'comp_id'   => $fileLesson->media_id,
-                        'module'    => 'UploadFiles',
-                        'model'     => 'media',
-                        'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                    $file = new media;
+                    $file->type = $extension;
+                    $file->name = $name;
+                    $file->description = $description;
+                    $file->size = $size;
+                    $file->attachment_name = $fileName;
+                    $file->user_id = Auth::user()->id;
+                    $file->link = url('public/storage/media/' . $lesson . '/' . $name);
+                    $check = $file->save();
+                    $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
+                    $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
+                    User::notify([
+                        'message' => 'This media is added',
+                        'from' => Auth::user()->id,
+                        'users' => $usersIDs,
+                        'course_id' => $courseID,
+                        'type' => 'media',
+                        'publish_date' => $publishdate,
                     ]);
-                    Storage::disk('public')->putFileAs(
-                        'media/' . $request->lesson_id ,
-                        $singlefile,
-                        $name
-                    );
+
+                    if ($check) {
+                        $filesegment = new MediaCourseSegment;
+                        $filesegment->course_segment_id = $activeCourseSegments->id;
+                        $filesegment->media_id = $file->id;
+                        $filesegment->save();
+                        $maxIndex = MediaLesson::where('lesson_id', $lesson)->max('index');
+                        if ($maxIndex == null) {
+                            $newIndex = 1;
+                        } else {
+                            $newIndex = ++$maxIndex;
+                        }
+
+                        $fileLesson = new MediaLesson;
+                        $fileLesson->lesson_id = $lesson;
+                        $fileLesson->media_id = $file->id;
+                        $fileLesson->index = $newIndex;
+                        $fileLesson->publish_date = $publishdate;
+
+                        $fileLesson->save();
+                        LessonComponent::create([
+                            'lesson_id' => $fileLesson->lesson_id,
+                            'comp_id'   => $fileLesson->media_id,
+                            'module'    => 'UploadFiles',
+                            'model'     => 'media',
+                            'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                        ]);
+                        Storage::disk('public')->putFileAs(
+                            'media/' . $lesson ,
+                            $singlefile,
+                            $name
+                        );
+                    }
                 }
             }
-
             return HelperController::api_response_format(200, $file, 'Upload Successfully');
         } catch (Exception $ex) {
             return HelperController::api_response_format(400, null, 'Please Try again');
@@ -417,7 +419,7 @@ class MediaController extends Controller
                 'name' => 'nullable|string|max:130',
                 'description' => 'nullable|string|min:1',
                 'url' => 'required|active_url',
-                'lesson_id' => 'required|integer|exists:lessons,id',
+                'lesson_id' => 'required|array|exists:lessons,id',
                 'attachment_name' => 'required|string|max:190',
                 //'year' => 'required|integer|exists:academic_years,id',
                 //'type' => 'required|integer|exists:academic_types,id',
@@ -480,36 +482,38 @@ class MediaController extends Controller
             //         return HelperController::api_response_format(400, null, 'No Class active in segment');
             //     }
             // }
+            foreach($request->lesson_id as $lesson)
+            {
+                $file = new media;
+                $file->name = $request->name;
+                $file->description = $request->description;
+                $file->link = $request->url;
+                $file->attachment_name = $request->attachment_name;
+                $file->user_id = Auth::user()->id;
+                $check = $file->save();
 
-            $file = new media;
-            $file->name = $request->name;
-            $file->description = $request->description;
-            $file->link = $request->url;
-            $file->attachment_name = $request->attachment_name;
-            $file->user_id = Auth::user()->id;
-            $check = $file->save();
-
-            if ($check) {
-                    $filesegment = new MediaCourseSegment;
-                    $filesegment->course_segment_id = $activeCourseSegments->id;
-                    $filesegment->media_id = $file->id;
-                    $filesegment->save();
+                if ($check) {
+                        $filesegment = new MediaCourseSegment;
+                        $filesegment->course_segment_id = $activeCourseSegments->id;
+                        $filesegment->media_id = $file->id;
+                        $filesegment->save();
 
 
-                $maxIndex = MediaLesson::where('lesson_id', $request->lesson_id)->max('index');
+                    $maxIndex = MediaLesson::where('lesson_id', $lesson)->max('index');
 
-                if ($maxIndex == null) {
-                    $newIndex = 1;
-                } else {
-                    $newIndex = ++$maxIndex;
+                    if ($maxIndex == null) {
+                        $newIndex = 1;
+                    } else {
+                        $newIndex = ++$maxIndex;
+                    }
+
+                    $fileLesson = new MediaLesson;
+                    $fileLesson->lesson_id = $lesson;
+                    $fileLesson->media_id = $file->id;
+                    $fileLesson->index = $newIndex;
+                    $fileLesson->publish_date = Carbon::now();
+                    $fileLesson->save();
                 }
-
-                $fileLesson = new MediaLesson;
-                $fileLesson->lesson_id = $request->lesson_id;
-                $fileLesson->media_id = $file->id;
-                $fileLesson->index = $newIndex;
-                $fileLesson->publish_date = Carbon::now();
-                $fileLesson->save();
             }
 
             return HelperController::api_response_format(200, $file, 'Link added Successfully');

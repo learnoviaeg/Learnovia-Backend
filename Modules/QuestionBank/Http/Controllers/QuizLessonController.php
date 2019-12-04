@@ -66,7 +66,7 @@ class QuizLessonController extends Controller
     {
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
-            'lesson_id' => 'required|integer|exists:lessons,id',
+            'lesson_id' => 'required|array|exists:lessons,id',
             'opening_time' => 'required|date|date_format:Y-m-d H:i:s',
             'closing_time' => 'required|date|date_format:Y-m-d H:i:s|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
@@ -80,58 +80,62 @@ class QuizLessonController extends Controller
         ]);
 
         $quiz = quiz::find($request->quiz_id);
-        $lesson = Lesson::find($request->lesson_id);
-        $gradeCats= $lesson->courseSegment->GradeCategory;
-        $flag= false;
-        foreach ($gradeCats as $grade){
-            if($grade->id==$request->grade_category_id){
-                $flag =true;
+        foreach ($request->lesson_id as $lessons)
+        {
+            $lesson = Lesson::find($lessons);
+            $gradeCats= $lesson->courseSegment->GradeCategory;
+            $flag= false;
+            foreach ($gradeCats as $grade){
+                if($grade->id==$request->grade_category_id){
+                    $flag =true;
+                }
             }
-        }
-        $coueseSegment = $lesson->courseSegment;
-        if($quiz->course_id != $coueseSegment->course_id){
-            return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
+            $course_Quiz=CourseSegment::where('id',$quiz->course_segment_id)->pluck('course_id')->first();
+            $coueseSegment = $lesson->courseSegment;
+            if($course_Quiz != $coueseSegment->course_id){
+                return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
+            }
+    
+            $check = QuizLesson::where('quiz_id',$request->quiz_id)
+                ->where('lesson_id',$request->quiz_id)->get();
+    
+            if(count($check) > 0){
+                return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
+            }
+            if($flag==false){
+                return HelperController::api_response_format(400, null,'this grade category invalid');
+    
+            }
+            $quizLesson[] = QuizLesson::create([
+                'quiz_id' => $request->quiz_id,
+                'lesson_id' => $lessons,
+                'start_date' => $request->opening_time,
+                'due_date' => $request->closing_time,
+                'max_attemp' => $request->max_attemp,
+                'grading_method_id' => $request->grading_method_id,
+                'grade' => $request->grade,
+                'grade_category_id' => $request->grade_category_id,
+                'publish_date' => $request->opening_time
+            ]);
+            $this->NotifyQuiz($quiz,$request->opening_time,'add');
+            $grade_category=GradeCategory::find($request->grade_category_id);
+            $grade_item = $grade_category->GradeItems()->create([
+                'grademin'=>$request->grade_min,
+                'grademax'=>$request->grade_max,
+                'scale_id'=>$request->scale_id,
+                'grade_pass'=>$request->grade_to_pass,
+                'item_type'=>1,
+                'item_Entity'=>$quizLesson[0]->id
+            ]);
+            LessonComponent::create([
+                'lesson_id' => $lessons,
+                'comp_id'   => $request->quiz_id,
+                'module'    => 'QuestionBank',
+                'model'     => 'quiz',
+                'index'     => LessonComponent::getNextIndex($lessons)
+            ]);
         }
 
-        $check = QuizLesson::where('quiz_id',$request->quiz_id)
-            ->where('lesson_id',$request->quiz_id)->get();
-
-        if(count($check) > 0){
-            return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
-        }
-        if($flag==false){
-            return HelperController::api_response_format(400, null,'this grade category invalid');
-
-        }
-        $quizLesson = QuizLesson::create([
-            'quiz_id' => $request->quiz_id,
-            'lesson_id' => $request->lesson_id,
-            'start_date' => $request->opening_time,
-            'due_date' => $request->closing_time,
-            'max_attemp' => $request->max_attemp,
-            'grading_method_id' => $request->grading_method_id,
-            'grade' => $request->grade,
-            'grade_category_id' => $request->grade_category_id,
-            'publish_date' => $request->opening_time
-        ]);
-
-        $this->NotifyQuiz($quiz,$request->opening_time,'add');
-        $grade_category=GradeCategory::find($request->grade_category_id);
-        $grade_item = $grade_category->GradeItems()->create([
-            'grademin'=>$request->grade_min,
-            'grademax'=>$request->grade_max,
-            'scale_id'=>$request->scale_id,
-            'grade_pass'=>$request->grade_to_pass,
-            'item_type'=>1,
-            'item_Entity'=>$quizLesson->id
-        ]);
-        LessonComponent::create([
-            'lesson_id' => $request->lesson_id,
-            'comp_id'   => $request->quiz_id,
-            'module'    => 'QuestionBank',
-            'model'     => 'quiz',
-            'index'     => LessonComponent::getNextIndex($request->lesson_id)
-        ]);
         return HelperController::api_response_format(200, $quizLesson,'Quiz added to lesson Successfully');
     }
 
