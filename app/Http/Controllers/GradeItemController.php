@@ -6,11 +6,7 @@ use Illuminate\Http\Request;
 use App\GradeItems;
 use App\CourseSegment;
 use App\GradeCategory;
-use App\ItemType;
 use App\YearLevel;
-use App\AcademicType;
-use DB;
-use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
 
@@ -29,14 +25,14 @@ class GradeItemController extends Controller
     {
         $request->validate([
             'name' => 'nullable|string',
-            'override' => 'nullable|boolean',
+            'weight' => 'nullable|boolean',
             'grade_category' => 'required|exists:grade_categories,id',
-            'grademin' => 'required|integer',
-            'grademax' => 'required|integer',
+            'grademin' => 'required|integer|min:0',
+            'grademax' => 'required|integer|min:grademin',
             'calculation' => 'nullable|string',
             'item_no' => 'nullable|integer',
             'scale_id' => 'nullable|exists:scales,id',
-            'grade_pass' => 'required|integer',
+            'grade_pass' => 'nullable|integer',
             'multifactor' => 'nullable|numeric|between:0,99.99',
             'plusfactor' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef' => 'nullable|numeric|between:0,99.99',
@@ -53,19 +49,19 @@ class GradeItemController extends Controller
             'grade_category' => $request->grade_category,
             'grademin' => $request->grademin,
             'grademax' => $request->grademax,
-            'calculation' => $request->calculation,
-            'item_no' => $request->item_no,
-            'scale_id' => $request->scale_id,
-            'grade_pass' => $request->grade_pass,
-            'aggregationcoef' => $request->aggregationcoef,
-            'aggregationcoef2' => $request->aggregationcoef2,
-            'item_type' => $request->item_type,
+            'calculation' => (isset($request->calculation)) ? $request->calculation : null,
+            'item_no' => (isset($request->item_no)) ? $request->item_no : null,
+            'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
+            'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : null,
+            'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
+            'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
+            'item_type' => (isset($request->item_type)) ? $request->item_type : null,
             'id_number' => $id_number->id_number,
-            'item_Entity' => $request->item_Entity,
+            'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : null,
             'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
             'name' => (isset($request->name)) ? $request->name : 'Grade Item',
-            'override' => (isset($request->override)) ? $request->override : 0,
+            'weight' => (isset($request->weight)) ? $request->weight : 0,
             'plusfactor' => (isset($request->plusfactor)) ? $request->plusfactor : 1,
         ];
 
@@ -79,24 +75,24 @@ class GradeItemController extends Controller
         $request->validate([
             'items' => 'required|array',
             'items.*.name' => 'string',
-            'items.*.override' => 'boolean',
+            'items.*.weight' => 'boolean',
             'items.*.grade_category' => 'required|exists:grade_categories,name',
-            'items.*.grademin' => 'required|integer',
-            'items.*.grademax' => 'required|integer',
-            'items.*.calculation' => 'string',
-            'items.*.item_no' => 'integer',
-            'items.*.scale_id' => 'exists:scales,id',
-            'items.*.grade_pass' => 'required|integer',
+            'items.*.grademin' => 'required|integer|min:0',
+            'items.*.grademax' => 'required|integer|min:grademin',
+            'items.*.calculation' => 'nullable|string',
+            'items.*.item_no' => 'nullable|integer',
+            'items.*.scale_id' => 'nullable|exists:scales,id',
+            'items.*.grade_pass' => 'nullable|integer',
             'items.*.multifactor' => 'numeric|between:0,99.99',
             'items.*.plusfactor' => 'numeric|between:0,99.99',
             'items.*.aggregationcoef' => 'numeric|between:0,99.99',
             'items.*.aggregationcoef2' => 'numeric|between:0,99.99',
-            'items.*.item_type' => 'exists:item_types,id',
+            'items.*.item_type' => 'nullable|exists:item_types,id',
             'items.*.item_Entity' => 'nullable',
             'items.*.hidden' => 'boolean',
-            'year' => 'nullable|exists:academic_years,id',
-            'level'=> 'nullable|exists:levels,id',
-            'type' => 'nullable|exists:academic_types,id',
+            'year' => 'exists:academic_years,id',
+            'level'=> 'exists:levels,id',
+            'type' => 'exists:academic_types,id',
             'segment' => 'exists:segments,id',
             'class' => 'exists:classes,id',
             'courses' => 'array|exists:courses,id'
@@ -152,7 +148,7 @@ class GradeItemController extends Controller
                         'hidden' => $gradeitem->hidden,
                         'multifactor' => $gradeitem->multifactor,
                         'name' =>  $gradeitem->name ,
-                        'override' => $gradeitem->override ,
+                        'weight' => $gradeitem->weight ,
                         'plusfactor' => $gradeitem->plusfactor ,
                         'id_number' =>  $year_level[0]->id
                     ]); 
@@ -196,8 +192,8 @@ class GradeItemController extends Controller
         $grade = GradeItems::find($request->id);
         $request->validate([
             'grade_category' => 'required|exists:grade_categories,id',
-            'grademin' => 'required|integer',
-            'grademax' => 'required|integer',
+            'grademin' => 'required|integer|min:0',
+            'grademax' => 'required|integer|min:grademin',
             'calculation' => 'required|string',
             'item_no' => 'nullable|integer',
             'scale_id' => 'required|exists:scales,id',
@@ -313,8 +309,8 @@ class GradeItemController extends Controller
         $request->validate([
             'id' => 'required|array',
             'id.*' => 'required|exists:grade_items,id',
-            'override' => 'required|array',
-            'override.*' => 'required|min:0|max:100',
+            'weight' => 'required|array',
+            'weight.*' => 'required|min:0|max:100',
         ]);
         $message = null ;
         $gradeCategory = GradeItems::whereIn('id' , $request->id)->groupBy('grade_category')->pluck('grade_category');
@@ -322,7 +318,7 @@ class GradeItemController extends Controller
             return HelperController::api_response_format(400 , null , 'This grade items not belong to the same grade category');
         foreach ($request->id as $index => $id) {
             $grade_item = GradeItems::find($id);
-            $grade_item->update(['override' => round($request->override[$index] , 3 )]);
+            $grade_item->update(['weight' => round($request->weight[$index] , 3 )]);
         }
         $grade_items = $grade_item->GradeCategory->GradeItems;
         $allWeight = 0;
@@ -339,7 +335,7 @@ class GradeItemController extends Controller
             $calculations=(100/ array_sum($devitions));
             $count=0;
             foreach ($grade_items as $grade_item) {
-                $grade_item->update(['override' =>round($devitions[$count]*$calculations , 3)]);
+                $grade_item->update(['weight' =>round($devitions[$count]*$calculations , 3)]);
                 $count++;
             }
         }

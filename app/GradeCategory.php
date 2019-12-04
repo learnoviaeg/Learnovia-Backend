@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name', 'course_segment_id', 'parent', 'aggregation', 
-                'aggregatedOnlyGraded', 'hidden', 'id_number' , 'override','type','grademin','exclude_flag','grademax'];
+    protected $fillable = ['name', 'course_segment_id', 'parent', 'aggregation', 'locked',
+                'aggregatedOnlyGraded', 'hidden', 'id_number' , 'weight','type','grademin','exclude_flag','grademax'];
     public function Child()
     {
         return $this->hasMany('App\GradeCategory', 'parent', 'id');
@@ -42,13 +42,13 @@ class GradeCategory extends Model
         $grade_items = $this->GradeItems;
         $result = 100;
         foreach ($grade_items as $Item) {
-            $result -=  $Item->override;
+            $result -=  $Item->weight;
         }
         return $result;
     }
     public function naturalTotal()
     {
-        $grade_items = $this->GradeItems->where('override', '!=', 0);
+        $grade_items = $this->GradeItems->where('weight', '!=', 0);
         $total = $this->total();
         foreach ($grade_items as $grades) {
             $total -= $grades->grademax;
@@ -71,8 +71,8 @@ class GradeCategory extends Model
 
     public function weight()
     {
-        if ($this->override != 0)
-            return $this->override;
+        if ($this->weight != 0)
+            return $this->weight;
         if (!$this->Parents)
             return 100;
         return round(($this->total() / $this->Parents->total()) * 100, 3);
