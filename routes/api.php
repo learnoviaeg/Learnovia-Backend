@@ -47,7 +47,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'roles'], function () {
         Route::post('add', 'SpatieController@Add_Role')->name('addrole')->middleware('permission:roles/add');
         Route::post('delete', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:roles/delete');
-        Route::post('assign-to-user', 'SpatieController@Assign_Role_to_user')->name('assignroletouser')->middleware('permission:roles/assign-to-user');
+        Route::post('assign-to-user', 'SpatieController@Assign_Role_to_user')->name('assignroletouser')->middleware('permission:roles/assign');
         Route::post('revoke-from-user', 'SpatieController@Revoke_Role_from_user')->name('revokerolefromuser')->middleware('permission:roles/revoke-from-user');
         Route::post('get', 'SpatieController@Get_Role')->name('getrolebyid')->middleware('permission:roles/get');
         Route::post('update', 'SpatieController@Update_Role')->name('updaterolebyid')->middleware('permission:roles/update');
@@ -191,7 +191,7 @@ Route::group(['prefix' => 'enroll', 'middleware' => 'auth:api'], function () {
     Route::post('enroll-single-user', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/enroll-single-user');
     Route::post('un-enroll-single-user', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
     Route::get('get-enrolled-courses', 'EnrollUserToCourseController@ViewAllCoursesThatUserEnrollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
-    Route::post('mandatory-course', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:enroll/mandatory-course');
+    Route::post('mandatory-course', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:enroll/mandatory');
     Route::post('bulk-of-exist-users', 'EnrollUserToCourseController@EnrollExistUsersFromExcel')->name('enrollexcel')->middleware('permission:enroll/bulk-of-exist-users');
     Route::post('add-and-enroll-bulk-of-new-users', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
     Route::get('enrolled-users', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');

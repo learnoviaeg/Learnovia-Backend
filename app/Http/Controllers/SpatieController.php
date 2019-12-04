@@ -49,7 +49,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/delete', 'title' => 'delete role']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/get', 'title' => 'get role']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/update', 'title' => 'update role']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/assign-to-user', 'title' => 'assign role to user']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/assign', 'title' => 'assign role to user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'permissions/assign-to-role', 'title' => 'assign permission to role']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/revoke-from-user', 'title' => 'revoke role from user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'permissions/revoke-from-role', 'title' => 'revoke permission from role']);
@@ -132,7 +132,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/enroll-single-user', 'title' => 'enroll single user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/un-enroll-single-user', 'title' => 'un enroll single user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-enrolled-courses', 'title' => 'get enrolled courses']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/mandatory-course', 'title' => 'enroll mandatory courses']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/mandatory', 'title' => 'enroll mandatory courses']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/bulk-of-exist-users', 'title' => 'enroll bulk of exist users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/add-and-enroll-bulk-of-new-users', 'title' => 'add and enroll bulk of new users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/enrolled-users', 'title' => 'enrolled users']);
