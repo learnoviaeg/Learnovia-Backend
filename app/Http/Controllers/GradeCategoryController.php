@@ -117,8 +117,7 @@ class GradeCategoryController extends Controller
             $classlevel=$segclass[0]->classLevel;
             $year_level= $classlevel[0]->yearLevels;
             $gradeCat=GradeCategory::where('name',$request->name)->first();
-            $check=GradeCategory::where('name',$request->name)->where('course_segment_id',$courseseg)->pluck('id')->first();
-            if(!$check)
+            if(isset($gradeCat))
             {
                 $grade_category[] = GradeCategory::firstOrCreate([
                     'name' => $gradeCat->name,
