@@ -31,6 +31,9 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-attendence', 'title' => 'get  all users in attendence']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'get all users in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-all-taken-users-in-session', 'title' => 'get all taken users in session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attendance', 'title' => 'get attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-my-attendance', 'title' => 'get my attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attend', 'title' => 'get attend']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'add session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/attendance/bulck/attendace', 'title' => 'add session']);
 
@@ -41,6 +44,9 @@ class AttendanceController extends Controller
         $role->givePermissionTo('attendance/get-users-in-session');
         $role->givePermissionTo('attendance/get-all-taken-users-in-session');
         $role->givePermissionTo('attendance/add-session');
+        $role->givePermissionTo('attendance/get-attendance');
+        $role->givePermissionTo('attendance/get-my-attendance');
+        $role->givePermissionTo('attendance/get-attend');
         $role->givePermissionTo('site/attendance/bulck/attendace');
 
 
@@ -62,39 +68,39 @@ class AttendanceController extends Controller
         ]);
         $Course_Segments = Attendance::get_CourseSegments_by_AttendenceID($request->id);
         $users = Enroll::whereIn('course_segment', $Course_Segments)->with('user')->get();
-        return HelperController::api_response_format(200,$users , 'Users are.....');
+        return HelperController::api_response_format(200, $users, 'Users are.....');
     }
 
     public function get_all_users_in_session(Request $request)
     {
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
-            'year'=>'exists:academic_years,id',
-            'type'=>'exists:academic_types,id',
-            'level'=>'exists:levels,id',
-            'class'=>'exists:classes,id',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'class' => 'exists:classes,id',
         ]);
-        $session = AttendanceSession::where('id',$request->session_id)->first();
-        $AlreadyTakenUsers=AttendanceLog::where('session_id',$request->session_id)->pluck('student_id');
+        $session = AttendanceSession::where('id', $request->session_id)->first();
+        $AlreadyTakenUsers = AttendanceLog::where('session_id', $request->session_id)->pluck('student_id');
         $course_segments = [];
         $course_segments[] = $session->course_segment_id;
-        if(is_null($course_segments[0])){
+        if (is_null($course_segments[0])) {
             $course_segments = GradeCategoryController::getCourseSegment($request);
         }
-        $users=Enroll::whereIn('course_segment',$course_segments)->with(['users' => function($query)use ($AlreadyTakenUsers){
-            $query->whereNotIn('id' , $AlreadyTakenUsers);
+        $users = Enroll::whereIn('course_segment', $course_segments)->with(['users' => function ($query) use ($AlreadyTakenUsers) {
+            $query->whereNotIn('id', $AlreadyTakenUsers);
         }])->get()->pluck('users');
-        return HelperController::api_response_format(200,$users , 'Users are.....');
+        return HelperController::api_response_format(200, $users, 'Users are.....');
     }
-    
+
     public function get_all_taken_users_in_session(Request $request)
     {
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
         ]);
-        $AlreadyTakenUsers=AttendanceLog::where('session_id',$request->session_id)->pluck('student_id');
-        $users = User::whereIn('id' , $AlreadyTakenUsers)->get();
-        return HelperController::api_response_format(200,$users , 'Users are....');
+        $AlreadyTakenUsers = AttendanceLog::where('session_id', $request->session_id)->pluck('student_id');
+        $users = User::whereIn('id', $AlreadyTakenUsers)->get();
+        return HelperController::api_response_format(200, $users, 'Users are....');
     }
 
     /**
@@ -116,7 +122,8 @@ class AttendanceController extends Controller
             return HelperController::api_response_format(200, 'does not have the right permissions ');
         }
         $user_id = Auth::User()->id;
-        $attendance = Attendance::create(['name' => $request->name,
+        $attendance = Attendance::create([
+            'name' => $request->name,
             'type' => $request->attendance_type,
             'grade' => ($request->grade) ? $request->grade : null
         ]);
@@ -137,7 +144,6 @@ class AttendanceController extends Controller
         $jop = (new Attendance_sessions($req, $user_id, null));
         dispatch($jop);
         return HelperController::api_response_format(200, 'all sesions without  course segments');
-
     }
 
     public function createSession(Request $request)
@@ -154,12 +160,12 @@ class AttendanceController extends Controller
         $req['attendance_id'] = $attendance->id;
         $user_id = Auth::User()->id;
         switch ($attendance->type) {
-            case  1 :
+            case  1:
                 $course_segments = GradeCategoryController::getCourseSegment($request);
                 $jop = (new Attendance_sessions($req, $user_id, $course_segments));
                 dispatch($jop);
                 return HelperController::api_response_format(200, 'all sesions with all course segments');
-            case 2 :
+            case 2:
                 if (!Auth::User()->can('site/attendance/bulck/attendace')) {
                     return HelperController::api_response_format(200, 'does not have the right permissions ');
                 }
@@ -167,7 +173,38 @@ class AttendanceController extends Controller
                 $jop = (new Attendance_sessions($req, $user_id, null));
                 dispatch($jop);
                 return HelperController::api_response_format(200, 'all sesions without  course segments');
+        }
+    }
 
+    public function GetAttendance(Request $request)
+    {
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:level',
+            'level' => 'exists:levels,id|required_with:class',
+            'class' => 'exists:classes,id',
+            'segment' => 'exists:segments,id',
+            'courses' => 'array|exists:courses,id'
+        ]);
+
+        $course_segments = GradeCategoryController::getCourseSegment($request);
+        // return $course_segments;
+            
+        if (!$course_segments)
+            return HelperController::api_response_format(404, 'no course segments');
+
+        if ($request->user()->can('attendance/get-attendance')) {
+            foreach ($course_segments as $course) {
+                $attendance_session[] = AttendanceSession::whereNotNull('course_segment_id')
+                    ->where('course_segment_id', $course)->with('Attendence')->get()->first();
+            }
+            return $attendance_session;
+        } else if ($request->user()->can('attendance/get-my-attendance')) {
+            $student = AttendanceLog::where('student_id', $request->user()->id)->with('session.Attendence')->get()->pluck('session');
+            return $student;
+        } else if ($request->user()->can('attendance/get-attend')) {
+            $teacher = AttendanceSession::where('taker_id', $request->user()->id)->with('Attendence')->get();
+            return $teacher;
         }
     }
 }
