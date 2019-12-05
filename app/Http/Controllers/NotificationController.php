@@ -32,7 +32,7 @@ class NotificationController extends Controller
     */
     public function getallnotifications(Request $request)
     {
-        $noti = DB::table('notifications')->select('data','read_at')->where('notifiable_id', $request->user()->id)->get();
+        $noti = DB::table('notifications')->select('data','read_at','id')->where('notifiable_id', $request->user()->id)->get();
         $data=array();
         $i=0;
         foreach ($noti as $not) {
@@ -42,7 +42,7 @@ class NotificationController extends Controller
                 {
                     $data[$i] = $not->data;
                     $data[$i]['read_at'] = $not->read_at;
-
+                    $data[$i]['notification_id'] = $not->id;
                 }
             }else{
                 if ($not->data['type'] == 'announcement')
@@ -54,6 +54,7 @@ class NotificationController extends Controller
                                 $customize = announcement::whereId($announce_id)->first(['id', 'title', 'description']);
                                 $data[$i]=$customize;
                                 $data[$i]['read_at'] = $not->read_at;
+                                $data[$i]['notification_id'] = $not->id;
                             }
                         }
                     }
