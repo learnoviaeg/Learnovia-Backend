@@ -61,7 +61,12 @@ class NotificationController extends Controller
             }
             $i++;
         }
-        return HelperController::api_response_format(200, $body = $data, $message = 'all users notifications');
+        $final=array();
+        foreach($data as $object)
+        {
+            $final[]= $object;
+        }
+        return HelperController::api_response_format(200, $body = $final, $message = 'all users notifications');
     }
    /**
     * @description: get unread Notifications From database From Notifcation Table
@@ -147,7 +152,8 @@ class NotificationController extends Controller
         else
         {
             $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
-            return HelperController::api_response_format(200, $body = [], $message = 'All your notifications is seened successfully ');
+            $print=self::getallnotifications($request);
+            return $print;
         }
         return HelperController::api_response_format(400, $body = [], $message = 'you cannot seen this notification');
 
