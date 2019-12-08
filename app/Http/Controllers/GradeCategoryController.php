@@ -45,7 +45,7 @@ class GradeCategoryController extends Controller
         ]);
         $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (isset($course_segment_id)) {
-            $segclass=CourseSegment::find($course_segment_id)->segmentClasses;
+            $segclass=CourseSegment::find($course_segment_id->id)->segmentClasses;
             $classlevel=$segclass[0]->classLevel;
             $year_level= $classlevel[0]->yearLevels;
             $grade_category = GradeCategory::create([

@@ -28,7 +28,7 @@ class GradeItemController extends Controller
             'weight' => 'nullable|boolean',
             'grade_category' => 'required|exists:grade_categories,id',
             'grademin' => 'required|integer|min:0',
-            'grademax' => 'required|integer|min:grademin',
+            'grademax' => 'required|integer|gt:grademin',
             'calculation' => 'nullable|string',
             'item_no' => 'nullable|integer',
             'scale_id' => 'nullable|exists:scales,id',
@@ -119,7 +119,7 @@ class GradeItemController extends Controller
         $coursesegment=GradeCategoryController::getCourseSegment($request);
         if(!$coursesegment)
             return HelperController::api_response_format(200, 'There is No Course segment available.');
-            
+
         // return $coursesegment;
         foreach($coursesegment as $courseseg)
         {
@@ -151,7 +151,7 @@ class GradeItemController extends Controller
                         'weight' => $gradeitem->weight ,
                         'plusfactor' => $gradeitem->plusfactor ,
                         'id_number' =>  $year_level[0]->id
-                    ]); 
+                    ]);
                 }
         }
         return HelperController::api_response_format(200, $grade_category,'Grade Item Assigned.');
@@ -237,7 +237,7 @@ class GradeItemController extends Controller
 
     }
 
-    
+
     /**
      * bulk update grade
      *
@@ -311,9 +311,9 @@ class GradeItemController extends Controller
                             'name' => $request->newname,
                             'override' => (isset($request->override)) ? $request->override : $gradeCat->override,
                             'plusfactor' => (isset($request->plusfactor)) ? $request->plusfactor : $gradeCat->plusfactor,
-                        ]); 
+                        ]);
                     }
-                }                
+                }
             return HelperController::api_response_format(200, 'Grade categories updated');
         } else {
             return HelperController::api_response_format(200, 'There is No Course segment available.');
