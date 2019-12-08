@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\scale;
+use stdClass;
 
 class ScaleController extends Controller
 {
@@ -17,11 +18,19 @@ class ScaleController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'formate' => 'required|array'
+            'formate' => 'required|array',
+            'formate.*'=> 'required',
+            'formate.*.name'=> 'required|string',
         ]);
 
-        $scaleFormates=serialize($request->formate);
-
+        $withgrade = collect();
+        foreach ($request->formate as $index => $scale) {
+            $temp = new stdClass();
+            $temp->name = $scale['name'];
+            $temp->grade = $index;
+            $withgrade->push($temp);
+        }
+        $scaleFormates=serialize($withgrade);
         $newScale = scale::firstOrCreate([
             'name' => $request->name,
             'formate' => $scaleFormates
