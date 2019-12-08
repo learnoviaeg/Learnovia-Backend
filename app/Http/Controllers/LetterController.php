@@ -107,4 +107,19 @@ class LetterController extends Controller
         return HelperController::api_response_format(200, $letter_id);
     }
 
+    public function assignLetterToCourse(Request $request){
+        $request->validate([
+            'course' => 'required|exists:courses,id',
+            'class' => 'required|exists:classes,id',
+            'letter' => 'required|exists:letters,id',
+        ]);
+        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+        if($courseSegment == null)
+            return HelperController::api_response_format(200, 'This Course is not assigned to this class');
+        $courseSegment->update([
+            'letter_id' => $request->letter
+        ]);
+        return HelperController::api_response_format(200, 'Letter Assigned Successfully');
+    }
+
 }
