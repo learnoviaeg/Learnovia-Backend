@@ -36,8 +36,8 @@ class GradeCategoryController extends Controller
             'aggregatedOnlyGraded' => 'integer',
             'hidden' => 'integer',
             'id_number' => 'integer',
-            'grademin' => 'required_if:type,==,1|integer',
-            'grademax' => 'required_if:type,==,1|integer',
+            'grademin' => 'required_if:type,==,1|integer|min:0',
+            'grademax' => 'required_if:type,==,1|integer|gt:grademin',
             'type' => 'boolean|required',
             'exclude_flag' => 'boolean',
             'locked' => 'boolean',
@@ -89,10 +89,16 @@ class GradeCategoryController extends Controller
             'grades.*.aggregatedOnlyGraded' => 'boolean|nullable',
             'grades.*.hidden' => 'boolean|nullable',
             'grades.*.grademin' => 'required_if:grades.*.type,==,1|integer|min:0',
-            'grades.*.grademax' => 'required_if:grades.*.type,==,1|integer|min:grademin',
+            'grades.*.grademax' => 'required_if:grades.*.type,==,1|integer|gt:grades.*.grademin',
             'grades.*.type' => 'boolean|required',
             'grades.*.exclude_flag' => 'boolean|nullable',
-            'grades.*.locked' => 'boolean|nullable'
+            'grades.*.locked' => 'boolean|nullable',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:level',
+            'level' => 'exists:levels,id|required_with:class',
+            'class' => 'exists:classes,id',
+            'segment' => 'exists:segments,id',
+            'courses' => 'array|exists:courses,id'
         ]);
         $jop = (new \App\Jobs\addgradecategory($this->getCourseSegment($request), $request->grades));
         dispatch($jop);
@@ -111,16 +117,13 @@ class GradeCategoryController extends Controller
             'courses' => 'array|exists:courses,id'
         ]);
 
+        $grade_category=[];
         $coursesegment=GradeCategoryController::getCourseSegment($request);
         if(!$coursesegment)
             return HelperController::api_response_format(200, 'There is No Course segment available.');
 
-        // return $coursesegment;
         foreach($coursesegment as $courseseg)
         {
-            // $year_level_tree=CourseSegment::where('id',$courseseg)->with(['segmentClasses.classLevel.yearLevels' => function ($query) use ($request){
-            //     $query->pluck('id')->first();
-            // }])->get();
             $segclass=CourseSegment::find($courseseg)->segmentClasses;
             $classlevel=$segclass[0]->classLevel;
             $year_level= $classlevel[0]->yearLevels;
@@ -142,7 +145,10 @@ class GradeCategoryController extends Controller
                 ]);
             }
         }
-        return HelperController::api_response_format(200, $grade_category,'Grade Category Assigned.');
+        if($grade_category == null)
+            return HelperController::api_response_format(200, $grade_category,'No assigned Grade Categories, No Grade with this name');
+    
+        return HelperController::api_response_format(200, $grade_category,'Grade Categories Assigned.');
     }
 
     /**
@@ -205,7 +211,7 @@ class GradeCategoryController extends Controller
             'aggregatedOnlyGraded' => 'integer',
             'hidden' => 'integer',
             'grademin' => 'required_if:type,==,1|integer|min:0',
-            'grademax' => 'required_if:type,==,1|integer|min:grademin',
+            'grademax' => 'required_if:type,==,1|integer|gt:grademin',
             'type' => 'boolean|required',
             'exclude_flag' => 'boolean'
         ]);
