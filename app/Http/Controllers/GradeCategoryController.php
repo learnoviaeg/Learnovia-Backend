@@ -40,7 +40,7 @@ class GradeCategoryController extends Controller
             'grademax' => 'required_if:type,==,1|integer',
             'type' => 'boolean|required',
             'exclude_flag' => 'boolean',
-            'locked' => 'boolean'
+            'locked' => 'boolean',
             'override' => 'boolean'
         ]);
         $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
