@@ -286,17 +286,18 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
     });
 });
 Route::group(['prefix' => 'scale', 'middleware' => 'auth:api'], function () {
-    Route::post('add', 'ScaleController@AddScale');//->name('addscale')->middleware('permission:scale/add');
-    Route::get('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
+    Route::post('add', 'ScaleController@AddScale')->name('addscale')->middleware('permission:scale/add');
+    Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
     Route::post('delete', 'ScaleController@DeleteScale')->name('deletescale')->middleware('permission:scale/delete');
-    Route::post('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
+    Route::get('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
 });
 
 Route::group(['prefix' => 'letter', 'middleware' => 'auth:api'], function () {
-    Route::post('add', 'LetterController@add')->name('addscale')->middleware('permission:letter/add');
-    Route::get('update', 'LetterController@update')->name('updatescale')->middleware('permission:letter/update');
-    Route::post('delete', 'LetterController@delete')->name('deletescale')->middleware('permission:letter/delete');
-    Route::post('get', 'LetterController@get')->name('getscale')->middleware('permission:letter/get');
+    Route::post('add', 'LetterController@add')->name('addletter')->middleware('permission:letter/add');
+    Route::post('update', 'LetterController@update')->name('updateletter')->middleware('permission:letter/update');
+    Route::post('delete', 'LetterController@delete')->name('deleteletter')->middleware('permission:letter/delete');
+    Route::get('get', 'LetterController@get')->name('getletter')->middleware('permission:letter/get');
+    Route::post('assign', 'LetterController@assignLetterToCourse')->name('assignletter')->middleware('permission:letter/assign');
 });
 Route::post('search-contacts', 'ContactController@SearchMyContacts');
 Route::post('search-messages', 'MessageController@SearchMessage');
