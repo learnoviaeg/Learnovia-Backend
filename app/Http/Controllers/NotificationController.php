@@ -32,15 +32,17 @@ class NotificationController extends Controller
     */
     public function getallnotifications(Request $request)
     {
-        $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->get();
+        $noti = DB::table('notifications')->select('data','read_at','id')->where('notifiable_id', $request->user()->id)->get();
         $data=array();
-
+        $i=0;
         foreach ($noti as $not) {
             $not->data= json_decode($not->data, true);
             if(isset($not->data['publish_date'])){
                 if($not->data['publish_date'] < Carbon::now() && $not->data['type'] != 'announcement')
                 {
-                    $data[] = $not->data;
+                    $data[$i] = $not->data;
+                    $data[$i]['read_at'] = $not->read_at;
+                    $data[$i]['notification_id'] = $not->id;
                 }
             }else{
                 if ($not->data['type'] == 'announcement')
@@ -50,11 +52,14 @@ class NotificationController extends Controller
                         if($annocument!= null){
                             if ($annocument->publish_date <= Carbon::now()) {
                                 $customize = announcement::whereId($announce_id)->first(['id', 'title', 'description']);
-                                $data[]=$customize;
+                                $data[$i]=$customize;
+                                $data[$i]['read_at'] = $not->read_at;
+                                $data[$i]['notification_id'] = $not->id;
                             }
                         }
                     }
             }
+            $i++;
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all users notifications');
     }
@@ -128,13 +133,21 @@ class NotificationController extends Controller
     public function SeenNotifications(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:notifications,id'
+            'id' => 'exists:notifications,id',
         ]);
         $session_id = Auth::User()->id;
-        $note = DB::table('notifications')->where('id', $request->id)->first();
-        if ($note->notifiable_id == $session_id){
-            $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
-            return HelperController::api_response_format(200, $body = [], $message = 'this notification  is seened successfully ');
+        if(isset($request->id))
+        {
+            $note = DB::table('notifications')->where('id', $request->id)->first();
+            if ($note->notifiable_id == $session_id){
+                $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
+                return HelperController::api_response_format(200, $body = [], $message = 'this notification  is seened successfully ');
+            }
+        }
+        else
+        {
+            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+            return HelperController::api_response_format(200, $body = [], $message = 'All your notifications is seened successfully ');
         }
         return HelperController::api_response_format(400, $body = [], $message = 'you cannot seen this notification');
 
