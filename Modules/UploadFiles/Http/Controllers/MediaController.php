@@ -197,7 +197,7 @@ class MediaController extends Controller
                     $name = uniqid() . '.' . $extension;
 
                     $file = new media;
-                    $file->type = $extension;
+                    $file->type = $singlefile->getClientMimeType();
                     $file->name = $name;
                     $file->description = $description;
                     $file->size = $size;
