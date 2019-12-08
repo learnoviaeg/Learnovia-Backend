@@ -28,7 +28,7 @@ class GradeItemController extends Controller
             'weight' => 'nullable|boolean',
             'grade_category' => 'required|exists:grade_categories,id',
             'grademin' => 'required|integer|min:0',
-            'grademax' => 'required|integer|min:grademin',
+            'grademax' => 'required|integer|gt:grademin',
             'calculation' => 'nullable|string',
             'item_no' => 'nullable|integer',
             'scale_id' => 'nullable|exists:scales,id',
@@ -78,7 +78,7 @@ class GradeItemController extends Controller
             'items.*.weight' => 'boolean',
             'items.*.grade_category' => 'required|exists:grade_categories,name',
             'items.*.grademin' => 'required|integer|min:0',
-            'items.*.grademax' => 'required|integer|min:grademin',
+            'items.*.grademax' => 'required|integer|gt:grademin',
             'items.*.calculation' => 'nullable|string',
             'items.*.item_no' => 'nullable|integer',
             'items.*.scale_id' => 'nullable|exists:scales,id',
@@ -91,10 +91,10 @@ class GradeItemController extends Controller
             'items.*.item_Entity' => 'nullable',
             'items.*.hidden' => 'boolean',
             'year' => 'exists:academic_years,id',
-            'level'=> 'exists:levels,id',
-            'type' => 'exists:academic_types,id',
-            'segment' => 'exists:segments,id',
+            'type' => 'exists:academic_types,id|required_with:level',
+            'level' => 'exists:levels,id|required_with:class',
             'class' => 'exists:classes,id',
+            'segment' => 'exists:segments,id',
             'courses' => 'array|exists:courses,id'
         ]);
 
@@ -193,7 +193,7 @@ class GradeItemController extends Controller
         $request->validate([
             'grade_category' => 'required|exists:grade_categories,id',
             'grademin' => 'required|integer|min:0',
-            'grademax' => 'required|integer|min:grademin',
+            'grademax' => 'required|integer|gt:grademin',
             'calculation' => 'required|string',
             'item_no' => 'nullable|integer',
             'scale_id' => 'required|exists:scales,id',
