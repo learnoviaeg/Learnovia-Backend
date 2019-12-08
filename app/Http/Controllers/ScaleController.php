@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\scale;
 use stdClass;
-
+use App\GradeItems;
 class ScaleController extends Controller
 {
      /**
