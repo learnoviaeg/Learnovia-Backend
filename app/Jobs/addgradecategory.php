@@ -40,6 +40,7 @@ class addgradecategory implements ShouldQueue
                     'grademin' => ($grade_cat['type']==1) ? $grade_cat['grademin'] : null,
                     'type' => $grade_cat['type'],
                     'parent' => (isset($grade_cat['parent'])) ? $grade_cat['parent'] : null,
+                    'locked' => (isset($grade_cat['locked'])) ? $grade_cat['locked'] : null,
                     'aggregation' => (isset($grade_cat['aggregation'])) ? $grade_cat['aggregation'] : null,
                     'aggregatedOnlyGraded' => (isset($grade_cat['aggregatedOnlyGraded'])) ? $grade_cat['aggregatedOnlyGraded'] : 0,
                     'exclude_flag' => (isset($grade_cat['exclude_flag'])) ? $grade_cat['exclude_flag'] : 0,
