@@ -23,5 +23,11 @@ class media extends Model
     {
         return $this->belongsTo('App\User', 'user_id', 'id');
     }
+    protected $appends = ['media_type'];
 
+    public function getMediaTypeAttribute(){
+        if($this->type != null)
+            return 'Media';
+        return 'Link';
+    }
 }
