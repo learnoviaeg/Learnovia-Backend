@@ -393,9 +393,15 @@ class CourseController extends Controller
                             foreach ($comp as $com) {
                                 $Component = $lessoncounter->module($com->module, $com->model);
                                 if ($request->user()->can('site/course/student')) {
-                                    $Component->where('visible', '=', 1)
-                                        ->where('publish_date', '<=', Carbon::now());
+                                    $Component->where('visible' , '=' , 1)
+                                        ->where('publish_date' , '<=' , Carbon::now());
                                 }
+
+                                $lessonn[$com->name] = $Component->get();
+
+                                // $lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
+                                // if (isset($com->name))
+                                //     $clase[$i][$com->name . $count] += count($lessonn[$com->name]);
                             }
                         }
                         $i++;

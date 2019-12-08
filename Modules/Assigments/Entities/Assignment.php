@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class assignment extends Model
 {
     protected $fillable = ['name', 'content', 'attachment_id'];
+    protected $appends = ['url' , 'url2'];
     public function attachment()
     {
         return $this->belongsTo('App\attachment', 'attachment_id', 'id');
@@ -18,5 +19,19 @@ class assignment extends Model
     public function Lesson()
     {
         return $this->belongsToMany('App\Lesson', 'assignment_lessons', 'assignment_id', 'lesson_id');
+    }
+
+    public function getUrlAttribute()
+    {
+        if (isset($this->attachment)) {
+            return 'https://docs.google.com/viewer?url=' . $this->attachment->path;
+        }
+    }
+
+    public function getUrl2Attribute()
+    {
+        if (isset($this->attachment)) {
+            return $this->attachment->path;
+        }
     }
 }
