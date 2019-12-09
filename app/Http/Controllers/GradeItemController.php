@@ -25,7 +25,7 @@ class GradeItemController extends Controller
     {
         $request->validate([
             'name' => 'nullable|string',
-            'weight' => 'nullable|boolean',
+            'weight' => 'nullable|integer',
             'grade_category' => 'required|exists:grade_categories,id',
             'grademin' => 'required|integer|min:0',
             'grademax' => 'required|integer|gt:grademin',
@@ -39,7 +39,7 @@ class GradeItemController extends Controller
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
             'item_type' => 'nullable|exists:item_types,id',
             'item_Entity' => 'nullable',
-            'hidden' => 'nullable|boolean'
+            'hidden' => 'boolean'
         ]);
 
         $id_number=GradeCategory::find($request->grade_category);
@@ -47,8 +47,8 @@ class GradeItemController extends Controller
 
         $data = [
             'grade_category' => $request->grade_category,
-            'grademin' => $request->grademin,
-            'grademax' => $request->grademax,
+            'grademin' => (isset($request->grademin)) ? $request->grademin : null,
+            'grademax' => (isset($request->grademax)) ? $request->grademax : null,
             'calculation' => (isset($request->calculation)) ? $request->calculation : null,
             'item_no' => (isset($request->item_no)) ? $request->item_no : null,
             'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
@@ -76,17 +76,17 @@ class GradeItemController extends Controller
             'items' => 'required|array',
             'items.*.name' => 'string',
             'items.*.weight' => 'boolean',
-            'items.*.grade_category' => 'required|exists:grade_categories,name',
+            'grade_category' => 'required|exists:grade_categories,name',
             'items.*.grademin' => 'required|integer|min:0',
-            'items.*.grademax' => 'required|integer|gt:grademin',
+            'items.*.grademax' => 'required|integer|gt:items.*.grademin',
             'items.*.calculation' => 'nullable|string',
             'items.*.item_no' => 'nullable|integer',
             'items.*.scale_id' => 'nullable|exists:scales,id',
             'items.*.grade_pass' => 'nullable|integer',
             'items.*.multifactor' => 'numeric|between:0,99.99',
             'items.*.plusfactor' => 'numeric|between:0,99.99',
-            'items.*.aggregationcoef' => 'numeric|between:0,99.99',
-            'items.*.aggregationcoef2' => 'numeric|between:0,99.99',
+            'items.*.aggregationcoef' => 'nullable|numeric|between:0,99.99',
+            'items.*.aggregationcoef2' => 'numeric|nullable|between:0,99.99',
             'items.*.item_type' => 'nullable|exists:item_types,id',
             'items.*.item_Entity' => 'nullable',
             'items.*.hidden' => 'boolean',
@@ -98,7 +98,7 @@ class GradeItemController extends Controller
             'courses' => 'array|exists:courses,id'
         ]);
 
-        $jop = (new \App\Jobs\AddGradeItemJob($request->items,GradeCategoryController::getCourseSegment($request)));
+        $jop = (new \App\Jobs\AddGradeItemJob($request->items,$request->grade_category,GradeCategoryController::getCourseSegment($request)));
         dispatch($jop);
         return HelperController::api_response_format(200, null, 'Grade items are created successfully');
     }
@@ -123,39 +123,35 @@ class GradeItemController extends Controller
         // return $coursesegment;
         foreach($coursesegment as $courseseg)
         {
-                // $year_level_tree=CourseSegment::where('id',$courseseg)->with(['segmentClasses.classLevel.yearLevels' => function ($query) use ($request){
-                //     $query->pluck('id')->first();
-                // }])->get();
-                $segclass=CourseSegment::find($courseseg)->segmentClasses;
-                $classlevel=$segclass[0]->classLevel;
-                $year_level= $classlevel[0]->yearLevels;
-                $gradeitem=GradeItems::where('name',$request->item_name)->first();
-                $gradecat=GradeCategory::where('name',$request->grade_category_name)->where('course_segment_id',$courseseg)->pluck('id')->first();
-                if($gradecat)
-                {
-                    $grade_category[] = GradeItems::firstOrCreate([
-                        'grade_category' => $gradecat,
-                        'grademin' => $gradeitem->grademin,
-                        'grademax' => $gradeitem->grademax,
-                        'calculation' => $gradeitem->calculation,
-                        'item_no' => $gradeitem->item_no,
-                        'scale_id' => $gradeitem->scale_id,
-                        'grade_pass' => $gradeitem->grade_pass,
-                        'aggregationcoef' => $gradeitem->aggregationcoef,
-                        'aggregationcoef2' => $gradeitem->aggregationcoef2,
-                        'item_type' => $gradeitem->item_type,
-                        'item_Entity' => $gradeitem->item_Entity,
-                        'hidden' => $gradeitem->hidden,
-                        'multifactor' => $gradeitem->multifactor,
-                        'name' =>  $gradeitem->name ,
-                        'weight' => $gradeitem->weight ,
-                        'plusfactor' => $gradeitem->plusfactor ,
-                        'id_number' =>  $year_level[0]->id
-                    ]); 
-                }
+            $segclass=CourseSegment::find($courseseg)->segmentClasses;
+            $classlevel=$segclass[0]->classLevel;
+            $year_level= $classlevel[0]->yearLevels;
+            $gradeitem=GradeItems::where('name',$request->item_name)->first();
+            $gradecat=GradeCategory::where('name',$request->grade_category_name)->where('course_segment_id',$courseseg)->pluck('id')->first();
+            if($gradecat)
+            {
+                $grade_category[] = GradeItems::firstOrCreate([
+                    'grade_category' => $gradecat,
+                    'grademin' => $gradeitem->grademin,
+                    'grademax' => $gradeitem->grademax,
+                    'calculation' => $gradeitem->calculation,
+                    'item_no' => $gradeitem->item_no,
+                    'scale_id' => $gradeitem->scale_id,
+                    'grade_pass' => $gradeitem->grade_pass,
+                    'aggregationcoef' => $gradeitem->aggregationcoef,
+                    'aggregationcoef2' => $gradeitem->aggregationcoef2,
+                    'item_type' => $gradeitem->item_type,
+                    'item_Entity' => $gradeitem->item_Entity,
+                    'hidden' => $gradeitem->hidden,
+                    'multifactor' => $gradeitem->multifactor,
+                    'name' =>  $gradeitem->name ,
+                    'weight' => $gradeitem->weight ,
+                    'plusfactor' => $gradeitem->plusfactor ,
+                    'id_number' =>  $year_level[0]->id
+                ]); 
+            }
         }
         return HelperController::api_response_format(200, $grade_category,'Grade Item Assigned.');
-
     }
 
 
@@ -204,21 +200,31 @@ class GradeItemController extends Controller
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
             'item_type' => 'required|exists:item_types,id',
             'item_Entity' => 'required',
-            'hidden' => 'nullable|integer'
+            'hidden' => 'nullable|integer',
+            'name' => 'nullable|string',
+            'weight' => 'integer'
         ]);
 
+        $grade_cat=GradeCategory::find($request->grade_category);
+        $segclass=CourseSegment::find($grade_cat->course_segment_id)->segmentClasses;
+        $classlevel=$segclass[0]->classLevel;
+        $year_level= $classlevel[0]->yearLevels;
+
         $data = [
-            'grade_category' => $request->grade_category,
-            'grademin' => $request->grademin,
-            'grademax' => $request->grademax,
-            'calculation' => $request->calculation,
-            'item_no' => $request->item_no,
-            'scale_id' => $request->scale_id,
-            'grade_pass' => $request->grade_pass,
-            'aggregationcoef' => $request->aggregationcoef,
-            'aggregationcoef2' => $request->aggregationcoef2,
-            'item_type' => $request->item_type,
-            'item_Entity' => $request->item_Entity
+            'grade_category' => (isset($request->grade_category)) ? $request->grade_category : $grade->grade_category,
+            'grademin' => (isset($request->grademin)) ? $request->grademin : $grade->grademin,
+            'grademax' => (isset($request->grademax)) ? $request->grademax : $grade->grademax,
+            'calculation' => (isset($request->calculation)) ? $request->calculation : $grade->calculation,
+            'item_no' => (isset($request->item_no)) ? $request->item_no : $grade->item_no,
+            'scale_id' => (isset($request->scale_id)) ? $request->scale_id : $grade->scale_id,
+            'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : $grade->grade_pass,
+            'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef :$grade->aggregationcoef,
+            'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : $grade->aggregationcoef2,
+            'item_type' => (isset($request->item_type)) ? $request->item_type : $grade->item_type,
+            'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : $grade->item_Entity,
+            'weight' => (isset($request->weight)) ? $request->weight : $grade->weight,
+            'name' => (isset($request->name)) ? $request->name : 'Grade Item',
+            'id_number' => (isset($request->grade_category)) ? $year_level[0]->id : $grade->id_number
         ];
         if (isset($request->multifactor)) {
             $data['multifactor'] = $request->multifactor;
@@ -232,12 +238,9 @@ class GradeItemController extends Controller
 
         $update = $grade->update($data);
 
-
         return HelperController::api_response_format(200, $grade, 'Grade Updated Successfully');
-
     }
 
-    
     /**
      * bulk update grade
      *
@@ -263,10 +266,10 @@ class GradeItemController extends Controller
             'class' => 'exists:classes,id',
             'segment' => 'exists:segments,id',
             'courses' => 'array|exists:courses,id',
-            'override' => 'nullable|boolean',
+            'weight' => 'nullable|integer',
             'grade_category' => 'nullable|exists:grade_categories,id',
-            'grademin' => 'required|integer',
-            'grademax' => 'required|integer',
+            'grademin' => 'required|integer|min:0',
+            'grademax' => 'required|integer|gt:grademin',
             'calculation' => 'nullable|string',
             'item_no' => 'nullable|integer',
             'scale_id' => 'nullable|exists:scales,id',
@@ -280,7 +283,6 @@ class GradeItemController extends Controller
             'hidden' => 'nullable|boolean'
         ]);
 
-        $grade_category=[];
         $course_segment = GradeCategoryController::getCourseSegment($request);
         if (isset($course_segment)) {
                 foreach($course_segment as $course)
@@ -308,8 +310,8 @@ class GradeItemController extends Controller
                             'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : $gradeCat->item_Entity,
                             'hidden' => (isset($request->hidden)) ? $request->hidden : $gradeCat->hidden,
                             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : $gradeCat->item_Entity,
-                            'name' => $request->newname,
-                            'override' => (isset($request->override)) ? $request->override : $gradeCat->override,
+                            'name' => (isset($request->newname)) ? $request->newname : $gradeCat->name,
+                            'weight' => (isset($request->weight)) ? $request->weight : $gradeCat->weight,
                             'plusfactor' => (isset($request->plusfactor)) ? $request->plusfactor : $gradeCat->plusfactor,
                         ]); 
                     }
@@ -457,5 +459,5 @@ class GradeItemController extends Controller
                 'name' =>'Weighted mean'
             ]
         ];
-}
+    }
 }
