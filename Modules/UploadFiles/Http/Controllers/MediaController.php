@@ -7,7 +7,6 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Carbon\Carbon;
 use Modules\UploadFiles\Entities\media;
-use Modules\UploadFiles\Entities\MediaCourseSegment;
 use Modules\UploadFiles\Entities\MediaLesson;
 use checkEnroll;
 use URL;
@@ -119,7 +118,8 @@ class MediaController extends Controller
             'url' => 'required_if:type,==,1|array',
             'url.*' => 'required|active_url',
             'type' => 'required|in:0,1',
-            'name' => 'required_if:type,==,1'
+            'name' => 'required_if:type,==,1',
+            'show' => 'nullable|in:0,1'
         ]);
 
         if ($request->filled('publish_date')) {
@@ -160,6 +160,8 @@ class MediaController extends Controller
 
                 if ($request->filled('description'))
                     $media->description = $request->description;
+                if ($request->filled('show'))
+                    $media->show = $request->show;
                 $media->save();
                 $mediaLesson = new MediaLesson;
                 $mediaLesson->lesson_id = $lesson;
@@ -275,21 +277,7 @@ class MediaController extends Controller
                 'LessonID' => 'required|integer|exists:media_lessons,lesson_id',
 
             ]);
-
             $media = media::find($request->mediaId);
-
-            if (!isset($media->MediaCourseSegment)) {
-                return HelperController::api_response_format(404, null, 'No Media Found');
-            }
-
-            //check Authotizing
-            $courseSegmentID = $media->MediaCourseSegment->course_segment_id;
-
-            // check Enroll
-            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
-            if ($checkTeacherEnroll == false) {
-                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
-            }
             $mediaLesson = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id', '=', $request->LessonID)->first();
             if (!isset($mediaLesson)) {
                 return HelperController::api_response_format(400, null, 'Try again , Data invalid');
