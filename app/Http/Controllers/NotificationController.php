@@ -146,7 +146,8 @@ class NotificationController extends Controller
             $note = DB::table('notifications')->where('id', $request->id)->first();
             if ($note->notifiable_id == $session_id){
                 $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
-                return HelperController::api_response_format(200, $body = [], $message = 'this notification  is seened successfully ');
+                $print=self::getallnotifications($request);
+                return $print;
             }
         }
         else
