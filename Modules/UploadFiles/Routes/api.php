@@ -25,7 +25,6 @@ Route::group(['prefix' => 'file', 'middleware' => 'auth:api'], function () {
 
 /* Media Routes */
 Route::group(['prefix' => 'media', 'middleware' => 'auth:api'], function () {
-
     Route::post('add', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
     Route::post('update', 'MediaController@update')->name('updateMedia')->middleware('permission:media/update');
     Route::post('delete', 'MediaController@destroy')->name('deleteMedia')->middleware('permission:media/delete');
@@ -34,12 +33,4 @@ Route::group(['prefix' => 'media', 'middleware' => 'auth:api'], function () {
     Route::get('get-all','MediaController@getAllMedia')->name('getAllMedia')->middleware('permission:media/get-all');
     Route::get('get','MediaController@GetMediaByID')->name('GetMediaByID')->middleware('permission:media/get');
     Route::post('assign','MediaController@AssignMediaToLesson')->name('assigntolesson')->middleware('permission:media/assign');
-
-});
-
-/* Attach link as media */
-Route::group(['prefix' => 'link', 'middleware' => 'auth:api'], function () {
-
-    Route::post('add', 'MediaController@storeMediaLink')->name('storeMediaLink')->middleware('permission:link/add');
-    Route::post('update', 'MediaController@updateMediaLink')->name('updateMediaLink')->middleware('permission:link/update');
 });

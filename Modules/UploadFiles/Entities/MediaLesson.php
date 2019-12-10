@@ -15,4 +15,10 @@ class MediaLesson extends Model
     {
         return $this->hasMany('Modules\UploadFiles\Entities\Media', 'id', 'media_id');
     }
+
+    public static function getNextIndex($lesson_id){
+        if(self::whereLesson_id($lesson_id)->max('index') == null)
+            return 1;
+        return self::whereLesson_id($lesson_id)->max('index') + 1;
+    }
 }
