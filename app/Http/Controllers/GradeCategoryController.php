@@ -183,7 +183,22 @@ class GradeCategoryController extends Controller
         if ($request->filled('id')) {
             $gradeCategory = GradeCategory::with('Child')->where('id', $request->id)->first();
         } else {
+          
             $gradeCategory = GradeCategory::with('Child')->get();
+            foreach($gradeCategory as $g)
+            {    
+                $g->weight = $g->weight();
+                foreach($g->child as $chil)
+                {
+                     $chil->weight = $chil->weight();
+                     unset($chil->Parents);
+                     unset($chil->GradeItems);
+                     unset($chil->Children);
+                }
+                unset($g->Parents);
+                unset($g->GradeItems);
+                unset($g->Children);
+            }
         }
         return HelperController::api_response_format(200, $gradeCategory);
     }
