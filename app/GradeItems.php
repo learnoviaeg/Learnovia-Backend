@@ -9,7 +9,9 @@ class GradeItems extends Model
     protected $fillable = ['grade_category','grademin','grademax','calculation','item_no','scale_id','grade_pass','multifactor',
         'plusfactor','aggregationcoef','aggregationcoef2','item_type','name','item_Entity','hidden','weight','id_number'];
 
-    public function GradeCategory()
+        protected $appends = ['parent_aggregation'];
+
+        public function GradeCategory()
     {
         return $this->belongsTo('App\GradeCategory', 'grade_category', 'id');
     }
@@ -31,5 +33,9 @@ class GradeItems extends Model
         if($this->attributes['weight'] != 0)
             return $this->attributes['weight'];
         return round(($this->grademax * $this->GradeCategory->percentage()) / $this->GradeCategory->total() , 3);
+    }
+
+    public function getParentAggregationAttribute(){
+        return $this->GradeCategory->aggregation;
     }
 }

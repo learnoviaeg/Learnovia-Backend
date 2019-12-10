@@ -149,10 +149,24 @@ class MediaController extends Controller
                     $media->name = $name;
                     $media->size = $size;
                     $media->attachment_name = $fileName;
-                    $media->link = url('public/storage/media/'. $name);
+                    $media->link = url('public/storage/media/' . $name);
                 }
 
                 if ($request->type == 1) {
+                    $avaiableHosts = collect([
+                        'www.youtube.com',
+                        'vimeo.com',
+                        'soundcloud.com',
+                    ]);
+
+                    $urlparts = parse_url($item);
+                    if (!$avaiableHosts->contains($urlparts['host'])) {
+                        return HelperController::api_response_format(400, $item, 'Link is invalid');
+                    }
+
+                    if (!isset($urlparts['path'])) {
+                        return HelperController::api_response_format(400, $item, 'Link is invalid');
+                    }
                     $media->name = $request->name;
                     $media->attachment_name = $request->name;
                     $media->link = $item;
@@ -207,39 +221,39 @@ class MediaController extends Controller
      */
     public function update(Request $request)
     {
-            $request->validate([
-                'id' => 'required|integer|exists:media,id',
-                'name' => 'nullable|string|max:190',
-                'description' => 'nullable|string|min:1',
-                'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
-                'url' => 'nullable|active_url',
-            ]);
+        $request->validate([
+            'id' => 'required|integer|exists:media,id',
+            'name' => 'nullable|string|max:190',
+            'description' => 'nullable|string|min:1',
+            'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
+            'url' => 'nullable|active_url',
+        ]);
 
-            $media = media::find($request->id);
+        $media = media::find($request->id);
 
-            if ($media->type != null && $request->hasFile('Imported_file')) {
-                $extension = $request->Imported_file->getClientOriginalExtension();
-                $fileName = $request->Imported_file->getClientOriginalName();
-                $size = $request->Imported_file->getSize();
-                $name = uniqid() . '.' . $extension;
-                $media->type = $request->Imported_file->getClientMimeType();
-                $media->size = $size;
-                $media->attachment_name = $fileName;
-                $media->link = url('public/storage/media/'. $name);
-                Storage::disk('public')->putFileAs('media/',$request->Imported_file,$fileName);
-            }
+        if ($media->type != null && $request->hasFile('Imported_file')) {
+            $extension = $request->Imported_file->getClientOriginalExtension();
+            $fileName = $request->Imported_file->getClientOriginalName();
+            $size = $request->Imported_file->getSize();
+            $name = uniqid() . '.' . $extension;
+            $media->type = $request->Imported_file->getClientMimeType();
+            $media->size = $size;
+            $media->attachment_name = $fileName;
+            $media->link = url('public/storage/media/' . $name);
+            Storage::disk('public')->putFileAs('media/', $request->Imported_file, $fileName);
+        }
 
-            if ($media->type == null && $request->filled('url')) {
-                $media->link = $request->url;
-            }
+        if ($media->type == null && $request->filled('url')) {
+            $media->link = $request->url;
+        }
 
-            if ($request->filled('description'))
-                $media->description = $request->description;
+        if ($request->filled('description'))
+            $media->description = $request->description;
 
-            if($request->filled('name'))
-                $media->name = $request->name;
-            $media->save();
-            return HelperController::api_response_format(200, $media, 'Update Successfully');
+        if ($request->filled('name'))
+            $media->name = $request->name;
+        $media->save();
+        return HelperController::api_response_format(200, $media, 'Update Successfully');
     }
 
     /**
