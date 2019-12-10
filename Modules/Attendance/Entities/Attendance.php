@@ -69,7 +69,7 @@ class Attendance extends Model
         ];
         $array['sessions.time'] = 'required|array|size:' . $times;
         $array[ 'sessions.time.*.start'] = 'required|regex:/(\d+\:\d+)/';
-        $array[ 'sessions.time.*.start'] = 'required|regex:/(\d+\:\d+)/';
+        $array[ 'sessions.time.*.end'] = 'required|regex:/(\d+\:\d+)/';
         return $array;
     }
 
@@ -140,6 +140,20 @@ class Attendance extends Model
         return ['friday', 'saturday'];
     }
     public static function check_in_array($all,$small){
-        return count(array_intersect($small, $all)) == count($small);
+        if( count(array_intersect($small, $all)) == count($small)){
+            return true;
+        }
+        return false;
+    }
+
+    public function getAllowedClassesAttribute($value)
+    {
+        $temp = [];
+        $value = unserialize($value);
+        foreach ($value as $classes){
+            foreach ($classes as $class)
+                $temp[] = $class;
+        }
+        return $temp;
     }
 }

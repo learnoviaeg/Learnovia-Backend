@@ -21,6 +21,7 @@ use Modules\Attendance\Entities\AttendanceStatus;
 use Modules\Attendance\Jobs\Attendance_sessions;
 use Modules\Attendance\Jobs\AttendanceGradeItems;
 use Modules\Attendance\Jobs\AttendanceSessionsJob;
+use Modules\QuestionBank\Entities\quiz;
 
 class AttendanceController extends Controller
 {
@@ -129,11 +130,11 @@ class AttendanceController extends Controller
             'allowed_levels' => serialize($levels),
             'allowed_courses' => serialize($courses),
             'allowed_classes' => serialize($classes),
-            'year_id'=>$request->year,
-            'segment_id'=>$request->segment,
-            'type_id'=>$request->type,
-            'start_date' =>$request->start,
-            'end_date'=>$request->end
+            'year_id' => $request->year,
+            'segment_id' => $request->segment,
+            'type_id' => $request->type,
+            'start_date' => $request->start,
+            'end_date' => $request->end
 
         ]);
         $default = AttendanceStatus::defaultStatus();
@@ -165,7 +166,7 @@ class AttendanceController extends Controller
         $attendance->allowed_courses = unserialize($attendance->allowed_courses);
         $attendance->allowed_classes = unserialize($attendance->allowed_classes);
         if ($request->attendance_type == Attendance::$FIRST_TYPE && $request->graded == 1) {
-            $jop = (new  AttendanceGradeItems($request->all(),Attendance::$FIRST_TYPE,null));
+            $jop = (new  AttendanceGradeItems($request->all(), Attendance::$FIRST_TYPE, null));
             dispatch($jop);
             return HelperController::api_response_format(200, $attendance, 'attendance created successfully with grade Items');
         } elseif ($request->attendance_type == Attendance::$SECOND_TYPE) {
@@ -185,9 +186,9 @@ class AttendanceController extends Controller
                     ]);
                     $course_segments = GradeCategoryController::getCourseSegmentWithArray($req);
                     $gradeCategories = GradeCategory::where('name', $period['grade_category_name'])->whereIn('course_segment_id', $course_segments)->get();
-                    $job = new AttendanceGradeItems($request->all(), Attendance::$SECOND_TYPE,$gradeCategories);
+                    $job = new AttendanceGradeItems($request->all(), Attendance::$SECOND_TYPE, $gradeCategories);
                     dispatch($job);
-                    $job= new AttendanceSessionsJob($request->all(), $attendance->id, $course_segments, $period,$user_id);
+                    $job = new AttendanceSessionsJob($request->all(), $attendance->id, $course_segments, $period, $user_id);
                     dispatch($job);
                 }
             }
@@ -195,57 +196,137 @@ class AttendanceController extends Controller
         return HelperController::api_response_format(200, $attendance, 'attendance created successfully');
     }
 
-//    public static function second_Type_sessions($request, $attendance_id, $course_segments, $periods)
-//    {
-//        foreach ($course_segments as $course_segment) {
-//            $alldays = Attendance::getAllWorkingDays($request['start'], $request['end']);
-//            $FromTodays = Attendance::getAllWorkingDays($periods['from'], $periods['to']);
-//            if (Attendance::check_in_array($alldays, $FromTodays)) {
-//                foreach ($FromTodays as $day) {
-//                    for ($i = 0; $i < $request['sessions']['times']; $i++) {
-//                        AttendanceSession::create([
-//                            'attendance_id' => $attendance_id,
-//                            'taker_id' => $user_id,
-//                            'date' => $day,
-//                            'course_segment_id' => $course_segment,
-//                            'from' => $request['sessions']['time'][$i]['start'],
-//                            'to' => $request['sessions']['time'][$i]['end']
-//                        ]);
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-
     public function createSession(Request $request)
     {
         $request->validate([
             'attendance_id' => 'required|exists:attendances,id',
-            'days' => 'required|array|min:1|max:5', // all dayes must be small
-            'days.*' => 'required|in:sunday,monday,tuesday,wednesday,thursday',
-            'end_date' => 'required|date',
         ]);
         $attendance = Attendance::find($request->attendance_id);
-        $req = $request->all();
-        $req['attendance_type'] = $attendance->type;
-        $req['attendance_id'] = $attendance->id;
         $user_id = Auth::User()->id;
+        $attendance->allowed_levels = unserialize($attendance->allowed_levels);
+        $attendance->allowed_courses = unserialize($attendance->allowed_courses);
         switch ($attendance->type) {
             case  1 :
-                $course_segments = GradeCategoryController::getCourseSegment($request);
-                $jop = (new Attendance_sessions($req, $user_id, $course_segments));
-                dispatch($jop);
-                return HelperController::api_response_format(200, 'all sesions with all course segments');
-            case 2 :
-                if (!Auth::User()->can('site/attendance/bulck/attendace')) {
-                    return HelperController::api_response_format(200, 'does not have the right permissions ');
-                }
-                $request->validate(['times' => 'required']);
-                $jop = (new Attendance_sessions($req, $user_id, null));
-                dispatch($jop);
-                return HelperController::api_response_format(200, 'all sesions without  course segments');
+                $array = [
+                    'days' => 'array|required|min:1',
+                    'days.*.name' => 'required|string',
+                    'days.*.from' => 'required|regex:/(\d+\:\d+)/',
+                    'days.*.to' => 'required|regex:/(\d+\:\d+)/',
+                    'days.*.date' => 'required|date',
+                    'repeat_untill' => 'date',
+                    'levels' => 'required|array|min:1',
+                    'levels.*.id' => 'exists:levels,id',
+                    'levels.*.class' => 'required|exists:classes,id',
+                    'levels.*.course' => 'required|exists:courses,id',
+                ];
+                $request->validate($array);
+                foreach ($request->levels as $level) {
+                    $req = new Request([
+                        'year' => $attendance->year_id,
+                        'segments' => [$attendance->segment_id],
+                        'type' => [$attendance->type_id],
+                        'levels' => [$level['id']],
+                        'classes' => [$level['class']],
+                        'courses' => [$level['course']]
+                    ]);
+                    $course_segments = GradeCategoryController::getCourseSegmentWithArray($req);
+                    if (!((Attendance::check_in_array($attendance->allowed_classes, $req->classes)) &&
+                        (Attendance::check_in_array($attendance->allowed_levels, $req->levels)) &&
+                        (Attendance::check_in_array($attendance->allowed_courses, $req->courses)))
+                    ) {
+                        return HelperController::api_response_format(400, 'Something wrong with untill date');
+                    }
 
+                    if (!isset($request->repeat_untill)) {
+                        foreach ($course_segments as $course_segment) {
+                            foreach ($request->days as $day) {
+                                AttendanceSession::create([
+                                    'attendance_id' => $attendance->id,
+                                    'taker_id' => $user_id,
+                                    'date' => $day['date'],
+                                    'from' => $day['from'],
+                                    'to' => $day['to'],
+                                    'course_segment_id' => $course_segment
+                                ]);
+                            }
+                        }
+                        return HelperController::api_response_format(200, 'Sessions are created successfully');
+                    }
+                    if($request->repeat_untill>$attendance->end_date){
+                        return HelperController::api_response_format(400, 'Something wrong with data');
+
+                    }
+
+                    foreach ($course_segments as $course_segment) {
+                        foreach ($request->days as $day) {
+                            $startDate = Carbon::parse(Carbon::parse($day['date']))->next(Attendance::GetCarbonDay($day['name']));
+                            $endDate = Carbon::parse($request->repeat_untill);
+
+                            for ($date = $startDate; $date->lte($endDate); $date->addWeek()) {
+                                $alldays[] = $date->format('Y-m-d');
+                                AttendanceSession::create([
+                                    'attendance_id' => $attendance->id,
+                                    'taker_id' => $user_id,
+                                    'date' => $date->format('Y-m-d'),
+                                    'from' => $day['from'],
+                                    'to' => $day['to'],
+                                    'course_segment_id' => $course_segment
+                                ]);
+                            }
+
+                        }
+
+                    }
+                }
+                break;
+            case 2:
+                $request->validate([
+                    'sessions.times' => 'required|integer',
+                ]);
+
+                $array = [
+                    'levels' => 'required|array|min:1',
+                    'levels.*.id' => 'exists:levels,id',
+                    'levels.*.classes' => 'required|array',
+                    'levels.*.classes.*' => 'required|exists:classes,id',
+                    'levels.*.periods' => 'required|array',
+                    'levels.*.periods.*.courses' => 'required|exists:courses,id',
+                    'levels.*.periods.*.from' => 'required|date',
+                    'levels.*.periods.*.to' => 'required|date',
+                    'levels.*.periods.*.grade_category_name' => 'required|string|exists:grade_categories,name',
+                    'sessions' => 'required',
+                    'sessions.time.*.start' => 'required|regex:/(\d+\:\d+)/',
+                    'sessions.time.*.end' => 'required|regex:/(\d+\:\d+)/',
+                ];
+                $array['sessions.time'] = 'required|array|size:' . $request->sessions['times'];
+                $request->validate($array);
+                $request['start'] = $attendance->start_date;
+                $request['end'] = $attendance->end_date;
+                foreach ($request->levels as $level) {
+                    foreach ($level['periods'] as $period) {
+                        $req = new Request([
+                            'year' => $attendance->year_id,
+                            'segments' => [$attendance->segment_id],
+                            'type' => [$attendance->type_id],
+                            'levels' => [$level['id']],
+                            'classes' => $level['classes'],
+                            'courses' => [$period['courses']]
+                        ]);
+                        if (!((Attendance::check_in_array($attendance->allowed_classes, $req->classes)) &&
+                            (Attendance::check_in_array($attendance->allowed_levels, $req->levels)) &&
+                            (Attendance::check_in_array($attendance->allowed_courses, $req->courses)))
+                        ) {
+                            return HelperController::api_response_format(400, 'Something wrong with data');
+                        }
+                        $course_segments = GradeCategoryController::getCourseSegmentWithArray($req);
+                        $job = new AttendanceSessionsJob($request->all(), $attendance->id, $course_segments, $period, $user_id);
+                        dispatch($job);
+                    }
+                }
+                return HelperController::api_response_format(200, 'Sessions are created successfully');
         }
+        return HelperController::api_response_format(200, 'Sessions are created successfully');
+
+
     }
 }
