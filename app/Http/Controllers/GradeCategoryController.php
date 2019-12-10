@@ -32,16 +32,15 @@ class GradeCategoryController extends Controller
             'course' => 'required|exists:course_segments,course_id',
             'class' => 'required|exists:classes,id',
             'parent' => 'nullable|exists:grade_categories,id',
-            'aggregation' => 'integer',
-            'aggregatedOnlyGraded' => 'integer',
+            'aggregation' => 'nullable|integer',
+            'aggregatedOnlyGraded' => 'nullable|integer',
             'hidden' => 'integer',
-            'id_number' => 'integer',
-            'grademin' => 'required_if:type,==,1|integer|min:0',
-            'grademax' => 'required_if:type,==,1|integer|gt:grademin',
+            'grademin' => 'nullable|required_if:type,==,1|integer|min:0',
+            'grademax' => 'nullable|required_if:type,==,1|integer|gt:grademin',
             'type' => 'boolean|required',
-            'exclude_flag' => 'boolean',
-            'locked' => 'boolean',
-            'override' => 'boolean'
+            'exclude_flag' => 'boolean|required',
+            'locked' => 'nullable|boolean',
+            'weight' => 'integer|required_if:exclude_flag,==,1'
         ]);
         $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (isset($course_segment_id)) {
@@ -51,17 +50,17 @@ class GradeCategoryController extends Controller
             $grade_category = GradeCategory::create([
                 'name' => $request->name,
                 'course_segment_id' => $course_segment_id->id,
-                'parent' => (isset($request->parent)) ? $request->parent :null,
+                'parent' => $request->parent,
+                'id_number' => $year_level[0]->id,
+                'aggregation' => $request->aggregation,
                 'locked' => (isset($request->locked)) ? $request->locked :null,
-                'id_number' => (isset($request->id_number)) ? $request->id_number : null,
-                'aggregation' => (isset($request->aggregation)) ? $request->aggregation :null,
-                'aggregatedOnlyGraded' => (isset($request->aggregatedOnlyGraded)) ? $request->aggregatedOnlyGraded :null,
+                'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
                 'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
-                'override' => (isset($request->override)) ? $request->override : 0,
+                'weight' => ($request->exclude_flag==1) ? $request->weight : 0,
                 'grademax' => ($request->type==1) ? $request->grademax : null,
                 'grademin' => ($request->type==1) ? $request->grademin : null,
                 'type' => $request->type,
-                'exclude_flag' => (isset($request->exclude_flag)) ? $request->exclude_flag : 0,
+                'exclude_flag' => $request->exclude_flag
             ]);
 
             return HelperController::api_response_format(200, $grade_category, 'Grade Category is created successfully');
@@ -93,6 +92,7 @@ class GradeCategoryController extends Controller
             'grades.*.type' => 'boolean|required',
             'grades.*.exclude_flag' => 'boolean|nullable',
             'grades.*.locked' => 'boolean|nullable',
+            'grades.*.weight' => 'integer|required_if:grades.*.exclude_flag,==,1',
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id|required_with:level',
             'level' => 'exists:levels,id|required_with:class',
@@ -398,14 +398,15 @@ class GradeCategoryController extends Controller
             'segment' => 'exists:segments,id',
             'courses' => 'array|exists:courses,id',
             'parent' => 'nullable|exists:grade_categories,id',
-            'aggregation' => 'integer',
-            'aggregatedOnlyGraded' => 'integer',
+            'aggregation' => 'integer|nullable',
+            'aggregatedOnlyGraded' => 'nullable|integer',
             'hidden' => 'integer',
-            'grademin' => 'required_if:type_grade,==,1|integer',
-            'grademax' => 'required_if:type_grade,==,1|integer',
+            'grademin' => 'nullable|required_if:type_grade,==,1|integer',
+            'grademax' => 'nullable|required_if:type_grade,==,1|integer',
             'type_grade' => 'boolean|required',
             'exclude_flag' => 'boolean',
-            'override' => 'boolean'
+            'weight' => 'integer',
+            'locked' => 'nullable|boolean',
         ]);
 
         $grade_category=[];
@@ -422,23 +423,24 @@ class GradeCategoryController extends Controller
 
                     if(isset($gradeCat))
                     {
-                        $grade_category[] = $gradeCat->update([
+                        $gradeCat->update([
                             'name' => $request->newname,
                             'course_segment_id' => $course,
                             'parent' => (isset($request->parent)) ? $request->parent : $gradeCat->parent ,
                             'aggregation' => (isset($request->aggregation)) ? $request->aggregation : $gradeCat->aggregation,
                             'aggregatedOnlyGraded' => (isset($request->aggregatedOnlyGraded)) ? $request->aggregatedOnlyGraded : $gradeCat->aggregatedOnlyGraded,
                             'hidden' => (isset($request->hidden)) ? $request->hidden : $gradeCat->hidden,
-                            'override' => (isset($request->override)) ? $request->override : $gradeCat->override,
+                            'weight' => (isset($request->weight)) ? $request->weight : $gradeCat->weight,
                             'grademax' => ($request->type_grade==1) ? $request->grademax : $gradeCat->grademax,
                             'grademin' => ($request->type_grade==1) ? $request->grademin : $gradeCat->grademin,
-                            'type_grade' => $request->type_grade,
+                            'type_grade' => (isset($request->type_grade)) ? $request->type_grade: 0,
+                            'locked' => (isset($request->locked)) ? $request->locked :null,
                             'id_number' => $year_level[0]->id,
                             'exclude_flag' => (isset($request->exclude_flag)) ? $request->exclude_flag : $gradeCat->exclude_flag
                         ]);
                     }
                 }
-            return HelperController::api_response_format(200, $grade_category, 'Grade categories updated');
+            return HelperController::api_response_format(200, null, 'Grade categories updated');
         } else {
             return HelperController::api_response_format(200, 'There is No Course segment available.');
         }

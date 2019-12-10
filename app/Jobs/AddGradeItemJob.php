@@ -14,9 +14,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 class AddGradeItemJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $grade_cat=array();
     public $items=array();
-    public $itemcoll;
+    public $cat;
     public $coursesegment;
 
     /**
@@ -24,12 +23,11 @@ class AddGradeItemJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($items,$coursesegment)
+    public function __construct($items,$cat,$coursesegment)
     {
         $this->coursesegment=$coursesegment;
         $this->items=$items;
-        $this->itemcoll=collect($items);
-        $this->grade_cat=$this->itemcoll->pluck('grade_category')->first();
+        $this->cat=$cat;
     }
 
     /**
@@ -41,7 +39,7 @@ class AddGradeItemJob implements ShouldQueue
     {
         foreach($this->coursesegment as $corseseg)
         {
-            $cat_id=GradeCategory::where('name',$this->grade_cat)->where('course_segment_id',$corseseg)->get(['id','id_number'])->first();
+            $cat_id=GradeCategory::where('name',$this->cat)->where('course_segment_id',$corseseg)->get(['id','id_number'])->first();
             if(!is_null($cat_id))
             {
                 foreach($this->items as $item)
