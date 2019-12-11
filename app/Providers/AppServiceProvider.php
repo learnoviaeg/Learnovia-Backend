@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Observers\UserGradeObserver;
+use App\UserGrade;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -36,5 +38,7 @@ class AppServiceProvider extends ServiceProvider
                 ]
             );
         });
+
+        UserGrade::observe(UserGradeObserver::class);
     }
 }
