@@ -23,7 +23,6 @@ class UserGradeController extends Controller
      */
     public function create(Request $request)
     {
-
         $request->validate([
             'users'                     => 'required|array',
             'users.*.id'                => 'required|exists:users,id',
@@ -39,6 +38,11 @@ class UserGradeController extends Controller
                     ->first();
                 if ($enroll == null)
                     return HelperController::api_response_format(200, null, 'User with id : ' . $user['id'] . ' have not assigned to have grade in grade item ' . $item['id']);
+                $check = UserGrade::where('grade_item_id',$item['id'])
+                ->where('user_id' , $user['id'])
+                ->first();
+                if($check != null)
+                    return HelperController::api_response_format(200, null, 'User graded before in thi item with grade : ' . $check->final_grade);
                 $temp = UserGrade::create([
                     'grade_item_id' => $item['id'],
                     'user_id' => $user['id'],
@@ -142,12 +146,21 @@ class UserGradeController extends Controller
     {
         $request->validate([
             'course' => 'required|exists:courses,id',
-            'class'  => 'required|exists:classes,id'
+            'class'  => 'required|exists:classes,id',
+            'user'   => 'nullable|exists:users,id',
+            'search' => 'nullable|string'
         ]);
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if ($courseSegment == null)
             return HelperController::api_response_format(200, null, 'This Course not assigned to this class');
-        $users = User::whereIn('id', Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('id'))->get(['id', 'firstname', 'lastname', 'username', 'arabicname', 'picture']);
+        $users = User::whereIn('id', Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('id'));
+
+        if($request->filled('user'))
+            $users->whereId($request->user);
+
+        if($request->filled('search'))
+            $users->where('username' , 'like', '%' . $request->search. '%');
+        $users = $users->get(['id', 'firstname', 'lastname', 'username', 'arabicname', 'picture']);
         $gradeCategories = $courseSegment->where('id', $courseSegment->id)->with('GradeCategory.GradeItems')->get()->pluck('GradeCategory')[0];
         $first = true;
         $grades = [];
