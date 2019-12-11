@@ -361,6 +361,12 @@ class GradeItemController extends Controller
         $result = [];
         $gradeItems = GradeItems::whereNotNull('id_number')->get();
         foreach ($gradeItems as $item) {
+            $item->weight = $item->weight();
+            unset($item->GradeCategory);
+            $item->GradeCategory->weight = $item->GradeCategory->weight();
+            unset($item->GradeCategory->Parents);
+            unset($item->GradeCategory->GradeItems);
+            unset($item->GradeCategory->Children);
             if (!isset($result[$item->name])) {
                 $result[$item->name] = $item;
                 $result[$item->name]->levels = collect();

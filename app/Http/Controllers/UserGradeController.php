@@ -67,11 +67,10 @@ class UserGradeController extends Controller
                     if(isset($request->user[$key]['raw_grade_min'][$keys])) {
                         $data['raw_grade_min']=$request->user[$key]['raw_grade_min'][$keys];
                     }
-                    $grade=UserGrade::create($data);
+                    $grade[]=UserGrade::create($data);
                 }
             }
             return HelperController::api_response_format(201,$grade,'Users Grades are Created Successfully');
-
         }
 
     /**
@@ -224,7 +223,7 @@ class UserGradeController extends Controller
         if(!$courseSeg)
             return HelperController::api_response_format(201, 'this course haven\'t course segment');
 
-        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->with('GradeItems')->get();
+        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->with('GradeItems')->get();       
         $gradeitems=$gradeCat->pluck('GradeItems');
         $userGrade=[];
         foreach($gradeitems as $items){
@@ -233,6 +232,10 @@ class UserGradeController extends Controller
             if($temp != null)
                 $userGrade[]=$temp;
         }
+        // $userGrade[0]->GradeItems->weight=$userGrade[0]->GradeItems->weight();
+        // unset($userGrade[0]->GradeItems->GradeCategory);
+        // $userGrade[0]->GradeItems->GradeCategory;
+
         return HelperController::api_response_format(201, $userGrade);
     }
 

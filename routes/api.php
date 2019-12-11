@@ -259,7 +259,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'item', 'middleware' => 'auth:api'], function () {
         Route::post('add', 'GradeItemController@create')->name('addgrade')->middleware('permission:grade/item/add');
         Route::get('get', 'GradeItemController@list')->name('getgrade')->middleware('permission:grade/item/get');
-        Route::get('get-bulk', 'GradeItemController@GetAllGradeItems')->name('getbulkgrade')->middleware('permission:grade/item/get-bulk');
+        Route::get('get-bulk', 'GradeItemController@GetAllGradeItems')->name('getbulkgradeitem')->middleware('permission:grade/item/get-bulk');
         Route::post('delete', 'GradeItemController@delete')->name('deletegrade')->middleware('permission:grade/item/delete');
         Route::post('update', 'GradeItemController@update')->name('updategrade')->middleware('permission:grade/item/update');
         Route::get('grading-method', 'GradeItemController@gradeing_method')->name('gradingmethod')->middleware('permission:grade/item/grading-method');
@@ -281,7 +281,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
 
     Route::group(['prefix' => 'report'] , function(){
         Route::get('grader' ,'UserGradeController@graderReport')->name('graderReport');//->middleware('permission:grade/report/grader');
-        Route::post('user', 'UserGradeController@SingleUserInSingleCourse')->name('getallusergrades')->middleware('permission:grade/report/user');
+        Route::get('user', 'UserGradeController@SingleUserInSingleCourse')->name('getallusergrades')->middleware('permission:grade/report/user');
         //Route::post('getallGrades', 'UserGradeController@AllUserInCourse')->name('getallusersgrades')->middleware('permission:grade/report/overview');
         Route::post('over-all', 'UserGradeController@AllUserInAllCourses')->name('getalluserscoursesgrades')->middleware('permission:grade/report/over-all');
     });
