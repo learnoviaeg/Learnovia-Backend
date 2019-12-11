@@ -216,7 +216,6 @@ class UserGradeController extends Controller
         if (!$courseSeg)
             return HelperController::api_response_format(201, 'this course haven\'t course segment');
 
-<<<<<<< HEAD
         $gradeCat = GradeCategory::where('course_segment_id', $courseSeg->id)->with('GradeItems')->get();
         $gradeitems = $gradeCat->pluck('GradeItems');
         $userGrade = [];
@@ -225,16 +224,6 @@ class UserGradeController extends Controller
                 ->with('GradeItems', 'GradeItems.GradeCategory')->first();
             if ($temp != null)
                 $userGrade[] = $temp;
-=======
-        $gradeCat=GradeCategory::where('course_segment_id',$courseSeg->id)->with('GradeItems')->get();
-        $gradeitems=$gradeCat->pluck('GradeItems');
-        $userGrade=[];
-        foreach($gradeitems as $items){
-            $temp = UserGrade::where('user_id',$request->user_id)->whereIn('grade_item_id',$items)
-                                ->with('GradeItems','GradeItems.GradeCategory')->first();
-            if($temp != null)
-                $userGrade[]=$temp;
->>>>>>> cd433be48db66515ad13b56c28d2144698b50391
         }
         // $userGrade[0]->GradeItems->weight=$userGrade[0]->GradeItems->weight();
         // unset($userGrade[0]->GradeItems->GradeCategory);
