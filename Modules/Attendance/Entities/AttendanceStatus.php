@@ -33,8 +33,12 @@ class AttendanceStatus extends Model
         ];
     }
     public function Attendence()
+{
+    return $this->belongsTo('Modules\Attendance\Entities\Attendance', 'attendance_id' , 'id' );
+}
+    public function user()
     {
-        return $this->belongsTo('Modules\Attendance\Entities\Attendance', 'attendance_id' , 'id' );
+        return $this->belongsTo('App\User', 'user_id' , 'id' );
     }
 
 }
