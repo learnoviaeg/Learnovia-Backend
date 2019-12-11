@@ -31,14 +31,14 @@ class AcademicYear extends Model
         return $this->hasMany('App\AcademicYearType', 'academic_year_id' , 'id');
     }
 
-    public static function getAllYearLevel($year = null ,$level = null){
+    public static function getAllYearLevel($year = null ,$levels = null){
         $result = collect();
         $start = self::Get_current();
         if($year)
             $start = self::find($year);
-        $YearLevels = $start->where('id', $start->id)->with(['YearType.yearLevel' => function ($query) use ($level) {
-            if($level != null)
-                $query->where('level_id', $level);
+        $YearLevels = $start->where('id', $start->id)->with(['YearType.yearLevel' => function ($query) use ($levels) {
+            if(isset($levels))
+                $query->whereIn('level_id', $levels);
         }])->first();
         $types = $YearLevels->YearType;
         foreach($types as $type){

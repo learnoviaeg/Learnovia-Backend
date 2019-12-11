@@ -6,6 +6,7 @@ use App\GradeCategory;
 use App\CourseSegment;
 use App\AcademicYear;
 use App\YearLevel;
+use App\Level;
 use Illuminate\Http\Request;
 use App\Segment;
 use stdClass;
@@ -51,7 +52,6 @@ class GradeCategoryController extends Controller
                 'name' => $request->name,
                 'course_segment_id' => $course_segment_id->id,
                 'parent' => $request->parent,
-                'id_number' => $year_level[0]->id,
                 'aggregation' => $request->aggregation,
                 'locked' => (isset($request->locked)) ? $request->locked :null,
                 'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
@@ -147,7 +147,7 @@ class GradeCategoryController extends Controller
         }
         if($grade_category == null)
             return HelperController::api_response_format(200, $grade_category,'No assigned Grade Categories, No Grade with this name');
-    
+
         return HelperController::api_response_format(200, $grade_category,'Grade Categories Assigned.');
     }
 
@@ -550,7 +550,7 @@ class GradeCategoryController extends Controller
      * @return if there is no course segment [string] There is No Course segment available.
      * @return [objects] grade categories
      */
-    public function GetAllGradeCategory(Request $request)
+    public function GetAllGradeCategory()
     {
         $result = [];
         $gradeCategories = GradeCategory::whereNotNull('id_number')->get();
@@ -565,6 +565,33 @@ class GradeCategoryController extends Controller
             if (!$result[$gradeCategory->name]->levels->contains($temp))
                 $result[$gradeCategory->name]->levels->push($temp);
         }
+        return HelperController::api_response_format(200, $result);
+    }
+
+    public function GetAllGradeCategoryByLevels(Request $request)
+    {
+        $request->validate([
+            'levels' => 'required|array|exists:levels,id'
+        ]);
+        $result = [];
+        $yearL=array();
+        $yearL=AcademicYear::getAllYearLevel(null,$request->levels);
+        $gradeCategories = GradeCategory::whereNotNull('id_number')->get();
+
+        foreach ($gradeCategories as $gradeCategory) {
+            if(in_array($gradeCategory->id_number,$yearL->toArray()))
+            {
+                if (!isset($result[$gradeCategory->name])) {
+                    $result[$gradeCategory->name] = $gradeCategory;
+                    $result[$gradeCategory->name]->levels = collect();
+                }
+                $temp = new stdClass();
+                $temp->name = YearLevel::find($gradeCategory->id_number)->levels[0]->name;
+                $temp->id = $gradeCategory->id_number;
+                    if (!$result[$gradeCategory->name]->levels->contains($temp))
+                    $result[$gradeCategory->name]->levels->push($temp);
+                }
+            }
         return HelperController::api_response_format(200, $result);
     }
 }
