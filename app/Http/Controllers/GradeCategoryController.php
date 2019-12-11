@@ -372,6 +372,63 @@ class GradeCategoryController extends Controller
         return $array;
     }
 
+    public  static function getCourseSegmentWithArray(Request $request)
+    {
+        $year = AcademicYear::Get_current();
+        if ($request->filled('year'))
+            $year = AcademicYear::find($request->year);
+        $YearTypes = $year->where('id', $year->id)->with(['YearType' => function ($query) use ($request) {
+            if ($request->filled('type'))
+                $query->whereIn('academic_type_id', $request->type);
+        }, 'YearType.yearLevel' => function ($query) use ($request) {
+            if ($request->filled('levels'))
+                $query->whereIn('level_id', $request->levels);
+        }, 'YearType.yearLevel.classLevels' => function ($query) use ($request) {
+            if ($request->filled('classes'))
+                $query->whereIn('class_id', $request->classes);
+        }, 'YearType.yearLevel.classLevels.segmentClass' => function ($query) use ($request) {
+            if ($request->filled('type')) {
+                $ids = [];
+                foreach ($request->type as $type){
+                    $ids[]= Segment::Get_current($type)->id;
+                }
+                if ($request->filled('segments'))
+                    $ids = $request->segments;
+                $query->whereIn('segment_id', $ids);
+            }
+        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function ($query)  use ($request) {
+            if ($request->filled('courses'))
+                $query->whereIn('course_id', $request->courses);
+            if ($request->filled('typical'))
+                $query->where('typical', $request->typical);
+        }])->get()->pluck('YearType')[0];
+        $array = collect();
+        if (count($YearTypes) > 0) {
+            $YearTypes = $YearTypes->pluck('yearLevel');
+            if (count($YearTypes) > 0) {
+                for ($i = 0; $i < count($YearTypes); $i++) {
+                    $classes = $YearTypes[$i]->pluck('classLevels');
+                    if (count($classes) > 0) {
+                        for ($j = 0; $j < count($classes); $j++) {
+                            $segments = $classes[$j]->pluck('segmentClass');
+                            if (count($segments) > 0) {
+                                for ($k = 0; $k < count($segments); $k++) {
+                                    $courseSegments = $segments[$k]->pluck('courseSegment');
+
+                                    foreach ($courseSegments as $courseSegment) {
+                                        foreach ($courseSegment as $value) {
+                                            $array->push($value->id);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $array;
+    }
     /**
      * bulk update grade
      *
