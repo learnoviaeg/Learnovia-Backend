@@ -182,6 +182,14 @@ class GradeCategoryController extends Controller
     {
         if ($request->filled('id')) {
             $gradeCategory = GradeCategory::with('Child')->where('id', $request->id)->first();
+            $gradeCategory->weight = $gradeCategory->weight();
+            foreach($gradeCategory->child as $chil)
+            {
+                 $chil->weight = $chil->weight();
+                 unset($chil->Parents);
+                 unset($chil->GradeItems);
+                 unset($chil->Children);
+            }
         } else {
           
             $gradeCategory = GradeCategory::with('Child')->get();
@@ -318,6 +326,10 @@ class GradeCategoryController extends Controller
             return HelperController::api_response_format(200, null, 'This Course not assigned to this class');
         $grade_category = GradeCategory::where('course_segment_id', $courseSegment->id)->with('Children', 'GradeItems')
             ->first();
+        $grade_category->weight=$grade_category->weight();
+        unset($grade_category->Parents);
+        // unset($gradeCategory->GradeItems);
+        // unset($gradeCategory->Children);
         return HelperController::api_response_format(200, $grade_category);
     }
 
@@ -570,6 +582,10 @@ class GradeCategoryController extends Controller
         $result = [];
         $gradeCategories = GradeCategory::whereNotNull('id_number')->get();
         foreach ($gradeCategories as $gradeCategory) {
+            $gradeCategory->weight=$gradeCategory->weight();
+            unset($gradeCategory->Parents);
+            unset($gradeCategory->GradeItems);
+            unset($gradeCategory->Children);
             if (!isset($result[$gradeCategory->name])) {
                 $result[$gradeCategory->name] = $gradeCategory;
                 $result[$gradeCategory->name]->levels = collect();
