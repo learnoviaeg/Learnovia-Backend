@@ -342,8 +342,17 @@ class GradeItemController extends Controller
      * @return [objects] all grade items with Grade category and item type and scale
      */
     public function list()
-    {
+    {   
         $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale'])->get();
+        foreach($grade as $g)
+        {    
+            $g->weight = $g->weight();
+            unset($g->GradeCategory);
+            $g->GradeCategory->weight = $g->GradeCategory->weight();
+            unset($g->GradeCategory->Parents);
+            unset($g->GradeCategory->GradeItems);
+            unset($g->GradeCategory->Children);
+        }
         return HelperController::api_response_format(200, $grade);
     }
 
