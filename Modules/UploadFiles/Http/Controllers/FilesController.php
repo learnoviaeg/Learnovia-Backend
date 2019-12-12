@@ -231,11 +231,6 @@ class FilesController extends Controller
                         'publish_date' => $publishdate,
                     ]);
                     if ($check) {
-                        $filesegment = new FileCourseSegment;
-                        $filesegment->course_segment_id = $tempLesson->courseSegment->id;
-                        $filesegment->file_id = $file->id;
-                        $filesegment->save();
-
                         $maxIndex = FileLesson::where('lesson_id', $lesson)->max('index');
 
                         if ($maxIndex == null) {
