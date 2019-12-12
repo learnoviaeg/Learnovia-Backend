@@ -2,6 +2,7 @@
 
 namespace Modules\Attendance\Http\Controllers;
 
+use App\Enroll;
 use App\Http\Controllers\HelperController;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -22,30 +23,27 @@ class AttendanceLogController extends Controller
         $date = Carbon::now();
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
-            'student_ids' => 'required|exists:users,id|array',
-            'status_ids' => 'required|exists:attendance_statuses,id|array',
+            'users' => 'required|array',
+            'users.*.id' => 'required|exists:users,id',
+            'users.*.status_id' => 'required|exists:attendance_statuses,id',
         ]);
-        if(count($request->student_ids) !=count($request->status_ids) ){
-            return HelperController::api_response_format(400, null , 'size of students array not equal size of status');
-        }
-        $allowed_status = AttendanceSession::find($request->session_id)->Attendence->status->pluck('id');
-        $request->validate([
-            'status_ids.*' =>[ 'required', Rule::in($allowed_status)],
-        ]);
-        AttendanceSession::find($request->session_id)->update(['last_time_taken' => $date]);
-        for ($i = 0; $i < count($request->student_ids); $i++) {
-            $AttendanceLog[] = AttendanceLog::create([
-                'ip_address' => $ip,
-                'session_id' => $request->session_id,
-                'student_id' => $request->student_ids[$i],
-                'status_id' => $request->status_ids[$i],
-                'taker_id' => $user_id,
-                'taken_at' => $date
-            ]);
-        }
-        return HelperController::api_response_format(200, $AttendanceLog , 'Attendance Log ...');
 
-
+        $attendance_sessions = AttendanceSession::find($request->session_id);
+        $attendance_sessions->update(['last_time_taken' => $date]);
+        $enroll = Enroll::where('course_segment', $attendance_sessions->course_segment_id)->pluck('user_id');
+        foreach ($request->users as $user) {
+            if (in_array($user['id'], $enroll->toArray())) {
+                $AttendanceLog[] = AttendanceLog::create([
+                    'ip_address' => $ip,
+                    'session_id' => $request->session_id,
+                    'student_id' => $user['id'],
+                    'status_id' => $user['status_id'],
+                    'taker_id' => $user_id,
+                    'taken_at' => $date
+                ]);
+            }
+        }
+        return HelperController::api_response_format(200, $AttendanceLog, 'Attendance Log ...');
     }
 
 
