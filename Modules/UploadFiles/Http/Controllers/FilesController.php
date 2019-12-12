@@ -31,25 +31,25 @@ class FilesController extends Controller
         if (\Spatie\Permission\Models\Permission::whereName('file/add')->first() != null) {
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add','title' => 'add file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update','title' => 'update file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete','title' => 'delete file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle','title' => 'toggle file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/add','title' => 'add media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/update','title' => 'update media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/delete','title' => 'delete media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/toggle','title' => 'toggle media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/media/get','title' => 'get file and media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/add','title' => 'add link']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/update','title' => 'update link']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/sort','title' => 'sort file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/sort','title' => 'sort media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get-all','title' => 'get all files']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get-all','title' => 'get all media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get','title' => 'get media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get','title' => 'get file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/file/edit','title' => 'update file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/media/edit','title' => 'update media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add', 'title' => 'add file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update', 'title' => 'update file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete', 'title' => 'delete file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle', 'title' => 'toggle file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/add', 'title' => 'add media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/update', 'title' => 'update media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/delete', 'title' => 'delete media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/toggle', 'title' => 'toggle media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/media/get', 'title' => 'get file and media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/add', 'title' => 'add link']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/update', 'title' => 'update link']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/sort', 'title' => 'sort file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/sort', 'title' => 'sort media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get-all', 'title' => 'get all files']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get-all', 'title' => 'get all media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get', 'title' => 'get media']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get', 'title' => 'get file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/file/edit', 'title' => 'update file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/media/edit', 'title' => 'update media']);
 
 
 
@@ -76,7 +76,7 @@ class FilesController extends Controller
 
         Component::create([
             'name' => 'Media',
-            'module'=>'UploadFiles',
+            'module' => 'UploadFiles',
             'model' => 'media',
             'type' => 1,
             'active' => 1
@@ -84,7 +84,7 @@ class FilesController extends Controller
 
         Component::create([
             'name' => 'File',
-            'module'=>'UploadFiles',
+            'module' => 'UploadFiles',
             'model' => 'file',
             'type' => 1,
             'active' => 1
@@ -94,31 +94,33 @@ class FilesController extends Controller
     }
 
 
-    public function getAllFiles(Request $request){
+    public function getAllFiles(Request $request)
+    {
         $request->validate([
             'course' => 'required_with:class|integer|exists:courses,id',
             'class' => 'required_with:course|integer|exists:classes,id',
         ]);
         $FILES = collect([]);
 
-        if(isset($request->class)){
+        if (isset($request->class)) {
 
             $class = Classes::with([
                 'classlevel.segmentClass.courseSegment' =>
-                    function ($query) use ($request) {
-                        $query->with(['lessons'])->where('course_id',$request->course);
-                    }])->whereId($request->class)->first();
+                function ($query) use ($request) {
+                    $query->with(['lessons'])->where('course_id', $request->course);
+                }
+            ])->whereId($request->class)->first();
 
-            foreach($class->classlevel->segmentClass as $segmentClass){
-                foreach($segmentClass->courseSegment as $courseSegment){
-                    foreach($courseSegment->lessons as $lesson){
+            foreach ($class->classlevel->segmentClass as $segmentClass) {
+                foreach ($segmentClass->courseSegment as $courseSegment) {
+                    foreach ($courseSegment->lessons as $lesson) {
 
-                        foreach($lesson->fileLesson as $fileLesson){
+                        foreach ($lesson->fileLesson as $fileLesson) {
                             $allFiles = $fileLesson->File;
 
                             foreach ($allFiles as $file) {
                                 $lesson_id = $file->FileLesson->lesson_id;
-                                $file->path  = URL::asset('storage/files/'.$lesson_id.'/'.$file->id.'/'.$file->name);
+                                $file->path  = URL::asset('storage/files/' . $lesson_id . '/' . $file->id . '/' . $file->name);
 
                                 $userid = $file->user->id;
                                 $firstname = $file->user->firstname;
@@ -136,16 +138,14 @@ class FilesController extends Controller
                             }
                         }
                     }
-
                 }
             }
-        }
-        else{
+        } else {
             $allFiles = File::all();
 
             foreach ($allFiles as $file) {
                 $lesson_id = $file->FileLesson->lesson_id;
-                $file->path  = URL::asset('storage/files/'.$lesson_id.'/'.$file->id.'/'.$file->name);
+                $file->path  = URL::asset('storage/files/' . $lesson_id . '/' . $file->id . '/' . $file->name);
 
                 $userid = $file->user->id;
                 $firstname = $file->user->firstname;
@@ -162,109 +162,89 @@ class FilesController extends Controller
                 $FILES->push($file);
             }
         }
-        return HelperController::api_response_format(200,$FILES);
-
+        return HelperController::api_response_format(200, $FILES);
     }
 
     /**
-     * Store a array of files to specific course segment.
+     * Store a array of files to specific lessons.
      * @param Request $request
      * Following sending in the request
      * @param description of the file
      * @param Imported_file of the array of files
-     * @param course_segment_id id of the course segment
      * @param from as the start date of showing this file.
      * @param to as the end date of showing this file
      * @return Response as success Message
      */
     public function store(Request $request)
     {
-        try {
-            $request->validate([
-                'description' => 'string|min:1',
-                'Imported_file' => 'required|array',
-                'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-                'lesson_id' => 'required|array|exists:lessons,id',
-                'publish_date'=>'nullable',
-            ]);
+        $request->validate([
+            'description' => 'string|min:1',
+            'Imported_file' => 'required|array',
+            'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
+            'lesson_id' => 'required|array|exists:lessons,id',
+            'publish_date' => 'nullable',
+        ]);
 
-            if($request->filled('publish_date'))
-            {
-                $publishdate=$request->publish_date;
-                if(Carbon::parse($request->publish_date)->isPast()){
-                    $publishdate=Carbon::now();
-                }
+        if ($request->filled('publish_date')) {
+            $publishdate = $request->publish_date;
+            if (Carbon::parse($request->publish_date)->isPast()) {
+                $publishdate = Carbon::now();
             }
-            else
-            {
-                $publishdate=Carbon::now();
-            }
-            foreach($request->lesson_id as $lesson)
-            {
-                $tempLesson = Lesson::find($lesson);
-                foreach ($request->Imported_file as $singlefile) {
-                    $extension = $singlefile->getClientOriginalExtension();
-                    $fileName = $singlefile->getClientOriginalName();
-                    $size = $singlefile->getSize();
-                    $description = $request->description;
-                    $name = uniqid() . '.' . $extension;
-                    $file = new file;
-                    $file->type = $extension;
-                    $file->name = $name;
-                    $file->description = $description;
-                    $file->size = $size;
-                    $file->attachment_name =$fileName;
-                    $file->user_id = Auth::user()->id;
-                    $check = $file->save();
-                    $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $lesson . '/' . $name);
-                    $file->url2 = url('public/storage/files/' . $lesson . '/' . $name);
-                    $file->save();
-                    $courseID=CourseSegment::where('id',$tempLesson->courseSegment->id)->pluck('course_id')->first();
-                    $usersIDs=Enroll::where('course_segment',$tempLesson->courseSegment->id)->pluck('user_id')->toarray();
-                    User::notify([
-                        'message' => 'new file is added',
-                        'from' => Auth::user()->id,
-                        'users' => $usersIDs,
-                        'course_id' => $courseID,
-                        'type' => 'file',
-                        'link' => $file->url,
-                        'publish_date' => $publishdate,
-                    ]);
-                    if ($check) {
-                        $maxIndex = FileLesson::where('lesson_id', $lesson)->max('index');
-
-                        if ($maxIndex == null) {
-                            $newIndex = 1;
-                        } else {
-                            $newIndex = ++$maxIndex;
-                        }
-
-                        $fileLesson = new FileLesson;
-                        $fileLesson->lesson_id =$lesson;
-                        $fileLesson->file_id = $file->id;
-                        $fileLesson->index = $newIndex;
-                        $fileLesson->publish_date = $publishdate;
-
-                        $fileLesson->save();
-                        LessonComponent::create([
-                            'lesson_id' => $fileLesson->lesson_id,
-                            'comp_id'   => $fileLesson->file_id,
-                            'module'    => 'UploadFiles',
-                            'model'     => 'file',
-                            'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
-                        ]);
-                        Storage::disk('public')->putFileAs(
-                            'files/' . $request->$lesson ,
-                            $singlefile,
-                            $name
-                        );
-                    }
-                }
-            }
-            return HelperController::api_response_format(200, $file, 'Upload Successfully');
-        } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
+        } else {
+            $publishdate = Carbon::now();
         }
+        foreach ($request->lesson_id as $lesson) {
+            $tempLesson = Lesson::find($lesson);
+            foreach ($request->Imported_file as $singlefile) {
+                $extension = $singlefile->getClientOriginalExtension();
+                $fileName = $singlefile->getClientOriginalName();
+                $size = $singlefile->getSize();
+                $description = $request->description;
+                $name = uniqid() . '.' . $extension;
+                $file = new file;
+                $file->type = $extension;
+                $file->name = $name;
+                $file->description = $description;
+                $file->size = $size;
+                $file->attachment_name = $fileName;
+                $file->user_id = Auth::user()->id;
+                $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $name);
+                $file->url2 = url('public/storage/files/' . $name);
+                $check = $file->save();
+                $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
+                $usersIDs = Enroll::where('course_segment', $tempLesson->courseSegment->id)->pluck('user_id')->toarray();
+                User::notify([
+                    'message' => 'new file is added',
+                    'from' => Auth::user()->id,
+                    'users' => $usersIDs,
+                    'course_id' => $courseID,
+                    'type' => 'file',
+                    'link' => $file->url,
+                    'publish_date' => $publishdate,
+                ]);
+                if ($check) {
+                    $fileLesson = new FileLesson;
+                    $fileLesson->lesson_id = $lesson;
+                    $fileLesson->file_id = $file->id;
+                    $fileLesson->index = FileLesson::getNextIndex($lesson);
+                    $fileLesson->publish_date = $publishdate;
+                    $fileLesson->save();
+                    LessonComponent::create([
+                        'lesson_id' => $fileLesson->lesson_id,
+                        'comp_id'   => $fileLesson->file_id,
+                        'module'    => 'UploadFiles',
+                        'model'     => 'file',
+                        'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                    ]);
+                    Storage::disk('public')->putFileAs(
+                        'files/' . $request->$lesson,
+                        $singlefile,
+                        $name
+                    );
+                }
+            }
+        }
+        return HelperController::api_response_format(200, $file, 'Upload Successfully');
     }
 
     /**
@@ -359,78 +339,46 @@ class FilesController extends Controller
      */
     public function update(Request $request)
     {
-        try {
-            $request->validate([
-                'fileID' => 'required|integer|exists:files,id',
-                'attachment_name' => 'required|string|max:190',
-                'description' => 'required|string|min:1',
-                'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-            ]);
+        $request->validate([
+            'id'            => 'required|exists:files,id',
+            'name'          => 'nullable|string|max:190',
+            'description'   => 'nullable|string|min:1',
+            'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
+            'lesson'        => 'nullable|required_with:publish_date|exists:lessons,id',
+            'publish_date'  => 'nullable',
+        ]);
+        $file = file::find($request->id);
 
-            $file = file::find($request->fileID);
+        if ($request->filled('name'))
+            $file->attachment_name = $request->name;
 
-
-            if(!isset($file->FileCourseSegment)){
-                return HelperController::api_response_format(404, null,'No file Found');
-            }
-            $courseSegmentID = $file->FileCourseSegment->course_segment_id;
-
-            $user = Auth::User();
-            if(!$user->can('site/file/edit')){
-                return HelperController::api_response_format(400, null, 'only teachers are allowed to edit ');
-            }
-
-            if (isset($request->Imported_file)) {
-                $oldname = $file->name;
-
-                $extension = $request->Imported_file->getClientOriginalExtension();
-                $fileName = uniqid() . '.' . $extension;
-
-                // $fileName = $request->Imported_file->getClientOriginalName();
-                $size = $request->Imported_file->getSize();
-
-                $file->type = $extension;
-                $file->name = $fileName;
-                $file->size = $size;
-                $lesson_id = $file->FileLesson->lesson_id;
-                $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $lesson_id . '/' . $fileName);
-                $file->url2 = url('public/storage/files/' . $lesson_id . '/' . $fileName);
-            }
-            $file->attachment_name = $request->attachment_name;
+        if ($request->filled('description'))
             $file->description = $request->description;
-            $check = $file->save();
-            $courseID=CourseSegment::where('id',$courseSegmentID)->pluck('course_id')->first();
-            $usersIDs=Enroll::where('course_segment',$courseSegmentID)->pluck('user_id')->toarray();
-            User::notify([
-                'message' => 'This file is Updated',
-                'from' => Auth::user()->id,
-                'users' => $usersIDs,
-                'course_id' => $courseID,
-                'type' => 'file',
-                'link' => $file->url,
-                'publish_date' => Carbon::now(),
-            ]);
-            if ($check) {
-                if (isset($request->Imported_file)) {
-                    $fileId = $file->id;
-                    $lesson_id = $file->FileLesson->lesson_id;
-
-                    $filePath = 'storage\files\\' . $lesson_id . '\\' . $oldname;
-                    if (file_exists($filePath)) {
-                        unlink($filePath);
-                    }
-
-                    Storage::disk('public')->putFileAs(
-                        'files/' . $lesson_id,
-                        $request->Imported_file,
-                        $fileName
-                    );
-                }
-            }
-            return HelperController::api_response_format(200, null, 'Update Successfully');
-        } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
+        if ($request->hasFile('Imported_file')) {
+            $extension = $request->Imported_file->getClientOriginalExtension();
+            $name = uniqid() . '.' . $extension;
+            Storage::disk('public')->putFileAs('files/', $request->Imported_file, $name);
+            $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $name);
+            $file->url2 = url('public/storage/files/' . $name);
+            $file->type = $extension;
         }
+        $tempReturn = null;
+        if ($request->filled('publish_date')) {
+            $fileLesson = FileLesson::where('lesson_id', $request->lesson)->where('file_id', $request->id)->first();
+            $publishdate = $request->publish_date;
+            if (Carbon::parse($request->publish_date)->isPast()) {
+                $publishdate = Carbon::now();
+            } else {
+                $publishdate = Carbon::parse($request->publish_date);
+            }
+            $fileLesson->update([
+                'publish_date' => $publishdate
+            ]);
+        }
+        if ($request->filled('lesson'))
+            $tempReturn = Lesson::find($request->lesson)->module('UploadFiles', 'media')->get();
+        $file->save();
+        return HelperController::api_response_format(200, $tempReturn, 'Update Successfully');
     }
 
     /**
@@ -442,16 +390,15 @@ class FilesController extends Controller
      */
     public function destroy(Request $request)
     {
-            $request->validate([
-                'fileID' => 'required|integer|exists:file_lessons,file_id',
-                'lesson_id' => 'required|exists:file_lessons,lesson_id'
-                ]);
+        $request->validate([
+            'fileID' => 'required|integer|exists:file_lessons,file_id',
+            'lesson_id' => 'required|exists:file_lessons,lesson_id'
+        ]);
 
-            $file = FileLesson::where('file_id', $request->fileID)->where('lesson_id',$request->lesson_id)->first();
-            $file->delete();
-
-            return HelperController::api_response_format(200, $body = [], $message = 'File deleted succesfully');
-
+        $file = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
+        $file->delete();
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
+        return HelperController::api_response_format(200, $tempReturn, $message = 'File deleted succesfully');
     }
 
     /**
@@ -463,37 +410,18 @@ class FilesController extends Controller
      */
     public function toggleVisibility(Request $request)
     {
-        try {
-            $request->validate([
-                'fileID' => 'required|integer|exists:files,id',
-                'LessonID' => 'required|integer|exists:file_lessons,lesson_id',
-            ]);
-
-            $file = file::find($request->fileID);
-
-            if(!isset($file->FileCourseSegment)){
-                return HelperController::api_response_format(404, null,'No file Found');
-            }
-
-            //check Authotizing
-            $courseSegmentID = $file->FileCourseSegment->course_segment_id;
-            // check Enroll
-            $checkTeacherEnroll = checkEnroll::checkEnrollmentAuthorization($courseSegmentID);
-
-            if ($checkTeacherEnroll == false) {
-                return HelperController::api_response_format(400, null, 'You\'re unauthorize');
-            }
-            $fileLesson= FileLesson::where('file_id',$request->fileID)->where('lesson_id','=',$request->LessonID)->first();
-            if(!isset($fileLesson)){
-                return HelperController::api_response_format(400, null, 'Try again , Data invalid');
-            }
-            $fileLesson->visible = ($fileLesson->visible == 1) ? 0 : 1;
-            $fileLesson->save();
-
-            return HelperController::api_response_format(200, $file, 'Toggle Successfully');
-        } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
+        $request->validate([
+            'fileID' => 'required|integer|exists:files,id',
+            'LessonID' => 'required|integer|exists:file_lessons,lesson_id',
+        ]);
+        $fileLesson = FileLesson::where('file_id', $request->fileID)->where('lesson_id', '=', $request->LessonID)->first();
+        if (!isset($fileLesson)) {
+            return HelperController::api_response_format(400, null, 'Try again , Data invalid');
         }
+        $fileLesson->visible = ($fileLesson->visible == 1) ? 0 : 1;
+        $fileLesson->save();
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
+        return HelperController::api_response_format(200, $tempReturn, 'Toggle Successfully');
     }
 
     public function sortLessonFile(Request $request)
@@ -516,7 +444,8 @@ class FilesController extends Controller
         } else {
             $this->sortUp($fileLesson, $currentIndex, $request->index);
         }
-        return HelperController::api_response_format(200, null, ' Successfully');
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
+        return HelperController::api_response_format(200, $tempReturn, ' Successfully');
     }
 
     public function sortDown($fileLesson, $currentIndex, $newIndex)
@@ -564,12 +493,12 @@ class FilesController extends Controller
         }
         return $fileLessons;
     }
-    Public function GetFileByID(Request $request)
+    public function GetFileByID(Request $request)
     {
         $request->validate([
             'id' => 'required|integer|exists:media,id',
         ]);
-        $File=file::find($request->id);
+        $File = file::find($request->id);
         return HelperController::api_response_format(200, $File);
     }
     public function AssignFileToLesson(Request $request)
@@ -580,9 +509,9 @@ class FilesController extends Controller
                 'lesson_id' => 'required|exists:lessons,id',
                 'publish_date' => 'required|date'
             ]);
-            $file_lessons = FileLesson::create(['lesson_id' => $request->lesson_id
-                ,'file_id'=>$request->file_id
-                ,'publish_date'=>$request->publish_date]);
+            $file_lessons = FileLesson::create([
+                'lesson_id' => $request->lesson_id, 'file_id' => $request->file_id, 'publish_date' => $request->publish_date
+            ]);
             return HelperController::api_response_format(200, $file_lessons, 'Assigned Successfully');
         } catch (Exception $ex) {
             return HelperController::api_response_format(400, null, 'Please Try again');
