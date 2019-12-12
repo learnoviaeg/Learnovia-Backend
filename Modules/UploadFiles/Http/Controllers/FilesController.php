@@ -199,15 +199,6 @@ class FilesController extends Controller
             {
                 $publishdate=Carbon::now();
             }
-            // activeCourseSgement
-            $activeCourseSegments = HelperController::Get_Course_segment_Course($request);
-            if ($activeCourseSegments['result'] == false) {
-                return HelperController::api_response_format(400, null, $activeCourseSegments['value']);
-            }
-            if ($activeCourseSegments['value'] == null) {
-                return HelperController::api_response_format(400, null, 'No Course active in segment');
-            }
-            $activeCourseSegments =  $activeCourseSegments['value'];
             foreach($request->lesson_id as $lesson)
             {
                 foreach ($request->Imported_file as $singlefile) {
@@ -227,8 +218,8 @@ class FilesController extends Controller
                     $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $lesson . '/' . $name);
                     $file->url2 = url('public/storage/files/' . $lesson . '/' . $name);
                     $file->save();
-                    $courseID=CourseSegment::where('id',$activeCourseSegments->id)->pluck('course_id')->first();
-                    $usersIDs=Enroll::where('course_segment',$activeCourseSegments->id)->pluck('user_id')->toarray();
+                    $courseID=CourseSegment::where('id',$lesson->courseSegment->id)->pluck('course_id')->first();
+                    $usersIDs=Enroll::where('course_segment',$lesson->courseSegment->id)->pluck('user_id')->toarray();
                     User::notify([
                         'message' => 'new file is added',
                         'from' => Auth::user()->id,
@@ -240,7 +231,7 @@ class FilesController extends Controller
                     ]);
                     if ($check) {
                         $filesegment = new FileCourseSegment;
-                        $filesegment->course_segment_id = $activeCourseSegments->id;
+                        $filesegment->course_segment_id = $lesson->courseSegment->id;
                         $filesegment->file_id = $file->id;
                         $filesegment->save();
 
