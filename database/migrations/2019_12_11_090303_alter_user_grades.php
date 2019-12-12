@@ -14,13 +14,18 @@ class AlterUserGrades extends Migration
     public function up()
     {
         Schema::table('user_grades', function (Blueprint $table) {
+            $table->dropColumn('feedback');
             $table->dropColumn('hidden');
             $table->dropColumn('locked');
             $table->dropForeign('user_grades_letter_id_foreign');
             $table->dropColumn('letter_id');
             $table->dropForeign('user_grades_raw_scale_id_foreign');
             $table->dropColumn('raw_scale_id');
-            $table->dropColumn('feedback');
+            //$table->mediumText('feedback')->nullable();
+        });
+
+        Schema::table('user_grades', function (Blueprint $table) {
+            $table->mediumText('feedback')->nullable();
         });
     }
 
