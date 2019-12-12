@@ -611,6 +611,8 @@ class CourseController extends Controller
                 $result[$lesson->name] = [];
                 foreach ($components as $component) {
                     eval('$res = \Modules\\' . $component->module . '\Entities\\' . $component->model . '::find(' . $component->comp_id . ');');
+                    if($res == null)
+                        continue;
                     $res->type = $component->model;
                     $result[$lesson->name][] = $res;
                 }
