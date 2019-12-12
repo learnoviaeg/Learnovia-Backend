@@ -201,6 +201,7 @@ class FilesController extends Controller
             }
             foreach($request->lesson_id as $lesson)
             {
+                $tempLesson = Lesson::find($lesson);
                 foreach ($request->Imported_file as $singlefile) {
                     $extension = $singlefile->getClientOriginalExtension();
                     $fileName = $singlefile->getClientOriginalName();
@@ -218,8 +219,8 @@ class FilesController extends Controller
                     $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $lesson . '/' . $name);
                     $file->url2 = url('public/storage/files/' . $lesson . '/' . $name);
                     $file->save();
-                    $courseID=CourseSegment::where('id',$lesson->courseSegment->id)->pluck('course_id')->first();
-                    $usersIDs=Enroll::where('course_segment',$lesson->courseSegment->id)->pluck('user_id')->toarray();
+                    $courseID=CourseSegment::where('id',$tempLesson->courseSegment->id)->pluck('course_id')->first();
+                    $usersIDs=Enroll::where('course_segment',$tempLesson->courseSegment->id)->pluck('user_id')->toarray();
                     User::notify([
                         'message' => 'new file is added',
                         'from' => Auth::user()->id,
@@ -231,7 +232,7 @@ class FilesController extends Controller
                     ]);
                     if ($check) {
                         $filesegment = new FileCourseSegment;
-                        $filesegment->course_segment_id = $lesson->courseSegment->id;
+                        $filesegment->course_segment_id = $tempLesson->courseSegment->id;
                         $filesegment->file_id = $file->id;
                         $filesegment->save();
 
