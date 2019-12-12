@@ -14,7 +14,10 @@ class Attendance extends Model
     {
         return $this->hasMany('Modules\Attendance\Entities\AttendanceSession', 'attendance_id', 'id');
     }
-
+    public function status()
+    {
+        return $this->hasMany('Modules\Attendance\Entities\AttendanceStatus', 'attendance_id', 'id');
+    }
     public static function FirstTypeRules()
     {
         return [
