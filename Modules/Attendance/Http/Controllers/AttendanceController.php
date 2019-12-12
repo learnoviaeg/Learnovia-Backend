@@ -252,7 +252,7 @@ class AttendanceController extends Controller
                         }
                         return HelperController::api_response_format(200, 'Sessions are created successfully');
                     }
-                    if($request->repeat_untill>$attendance->end_date){
+                    if ($request->repeat_untill > $attendance->end_date) {
                         return HelperController::api_response_format(400, 'Something wrong with data');
 
                     }
@@ -329,4 +329,30 @@ class AttendanceController extends Controller
 
 
     }
+
+    public function viewstudentsinsessions(Request $request)
+    {
+
+        $request->validate([
+            'session_id' => 'required|exists:attendance_sessions,id',
+        ]);
+        $course_segment = AttendanceSession::where('id', $request->session_id)->pluck('course_segment_id');
+        $users_ids = Enroll::where('course_segment', $course_segment[0])->pluck('user_id');
+        $logs = AttendanceLog::where('session_id', $request->session_id)->whereIn('student_id', $users_ids)->get();
+        $users = User::whereIn('id', $users_ids)->get();
+        foreach ($users as $user) {
+            $user['flag'] = false;
+            $temp = collect();
+            foreach ($logs as $log) {
+                if ($log->student_id == $user->id) {
+                    $user['flag'] = true;
+                    $temp->push($log);
+                }
+            }
+            $user['log'] = $temp->toArray();
+        }
+        return HelperController::api_response_format(200, $users, 'Users are.....');
+    }
+
+
 }
