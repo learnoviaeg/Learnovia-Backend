@@ -615,7 +615,7 @@ class CourseController extends Controller
                     eval('$res = \Modules\\' . $component->module . '\Entities\\' . $component->model . '::find(' . $component->comp_id . ');');
                     if($res == null)
                         continue;
-                    $res->type = $component->model;
+                    $res->flag = $component->model;
                     $result[$i]['data'][] = $res;
                 }
                 $i++;
