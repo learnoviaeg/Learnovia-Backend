@@ -606,16 +606,18 @@ class CourseController extends Controller
         $result = [];
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class_id, $request->course_id);
         if ($courseSegment != null) {
+            $i = 0 ;
             foreach ($courseSegment->lessons as $lesson) {
                 $components = LessonComponent::whereLesson_id($lesson->id)->get();
-                $result[$lesson->name] = [];
                 foreach ($components as $component) {
                     eval('$res = \Modules\\' . $component->module . '\Entities\\' . $component->model . '::find(' . $component->comp_id . ');');
                     if($res == null)
                         continue;
                     $res->type = $component->model;
-                    $result[$lesson->name][] = $res;
+                    $result[$i]['data'][] = $res;
+                    $result[$i]['name'] = $lesson->name;
                 }
+                $i++;
             }
         }
         return HelperController::api_response_format(200, $result);
