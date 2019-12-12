@@ -3,11 +3,13 @@
 namespace Modules\Attendance\Http\Controllers;
 use Modules\Attendance\Entities\AttendanceStatus;
 use App\Http\Controllers\HelperController;
-
+use Modules\Attendance\Entities\AttendanceLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-
+use Illuminate\Support\Facades\Auth;
+use App\Enroll;
+use App\CourseSegment;
 class StatusController extends Controller
 {
     
@@ -68,6 +70,36 @@ class StatusController extends Controller
         $status=AttendanceStatus::find($request->id);
         $status->delete();
         return HelperController::api_response_format(201,'Status Deleted Successfully');
+    }
+
+    public function GetStatus(Request $request)
+    {
+        $request->validate([
+            'session_id'  => 'nullable|exists:attendance_sessions,id',
+        ]);
+
+        $user_id[]= Auth::id();
+        if (Auth::user()->can('site/course/teacher')) {
+            $Course_Segment = Enroll::where('user_id',$user_id)->pluck('course_segment');
+            $Course_Segments = CourseSegment::whereIn('id',$Course_Segment)->where('is_active','1')->pluck('id');
+            $Students= (Enroll::whereIn('course_segment',$Course_Segments)->pluck('user_id'))->unique();
+            $user_id= $Students;
+        }
+       
+        $logs = AttendanceLog::whereIn('student_id',$user_id)->with('status')->get();
+        if($request->filled('session_id'))
+             $logs = AttendanceLog::whereIn('student_id',$user_id)->where('session_id',$request->session_id)->with('status')->get();
+        foreach($logs as $log){
+           $st[$log->status->letter]= $log->status->id;
+        }
+        $all_Status = array_unique($st);
+        foreach($all_Status as $key => $Letter){
+            if($request->filled('session_id'))
+                 $count[$key][] = (AttendanceLog::whereIn('student_id',$user_id)->where('status_id',$Letter)->where('session_id',$request->session_id)->get())->count();
+            else
+                $count[$key][] = (AttendanceLog::whereIn('student_id',$user_id)->where('status_id',$Letter)->get())->count();
+        }
+        return $count;
     }
   
 }
