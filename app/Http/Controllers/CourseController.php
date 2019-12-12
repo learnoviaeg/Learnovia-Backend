@@ -609,13 +609,14 @@ class CourseController extends Controller
             $i = 0 ;
             foreach ($courseSegment->lessons as $lesson) {
                 $components = LessonComponent::whereLesson_id($lesson->id)->get();
+                $result[$i]['name'] = $lesson->name;
+                $result[$i]['data'] = [];
                 foreach ($components as $component) {
                     eval('$res = \Modules\\' . $component->module . '\Entities\\' . $component->model . '::find(' . $component->comp_id . ');');
                     if($res == null)
                         continue;
                     $res->type = $component->model;
                     $result[$i]['data'][] = $res;
-                    $result[$i]['name'] = $lesson->name;
                 }
                 $i++;
             }
