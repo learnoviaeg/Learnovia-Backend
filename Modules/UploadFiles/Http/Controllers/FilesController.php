@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Modules\UploadFiles\Entities\file;
-use Modules\UploadFiles\Entities\FileCourseSegment;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
 use App\Lesson;
@@ -376,7 +375,7 @@ class FilesController extends Controller
             ]);
         }
         if ($request->filled('lesson'))
-            $tempReturn = Lesson::find($request->lesson)->module('UploadFiles', 'media')->get();
+            $tempReturn = Lesson::find($request->lesson)->module('UploadFiles', 'file')->get();
         $file->save();
         return HelperController::api_response_format(200, $tempReturn, 'Update Successfully');
     }
@@ -397,7 +396,7 @@ class FilesController extends Controller
 
         $file = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
         $file->delete();
-        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, $message = 'File deleted succesfully');
     }
 
@@ -420,7 +419,7 @@ class FilesController extends Controller
         }
         $fileLesson->visible = ($fileLesson->visible == 1) ? 0 : 1;
         $fileLesson->save();
-        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, 'Toggle Successfully');
     }
 
@@ -444,7 +443,7 @@ class FilesController extends Controller
         } else {
             $this->sortUp($fileLesson, $currentIndex, $request->index);
         }
-        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, ' Successfully');
     }
 
