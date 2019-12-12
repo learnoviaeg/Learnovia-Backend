@@ -9,7 +9,6 @@ class UserGrade extends Model
     protected $fillable = [
         'grade_item_id', 'user_id', 'raw_grade', 'raw_grade_max', 'raw_grade_min','feedback'
     ];
-    protected $appends = ['raw_grade_max' , 'raw_grade_min' , 'final_grade'];
 
     public function GradeItems()
     {
@@ -62,5 +61,4 @@ class UserGrade extends Model
                 break;
         }
     }
-
 }

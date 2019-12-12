@@ -42,8 +42,7 @@ class GradeItemController extends Controller
             'hidden' => 'boolean'
         ]);
 
-        $id_number = GradeCategory::find($request->grade_category);
-        // return $id_number;
+        $GradeCat = GradeCategory::find($request->grade_category);
 
         $data = [
             'grade_category' => $request->grade_category,
@@ -56,7 +55,7 @@ class GradeItemController extends Controller
             'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
             'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
             'item_type' => (isset($request->item_type)) ? $request->item_type : null,
-            'id_number' => $id_number->id_number,
+            'id_number' => $GradeCat->id_number,
             'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : null,
             'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
@@ -66,6 +65,29 @@ class GradeItemController extends Controller
         ];
 
         $grade = GradeItems::create($data);
+
+        $grade_itms=GradeCategory::where('id',$request->grade_category)->with('GradeItems')->get();
+        // return $grade_itms[0]->GradeItems;
+
+        $allWeight = 0;
+        foreach ($grade_itms[0]->GradeItems as $childs) {
+            $allWeight += $childs->weight();
+            $weight[] = $childs->weight();
+        }
+        if ($allWeight != 100) {
+            $message = "Your grades adjusted to get 100!";
+            $gcd = GradeItemController::findGCD($weight, sizeof($weight));
+            foreach ($weight as $w) {
+                $devitions[] = $w / $gcd;
+            }
+            $calculations = (100 / array_sum($devitions));
+            $count = 0;
+            foreach ($grade_itms[0]->GradeItems as $childs) {
+                $childs->update(['weight' => round($devitions[$count] * $calculations, 3)]);
+                $count++;
+            }
+        }
+        $grade->weight=GradeItems::where('id',$grade->id)->pluck('weight')->first();
 
         return HelperController::api_response_format(201, $grade, 'Grade item Created Successfully');
     }
