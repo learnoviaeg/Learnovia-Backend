@@ -67,8 +67,9 @@ class PageController extends Controller
         $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
-            'Lesson_id' => 'required|exists:lessons,id',
-            'publish_date' => 'nullable'
+            'lesson_id' => 'required|array',
+            'lesson_id.*' => 'required|exists:lessons,id',
+            'publish_date' => 'nullable|date'
         ]);
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
@@ -78,44 +79,36 @@ class PageController extends Controller
         } else {
             $publishdate = Carbon::now();
         }
-        $courseSegID = Lesson::where('id', $request->Lesson_id)->pluck('course_segment_id')->first();
-        $segmentClass = CourseSegment::where('id', $courseSegID)->pluck('segment_class_id')->first();
-        $ClassLevel = SegmentClass::where('id', $segmentClass)->pluck('class_level_id')->first();
-        $classId = ClassLevel::where('id', $ClassLevel)->pluck('class_id')->first();
-        $courseID = CourseSegment::where('id', $courseSegID)->pluck('course_id')->first();
-        $usersIDs = Enroll::where('course_segment', $courseSegID)->pluck('user_id')->toarray();
-
         $page = new Page();
         $page->title = $request->title;
         $page->content = $request->content;
-        if (isset($request->visible)) {
-            $page->visible;
-        }
         $page->save();
-
-        User::notify([
-            'message' => 'A new Page is added',
-            'from' => Auth::user()->id,
-            'users' => $usersIDs,
-            'course_id' => $courseID,
-            'class_id' => $classId,
-            'type' => 'Page',
-            'link' => url(route('getPage')) . '?id=' . $page->id,
-            'publish_date' => $publishdate
-        ]);
-
-        pageLesson::firstOrCreate([
-            'page_id' => $page->id,
-            'lesson_id' => $request->Lesson_id,
-            'publish_date' => $publishdate
-        ]);
-        LessonComponent::create([
-            'lesson_id' => $request->Lesson_id,
-            'comp_id' => $page->id,
-            'module' => 'Page',
-            'model' => 'page',
-            'index' => LessonComponent::getNextIndex($request->Lesson_id)
-        ]);
+        foreach($request->lesson_id as $lesson){
+            pageLesson::firstOrCreate([
+                'page_id' => $page->id,
+                'lesson_id' => $lesson,
+                'publish_date' => $publishdate
+            ]);
+            LessonComponent::create([
+                'lesson_id' => $lesson,
+                'comp_id' => $page->id,
+                'module' => 'Page',
+                'model' => 'page',
+                'index' => LessonComponent::getNextIndex($request->Lesson_id)
+            ]);
+            $TempLesson = Lesson::find($lesson);
+            $usersIDs = Enroll::where('course_segment', $TempLesson->courseSegment->id)->pluck('user_id')->toarray();
+            User::notify([
+                'message' => 'A new Page is added',
+                'from' => Auth::user()->id,
+                'users' => $usersIDs,
+                'course_id' => $TempLesson->courseSegment->courses[0]->id,
+                'class_id' => $TempLesson->courseSegment->segmentClasses[0]->classLevel[0]->classes[0]->id,
+                'type' => 'Page',
+                'link' => url(route('getPage')) . '?id=' . $page->id,
+                'publish_date' => $publishdate
+            ]);
+        }
         return HelperController::api_response_format(200, $page, 'Page added Successfully');
 
     }
