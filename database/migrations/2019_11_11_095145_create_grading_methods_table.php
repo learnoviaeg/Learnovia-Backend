@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 class CreateGradingMethodsTable extends Migration
 {
@@ -18,6 +19,12 @@ class CreateGradingMethodsTable extends Migration
             $table->string('name',45);
             $table->timestamps();
         });
+        DB::table('grading_methods')->insert([
+                ['id' => 1,'name' => 'Natural'],
+                ['id' => 2,'name' => 'Simple weighted mean'],
+                ['id' => 3,'name' => 'Weighted mean']
+            ]
+        );
     }
 
     /**
