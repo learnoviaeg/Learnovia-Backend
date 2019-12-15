@@ -343,7 +343,7 @@ class FilesController extends Controller
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
             'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-            'lesson'        => 'nullable|required_with:publish_date|exists:lessons,id',
+            'lesson'        => 'required|integer|exists:lessons,id',
             'publish_date'  => 'nullable',
         ]);
         $file = file::find($request->id);
@@ -374,8 +374,7 @@ class FilesController extends Controller
                 'publish_date' => $publishdate
             ]);
         }
-        if ($request->filled('lesson'))
-            $tempReturn = Lesson::find($request->lesson)->module('UploadFiles', 'file')->get();
+        $tempReturn = Lesson::find($request->lesson)->module('UploadFiles', 'file')->get();
         $file->save();
         return HelperController::api_response_format(200, $tempReturn, 'Update Successfully');
     }

@@ -109,7 +109,8 @@ class PageController extends Controller
                 'publish_date' => $publishdate
             ]);
         }
-        return HelperController::api_response_format(200, $page, 'Page added Successfully');
+        $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
+        return HelperController::api_response_format(200, $tempReturn, 'Page added Successfully');
 
     }
 
@@ -164,12 +165,11 @@ class PageController extends Controller
     {
         $request->validate([
             'page_id' => 'required|exists:page_lessons,page_id',
-            'lesson_id' => 'required|exists:page_lessons,lesson_id'
+            'lesson_id' => 'required|exists:lessons,id'
         ]);
-
         $page = PageLesson::where('page_id', $request->page_id)->where('lesson_id', $request->lesson_id)->first();
         if ($page->delete()) {
-            $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'page')->get();;
+            $tempReturn = Lesson::find($request->lesson_id)->module('Page', 'page')->get();
             return HelperController::api_response_format(200, $tempReturn, 'Page Deleted Successfully');
         }
         return HelperController::api_response_format(404, [], 'Not Found');

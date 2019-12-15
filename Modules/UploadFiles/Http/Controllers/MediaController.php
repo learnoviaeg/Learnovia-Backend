@@ -19,6 +19,7 @@ use App\LessonComponent;
 use Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Lesson;
+use Modules\Page\Entities\pageLesson;
 
 class MediaController extends Controller
 {
@@ -227,11 +228,12 @@ class MediaController extends Controller
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             'url' => 'nullable|active_url',
-            'lesson_id' => 'required|exists:lessons,id'
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'publish_date' => 'nullable|date'
         ]);
 
         $media = media::find($request->id);
-
+        $mediaLesson = MediaLesson::where('lesson_id' , $request->lesson_id)->where('media_id' , $request->id)->first();
         if ($media->type != null && $request->hasFile('Imported_file')) {
             $extension = $request->Imported_file->getClientOriginalExtension();
             $fileName = $request->Imported_file->getClientOriginalName();
@@ -254,6 +256,13 @@ class MediaController extends Controller
         if ($request->filled('name'))
             $media->name = $request->name;
         $media->save();
+        if ($request->filled('publish_date')) {
+            $publishdate = $request->publish_date;
+            if (Carbon::parse($request->publish_date)->isPast()) {
+                $publishdate = Carbon::now();
+            }
+            $mediaLesson->update(['publish_date' => $publishdate]);
+        }
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();;
         return HelperController::api_response_format(200, $tempReturn, 'Update Successfully');
     }
