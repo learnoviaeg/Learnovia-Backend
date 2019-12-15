@@ -144,7 +144,8 @@ class PageController extends Controller
         $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
-            'id' => 'required|exists:pages,id'
+            'id' => 'required|exists:pages,id',
+            'lesson' => 'integer|exists:lessons,id'
         ]);
 
         $page = Page::find($request->id);
@@ -153,6 +154,9 @@ class PageController extends Controller
             'content' => $request->content
         ];
         $page->update($data);
+        if($request->filled('lesson')){
+            $page = Lesson::find($request->lesson)->module('Page', 'page')->get();;
+        }
         return HelperController::api_response_format(200, $page, 'Page Updated Successfully');
     }
 
