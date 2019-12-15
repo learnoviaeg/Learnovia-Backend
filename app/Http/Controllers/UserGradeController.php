@@ -211,24 +211,12 @@ class UserGradeController extends Controller
             'course' => 'required|exists:courses,id',
             'class' => 'required|exists:classes,id'
         ]);
-
         $courseSeg = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (!$courseSeg)
-            return HelperController::api_response_format(201, 'this course haven\'t course segment');
-
-        $gradeCat_item = GradeCategory::where('course_segment_id', $courseSeg->id)->with('GradeItems')->get()->pluck('GradeItems');
-        $userGrade = [];
-        foreach ($gradeCat_item as $items) {
-            $temp = UserGrade::where('user_id', $request->user_id)->whereIn('grade_item_id', $items)
-                ->with('GradeItems.GradeCategory.Children')->first();
-            if ($temp != null)
-                $userGrade[] = $temp;
-        }
-        // $userGrade[0]->GradeItems->weight=$userGrade[0]->GradeItems->weight();
-        // unset($userGrade[0]->GradeItems->GradeCategory);
-        // $userGrade[0]->GradeItems->GradeCategory;
-
-        return HelperController::api_response_format(201, $userGrade);
+            return HelperController::api_response_format(200, 'this course haven\'t course segment');
+        $gradeCat_item = GradeCategory::where('course_segment_id', $courseSeg->id)->first();
+        $gradeCat_item->getUsergrades($request->user_id);
+        return $gradeCat_item;
     }
 
     public function AllUserInCourse(Request $request)
