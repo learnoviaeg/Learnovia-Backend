@@ -227,6 +227,7 @@ class MediaController extends Controller
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             'url' => 'nullable|active_url',
+            'lesson_id' => 'required|exists:lessons,id'
         ]);
 
         $media = media::find($request->id);
@@ -253,7 +254,8 @@ class MediaController extends Controller
         if ($request->filled('name'))
             $media->name = $request->name;
         $media->save();
-        return HelperController::api_response_format(200, $media, 'Update Successfully');
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();;
+        return HelperController::api_response_format(200, $tempReturn, 'Update Successfully');
     }
 
     /**
@@ -272,8 +274,8 @@ class MediaController extends Controller
 
         $file = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id', $request->lesson_id)->first();
         $file->delete();
-
-        return HelperController::api_response_format(200, $body = [], $message = 'File deleted succesfully');
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();;
+        return HelperController::api_response_format(200, $tempReturn, $message = 'File deleted succesfully');
     }
 
     /**
