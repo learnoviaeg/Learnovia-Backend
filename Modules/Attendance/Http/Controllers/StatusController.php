@@ -10,7 +10,7 @@ use Illuminate\Routing\Controller;
 
 class StatusController extends Controller
 {
-    
+
     public function Add(Request $request)
     {
         $request->validate([
@@ -69,5 +69,13 @@ class StatusController extends Controller
         $status->delete();
         return HelperController::api_response_format(201,'Status Deleted Successfully');
     }
-  
+
+    public function get(Request $request)
+    {
+        $request->validate([
+            'attendance_id' => 'required|exists:attendances,id'
+        ]);
+        $statuses = AttendanceStatus::where('attendance_id' , $request->attendance_id)->where('visible' , 1)->get();
+        return HelperController::api_response_format(200 , $statuses);
+    }
 }

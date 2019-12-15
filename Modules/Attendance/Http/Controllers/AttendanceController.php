@@ -39,7 +39,10 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-all-taken-users-in-session', 'title' => 'get all taken users in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'add session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/attendance/bulck/attendace', 'title' => 'add session']);
-
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/add', 'title' => 'add attendance status']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/update', 'title' => 'update attendance status']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/delete', 'title' => 'delete attendance status']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/get', 'title' => 'get attendance status']);
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('attendance/add');
         $role->givePermissionTo('attendance/add-log');
@@ -48,6 +51,10 @@ class AttendanceController extends Controller
         $role->givePermissionTo('attendance/get-all-taken-users-in-session');
         $role->givePermissionTo('attendance/add-session');
         $role->givePermissionTo('site/attendance/bulck/attendace');
+        $role->givePermissionTo('attendance/status/add');
+        $role->givePermissionTo('attendance/status/update');
+        $role->givePermissionTo('attendance/status/delete');
+        $role->givePermissionTo('attendance/status/get');
 
 
         Component::create([
