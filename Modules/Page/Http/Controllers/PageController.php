@@ -176,7 +176,8 @@ class PageController extends Controller
 
         $page = PageLesson::where('page_id', $request->page_id)->where('lesson_id', $request->lesson_id)->first();
         if ($page->delete()) {
-            return HelperController::api_response_format(200, $page, 'Page Deleted Successfully');
+            $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'page')->get();;
+            return HelperController::api_response_format(200, $tempReturn, 'Page Deleted Successfully');
         }
         return HelperController::api_response_format(404, [], 'Not Found');
     }
@@ -215,5 +216,5 @@ class PageController extends Controller
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
-    
+
 }
