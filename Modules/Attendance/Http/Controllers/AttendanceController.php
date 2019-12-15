@@ -164,7 +164,7 @@ class AttendanceController extends Controller
         $attendance = self::createAttendance($request);
         $attendance->allowed_levels = unserialize($attendance->allowed_levels);
         $attendance->allowed_courses = unserialize($attendance->allowed_courses);
-        $attendance->allowed_classes = unserialize($attendance->allowed_classes);
+        $attendance->allowed_classes = $attendance->allowed_classes;
         if ($request->attendance_type == Attendance::$FIRST_TYPE && $request->graded == 1) {
             $jop = (new  AttendanceGradeItems($request->all(), Attendance::$FIRST_TYPE, null));
             dispatch($jop);
