@@ -7,7 +7,7 @@ use App\GradeItems;
 use App\CourseSegment;
 use App\GradeCategory;
 use App\YearLevel;
-use Modules\QuestionBank\Entities\GradingMethod;
+use App\GradingMethod;
 use stdClass;
 
 
