@@ -7,6 +7,7 @@ use App\GradeItems;
 use App\CourseSegment;
 use App\GradeCategory;
 use App\YearLevel;
+use App\GradingMethod;
 use stdClass;
 
 
@@ -342,10 +343,10 @@ class GradeItemController extends Controller
      * @return [objects] all grade items with Grade category and item type and scale
      */
     public function list()
-    {   
+    {
         $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale'])->get();
         foreach($grade as $g)
-        {    
+        {
             $g->weight = $g->weight();
             unset($g->GradeCategory);
             $g->GradeCategory->weight = $g->GradeCategory->weight();
@@ -454,19 +455,6 @@ class GradeItemController extends Controller
     }
     public function gradeing_method()
     {
-        return [
-            [
-                'id' => 1,
-                'name' => 'Natural'
-            ],
-            [
-                'id' => 2,
-                'name' => 'Simple weighted mean'
-            ],
-            [
-                'id' => 3,
-                'name' => 'Weighted mean'
-            ]
-        ];
+        return HelperController::api_response_format(200,GradingMethod::get());
     }
 }
