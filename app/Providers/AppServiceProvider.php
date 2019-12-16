@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\GradeItems;
+use App\Observers\GradeItemObserver;
 use App\Observers\UserGradeObserver;
 use App\UserGrade;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -40,5 +42,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         UserGrade::observe(UserGradeObserver::class);
+        GradeItems::observe(GradeItemObserver::class);
     }
 }
