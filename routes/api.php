@@ -168,6 +168,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('toggle/letter', 'CourseController@ToggleCourseLetter')->middleware('permission:course/toggle/letter');
     Route::get('count-components', 'CourseController@Count_Components')->middleware('permission:course/count-components');
     Route::get('chain', 'CourseController@getAllCoursesWithChain')->middleware('permission:course/chain');
+    Route::get('components', 'CourseController@getAllMyComponenets')->middleware('permission:course/components');
 });
 
 //USER CRUD ROUTES

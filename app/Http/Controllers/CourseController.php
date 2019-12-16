@@ -393,8 +393,8 @@ class CourseController extends Controller
                             foreach ($comp as $com) {
                                 $Component = $lessoncounter->module($com->module, $com->model);
                                 if ($request->user()->can('site/course/student')) {
-                                    $Component->where('visible' , '=' , 1)
-                                        ->where('publish_date' , '<=' , Carbon::now());
+                                    $Component->where('visible', '=', 1)
+                                        ->where('publish_date', '<=', Carbon::now());
                                 }
 
                                 $lessonn[$com->name] = $Component->get();
@@ -606,14 +606,14 @@ class CourseController extends Controller
         $result = [];
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class_id, $request->course_id);
         if ($courseSegment != null) {
-            $i = 0 ;
+            $i = 0;
             foreach ($courseSegment->lessons as $lesson) {
                 $components = LessonComponent::whereLesson_id($lesson->id)->get();
                 $result[$i]['name'] = $lesson->name;
                 $result[$i]['data'] = [];
                 foreach ($components as $component) {
                     eval('$res = \Modules\\' . $component->module . '\Entities\\' . $component->model . '::find(' . $component->comp_id . ');');
-                    if($res == null)
+                    if ($res == null)
                         continue;
                     $res->flag = $component->model;
                     $result[$i]['data'][] = $res;
@@ -711,5 +711,49 @@ class CourseController extends Controller
             unset($item->segmentClasses);
         }
         return HelperController::api_response_format(400, $courses);
+    }
+
+    public function getAllMyComponenets(Request $request)
+    {
+        $request->validate([
+            'course'    => 'nullable|integer|exists:courses,id',
+            'start'     => 'nullable|date',
+            'end'       => 'nullable|date',
+            'components' => 'nullable|array',
+            'components.*' => 'required|integer|exists:components,id'
+        ]);
+        $components  = Component::where('active', 1)->where('type', 1);
+        if ($request->filled('components')) {
+            $components->whereIn('id', $request->components);
+        };
+        $components = $components->get();
+        $result = [];
+        foreach ($components as $component) {
+            $result[$component->name] = [];
+        }
+        $user = User::whereId($request->user()->id)->with(['enroll.courseSegment' => function ($query) use ($request) {
+            if ($request->filled('course'))
+                $query->where('course_id', $request->course);
+        }])->first();
+        foreach ($user->enroll as $enroll) {
+            if ($enroll->courseSegment != null) {
+                foreach ($enroll->courseSegment->lessons as $lesson) {
+                    foreach ($components as $component) {
+                        $temp = $lesson->module($component->module, $component->model);
+                        if ($request->user()->can('site/course/student')) {
+                            $temp->where('visible', '=', 1)
+                                ->where('publish_date', '<=', Carbon::now());
+                        }
+                        if(count($temp->get()) == 0)
+                            continue;
+                        $tempBulk = $temp->get();
+                        foreach($tempBulk as $item){
+                            $result[$component->name][] = $item;
+                        }
+                    }
+                }
+            }
+        }
+        return HelperController::api_response_format(200,$result);
     }
 }
