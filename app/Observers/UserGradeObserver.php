@@ -15,12 +15,9 @@ class UserGradeObserver
      */
     public function created(UserGrade $userGrade)
     {
-        if (in_array($userGrade->GradeItems->calculation, GradeItems::rads())) {
-            $userGrade->final_grade = GradeItems::clacWitheval($userGrade->GradeItems->calculation, $userGrade->raw_grade);
-        } else {
-
-            $userGrade->final_grade = GradeItems::clacWitheval($userGrade->GradeItems->calculation, deg2rad($userGrade->raw_grade));
-        }
+        $grade = $userGrade->raw_grade;
+        if (!in_array($userGrade->GradeItems->calculation, GradeItems::rads())) {$grade = deg2rad($grade);}
+        $userGrade->final_grade = GradeItems::clacWitheval($userGrade->GradeItems->calculation, $grade);
         $userGrade->raw_grade_min = $userGrade->GradeItems->grademax;
         $userGrade->raw_grade_max = $userGrade->GradeItems->grademin;
         $userGrade->save();
