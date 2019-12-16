@@ -38,4 +38,20 @@ class GradeItems extends Model
     public function getParentAggregationAttribute(){
         return $this->GradeCategory->aggregation;
     }
+    public static function clacWitheval($calculation, $grade)
+    {
+        $str = $calculation . "(" . $grade . ")";
+        $p = eval('return '.$str.';');
+        return $p;
+    }
+
+    public static function rads(){
+        return [
+            'abs' ,
+            'log10',
+            'exp',
+            'sqrt',
+
+        ];
+    }
 }
