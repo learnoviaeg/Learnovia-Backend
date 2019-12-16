@@ -216,7 +216,7 @@ class UserGradeController extends Controller
             return HelperController::api_response_format(200, 'this course haven\'t course segment');
         $gradeCat_item = GradeCategory::where('course_segment_id', $courseSeg->id)->first();
         $gradeCat_item->getUsergrades($request->user_id);
-        return $gradeCat_item;
+        return HelperController::api_response_format(200, $gradeCat_item);
     }
 
     public function AllUserInCourse(Request $request)
