@@ -221,7 +221,7 @@ class QuizLessonController extends Controller
         ]);
 
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
-                ->where('lesson_id',$request->quiz_id)->first();
+                ->where('lesson_id',$request->lesson_id)->first();
 
         if(!isset($quizLesson)){
             return HelperController::api_response_format(404, null,'This quiz doesn\'t belongs to the lesson');

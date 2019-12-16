@@ -489,7 +489,7 @@ class AssigmentsController extends Controller
     /*
         delete assigment
     */
-    public function deleteAssigment(Request $request)
+    public function deleteAssignmentLesson(Request $request)
     {
         $request->validate([
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
@@ -497,7 +497,15 @@ class AssigmentsController extends Controller
         ]);
         $assigment = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         $assigment->delete();
-        $assign=Assignment::where('id',$request->assignment_id)->first();
+        return HelperController::api_response_format(200, $body = [], $message = 'Assigment Lesson deleted succesfully');
+    }
+
+    public function deleteAssignment(Request $request)
+    {
+        $request->validate([
+            'assignment_id' => 'required|exists:assignments,id'
+        ]);
+        $assign=Assignment::where('id',$request->assignment_id);
         $assign->delete();
         return HelperController::api_response_format(200, $body = [], $message = 'Assigment deleted succesfully');
     }
