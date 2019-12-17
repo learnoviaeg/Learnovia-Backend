@@ -2,8 +2,10 @@
 
 namespace Modules\Page\Providers;
 
+use App\Observers\PageObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\Page\Entities\pageLesson;
 
 class PageServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,9 @@ class PageServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
+        pageLesson::observe(PageObserver::class);
+
     }
 
     /**
