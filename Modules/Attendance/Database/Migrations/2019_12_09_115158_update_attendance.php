@@ -22,9 +22,6 @@ class UpdateAttendance extends Migration
             $table->foreign('segment_id')->references('id')->on('segments')->onDelete('cascade')->onUpdate('cascade');
             $table->dateTime('start_date');
             $table->dateTime('end_date');
-
-
-
         });
     }
 

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use stdClass;
 
 class GradeCategory extends Model
 {
@@ -23,6 +24,10 @@ class GradeCategory extends Model
     public function GradeItems()
     {
         return $this->hasMany('App\GradeItems', 'grade_category', 'id');
+    }
+    public function Children()
+    {
+        return $this->Child()->with(['Children', 'GradeItems']);
     }
     public function total()
     {
@@ -99,8 +104,18 @@ class GradeCategory extends Model
         }
         return $result;
     }
-    public function Children()
-    {
-        return $this->Child()->with(['Children', 'GradeItems']);
+
+    public function getUsergrades($userid){
+        $children = $this->Children;
+        $items = $this->GradeItems;
+        foreach($items as $item){
+            $item->grade = '-';
+            $usergrade = UserGrade::where('grade_item_id' , $item->id)->where('user_id' , $userid)->first();
+            if($usergrade != null)
+                $item->grade = $usergrade->final_grade;
+        }
+        foreach($children as $child){
+            $child->getUsergrades($userid);
+        }
     }
 }

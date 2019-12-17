@@ -6,6 +6,7 @@ use App\GradeCategory;
 use App\CourseSegment;
 use App\AcademicYear;
 use App\YearLevel;
+use App\GradeItems;
 use App\Level;
 use Illuminate\Http\Request;
 use App\Segment;
@@ -56,12 +57,41 @@ class GradeCategoryController extends Controller
                 'locked' => (isset($request->locked)) ? $request->locked :null,
                 'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
                 'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
-                'weight' => ($request->exclude_flag==1) ? $request->weight : 0,
                 'grademax' => ($request->type==1) ? $request->grademax : null,
                 'grademin' => ($request->type==1) ? $request->grademin : null,
                 'type' => $request->type,
-                'exclude_flag' => $request->exclude_flag
+                'exclude_flag' => $request->exclude_flag,
+                'id_number' => $year_level[0]->id
             ]);
+            if(isset($request->weight))
+            {
+                if(!isset($request->parent))
+                    $grade_category->weight=100;
+                else
+                {
+                    $grade_parent=GradeCategory::where('id',$request->parent)->with('child')->get();
+
+                    $allWeight = 0;
+                    foreach ($grade_parent[0]->child as $childs) {
+                        $allWeight += $childs->weight();
+                        $weight[] = $childs->weight();
+                    }
+                    if ($allWeight != 100) {
+                        $message = "Your grades adjusted to get 100!";
+                        $gcd = GradeItemController::findGCD($weight, sizeof($weight));
+                        foreach ($weight as $w) {
+                            $devitions[] = $w / $gcd;
+                        }
+                        $calculations = (100 / array_sum($devitions));
+                        $count = 0;
+                        foreach ($grade_parent[0]->child as $childs) {
+                            $childs->update(['weight' => round($devitions[$count] * $calculations, 3)]);
+                            $count++;
+                        }
+                    }
+                }
+            }
+            $grade_category->weight=GradeCategory::where('id',$grade_category->id)->pluck('weight')->first();
 
             return HelperController::api_response_format(200, $grade_category, 'Grade Category is created successfully');
         }

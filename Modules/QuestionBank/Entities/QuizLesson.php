@@ -30,6 +30,6 @@ class QuizLesson extends Model
     }
     public function grading_method()
     {
-        return $this->belongsTo('Modules\QuestionBank\Entities\GradingMethod', 'grading_method_id', 'id');
+        return $this->belongsTo('App\GradingMethod', 'grading_method_id', 'id');
     }
 }
