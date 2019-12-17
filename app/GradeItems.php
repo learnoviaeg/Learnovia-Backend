@@ -51,7 +51,26 @@ class GradeItems extends Model
             'log10',
             'exp',
             'sqrt',
-
+        ];
+    }
+    public static function Allowed_functions(){
+        return [
+            'abs' ,
+            'log10',
+            'exp',
+            'sqrt',
+            'sin',
+            'sinh',
+            'asin',
+            'asinh',
+            'cos',
+            'cosh',
+            'acos',
+            'acosh',
+            'tan',
+            'tanh',
+            'atan',
+            'atanh',
         ];
     }
 }
