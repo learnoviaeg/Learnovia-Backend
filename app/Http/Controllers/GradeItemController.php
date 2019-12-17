@@ -49,7 +49,7 @@ class GradeItemController extends Controller
             'grade_category' => $request->grade_category,
             'grademin' => (isset($request->grademin)) ? $request->grademin : null,
             'grademax' => (isset($request->grademax)) ? $request->grademax : null,
-            'calculation' => (isset($request->calculation)) ? $request->calculation : null,
+            'calculation' => (isset($request->calculation) && in_array($request->calculation,GradeItems::Allowed_functions())) ? $request->calculation : null,
             'item_no' => (isset($request->item_no)) ? $request->item_no : null,
             'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
             'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : null,
@@ -478,5 +478,8 @@ class GradeItemController extends Controller
     public function gradeing_method()
     {
         return HelperController::api_response_format(200,GradingMethod::get());
+    }
+    public function get_allowed_functions(){
+        return HelperController::api_response_format(200,GradeItems::Allowed_functions(),'allowed mathematical functions');
     }
 }

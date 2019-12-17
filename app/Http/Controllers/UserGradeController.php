@@ -28,7 +28,7 @@ class UserGradeController extends Controller
             'users.*.id'                => 'required|exists:users,id',
             'users.*.items'             => 'required|array',
             'users.*.items.*.id'        => 'required|exists:grade_items,id',
-            'users.*.items.*.grade'     => 'required|integer',
+            'users.*.items.*.grade'     => 'required',
             'users.*.items.*.feedback'  => 'nullable|string',
         ]);
         foreach ($request->users as $user) {

@@ -343,7 +343,7 @@ class FilesController extends Controller
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
             'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-            'lesson'        => 'required|integer|exists:lessons,id',
+            'lesson_id'        => 'required|integer|exists:lessons,id',
             'publish_date'  => 'nullable',
         ]);
         $file = file::find($request->id);
@@ -363,7 +363,7 @@ class FilesController extends Controller
         }
         $tempReturn = null;
         if ($request->filled('publish_date')) {
-            $fileLesson = FileLesson::where('lesson_id', $request->lesson)->where('file_id', $request->id)->first();
+            $fileLesson = FileLesson::where('lesson_id', $request->lesson_id)->where('file_id', $request->id)->first();
             $publishdate = $request->publish_date;
             if (Carbon::parse($request->publish_date)->isPast()) {
                 $publishdate = Carbon::now();
@@ -374,8 +374,8 @@ class FilesController extends Controller
                 'publish_date' => $publishdate
             ]);
         }
-        $tempReturn = Lesson::find($request->lesson)->module('UploadFiles', 'file')->get();
         $file->save();
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, 'Update Successfully');
     }
 
@@ -410,9 +410,9 @@ class FilesController extends Controller
     {
         $request->validate([
             'fileID' => 'required|integer|exists:files,id',
-            'LessonID' => 'required|integer|exists:file_lessons,lesson_id',
+            'lesson_id' => 'required|integer|exists:file_lessons,lesson_id',
         ]);
-        $fileLesson = FileLesson::where('file_id', $request->fileID)->where('lesson_id', '=', $request->LessonID)->first();
+        $fileLesson = FileLesson::where('file_id', $request->fileID)->where('lesson_id', '=', $request->lesson_id)->first();
         if (!isset($fileLesson)) {
             return HelperController::api_response_format(400, null, 'Try again , Data invalid');
         }
