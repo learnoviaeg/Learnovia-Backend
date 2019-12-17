@@ -4,20 +4,9 @@ namespace App\Providers;
 
 use App\Observers\UserGradeObserver;
 use App\UserGrade;
-use App\Observers\AssignmentObserver;
-use App\Observers\FileObserver;
-use App\Observers\MediaObserver;
-use App\Observers\PageObserver;
-use App\Observers\QuizObserver;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
-use Modules\Assigments\Entities\AssignmentLesson;
-use Modules\Page\Entities\pageLesson;
-use Modules\QuestionBank\Entities\QuizLesson;
-use Modules\UploadFiles\Entities\FileLesson;
-use Modules\UploadFiles\Entities\MediaLesson;
-use Nwidart\Modules\Collection;
 
 
 class AppServiceProvider extends ServiceProvider
