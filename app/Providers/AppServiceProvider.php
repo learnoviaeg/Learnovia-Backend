@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Observers\UserGradeObserver;
 use App\UserGrade;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
