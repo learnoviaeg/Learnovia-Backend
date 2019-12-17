@@ -350,7 +350,6 @@ class FilesController extends Controller
 
         if ($request->filled('name'))
             $file->attachment_name = $request->name;
-
         if ($request->filled('description'))
             $file->description = $request->description;
         if ($request->hasFile('Imported_file')) {
