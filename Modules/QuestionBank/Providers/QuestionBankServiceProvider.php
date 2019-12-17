@@ -2,8 +2,10 @@
 
 namespace Modules\QuestionBank\Providers;
 
+use App\Observers\QuizObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\QuestionBank\Entities\QuizLesson;
 
 class QuestionBankServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,9 @@ class QuestionBankServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
+        QuizLesson::observe(QuizObserver::class);
+
     }
 
     /**

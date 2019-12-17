@@ -49,11 +49,6 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        QuizLesson::observe(QuizObserver::class);
-        AssignmentLesson::observe(AssignmentObserver::class);
-        PageLesson::observe(PageObserver::class);
-        MediaLesson::observe(MediaObserver::class);
-        FileLesson::observe(FileObserver::class);
         UserGrade::observe(UserGradeObserver::class);
     }
 }

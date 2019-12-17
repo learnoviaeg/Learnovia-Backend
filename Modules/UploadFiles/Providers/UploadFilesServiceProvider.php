@@ -2,8 +2,12 @@
 
 namespace Modules\UploadFiles\Providers;
 
+use App\Observers\FileObserver;
+use App\Observers\MediaObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\UploadFiles\Entities\FileLesson;
+use Modules\UploadFiles\Entities\MediaLesson;
 
 class UploadFilesServiceProvider extends ServiceProvider
 {
@@ -19,6 +23,9 @@ class UploadFilesServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
+        MediaLesson::observe(MediaObserver::class);
+        FileLesson::observe(FileObserver::class);
     }
 
     /**
