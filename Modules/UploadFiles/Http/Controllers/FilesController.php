@@ -410,9 +410,9 @@ class FilesController extends Controller
     {
         $request->validate([
             'fileID' => 'required|integer|exists:files,id',
-            'LessonID' => 'required|integer|exists:file_lessons,lesson_id',
+            'lesson_id' => 'required|integer|exists:file_lessons,lesson_id',
         ]);
-        $fileLesson = FileLesson::where('file_id', $request->fileID)->where('lesson_id', '=', $request->LessonID)->first();
+        $fileLesson = FileLesson::where('file_id', $request->fileID)->where('lesson_id', '=', $request->lesson_id)->first();
         if (!isset($fileLesson)) {
             return HelperController::api_response_format(400, null, 'Try again , Data invalid');
         }
