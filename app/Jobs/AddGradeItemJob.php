@@ -49,6 +49,7 @@ class AddGradeItemJob implements ShouldQueue
                         'id_number' => $cat_id->id_number,
                         'grademin' => $item['grademin'],
                         'grademax' => $item['grademax'],
+                        'locked' => (isset($item['locked'])) ? $item['locked'] : null,
                         'grade_pass' =>(isset($item['grade_pass'])) ? $item['grade_pass'] : null ,
                         'name' => (isset($item['name'])) ? $item['name'] : 'Grade Item',
                         'weight' => (isset($item['weight'])) ? $item['weight'] : 0,

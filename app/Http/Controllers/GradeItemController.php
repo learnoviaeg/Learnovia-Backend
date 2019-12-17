@@ -39,7 +39,8 @@ class GradeItemController extends Controller
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
             'item_type' => 'nullable|exists:item_types,id',
             'item_Entity' => 'nullable',
-            'hidden' => 'boolean'
+            'hidden' => 'boolean',
+            'locked' => 'boolean'
         ]);
 
         $id_number = GradeCategory::find($request->grade_category);
@@ -58,7 +59,8 @@ class GradeItemController extends Controller
             'item_type' => (isset($request->item_type)) ? $request->item_type : null,
             'id_number' => $id_number->id_number,
             'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : null,
-            'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
+            'locked' => (isset($request->locked)) ? $request->locked : null,
+            'hidden' => (isset($request->hidden)) ? $request->hidden : null,
             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
             'name' => (isset($request->name)) ? $request->name : 'Grade Item',
             'weight' => (isset($request->weight)) ? $request->weight : 0,
@@ -90,6 +92,7 @@ class GradeItemController extends Controller
             'items.*.item_type' => 'nullable|exists:item_types,id',
             'items.*.item_Entity' => 'nullable',
             'items.*.hidden' => 'boolean',
+            'items.*.locked' => 'boolean',
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id|required_with:level',
             'level' => 'exists:levels,id|required_with:class',
@@ -141,6 +144,7 @@ class GradeItemController extends Controller
                     'item_type' => $gradeitem->item_type,
                     'item_Entity' => $gradeitem->item_Entity,
                     'hidden' => $gradeitem->hidden,
+                    'locked' => $gradeitem->locked,
                     'multifactor' => $gradeitem->multifactor,
                     'name' =>  $gradeitem->name,
                     'weight' => $gradeitem->weight,

@@ -35,13 +35,13 @@ class GradeCategoryController extends Controller
             'parent' => 'nullable|exists:grade_categories,id',
             'aggregation' => 'nullable|integer',
             'aggregatedOnlyGraded' => 'nullable|integer',
-            'hidden' => 'integer',
+            'hidden' => 'boolean',
             'grademin' => 'nullable|required_if:type,==,1|integer|min:0',
             'grademax' => 'nullable|required_if:type,==,1|integer|gt:grademin',
             'type' => 'boolean|required',
             'exclude_flag' => 'boolean|required',
             'locked' => 'nullable|boolean',
-            'weight' => 'integer|required_if:exclude_flag,==,1'
+            'weight' => 'nullable|integer|required_if:exclude_flag,==,1'
         ]);
         $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (isset($course_segment_id)) {
