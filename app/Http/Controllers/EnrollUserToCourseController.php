@@ -253,50 +253,62 @@ class EnrollUserToCourseController extends Controller
     {
         $request->validate([
             'course_id' => 'required|exists:courses,id',
+            'search' => 'nullable'
         ]);
 
-        $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
-
         if ($request->class_id == null) {
-            foreach ($course_seg_id as $course_seg)
-                $users_id[] = Enroll::GetUsers_id($course_seg);
-            foreach ($users_id as $users) {
-                if ($users->isEmpty())
-                    return HelperController::api_response_format(200, null, 'There is No student enrolled');
-                else
-                    foreach ($users as $user)
-                        $UsersIds[] = User::findOrFail($user);
+            $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
+
+            $users_id=Enroll::whereIn('course_segment',$course_seg_id)->where('role_id',3)->pluck('user_id');
+
+            if($request->filled('search'))
+            {
+                $users = User::whereIn('id',$users_id)->where(function ($query) use ($request) {
+                    $query->where('firstname', 'LIKE' , "%$request->search%")
+                    ->orWhere('lastname', 'LIKE', "%$request->search%")->orWhere('username', 'LIKE', "%$request->search%");
+                })->get();
+
+                return HelperController::api_response_format(200, $users);
             }
 
+            $users = User::whereIn('id',$users_id)->get();
+
             //return all users that enrolled in this course
-            return HelperController::api_response_format(200, $UsersIds, 'students are ... ');
-        } //if was send class_id and course_id
+            return HelperController::api_response_format(200, $users, 'students are ... ');
+        } 
+        //if was send class_id and course_id
         else {
             $request->validate([
                 'class_id' => 'required|exists:classes,id'
             ]);
 
-            //$usersByClass is an array that have all users in this class
+            $course_seg=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
+            
+            //$usersByClass --> all users in this class
             $usersByClass = User::GetUsersByClass_id($request->class_id);
+            //$usersByClass --> all users in this course
+            $users_id = Enroll::GetUsers_id($course_seg->id);
 
+            $result = array_intersect($usersByClass->toArray(), $users_id->toArray());
+
+            if($request->filled('search'))
+            {
+                $users = User::whereIn('id',$users_id)->where(function ($query) use ($request) {
+                    $query->where('firstname', 'LIKE' , "%$request->search%")
+                    ->orWhere('lastname', 'LIKE', "%$request->search%")->orWhere('username', 'LIKE', "%$request->search%");
+                })->get();
+
+                return HelperController::api_response_format(200, $users);
+            }
+            
             if ($usersByClass->isEmpty())
                 return HelperController::api_response_format(200, null, 'There is no student in This class ');
 
-            foreach ($usersByClass as $users)
-                $UsersClassIds[] = User::findOrFail($users);
-
-            foreach ($course_seg_id as $course_seg) {
-                $users_id = Enroll::GetUsers_id($course_seg);
-
-                // $result is an array of users enrolled this course in this class
-                $result[] = array_intersect($usersByClass->toArray(), $users_id->toArray());
-            }
-
             foreach ($result as $users)
                 $Usersenrolled[] = User::findOrFail($users);
-            foreach ($Usersenrolled as $use)
-                if ($use->isEmpty())
-                    return HelperController::api_response_format(200, null, 'there is no student ');
+
+            if (!isset($Usersenrolled))
+                return HelperController::api_response_format(200, null, 'there is no student ');
 
             return HelperController::api_response_format(200, $Usersenrolled, 'students are ... ');
         }
