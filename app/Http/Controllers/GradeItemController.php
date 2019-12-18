@@ -40,7 +40,8 @@ class GradeItemController extends Controller
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
             'item_type' => 'nullable|exists:item_types,id',
             'item_Entity' => 'nullable',
-            'hidden' => 'boolean'
+            'hidden' => 'boolean',
+            'locked' => 'boolean'
         ]);
 
         $GradeCat = GradeCategory::find($request->grade_category);
@@ -49,7 +50,7 @@ class GradeItemController extends Controller
             'grade_category' => $request->grade_category,
             'grademin' => (isset($request->grademin)) ? $request->grademin : null,
             'grademax' => (isset($request->grademax)) ? $request->grademax : null,
-            'calculation' => (isset($request->calculation)) ? $request->calculation : null,
+            'calculation' => (isset($request->calculation) && in_array($request->calculation,GradeItems::Allowed_functions())) ? $request->calculation : null,
             'item_no' => (isset($request->item_no)) ? $request->item_no : null,
             'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
             'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : null,
@@ -58,7 +59,8 @@ class GradeItemController extends Controller
             'item_type' => (isset($request->item_type)) ? $request->item_type : null,
             'id_number' => $GradeCat->id_number,
             'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : null,
-            'hidden' => (isset($request->hidden)) ? $request->hidden : 0,
+            'locked' => (isset($request->locked)) ? $request->locked : null,
+            'hidden' => (isset($request->hidden)) ? $request->hidden : null,
             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
             'name' => (isset($request->name)) ? $request->name : 'Grade Item',
             'weight' => (isset($request->weight)) ? $request->weight : 0,
@@ -113,6 +115,7 @@ class GradeItemController extends Controller
             'items.*.item_type' => 'nullable|exists:item_types,id',
             'items.*.item_Entity' => 'nullable',
             'items.*.hidden' => 'boolean',
+            'items.*.locked' => 'boolean',
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id|required_with:level',
             'level' => 'exists:levels,id|required_with:class',
@@ -164,6 +167,7 @@ class GradeItemController extends Controller
                     'item_type' => $gradeitem->item_type,
                     'item_Entity' => $gradeitem->item_Entity,
                     'hidden' => $gradeitem->hidden,
+                    'locked' => $gradeitem->locked,
                     'multifactor' => $gradeitem->multifactor,
                     'name' =>  $gradeitem->name,
                     'weight' => $gradeitem->weight,
@@ -478,5 +482,8 @@ class GradeItemController extends Controller
     public function gradeing_method()
     {
         return HelperController::api_response_format(200,GradingMethod::get());
+    }
+    public function get_allowed_functions(){
+        return HelperController::api_response_format(200,GradeItems::Allowed_functions(),'allowed mathematical functions');
     }
 }
