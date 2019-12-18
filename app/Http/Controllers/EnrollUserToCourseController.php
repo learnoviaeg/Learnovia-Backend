@@ -2,20 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\AcademicYear;
 use App\AcademicYearType;
 use App\Http\Controllers\HelperController;
 use App\YearLevel;
 use Illuminate\Http\Request;
 use App\User;
-use Excel;
-use App\Imports\EnrollImport;
 use App\Enroll;
-use Carbon\Carbon;
 use App\ClassLevel;
 use App\CourseSegment;
 use App\Course;
 use App\SegmentClass;
-use DB;
 
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
@@ -204,7 +201,7 @@ class EnrollUserToCourseController extends Controller
                     foreach ($request->course as $course) {
                         $courseSegment = HelperController::Get_Course_segment_course($request);
                         Enroll::Create([
-                            'user_id' => user,
+                            'user_id' => $user,
                             'course_segment' => $courseSegment['value']['id'],
                             'role_id' => 3,
                         ]);
