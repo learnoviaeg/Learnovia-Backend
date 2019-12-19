@@ -31,12 +31,10 @@ class AttendanceLogController extends Controller
             'users.*.id' => 'required|exists:users,id',
             'users.*.status_id' => 'required|exists:attendance_statuses,id',
         ]);
-
         $attendance_sessions = AttendanceSession::find($request->session_id);
         $attendance_sessions->update(['last_time_taken' => $date]);
         $enroll = Enroll::where('course_segment', $attendance_sessions->course_segment_id)->pluck('user_id');
         $courseID = CourseSegment::where('id',$attendance_sessions->course_segment_id)->where('is_active',1)->first('course_id');
-//        return($courseID);
         $attendance = Attendance::find($attendance_sessions->attendance_id);
         foreach ($request->users as $user) {
             if (in_array($user['id'], $enroll->toArray())) {
@@ -51,9 +49,7 @@ class AttendanceLogController extends Controller
                 ]);
             }
             foreach ($attendance->allowed_classes as $classID) {
-
-                if(CourseSegment::GetWithClassAndCourse($classID,$courseID->course_id)->id==$attendance_sessions->course_segment_id){
-              $noti=  User::notify([
+                if(CourseSegment::GetWithClassAndCourse($classID,$courseID->course_id)->id==$attendance_sessions->course_segment_id){User::notify([
                     'message' => 'Attendance is taken with status '. $letter,
                     'from' => Auth::User()->id,
                     'users' => [$user['id']],

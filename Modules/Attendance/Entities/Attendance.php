@@ -52,14 +52,14 @@ class Attendance extends Model
             'start' => 'required|date',
             'end' => 'required|date',
             'sessions' => 'required',
-            'grade_items' => 'required',
-            'grade_items.min' => 'required|integer',
-            'grade_items.max' => 'required|integer',
-            'levels' => 'required|array|min:1',
-            'levels.*.id' => 'exists:levels,id',
-            'levels.*.classes' => 'required|array',
+            'grade_items' => 'required_if:graded,1',
+            'grade_items.min' => 'required_if:graded,1|integer',
+            'grade_items.max' => 'required_if:graded,1|integer',
+            'levels' => 'required_if:graded,1|array|min:1',
+            'levels.*.id' => 'required_if:graded,1|exists:levels,id',
+            'levels.*.classes' => 'required_if:graded,1|array',
             'levels.*.classes.*' => 'required|exists:classes,id',
-            'levels.*.periods' => 'required|array',
+            'levels.*.periods' => 'required_if:graded,1|array',
             'levels.*.periods.*.courses' => 'required|exists:courses,id',
             'levels.*.periods.*.from' => 'required|date',
             'levels.*.periods.*.to' => 'required|date',
@@ -146,6 +146,8 @@ class Attendance extends Model
 
     public function getAllowedClassesAttribute($value)
     {
+        if(is_null($value))
+            return $value;
         $temp = [];
         $value = unserialize($value);
         foreach ($value as $classes){
