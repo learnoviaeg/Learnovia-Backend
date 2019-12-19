@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Enroll;
+use App\Observers\EnrollObserver;
 use App\Observers\UserGradeObserver;
 use App\UserGrade;
 use Illuminate\Database\Eloquent\Collection;
@@ -40,5 +42,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         UserGrade::observe(UserGradeObserver::class);
+        Enroll::observe(EnrollObserver::class);
     }
 }
