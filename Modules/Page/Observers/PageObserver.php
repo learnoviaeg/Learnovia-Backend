@@ -1,6 +1,6 @@
 <?php
  
-namespace App\Observers;
+namespace Modules\Page\Observers;
 
 use App\LessonComponent;
 use Modules\Page\Entities\PageLesson;

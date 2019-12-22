@@ -199,6 +199,7 @@ Route::group(['prefix' => 'enroll', 'middleware' => 'auth:api'], function () {
     Route::get('get-unenroll-users', 'EnrollUserToCourseController@getUnEnroll')->name('getUnEnroll')->middleware('permission:enroll/get-unenroll-users');
     Route::get('get-unenrolled-users-Bulk', 'EnrollUserToCourseController@unEnrolledUsersBulk')->name('getUnEnrolleduser')->middleware('permission:enroll/get-unenrolled-users-Bulk');
     Route::post('users', 'EnrollUserToCourseController@enrollWithChain')->name('Enrollusers')->middleware('permission:enroll/users');
+    Route::post('migrate-user', 'EnrollUserToCourseController@Migration');//->name('migrateuser')->middleware('permission:enroll/migrate-user');
 });
 
 //Messages Routes

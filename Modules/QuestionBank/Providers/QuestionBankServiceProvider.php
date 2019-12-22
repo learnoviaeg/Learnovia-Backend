@@ -2,10 +2,10 @@
 
 namespace Modules\QuestionBank\Providers;
 
-use App\Observers\QuizObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Observers\QuizObserver;
 
 class QuestionBankServiceProvider extends ServiceProvider
 {

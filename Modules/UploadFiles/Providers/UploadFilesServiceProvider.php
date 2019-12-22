@@ -2,12 +2,12 @@
 
 namespace Modules\UploadFiles\Providers;
 
-use App\Observers\FileObserver;
-use App\Observers\MediaObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
+use Modules\UploadFiles\Observers\FileObserver;
+use Modules\UploadFiles\Observers\MediaObserver;
 
 class UploadFilesServiceProvider extends ServiceProvider
 {
