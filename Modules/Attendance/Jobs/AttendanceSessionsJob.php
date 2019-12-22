@@ -23,7 +23,6 @@ class AttendanceSessionsJob implements ShouldQueue
         $this->periods=$periods;
         $this->user_id=$user_id;
     }
-
     public function handle()
     {
         foreach ($this->course_segments as $course_segment) {
@@ -44,7 +43,5 @@ class AttendanceSessionsJob implements ShouldQueue
                 }
             }
         }
-
-
         }
     }

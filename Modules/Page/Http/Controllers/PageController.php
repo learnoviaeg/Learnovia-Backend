@@ -145,8 +145,9 @@ class PageController extends Controller
             'title' => 'required|string',
             'content' => 'required|string',
             'id' => 'required|exists:pages,id',
-            'lesson' => 'integer|exists:lessons,id'
-        ]);
+            'lesson_id' => 'required|array',
+            'lesson_id.*' => 'required|exists:lessons,id',
+            ]);
 
         $page = Page::find($request->id);
         $data = [
@@ -154,8 +155,8 @@ class PageController extends Controller
             'content' => $request->content
         ];
         $page->update($data);
-        if($request->filled('lesson')){
-            $page = Lesson::find($request->lesson)->module('Page', 'page')->get();;
+        if($request->filled('lesson_id')){
+            $page = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
         }
         return HelperController::api_response_format(200, $page, 'Page Updated Successfully');
     }
