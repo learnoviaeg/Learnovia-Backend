@@ -18,7 +18,7 @@ class AllowNullGradeCategoryToQuizLessonTable extends Migration
         });
 
         Schema::table('quiz_lessons', function (Blueprint $table) {
-            $table->unsignedBigInteger('grade_category_id')->nullable(0);
+            $table->unsignedBigInteger('grade_category_id')->nullable();
         });
     }
 
