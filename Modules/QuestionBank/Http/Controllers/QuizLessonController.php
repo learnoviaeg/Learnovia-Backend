@@ -71,6 +71,7 @@ class QuizLessonController extends Controller
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
+            'grade' => 'required|integer|min:1',
             'graded' => 'required|boolean',
             'grade_category_id' => 'required_if:graded,=,true|integer|exists:grade_categories,id',
             'grade_min' => 'required_if:graded,=,1|integer',
