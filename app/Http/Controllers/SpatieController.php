@@ -140,6 +140,12 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-unenrolled-users-Bulk', 'title' => 'get bulk of unenrolled users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/users', 'title' => 'enroll users with chain']);
 
+            //Events
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/add', 'title' => 'Add event to users']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/delete', 'title' => 'delete event']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/update', 'title' => 'update event']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/my-events', 'title' => 'get my event']);
+
             //Contact Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/add', 'title' => 'add contact']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/get', 'title' => 'get contact']);
