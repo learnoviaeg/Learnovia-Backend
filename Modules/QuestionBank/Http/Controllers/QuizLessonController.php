@@ -101,10 +101,7 @@ class QuizLessonController extends Controller
             if(count($check) > 0){
                 return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
             }
-            if($flag==false){
-                return HelperController::api_response_format(400, null,'this grade category invalid');
 
-            }
             $quizLesson[] = QuizLesson::create([
                 'quiz_id' => $request->quiz_id,
                 'lesson_id' => $lessons,
@@ -118,6 +115,9 @@ class QuizLessonController extends Controller
             ]);
             $this->NotifyQuiz($quiz,$request->opening_time,'add');
             if($request->graded == true){
+                if($flag==false){
+                    return HelperController::api_response_format(400, null,'this grade category invalid');
+                }
                 $grade_category=GradeCategory::find($request->grade_category_id);
                 $grade_category->GradeItems()->create([
                     'name' => 'Quiz',
