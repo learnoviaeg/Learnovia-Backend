@@ -71,12 +71,11 @@ class QuizLessonController extends Controller
             'closing_time' => 'required|date|date_format:Y-m-d H:i:s|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
-            'grade' => 'required',
-            'grade_category_id' => 'required|integer|exists:grade_categories,id',
-            'grade_min' => 'required|integer',
-            'grade_max' => 'required|integer',
-            'scale_id' => 'required|integer|exists:scales,id',
-            'grade_to_pass' => 'required|integer',
+            'graded' => 'required|boolean',
+            'grade_category_id' => 'required_if:graded,=,1|integer|exists:grade_categories,id',
+            'grade_min' => 'required_if:graded,=,1|integer',
+            'grade_max' => 'required_if:graded,=,1|integer',
+            'grade_to_pass' => 'required_if:graded,=,1|integer',
         ]);
 
         $quiz = quiz::find($request->quiz_id);
@@ -95,16 +94,16 @@ class QuizLessonController extends Controller
             if($course_Quiz != $coueseSegment->course_id){
                 return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
             }
-    
+
             $check = QuizLesson::where('quiz_id',$request->quiz_id)
                 ->where('lesson_id',$request->quiz_id)->get();
-    
+
             if(count($check) > 0){
                 return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
             }
             if($flag==false){
                 return HelperController::api_response_format(400, null,'this grade category invalid');
-    
+
             }
             $quizLesson[] = QuizLesson::create([
                 'quiz_id' => $request->quiz_id,
@@ -118,15 +117,17 @@ class QuizLessonController extends Controller
                 'publish_date' => $request->opening_time
             ]);
             $this->NotifyQuiz($quiz,$request->opening_time,'add');
-            $grade_category=GradeCategory::find($request->grade_category_id);
-            $grade_item = $grade_category->GradeItems()->create([
-                'grademin'=>$request->grade_min,
-                'grademax'=>$request->grade_max,
-                'scale_id'=>$request->scale_id,
-                'grade_pass'=>$request->grade_to_pass,
-                'item_type'=>1,
-                'item_Entity'=>$quizLesson[0]->id
-            ]);
+            if($request->graded == true){
+                $grade_category=GradeCategory::find($request->grade_category_id);
+                $grade_category->GradeItems()->create([
+                    'name' => 'Quiz',
+                    'grademin'=>$request->grade_min,
+                    'grademax'=>$request->grade_max,
+                    'grade_pass'=>$request->grade_to_pass,
+                    'item_type'=>1,
+                    'item_Entity'=>$quizLesson[0]->id
+                ]);
+            }
             LessonComponent::create([
                 'lesson_id' => $lessons,
                 'comp_id'   => $request->quiz_id,
