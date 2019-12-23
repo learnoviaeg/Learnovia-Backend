@@ -303,6 +303,14 @@ Route::group(['prefix' => 'letter', 'middleware' => 'auth:api'], function () {
     Route::get('get', 'LetterController@get')->name('getletter')->middleware('permission:letter/get');
     Route::post('assign', 'LetterController@assignLetterToCourse')->name('assignletter')->middleware('permission:letter/assign');
 });
+
+Route::group(['prefix' => 'event', 'middleware' => 'auth:api'], function () {
+    Route::post('add', 'EventController@create')->name('addevent')->middleware('permission:event/add');
+    Route::post('delete', 'EventController@delete')->name('deleteevent')->middleware('permission:event/delete');
+    Route::post('update', 'EventController@update')->name('updateevent')->middleware('permission:event/update');
+    Route::get('my-events', 'EventController@get_my_events')->name('myevent')->middleware('permission:event/my-events');
+    Route::get('all-events', 'EventController@GetAllEvents')->name('allevent')->middleware('permission:event/all-events');
+});
 Route::post('search-contacts', 'ContactController@SearchMyContacts');
 Route::post('search-messages', 'MessageController@SearchMessage');
 Route::post('change-color', 'ComponentController@ChangeColor');
