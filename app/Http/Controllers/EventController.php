@@ -104,9 +104,6 @@ class EventController extends Controller
         ]);
 
         $user_ids = collect();
-        $file_id = null;
-        $cover_id = null;
-        $id_number = null;
         if ($request->filled('classes')) {
             $user_ids->push(User::whereIn('class_id', $request->classes)->pluck('id'));
         }
@@ -131,13 +128,14 @@ class EventController extends Controller
             default:
                 $users_ids = [];
         }
-        if (count($users_ids) > 0) {
-            Event::whereIn('user_id', $users_ids)->where('name', $request->name)->delete();
-            return HelperController::api_response_format(201, 'deleted Successfully');
-        }
-        Event::where('name', $request->name)->delete();
-        return HelperController::api_response_format(201, 'deleted  all Successfully');
+        $events = Event::where('name', $request->name);
+        if (count($users_ids) > 0) { 
+            $events->whereIn('user_id', $users_ids);
+        } 
+        $events->delete(); 
+        return HelperController::api_response_format(201, 'deleted Successfully');
     }
+
     public function update(Request $request)
     {
         $request->validate([
@@ -197,24 +195,11 @@ class EventController extends Controller
             $cover_name = attachment::upload_attachment($request->cover, 'Event');
             $cover_id = $cover_name->id;
         }
-        if (count($users_ids) > 0) {
 
-            Event::whereIn('user_id', $users_ids)->where('name', $request->old_name)->update(
-                [
-                    'name' =>isset( $request->name)? $request->name :$request->old_name ,
-                    'description' => $request->description,
-                    'attached_file' => $file_id,
-                    'from' => $request->from,
-                    'to' => isset($request->to) ? $request->to : null,
-                    'cover' => $cover_id,
-                    'id_number' => $id_number,
-                ]
-
-            );
-            return HelperController::api_response_format(201, 'updated Successfully');
-        }
-        Event::where('name', $request->old_name)->update(
-            [
+        $events = Event::where('name', $request->old_name);
+        if(count($user_ids)>0)
+            $events->whereIn('user_id', $users_ids);
+        $events->update([
                 'name' =>isset( $request->name)? $request->name :$request->old_name ,
                 'description' => $request->description,
                 'attached_file' => $file_id,
@@ -223,27 +208,62 @@ class EventController extends Controller
                 'cover' => $cover_id,
                 'id_number' => $id_number,
             ]
-
         );
-        return HelperController::api_response_format(201, 'updated  all Successfully');
+        return HelperController::api_response_format(201, 'updated Successfully');
     }
 
 
     public function get_my_events(Request $request){
 
         $request->validate([
-            'from' => 'required|date|exists:events,from',
-            'to' => 'date',
-            ]);
-        $events=Event::whereIn('from' , $request->from);
-        if($request->filled('to')){
-            $allDays = Event::getAllWorkingDays($request->from,$request->to);
-            $events->whereIn('to' ,$allDays);
-            $events->whereIn('from' ,$allDays);
-        }
-        $user_id = Auth::user()->id;
-        $events->where('user_id',$user_id);
+            'from' => 'date|required_with:to',
+            'to' => 'nullable|date',
+        ]);
+        $events = Event::where('user_id',Auth::user()->id);
+        
+        if($request->filled('from') && !$request->filled('to'))
+            $events->where('from' , $request->from);
+        
+        if($request->filled('to'))
+            $events->whereBetween('from' , [$request->from , $request->to]);
+        
+        return HelperController::api_response_format(201,$events->get(),'there are your events ... ' );
+    }
 
-        return  HelperController::api_response_format(201,$events->get(),'there are your events ... ' );
+    public function GetAllEvents(Request $request)
+    {
+        $request->validate([
+            'from' => 'nullable|date|required_with:to',
+            'to' => 'nullable|date',
+            'users' => 'array',
+            'users.*' => 'nullable|exists:users,id',
+            'classes' => 'array',
+            'classes.*' => 'nullable|exists:users,class_id',
+            'levels' => 'array',
+            'levels.*' => 'nullable|exists:users,level'
+        ]);
+        $users=collect();
+        $events = Event::whereNotNull('id');
+        
+        if($request->filled('from') && !$request->filled('to'))
+            $events->where('from' , $request->from);
+        
+        if($request->filled('to'))
+            $events->whereBetween('from' , [$request->from , $request->to]);
+
+        if($request->filled('users'))
+            $events->whereIn('user_id' , $request->users);
+
+        if ($request->filled('classes')) {
+            $users->push(User::whereIn('class_id', $request->classes)->pluck('id'));
+        }
+
+        if ($request->filled('levels')) {
+            $users->push(User::whereIn('level', $request->levels)->pluck('id'));
+        }
+        if($users != null)
+            $events->whereIn('user_id',$users[0]);
+
+        return HelperController::api_response_format(201,$events->get(),'there are all events ... ' );
     }
 }

@@ -145,6 +145,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/delete', 'title' => 'delete event']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/update', 'title' => 'update event']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/my-events', 'title' => 'get my event']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/all-events', 'title' => 'get all events']);
 
             //Contact Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/add', 'title' => 'add contact']);
