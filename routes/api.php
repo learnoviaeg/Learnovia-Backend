@@ -185,11 +185,11 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
     Route::get('get-with-role-cs', 'UserController@get_users_with_filter_role')->name('getbyroleid')->middleware('permission:user/get-with-role-cs');
     Route::get('filter-with-role', 'UserController@allUserFilterRole')->name('filterallbyrole')->middleware('permission:user/filter-with-role');
     Route::get('search-all-users', 'UserController@getAllUsersInCourseSegment')->name('searchusers')->middleware('permission:user/search-all-users');
-    Route::get('overview-report', 'UserController@Overview_Report');//->name('getusergrade')->middleware('permission:grade/user/get');
+    Route::get('overview-report', 'UserController@Overview_Report')->name('getusergrade')->middleware('permission:grade/user/get');
 });
 //Enroll Routes
 Route::group(['prefix' => 'enroll', 'middleware' => 'auth:api'], function () {
-    Route::post('enroll-single-user', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/enroll-single-user');
+    Route::post('enroll-single-user', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/single');
     Route::post('un-enroll-single-user', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
     Route::get('get-enrolled-courses', 'EnrollUserToCourseController@ViewAllCoursesThatUserEnrollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
     Route::post('mandatory-course', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:enroll/mandatory');
@@ -199,7 +199,7 @@ Route::group(['prefix' => 'enroll', 'middleware' => 'auth:api'], function () {
     Route::get('get-unenroll-users', 'EnrollUserToCourseController@getUnEnroll')->name('getUnEnroll')->middleware('permission:enroll/get-unenroll-users');
     Route::get('get-unenrolled-users-Bulk', 'EnrollUserToCourseController@unEnrolledUsersBulk')->name('getUnEnrolleduser')->middleware('permission:enroll/get-unenrolled-users-Bulk');
     Route::post('users', 'EnrollUserToCourseController@enrollWithChain')->name('Enrollusers')->middleware('permission:enroll/users');
-    Route::post('migrate-user', 'EnrollUserToCourseController@Migration');//->name('migrateuser')->middleware('permission:enroll/migrate-user');
+    Route::post('migrate-user', 'EnrollUserToCourseController@Migration')->name('migrateuser')->middleware('permission:enroll/migrate-user');
 });
 
 //Messages Routes

@@ -32,7 +32,7 @@ class EnrollUserToCourseController extends Controller
      * @return if these users enrolled before [string] those users already enrolled
      * @return if coure not active and invalid class [string] invalid class data or not active course
      * @return [string] added successfully
-    */
+     */
     public static function EnrollCourses(Request $request)
     {
         $request->validate([
@@ -93,7 +93,7 @@ class EnrollUserToCourseController extends Controller
      * @return if No current segment or year [string] There is no current segment or year
      * @return if No user in this course [string] NOT FOUND USER IN THIS COURSE/invalid data
      * @return [object] courses that users unenrolled successfully
-    */
+     */
     public function UnEnroll(Request $request)
     {
         $request->validate([
@@ -123,7 +123,7 @@ class EnrollUserToCourseController extends Controller
      *
      * @param  [int] user_id .. id
      * @return [ids] courses that users enrolled in
-    */
+     */
     public function ViewAllCoursesThatUserEnrollment(Request $request)
     {
         $request->validate([
@@ -153,7 +153,7 @@ class EnrollUserToCourseController extends Controller
      * @return if these users enrolled before [string] those users already enrolled
      * @return if No current segment or year [string] There is no current segment or year
      * @return [string] added successfully
-    */
+     */
     public static function EnrollInAllMandatoryCourses(Request $request)
     {
         $request->validate([
@@ -194,8 +194,7 @@ class EnrollUserToCourseController extends Controller
                             'role_id' => 3,
                         ]);
                     }
-                }
-                elseif  (isset($request->course)) {
+                } elseif (isset($request->course)) {
                     $mand = Course::where('id', $request->course)->pluck('mandatory')->first();
                     if ($mand == 1)
                         return HelperController::api_response_format(400, [], 'This Course not Optional_Course');
@@ -226,7 +225,7 @@ class EnrollUserToCourseController extends Controller
      *
      * @param  [excel] all data of user
      * @return [string] done depended on Import files {enroll/users/courses}
-    */
+     */
     public function EnrollExistUsersFromExcel(Request $request)
     {
         $ExcelCntrlVar = new ExcelController();
@@ -247,7 +246,7 @@ class EnrollUserToCourseController extends Controller
      * @return if given class [string] filtered just students in this class
      * @return if these users enrolled before [string] those users already enrolled
      * @return [string] students
-    */
+     */
     public function GetEnrolledStudents(Request $request)
     {
         $request->validate([
@@ -258,31 +257,30 @@ class EnrollUserToCourseController extends Controller
         if ($request->class_id == null) {
             $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
 
-            $users_id=Enroll::whereIn('course_segment',$course_seg_id)->where('role_id',3)->pluck('user_id');
+            $users_id = Enroll::whereIn('course_segment', $course_seg_id)->where('role_id', 3)->pluck('user_id');
 
-            if($request->filled('search'))
-            {
-                $users = User::whereIn('id',$users_id)->where(function ($query) use ($request) {
-                    $query->where('firstname', 'LIKE' , "%$request->search%")
-                    ->orWhere('lastname', 'LIKE', "%$request->search%")->orWhere('username', 'LIKE', "%$request->search%");
+            if ($request->filled('search')) {
+                $users = User::whereIn('id', $users_id)->where(function ($query) use ($request) {
+                    $query->where('firstname', 'LIKE', "%$request->search%")
+                        ->orWhere('lastname', 'LIKE', "%$request->search%")->orWhere('username', 'LIKE', "%$request->search%");
                 })->get();
 
                 return HelperController::api_response_format(200, $users);
             }
 
-            $users = User::whereIn('id',$users_id)->get();
+            $users = User::whereIn('id', $users_id)->get();
 
             //return all users that enrolled in this course
             return HelperController::api_response_format(200, $users, 'students are ... ');
-        } 
+        }
         //if was send class_id and course_id
         else {
             $request->validate([
                 'class_id' => 'required|exists:classes,id'
             ]);
 
-            $course_seg=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
-            
+            $course_seg = CourseSegment::GetWithClassAndCourse($request->class_id, $request->course_id);
+
             //$usersByClass --> all users in this class
             $usersByClass = User::GetUsersByClass_id($request->class_id);
             //$usersByClass --> all users in this course
@@ -290,16 +288,15 @@ class EnrollUserToCourseController extends Controller
 
             $result = array_intersect($usersByClass->toArray(), $users_id->toArray());
 
-            if($request->filled('search'))
-            {
-                $users = User::whereIn('id',$users_id)->where(function ($query) use ($request) {
-                    $query->where('firstname', 'LIKE' , "%$request->search%")
-                    ->orWhere('lastname', 'LIKE', "%$request->search%")->orWhere('username', 'LIKE', "%$request->search%");
+            if ($request->filled('search')) {
+                $users = User::whereIn('id', $users_id)->where(function ($query) use ($request) {
+                    $query->where('firstname', 'LIKE', "%$request->search%")
+                        ->orWhere('lastname', 'LIKE', "%$request->search%")->orWhere('username', 'LIKE', "%$request->search%");
                 })->get();
 
                 return HelperController::api_response_format(200, $users);
             }
-            
+
             if ($usersByClass->isEmpty())
                 return HelperController::api_response_format(200, null, 'There is no student in This class ');
 
@@ -325,7 +322,7 @@ class EnrollUserToCourseController extends Controller
      * @param  [array..id] course
      * @return if No current segment or year [string] There is no current segment or year
      * @return [objects] students
-    */
+     */
     public function getUnEnroll(Request $request)
     {
         $request->validate([
@@ -361,7 +358,6 @@ class EnrollUserToCourseController extends Controller
         $userUnenrolls = User::whereNotIn('id', $ids)->get();
 
         return HelperController::api_response_format(200, $userUnenrolls, 'students are ... ');
-
     }
 
     /**
@@ -375,7 +371,7 @@ class EnrollUserToCourseController extends Controller
      * @return if course not active and invalid class [string] invalid class data or not active course
      * @return if there is no courses [string] false and null
      * @return [objects] students
-    */
+     */
     public function unEnrolledUsersBulk(Request $request)
     {
         $courseSegments = HelperController::Get_Course_segment($request);
@@ -405,7 +401,7 @@ class EnrollUserToCourseController extends Controller
      * @return if these users enrolled before [string] those users already enrolled     *
      * @return if there is no courses [string] there is no course segment here
      * @return [objects] Enrolled successfilly
-    */
+     */
     public function enrollWithChain(Request $request)
     {
         $request->validate([
@@ -420,28 +416,24 @@ class EnrollUserToCourseController extends Controller
             'courses' => 'array|exists:courses,id'
         ]);
 
-        $courseSeg=GradeCategoryController::getCourseSegment($request);
-        if(isset($courseSeg))
-        {
-            $count=0;
-            foreach($request->users as $user)
-            {
+        $courseSeg = GradeCategoryController::getCourseSegment($request);
+        if (isset($courseSeg)) {
+            $count = 0;
+            foreach ($request->users as $user) {
                 foreach ($courseSeg as $course) {
-                $check = Enroll::IsExist($course, $user);
-                if($check==null)
-                {
-                    Enroll::Create([
-                        'user_id' => $user,
-                        'course_segment' => $course,
-                        'role_id' => $request->role_id[$count],
-                    ]);
-                }
-                else
-                    $EnrolledBefore[]=$user[$count];
+                    $check = Enroll::IsExist($course, $user);
+                    if ($check == null) {
+                        Enroll::Create([
+                            'user_id' => $user,
+                            'course_segment' => $course,
+                            'role_id' => $request->role_id[$count],
+                        ]);
+                    } else
+                        $EnrolledBefore[] = $user[$count];
                 }
                 $count++;
             }
-            if(isset($EnrolledBefore))
+            if (isset($EnrolledBefore))
                 return HelperController::api_response_format(200, array_values(array_unique($EnrolledBefore)), 'Success and theses users added before');
             else
                 return HelperController::api_response_format(200, 'Enrolled Successfully');
@@ -456,56 +448,52 @@ class EnrollUserToCourseController extends Controller
             'new_class' => 'exists:classes,id'
         ]);
 
-        foreach($request->users as $user1)
-        {
-            $user=User::find($user1);
+        foreach ($request->users as $user1) {
+            $user = User::find($user1);
             $req = new Request([
                 'class' => $user->class_id,
                 'level' => $user->level,
                 'type' => $user->type,
             ]);
-            $oldcourseSeg=GradeCategoryController::getCourseSegment($req);
-            $userGrade1=UserGrade::where('user_id',$user1)->with(['GradeItems.GradeCategory' => function ($query) use ($oldcourseSeg) {
+            $oldcourseSeg = GradeCategoryController::getCourseSegment($req);
+            $userGrade1 = UserGrade::where('user_id', $user1)->with(['GradeItems.GradeCategory' => function ($query) use ($oldcourseSeg) {
                 $query->whereIn('course_segment_id', $oldcourseSeg);
             }])->get();
-            $oldGradeItems= $userGrade1->pluck('GradeItems');
+            $oldGradeItems = $userGrade1->pluck('GradeItems');
             $requestenroll = new Request([
                 'class' => $request->new_class,
                 'level' => $user->level,
                 'type' => $user->type,
                 'users' => $request->users
             ]);
-            self::EnrollInAllMandatoryCourses($requestenroll);
-            Enroll::whereIn('course_segment',$oldcourseSeg)->whereIn('user_id',$request->users)->delete();
+            $newcourseSeg = GradeCategoryController::getCourseSegment($requestenroll);
 
-            $newcourseSeg=GradeCategoryController::getCourseSegment($requestenroll);
-            if(!$newcourseSeg)            
+            if (!$newcourseSeg)
                 return HelperController::api_response_format(200, 'No Course Segment here');
 
-            $newGradeItms=GradeCategory::whereIn('course_segment_id',$newcourseSeg)->with('GradeItems')->get();
-            $newsItems= $newGradeItms->pluck('GradeItems');
-            if(!$newGradeItms)
+            self::EnrollInAllMandatoryCourses($requestenroll);
+            Enroll::whereIn('course_segment', $oldcourseSeg)->whereIn('user_id', $request->users)->delete();
+            $newGradeItms = GradeCategory::whereIn('course_segment_id', $newcourseSeg)->with('GradeItems')->get();
+            $newsItems = $newGradeItms->pluck('GradeItems');
+            if (!$newGradeItms)
                 continue;
 
-            foreach($oldGradeItems as $oldItems)
-            {
-                $useGrade= $oldItems->UserGrade->where('user_id',$user1);
-                foreach($newsItems as $newItems)
-                {
-                    foreach($newItems as $new)
-                    {
-                        if($oldItems->name == $new->name)
-                        {
+            foreach ($oldGradeItems as $oldItems) {
+                $useGrade = $oldItems->UserGrade->where('user_id', $user1);
+                foreach ($newsItems as $newItems) {
+                    foreach ($newItems as $new) {
+                        if ($oldItems->name == $new->name) {
                             UserGrade::firstOrCreate([
                                 'grade_item_id' => $new->id,
                                 'user_id' => $user1,
                                 'raw_grade' => $useGrade[0]->raw_grade
                             ]);
                         }
-                        UserGrade::where('grade_item_id',$oldItems->id)->where('user_id',$user1)->delete();
+                        UserGrade::where('grade_item_id', $oldItems->id)->where('user_id', $user1)->delete();
                     }
                 }
-            } 
+            }
         }
+        return HelperController::api_response_format(200, 'User Migrated to class ' . $request->new_class);
     }
 }

@@ -104,7 +104,7 @@ class ClassController extends Controller
     }
 
     /**
-     * @Description :list all classes or select one by id or a filter . 
+     * @Description :list all classes or select one by id or a filter .
      * @param : id of classes or search as an optional parameter.
      * @return : returns all classes or filtered ones or a class selected by id.
      */
@@ -119,7 +119,7 @@ class ClassController extends Controller
             {
                 $Classes = Classes::where('name', 'LIKE' , "%$request->search%")->get()
                 ->paginate(HelperController::GetPaginate($request));
-                return HelperController::api_response_format(202, $Classes);   
+                return HelperController::api_response_format(202, $Classes);
             }
             $classes = Classes::paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(200,$classes);
@@ -144,7 +144,7 @@ class ClassController extends Controller
     {
         $valid = Validator::make($request->all(), [
             'name' => 'required',
-            'id' => 'required|exists:levels,id',
+            'id' => 'required|exists:classes,id',
         ]);
 
         if ($valid->fails())
