@@ -149,6 +149,9 @@ Route::group(['prefix' => 'category', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'CategoryController@delete')->name('deletecategory')->middleware('permission:category/delete');
     Route::get('get-all', 'CategoryController@get')->name('getcategory')->middleware('permission:category/get-all');
 });
+Route::group(['prefix' => 'course', 'middleware' => ['auth:api','ParentCheck']], function () {
+    Route::get('my-courses', 'CourseController@CurrentCourses');//->name('mycourses')->middleware('permission:course/my-courses');
+});
 
 //Course Routes
 Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
@@ -156,7 +159,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'CourseController@update')->name('editcourse')->middleware('permission:course/update');
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:course/delete');
     Route::get('get-all', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
-    Route::get('my-courses', 'CourseController@CurrentCourses')->name('mycourses')->middleware('permission:course/my-courses');
+//    Route::get('my-courses', 'CourseController@CurrentCourses')->name('mycourses')->middleware('permission:course/my-courses');
     Route::get('all-courses', 'CourseController@EnrolledCourses')->name('enrolledcourses')->middleware('permission:course/all-courses');
     Route::get('past-courses', 'CourseController@PastCourses')->name('pastcourses')->middleware('permission:course/past-courses');
     Route::get('future-courses', 'CourseController@FutureCourses')->name('futurecourses')->middleware('permission:course/future-courses');
@@ -186,6 +189,15 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
     Route::get('filter-with-role', 'UserController@allUserFilterRole')->name('filterallbyrole')->middleware('permission:user/filter-with-role');
     Route::get('search-all-users', 'UserController@getAllUsersInCourseSegment')->name('searchusers')->middleware('permission:user/search-all-users');
     Route::get('overview-report', 'UserController@Overview_Report')->name('getusergrade')->middleware('permission:grade/user/get');
+
+    Route::post('get-someone-children', 'UserController@getSomeoneChildren')->name('getsomeonechild')->middleware('permission:user/get-someone-child');
+
+    Route::post('get-someone-parent', 'UserController@getSomeoneParent')->name('getsomeoneparent')->middleware('permission:user/get-someone-parent');
+
+    Route::get('get-my-children', 'UserController@getMyChildren')->name('getmychild')->middleware('permission:user/get-my-child');
+
+    Route::post('current-child', 'UserController@SetCurrentChild')->name('currentchild')->middleware('permission:user/current-child');
+
 });
 //Enroll Routes
 Route::group(['prefix' => 'enroll', 'middleware' => 'auth:api'], function () {
