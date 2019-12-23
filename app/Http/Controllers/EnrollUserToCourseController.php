@@ -12,11 +12,13 @@ use App\Enroll;
 use App\ClassLevel;
 use App\CourseSegment;
 use App\Course;
+use App\GradeCategory;
 use App\SegmentClass;
 
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
+use App\UserGrade;
 
 class EnrollUserToCourseController extends Controller
 {
@@ -214,7 +216,7 @@ class EnrollUserToCourseController extends Controller
         }
         //($count);
         if ($count > 0) {
-            return HelperController::api_response_format(200, [], 'those users added before');
+            return HelperController::api_response_format(200, [], 'found user added before');
         }
         return HelperController::api_response_format(200, [], 'added successfully');
     }
@@ -445,5 +447,65 @@ class EnrollUserToCourseController extends Controller
                 return HelperController::api_response_format(200, 'Enrolled Successfully');
         }
         return HelperController::api_response_format(200, 'No Course Segment here');
+    }
+
+    public function Migration(Request $request)
+    {
+        $request->validate([
+            'users' => 'array|required|exists:users,id',
+            'new_class' => 'exists:classes,id'
+        ]);
+
+        foreach($request->users as $user1)
+        {
+            $user=User::find($user1);
+            $req = new Request([
+                'class' => $user->class_id,
+                'level' => $user->level,
+                'type' => $user->type,
+            ]);
+            $oldcourseSeg=GradeCategoryController::getCourseSegment($req);
+            $userGrade1=UserGrade::where('user_id',$user1)->with(['GradeItems.GradeCategory' => function ($query) use ($oldcourseSeg) {
+                $query->whereIn('course_segment_id', $oldcourseSeg);
+            }])->get();
+            $oldGradeItems= $userGrade1->pluck('GradeItems');
+            $requestenroll = new Request([
+                'class' => $request->new_class,
+                'level' => $user->level,
+                'type' => $user->type,
+                'users' => $request->users
+            ]);
+            self::EnrollInAllMandatoryCourses($requestenroll);
+            Enroll::whereIn('course_segment',$oldcourseSeg)->whereIn('user_id',$request->users)->delete();
+
+            $newcourseSeg=GradeCategoryController::getCourseSegment($requestenroll);
+            if(!$newcourseSeg)            
+                return HelperController::api_response_format(200, 'No Course Segment here');
+
+            $newGradeItms=GradeCategory::whereIn('course_segment_id',$newcourseSeg)->with('GradeItems')->get();
+            $newsItems= $newGradeItms->pluck('GradeItems');
+            if(!$newGradeItms)
+                continue;
+
+            foreach($oldGradeItems as $oldItems)
+            {
+                $useGrade= $oldItems->UserGrade->where('user_id',$user1);
+                foreach($newsItems as $newItems)
+                {
+                    foreach($newItems as $new)
+                    {
+                        if($oldItems->name == $new->name)
+                        {
+                            UserGrade::firstOrCreate([
+                                'grade_item_id' => $new->id,
+                                'user_id' => $user1,
+                                'raw_grade' => $useGrade[0]->raw_grade
+                            ]);
+                        }
+                        UserGrade::where('grade_item_id',$oldItems->id)->where('user_id',$user1)->delete();
+                    }
+                }
+            } 
+        }
     }
 }

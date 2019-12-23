@@ -2,10 +2,10 @@
 
 namespace Modules\Assigments\Providers;
 
-use App\Observers\AssignmentObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\Assigments\Observers\AssignmentObserver;
 
 class AssigmentsServiceProvider extends ServiceProvider
 {

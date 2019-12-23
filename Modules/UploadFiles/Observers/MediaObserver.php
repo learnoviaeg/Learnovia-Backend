@@ -1,6 +1,6 @@
 <?php
- 
-namespace App\Observers;
+
+namespace Modules\UploadFiles\Observers;
 
 use App\LessonComponent;
 use Modules\UploadFiles\Entities\MediaLesson;
