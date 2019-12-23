@@ -1,5 +1,5 @@
 <?php
- 
+
 namespace App\Observers;
 
 use App\CourseSegment;
@@ -12,17 +12,13 @@ class EnrollObserver
 {
     public function created(Enroll $enroll)
     {
-        $user = User::find($enroll->user_id);
-
-        $courseSeg=CourseSegment::find($enroll->course_segment);
-        if($courseSeg->mandatory != 1)
-            // continue;
-            return HelperController::api_response_format(400, $courseSeg, 'This Course not mandatory');
-
-        $user->update([
-            'class_id' => $courseSeg->segmentClasses[0]->classLevel[0]->class_id,
-            'level' => $courseSeg->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id,
-            'type' => $courseSeg->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id
-        ]);
+        if ($enroll->courseSegment->courses[0]->mandatory == 1) {
+            $user = User::find($enroll->user_id);
+            $user->update([
+                'class_id' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->class_id,
+                'level' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id,
+                'type' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id
+            ]);
+        }
     }
 }
