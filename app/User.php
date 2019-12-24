@@ -5,18 +5,18 @@ namespace App;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\NewMessage;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
-use DB;
 
 class User extends Authenticatable
 {
     use HasRoles;
+    use SoftDeletes;
 
     use Notifiable, HasApiTokens, HasRoles;
     protected $guard_name = 'api';
