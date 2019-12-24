@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Parents;
 use App\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -109,6 +110,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->token()->revoke();
+        Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
         return HelperController::api_response_format(200, [], 'Successfully logged out');
     }
  /**
