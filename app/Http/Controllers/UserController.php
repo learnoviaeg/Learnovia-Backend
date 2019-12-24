@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 use App\Enroll;
 use App\GradeCategory;
+use App\Parents;
 use App\User;
 use Carbon\Carbon;
 use App\Course;
@@ -56,11 +57,13 @@ class UserController extends Controller
             'picture' => 'nullable|array','arabicname' => 'nullable|array', 'gender' => 'nullable|array', 'phone' => 'nullable|array',
             'address' => 'nullable|array','nationality' => 'nullable|array','country' => 'nullable|array', 'birthdate' => 'nullable|array',
             'notes' => 'nullable|array','email' => 'nullable|array', 'language' => 'nullable|array','timezone' => 'nullable|array',
-            'religion' => 'nullable|array','second language' => 'nullable|array'
+            'religion' => 'nullable|array','second language' => 'nullable|array', 'username' => 'nullable|array', 'type' => 'nullable|array',
+            'level' => 'nullable|array', 'real_password' => 'nullable|array'
         ]);
         $users = collect([]);
-        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
-            'language', 'timezone', 'religion', 'second language','picture'];
+        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email', 'suspend',
+            'language', 'timezone', 'religion', 'second language','picture', 'real_password', 'level', 'type', 'class_id', 'username'
+        ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
         $i=0;
@@ -75,12 +78,18 @@ class UserController extends Controller
             ]);
 
             foreach ($optionals as $optional)
-                if ($optional == 'picture') 
-                    $user->$optional = attachment::upload_attachment($request->$optional[$i], 'User')->id;
-                else if($optional =='birthdate')
-                    $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
-                if ($request->filled($optional))
+                if ($request->filled($optional)){
+                    if ($optional == 'picture') 
+                        $user->$optional = attachment::upload_attachment($request->$optional[$i], 'User')->id;
+                    if($optional =='birthdate')
+                        $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
+                    if($optional =='real_password'){
+                        $user->$optional = $request->$optional[$i];
+                        $user->password =   bcrypt($request->$optional[$i]);
+                    }
                     $user->$optional =$request->$optional[$i];
+                }
+
             $i++;
 
             $user->save();
@@ -111,7 +120,6 @@ class UserController extends Controller
                 $teachercounter = 0;
 
                 while (isset($request->$teacheroptional[$key][$teachercounter])) {
-
                     $course_id = Course::findByName($request->$teacheroptional[$key][$teachercounter]);
                     $segmentid = CourseSegment::getidfromcourse($course_id);
                     $option = new Request([
@@ -393,5 +401,37 @@ class UserController extends Controller
         return $course_segments;
     }
 
+    Public Function SetCurrentChild(Request $request)
+    {
+        $request->validate([
+            'child_id' => 'required|exists:parents,child_id'
+        ]);
+        Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
+        return HelperController::api_response_format(200, 'Child is choosen successfully');
 
+    }
+    Public Function getMyChildren(){
+        $childrenIDS = Parents::where('parent_id',Auth::id())->pluck('child_id');
+        $children =  User::whereIn('id',$childrenIDS)->get();
+        return HelperController::api_response_format(200,$children ,'Children are.......');
+
+    }
+    Public Function getSomeoneChildren(Request $request){
+        $request->validate([
+            'parent_id' => 'required|exists:parents,parent_id'
+        ]);
+        $childrenIDS = Parents::where('parent_id',$request->parent_id)->pluck('child_id');
+        $children =  User::whereIn('id',$childrenIDS)->get();
+        return HelperController::api_response_format(200,$children ,'Children are.......');
+
+    }
+    Public Function getSomeoneParent(Request $request)
+    {
+        $request->validate([
+            'child_id' => 'required|exists:parents,child_id'
+        ]);
+        $parentID = Parents::where('child_id',$request->child_id)->first('parent_id');
+        $parent =  User::find($parentID);
+        return $parent;
+    }
 }

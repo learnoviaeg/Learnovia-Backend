@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\AcademicYearType;
 use App\ClassLevel;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Classes;

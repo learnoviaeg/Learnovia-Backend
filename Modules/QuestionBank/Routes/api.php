@@ -15,7 +15,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
     //Quiz Routes
     Route::post('delete', 'QuizController@destroy')->middleware('permission:quiz/delete');
-    Route::get('get', 'QuizController@get')->name('getquiz')->middleware('permission:quiz/get');
+    Route::get('get', 'QuizController@get')->name('getquiz')->middleware(['permission:quiz/get' , 'ParentCheck']);
     Route::get('sort', 'QuizController@sort')->middleware('permission:quiz/sort');
     Route::get('sortup', 'QuizController@SortUp')->middleware('permission:quiz/sortup');
 
@@ -37,11 +37,11 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('get-student-in-quiz', 'QuizController@getStudentinQuiz')->middleware('permission:quiz/get-student-in-quiz');
     Route::get('get-student-answer-quiz', 'QuizController@getStudentAnswerinQuiz')->middleware('permission:quiz/get-student-answer-quiz');
     Route::get('get-all-students-answer', 'QuizController@getAllStudentsAnswerinQuiz')->middleware('permission:quiz/get-all-students-answer');
-    Route::get('get-single-quiz', 'QuizController@getSingleQuiz')->middleware('permission:quiz/get-single-quiz');
+    Route::get('get-single-quiz', 'QuizController@getSingleQuiz')->middleware(['permission:quiz/get-single-quiz' , 'ParentCheck']);
     Route::post('toggle', 'QuizController@toggleQuizVisibity')->middleware('permission:quiz/toggle');
     Route::post('correct-user-quiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
     Route::post('get-attempts', 'UserQuizController@get_user_quiz')->middleware('permission:quiz/get-attempts');
-    Route::post('grade-user-quiz', 'UserQuizController@gradeUserQuiz');//->middleware('permission:quiz/grade-user-quiz');
+    Route::post('grade-user-quiz', 'UserQuizController@gradeUserQuiz')->middleware('permission:quiz/grade-user-quiz');
 });
 
 Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
@@ -52,7 +52,7 @@ Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
         Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
     });
 
-    Route::get('get', 'QuestionBankController@index')->middleware('permission:question/get');
+    Route::get('get', 'QuestionBankController@index')->middleware(['permission:question/get' , 'ParentCheck']);
     Route::post('delete', 'QuestionBankController@destroy')->middleware('permission:question/delete');
     Route::get('random', 'QuestionBankController@getRandomQuestion')->middleware('permission:question/random');
     Route::post('delete-answer', 'QuestionBankController@deleteAnswer')->middleware('permission:question/delete-answer');

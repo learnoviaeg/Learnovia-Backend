@@ -1,6 +1,6 @@
 <?php
- 
-namespace App\Observers;
+
+namespace Modules\Assigments\Observers;
 
 use App\LessonComponent;
 use Modules\Assigments\Entities\AssignmentLesson;

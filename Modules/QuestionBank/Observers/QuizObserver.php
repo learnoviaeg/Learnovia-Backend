@@ -1,6 +1,6 @@
 <?php
- 
-namespace App\Observers;
+
+namespace Modules\QuestionBank\Observers;
 
 use App\LessonComponent;
 use Modules\QuestionBank\Entities\QuizLesson;

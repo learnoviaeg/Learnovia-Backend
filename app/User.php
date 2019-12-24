@@ -27,7 +27,9 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'firstname', 'email', 'password', 'real_password', 'lastname', 'username','suspend','class_id','picture', 'level', 'type'
+        'firstname', 'email', 'password', 'real_password', 'lastname', 'username','suspend','class_id','picture', 'level',
+        'type', 'arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'language', 
+        'timezone', 'religion', 'second language'
     ];
 
     /**
@@ -136,6 +138,11 @@ class User extends Authenticatable
         return $this->belongsToMany('App\User' , 'parents' , 'parent_id' , 'child_id');
     }
 
+    public function currentChild()
+    {
+        return $this->hasOne('App\Parents','parent_id','id')->where('current',1);
+
+    }
     public function parents()
     {
         return $this->belongsToMany('App\User' , 'parents' , 'child_id' , 'parent_id');

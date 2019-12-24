@@ -2,10 +2,10 @@
 
 namespace Modules\Page\Providers;
 
-use App\Observers\PageObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\Page\Entities\pageLesson;
+use Modules\Page\Observers\PageObserver;
 
 class PageServiceProvider extends ServiceProvider
 {

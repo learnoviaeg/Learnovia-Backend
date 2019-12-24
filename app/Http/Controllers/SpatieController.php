@@ -129,7 +129,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/chain', 'title' => 'Get All Courses with Chain']);
 
             //Enroll Permissions
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/enroll-single-user', 'title' => 'enroll single user']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/single', 'title' => 'enroll single user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/un-enroll-single-user', 'title' => 'un enroll single user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-enrolled-courses', 'title' => 'get enrolled courses']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/mandatory', 'title' => 'enroll mandatory courses']);
@@ -139,6 +139,14 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-unenroll-users', 'title' => 'get enrolled users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-unenrolled-users-Bulk', 'title' => 'get bulk of unenrolled users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/users', 'title' => 'enroll users with chain']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/migrate-user', 'title' => 'migrate user to another class']);
+
+            //Events
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/add', 'title' => 'Add event to users']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/delete', 'title' => 'delete event']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/update', 'title' => 'update event']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/my-events', 'title' => 'get my event']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/all-events', 'title' => 'get all events']);
 
             //Contact Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/add', 'title' => 'add contact']);
@@ -158,6 +166,11 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-by-id', 'title' => 'get user by id']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-with-role-cs', 'title' => 'get users  in couse segment with filter role_id ']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/filter-with-role', 'title' => 'Filter among all users with role']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/current-child', 'title' => 'set current child']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-someone-child', 'title' => 'get someone child']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-someone-parent', 'title' => 'get someone parent']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-my-child', 'title' => 'get my child']);
+
 
             //Components Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/get', 'title' => 'get component']);
@@ -207,6 +220,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/bulk-get', 'title' => 'get bulk grade category']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/bulk-get-level', 'title' => 'get bulk grade category by levels']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/bulk-all-get', 'title' => 'get all bulk grade category']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/grades', 'title' => 'Grades' , 'dashboard' => 1]);
 
             //Grade Item
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/item/add', 'title' => 'add grade item']);

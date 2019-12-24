@@ -17,7 +17,7 @@ Route::group(['prefix' => 'file', 'middleware' => 'auth:api'], function () {
     Route::post('toggle', 'FilesController@toggleVisibility')->name('toggleFileVisibility')->middleware('permission:file/toggle');
     Route::post('sort', 'FilesController@sortLessonFile')->name('sortLessonFile')->middleware('permission:file/sort');
     Route::get('get-all','FilesController@getAllFiles')->name('getAllFiles')->middleware('permission:file/get-all');
-    Route::get('get','FilesController@GetFileByID')->name('GetFileByID')->middleware('permission:file/get');
+    Route::get('get','FilesController@GetFileByID')->name('GetFileByID')->middleware(['permission:file/get' , 'ParentCheck']);
     Route::post('assign','FilesController@AssignFileToLesson')->name('assignfiletolesson')->middleware('permission:file/assign');
 
 
@@ -31,6 +31,6 @@ Route::group(['prefix' => 'media', 'middleware' => 'auth:api'], function () {
     Route::post('toggle', 'MediaController@toggleVisibility')->name('toggleMediaVisibility')->middleware('permission:media/toggle');
     Route::post('sort', 'MediaController@sortLessonMedia')->name('sortLessonMedia')->middleware('permission:media/sort');
     Route::get('get-all','MediaController@getAllMedia')->name('getAllMedia')->middleware('permission:media/get-all');
-    Route::get('get','MediaController@GetMediaByID')->name('GetMediaByID')->middleware('permission:media/get');
+    Route::get('get','MediaController@GetMediaByID')->name('GetMediaByID')->middleware(['permission:media/get' , 'ParentCheck']);
     Route::post('assign','MediaController@AssignMediaToLesson')->name('assigntolesson')->middleware('permission:media/assign');
 });
