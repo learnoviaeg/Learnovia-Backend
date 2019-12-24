@@ -7,7 +7,7 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
 
-Route::group(['middleware' => 'auth:api'], function () {
+Route::group(['middleware' => ['auth:api','ParentCheck']], function () {
     //user main routes without permissions
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
     Route::get('logout', 'AuthController@logout')->name('logout');
@@ -90,7 +90,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 });
 
 //Year Routes
-Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'year', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'AcademicYearController@store')->name('addyear')->middleware('permission:year/add');
     Route::get('get', 'AcademicYearController@get')->name('getyear')->middleware('permission:year/get');
     Route::get('get-all', 'AcademicYearController@getall')->name('getallyear')->middleware('permission:year/get-all');
@@ -100,7 +100,7 @@ Route::group(['prefix' => 'year', 'middleware' => 'auth:api'], function () {
 });
 
 //Type Routes
-Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'type', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('delete', 'AC_year_type@deleteType')->name('deletetype')->middleware('permission:type/delete');
     Route::post('add', 'AC_year_type@Add_type_to_Year')->name('addtype')->middleware('permission:type/add');
     Route::get('get', 'AC_year_type@List_Years_with_types')->name('getyearswithtype')->middleware('permission:type/get');
@@ -110,7 +110,7 @@ Route::group(['prefix' => 'type', 'middleware' => 'auth:api'], function () {
 });
 
 //Level Routes
-Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'level', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'LevelsController@AddLevelWithYear')->name('addlevel')->middleware('permission:level/add');
     Route::get('get', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get');
     //without year or type request
@@ -121,7 +121,7 @@ Route::group(['prefix' => 'level', 'middleware' => 'auth:api'], function () {
 });
 
 //Class Routes
-Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'class', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'ClassController@AddClassWithYear')->name('addclass')->middleware('permission:class/add');
     Route::get('get', 'ClassController@index')->name('getallclasses')->middleware('permission:class/get');
     //without any parameters
@@ -132,7 +132,7 @@ Route::group(['prefix' => 'class', 'middleware' => 'auth:api'], function () {
 });
 
 //Segment Routes
-Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'segment', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', "segment_class_Controller@Add_Segment_with_class")->name('addsegment')->middleware('permission:segment/add');
     Route::post('delete', "segment_class_Controller@deleteSegment")->name('deletesegment')->middleware('permission:segment/delete');
     Route::post('assign', "segment_class_Controller@Assign_to_anther_Class")->name('assignsegment')->middleware('permission:segment/assign');
@@ -143,23 +143,20 @@ Route::group(['prefix' => 'segment', 'middleware' => 'auth:api'], function () {
 });
 
 //Category Routes
-Route::group(['prefix' => 'category', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'category', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'CategoryController@add')->name('addcategory')->middleware('permission:category/add');
     Route::post('update', 'CategoryController@edit')->name('editcategory')->middleware('permission:category/update');
     Route::post('delete', 'CategoryController@delete')->name('deletecategory')->middleware('permission:category/delete');
     Route::get('get-all', 'CategoryController@get')->name('getcategory')->middleware('permission:category/get-all');
 });
-Route::group(['prefix' => 'course', 'middleware' => ['auth:api','ParentCheck']], function () {
-    Route::get('my-courses', 'CourseController@CurrentCourses');//->name('mycourses')->middleware('permission:course/my-courses');
-});
 
 //Course Routes
-Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'course', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'CourseController@add')->name('addcourse')->middleware('permission:course/add');
     Route::post('update', 'CourseController@update')->name('editcourse')->middleware('permission:course/update');
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:course/delete');
     Route::get('get-all', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
-//    Route::get('my-courses', 'CourseController@CurrentCourses')->name('mycourses')->middleware('permission:course/my-courses');
+    Route::get('my-courses', 'CourseController@CurrentCourses')->name('mycourses')->middleware('permission:course/my-courses');
     Route::get('all-courses', 'CourseController@EnrolledCourses')->name('enrolledcourses')->middleware('permission:course/all-courses');
     Route::get('past-courses', 'CourseController@PastCourses')->name('pastcourses')->middleware('permission:course/past-courses');
     Route::get('future-courses', 'CourseController@FutureCourses')->name('futurecourses')->middleware('permission:course/future-courses');
@@ -175,7 +172,7 @@ Route::group(['prefix' => 'course', 'middleware' => 'auth:api'], function () {
 });
 
 //USER CRUD ROUTES
-Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'user', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'UserController@create')->name('adduser')->middleware('permission:user/add');
     Route::post('update', 'UserController@update')->name('updateuser')->middleware('permission:user/update');
     Route::post('delete', 'UserController@delete')->name('deleteuser')->middleware('permission:user/delete');
@@ -200,7 +197,7 @@ Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
 
 });
 //Enroll Routes
-Route::group(['prefix' => 'enroll', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('enroll-single-user', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/single');
     Route::post('un-enroll-single-user', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
     Route::get('get-enrolled-courses', 'EnrollUserToCourseController@ViewAllCoursesThatUserEnrollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
@@ -215,7 +212,7 @@ Route::group(['prefix' => 'enroll', 'middleware' => 'auth:api'], function () {
 });
 
 //Messages Routes
-Route::group(['prefix' => 'messages', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'messages', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('send', 'MessageController@Send_message_of_all_user')->name('sendMessage')->middleware('permission:messages/send');
     Route::post('delete-for-all', 'MessageController@deleteMessageForAll')->name('deleteMessageforall')->middleware('permission:messages/delete-for-all');
     Route::post('delete-for-me', 'MessageController@deleteMessageforMe')->name('deleteMessageforMe')->middleware('permission:messages/delete-for-me');
@@ -226,13 +223,13 @@ Route::group(['prefix' => 'messages', 'middleware' => 'auth:api'], function () {
 });
 
 //Contact Route
-Route::group(['prefix' => 'contact', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'contact', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'ContactController@addContact')->name('addContact')->middleware('permission:contact/add');
     Route::get('get', 'ContactController@ViewMyContact')->name('ViewMyContact')->middleware('permission:contact/get');
 });
 
 //component routes
-Route::group(['prefix' => 'component', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'component', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::get('get', 'ComponentController@GetInstalledComponents')->name('getcomponent')->middleware('permission:component/get');
     Route::post('install', 'ComponentController@Install')->name('installcomponenet')->middleware('permission:component/install');
     Route::post('uninstall', 'ComponentController@Uninstall')->name('uninstallcomponenet')->middleware('permission:component/uninstall');
@@ -242,7 +239,7 @@ Route::group(['prefix' => 'component', 'middleware' => 'auth:api'], function () 
 });
 
 //lesson routes
-Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'lesson', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'LessonController@AddLesson')->name('addLesson')->middleware('permission:lesson/add');
     Route::get('get', 'LessonController@ShowLesson')->name('showlesson')->middleware('permission:lesson/get');
     Route::post('delete', 'LessonController@deleteLesson')->name('deleteLesson')->middleware('permission:lesson/delete');
@@ -253,9 +250,9 @@ Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
 });
 
 //grade routes
-Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'grade', 'middleware' => ['auth:api','ParentCheck']], function () {
 
-    Route::group(['prefix' => 'category', 'middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'category', 'middleware' => ['auth:api','ParentCheck']], function () {
         Route::post('add', 'GradeCategoryController@AddGradeCategory')->middleware('permission:grade/category/add');
         Route::post('assign-bulk', 'GradeCategoryController@AssignBulkGradeCategory')->middleware('permission:grade/category/assign-bulk');
         Route::post('bulk', 'GradeCategoryController@addBulkGradeCategories')->middleware('permission:grade/category/bulk');
@@ -270,7 +267,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::get('bulk-all-get', 'GradeCategoryController@GetGradeCategoryTree')->middleware('permission:grade/category/bulk-all-get');
     });
 
-    Route::group(['prefix' => 'item', 'middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'item', 'middleware' => ['auth:api','ParentCheck']], function () {
         Route::post('add', 'GradeItemController@create')->name('addgrade')->middleware('permission:grade/item/add');
         Route::get('get', 'GradeItemController@list')->name('getgrade')->middleware('permission:grade/item/get');
         Route::get('get-bulk', 'GradeItemController@GetAllGradeItems')->name('getbulkgradeitem')->middleware('permission:grade/item/get-bulk');
@@ -287,7 +284,7 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
 
     });
 
-    Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'user', 'middleware' => ['auth:api','ParentCheck']], function () {
         Route::post('add', 'UserGradeController@create')->name('addusergrade')->middleware('permission:grade/user/add');
         Route::get('get', 'UserGradeController@list')->name('getusergrade')->middleware('permission:grade/user/get');
         Route::post('delete', 'UserGradeController@delete')->name('deleteusergrade')->middleware('permission:grade/user/delete');
@@ -301,14 +298,14 @@ Route::group(['prefix' => 'grade', 'middleware' => 'auth:api'], function () {
         Route::post('over-all', 'UserGradeController@AllUserInAllCourses')->name('getalluserscoursesgrades')->middleware('permission:grade/report/over-all');
     });
 });
-Route::group(['prefix' => 'scale', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'ScaleController@AddScale')->name('addscale')->middleware('permission:scale/add');
     Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
     Route::post('delete', 'ScaleController@DeleteScale')->name('deletescale')->middleware('permission:scale/delete');
     Route::get('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
 });
 
-Route::group(['prefix' => 'letter', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'letter', 'middleware' => ['auth:api','ParentCheck']], function () {
     Route::post('add', 'LetterController@add')->name('addletter')->middleware('permission:letter/add');
     Route::post('update', 'LetterController@update')->name('updateletter')->middleware('permission:letter/update');
     Route::post('delete', 'LetterController@delete')->name('deleteletter')->middleware('permission:letter/delete');
@@ -318,4 +315,4 @@ Route::group(['prefix' => 'letter', 'middleware' => 'auth:api'], function () {
 Route::post('search-contacts', 'ContactController@SearchMyContacts');
 Route::post('search-messages', 'MessageController@SearchMessage');
 Route::post('change-color', 'ComponentController@ChangeColor');
-Route::post('search-specific-thread', 'MessageController@SearchSpecificThread')->middleware('auth:api');
+Route::post('search-specific-thread', 'MessageController@SearchSpecificThread')->middleware(['auth:api','ParentCheck']);
