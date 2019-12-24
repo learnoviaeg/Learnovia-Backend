@@ -166,6 +166,11 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-by-id', 'title' => 'get user by id']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-with-role-cs', 'title' => 'get users  in couse segment with filter role_id ']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/filter-with-role', 'title' => 'Filter among all users with role']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/current-child', 'title' => 'set current child']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-someone-child', 'title' => 'get someone child']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-someone-parent', 'title' => 'get someone parent']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-my-child', 'title' => 'get my child']);
+
 
             //Components Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/get', 'title' => 'get component']);

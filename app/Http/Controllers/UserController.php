@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 use App\Enroll;
 use App\GradeCategory;
+use App\Parents;
 use App\User;
 use Carbon\Carbon;
 use App\Course;
@@ -393,5 +394,37 @@ class UserController extends Controller
         return $course_segments;
     }
 
+    Public Function SetCurrentChild(Request $request)
+    {
+        $request->validate([
+            'child_id' => 'required|exists:parents,child_id'
+        ]);
+        Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
+        return HelperController::api_response_format(200, 'Child is choosen successfully');
 
+    }
+    Public Function getMyChildren(){
+        $childrenIDS = Parents::where('parent_id',Auth::id())->pluck('child_id');
+        $children =  User::whereIn('id',$childrenIDS)->get();
+        return HelperController::api_response_format(200,$children ,'Children are.......');
+
+    }
+    Public Function getSomeoneChildren(Request $request){
+        $request->validate([
+            'parent_id' => 'required|exists:parents,parent_id'
+        ]);
+        $childrenIDS = Parents::where('parent_id',$request->parent_id)->pluck('child_id');
+        $children =  User::whereIn('id',$childrenIDS)->get();
+        return HelperController::api_response_format(200,$children ,'Children are.......');
+
+    }
+    Public Function getSomeoneParent(Request $request)
+    {
+        $request->validate([
+            'child_id' => 'required|exists:parents,child_id'
+        ]);
+        $parentID = Parents::where('child_id',$request->child_id)->first('parent_id');
+        $parent =  User::find($parentID);
+        return $parent;
+    }
 }
