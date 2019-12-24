@@ -187,7 +187,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
     Route::get('search-all-users', 'UserController@getAllUsersInCourseSegment')->name('searchusers')->middleware('permission:user/search-all-users');
     Route::get('overview-report', 'UserController@Overview_Report')->name('getusergrade')->middleware('permission:grade/user/get');
 
-    Route::pgetost('get-someone-children', 'UserController@getSomeoneChildren')->name('getsomeonechild')->middleware('permission:user/get-someone-child');
+    Route::get('get-someone-children', 'UserController@getSomeoneChildren')->name('getsomeonechild')->middleware('permission:user/get-someone-child');
 
     Route::get('get-someone-parent', 'UserController@getSomeoneParent')->name('getsomeoneparent')->middleware('permission:user/get-someone-parent');
 
