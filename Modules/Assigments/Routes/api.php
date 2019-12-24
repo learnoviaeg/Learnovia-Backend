@@ -29,7 +29,7 @@ Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function ()
     Route::post('override', 'AssigmentsController@override')->middleware('permission:assignment/override');
     Route::post('delete', 'AssigmentsController@deleteAssigment');//->middleware('permission:assignment/delete-assign-lesson');
     Route::post('delete-assign-lesson', 'AssigmentsController@deleteAssignmentLesson')->middleware('permission:assignment/delete');
-    Route::get('get','AssigmentsController@GetAssignment')->name('getAssignment')->middleware('permission:assignment/get');
+    Route::get('get','AssigmentsController@GetAssignment')->name('getAssignment')->middleware(['permission:assignment/get' , 'ParentCheck']);
     Route::post('toggle', 'AssigmentsController@toggleAssignmentVisibity')->middleware('permission:assignment/toggle');
     Route::get('get-all', 'AssigmentsController@getAllAssigment')->middleware('permission:assignment/get-all');
 
