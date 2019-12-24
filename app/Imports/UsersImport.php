@@ -40,8 +40,9 @@ class UsersImport implements ToModel, WithHeadingRow
         ])->validate();
 
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
-                        'language','timezone','religion','second language'];
-        $enrollOptional = 'optional';
+                    'language', 'timezone', 'religion', 'second language', 'class_id', 'level', 'type', 'firstname',
+                    'lastname', 'username', 'real_password', 'suspend'];
+        $enrollOptional = 'optional'; 
         $teacheroptional='course';
 
         $password = mt_rand(100000, 999999);
@@ -59,17 +60,21 @@ class UsersImport implements ToModel, WithHeadingRow
                 if($optional =='birthdate'){
                     $row[$optional] =  Date::excelToDateTimeObject($row['birthdate']);
                 }
+                if($optional =='real_password'){
+                    $user->$optional = $row[$optional];
+                    $user->password =   bcrypt($row[$optional]);
+                }
                 $user->$optional = $row[$optional];
             }
         }
         $user->save();
 
-        if (isset($row['type'])&&isset($row['level'])&&isset($row['class']))
+        if (isset($row['type'])&&isset($row['level'])&&isset($row['class_id']))
         {
             Validator::make($row,[
                 'type' => 'required|exists:academic_types,id',
                 'level' => 'required|exists:levels,id',
-                'class' => 'required|exists:classes,id',
+                'class_id' => 'required|exists:classes,id',
                 'segment' => 'exists:segments,id',
                 'year' => 'exists:academic_years,id'
             ])->validate();
@@ -110,7 +115,7 @@ class UsersImport implements ToModel, WithHeadingRow
                     'year' => $year,
                     'type' => $row['type'],
                     'level' => $row['level'],
-                    'class' => $row['class'],
+                    'class' => $row['class_id'],
                     'segment' => $segment,
                     'users' => $userId
                 ]);
@@ -122,7 +127,7 @@ class UsersImport implements ToModel, WithHeadingRow
 
                     $course_id=Course::findById($row[$enrollOptional.$enrollcounter]);
                     // $courseSeg=CourseSegment::getidfromcourse($course_id);
-                    $courseSeg=CourseSegment::GetWithClassAndCourse($row['class'],$course_id);
+                    $courseSeg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);
                     if($courseSeg == null)
                         break;
                     $userId =User::FindByName($user->username)->id;
