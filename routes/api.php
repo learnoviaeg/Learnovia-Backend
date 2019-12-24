@@ -320,6 +320,10 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api'], function () {
     Route::get('my-events', 'EventController@get_my_events')->name('myevent')->middleware('permission:event/my-events');
     Route::get('all-events', 'EventController@GetAllEvents')->name('allevent')->middleware('permission:event/all-events');
 });
+Route::group(['prefix' => 'contract', 'middleware' => 'auth:api'], function () {
+    Route::post('add', 'ContractController@create');//->name('addcontract')->middleware('permission:contract/add');
+
+});
 Route::post('search-contacts', 'ContactController@SearchMyContacts');
 Route::post('search-messages', 'MessageController@SearchMessage');
 Route::post('change-color', 'ComponentController@ChangeColor');
