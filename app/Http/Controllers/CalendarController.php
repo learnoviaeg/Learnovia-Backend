@@ -107,7 +107,7 @@ class CalendarController extends Controller
         foreach ($components as $component) {
             $result[$component->name] = [];
         }
-        $user = User::whereId($request->user()->id)->with(['enroll.courseSegment'])->first();
+        $user = User::whereId(Auth::user()->id)->with(['enroll.courseSegment'])->first();
         foreach ($user->enroll as $enroll) {
             if ($enroll->courseSegment != null) {
                 foreach ($enroll->courseSegment->lessons as $lesson) {
