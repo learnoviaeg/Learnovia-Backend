@@ -11,7 +11,7 @@ use App\Enroll;
 use App\Lesson;
 use Auth;
 use DB;
-
+use App\User;
 class CalendarController extends Controller
 {
     /**
