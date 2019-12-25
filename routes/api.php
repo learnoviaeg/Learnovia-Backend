@@ -321,8 +321,15 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api'], function () {
     Route::get('all-events', 'EventController@GetAllEvents')->name('allevent')->middleware('permission:event/all-events');
 });
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api'], function () {
-    Route::post('add', 'ContractController@create');//->name('addcontract')->middleware('permission:contract/add');
+    Route::post('add', 'ContractController@create')->name('addcontract')->middleware('permission:contract/add');
+    Route::post('update', 'ContractController@update')->name('updatecontract')->middleware('permission:contract/update');
 
+});
+Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
+    Route::post('add', 'PaymentController@create')->name('addpayment')->middleware('permission:payment/add');
+    Route::post('delete', 'PaymentController@delete')->name('deletepayment')->middleware('permission:payment/delete');
+    Route::post('postponed-payment', 'PaymentController@postponedPayment')->name('deletepayment')->middleware('permission:payment/postponed-payment');
+    Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
 });
 Route::post('search-contacts', 'ContactController@SearchMyContacts');
 Route::post('search-messages', 'MessageController@SearchMessage');

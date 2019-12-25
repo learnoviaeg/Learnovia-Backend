@@ -262,6 +262,15 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/delete', 'title' => 'Delete Letter']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/get', 'title' => 'Get Letter']);
 
+
+            //contract
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contract/add', 'title' => 'Add contract']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contract/update', 'title' => 'updated contract']);
+            //payment
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/add', 'title' => 'Add payment']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/delete', 'title' => 'delete payment']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/postpond-payment', 'title' => 'postpond payment']);
+
             //Add Roles
             $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin']);
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'System Admin']);

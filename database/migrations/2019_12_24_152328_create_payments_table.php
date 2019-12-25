@@ -17,7 +17,6 @@ class CreatePaymentsTable extends Migration
             $table->bigIncrements('id');
             $table->integer('amount')->nullable();
             $table->dateTime('date')->nullable();
-            $table->dateTime('due_date')->nullable();
             $table->text('note')->nullable();
             $table->unsignedBigInteger('contract_id')->nullable();
             $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade')->onUpdate('cascade');
