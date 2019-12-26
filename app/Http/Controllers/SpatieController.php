@@ -188,6 +188,7 @@ class SpatieController extends Controller
 
             //Calendar Permission
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'calendar/get', 'title' => 'get calendar']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'calendar/weekly', 'title' => 'get weekly calendar']);
 
             //Import
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'import', 'title' => 'import excel sheet']);

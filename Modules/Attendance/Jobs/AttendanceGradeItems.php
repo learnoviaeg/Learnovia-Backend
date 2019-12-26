@@ -53,13 +53,13 @@ class AttendanceGradeItems implements ShouldQueue
                 $course_segments = GradeCategoryController::getCourseSegmentWithArray($req);
                 $gradeCategories = GradeCategory::where('name', $level['grade_category_name'])->whereIn('course_segment_id', $course_segments)->get();
                 foreach ($gradeCategories as $gradeCategory) {
-                    $gradeCategory->GradeItems()->create(['name' => 'Attendance','grademin' => $this->request['grade_items']['min'], 'grademax' => $this->request['grade_items']['min']]);
+                    $gradeCategory->GradeItems()->create(['name' => 'Attendance','grademin' => $this->request['grade_items']['min'], 'grademax' => $this->request['grade_items']['min'] , 'weight' => 0]);
                 }
             }
         }
         if ($this->type == Attendance::$SECOND_TYPE) {
             foreach ($this->grade_category as $gradeCategory) {
-                 $gradeCategory->GradeItems()->create(['name' => 'Attendance', 'grademin' => $this->request['grade_items']['min'], 'grademax' => $this->request['grade_items']['min']]);
+                 $gradeCategory->GradeItems()->create(['name' => 'Attendance', 'grademin' => $this->request['grade_items']['min'], 'grademax' => $this->request['grade_items']['min'] , 'weight' => 0]);
             }
         }
     }
