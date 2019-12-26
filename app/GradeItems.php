@@ -33,8 +33,8 @@ class GradeItems extends Model
 
     public function weight()
     {
-        if ($this->attributes['weight'] != 0)
-            return $this->attributes['weight'];
+        if ($this->weight != 0)
+            return $this->weight;
         return round(($this->grademax * $this->GradeCategory->percentage()) / $this->GradeCategory->total(), 3);
     }
 
