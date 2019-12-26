@@ -126,7 +126,7 @@ class AttendanceController extends Controller
                 $classes[] = $level['classes'];
                 $courses[] = $level['courses'];
             }
-        } elseif ($request->attendance_type == Attendance::$SECOND_TYPE && $request->graded == 1 ) {
+        } elseif ($request->attendance_type == Attendance::$SECOND_TYPE ) {
             foreach ($request->levels as $level) {
                 foreach ($level['periods'] as $periods) {
                     $courses[] = $periods['courses'];
