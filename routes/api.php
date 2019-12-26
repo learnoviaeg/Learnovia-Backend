@@ -83,7 +83,10 @@ Route::group(['middleware' => ['auth:api']], function () {
     });
 
     //Calendar Route
-    Route::post('calendar/get', 'CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
+    Route::group(['prefix' => 'calendar'] , function(){
+        Route::get('get', 'CalendarController@Calendar')->name('calendar')->middleware('permission:calendar/get');
+        Route::get('weekly', 'CalendarController@weeklyCalender')->name('calendar')->middleware('permission:calendar/weekly');
+    });
 
     //Import Excel Route
     Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:import');

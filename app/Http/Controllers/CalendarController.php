@@ -8,10 +8,12 @@ use Modules\Assigments\Entities\assignment;
 use Modules\Assigments\Entities\UserAssigment;
 use App\Component;
 use App\Enroll;
+use App\Event;
 use App\Lesson;
 use Auth;
 use DB;
 use App\User;
+use Carbon\Carbon;
 class CalendarController extends Controller
 {
     /**
@@ -131,5 +133,29 @@ class CalendarController extends Controller
             }
         }
         return $result;
+    }
+
+    public function weeklyCalender(Request $request)
+    {
+        $days = collect();
+        $events = collect();
+        Carbon::setWeekStartsAt(Carbon::SUNDAY);
+        Carbon::setWeekEndsAt(Carbon::SATURDAY);
+        $day = Carbon::now()->startOfWeek();
+        $last = Carbon::now()->endOfWeek();
+        while ($day->format('Y-m-d') != $last->format('Y-m-d')) {
+            $days[] = [$day->format('Y-m-d'), $day->format('l')];
+            $events[] = Event::where('user_id' , Auth::user()->id)
+            ->whereDate('from' ,'<=' , $day->format('Y-m-d'))
+            ->WhereDate('to', '>=' , $day->format('Y-m-d'))
+            ->get(['name' , 'description' , 'from' , 'to']);
+            $day = $day->copy()->addDay();
+        }
+        $days[] = [$last->format('Y-m-d'), $last->format('l')];
+        $events[] = Event::where('user_id' , Auth::user()->id)
+        ->whereDate('from' ,'<=' , $last->format('Y-m-d'))
+        ->WhereDate('to', '>=' , $last->format('Y-m-d'))
+        ->get(['name' , 'description' , 'from' , 'to']);
+        return HelperController::api_response_format(201, ['days' => $days , 'events' => $events]);
     }
 }
