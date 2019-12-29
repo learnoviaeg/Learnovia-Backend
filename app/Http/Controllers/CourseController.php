@@ -757,4 +757,16 @@ class CourseController extends Controller
         }
         return HelperController::api_response_format(200,$result);
     }
+    public function getLessonsFromCourseAndClass(Request $request){
+        $validator =  Validator::make($request->all() , [
+            'class'  => 'required|exists:classes,id',
+            'course' => 'required|exists:courses,id',
+        ]);
+        if($validator->fails())
+            return HelperController::api_response_format(200, $validator->errors());
+        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
+        if($courseSegment == null)
+            return HelperController::api_response_format(200, null, 'This Course have no activated to this class');
+        return HelperController::api_response_format(200, $courseSegment->lessons);
+    }
 }

@@ -172,6 +172,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api']], function () {
     Route::get('count-components', 'CourseController@Count_Components')->middleware(['permission:course/count-components' , 'ParentCheck']);
     Route::get('chain', 'CourseController@getAllCoursesWithChain')->middleware('permission:course/chain');
     Route::get('components', 'CourseController@getAllMyComponenets')->middleware(['permission:course/components' , 'ParentCheck']);
+    Route::get('lessons', 'CourseController@getLessonsFromCourseAndClass')->middleware('permission:course/lessons');
 });
 
 //USER CRUD ROUTES
