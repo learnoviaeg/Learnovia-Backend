@@ -11,4 +11,9 @@ class status extends Model
     {
         return $this->hasMany('Modules\Assigments\Entities\UserAssigment', 'status_id', 'id');
     }
+
+    public function Payment()
+    {
+        return $this->hasMany('App\Payment', 'status_id', 'id');
+    }
 }

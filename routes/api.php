@@ -320,17 +320,21 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api'], function () {
     Route::get('my-events', 'EventController@get_my_events')->name('myevent')->middleware('permission:event/my-events');
     Route::get('all-events', 'EventController@GetAllEvents')->name('allevent')->middleware('permission:event/all-events');
 });
+
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'ContractController@create')->name('addcontract')->middleware('permission:contract/add');
     Route::post('update', 'ContractController@update')->name('updatecontract')->middleware('permission:contract/update');
-
+    //['permission:contract/restrict','ContractRestrict']
+    Route::post('restrict', 'ContractController@Contract_Restrict_Alarm')->name('ResctrictContract')->middleware(['permission:contract/restrict','ContractRestrict']);
 });
+
 Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'PaymentController@create')->name('addpayment')->middleware('permission:payment/add');
     Route::post('delete', 'PaymentController@delete')->name('deletepayment')->middleware('permission:payment/delete');
     Route::post('postponed-payment', 'PaymentController@postponedPayment')->name('deletepayment')->middleware('permission:payment/postponed-payment');
     Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
 });
+
 Route::post('search-contacts', 'ContactController@SearchMyContacts');
 Route::post('search-messages', 'MessageController@SearchMessage');
 Route::post('change-color', 'ComponentController@ChangeColor');

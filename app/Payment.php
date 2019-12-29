@@ -22,4 +22,9 @@ class Payment extends Model
         $newDate = Carbon::parse($this->date)->addDays($allowance_period)->format('Y-m-d');
         return  $newDate ;
     }
+
+    public function status()
+    {
+        return $this->belongsTo('App\Status', 'status_id', 'id');
+    }
 }

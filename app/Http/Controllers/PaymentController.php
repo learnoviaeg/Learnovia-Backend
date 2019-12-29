@@ -122,11 +122,9 @@ class PaymentController extends Controller
         } elseif ($request->amount > $payment->amount) {
             $payment->update(['status_id' => $status_id_paid]);
             $remainder = $request->amount- $payment->amount;
-
             $all_next_payment = Payment::where('contract_id',$payment->contract_id)->where('id','>',$payment->id)->orderBy('date', 'asc')->get();
+            
             foreach ( $all_next_payment as $payment){
-
-
                 if ($remainder >= $payment->amount) {
                     $payment->update(['status_id' => $status_id_paid]);
                     $remainder = $remainder - $payment->amount;
@@ -144,11 +142,8 @@ class PaymentController extends Controller
                         'amount' => $remainder,
                         'status_id' => $status_id_paid]);
                 }
-        }
+            }
             return HelperController::api_response_format(200, 'Amount is distributed on all payments Successfully.');
-
         }
-        }
-
-
+    }
 }

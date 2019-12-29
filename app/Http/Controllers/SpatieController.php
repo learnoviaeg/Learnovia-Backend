@@ -265,7 +265,9 @@ class SpatieController extends Controller
 
             //contract
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contract/add', 'title' => 'Add contract']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contract/update', 'title' => 'updated contract']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contract/update', 'title' => 'update contract']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contract/restrict', 'title' => 'restrict contract']);
+
             //payment
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/add', 'title' => 'Add payment']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/delete', 'title' => 'delete payment']);

@@ -3,7 +3,6 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use Modules\QuestionBank\Http\Middleware\Restrict;
 
 class Kernel extends HttpKernel
 {
@@ -67,6 +66,7 @@ class Kernel extends HttpKernel
         'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
         'Restrict' => \App\Http\Middleware\Restrict::class,
         'ParentCheck' => \App\Http\Middleware\ParentCheck::class,
+        'ContractRestrict' => \App\Http\Middleware\ContractRestrict::class,
     ];
     /**
      * The priority-sorted list of middleware.
