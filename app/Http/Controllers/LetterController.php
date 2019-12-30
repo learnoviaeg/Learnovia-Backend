@@ -23,7 +23,7 @@ class LetterController extends Controller
             'formate' => 'required|array',
             'formate.*'=> 'required',
             'formate.*.name'=> 'required|string',
-            'formate.*.boundary'=> 'required',
+            'formate.*.boundary'=> 'required|integer',
         ]);
 
         $scaleLetter=serialize($request->formate);

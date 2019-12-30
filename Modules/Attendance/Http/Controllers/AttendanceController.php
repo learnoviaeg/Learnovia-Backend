@@ -56,7 +56,6 @@ class AttendanceController extends Controller
         $role->givePermissionTo('attendance/status/delete');
         $role->givePermissionTo('attendance/status/get');
 
-
         Component::create([
             'name' => 'Attendance',
             'module' => 'Attendance',
@@ -361,13 +360,10 @@ class AttendanceController extends Controller
                 return HelperController::api_response_format(200, 'Sessions are created successfully');
         }
         return HelperController::api_response_format(200, 'Sessions are created successfully');
-
-
     }
 
     public function viewstudentsinsessions(Request $request)
     {
-
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
         ]);
@@ -389,5 +385,8 @@ class AttendanceController extends Controller
         return HelperController::api_response_format(200, $users, 'Users are.....');
     }
 
+    public function ReportAttendance(Request $request)
+    {
 
+    }
 }
