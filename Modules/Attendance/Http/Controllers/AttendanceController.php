@@ -211,7 +211,6 @@ class AttendanceController extends Controller
                 'allowed_levels' => serialize($request->allowed_levels)
             ]);
                 $attendance->allowed_levels = unserialize($attendance->allowed_levels);
-
             }
             $alldays = Attendance::getAllWorkingDays($request->start, $request->end);
                 foreach ($alldays as $day) {
@@ -288,7 +287,6 @@ class AttendanceController extends Controller
                     }
                     if ($request->repeat_untill > $attendance->end_date) {
                         return HelperController::api_response_format(400, 'Something wrong with data');
-
                     }
 
                     foreach ($course_segments as $course_segment) {
@@ -307,9 +305,7 @@ class AttendanceController extends Controller
                                     'course_segment_id' => $course_segment
                                 ]);
                             }
-
                         }
-
                     }
                 }
                 break;
