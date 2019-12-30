@@ -384,9 +384,4 @@ class AttendanceController extends Controller
         }
         return HelperController::api_response_format(200, $users, 'Users are.....');
     }
-
-    public function ReportAttendance(Request $request)
-    {
-
-    }
 }
