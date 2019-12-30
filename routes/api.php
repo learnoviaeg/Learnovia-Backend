@@ -12,7 +12,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('getuserPermession', 'AuthController@getuserPermession');
-    Route::get('user', 'AuthController@user')->name('user');
+    Route::get('user', 'AuthController@user')->name('user')->middleware('ContractRestrict');
     Route::post('CheckPermission', 'SpatieController@checkPermessionOnCourse')->name('checkPermessionOnCourse');
     Route::get('getMyLimits', 'AuthController@getuserPermessionFlags')->name('getuserPermessionFlags');
     Route::post('comparepermissions', 'SpatieController@comparepermissions')->name('comparepermissions');
@@ -173,7 +173,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api']], function () {
 
 //USER CRUD ROUTES
 Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
-    Route::post('add', 'UserController@create')->name('adduser')->middleware('permission:user/add');
+    Route::post('add', 'UserController@create')->name('adduser')->middleware(['permission:user/add','ContractRestrict']);
     Route::post('update', 'UserController@update')->name('updateuser')->middleware('permission:user/update');
     Route::post('delete', 'UserController@delete')->name('deleteuser')->middleware('permission:user/delete');
     Route::get('get-all', 'UserController@list')->name('listAll')->middleware('permission:user/get-all');
@@ -322,10 +322,8 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api'], function () {
-    Route::post('add', 'ContractController@create')->name('addcontract')->middleware('permission:contract/add');
+    Route::post('add', 'ContractController@create')->name('addcontract')->middleware(['ContractRestrict']);
     Route::post('update', 'ContractController@update')->name('updatecontract')->middleware('permission:contract/update');
-    //['permission:contract/restrict','ContractRestrict']
-    Route::post('restrict', 'ContractController@Contract_Restrict_Alarm')->name('ResctrictContract')->middleware(['permission:contract/restrict','ContractRestrict']);
 });
 
 Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {

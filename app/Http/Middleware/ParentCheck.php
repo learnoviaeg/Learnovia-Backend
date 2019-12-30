@@ -17,7 +17,8 @@ class ParentCheck
      * @return mixed
      */
     public function handle($request, Closure $next)
-    {   $roles = Auth::user()->roles->pluck('name');
+    {   
+        $roles = Auth::user()->roles->pluck('name');
         if(!in_array("Parent" , $roles->toArray())){
             return $next($request);
         }

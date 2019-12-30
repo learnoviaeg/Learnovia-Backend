@@ -62,7 +62,7 @@ class UserController extends Controller
         ]);
 
         // return User::max('id');
-        $users = collect([]);
+        $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email', 'suspend',
             'language', 'timezone', 'religion', 'second language','picture', 'real_password', 'level', 'type', 'class_id', 'username'
         ];
@@ -109,14 +109,14 @@ class UserController extends Controller
             $role = Role::find($request->role[$key]);
             $user->assignRole($role);
             if ($request->role[$key] == 3) {
-
-                $classLevID = ClassLevel::GetClass($request->class_id[$key]);
-                $classSegID = SegmentClass::GetClasseLevel($classLevID);
-
                 $option = new Request([
-                    'SegmentClassId' => $classSegID
+                    'users' => [$user->id],
+                    'level' => $request->level[$key] ,
+                    'type' => $request->type[$key],
+                    'class' => $request->class_id[$key]
                 ]);
                 EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
+
                 $enrollcounter = 0;
                 while (isset($request->$enrollOptional[$key][$enrollcounter])) {
                     $course_id = Course::findByName($request->$enrollOptional[$key][$enrollcounter]);
@@ -144,9 +144,9 @@ class UserController extends Controller
                     $teachercounter++;
                 }
             }
-            $users->push($user);
+            $users_is->push($user);
         }
-        return HelperController::api_response_format(201, $users, 'User Created Successfully');
+        return HelperController::api_response_format(201, $users_is, 'User Created Successfully');
 
     }
 
