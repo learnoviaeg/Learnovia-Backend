@@ -115,9 +115,9 @@ class AuthController extends Controller
     }
  /**
      *
-     * @Description :getuserPermession gets all permissions for logged in user. 
+     * @Description :getuserPermession gets all permissions for logged in user.
      * @param : No parameters.
-     * @return : return an array of permissions of this user .  
+     * @return : return an array of permissions of this user .
      */
     public function getuserPermession()
     {
@@ -149,9 +149,9 @@ class AuthController extends Controller
     }
  /**
      *
-     * @Description :getuserPermessionFlags gets all permissions for logged in user. 
+     * @Description :getuserPermessionFlags gets all permissions for logged in user.
      * @param : No parameters.
-     * @return : return an array of permissions as keys and True/False as a values for this user .  
+     * @return : return an array of permissions as keys and True/False as a values for this user .
      */
     public function getuserPermessionFlags(Request $request)
     {
@@ -161,5 +161,12 @@ class AuthController extends Controller
             $result[$permession->name] = $request->user()->hasPermissionTo($permession->name);
         }
         return HelperController::api_response_format(200, $result);
+    }
+
+    public function site(){
+        $array = [];
+        $array['allow'] = true;
+        $array['site'] = env('APP_NAME' , 'Learnovia');
+        return HelperController::api_response_format(200,$array);
     }
 }
