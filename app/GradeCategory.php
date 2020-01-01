@@ -110,6 +110,8 @@ class GradeCategory extends Model
         $items = $this->GradeItems;
         foreach($items as $item){
             $item->grade = '-';
+            $item->feedback = '-';
+            $item->precentage = '-';
             $usergrade = UserGrade::where('grade_item_id' , $item->id)->where('user_id' , $userid)->first();
             $gpa_letter=Letter::find($usergrade->GradeItems->GradeCategory->CourseSegment->letter_id);
             $gpa_letter = unserialize($gpa_letter->formate);
