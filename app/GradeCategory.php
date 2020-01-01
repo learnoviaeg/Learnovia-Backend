@@ -121,7 +121,7 @@ class GradeCategory extends Model
                 $item->precentage=((($usergrade->final_grade)*100)/$usergrade->raw_grade_max);
 
                 foreach($gpa_letter as $gpa)
-                    if($item->percentage <= $gpa['boundary'])
+                    if($item->percentage < $gpa['boundary'])
                         $item->letter=$gpa['name'];
             }
         }

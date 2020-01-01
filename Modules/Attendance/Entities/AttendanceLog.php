@@ -21,4 +21,10 @@ class AttendanceLog extends Model
         return $this->hasOne('Modules\Attendance\Entities\AttendanceStatus', 'id' , 'status_id' );
     }
     
+    public function getPrecentageStatus($count)
+    {
+        $status= $this->status;
+        $status->precentage=100/$count;
+        return $status;
+    }
 }
