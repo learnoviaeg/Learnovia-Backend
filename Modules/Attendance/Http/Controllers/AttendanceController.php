@@ -399,7 +399,9 @@ class AttendanceController extends Controller
             $data[$i]['course']=$session->Course_Segment->courses[0]->name;
             $data[$i]['from']= $session->from;
             $data[$i]['to']= $session->to;
-            $data[$i]['status']= $session->logs[0]->status->letter;
+            $data[$i]['status']= '-';
+            if(count($session->logs)>0)
+                $data[$i]['status']= $session->logs[0]->status->letter;
             if($request->user()->can('site/course/teacher'))
                 $data[$i]['status']= '-';
             $i++;
