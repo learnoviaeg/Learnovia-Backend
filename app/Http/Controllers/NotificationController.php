@@ -79,7 +79,10 @@ class NotificationController extends Controller
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
         foreach ($noti as $not) {
             $not->data= json_decode($not->data, true);
-            if($not->data['publish_date'] < Carbon::now())
+            if(!isset($not->data['publish_date'])){
+                $data[] = $not->data;
+            }
+            elseif($not->data['publish_date'] < Carbon::now())
             {
                 $data[] = $not->data;
             }
