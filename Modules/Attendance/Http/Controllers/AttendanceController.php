@@ -394,12 +394,12 @@ class AttendanceController extends Controller
 
         $All_Sessions=AttendanceSession::whereIn('course_segment_id', $CourseSeg)->get();
 
-        ////if user is teacher
-        if($role == 4)
+        ////if user is teacher ///if($role == 4)
+        if($request->user()->can('site/course/teacher'))
             return HelperController::api_response_format(200, $All_Sessions, 'there is all your sessions');
 
-        ////get all attendance assoicated the user|student
-        if($role == 3)
+        ////get all attendance assoicated the user|student ///if($role == 3)
+        if($request->user()->can('site/course/student'))
         {
             $All_Attendance=AttendanceLog::where('student_id', Auth::id())->with('status')->get();
             if($request->filled('session'))
