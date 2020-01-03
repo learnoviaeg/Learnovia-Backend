@@ -239,7 +239,6 @@ class AttendanceController extends Controller
         $attendance = Attendance::find($request->attendance_id);
         $user_id = Auth::User()->id;
         $attendance->allowed_levels = unserialize($attendance->allowed_levels);
-        $attendance->allowed_courses = unserialize($attendance->allowed_courses);
         switch ($attendance->type) {
             case  1 :
                 $array = [

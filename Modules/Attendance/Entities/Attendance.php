@@ -156,4 +156,17 @@ class Attendance extends Model
         }
         return $temp;
     }
+
+    public function getAllowedCoursesAttribute($value)
+    {
+        if(is_null($value))
+            return $value;
+        $temp = [];
+        $value = unserialize($value);
+        foreach ($value as $classes){
+            foreach ($classes as $class)
+                $temp[] = $class;
+        }
+        return $temp;
+    }
 }
