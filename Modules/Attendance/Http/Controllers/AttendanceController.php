@@ -41,6 +41,7 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/add', 'title' => 'add attendance status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/update', 'title' => 'update attendance status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/delete', 'title' => 'delete attendance status']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/attend-report', 'title' => 'report of attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/get', 'title' => 'get attendance status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-session', 'title' => 'get session and status']);
         $role = \Spatie\Permission\Models\Role::find(1);
@@ -401,5 +402,31 @@ class AttendanceController extends Controller
             $i++;
         }
         return HelperController::api_response_format(200, $data, 'there is your session & status');
+    }
+    public function Attendance_Report(Request $request)
+    {
+        $enrolls=Enroll::where('user_id',Auth::id())->get();
+        $CourseSeg=$enrolls->pluck('course_segment');
+        $role=$enrolls->pluck('role_id')->first();
+
+        $All_Sessions=AttendanceSession::whereIn('course_segment_id', $CourseSeg)->get();
+
+        ////if user is teacher ///if($role == 4)
+        if($request->user()->can('site/course/teacher'))
+            return HelperController::api_response_format(200, $All_Sessions, 'there is all your sessions');
+
+        ////get all attendance assoicated the user|student ///if($role == 3)
+        if($request->user()->can('site/course/student'))
+        {
+            $All_Attendance=AttendanceLog::where('student_id', Auth::id())->with('status')->get();
+            if($request->filled('session'))
+                $All_Attendance=AttendanceLog::where('session_id',$request->session)->where('student_id', Auth::id())
+                                                ->with('status')->get();
+
+            foreach($All_Attendance as $all)
+                $all->getPrecentageStatus(count($All_Attendance));
+
+            return HelperController::api_response_format(200, $All_Attendance, 'there is all your logs');
+        }
     }
 }
