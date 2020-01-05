@@ -110,9 +110,22 @@ class GradeCategory extends Model
         $items = $this->GradeItems;
         foreach($items as $item){
             $item->grade = '-';
+            $item->feedback = '-';
+            $item->precentage = '-';
             $usergrade = UserGrade::where('grade_item_id' , $item->id)->where('user_id' , $userid)->first();
+            $gpa_letter=Letter::find($usergrade->GradeItems->GradeCategory->CourseSegment->letter_id);
+            $gpa_letter = unserialize($gpa_letter->formate);
+
             if($usergrade != null)
+            {
                 $item->grade = $usergrade->final_grade;
+                $item->feedback=$usergrade->feedback;
+                $item->precentage=((($usergrade->final_grade)*100)/$usergrade->raw_grade_max);
+
+                foreach($gpa_letter as $gpa)
+                    if($item->percentage < $gpa['boundary'])
+                        $item->letter=$gpa['name'];
+            }
         }
         foreach($children as $child){
             $child->getUsergrades($userid);
