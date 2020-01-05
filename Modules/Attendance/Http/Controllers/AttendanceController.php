@@ -25,7 +25,6 @@ use Modules\QuestionBank\Entities\quiz;
 
 class AttendanceController extends Controller
 {
-
     public function install()
     {
         if (\Spatie\Permission\Models\Permission::whereName('attendance/add')->first() != null) {
@@ -43,6 +42,7 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/update', 'title' => 'update attendance status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/delete', 'title' => 'delete attendance status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/get', 'title' => 'get attendance status']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-session', 'title' => 'get session and status']);
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('attendance/add');
         $role->givePermissionTo('attendance/add-log');
@@ -360,13 +360,10 @@ class AttendanceController extends Controller
                 return HelperController::api_response_format(200, 'Sessions are created successfully');
         }
         return HelperController::api_response_format(200, 'Sessions are created successfully');
-
-
     }
 
     public function viewstudentsinsessions(Request $request)
     {
-
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
         ]);
@@ -388,5 +385,26 @@ class AttendanceController extends Controller
         return HelperController::api_response_format(200, $users, 'Users are.....');
     }
 
-
+    public function GetAllSessionDay(Request $request)
+    {
+        $data=array();
+        $i=0;
+        $courses=Enroll::where('user_id',Auth::id())->pluck('course_segment');
+        $Sessions=AttendanceSession::whereIn('course_segment_id',$courses)->where('date',Carbon::today())->get();
+        if($request->filled('id'))
+            $Sessions=AttendanceSession::where('id',$request->id)->get();
+        foreach($Sessions as $session)
+        {
+            $data[$i]['course']=$session->Course_Segment->courses[0]->name;
+            $data[$i]['from']= $session->from;
+            $data[$i]['to']= $session->to;
+            $data[$i]['status']= '-';
+            if(count($session->logs)>0)
+                $data[$i]['status']= $session->logs[0]->status->letter;
+            if($request->user()->can('site/course/teacher'))
+                $data[$i]['status']= '-';
+            $i++;
+        }
+        return HelperController::api_response_format(200, $data, 'there is your session & status');
+    }
 }
