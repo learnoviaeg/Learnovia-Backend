@@ -17,6 +17,7 @@ use Modules\Attendance\Entities\AttendanceLog;
 use Modules\Attendance\Entities\AttendanceSession;
 
 use App\Enroll;
+use App\Level;
 use Modules\Attendance\Entities\AttendanceStatus;
 use Modules\Attendance\Jobs\Attendance_sessions;
 use Modules\Attendance\Jobs\AttendanceGradeItems;
@@ -35,6 +36,7 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add', 'title' => 'add attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'add attendance log']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-attendence', 'title' => 'get  all users in attendence']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attendence', 'title' => 'get attendence']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'get all users in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-all-taken-users-in-session', 'title' => 'get all taken users in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'add session']);
@@ -367,7 +369,6 @@ class AttendanceController extends Controller
 
     public function viewstudentsinsessions(Request $request)
     {
-
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
         ]);
@@ -389,5 +390,25 @@ class AttendanceController extends Controller
         return HelperController::api_response_format(200, $users, 'Users are.....');
     }
 
-
+    public function getAttendance()
+    {
+        $attendance=Attendance::get(['name','allowed_levels','type']);
+        foreach($attendance as $attend)
+        {
+            $i=0;
+            $attends=unserialize($attend->allowed_levels);
+            foreach($attends as $levels)
+            {
+                $level=Level::find($levels);
+                $att[$i]=$level->name;
+                $attend->allowed_levels=$att;
+                $i++;
+            }
+            if($attend->type == 1)
+                $attend->type = 'per session';
+            if($attend->type == 2)
+                $attend->type = 'Daily';
+        }
+        return $attendance;
+    }
 }
