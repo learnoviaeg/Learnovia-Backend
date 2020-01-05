@@ -294,4 +294,17 @@ class MessageController extends Controller
         return HelperController::api_response_format(200 , $msgs,'Messages are....');
     }
 
+    public function RolesWithAssiocatedUsers()
+    {
+        $users=User::get();
+        $role_user=array();
+        foreach($users as $user)
+        {
+            $roles=$user->roles->first();
+            if(isset($roles))
+                $role_user[$roles->name][]=$user->username;
+        }
+        return $role_user;
+    }
+
 }
