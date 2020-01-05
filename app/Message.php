@@ -31,9 +31,18 @@ class Message extends Model
 
     private static function getLastMessage($auth_user , $other_user){
         $message = Message::where('From' , $auth_user)->Where('To' , $other_user)->orderBy('created_at' , 'desc')->first();
+        // dd( attachment::find($message->attachment_id)->extension);
+        $attachment=null;
+        $type=null;
+        if($message->file != null)
+        {
+            $attachment=attachment::find($message->attachment_id);
+            if($attachment != null)
+                $type=$attachment->extension;
+        }
         if($message == null)
             $message = Message::where('From' , $other_user)->Where('To' , $auth_user)->orderBy('created_at' , 'desc')->first();
-        return ['message'=>$message->text , 'file' => $message->file, 'seen'=>$message->seen];
+        return ['message'=>$message->text , 'file' => $message->file, 'seen'=>$message->seen,'type'=>$type];
     }
 
     private static function handleMessageView($users , $user_id){
