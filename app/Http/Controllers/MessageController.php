@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Contacts;
 use App\User;
+use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use File;
 use Spatie\Permission\Traits\HasRoles;
@@ -296,15 +297,9 @@ class MessageController extends Controller
 
     public function RolesWithAssiocatedUsers()
     {
-        $users=User::get();
-        $role_user=array();
-        foreach($users as $user)
-        {
-            $roles=$user->roles->first();
-            if(isset($roles))
-                $role_user[$roles->name][]=$user->username;
-        }
-        return $role_user;
+        $roles = Role::get()->each(function($role){
+            $role->users = User::role($role)->get();
+        });
+        return HelperController::api_response_format(200 , $roles);
     }
-
 }

@@ -225,7 +225,7 @@ Route::group(['prefix' => 'messages', 'middleware' => ['auth:api']], function ()
     Route::get('get-from-to', 'MessageController@ViewAllMSG_from_to')->name('ViewFromTo')->middleware('permission:messages/get-from-to');
     Route::post('add-send-permission-for-role', 'MessageController@add_send_Permission_for_role')->name('Message_add_send_Permission_for_role')->middleware('permission:messages/add-send-permission-for-role');
     Route::get('mythreads', 'MessageController@GetMyThreads')->name('mythreads')->middleware('permission:messages/mythreads');
-    Route::get('users-assosiated-roles', 'MessageController@RolesWithAssiocatedUsers')->name('users-assosiated-roles')->middleware('permission:messages/users-assosiated-roles');
+    Route::get('users-assosiated-roles', 'MessageController@RolesWithAssiocatedUsers');//->name('users-assosiated-roles')->middleware('permission:messages/users-assosiated-roles');
 });
 
 //Contact Route
