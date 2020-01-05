@@ -221,7 +221,7 @@ class MessageController extends Controller
     function ViewAllMSG_from_to(Request $request)
     {
         $request->validate([
-            'search' => 'required',
+            'search' => 'nullable|string',
             'user_id'     => 'required|exists:users,id'
         ]);
          $check = Message::where('From', $request->user_id)->orWhere('To', $request->user_id)->first();
@@ -229,9 +229,13 @@ class MessageController extends Controller
             $current_user = Auth::id();
             $messages = Message::where(function ($query) use ($request, $current_user) {
                 $query->whereIn('From', [$request->user_id, $current_user])->whereIn('To', [$request->user_id, $current_user]);
-            })->where(function ($query) use ($request) {
-                $query->where('text', 'LIKE' , "%$request->search%");
-            })->get();
+            });
+            if($request->filled('search')){
+                $messages->where(function ($query) use ($request) {
+                    $query->where('text', 'LIKE' , "%$request->search%");
+                });
+            }
+            $messages->get();
             $msg = MessageFromToResource::collection($messages);
             return HelperController::api_response_format(200, $msg);
         }
