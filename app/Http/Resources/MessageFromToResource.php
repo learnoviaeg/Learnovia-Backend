@@ -78,26 +78,29 @@ class MessageFromToResource extends JsonResource
         }
         $arr = [
             'id' => $this->id,
-            'Message' => $this->text,
+            'text' => $this->text,
             'about' => User::find($this->about),
             'From' => $from,
             'To' => $To,
             'Seen'=>$this->seen,
             'file' => $this->file,
-            'type' => $type,
+            'type' => $type
         ];
+        if(isset($extension))
+            $arr['extension']=$extension;
+
         if ($this->deleted == 0) {
             return $arr;
         } elseif ($this->deleted == Message::$DELETE_FROM_ALL) {
-            $arr['Message'] = "this message was Deleted for All";
+            $arr['text'] = "this message was Deleted for All";
             return $arr;
         } elseif ($this->deleted == Message::$DELETE_FOR_RECEIVER && $session_id == $this->To) {
-            $arr['Message'] = "this message was Deleted";
+            $arr['text'] = "this message was Deleted";
             return $arr;
         } elseif ($this->deleted == Message::$DELETE_FOR_RECEIVER && $session_id == $this->From) {
             return $arr;
         } elseif ($this->deleted == Message::$DELETE_FOR_SENDER && $session_id == $this->From) {
-            $arr['Message'] = "this message was Deleted";
+            $arr['text'] = "this message was Deleted";
             return $arr;
         } elseif ($this->deleted == Message::$DELETE_FOR_SENDER && $session_id == $this->To) {
             return $arr;

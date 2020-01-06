@@ -34,15 +34,19 @@ class Message extends Model
         // dd( attachment::find($message->attachment_id)->extension);
         $attachment=null;
         $type=null;
+        $exten=null;
         if($message->file != null)
         {
             $attachment=attachment::find($message->attachment_id);
             if($attachment != null)
-                $type=$attachment->extension;
+            {
+                $exten=$attachment->extension;
+                $type=$attachment->type;
+            }
         }
         if($message == null)
             $message = Message::where('From' , $other_user)->Where('To' , $auth_user)->orderBy('created_at' , 'desc')->first();
-        return ['message'=>$message->text , 'file' => $message->file, 'seen'=>$message->seen,'type'=>$type];
+        return ['message'=>$message->text , 'file' => $message->file, 'seen'=>$message->seen,'type'=>$type, 'extension'=>$exten];
     }
 
     private static function handleMessageView($users , $user_id){
