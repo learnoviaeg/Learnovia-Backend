@@ -609,22 +609,24 @@ class GradeCategoryController extends Controller
      */
     public function GetAllGradeCategory()
     {
-        $result = [];
+        $result = array();
         $gradeCategories = GradeCategory::whereNotNull('id_number')->get();
+        $i=0;
         foreach ($gradeCategories as $gradeCategory) {
             $gradeCategory->weight=$gradeCategory->weight();
             unset($gradeCategory->Parents);
             unset($gradeCategory->GradeItems);
             unset($gradeCategory->Children);
             if (!isset($result[$gradeCategory->name])) {
-                $result[$gradeCategory->name] = $gradeCategory;
-                $result[$gradeCategory->name]->levels = collect();
+                $result[$i]=$gradeCategory;
+                $result[$i]->levels = collect();
             }
             $temp = new stdClass();
             $temp->name = YearLevel::find($gradeCategory->id_number)->levels[0]->name;
             $temp->id = $gradeCategory->id_number;
-            if (!$result[$gradeCategory->name]->levels->contains($temp))
-                $result[$gradeCategory->name]->levels->push($temp);
+            if (!$result[$i]->levels->contains($temp))
+                $result[$i]->levels->push($temp);
+            $i++;
         }
         return HelperController::api_response_format(200, $result);
     }
