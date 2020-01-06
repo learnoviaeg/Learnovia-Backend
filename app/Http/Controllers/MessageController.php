@@ -2,21 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Contacts;
 use App\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
-use File;
-use Spatie\Permission\Traits\HasRoles;
 use Validator;
-use Session;
 use App\Http\Resources\Messageresource;
 use App\Http\Resources\MessageFromToResource;
 use App\Message_Role;
 use Illuminate\Support\Facades\Auth;
 use App\Message;
-use DB;
-use Illuminate\Support\Facades\Storage;
 use App\attachment;
 
 class MessageController extends Controller
@@ -32,8 +26,6 @@ class MessageController extends Controller
      * @return: => Successfully Sent Message! if will success
      */
     // please before  excute this fun  run  php artisan Storage:link
-
-
     public function Send_message_of_all_user(Request $req)
     {
         //return response()->json($req->file->getClientOriginalExtension());
@@ -92,19 +84,14 @@ class MessageController extends Controller
             }
         }
         return HelperController::api_response_format(201, null,$message, 'Successfully Sent Message!');
-
-
     }
-
 
     /**
      * @description:  delete message for all
      * @param Request $req => id of message that you want to delete
      * @return deleted if message was deleted  for all
      */
-
-    public
-    function deleteMessageForAll(Request $req)
+    public function deleteMessageForAll(Request $req)
     {
         $session_id = Auth::User()->id;
         $valid = Validator::make($req->all(), [
@@ -128,15 +115,13 @@ class MessageController extends Controller
     }
 
     /*
-    @Description: delete Message for user
-                           0=default
-                           1=deleted for all
-                           2=deleted by receiver
-                           3=deleted by sender
-     @param: id of message and my_id if not use session
-    @return: 'message' => 'message was deleted'
-
-
+        @Description: delete Message for user
+                            0=default
+                            1=deleted for all
+                            2=deleted by receiver
+                            3=deleted by sender
+        @param: id of message and my_id if not use session
+        @return: 'message' => 'message was deleted'
     */
     public
     function deleteMessageforMe(Request $req)
@@ -195,8 +180,7 @@ class MessageController extends Controller
      * Function list all messages take no parameter
      * @return all messages
      */
-    public
-    function List_All_Message()
+    public function List_All_Message()
     {
         $Message = Messageresource::collection(Message::get());
         return HelperController::api_response_format(200, $Message, 'All messages');
@@ -206,8 +190,7 @@ class MessageController extends Controller
      * @param Request $req --> id for message that you want see it.
      * @return message was seen
      */
-    public
-    function SeenMessage(Request $req)
+    public function SeenMessage(Request $req)
     {
         $session_id = Auth::User()->id;
         $req->validate([
@@ -221,8 +204,7 @@ class MessageController extends Controller
         return HelperController::api_response_format(200, $messages, 'message was seen');
     }
 
-    public
-    function ViewAllMSG_from_to(Request $request)
+    public function ViewAllMSG_from_to(Request $request)
     {
         $request->validate([
             'search' => 'nullable|string',
@@ -255,7 +237,6 @@ class MessageController extends Controller
      */
     public function add_send_Permission_for_role(Request $req)
     {
-
         $valid = Validator::make($req->all(), [
             'From_Role' => 'required | exists:roles,id',
             'To_Role' => 'required | exists:roles,id'
@@ -269,11 +250,10 @@ class MessageController extends Controller
         ]);
         if ($Message_Role) {
             return HelperController::api_response_format(200, null, 'Message Role insertion sucess');
-
         }
         return HelperController::api_response_format(404, null, 'Message Role insertion Fail');
-
     }
+    
     /**
      * @description: view all threads of a user.
      * @param Request $req => id of a user.
