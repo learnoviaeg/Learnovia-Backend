@@ -78,10 +78,12 @@ class MessageFromToResource extends JsonResource
             $extension = null;
             $type = 'text';
         }
+      $about = User::find($this->about);
+        $about->picture = $about->attachment->path;
         $arr = [
             'id' => $this->id,
             'Message' => $this->text,
-            'about' => User::find($this->about),
+            'about' => $about,
             'From' => $from,
             'To' => $To,
             'Seen'=>$this->seen,
