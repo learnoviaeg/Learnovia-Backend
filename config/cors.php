@@ -4,7 +4,7 @@ return [
 
     /*
      * A cors profile determines which origins, methods, headers are allowed for
-     * a given requests. The `DefaultProfile` reads its configuration from this
+     * a given requests. The `DefaultProfile` reads its configuration from thisfv
      * config file.
      *
      * You can easily create your own cors profile.
@@ -20,7 +20,7 @@ return [
         'allow_credentials' => true,
 
         'allow_origins' => [
-            'http://locahost:4200',
+            'http://localhost:4200',
         ],
 
         'allow_methods' => [
