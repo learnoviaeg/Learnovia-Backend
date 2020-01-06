@@ -214,7 +214,6 @@ class MessageController extends Controller
             'from' => 'required|exists:users,id'
         ]);
         $messages = Message::where('From', $req->from)->where('To', $session_id)->where('seen', null)->get();
-        // return Carbon::now()->toDateTimeString();
         foreach ($messages as $msg) {
             $msg->seen = Carbon::now()->toDateTimeString();
             $msg->save();
