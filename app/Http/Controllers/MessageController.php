@@ -303,7 +303,10 @@ class MessageController extends Controller
 
         $session_id=Auth::id();
         $courseSeg=GradeCategoryController::getCourseSegmentWithArray($request);
-        $users=Enroll::whereIn('course_segment',$courseSeg)->whereIn('role_id',$request->role)->pluck('user_id');
+        if(isset($request->role))
+            $users=Enroll::whereIn('course_segment',$courseSeg)->whereIn('role_id',$request->role)->pluck('user_id');
+        else
+            $users=Enroll::whereIn('course_segment',$courseSeg)->pluck('user_id');
         $user_ids= array_values(array_unique($users->toArray()));
 
         $key=array_search($session_id,$user_ids);
