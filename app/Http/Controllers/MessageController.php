@@ -12,6 +12,7 @@ use App\Message_Role;
 use Illuminate\Support\Facades\Auth;
 use App\Message;
 use App\attachment;
+use App\Enroll;
 
 class MessageController extends Controller
 {
@@ -53,8 +54,8 @@ class MessageController extends Controller
                         if ($permission) {
                             $message = Message::Create(array(
                                 'text' => $req->text,
-                                'about' => (!$req->filled('about')) ? $req->user()->id : $req->about,
-                                'From' => $req->user()->id,
+                                'about' => (!$req->filled('about')) ? $session_id : $req->about,
+                                'From' => $session_id,
                                 'seen' => false,
                                 'deleted' => 0,
                                 'To' => $userId,
@@ -77,13 +78,14 @@ class MessageController extends Controller
                     }
                 }
                 if ($is_send == false) {
-                    return HelperController::api_response_format(404, null, 'Fail ,  you do not have a permission to send message to this user!');
+                    // return HelperController::api_response_format(404, User::find($userId), 'Fail ,  you do not have a permission to send message to this user!');
+                    return HelperController::api_response_format(404, $userId, 'Fail ,  you do not have a permission to send message to this user!');
                 }
             } else {
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
             }
         }
-        return HelperController::api_response_format(201, null,$message, 'Successfully Sent Message!');
+        return HelperController::api_response_format(201, $message, 'Successfully Sent Message!');
     }
 
     /**
@@ -253,19 +255,21 @@ class MessageController extends Controller
         }
         return HelperController::api_response_format(404, null, 'Message Role insertion Fail');
     }
-    
+
     /**
      * @description: view all threads of a user.
      * @param Request $req => id of a user.
      * @return all threads.
      */
-    public function GetMyThreads(Request $request){
+    public function GetMyThreads(Request $request)
+    {
         $messages = Message::where('From', $request->user()->id)->orWhere('To', $request->user()->id)->orderBy('created_at','desc')->get();
         $users = Message::GetMessageDetails($messages , $request->user()->id);
         return HelperController::api_response_format(200 , $users);
     }
 
-    public function SearchMessage(Request $request){
+    public function SearchMessage(Request $request)
+    {
         $request->validate([
             'search' => 'required'
         ]);
@@ -284,5 +288,32 @@ class MessageController extends Controller
             $role->users = User::role($role)->get();
         });
         return HelperController::api_response_format(200 , $roles);
+    }
+
+    public function BulkMessage(Request $request)
+    {
+        $request->validate([
+            'role' => 'array|exists:roles,id',
+            'type' => 'array|exists:academic_types,id',
+            'levels' => 'array|exists:levels,id',
+            'classes' => 'array|exists:classes,id',
+            'courses' => 'array|exists:courses,id',
+            'message' => 'string|required'
+        ]);
+
+        $session_id=Auth::id();
+        $courseSeg=GradeCategoryController::getCourseSegmentWithArray($request);
+        $users=Enroll::whereIn('course_segment',$courseSeg)->whereIn('role_id',$request->role)->pluck('user_id');
+        $user_ids= array_values(array_unique($users->toArray()));
+
+        $key=array_search($session_id,$user_ids);
+        if($key !== false)
+            unset($user_ids[$key]);
+        $req = new Request([
+            'users' => array_values(array_unique($user_ids)),
+            'text' => $request->message
+        ]);
+        $message=self::Send_message_of_all_user($req);
+        return HelperController::api_response_format(201, $message, 'Successfully Sent Message!');
     }
 }
