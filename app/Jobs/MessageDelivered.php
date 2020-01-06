@@ -31,7 +31,7 @@ class MessageDelivered implements ShouldQueue
      */
     public function handle()
     {
-        $messages =  Message::where('To' ,$this->user_id)->where('seen',false)->get();
+        $messages =  Message::where('To' ,$this->user_id)->where('seen',null)->get();
         foreach ($messages as $message){
             $message->update(['delivered'=>1]);
         }

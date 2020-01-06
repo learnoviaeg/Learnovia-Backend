@@ -17,6 +17,7 @@ use App\Message;
 use DB;
 use Illuminate\Support\Facades\Storage;
 use App\attachment;
+use Carbon\Carbon;
 
 class MessageController extends Controller
 {
@@ -62,7 +63,7 @@ class MessageController extends Controller
                                 'text' => $req->text,
                                 'about' => (!$req->filled('about')) ? $req->user()->id : $req->about,
                                 'From' => $req->user()->id,
-                                'seen' => false,
+                                'seen' => null,
                                 'deleted' => 0,
                                 'To' => $userId,
                             ));
@@ -212,16 +213,16 @@ class MessageController extends Controller
         $req->validate([
             'from' => 'required|exists:users,id'
         ]);
-        $messages = Message::where('From', $req->from)->where('To', $session_id)->where('seen', 0)->get();
+        $messages = Message::where('From', $req->from)->where('To', $session_id)->where('seen', null)->get();
+        // return Carbon::now()->toDateTimeString();
         foreach ($messages as $msg) {
-            $msg->seen = 1;
+            $msg->seen = Carbon::now()->toDateTimeString();
             $msg->save();
         }
         return HelperController::api_response_format(200, $messages, 'message was seen');
     }
 
-    public
-    function ViewAllMSG_from_to(Request $request)
+    public function ViewAllMSG_from_to(Request $request)
     {
         $request->validate([
             'search' => 'nullable|string',
