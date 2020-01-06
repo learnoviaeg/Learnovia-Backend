@@ -43,8 +43,16 @@ class QuizController extends Controller
              */
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
-            'shuffle' => 'boolean'
+            'shuffle' => 'boolean',
+            'feedback' => 'required|integer| in:1,2,3',
+            /**
+             * feedback 1 =>After due date,
+             * feedback 2 => After submission
+             * feedback 3 => No feedback
+            */
         ]);
+        if($request->is_graded==1 && $request->feedback == 2)
+            return HelperController::api_response_format(200, null, 'invalid feedback ');
 
         $request->validate([
             'Question' => 'nullable|array',
@@ -162,7 +170,8 @@ class QuizController extends Controller
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
                 'Shuffle' => quiz::checkSuffle($request),
-                'index' => $Next_index
+                'index' => $Next_index,
+                'feedback' => $request->feedback,
             ]);
             return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
         }
@@ -175,7 +184,8 @@ class QuizController extends Controller
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
                 'Shuffle' => quiz::checkSuffle($request),
-                'index' => $Next_index
+                'index' => $Next_index,
+                'feedback' => $request->feedback,
             ]);
 
             $quiz->Question()->attach($questionsIDs);

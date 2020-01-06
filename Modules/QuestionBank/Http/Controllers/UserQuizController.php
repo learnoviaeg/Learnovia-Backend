@@ -13,6 +13,7 @@ use Auth;
 use Browser;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
+use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\QuizLesson;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\Questions;
@@ -393,4 +394,50 @@ class UserQuizController extends Controller
 
         return HelperController::api_response_format(200, $body = $user_grade, $message = 'Quiz graded sucess');
     }
+
+    public function Feedback(Request $request)
+    {
+        $request->validate([
+            'user_quiz_id' =>'required|integer|exists:user_quizzes,id',
+        ]);
+        $Q_lesson_id = userQuiz::find($request->user_quiz_id)->first('quiz_lesson_id');
+        $Due_date= QuizLesson::find($Q_lesson_id->quiz_lesson_id);
+        if(Carbon::now() < $Due_date->due_date)
+            return HelperController::api_response_format(200, Null , 'You are not allowed to view feedback now!');
+
+        $UserAnswers = userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->pluck('answer_id');
+        $Right_ans = QuestionsAnswer::where('is_true',1)->whereIn('id',$UserAnswers)->count();
+        $total['right'] = $Right_ans;
+        $total['wrong'] = count($UserAnswers) - $Right_ans;
+
+        return HelperController::api_response_format(200, $total );
+    }
+    public function detailed_feedback(Request $request){
+        $request->validate([
+            'lesson_id' =>'required|integer|exists:lessons,id',
+            'quiz_id' =>'required|integer|exists:quizzes,id',
+            'user_id' =>'required|integer|exists:users,id',
+            'true_answer' => 'required|boolean'
+        ]);
+        $quiz = quiz::where('id',$request->quiz_id)->with(['Question.question_answer'])->first();
+        $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->pluck('id');
+        $user_quiz = userQuiz::where('quiz_lesson_id',$quiz_lesson[0])->where('user_id',$request->user_id)->with('UserQuizAnswer')->first();
+
+        foreach($quiz->Question as $q){
+            $Question_id =  $q->pivot->question_id;
+            $Ans_ID = userQuizAnswer::where('user_quiz_id',$user_quiz->id)->where('question_id',$Question_id)->first();
+            if(isset($Ans_ID->answer_id)){
+                $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
+                $q->user_grade =$Ans_ID->user_grade;
+            }
+            if($request->true_answer==1){
+                foreach($q->question_answer as $ans)
+                {
+                    unset($ans['is_true']);
+                }
+                }
+        }
+        return HelperController::api_response_format(200, $quiz);
+    }
+   
 }
