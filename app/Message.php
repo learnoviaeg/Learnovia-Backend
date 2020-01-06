@@ -49,7 +49,7 @@ class Message extends Model
         $temp = [];
         $i = 0 ;
         foreach($users as $user){
-            $temp[$i]['picture'] = $user->picture;
+            $temp[$i]['picture'] = $user->attachment->path;
             $temp[$i]['id'] = $user->id;
             $temp[$i]['name'] = $user->firstname . ' ' .$user->lastname;
             $temp[$i]['roles'] = $user->getRoleNames();
