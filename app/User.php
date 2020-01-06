@@ -164,7 +164,7 @@ class User extends Authenticatable
     public function attachment()
     {
         if($this->picture == null)
-            return attachment::find(1);
+            return $this->hasOne('App\attachment')->whereId(1);
         return $this->hasOne('App\attachment', 'id', 'picture');
     }
 
