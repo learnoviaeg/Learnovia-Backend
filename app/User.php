@@ -28,7 +28,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'firstname', 'email', 'password', 'real_password', 'lastname', 'username','suspend','class_id','picture', 'level',
-        'type', 'arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'language', 
+        'type', 'arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'language',
         'timezone', 'religion', 'second language'
     ];
 
@@ -163,6 +163,8 @@ class User extends Authenticatable
 
     public function attachment()
     {
+        if($this->picture == null)
+            return attachment::find(1);
         return $this->hasOne('App\attachment', 'id', 'picture');
     }
 
