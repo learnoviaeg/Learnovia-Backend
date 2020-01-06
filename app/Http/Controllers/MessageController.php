@@ -81,6 +81,7 @@ class MessageController extends Controller
                             {
                                 $message['type']=$attachment->type;
                                 $message['extension']=$attachment->extension;
+                                $message['name']=pathinfo($req->file->getClientOriginalName(), PATHINFO_FILENAME);//;
                             }
                             $is_send = true;
                             break;
@@ -127,10 +128,10 @@ class MessageController extends Controller
             ));
             $message->save();
 
-            return HelperController::api_response_format(201, null, 'message was deleted');
+            return HelperController::api_response_format(201, $message, 'message was deleted');
 
         } else {
-            return HelperController::api_response_format(404, null, 'You do not have permission delete this message');
+            return HelperController::api_response_format(404,null , 'You do not have permission delete this message');
         }
     }
 
@@ -192,7 +193,7 @@ class MessageController extends Controller
             }
 
             $message->save();
-            return HelperController::api_response_format(201, null, 'message was deleted');
+            return HelperController::api_response_format(201, $message, 'message was deleted');
         } else {
             return HelperController::api_response_format(404, null, 'You do not have permission delete this message');
         }

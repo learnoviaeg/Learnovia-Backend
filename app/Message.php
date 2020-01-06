@@ -35,6 +35,7 @@ class Message extends Model
         $attachment=null;
         $type=null;
         $exten=null;
+        $name =null;
         if($message->file != null)
         {
             $attachment=attachment::find($message->attachment_id);
@@ -42,11 +43,13 @@ class Message extends Model
             {
                 $exten=$attachment->extension;
                 $type=$attachment->type;
+                // $name=$message->file->getClientOriginalName();
             }
         }
         if($message == null)
             $message = Message::where('From' , $other_user)->Where('To' , $auth_user)->orderBy('created_at' , 'desc')->first();
-        return ['message'=>$message->text , 'file' => $message->file, 'type' => $type,'seen'=>$message->seen, 'created_at'=>$message->created_at , 'extension'=>$exten];
+        return ['message'=>$message->text , 'file' => $message->file, 'type' => $type,'seen'=>$message->seen,
+         'created_at'=>$message->created_at , 'extension'=>$exten, 'name'=>$name];
     }
 
     private static function handleMessageView($users , $user_id){
