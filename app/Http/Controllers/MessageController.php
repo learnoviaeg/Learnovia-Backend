@@ -77,6 +77,11 @@ class MessageController extends Controller
                             $message->about=User::find($message->about);
                             $message->From=User::find($message->From);
                             $message->To=User::find($message->To);
+                            if(isset($attachment))
+                            {
+                                $message['type']=$attachment->type;
+                                $message['extension']=$attachment->extension;
+                            }
                             $is_send = true;
                             break;
                         }
@@ -92,7 +97,8 @@ class MessageController extends Controller
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
             }
         }
-        return HelperController::api_response_format(201, null,$message, 'Successfully Sent Message!');
+        $message->message = $message->text;
+        return HelperController::api_response_format(201,$message, 'Successfully Sent Message!');
 
 
     }
