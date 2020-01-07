@@ -97,6 +97,8 @@ class MessageController extends Controller
         $message->From[0]->picture = $message->From[0]->attachment->path;
         $message->To = User::find($message->To);
         $message->To[0]->picture = $message->To[0]->attachment->path;
+        $message->about = User::find($message->about);
+        $message->about[0]->picture = $message->about[0]->attachment->path;
         $message->message = $message->text;
         return HelperController::api_response_format(201,$message, 'Successfully Sent Message!');
     }
