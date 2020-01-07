@@ -50,7 +50,7 @@ class AttendanceLogController extends Controller
             }
             foreach ($attendance->allowed_classes as $classID) {
                 if(CourseSegment::GetWithClassAndCourse($classID,$courseID->course_id)->id==$attendance_sessions->course_segment_id){User::notify([
-                    'message' => 'Attendance is taken with status '. $letter,
+                    'message' => 'Attendance is taken with status '. AttendanceStatus::find($user['status_id'])->letter,
                     'from' => Auth::User()->id,
                     'users' => [$user['id']],
                     'course_id' => $courseID->course_id,
