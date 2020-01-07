@@ -77,7 +77,7 @@ class AttendanceController extends Controller
         ]);
         $attendane = Attendance::find($request->id);
         $Course_Segments = Attendance::get_CourseSegments_by_AttendenceID($request->id);
-        $users =   User::whereIn('level', unserialize($attendane->allowed_levels))->get();
+        $users =   User::whereIn('level', $attendane->allowed_levels)->get();
         if(($Course_Segments)== null){
         $users = Enroll::whereIn('course_segment', $Course_Segments)->with('user')->get();
         }
@@ -177,7 +177,7 @@ class AttendanceController extends Controller
         $user_id = Auth::User()->id;
         $attendance = self::createAttendance($request);
         $attendance->allowed_levels =isset($attendance->allowed_levels)? $attendance->allowed_levels:null;
-        $attendance->allowed_courses = isset($attendance->allowed_courses)? unserialize($attendance->allowed_courses):null;
+        $attendance->allowed_courses = isset($attendance->allowed_courses)? $attendance->allowed_courses:null;
         if ($request->attendance_type == Attendance::$FIRST_TYPE && $request->graded == 1) {
             $jop = (new  AttendanceGradeItems($request->all(), Attendance::$FIRST_TYPE, null));
             dispatch($jop);
@@ -210,10 +210,9 @@ class AttendanceController extends Controller
             ]);
 
             if(isset($request->allowed_levels)){
-            $attendance->update([
-                'allowed_levels' => serialize($request->allowed_levels)
-            ]);
-                $attendance->allowed_levels = unserialize($attendance->allowed_levels);
+                $attendance->update([
+                    'allowed_levels' => serialize($request->allowed_levels)
+                ]);
             }
             $alldays = Attendance::getAllWorkingDays($request->start, $request->end);
                 foreach ($alldays as $day) {
@@ -239,7 +238,6 @@ class AttendanceController extends Controller
         ]);
         $attendance = Attendance::find($request->attendance_id);
         $user_id = Auth::User()->id;
-        $attendance->allowed_levels = unserialize($attendance->allowed_levels);
         switch ($attendance->type) {
             case  1 :
                 $array = [
@@ -438,7 +436,7 @@ class AttendanceController extends Controller
         foreach($attendance as $attend)
         {
             $i=0;
-            $attends=unserialize($attend->allowed_levels);
+            $attends=$attend->allowed_levels;
             foreach($attends as $levels)
             {
                 $level=Level::find($levels);
