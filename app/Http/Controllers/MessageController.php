@@ -2,23 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Contacts;
 use App\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
-use File;
-use Spatie\Permission\Traits\HasRoles;
 use Validator;
-use Session;
 use App\Http\Resources\Messageresource;
 use App\Http\Resources\MessageFromToResource;
 use App\Message_Role;
 use Illuminate\Support\Facades\Auth;
 use App\Message;
-use DB;
-use Illuminate\Support\Facades\Storage;
 use App\attachment;
 use Carbon\Carbon;
+use App\Enroll;
 
 class MessageController extends Controller
 {
@@ -33,8 +28,6 @@ class MessageController extends Controller
      * @return: => Successfully Sent Message! if will success
      */
     // please before  excute this fun  run  php artisan Storage:link
-
-
     public function Send_message_of_all_user(Request $req)
     {
         //return response()->json($req->file->getClientOriginalExtension());
@@ -91,7 +84,8 @@ class MessageController extends Controller
                     }
                 }
                 if ($is_send == false) {
-                    return HelperController::api_response_format(404, null, 'Fail ,  you do not have a permission to send message to this user!');
+                    // return HelperController::api_response_format(404, User::find($userId), 'Fail ,  you do not have a permission to send message to this user!');
+                    return HelperController::api_response_format(404, $userId, 'Fail ,  you do not have a permission to send message to this user!');
                 }
             } else {
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
@@ -99,19 +93,14 @@ class MessageController extends Controller
         }
         $message->message = $message->text;
         return HelperController::api_response_format(201,$message, 'Successfully Sent Message!');
-
-
     }
-
 
     /**
      * @description:  delete message for all
      * @param Request $req => id of message that you want to delete
      * @return deleted if message was deleted  for all
      */
-
-    public
-    function deleteMessageForAll(Request $req)
+    public function deleteMessageForAll(Request $req)
     {
         $session_id = Auth::User()->id;
         $valid = Validator::make($req->all(), [
@@ -135,15 +124,13 @@ class MessageController extends Controller
     }
 
     /*
-    @Description: delete Message for user
-                           0=default
-                           1=deleted for all
-                           2=deleted by receiver
-                           3=deleted by sender
-     @param: id of message and my_id if not use session
-    @return: 'message' => 'message was deleted'
-
-
+        @Description: delete Message for user
+                            0=default
+                            1=deleted for all
+                            2=deleted by receiver
+                            3=deleted by sender
+        @param: id of message and my_id if not use session
+        @return: 'message' => 'message was deleted'
     */
     public
     function deleteMessageforMe(Request $req)
@@ -202,8 +189,7 @@ class MessageController extends Controller
      * Function list all messages take no parameter
      * @return all messages
      */
-    public
-    function List_All_Message()
+    public function List_All_Message()
     {
         $Message = Messageresource::collection(Message::get());
         return HelperController::api_response_format(200, $Message, 'All messages');
@@ -213,8 +199,7 @@ class MessageController extends Controller
      * @param Request $req --> id for message that you want see it.
      * @return message was seen
      */
-    public
-    function SeenMessage(Request $req)
+    public function SeenMessage(Request $req)
     {
         $session_id = Auth::User()->id;
         $req->validate([
@@ -261,7 +246,6 @@ class MessageController extends Controller
      */
     public function add_send_Permission_for_role(Request $req)
     {
-
         $valid = Validator::make($req->all(), [
             'From_Role' => 'required | exists:roles,id',
             'To_Role' => 'required | exists:roles,id'
@@ -275,23 +259,24 @@ class MessageController extends Controller
         ]);
         if ($Message_Role) {
             return HelperController::api_response_format(200, null, 'Message Role insertion sucess');
-
         }
         return HelperController::api_response_format(404, null, 'Message Role insertion Fail');
-
     }
+
     /**
      * @description: view all threads of a user.
      * @param Request $req => id of a user.
      * @return all threads.
      */
-    public function GetMyThreads(Request $request){
+    public function GetMyThreads(Request $request)
+    {
         $messages = Message::where('From', $request->user()->id)->orWhere('To', $request->user()->id)->orderBy('created_at','desc')->get();
         $users = Message::GetMessageDetails($messages , $request->user()->id);
         return HelperController::api_response_format(200 , $users);
     }
 
-    public function SearchMessage(Request $request){
+    public function SearchMessage(Request $request)
+    {
         $request->validate([
             'search' => 'required'
         ]);
@@ -310,5 +295,35 @@ class MessageController extends Controller
             $role->users = User::role($role)->get();
         });
         return HelperController::api_response_format(200 , $roles);
+    }
+
+    public function BulkMessage(Request $request)
+    {
+        $request->validate([
+            'role' => 'array|exists:roles,id',
+            'type' => 'array|exists:academic_types,id',
+            'levels' => 'array|exists:levels,id',
+            'classes' => 'array|exists:classes,id',
+            'courses' => 'array|exists:courses,id',
+            'message' => 'string|required'
+        ]);
+
+        $session_id=Auth::id();
+        $courseSeg=GradeCategoryController::getCourseSegmentWithArray($request);
+        if(isset($request->role))
+            $users=Enroll::whereIn('course_segment',$courseSeg)->whereIn('role_id',$request->role)->pluck('user_id');
+        else
+            $users=Enroll::whereIn('course_segment',$courseSeg)->pluck('user_id');
+        $user_ids= array_values(array_unique($users->toArray()));
+
+        $key=array_search($session_id,$user_ids);
+        if($key !== false)
+            unset($user_ids[$key]);
+        $req = new Request([
+            'users' => array_values(array_unique($user_ids)),
+            'text' => $request->message
+        ]);
+        $message=self::Send_message_of_all_user($req);
+        return HelperController::api_response_format(201, $message, 'Successfully Sent Message!');
     }
 }
