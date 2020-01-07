@@ -433,15 +433,13 @@ class AttendanceController extends Controller
         $attendance=Attendance::get(['name','allowed_levels','type']);
         foreach($attendance as $attend)
         {
-            // $i=0;
-            // $attends=$attend->allowed_levels;
-            // foreach($attends as $levels)
-            // {
-            //     $level=Level::find($levels);
-            //     $att[$i]=$level->name;
-            //     $attend->allowed_levels=$att;
-            //     $i++;
-            // }
+            $temp = [];
+            foreach($attend->allowed_levels as $level)
+            {
+                $level  = Level::find($level);
+                $temp[] = $level->name;
+            }
+            $attend->levels = $temp;
             if($attend->type == 1)
                 $attend->type = 'per session';
             if($attend->type == 2)
