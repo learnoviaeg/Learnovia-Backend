@@ -90,8 +90,11 @@ class MessageFromToResource extends JsonResource
             'file' => $this->file,
             'type' => $type
         ];
-        if(isset($extension))
-            $arr['extension']=$extension;
+        if(isset($this->attachment))
+        {
+            $arr['extension']=$this->attachment->extension;
+            // $arr['name']=pathinfo($this->attachment->name->getClientOriginalName(), PATHINFO_FILENAME);
+        }
 
         if ($this->deleted == 0) {
             return $arr;
