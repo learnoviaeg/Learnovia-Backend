@@ -36,9 +36,11 @@ class AttendanceLogController extends Controller
         $enroll = Enroll::where('course_segment', $attendance_sessions->course_segment_id)->pluck('user_id');
         $courseID = CourseSegment::where('id',$attendance_sessions->course_segment_id)->where('is_active',1)->first('course_id');
         $attendance = Attendance::find($attendance_sessions->attendance_id);
+        $result = [];
+        $result['message'] = 'Attendance Logged Successfully';
+        $result['users'] = [];
         foreach ($request->users as $user) {
             if (in_array($user['id'], $enroll->toArray())) {
-               $letter = AttendanceStatus::find($user['status_id'])->letter;
                 $AttendanceLog[] = AttendanceLog::create([
                     'ip_address' => $ip,
                     'session_id' => $request->session_id,
@@ -47,6 +49,9 @@ class AttendanceLogController extends Controller
                     'taker_id' => $user_id,
                     'taken_at' => $date
                 ]);
+            }else{
+                $result['users'][] = $user['id'];
+                $result['message'] = 'Those Users are not belong to this Attendance';
             }
             foreach ($attendance->allowed_classes as $classID) {
                 if(CourseSegment::GetWithClassAndCourse($classID,$courseID->course_id)->id==$attendance_sessions->course_segment_id){User::notify([
@@ -61,7 +66,9 @@ class AttendanceLogController extends Controller
                 }
             }
         }
-        return HelperController::api_response_format(200, $AttendanceLog, 'Attendance Log ...');
+        if(count($result['users']) == 0)
+            $result['users'] = $AttendanceLog;
+        return HelperController::api_response_format(200, $result['users'], $result['message']);
     }
 
 
