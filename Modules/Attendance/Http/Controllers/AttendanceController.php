@@ -176,8 +176,6 @@ class AttendanceController extends Controller
         }
         $user_id = Auth::User()->id;
         $attendance = self::createAttendance($request);
-        $attendance->allowed_levels =isset($attendance->allowed_levels)? $attendance->allowed_levels:null;
-        $attendance->allowed_courses = isset($attendance->allowed_courses)? $attendance->allowed_courses:null;
         if ($request->attendance_type == Attendance::$FIRST_TYPE && $request->graded == 1) {
             $jop = (new  AttendanceGradeItems($request->all(), Attendance::$FIRST_TYPE, null));
             dispatch($jop);
