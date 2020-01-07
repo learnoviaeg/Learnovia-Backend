@@ -55,8 +55,8 @@ class MessageController extends Controller
                         if ($permission) {
                             $message = Message::Create(array(
                                 'text' => $req->text,
-                                'about' => (!$req->filled('about')) ? $req->user()->id : $req->about,
-                                'From' => $req->user()->id,
+                                'about' => (!$req->filled('about')) ? Auth::id() : $req->about,
+                                'From' => Auth::id(),
                                 'seen' => null,
                                 'deleted' => 0,
                                 'To' => $userId,
