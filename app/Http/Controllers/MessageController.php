@@ -92,6 +92,11 @@ class MessageController extends Controller
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
             }
         }
+        $message->picture = ($message->picture != null)? $message->attachment->path: null;
+        $message->From = User::find($message->From);
+        $message->From->picture = $message->From->attachment->path;
+        $message->To = User::find($message->To);
+        $message->To->picture = $message->To->attachment->path;
         $message->message = $message->text;
         return HelperController::api_response_format(201,$message, 'Successfully Sent Message!');
     }
