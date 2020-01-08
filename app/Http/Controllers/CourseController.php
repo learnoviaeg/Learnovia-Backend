@@ -256,6 +256,7 @@ class CourseController extends Controller
                 $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
                 $course->teacher = $teacher;
+                $course->attachment = ($course->attachment == null)?attachment::find(1):$course->attachment;
                 $all->push($course);
             }
         }
