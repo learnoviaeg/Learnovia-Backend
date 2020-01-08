@@ -40,6 +40,8 @@ class Course extends Model
 
     public function attachment()
     {
+        if($this->image == null)
+            $this->image= 1;
         return $this->hasOne('App\attachment', 'id', 'image');
     }
 }
