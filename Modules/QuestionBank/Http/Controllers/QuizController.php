@@ -46,13 +46,13 @@ class QuizController extends Controller
             'shuffle' => 'boolean',
             'feedback' => 'required|integer| in:1,2,3',
             /**
-             * feedback 1 =>After due date,
-             * feedback 2 => After submission
+             * feedback 1 => After submission
+             * feedback 2 =>After due date,
              * feedback 3 => No feedback
             */
         ]);
-        if($request->is_graded==1 && $request->feedback == 2)
-            return HelperController::api_response_format(200, null, 'invalid feedback ');
+        if($request->is_graded==1 && $request->feedback == 1)
+            return HelperController::api_response_format(200, null, 'invalid feedback, feedback should be in 2 or 3 ');
 
         $request->validate([
             'Question' => 'nullable|array',
