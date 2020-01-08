@@ -432,8 +432,11 @@ class UserQuizController extends Controller
             if(isset($Ans_ID->answer_id)){
                 $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
                 $q->user_grade =$Ans_ID->user_grade;
+                if($show_is_true == 0){
+                    unset($q->student_answer['is_true']); 
+                }
             }
-            if($show_is_true==0){
+            if($show_is_true == 0){
                 foreach($q->question_answer as $ans)
                 {
                     unset($ans['is_true']);
