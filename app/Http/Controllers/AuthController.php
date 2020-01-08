@@ -140,7 +140,9 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        return HelperController::api_response_format(200, $request->user());
+        $user = $request->user();
+        $user->picture = $user->attachment->path;
+        return HelperController::api_response_format(200, $user);
     }
 
     public function userRole(Request $request)
