@@ -14,7 +14,7 @@ class Message extends Model
     protected $hidden = [
         'created_at','updated_at'
     ];
-
+    protected $appends = ['filename'];
     public static function GetMessageDetails($messages , $user_id){
         $users = [];
         foreach($messages as $message){
@@ -31,7 +31,6 @@ class Message extends Model
 
     private static function getLastMessage($auth_user , $other_user){
         $message = Message::where('From' , $auth_user)->Where('To' , $other_user)->orderBy('created_at' , 'desc')->first();
-        // dd( attachment::find($message->attachment_id)->extension);
         $attachment=null;
         $type=null;
         $exten=null;
@@ -69,5 +68,11 @@ class Message extends Model
     public function attachment()
     {
         return $this->belongsTo('App\attachment', 'attachment_id', 'id');
+    }
+
+    public function getFilenameAttribute(){
+        if($this->attachment != null)
+            return $this->attachment->name;
+        return null;
     }
 }
