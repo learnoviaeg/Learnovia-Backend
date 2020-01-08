@@ -252,7 +252,7 @@ class CourseController extends Controller
                     Enroll::where('role_id', '4')
                     ->where('course_segment', $enroll->CourseSegment->id)
                     ->pluck('user_id')
-                    )->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
+                    )->get(['id', 'username', 'firstname', 'lastname', 'picture']);
                 $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
                 $course->teacher = $teacher;
