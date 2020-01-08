@@ -119,19 +119,21 @@ class MessageController extends Controller
         if ($valid->fails()) {
             return HelperController::api_response_format(404, $valid->errors());
         }
-        $messages[] = Message::find($req->id);
-        foreach($messages as $message){
+        $message = Message::find($req->id);
+        // foreach($messages as $message){
 
             if ($message->From == $session_id || $message->To == $session_id) {
                 $message->update(array(
                     'deleted' => Message::$DELETE_FROM_ALL
                 ));
                 $message->save();
-            
-                return HelperController::api_response_format(201, Message::GetMessageDetails($messages,$session_id), 'message was deleted');
+                $msg = MessageFromToResource::collection($message->get());
+
+                // return HelperController::api_response_format(201, Message::GetMessageDetails($messages,$session_id), 'message was deleted');
+                return HelperController::api_response_format(201, $msg, 'message was deleted');
             }
             return HelperController::api_response_format(404,null , 'You do not have permission delete this message');
-        }
+        // }
     }
 
     /*
@@ -152,9 +154,9 @@ class MessageController extends Controller
         if ($valid->fails()) {
             return HelperController::api_response_format(201,  $valid->errors());
         }
-        $messages[] = Message::find($req->id);
-        foreach($messages as $message)
-        {
+        $message = Message::find($req->id);
+        // foreach($messages as $message)
+        // {
             if ($message->From == $session_id || $message->To == $session_id) {
 
                 if ($session_id == $message->To) {
@@ -187,11 +189,15 @@ class MessageController extends Controller
                 }
     
                 $message->save();
-                return HelperController::api_response_format(201, Message::GetMessageDetails($messages,$session_id), 'message was deleted');
+                $msg = MessageFromToResource::collection($message->get());
+
+                // return HelperController::api_response_format(201, Message::GetMessageDetails($messages,$session_id), 'message was deleted');
+                return HelperController::api_response_format(201, $msg, 'message was deleted');
+
             } else {
                 return HelperController::api_response_format(404, null, 'You do not have permission delete this message');
             }
-        }
+        // }
     }
 
     /**
@@ -240,6 +246,7 @@ class MessageController extends Controller
                 });
             }
             $messages =$messages->get();
+            // return ($messages);
             $msg = MessageFromToResource::collection($messages);
             return HelperController::api_response_format(200, $msg);
         }
