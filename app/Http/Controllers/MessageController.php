@@ -74,7 +74,7 @@ class MessageController extends Controller
                             {
                                 $message['type']=$attachment->type;
                                 $message['extension']=$attachment->extension;
-                                $message['name']=pathinfo($req->file->getClientOriginalName(), PATHINFO_FILENAME);//;
+                                $message['name']=pathinfo($req->file->getClientOriginalName(), PATHINFO_FILENAME);
                             }
                             $is_send = true;
                             break;
@@ -92,6 +92,7 @@ class MessageController extends Controller
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
             }
         }
+            
         $message->picture = ($message->picture != null)? $message->attachment->path: null;
         $message->From = User::find($message->From);
         $message->From[0]->picture = $message->From[0]->attachment->path;
@@ -99,8 +100,9 @@ class MessageController extends Controller
         $message->To[0]->picture = $message->To[0]->attachment->path;
         $message->about = User::find($message->about);
         $message->about[0]->picture = $message->about[0]->attachment->path;
-        $message->message = $message->text;
-        return HelperController::api_response_format(201,$message, 'Successfully Sent Message!');
+        $message->Message = $message->text;
+
+        return HelperController::api_response_format(201, $message, 'Successfully Sent Message!');
     }
 
     /**
@@ -118,17 +120,20 @@ class MessageController extends Controller
             return HelperController::api_response_format(404, $valid->errors());
         }
         $message = Message::find($req->id);
-        if ($message->From == $session_id || $message->To == $session_id) {
-            $message->update(array(
-                'deleted' => Message::$DELETE_FROM_ALL
-            ));
-            $message->save();
+        // foreach($messages as $message){
 
-            return HelperController::api_response_format(201, $message, 'message was deleted');
+            if ($message->From == $session_id || $message->To == $session_id) {
+                $message->update(array(
+                    'deleted' => Message::$DELETE_FROM_ALL
+                ));
+                $message->save();
+                $msg = MessageFromToResource::collection($message->get());
 
-        } else {
+                // return HelperController::api_response_format(201, Message::GetMessageDetails($messages,$session_id), 'message was deleted');
+                return HelperController::api_response_format(201, $msg, 'message was deleted');
+            }
             return HelperController::api_response_format(404,null , 'You do not have permission delete this message');
-        }
+        // }
     }
 
     /*
@@ -140,57 +145,59 @@ class MessageController extends Controller
         @param: id of message and my_id if not use session
         @return: 'message' => 'message was deleted'
     */
-    public
-    function deleteMessageforMe(Request $req)
+    public function deleteMessageforMe(Request $req)
     {
         $session_id = Auth::User()->id;
-
-
         $valid = Validator::make($req->all(), [
             'id' => 'required|exists:messages,id',
-
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(201,  $valid->errors());
         }
-
         $message = Message::find($req->id);
-        if ($message->From == $session_id || $message->To == $session_id) {
+        // foreach($messages as $message)
+        // {
+            if ($message->From == $session_id || $message->To == $session_id) {
 
-            if ($session_id == $message->To) {
-                if ($message) {
-                    if ($message->deleted == Message::$DELETE_FOR_SENDER || $message->deleted == Message::$DELETE_FROM_ALL) {
-                        $message->update(array(
-                            'deleted' => Message::$DELETE_FROM_ALL
-                        ));
-
-                    } else {
-                        $message->update(array(
-                            'deleted' => Message::$DELETE_FOR_RECEIVER
-                        ));
+                if ($session_id == $message->To) {
+                    if ($message) {
+                        if ($message->deleted == Message::$DELETE_FOR_SENDER || $message->deleted == Message::$DELETE_FROM_ALL) {
+                            $message->update(array(
+                                'deleted' => Message::$DELETE_FROM_ALL
+                            ));
+    
+                        } else {
+                            $message->update(array(
+                                'deleted' => Message::$DELETE_FOR_RECEIVER
+                            ));
+                        }
+                    }
+    
+                } elseif ($session_id == $message->From) {
+    
+                    if ($message) {
+                        if ($message->deleted == Message::$DELETE_FOR_RECEIVER || $message->deleted == Message::$DELETE_FROM_ALL) {
+                            $message->update(array(
+                                'deleted' => Message::$DELETE_FROM_ALL
+                            ));
+                        } else {
+                            $message->update(array(
+                                'deleted' => Message::$DELETE_FOR_SENDER
+                            ));
+                        }
                     }
                 }
+    
+                $message->save();
+                $msg = MessageFromToResource::collection($message->get());
 
-            } elseif ($session_id == $message->From) {
+                // return HelperController::api_response_format(201, Message::GetMessageDetails($messages,$session_id), 'message was deleted');
+                return HelperController::api_response_format(201, $msg, 'message was deleted');
 
-                if ($message) {
-                    if ($message->deleted == Message::$DELETE_FOR_RECEIVER || $message->deleted == Message::$DELETE_FROM_ALL) {
-                        $message->update(array(
-                            'deleted' => Message::$DELETE_FROM_ALL
-                        ));
-                    } else {
-                        $message->update(array(
-                            'deleted' => Message::$DELETE_FOR_SENDER
-                        ));
-                    }
-                }
+            } else {
+                return HelperController::api_response_format(404, null, 'You do not have permission delete this message');
             }
-
-            $message->save();
-            return HelperController::api_response_format(201, $message, 'message was deleted');
-        } else {
-            return HelperController::api_response_format(404, null, 'You do not have permission delete this message');
-        }
+        // }
     }
 
     /**
@@ -239,6 +246,7 @@ class MessageController extends Controller
                 });
             }
             $messages =$messages->get();
+            // return ($messages);
             $msg = MessageFromToResource::collection($messages);
             return HelperController::api_response_format(200, $msg);
         }
