@@ -46,6 +46,9 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/attend-report', 'title' => 'report of attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/get', 'title' => 'get attendance status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-session', 'title' => 'get session and status']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/update-session', 'title' => 'update session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-session', 'title' => 'delete session']);
+
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('attendance/add');
         $role->givePermissionTo('attendance/add-log');
@@ -446,5 +449,53 @@ class AttendanceController extends Controller
                 $attend->type = 'Daily';
         }
         return HelperController::api_response_format(200, $attendance, 'there is all your logs');
+    }
+
+    public function update_session(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'exists:attendance_sessions,id',
+            'attendance_id' => 'exists:attendances,id',
+            'taker_id' => 'exists:users,id',
+            'date' =>  'date',
+            'from' =>  'regex:/(\d+\:\d+)/',
+            'to' => 'regex:/(\d+\:\d+)/',
+            'course_segment_id' => 'exists:course_segments,id',
+        ]);
+        $session = AttendanceSession::find($request->session_id);
+        $attendance = Attendance::find($session->attendance_id);
+        if($request->filled('attendance_id'))
+            $attendance = Attendance::find($request->attendance_id);
+        $req = new Request([
+            'classes' =>$attendance->allowed_classes,
+            'levels' => $attendance->allowed_levels,
+            'courses' => $attendance->allowed_courses
+        ]);
+        $course_segments= GradeCategoryController::getCourseSegmentWithArray($req);
+        if($request->filled('course_segment_id') && in_array($course_segments , $request->course_segment_id))
+            $session->course_segment_id = $request->course_segment_id;
+
+        if($request->filled('attendance_id'))
+            $session->attendance_id = $request->attendance_id;
+        if($request->filled('taker_id'))
+            $session->taker_id = $request->taker_id;
+        if($request->filled('date'))
+            $session->date = $request->date;
+        if($request->filled('from'))
+            $session->from = $request->from;
+        if($request->filled('to'))
+            $session->to = $request->to;
+        $session -> save();
+        return HelperController::api_response_format(400, $session ,'Session is updated successfully');
+
+    }
+
+    public function delete_session(Request $request){
+        $request->validate([
+            'session_id' => 'exists:attendance_sessions,id',
+        ]);
+        $session = AttendanceSession::find($request->session_id);
+        $session ->delete();
+        return HelperController::api_response_format(400, null ,'Session is deleted successfully');
     }
 }
