@@ -3,7 +3,6 @@
 namespace Modules\Attendance\Http\Controllers;
 
 use App\Component;
-use App\Course;
 use App\GradeCategory;
 use App\Http\Controllers\HelperController;
 use App\Http\Controllers\GradeCategoryController;
@@ -18,11 +17,10 @@ use Modules\Attendance\Entities\AttendanceSession;
 
 use App\Enroll;
 use App\Level;
+use App\CourseSegment;
 use Modules\Attendance\Entities\AttendanceStatus;
-use Modules\Attendance\Jobs\Attendance_sessions;
 use Modules\Attendance\Jobs\AttendanceGradeItems;
 use Modules\Attendance\Jobs\AttendanceSessionsJob;
-use Modules\QuestionBank\Entities\quiz;
 
 class AttendanceController extends Controller
 {
@@ -36,10 +34,12 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'add attendance log']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-attendence', 'title' => 'get  all users in attendence']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attendence', 'title' => 'get attendence']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-attendence', 'title' => 'delete attendence']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/edit-attendence', 'title' => 'edit attendence']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'get all users in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-all-taken-users-in-session', 'title' => 'get all taken users in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'add session']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/attendance/bulck/attendace', 'title' => 'add session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/attendance/bulk/attendance', 'title' => 'add session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/add', 'title' => 'add attendance status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/update', 'title' => 'update attendance status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/delete', 'title' => 'delete attendance status']);
@@ -53,7 +53,7 @@ class AttendanceController extends Controller
         $role->givePermissionTo('attendance/get-users-in-session');
         $role->givePermissionTo('attendance/get-all-taken-users-in-session');
         $role->givePermissionTo('attendance/add-session');
-        $role->givePermissionTo('site/attendance/bulck/attendace');
+        $role->givePermissionTo('site/attendance/bulk/attendance');
         $role->givePermissionTo('attendance/status/add');
         $role->givePermissionTo('attendance/status/update');
         $role->givePermissionTo('attendance/status/delete');
@@ -171,7 +171,7 @@ class AttendanceController extends Controller
             ]);
             $request->validate(Attendance::SecondTypeRules($request->sessions['times']));
         }
-        if ($request->attendance_type == Attendance::$SECOND_TYPE && !Auth::User()->can('site/attendance/bulck/attendace')) {
+        if ($request->attendance_type == Attendance::$SECOND_TYPE && !Auth::User()->can('site/attendance/bulk/attendance')) {
             return HelperController::api_response_format(200, 'does not have the right permissions ');
         }
         $user_id = Auth::User()->id;
@@ -379,7 +379,6 @@ class AttendanceController extends Controller
         return HelperController::api_response_format(200, $users, 'Users are.....');
     }
 
-
     public function GetAllSessionDay(Request $request)
     {
         $data=array();
@@ -402,6 +401,7 @@ class AttendanceController extends Controller
         }
         return HelperController::api_response_format(200, $data, 'there is your session & status');
     }
+
     public function Attendance_Report(Request $request)
     {
         $enrolls=Enroll::where('user_id',Auth::id())->get();
@@ -428,8 +428,17 @@ class AttendanceController extends Controller
             return HelperController::api_response_format(200, $All_Attendance, 'there is all your logs');
         }
     }
-    public function getAttendance()
+
+    public function getAttendance(Request $request)
     {
+        $request->validate([
+            'id' => 'exists:attendances',
+        ]);
+        if($request->filled('id'))
+        {
+            $attendance=Attendance::where('id',$request->id)->get(['name','allowed_levels','type']);
+            return HelperController::api_response_format(200, $attendance);
+        }
         $attendance=Attendance::get(['name','allowed_levels','type']);
         foreach($attendance as $attend)
         {
@@ -446,5 +455,68 @@ class AttendanceController extends Controller
                 $attend->type = 'Daily';
         }
         return HelperController::api_response_format(200, $attendance, 'there is all your logs');
+    }
+
+    public function deleteAttendance(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:attendances',
+        ]);
+
+        $attendance=Attendance::find($request->id);
+        $attendance->delete();
+        return HelperController::api_response_format(200, $attendance, 'Attendance deleted Successfully');
+    }
+
+    public function editAttendance(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:attendances',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'segment' => 'exists:segments,id',
+            'name' => 'string',
+            'type' => 'integer',
+            'graded' => 'int',
+            'start_date' => 'date',
+            'end_date' => 'date',
+        ]);
+
+        $attendance=Attendance::find($request->id);
+
+        $req = new Request([
+            'year' => (isset($request->year)) ? $request->year : null,
+            'segment' => (isset($request->segment)) ? $request->segment : null,
+            'type' => (isset($request->type)) ? $request->type : null 
+        ]);
+        $courseseg=GradeCategoryController::getCourseSegment($req);
+        $courses=CourseSegment::whereIn('id',$courseseg)->pluck('course_id');
+        $coursss= array_values(array_unique($courses->toArray()));
+        $classes = CourseSegment::whereIn('id',$coursss)->with('segmentClasses.classLevel.yearLevels')->get();
+        // return $classes;
+        $levels=[];
+        $classss=[];
+        foreach($classes as $class)
+        {
+            $classss[] = $class->segmentClasses[0]->classLevel[0]->class_id;
+            $levels[] = $class->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
+        }
+        if(!$courses)
+            return HelperController::api_response_format(200, 'there is no course segment');
+
+        $attendance->update([
+            'name' => ($request->name == null) ? $attendance : $request->name,
+            'type' => (isset($request->type)) ? $request->type :$attendance->type,
+            'allowed_levels' => serialize(array_values(array_unique($levels))),
+            'allowed_classes' => serialize((array_values(array_unique($classss)))) ,
+            'allowed_courses' => serialize($coursss),
+            'graded' => (isset($request->graded)) ? $request->graded :$attendance->graded,
+            'year_id' => (isset($request->year)) ? $request->year :$attendance->year_id,
+            'segment_id' => (isset($request->segment)) ? $request->segment :$attendance->segment_id,
+            'type_id' => (isset($request->type)) ? $request->type :$attendance->type_id,
+            'start_date' => (isset($request->start_date)) ? $request->start_date :$attendance->start_date,
+            'end_date' => (isset($request->end_date)) ? $request->end_date :$attendance->end_date,
+        ]);
+        return HelperController::api_response_format(200, $attendance);
     }
 }
