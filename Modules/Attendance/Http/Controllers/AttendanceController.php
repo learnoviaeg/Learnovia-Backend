@@ -454,7 +454,7 @@ class AttendanceController extends Controller
     public function update_session(Request $request)
     {
         $request->validate([
-            'session_id' => 'exists:attendance_sessions,id',
+            'session_id' => 'required|exists:attendance_sessions,id',
             'attendance_id' => 'exists:attendances,id',
             'taker_id' => 'exists:users,id',
             'date' =>  'date',
@@ -492,7 +492,7 @@ class AttendanceController extends Controller
 
     public function delete_session(Request $request){
         $request->validate([
-            'session_id' => 'exists:attendance_sessions,id',
+            'session_id' => 'required|exists:attendance_sessions,id',
         ]);
         $session = AttendanceSession::find($request->session_id);
         $session ->delete();
