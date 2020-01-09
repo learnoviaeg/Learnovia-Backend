@@ -25,7 +25,9 @@ Route::group(['prefix' => 'attendance', 'middleware' => 'auth:api'], function ()
     Route::get('attend-report', 'AttendanceController@Attendance_Report')->name('attendancereport')->middleware('permission:attendance/attend-report');
     Route::post('update-session', 'AttendanceController@update_session')->name('updatesession')->middleware('permission:attendance/update-session');
     Route::post('delete-session', 'AttendanceController@delete_session')->name('deletesession')->middleware('permission:attendance/delete-session');
+    Route::get('get-session', 'AttendanceController@get_session_byID')->name('getsessionbyid')->middleware('permission:attendance/get-session-by-id');
 
+    
     
     Route::group(['prefix' => 'status', 'middleware' => 'auth:api'], function () {
         Route::get('get','StatusController@get')->middleware('permission:attendance/status/get');
