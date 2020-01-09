@@ -48,7 +48,9 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-session', 'title' => 'get session and status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/update-session', 'title' => 'update session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-session', 'title' => 'delete session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-session-by-id', 'title' => 'get session by id']);
 
+        
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('attendance/add');
         $role->givePermissionTo('attendance/add-log');
@@ -497,5 +499,13 @@ class AttendanceController extends Controller
         $session = AttendanceSession::find($request->session_id);
         $session ->delete();
         return HelperController::api_response_format(400, null ,'Session is deleted successfully');
+    }
+
+    public function get_session_byID(Request $request){
+        $request->validate([
+            'session_id' => 'required|exists:attendance_sessions,id',
+        ]);
+        $session = AttendanceSession::find($request->session_id);
+        return HelperController::api_response_format(400, $session);
     }
 }
