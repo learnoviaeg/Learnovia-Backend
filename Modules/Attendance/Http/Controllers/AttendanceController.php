@@ -566,7 +566,7 @@ class AttendanceController extends Controller
             return HelperController::api_response_format(200, 'there is no course segment');
 
         $attendance->update([
-            'name' => ($request->name == null) ? $attendance : $request->name,
+            'name' => ($request->name == null) ? $attendance->name : $request->name,
             'type' => (isset($request->type)) ? $request->type :$attendance->type,
             'allowed_levels' => serialize(array_values(array_unique($levels))),
             'allowed_classes' => serialize((array_values(array_unique($classss)))) ,
