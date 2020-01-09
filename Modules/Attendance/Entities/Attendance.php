@@ -151,8 +151,7 @@ class Attendance extends Model
         $temp = [];
         $value = unserialize($value);
         foreach ($value as $classes){
-            foreach ($classes as $class)
-                $temp[] = $class;
+                $temp[] = $classes;
         }
         return $temp;
     }
