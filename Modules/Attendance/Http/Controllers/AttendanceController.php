@@ -441,10 +441,10 @@ class AttendanceController extends Controller
         ]);
         if($request->filled('id'))
         {
-            $attendance=Attendance::where('id',$request->id)->get(['name','allowed_levels','type']);
+            $attendance=Attendance::where('id',$request->id)->get();
             return HelperController::api_response_format(200, $attendance);
         }
-        $attendance=Attendance::get(['name','allowed_levels','type']);
+        $attendance=Attendance::get(['name','allowed_levels','type' , 'id']);
         foreach($attendance as $attend)
         {
             $temp = [];
