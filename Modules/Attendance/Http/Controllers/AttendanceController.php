@@ -49,7 +49,9 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/update-session', 'title' => 'update session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-session', 'title' => 'delete session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-session-by-id', 'title' => 'get session by id']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-all-sessions', 'title' => 'get all sessions']);
 
+        
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('attendance/add');
@@ -579,5 +581,20 @@ class AttendanceController extends Controller
             'end_date' => (isset($request->end_date)) ? $request->end_date :$attendance->end_date,
         ]);
         return HelperController::api_response_format(200, $attendance);
+    }
+
+    public function getAllSessions(Request $request)
+    { 
+        $Sessions = AttendanceSession::all();
+        foreach($Sessions as $session){
+            $sess['id'] = $session->id;
+            $sess['course'] = (isset($session->course_segment_id)) ? $session->Course_Segment->courses[0]->name:'-';
+            $sess['class'] =  (isset($session->course_segment_id)) ? ($session->Course_Segment->segmentClasses[0]->classLevel[0]->classes[0]->name): '-';
+            $sess['from'] = $session->from;
+            $sess['to'] = $session->to;
+            $sess['date'] = $session->date;
+            $final[]=$sess;
+        }
+        return $final;
     }
 }
