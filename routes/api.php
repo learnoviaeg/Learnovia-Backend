@@ -67,7 +67,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     //Announcements Routes
     Route::group(['prefix' => 'announcements'], function () {
         Route::post('delete', 'AnnouncementController@delete_announcement')->name('deleteannounce')->middleware('permission:announcements/delete');
-        Route::post('send', 'AnnouncementController@announcement')->name('announce')->middleware('permission:announcements/send');
+        Route::post('send', 'AnnouncementController@announcement');//->name('announce')->middleware('permission:announcements/send');
         Route::get('get', 'AnnouncementController@get')->name('get')->middleware('permission:announcements/get');
         Route::post('update', 'AnnouncementController@update_announce')->name('updateannounce')->middleware('permission:announcements/update');
         Route::get('getbyid', 'AnnouncementController@getAnnounceByID')->name('getbyid')->middleware('permission:announcements/getbyid');

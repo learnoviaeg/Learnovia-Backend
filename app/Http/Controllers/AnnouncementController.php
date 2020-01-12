@@ -181,7 +181,6 @@ class AnnouncementController extends Controller
             return HelperController::api_response_format(400, null, 'Something went wrong please check your data');
         }
 
-
         //Creating announcement in DB
         $ann = Announcement::create([
             'title' => $request->title,
@@ -265,14 +264,13 @@ class AnnouncementController extends Controller
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Sent Successfully');
     }
 
-  /**
+    /**
      *
      * @Description : update an announcement. 
      * @param : id, title and description required parameters.
      *          attached_file, publish_date, start_date and due_date as optional parameters.
      * @return : return all announcement of this user.  
-     */
-
+    */
     public function update_announce(Request $request)
     {
         $request->validate([
@@ -349,13 +347,12 @@ class AnnouncementController extends Controller
 
     }
 
-  /**
+    /**
      *
      * @Description : delete_announcement deletes an announcement. 
      * @param : id of the announcement as a required parameter.
      * @return : return all announcement of this user.  
-     */
-
+    */
     public function delete_announcement(Request $request)
     {
         $request->validate([

@@ -70,6 +70,8 @@ class MessageController extends Controller
                             $message->about=User::find($message->about);
                             $message->From=User::find($message->From);
                             $message->To=User::find($message->To);
+                            $message->Message = $message->text;
+
                             if(isset($attachment))
                             {
                                 $message['type']=$attachment->type;
@@ -92,15 +94,6 @@ class MessageController extends Controller
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
             }
         }
-            
-        $message->picture = ($message->picture != null)? $message->attachment->path: null;
-        $message->From = User::find($message->From);
-        $message->From[0]->picture = $message->From[0]->attachment->path;
-        $message->To = User::find($message->To);
-        $message->To[0]->picture = $message->To[0]->attachment->path;
-        $message->about = User::find($message->about);
-        $message->about[0]->picture = $message->about[0]->attachment->path;
-        $message->Message = $message->text;
 
         return HelperController::api_response_format(201, $message, 'Successfully Sent Message!');
     }
@@ -120,18 +113,17 @@ class MessageController extends Controller
             return HelperController::api_response_format(404, $valid->errors());
         }
         $message = Message::find($req->id);
-        // foreach($messages as $message){
-
-            if ($message->From == $session_id || $message->To == $session_id) {
-                $message->update(array(
-                    'deleted' => Message::$DELETE_FROM_ALL
-                ));
-                $message->save();
-                $msg = MessageFromToResource::collection($message->get());
-
-                // return HelperController::api_response_format(201, Message::GetMessageDetails($messages,$session_id), 'message was deleted');
-                return HelperController::api_response_format(201, $msg, 'message was deleted');
-            }
+        if ($message->From == $session_id || $message->To == $session_id) {
+            $message->update(array(
+            'deleted' => Message::$DELETE_FROM_ALL
+            ));
+            $message->save();
+            // return $message->get();
+            $msg = MessageFromToResource::collection($message->get());
+            foreach($msg as $messag)
+                if($messag->id == $req->id)
+                    return HelperController::api_response_format(201, $messag, 'message was deleted');
+        }
             return HelperController::api_response_format(404,null , 'You do not have permission delete this message');
         // }
     }
@@ -191,8 +183,9 @@ class MessageController extends Controller
                 $message->save();
                 $msg = MessageFromToResource::collection($message->get());
 
-                // return HelperController::api_response_format(201, Message::GetMessageDetails($messages,$session_id), 'message was deleted');
-                return HelperController::api_response_format(201, $msg, 'message was deleted');
+                foreach($msg as $messag)
+                if($messag->id == $req->id)
+                    return HelperController::api_response_format(201, $messag, 'message was deleted');return HelperController::api_response_format(201, $msg, 'message was deleted');
 
             } else {
                 return HelperController::api_response_format(404, null, 'You do not have permission delete this message');
@@ -305,11 +298,18 @@ class MessageController extends Controller
         return HelperController::api_response_format(200 , $msgs,'Messages are....');
     }
 
-    public function RolesWithAssiocatedUsers()
+    public function RolesWithAssiocatedUsers(Request $request)
     {
+        $request->validate([
+            'id' => 'exists:roles,id'
+        ]);
         $roles = Role::get()->each(function($role){
             $role->users = User::role($role)->get();
         });
+        if($request->filled('id'))
+            $roles = Role::where('id', $request->id)->get()->each(function($role){
+                $role->users = User::role($role)->get();
+            });
         return HelperController::api_response_format(200 , $roles);
     }
 
