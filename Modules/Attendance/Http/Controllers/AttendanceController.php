@@ -590,8 +590,8 @@ class AttendanceController extends Controller
             $sess['id'] = $session->id;
             $sess['course'] = (isset($session->course_segment_id)) ? $session->Course_Segment->courses[0]->name:'-';
             $sess['class'] =  (isset($session->course_segment_id)) ? ($session->Course_Segment->segmentClasses[0]->classLevel[0]->classes[0]->name): '-';
-            $sess['from'] =(isset( $session->from)) ? :'-';
-            $sess['to'] = (isset( $session->to)) ? :'-';
+            $sess['from'] =(isset( $session->from)) ? $session->from :'-';
+            $sess['to'] = (isset( $session->to)) ? $session->to:'-';
             $sess['date'] = $session->date;
             $final[]=$sess;
         }
