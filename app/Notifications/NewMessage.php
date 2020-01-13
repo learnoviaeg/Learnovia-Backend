@@ -52,10 +52,13 @@ class NewMessage extends Notification
             $returnobj = [
                 'id' => $this->mess['id'],
                 'type' => $this->mess['type'],
+                'message' => "A new announcement will be published",
+                'publish_date' => $this->mess['publish_date'],
             ];
             return $returnobj;
         } else {
             $array = [
+                'id' => $this->mess['id'],
                 'message' => $this->mess['message'],
                 'from' => $this->mess['from'],
                 'type' => $this->mess['type'],
@@ -65,6 +68,8 @@ class NewMessage extends Notification
             ];
             if(isset($this->mess['link']))
                 $array['link'] = $this->mess['link'];
+            if(!isset($this->mess['description']))
+                $array['description'] = null;
             return $array;
         }
     }

@@ -643,15 +643,18 @@ class QuizController extends Controller
 
     public function getSingleQuiz(Request $request){
         $request->validate([
-            'quiz_id' => 'required|integer|exists:quizzes,id'
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
         $quiz = Quiz::find($request->quiz_id);
         $qq = Quiz::where('id', $request->quiz_id)->first();
-        $max_attemp= $qq->quizLessson[0]->max_attemp;
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
-
+        $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
-            $quiz['max_attemp']=$max_attemp;
+            $quiz['max_attemp']=$quiz_lesson->max_attemp;
+            $quiz['start_date']=$quiz_lesson->start_date;
+            $quiz['due_date']=$quiz_lesson->due_date;
+            $quiz['mark']=$quiz_lesson->grade;
             $quiz['grade_category']=$gradecat;
 
         foreach($quiz->Question as $question){

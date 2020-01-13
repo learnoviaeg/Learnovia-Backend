@@ -19,44 +19,8 @@ use App\LessonComponent;
 use App\User;
 use Auth;
 
-
-
 class QuizLessonController extends Controller
 {
-
-    public function NotifyQuiz($quiz,$publishdate,$type)
-    {
-        $course_seg=CourseSegment::getidfromcourse($quiz->course_id);
-
-        if($type=='add')
-        {
-            $msg='A New Quiz is Added!';
-        }
-        else
-        {
-            $msg='Quiz is Updated!';
-        }
-
-        foreach($course_seg as $course_Segment)
-        {
-            $roles_id =   Permission::where('name','site/quiz/notify_quiz')->roles->pluck('id');
-            $users = Enroll::where('course_segment', $course_Segment)->whereIn('role_id',$roles_id)->pluck('user_id')->toarray();
-            $segmentClass=CourseSegment::where('id',$course_Segment)->pluck('segment_class_id')->first();
-            $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
-            $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
-            user::notify([
-                'message' => $msg,
-                'from' => Auth::user()->id,
-                'users' => $users,
-                'course_id' => $quiz->course_id,
-                'class_id'=> $classId,
-                'type' =>'quiz',
-                'link' => url(route('getquiz')) . '?quiz_id=' . $quiz->id,
-                'publish_date'=> $publishdate
-            ]);
-        }
-    }
-
     /**
      * Store a newly created resource in storage.
      * @param Request $request
@@ -80,6 +44,9 @@ class QuizLessonController extends Controller
         ]);
 
         $quiz = quiz::find($request->quiz_id);
+        $users=Enroll::where('course_segment',$quiz->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
+        $class=CourseSegment::find($quiz->course_segment_id)->segmentClasses[0]->classLevel[0]->classes[0]->id;
+        $course=CourseSegment::find($quiz->course_segment_id)->courses[0]->id;
         foreach ($request->lesson_id as $lessons)
         {
             $lesson = Lesson::find($lessons);
@@ -97,7 +64,7 @@ class QuizLessonController extends Controller
             }
 
             $check = QuizLesson::where('quiz_id',$request->quiz_id)
-                ->where('lesson_id',$request->quiz_id)->get();
+                ->where('lesson_id',$request->lesson_id)->get();
 
             if(count($check) > 0){
                 return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
@@ -114,7 +81,19 @@ class QuizLessonController extends Controller
                 'grade_category_id' => $request->grade_category_id,
                 'publish_date' => $request->opening_time
             ]);
-            $this->NotifyQuiz($quiz,$request->opening_time,'add');
+
+            $requ = ([
+                'message' => 'the quiz is added',
+                'id' => $quizLesson[0]->id,
+                'users' => $users,
+                'type' =>'quiz',
+                'publish_date'=> $request->opening_time,
+                'course_id' => $course,
+                'class_id'=> $class,
+                'from' => Auth::id(),
+            ]);
+            // return $requ;
+            $ss= user::notify($requ);
             if($request->graded == true){
                 if($flag==false){
                     return HelperController::api_response_format(400, null,'this grade category invalid');
@@ -137,7 +116,6 @@ class QuizLessonController extends Controller
                 'index'     => LessonComponent::getNextIndex($lessons)
             ]);
         }
-
         return HelperController::api_response_format(200, $quizLesson,'Quiz added to lesson Successfully');
     }
 
@@ -161,6 +139,9 @@ class QuizLessonController extends Controller
         ]);
 
         $quiz = quiz::find($request->quiz_id);
+        $users=Enroll::where('course_segment',$quiz->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
+        $class=CourseSegment::find($quiz->course_segment_id)->segmentClasses[0]->classLevel[0]->classes[0]->id;
+        $course=CourseSegment::find($quiz->course_segment_id)->courses[0]->id;
         $lesson = Lesson::find($request->lesson_id);
         $gradeCats= $lesson->courseSegment->GradeCategory;
         $flag= false;
@@ -170,19 +151,15 @@ class QuizLessonController extends Controller
             }
         }
         $coueseSegment = $lesson->courseSegment;
-        if($quiz->course_id != $coueseSegment->course_id){
-            return HelperController::api_response_format(404, null,'This lesson doesn\'t belongs to the course of this quiz');
-        }
 
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
-                        ->where('lesson_id',$request->quiz_id)->first();
+                        ->where('lesson_id',$request->lesson_id)->first();
 
         if(!isset($quizLesson)){
             return HelperController::api_response_format(404, null,'This quiz doesn\'t belongs to the lesson');
         }
         if($flag==false){
             return HelperController::api_response_format(400, null,'this grade category invalid');
-
         }
         $quizLesson->update([
             'quiz_id' => $request->quiz_id,
@@ -194,7 +171,17 @@ class QuizLessonController extends Controller
             'grade' => $request->grade,
             'grade_category_id' => $request->grade_category_id
         ]);
-        $this->NotifyQuiz($quiz,$request->opening_time,'update');
+        $requ = ([
+            'message' => 'the quiz is updated',
+            'id' => $quizLesson->id,
+            'users' => $users,
+            'type' =>'quiz',
+            'publish_date'=> $request->opening_time,
+            'course_id' => $course,
+            'class_id'=> $class,
+            'from' => Auth::id(),
+        ]);
+        $ss= user::notify($requ);
 
         return HelperController::api_response_format(200, $quizLesson,'Quiz updated atteched to lesson Successfully');
     }

@@ -187,6 +187,7 @@ class MediaController extends Controller
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->first('course_id');
                 $usersIDs = Enroll::where('course_segment', $tempLesson->courseSegment->id)->pluck('user_id')->toarray();
                 User::notify([
+                    'id' => $media->id,
                     'message' => 'This media is added',
                     'from' => Auth::user()->id,
                     'users' => $usersIDs,
