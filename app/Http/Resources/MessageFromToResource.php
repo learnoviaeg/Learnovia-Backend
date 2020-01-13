@@ -14,8 +14,7 @@ class MessageFromToResource extends JsonResource
      *
      * @param \Illuminate\Http\Request $request
      * @return array
-     */
-
+    */
     public function toArray($request)
     {
         $session_id = Auth::User()->id;
@@ -94,7 +93,9 @@ class MessageFromToResource extends JsonResource
         if(isset($this->attachment))
         {
             $arr['extension']=$this->attachment->extension;
-            // $arr['name']=pathinfo($this->attachment->name->getClientOriginalName(), PATHINFO_FILENAME);
+            // $arr['name']=substr($this->attachment->name,13,strpos($this->attachment->name,'.'));
+            $arr['name']=$this->attachment->name;
+
         }
 
         if ($this->deleted == 0) {
