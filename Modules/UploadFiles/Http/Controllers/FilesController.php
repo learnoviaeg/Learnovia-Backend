@@ -211,6 +211,7 @@ class FilesController extends Controller
                 $file->url2 = url('public/storage/files/' . $name);
                 $check = $file->save();
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
+                $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
                 $usersIDs = Enroll::where('course_segment', $tempLesson->courseSegment->id)->pluck('user_id')->toarray();
                 User::notify([
                     'id' => $file->id,
@@ -218,9 +219,10 @@ class FilesController extends Controller
                     'from' => Auth::user()->id,
                     'users' => $usersIDs,
                     'course_id' => $courseID,
+                    'class_id' => $class_id,
                     'type' => 'file',
                     'link' => $file->url,
-                    'publish_date' => $publishdate,
+                    'publish_date' => $publishdate, 
                 ]);
                 if ($check) {
                     $fileLesson = new FileLesson;

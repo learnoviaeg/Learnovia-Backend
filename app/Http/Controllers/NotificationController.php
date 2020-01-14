@@ -30,12 +30,15 @@ class NotificationController extends Controller
             if(isset($not->data['publish_date'])){
                 if($not->data['publish_date'] < Carbon::now() && $not->data['type'] != 'announcement')
                 {
-                    $data[$i] = $not->data;
+                    $data[$i]['id'] = $not->data['id'];
                     $data[$i]['read_at'] = $not->read_at;
                     $data[$i]['notification_id'] = $not->id;
                     $data[$i]['message'] = $not->data['message'];
                     $data[$i]['publish_date'] = $not->data['publish_date'];
                     $data[$i]['type'] = $not->data['type'];
+                    if(isset($not->data['title']))
+                        $data[$i]['title'] = $not->data['title'];
+                    $data[$i]['title'] = null;
                 }
             else{
                 if ($not->data['type'] == 'announcement')
@@ -44,7 +47,7 @@ class NotificationController extends Controller
                         $annocument = announcement::find($announce_id);
                         if($annocument!= null){
                             if ($annocument->publish_date <= Carbon::now()) {
-                                $customize = announcement::whereId($announce_id)->first(['id', 'title', 'description']);
+                                $customize = announcement::whereId($announce_id)->first(['id','title']);
                                 $data[$i]=$customize;
                                 $data[$i]['read_at'] = $not->read_at;
                                 $data[$i]['notification_id'] = $not->id;
@@ -54,8 +57,8 @@ class NotificationController extends Controller
                             }
                         }
                     }
+                }
             }
-        }
             $i++;
         }
         $final=array();
@@ -63,9 +66,9 @@ class NotificationController extends Controller
         {
             $final[]= $object;
         }
-        // return $data;
         return HelperController::api_response_format(200, $body = $final, $message = 'all users notifications');
     }
+
    /**
     * @description: get unread Notifications From database From Notifcation Table
     * @param no required parameters
@@ -87,6 +90,7 @@ class NotificationController extends Controller
         }
         return HelperController::api_response_format(200, $data,'all user Unread notifications');
     }
+
    /**
     * @description: mark all the notifications of this user as read.
     * @param no required parameters
@@ -97,6 +101,7 @@ class NotificationController extends Controller
         $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
         return HelperController::api_response_format(200, null, 'Read');
     }
+
    /**
     * @description: gets all the notifications of this user.
     * @param no required parameters
@@ -114,6 +119,7 @@ class NotificationController extends Controller
         }
         return HelperController::api_response_format(200, $body = $data, $message = 'all user notifications');
     }
+
    /**
     * @description: delete all the notifications within a time.
     * @param startdate and enddate are required parameters
@@ -131,6 +137,7 @@ class NotificationController extends Controller
         return HelperController::api_response_format(200, $body = [], $message = 'notifications deleted');
 
     }
+
    /**
     * @description: mark a notification as seen.
     * @param id of notification
@@ -158,6 +165,5 @@ class NotificationController extends Controller
             return $print;
         }
         return HelperController::api_response_format(400, $body = [], $message = 'you cannot seen this notification');
-
     }
 }

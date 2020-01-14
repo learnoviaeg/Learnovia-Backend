@@ -184,7 +184,8 @@ class MediaController extends Controller
                 $mediaLesson->index = MediaLesson::getNextIndex($lesson);
                 $mediaLesson->publish_date = $publishdate;
                 $mediaLesson->save();
-                $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->first('course_id');
+                $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
+                $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
                 $usersIDs = Enroll::where('course_segment', $tempLesson->courseSegment->id)->pluck('user_id')->toarray();
                 User::notify([
                     'id' => $media->id,
@@ -192,6 +193,7 @@ class MediaController extends Controller
                     'from' => Auth::user()->id,
                     'users' => $usersIDs,
                     'course_id' => $courseID,
+                    'class_id' => $class_id,
                     'type' => 'media',
                     'publish_date' => $publishdate,
                 ]);

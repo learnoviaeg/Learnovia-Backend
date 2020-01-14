@@ -60,9 +60,9 @@ class AttendanceLogController extends Controller
                     'id' => $AttendanceLog[0]->id,
                     'message' => 'Attendance is taken with status '. AttendanceStatus::find($user['status_id'])->letter,
                     'from' => Auth::User()->id,
-                    'users' => [$user['id']],
+                    'users' => array($user['id']),
                     'course_id' => $courseID->course_id,
-                    'class_id' => $classID,
+                    'class_id' => (int)$classID[0],
                     'type' => 'Attendance',
                     'publish_date' =>$date
                 ]);

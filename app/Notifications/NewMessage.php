@@ -68,8 +68,8 @@ class NewMessage extends Notification
             ];
             if(isset($this->mess['link']))
                 $array['link'] = $this->mess['link'];
-            if(!isset($this->mess['description']))
-                $array['description'] = null;
+            if(!isset($this->mess['title']))
+                $array['title'] = null;
             return $array;
         }
     }
