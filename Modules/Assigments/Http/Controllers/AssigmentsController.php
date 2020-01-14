@@ -156,6 +156,7 @@ class AssigmentsController extends Controller
             'closing_date' => 'required|date|date_format:Y-m-d H:i:s',
             'class' => 'required|exists:classes,id',
             'course' => 'required|exists:courses,id',
+            'visible'=> 'required|boolean'
         ]);
 
         $segments = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
@@ -197,11 +198,7 @@ class AssigmentsController extends Controller
                     'assignment_id' => $assigment->id,
                     'lesson_id' => $lessons,
                     'publish_date'=>$request->opening_date,
-                    'is_graded' => $request->is_graded,
-                    'mark' => $request->mark,
-                    'allow_attachment' => $request->allow_attachment,
-                    'start_date' => $request->opening_date,
-                    'due_date' => $request->closing_date,
+                    'visible' => $request->visible
                 ]
             );        
     
@@ -254,7 +251,8 @@ class AssigmentsController extends Controller
         $assigment->name = $request->name;
         $assigment->save();
 
-        $usersIDs = UserAssigment::where('assignment_id', $assigment->id)->pluck('user_id')->toarray();
+        // return $assigment;
+        $usersIDs = UserAssigment::where('assignment_id', $assigment->id)->pluck('user_id')->toArray();
 
         $lessonId=AssignmentLesson::where('assignment_id',$request->assignment_id)->pluck('lesson_id')->first();
 
@@ -267,6 +265,7 @@ class AssigmentsController extends Controller
         $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
 
         user::notify([
+            'id' => $assigment->id,
             'message' => 'Assignment is updated',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
@@ -274,7 +273,7 @@ class AssigmentsController extends Controller
             'class_id'=>$classId,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
-            'publish_date' => $request['publish_date']
+            'publish_date' => $assigment->start_date
         ]);
 
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment edited');
@@ -310,23 +309,21 @@ class AssigmentsController extends Controller
     */
     public function assignAsstoUsers($request)
     {
-
-        
       $roles = Permission::where('name','site/assignment/assigned-users')->first();
       $roles_id= $roles->roles->pluck('id');
 
       $usersIDs = Enroll::where('course_segment', $request['course_segment'])->whereIn('role_id' , $roles_id)->pluck('user_id')->toarray();
-        foreach ($usersIDs as $userId) {
+      foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
             $userassigment->user_id = $userId;
             $userassigment->assignment_id = $request['assignments_id'];
             $userassigment->status_id = 2;
             $userassigment->override = 0;
             $userassigment->save();
-
         }
         $courseID=CourseSegment::where('id',$request['course_segment'])->pluck('course_id')->first();
         user::notify([
+                'id' => $request['assignments_id'],
                 'message' => 'A new Assignment is added',
                 'from' => Auth::user()->id,
                 'users' => $usersIDs,

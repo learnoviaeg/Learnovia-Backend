@@ -29,7 +29,7 @@ use stdClass;
 
 class AnnouncementController extends Controller
 {
-  /**
+    /**
      *
      * @Description : create an announcement. 
      * @param : Title, description, start_date, due_date and assign are required parameters.
@@ -42,7 +42,6 @@ class AnnouncementController extends Controller
      */
     public function announcement(Request $request)
     {
-
         //Validtaion
         $request->validate([
             'title' => 'required',
@@ -57,7 +56,7 @@ class AnnouncementController extends Controller
 
         if (isset($request->publish_date)) {
             $publishdate = $request->publish_date;
-        } else {
+        }else {
             $publishdate = Carbon::now();
         }
 
@@ -207,12 +206,12 @@ class AnnouncementController extends Controller
         }
 
         $requ = ([
-            'id' => "$ann->id",
+            'id' => $ann->id,
             'type' => 'announcement',
-            'publish_date'=>$publishdate
+            'publish_date' => $publishdate
         ]);
 
-        // return $toUser;
+        // return $requ;
         //sending announcements
         if ($request->assign == 'all') {
             foreach ($toUser as $use) {
@@ -228,9 +227,10 @@ class AnnouncementController extends Controller
                 else
                     $requ['users'][] = $use->id;
             }
+            // return $requ;
             if(!isset($requ['users']))
                 return HelperController::api_response_format(201,'No User');
-            $notificatin = User::notify($requ);
+            $notification = User::notify($requ);
         } else {
             $user = array_unique($users);
             if($request->filled('role'))

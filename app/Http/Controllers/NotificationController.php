@@ -14,17 +14,6 @@ use App\Announcement;
 
 class NotificationController extends Controller
 {
-    public function index()
-    {
-        return user::notify([
-            'message' => 'two',
-            'from' => 1,
-            'users' => [2],
-            'course_id' => 2,
-            'class_id'=>3,
-            'type' => 'annoucn'
-        ]);
-    }
    /**
     * @description: get all Notifications From database From Notifcation Table of this user.
     * @param no required parameters
@@ -37,14 +26,18 @@ class NotificationController extends Controller
         $i=0;
         foreach ($noti as $not) {
             $not->data= json_decode($not->data, true);
+
             if(isset($not->data['publish_date'])){
                 if($not->data['publish_date'] < Carbon::now() && $not->data['type'] != 'announcement')
                 {
                     $data[$i] = $not->data;
                     $data[$i]['read_at'] = $not->read_at;
                     $data[$i]['notification_id'] = $not->id;
+                    $data[$i]['message'] = $not->data['message'];
+                    $data[$i]['publish_date'] = $not->data['publish_date'];
+                    $data[$i]['type'] = $not->data['type'];
                 }
-            }else{
+            else{
                 if ($not->data['type'] == 'announcement')
                     {
                         $announce_id = $not->data['id'];
@@ -55,10 +48,14 @@ class NotificationController extends Controller
                                 $data[$i]=$customize;
                                 $data[$i]['read_at'] = $not->read_at;
                                 $data[$i]['notification_id'] = $not->id;
+                                $data[$i]['message'] = $not->data['message'];
+                                $data[$i]['publish_date'] = $not->data['publish_date'];
+                                $data[$i]['type'] = $not->data['type'];
                             }
                         }
                     }
             }
+        }
             $i++;
         }
         $final=array();
@@ -66,6 +63,7 @@ class NotificationController extends Controller
         {
             $final[]= $object;
         }
+        // return $data;
         return HelperController::api_response_format(200, $body = $final, $message = 'all users notifications');
     }
    /**

@@ -54,7 +54,10 @@ class AttendanceLogController extends Controller
                 $result['message'] = 'Those Users are not belong to this Attendance';
             }
             foreach ($attendance->allowed_classes as $classID) {
-                if(CourseSegment::GetWithClassAndCourse($classID,$courseID->course_id)->id==$attendance_sessions->course_segment_id){User::notify([
+                if(CourseSegment::GetWithClassAndCourse($classID,$courseID->course_id)->id==$attendance_sessions->course_segment_id)
+                {
+                    User::notify([
+                    'id' => $AttendanceLog[0]->id,
                     'message' => 'Attendance is taken with status '. AttendanceStatus::find($user['status_id'])->letter,
                     'from' => Auth::User()->id,
                     'users' => [$user['id']],

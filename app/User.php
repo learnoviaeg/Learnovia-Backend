@@ -17,7 +17,6 @@ class User extends Authenticatable
 {
     use HasRoles;
     use SoftDeletes;
-
     use Notifiable, HasApiTokens, HasRoles;
     protected $guard_name = 'api';
 
@@ -88,13 +87,15 @@ class User extends Authenticatable
         $validater = Validator::make($request, [
             'users'=>'required|array',
             'users.*' => 'required|integer|exists:users,id',
-            'type' => 'required|string'
+            'type' => 'required|string',
+            'publish_date' => 'required|date'
         ]);
 
         if ($validater->fails()) {
             $errors = $validater->errors();
             return response()->json($errors, 400);
         }
+
         if($request['type']!='announcement')
         {
             $validater = Validator::make($request, [
@@ -121,9 +122,9 @@ class User extends Authenticatable
         if($request['type']=='announcement'){
             $request['message']="A new announcement will be published";
         }
-
-        $jop = (new \App\Jobs\Sendnotify($touserid,$request['message'],$request['publish_date']))->delay($seconds);
-        dispatch($jop);
+        $job = (new \App\Jobs\Sendnotify($touserid,$request['message'],$date))->delay($seconds);
+        dispatch($job);
+        
         Notification::send($touserid, new NewMessage($request));
         return 1;
     }

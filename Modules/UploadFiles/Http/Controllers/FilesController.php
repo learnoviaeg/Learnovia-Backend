@@ -213,6 +213,7 @@ class FilesController extends Controller
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
                 $usersIDs = Enroll::where('course_segment', $tempLesson->courseSegment->id)->pluck('user_id')->toarray();
                 User::notify([
+                    'id' => $file->id,
                     'message' => 'new file is added',
                     'from' => Auth::user()->id,
                     'users' => $usersIDs,

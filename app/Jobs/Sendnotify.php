@@ -12,18 +12,18 @@ class Sendnotify implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     public $message;
-    public $publish_data;
+    public $publish_date;
     public $touserid;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($touserid,$message,$publish_data)
+    public function __construct($touserid,$message,$publish_date)
     {
         $this->touserid=$touserid;
         $this->message=$message;
-        $this->publish_data=$publish_data;
+        $this->publish_date=$publish_date;
     }
 
     /**
@@ -34,7 +34,7 @@ class Sendnotify implements ShouldQueue
     public function handle()
     {
         foreach ($this->touserid as $u){
-            event(new \App\Events\notify($u->id ,$this->message,$this->publish_data));
+            event(new \App\Events\notify($u->id ,$this->message,$this->publish_date));
         }
     }
 }

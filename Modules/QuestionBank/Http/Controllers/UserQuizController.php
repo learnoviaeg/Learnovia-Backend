@@ -23,7 +23,6 @@ use function Opis\Closure\serialize;
 
 class UserQuizController extends Controller
 {
-
     public function store_user_quiz(Request $request)
     {
         $user = Auth::User();
@@ -80,6 +79,7 @@ class UserQuizController extends Controller
         $browserData->put('browserVersion', Browser::browserVersion());
         $browserData->put('browserEngine', Browser::browserEngine());
 
+        // return $browserData;
         $userQuiz = userQuiz::create([
             'user_id' => Auth::user()->id,
             'quiz_lesson_id' => $quiz_lesson->id,
@@ -92,10 +92,7 @@ class UserQuizController extends Controller
             'browser_data' => $browserData,
             'open_time' => Carbon::now()
         ]);
-
-
         return HelperController::api_response_format(200, $userQuiz);
-
     }
 
 
