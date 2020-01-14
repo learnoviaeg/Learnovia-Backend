@@ -42,7 +42,7 @@ class Message extends Model
             {
                 $exten=$attachment->extension;
                 $type=$attachment->type;
-                $name=$message->file;
+                $name=$attachment->name;
             }
         }
         if($message == null)

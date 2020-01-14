@@ -122,8 +122,8 @@ class User extends Authenticatable
         if($request['type']=='announcement'){
             $request['message']="A new announcement will be published";
         }
-        // $job = (new \App\Jobs\Sendnotify($touserid,$request['message'],$date))->delay($seconds);
-        // dispatch($job);
+        $job = (new \App\Jobs\Sendnotify($touserid,$request['message'],$date))->delay($seconds);
+        dispatch($job);
         Notification::send($touserid, new NewMessage($request));
         return 1;
     }
