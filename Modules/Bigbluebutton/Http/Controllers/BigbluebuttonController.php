@@ -114,6 +114,7 @@ class BigbluebuttonController extends Controller
                 $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
 
                 User::notify([
+                    'id' => $bigbb->id,
                     'message' => 'A new Meeting is created',
                     'from' => Auth::user()->id,
                     'users' => $usersIDs,
