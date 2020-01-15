@@ -8,7 +8,7 @@ class userQuizAnswer extends Model
 {
     protected $fillable = [
         'user_quiz_id','question_id','answer_id',
-        'and_why','mcq_answers_array','choices_array','content','user_grade'
+        'and_why','mcq_answers_array','choices_array','content','user_grade','feedback'
     ];
 
     public function Question()
