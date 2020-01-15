@@ -76,7 +76,8 @@ class MessageController extends Controller
                             {
                                 $message['type']=$attachment->type;
                                 $message['extension']=$attachment->extension;
-                                $message['name']=pathinfo($req->file->getClientOriginalName(), PATHINFO_FILENAME);
+                                // $message['name']=pathinfo($req->file->getClientOriginalName(), PATHINFO_FILENAME);
+                                $message['name']=$attachment->name;
                             }
                             $is_send = true;
                             break;
@@ -301,13 +302,13 @@ class MessageController extends Controller
     public function RolesWithAssiocatedUsers(Request $request)
     {
         $request->validate([
-            'id' => 'exists:roles,id'
+            'id' => 'array|exists:roles,id'
         ]);
         $roles = Role::get()->each(function($role){
             $role->users = User::role($role)->get();
         });
         if($request->filled('id'))
-            $roles = Role::where('id', $request->id)->get()->each(function($role){
+            $roles = Role::whereIn('id', $request->id)->get()->each(function($role){
                 $role->users = User::role($role)->get();
             });
         return HelperController::api_response_format(200 , $roles);

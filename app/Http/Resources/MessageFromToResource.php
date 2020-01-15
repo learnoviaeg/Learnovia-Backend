@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\attachment;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Message;
 use  App\User;
@@ -77,7 +78,7 @@ class MessageFromToResource extends JsonResource
             $extension = null;
             $type = 'text';
         }
-      $about = User::find($this->about);
+        $about = User::find($this->about);
         $about->picture = $about->attachment->path;
         $arr = [
             'id' => $this->id,
@@ -86,16 +87,16 @@ class MessageFromToResource extends JsonResource
             'From' => $from,
             'To' => $To,
             'Seen'=>$this->seen,
-            'file' => $this->file,
             'type' => $type,
             'deleted' => $this->deleted
         ];
         if(isset($this->attachment))
         {
+            $file_attach=attachment::where('id',$this->attachment->id)->first();
+            $arr['file']=$file_attach->path;
             $arr['extension']=$this->attachment->extension;
             // $arr['name']=substr($this->attachment->name,13,strpos($this->attachment->name,'.'));
             $arr['name']=$this->attachment->name;
-
         }
 
         if ($this->deleted == 0) {
