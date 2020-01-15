@@ -15,6 +15,8 @@ class notify implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
     public $user_id;
     public $message;
+    public $title;
+    public $type;
     public $publish_date;
     /**
      * Create a new event instance.
