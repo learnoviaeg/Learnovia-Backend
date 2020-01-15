@@ -21,6 +21,7 @@ use Validator;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Maatwebsite\Excel\Facades\Excel;
 use App\ClassLevel;
+use App\Contract;
 use App\SegmentClass;
 use Carbon\Carbon;
 
@@ -46,6 +47,13 @@ class UsersImport implements ToModel, WithHeadingRow
         $teacheroptional='course';
 
         $password = mt_rand(100000, 999999);
+
+        $max_allowed_users = Contract::whereNotNull('id')->pluck('numbers_of_users')->first();
+        $users=Enroll::where('role_id',3)->get();
+
+        // dd((count($users)));
+        if(((count($users) + count($row)-1)) > $max_allowed_users)
+            die('U Can\'t add users any more');
 
         $user = new User([
             'firstname' => $row['firstname'],
@@ -139,7 +147,6 @@ class UsersImport implements ToModel, WithHeadingRow
                         ]);
 
                         $enrollcounter++;
-
                 }
             }
             else{
@@ -164,6 +171,5 @@ class UsersImport implements ToModel, WithHeadingRow
                 }
             }
         }
-
     }
 }

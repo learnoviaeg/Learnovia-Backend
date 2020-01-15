@@ -23,9 +23,10 @@ class ExcelController extends Controller
         $type = $request->type;
         $files = scandir(__DIR__ . '/../../Imports/');
         $name = $type . '.php';
+
         if (in_array($name, $files)) {
-            eval('$impoerter = new App\Imports\\' . $type . '();');
-            $x = Excel::import($impoerter, request()->file('file'));
+            eval('$importer = new App\Imports\\' . $type . '();');
+            $check = Excel::import($importer, request()->file('file'));
             return HelperController::api_response_format(201 , [] , 'Data Imported Successfully');
         } else {
             return HelperController::NOTFOUND();

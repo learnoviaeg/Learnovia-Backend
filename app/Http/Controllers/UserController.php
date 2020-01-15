@@ -14,6 +14,7 @@ use App\Parents;
 use App\User;
 use Carbon\Carbon;
 use App\Course;
+use App\Contract;
 use App\CourseSegment;
 use Auth;
 use Spatie\Permission\Models\Role;
@@ -23,7 +24,6 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\Attachment;
 use App\SegmentClass;
-use DB;
 
 class UserController extends Controller
 {
@@ -60,13 +60,26 @@ class UserController extends Controller
             'religion' => 'nullable|array','second language' => 'nullable|array', 'username' => 'nullable|array', 'type' => 'nullable|array',
             'level' => 'nullable|array', 'real_password' => 'nullable|array'
         ]);
-        $users = collect([]);
+
+        // return User::max('id');
+        $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email', 'suspend',
             'language', 'timezone', 'religion', 'second language','picture', 'real_password', 'level', 'type', 'class_id', 'username'
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
         $i=0;
+
+        $count=0;
+        $max_allowed_users = Contract::whereNotNull('id')->pluck('numbers_of_users')->first();
+        $users=Enroll::where('role_id',3)->get();
+        foreach($request->role as $role)
+            if($role == 3)
+                $count++;
+
+        if((count($users) + $count) > $max_allowed_users)
+            return HelperController::api_response_format(404 ,$max_allowed_users, 'exceed MAX, U Can\'t add users any more');
+        
         foreach ($request->firstname as $key => $firstname) {
             $user = User::create([
                 'firstname' => $firstname,
@@ -96,14 +109,14 @@ class UserController extends Controller
             $role = Role::find($request->role[$key]);
             $user->assignRole($role);
             if ($request->role[$key] == 3) {
-
-                $classLevID = ClassLevel::GetClass($request->class_id[$key]);
-                $classSegID = SegmentClass::GetClasseLevel($classLevID);
-
                 $option = new Request([
-                    'SegmentClassId' => $classSegID
+                    'users' => [$user->id],
+                    'level' => $request->level[$key] ,
+                    'type' => $request->type[$key],
+                    'class' => $request->class_id[$key]
                 ]);
                 EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
+
                 $enrollcounter = 0;
                 while (isset($request->$enrollOptional[$key][$enrollcounter])) {
                     $course_id = Course::findByName($request->$enrollOptional[$key][$enrollcounter]);
@@ -131,9 +144,9 @@ class UserController extends Controller
                     $teachercounter++;
                 }
             }
-            $users->push($user);
+            $users_is->push($user);
         }
-        return HelperController::api_response_format(201, $users, 'User Created Successfully');
+        return HelperController::api_response_format(201, $users_is, 'User Created Successfully');
 
     }
 

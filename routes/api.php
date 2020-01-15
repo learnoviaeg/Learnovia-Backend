@@ -13,7 +13,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('getuserPermession', 'AuthController@getuserPermession');
-    Route::get('user', 'AuthController@user')->name('user');
+    Route::get('user', 'AuthController@user')->name('user')->middleware('ContractRestrict');
     Route::post('CheckPermission', 'SpatieController@checkPermessionOnCourse')->name('checkPermessionOnCourse');
     Route::get('getMyLimits', 'AuthController@getuserPermessionFlags')->name('getuserPermessionFlags');
     Route::post('comparepermissions', 'SpatieController@comparepermissions')->name('comparepermissions');
@@ -178,7 +178,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api']], function () {
 
 //USER CRUD ROUTES
 Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
-    Route::post('add', 'UserController@create')->name('adduser')->middleware('permission:user/add');
+    Route::post('add', 'UserController@create')->name('adduser')->middleware(['permission:user/add','ContractRestrict']);
     Route::post('update', 'UserController@update')->name('updateuser')->middleware('permission:user/update');
     Route::post('delete', 'UserController@delete')->name('deleteuser')->middleware('permission:user/delete');
     Route::get('get-all', 'UserController@list')->name('listAll')->middleware('permission:user/get-all');
@@ -327,6 +327,19 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api'], function () {
     Route::get('my-events', 'EventController@get_my_events')->name('myevent')->middleware('permission:event/my-events');
     Route::get('all-events', 'EventController@GetAllEvents')->name('allevent')->middleware('permission:event/all-events');
 });
+
+Route::group(['prefix' => 'contract', 'middleware' => 'auth:api'], function () {
+    Route::post('add', 'ContractController@create')->name('addcontract')->middleware(['ContractRestrict']);
+    Route::post('update', 'ContractController@update')->name('updatecontract')->middleware('permission:contract/update');
+});
+
+Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
+    Route::post('add', 'PaymentController@create')->name('addpayment')->middleware('permission:payment/add');
+    Route::post('delete', 'PaymentController@delete')->name('deletepayment')->middleware('permission:payment/delete');
+    Route::post('postponed-payment', 'PaymentController@postponedPayment')->name('deletepayment')->middleware('permission:payment/postponed-payment');
+    Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
+});
+
 Route::post('search-contacts', 'ContactController@SearchMyContacts');
 Route::post('search-messages', 'MessageController@SearchMessage');
 Route::post('change-color', 'ComponentController@ChangeColor');
