@@ -13,7 +13,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('getuserPermession', 'AuthController@getuserPermession');
-    Route::get('user', 'AuthController@user')->name('user')->middleware('ContractRestrict');
+    Route::get('user', 'AuthController@user')->name('user');//->middleware('ContractRestrict');
     Route::post('CheckPermission', 'SpatieController@checkPermessionOnCourse')->name('checkPermessionOnCourse');
     Route::get('getMyLimits', 'AuthController@getuserPermessionFlags')->name('getuserPermessionFlags');
     Route::post('comparepermissions', 'SpatieController@comparepermissions')->name('comparepermissions');
