@@ -35,7 +35,7 @@ class addgradecategory implements ShouldQueue
                 $parent = null;
                 if(isset($grade_cat['parent']))
                     $parent = GradeCategory::where('course_segment_id', $course->id)->where('name', $grade_cat['parent'])->first();
-                $x = GradeCategory::create([
+                GradeCategory::create([
                     'name' => $grade_cat['name'],
                     'course_segment_id' => $course_segment,
                     'grademax' => ($grade_cat['type'] == 1) ? $grade_cat['grademax'] : null,
