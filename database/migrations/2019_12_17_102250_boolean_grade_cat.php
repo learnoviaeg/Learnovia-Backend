@@ -23,9 +23,9 @@ class BooleanGradeCat extends Migration
 
         Schema::table('grade_categories', function (Blueprint $table) {
             $table->double('weight')->nullable();
-            $table->boolean('hidden');
-            $table->boolean('locked');
-            $table->boolean('exclude_flag');
+            $table->boolean('hidden')->nullable();
+            $table->boolean('locked')->nullable();
+            $table->boolean('exclude_flag')->nullable();
             $table->boolean('type');
         });
     }
