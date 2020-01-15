@@ -113,7 +113,7 @@ class GradeCategoryController extends Controller
         $request->validate([
             'grades' => 'required|array',
             'grades.*.name' => 'required|string',
-            'grades.*.parent' => 'nullable|exists:grade_categories,id',
+            'grades.*.parent' => 'nullable|exists:grade_categories,name',
             'grades.*.aggregation' => 'integer|nullable',
             'grades.*.aggregatedOnlyGraded' => 'boolean|nullable',
             'grades.*.hidden' => 'boolean|nullable',
@@ -221,10 +221,10 @@ class GradeCategoryController extends Controller
                  unset($chil->Children);
             }
         } else {
-          
+
             $gradeCategory = GradeCategory::with('Child')->get();
             foreach($gradeCategory as $g)
-            {    
+            {
                 $g->weight = $g->weight();
                 foreach($g->child as $chil)
                 {

@@ -31,21 +31,21 @@ class addgradecategory implements ShouldQueue
     {
         foreach ($this->course_segments_id as $course_segment) {
             $course = CourseSegment::find($course_segment);
-
             foreach ($this->grade_category as $grade_cat) {
+                $parent = GradeCategory::where('course_segment_id', $course->id)->where('name', $grade_cat['parent'])->first();
                 $x = GradeCategory::create([
                     'name' => $grade_cat['name'],
                     'course_segment_id' => $course_segment,
-                    'grademax' => ($grade_cat['type']==1) ? $grade_cat['grademax'] : null,
-                    'grademin' => ($grade_cat['type']==1) ? $grade_cat['grademin'] : null,
+                    'grademax' => ($grade_cat['type'] == 1) ? $grade_cat['grademax'] : null,
+                    'grademin' => ($grade_cat['type'] == 1) ? $grade_cat['grademin'] : null,
                     'type' => $grade_cat['type'],
-                    'parent' => (isset($grade_cat['parent'])) ? $grade_cat['parent'] : null,
+                    'parent' => $parent,
                     'locked' => (isset($grade_cat['locked'])) ? $grade_cat['locked'] : null,
                     'aggregation' => (isset($grade_cat['aggregation'])) ? $grade_cat['aggregation'] : null,
                     'aggregatedOnlyGraded' => (isset($grade_cat['aggregatedOnlyGraded'])) ? $grade_cat['aggregatedOnlyGraded'] : 0,
                     'exclude_flag' => $grade_cat['exclude_flag'],
                     'hidden' => (isset($grade_cat['hidden'])) ? $grade_cat['hidden'] : 0,
-                    'weight' => ($grade_cat['exclude_flag']==1) ? $grade_cat['weight'] : 0,
+                    'weight' => ($grade_cat['exclude_flag'] == 1) ? $grade_cat['weight'] : 0,
                     'id_number' => (isset($course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id)) ? $course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id : null,
                 ]);
             }
