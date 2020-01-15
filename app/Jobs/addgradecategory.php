@@ -32,6 +32,7 @@ class addgradecategory implements ShouldQueue
         foreach ($this->course_segments_id as $course_segment) {
             $course = CourseSegment::find($course_segment);
             foreach ($this->grade_category as $grade_cat) {
+                $parent = null;
                 if(isset($grade_cat['parent']))
                     $parent = GradeCategory::where('course_segment_id', $course->id)->where('name', $grade_cat['parent'])->first();
                 $x = GradeCategory::create([
