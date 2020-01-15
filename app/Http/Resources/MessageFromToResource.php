@@ -20,8 +20,10 @@ class MessageFromToResource extends JsonResource
     {
         $session_id = Auth::User()->id;
         $from = User::find($this->From);
+        if(isset($from->attachment->path))
         $from->picture = $from->attachment->path;
         $To = User::find($this->To);
+        if(isset($To->attachment->path))
         $To->picture = $To->attachment->path;
         $imageCollection = collect([
             'jpg','JPG',
@@ -79,6 +81,7 @@ class MessageFromToResource extends JsonResource
             $type = 'text';
         }
         $about = User::find($this->about);
+        if(isset($about->attachment->path))
         $about->picture = $about->attachment->path;
         $arr = [
             'id' => $this->id,
