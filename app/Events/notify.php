@@ -21,10 +21,12 @@ class notify implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct($user_id , $message,$publish_date)
+    public function __construct($user_id , $message,$publish_date,$title,$type)
     {
         $this->user_id=$user_id;
         $this->message=$message;
+        $this->title=$title;
+        $this->type=$type;
         $this->publish_date=$publish_date;
     }
     /**
