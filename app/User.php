@@ -12,6 +12,7 @@ use App\Notifications\NewMessage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use Modules\Attendance\Entities\AttendanceLog;
 
 class User extends Authenticatable
 {
@@ -119,11 +120,18 @@ class User extends Authenticatable
         if($seconds < 0) {
             $seconds = 0 ;
         }
+
+        $request['title']=null;
         if($request['type']=='announcement'){
             $request['message']="A new announcement will be published";
+            $request['title']=Announcement::whereId($request['id'])->first()->title;
         }
-        $job = (new \App\Jobs\Sendnotify($touserid,$request['message'],$date))->delay($seconds);
+
+        $job = ( new \App\Jobs\Sendnotify(
+            $touserid, $request['message'], $date, $request['title'], $request['type']
+        ))->delay($seconds);
         dispatch($job);
+        
         Notification::send($touserid, new NewMessage($request));
         return 1;
     }

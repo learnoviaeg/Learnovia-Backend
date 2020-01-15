@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Http\Controllers\MessageController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,18 +36,21 @@ class Message extends Model
         $type=null;
         $exten=null;
         $name =null;
+        if($message == null)
+            $message = Message::where('From' , $other_user)->Where('To' , $auth_user)->orderBy('created_at' , 'desc')->first();
+            
         if($message->file != null)
         {
             $attachment=attachment::find($message->attachment_id);
             if($attachment != null)
             {
                 $exten=$attachment->extension;
-                $type=$attachment->type;
+                $messge =new MessageController();
+                $type=$messge->getTypeFile($exten);
                 $name=$attachment->name;
             }
         }
-        if($message == null)
-            $message = Message::where('From' , $other_user)->Where('To' , $auth_user)->orderBy('created_at' , 'desc')->first();
+
         return ['message'=>$message->text , 'file' => $message->file, 'type' => $type,'seen'=>$message->seen,
          'created_at'=>$message->created_at , 'extension'=>$exten, 'name'=>$name, 'deleted'=>$message->deleted];
     }

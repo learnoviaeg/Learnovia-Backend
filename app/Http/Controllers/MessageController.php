@@ -17,6 +17,59 @@ use App\Enroll;
 
 class MessageController extends Controller
 {
+    public function getTypeFile($extension)
+    {
+        $imageCollection = collect([
+            'jpg','JPG',
+            'jpeg','JPEG',
+            'png','PNG',
+            'gif','GIF'
+        ]);
+
+        $fileCollection = collect([
+            'pdf','PDF',
+            'docx','DOCX',
+            'doc','DOC',
+            'xls','XLS',
+            'xlsx','XLSX',
+            'ppt','PPT',
+            'pptx','PPTX',
+            'zip','ZIP',
+            'rar','RAR',
+        ]);
+
+        $videoCollection = collect([
+            'mp4','MP4',
+            'avi','AVI',
+            'flv','FLV',
+        ]);
+
+        $audioCollection = collect([
+            'mp3','MP3',
+            'ogg','OGG',
+            'ogv','OGV',
+            'oga','OGA',
+            'wav','WAV',
+        ]);
+
+        if ($imageCollection->contains($extension)) {
+            $type = 'image';
+        }
+        else if($fileCollection->contains($extension)){
+            $type = 'file';
+        }
+        else if($videoCollection->contains($extension)){
+            $type = 'video';
+        }
+        else if($audioCollection->contains($extension)){
+            $type = 'audio';
+        }
+        else{
+            $type = null;
+        }
+        return $type;
+    }
+    
     /**
      * => Function send_message_of_all_user sends message for all ids which get from request
      * @param: => from request
@@ -63,6 +116,7 @@ class MessageController extends Controller
                             ));
                             if ($req->hasFile('file')) {
                                 $attachment = attachment::upload_attachment($req->file, 'message');
+                                $extension = $attachment->extension;
                                 $message->file = $attachment->path;
                                 $message->attachment_id = $attachment->id;
                             }
@@ -71,10 +125,11 @@ class MessageController extends Controller
                             $message->From=User::find($message->From);
                             $message->To=User::find($message->To);
                             $message->Message = $message->text;
+                            $message->type='text';
 
                             if(isset($attachment))
                             {
-                                $message['type']=$attachment->type;
+                                $message['type']=self::getTypeFile($extension);
                                 $message['extension']=$attachment->extension;
                                 // $message['name']=pathinfo($req->file->getClientOriginalName(), PATHINFO_FILENAME);
                                 $message['name']=$attachment->name;
