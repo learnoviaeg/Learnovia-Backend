@@ -349,7 +349,7 @@ class UserQuizController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
             'user_id' => 'integer|exists:users,id',
         ]);
-        if (isset($request->user_id)) 
+        if (isset($request->user_id))
             $user_id = $request->user_id;
 
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)
@@ -410,7 +410,7 @@ class UserQuizController extends Controller
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if (!isset($quiz_lesson))
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
-    
+
         $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('user_id')->unique();
         foreach ($users as $user_id){
             $user = User::where('id',$user_id)->first();
@@ -441,9 +441,62 @@ class UserQuizController extends Controller
                         if(!isset($q->student_answer))
                         $q->student_answer = Null;
                         if(!isset($q->user_grade))
-                        $q->user_grade = Null;          
+                        $q->user_grade = Null;
                     }}
        return $total;
 
     }
+
+    public function feedback(Request $request){
+        $request->validate([
+            'lesson_id' =>'required|integer|exists:lessons,id',
+            'quiz_id' =>'required|integer|exists:quizzes,id',
+            'user_id' =>'required|integer|exists:users,id',
+        ]);
+        $quiz = quiz::where('id',$request->quiz_id)->first();
+        $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+        $user_quiz = userQuiz::where('quiz_lesson_id',$quiz_lesson->id)->where('user_id',$request->user_id)->get();
+        $Due_date= QuizLesson::find($quiz_lesson->id);
+        $show_is_true=1;
+        if($quiz->feedback == 3)
+            return HelperController::api_response_format(200, Null , 'You are not allowed to view feedback!');
+        elseif(($quiz->feedback == 1 || $quiz_lesson->max_attemp == 1) && $quiz->is_graded == 0 )
+           $Final= self::get_feedback($request,$show_is_true   , $user_quiz);
+        elseif($quiz->feedback == 2 && Carbon::now() > $Due_date->due_date)
+            $Final= self::get_feedback($request,$show_is_true  , $user_quiz);
+        elseif($quiz->feedback == 2 && Carbon::now() < $Due_date->due_date && $quiz->is_graded == 0 )
+            $Final= self::get_feedback($request,$show_is_true, $user_quiz);
+        else{
+            $show_is_true=0;
+            $Final= self::get_feedback($request,$show_is_true, $user_quiz);
+            }
+        return HelperController::api_response_format(200, $Final);
+    }
+
+    public function get_feedback($request,$show_is_true , $user_quiz){
+        foreach($user_quiz as $UserQuiz){
+            $total[]= quiz::where('id',$request->quiz_id)->with(['Question.question_answer'])->first();
+         foreach($total as $quest){
+            foreach($quest->question as $q){
+            $q->question_answer;
+            $Question_id =  $q->pivot->question_id;
+            $Ans_ID = userQuizAnswer::where('user_quiz_id',$UserQuiz->id)->where('question_id',$Question_id)->first();
+            if(isset($Ans_ID->answer_id)){
+                $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
+                $q->user_grade =$Ans_ID->user_grade;
+                if($show_is_true == 0){
+                    unset($q->student_answer['is_true']);
+                }
+            }
+            if($show_is_true == 0){
+                foreach($q->question_answer as $ans)
+                {
+                    unset($ans['is_true']);
+                }
+                }
+        }}
+    }
+    return $total;
+    }
+
 }
