@@ -93,6 +93,10 @@ class UserQuizController extends Controller
             'browser_data' => $browserData,
             'open_time' => Carbon::now()
         ]);
+
+           foreach($quiz_lesson->quiz->Question as $question){
+            userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
+           }
         return HelperController::api_response_format(200, $userQuiz);
     }
 
@@ -102,16 +106,17 @@ class UserQuizController extends Controller
         $request->validate([
             'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
             'Questions' => 'required|array',
-            'Questions.*.id' => 'required|integer|exists:questions,id',
+            'Questions.*.id' => 'integer|exists:questions,id',
         ]);
-
+        return $request;
+        $Q_IDS= array();
         // check that question exist in the Quiz
         $user_quiz = userQuiz::find($request->user_quiz_id);
         $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
 
         $allData = collect([]);
         foreach ($request->Questions as $index => $question) {
-
+            if(isset($question['id'])){
             if (!$questions_ids->contains($question['id'])) {
 
                 $check_question = Questions::find($question['id']);
@@ -131,9 +136,10 @@ class UserQuizController extends Controller
 
             $data = [
                 'user_quiz_id' => $request->user_quiz_id,
-                'question_id' => $question['id']
+                'question_id' => $question['id'],
+                'answered' => 1
             ];
-
+            array_push($Q_IDS, $question['id']);
             if (isset($question_type_id)) {
                 switch ($question_type_id) {
                     case 1: // True_false
@@ -226,11 +232,12 @@ class UserQuizController extends Controller
             } else {
                 return HelperController::api_response_format(400, null, 'No type determine to this question');
             }
+        }
+        userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->where('question_id',$question['id'])->update($data);
 
         }
-        foreach ($allData as $data) {
-            userQuizAnswer::create($data);
-        }
+
+        $restOfAns =  userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->update(['answered'=>'1']);
 
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
 
