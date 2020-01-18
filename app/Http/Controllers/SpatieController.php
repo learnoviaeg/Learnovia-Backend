@@ -11,6 +11,8 @@ use App\CourseSegment;
 use Validator;
 use Auth;
 use App\Enroll;
+use App\Contract;
+use Carbon\Carbon;
 use DB;
 use Modules\QuestionBank\Entities\Quiz;
 
@@ -23,6 +25,9 @@ class SpatieController extends Controller
         if ($user) {
             return "This Site is Installed before go and ask admin";
         } else {
+            // initial Contract
+            Contract::create(['attachment_id' => null, 'start_date' => Carbon::now(), 'end_date' => null, 'numbers_of_users' => null, 'total' => null, 'allowance_period' => null]);
+
             // restrict
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/restrict', 'title' => 'restrict middleware']);
 
