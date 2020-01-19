@@ -32,10 +32,10 @@ class AttendanceController extends Controller
 
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add', 'title' => 'add attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'add attendance log']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-attendence', 'title' => 'get  all users in attendence']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attendence', 'title' => 'get attendence']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-attendence', 'title' => 'delete attendence']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/edit-attendence', 'title' => 'edit attendence']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-attendance', 'title' => 'get  all users in attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attendance', 'title' => 'get attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-attendance', 'title' => 'delete attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/edit-attendance', 'title' => 'edit attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'get all users in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-all-taken-users-in-session', 'title' => 'get all taken users in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'add session']);
@@ -56,7 +56,7 @@ class AttendanceController extends Controller
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('attendance/add');
         $role->givePermissionTo('attendance/add-log');
-        $role->givePermissionTo('attendance/get-users-in-attendence');
+        $role->givePermissionTo('attendance/get-users-in-attendance');
         $role->givePermissionTo('attendance/get-users-in-session');
         $role->givePermissionTo('attendance/get-all-taken-users-in-session');
         $role->givePermissionTo('attendance/add-session');

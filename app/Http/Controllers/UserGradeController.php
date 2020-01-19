@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Course;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
@@ -254,7 +255,8 @@ class UserGradeController extends Controller
         $courseSeg = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (!$courseSeg)
             return HelperController::api_response_format(201, 'this course haven\'t course segment');
-
+            // $gradeCat = GradeCategory::where('name','Course Total')->whereIn('course_segment_id', $courseSeg)
+            //                 ->with('GradeItems')->first();
         $gradeCat = GradeCategory::where('course_segment_id', $courseSeg->id)->with('GradeItems')->first();
         foreach ($gradeCat['GradeItems'] as $items) {
             if (!isset($items))
@@ -285,5 +287,33 @@ class UserGradeController extends Controller
             $j++;
         }
         return HelperController::api_response_format(200, $topusers, 'There is the Top Students');
+    }
+
+    public function courseGrades(Request $request)
+    {
+        $courseseg=Enroll::where('user_id',$request->user()->id)->pluck('course_segment');
+        $cour=array();
+        $i = 0;
+        $gradeCat = GradeCategory::where('name','Course Total')->whereIn('course_segment_id', $courseseg)
+            ->with('GradeItems')->get();
+        foreach($gradeCat as $grade)
+        {
+            foreach ($grade['GradeItems'] as $items) {
+                if (!isset($items))
+                    continue;
+                $temp = UserGrade::where('user_id',$request->user()->id)->where('grade_item_id', $items->id)->get();
+                if (count($temp) > 0)
+                    $userGrade[] = $temp;
+            }
+            foreach ($userGrade as $userGra)
+                foreach ($userGra as $useG) {
+                    //grade of course total
+                    $cour[$i] = $useG->GradeItems->GradeCategory->CourseSegment->courses[0];
+                    $cour[$i]['grade'] = $useG->calculateGrade();
+                    $cour[$i]['class'] = User::find($useG->user_id)->class_id;
+                }
+                $i++;
+        }
+        return HelperController::api_response_format(200, $cour);
     }
 }
