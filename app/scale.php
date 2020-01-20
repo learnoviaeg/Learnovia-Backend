@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\GradeItems;
 class scale extends Model
 {
-    protected $fillable = ['name' , 'formate'];
+    protected $fillable = ['name' , 'formate', 'course_segment'];
     protected $appends = ['allow'];
     public function GradeItems()
     {

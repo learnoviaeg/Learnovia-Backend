@@ -296,7 +296,7 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api']], function () {
         Route::get('get', 'UserGradeController@list')->name('getusergrade')->middleware(['permission:grade/user/get' , 'ParentCheck']);
         Route::post('delete', 'UserGradeController@delete')->name('deleteusergrade')->middleware('permission:grade/user/delete');
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
-        Route::post('course-grade', 'UserGradeController@courseGrades');//->name('coursegrades')->middleware('permission:grade/user/course-grade');
+        Route::post('course-grade', 'UserGradeController@courseGrades')->name('coursegrades')->middleware('permission:grade/user/course-grade');
     });
 
     Route::group(['prefix' => 'report'] , function(){
@@ -311,6 +311,7 @@ Route::group(['prefix' => 'scale', 'middleware' => ['auth:api']], function () {
     Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
     Route::post('delete', 'ScaleController@DeleteScale')->name('deletescale')->middleware('permission:scale/delete');
     Route::get('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
+    Route::get('get-with-course', 'ScaleController@GetScaleWithCourse')->name('getscale')->middleware('permission:scale/get-with-course');
 });
 
 Route::group(['prefix' => 'letter', 'middleware' => ['auth:api']], function () {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\CourseSegment;
 use Illuminate\Http\Request;
 use App\scale;
 use stdClass;
@@ -19,10 +20,15 @@ class ScaleController extends Controller
         $request->validate([
             'name' => 'required',
             'formate' => 'required|array',
-            'formate.*'=> 'required',
-            'formate.*.name'=> 'required|string',
+            'formate.*' => 'required',
+            'formate.*.name' => 'required|string',
+            'course' => 'integer|exists:courses,id',
+            'class' => 'integer|exists:classes,id' 
         ]);
 
+        $course_segment=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+        if(isset($course_segment))
+            $course_segment=$course_segment->id;
         $withgrade = collect();
         foreach ($request->formate as $index => $scale) {
             $temp = new stdClass();
@@ -33,7 +39,8 @@ class ScaleController extends Controller
         $scaleFormates=serialize($withgrade);
         $newScale = scale::firstOrCreate([
             'name' => $request->name,
-            'formate' => $scaleFormates
+            'formate' => $scaleFormates,
+            'course_segment' => (isset($course_segment)) ? $course_segment : null
         ]);
         $newScale->formate = unserialize($newScale->formate);
 
@@ -119,6 +126,34 @@ class ScaleController extends Controller
         $scales=scale::get();
         foreach($scales as $scale)
             $scale->formate = unserialize($scale->formate);
+
+        return HelperController::api_response_format(200,$scales);
+    }
+
+    public function GetScaleWithCourse(Request $request)
+    {
+        $request->validate([
+            'id' => 'nullable|exists:scales,id',
+            'course' => 'integer|exists:courses,id',
+            'class' => 'integer|exists:classes,id'
+        ]);
+
+        $course_segment=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+
+        if(isset($request->id))
+        {
+            $scale_id=scale::find($request->id);
+            $scale_id->formate = unserialize($scale_id->formate);
+            return HelperController::api_response_format(200,$scale_id );
+        }
+        $scales1=scale::whereNUll('course_segment')->get();
+        $scales2=[];
+        if(isset($course_segment))
+            $scales2=scale::where('course_segment',$course_segment->id)->get();
+
+        $scales=array_merge($scales1->toArray(),$scales2->toArray());
+        foreach($scales as $scale)
+            $scale['formate'] = unserialize($scale['formate']);
 
         return HelperController::api_response_format(200,$scales);
     }
