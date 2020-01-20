@@ -311,7 +311,7 @@ Route::group(['prefix' => 'scale', 'middleware' => ['auth:api']], function () {
     Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
     Route::post('delete', 'ScaleController@DeleteScale')->name('deletescale')->middleware('permission:scale/delete');
     Route::get('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
-    Route::get('get-with-course', 'ScaleController@GetScaleWithCourse')->name('getscale')->middleware('permission:scale/get-with-course');
+    Route::get('get-with-course', 'ScaleController@GetScaleWithCourse');//->name('getscale')->middleware('permission:scale/get-with-course');
 });
 
 Route::group(['prefix' => 'letter', 'middleware' => ['auth:api']], function () {
