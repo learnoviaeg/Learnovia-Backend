@@ -92,9 +92,7 @@ class AssigmentsController extends Controller
             'course' => 'required_with:class|integer|exists:courses,id',
             'class' => 'required_with:course|integer|exists:classes,id',
         ]);
-        $userID = Auth::id();
         $ASSIGNMENTS = collect([]);
-
         if(isset($request->class)){
 
             $class = Classes::with([
