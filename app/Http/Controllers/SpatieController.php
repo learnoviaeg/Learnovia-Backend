@@ -248,6 +248,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/get', 'title' => 'get user grade']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/update', 'title' => 'update user grade']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/delete', 'title' => 'delete user grade']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/course-grade', 'title' => 'course\'s user and grades']);
 
             //Grades Reports
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/report/grader', 'title' => 'Grader Report']);

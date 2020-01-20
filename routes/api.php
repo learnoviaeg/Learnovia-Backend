@@ -296,6 +296,7 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api']], function () {
         Route::get('get', 'UserGradeController@list')->name('getusergrade')->middleware(['permission:grade/user/get' , 'ParentCheck']);
         Route::post('delete', 'UserGradeController@delete')->name('deleteusergrade')->middleware('permission:grade/user/delete');
         Route::post('update', 'UserGradeController@update')->name('updateusergrade')->middleware('permission:grade/user/update');
+        Route::post('course-grade', 'UserGradeController@courseGrades');//->name('coursegrades')->middleware('permission:grade/user/course-grade');
     });
 
     Route::group(['prefix' => 'report'] , function(){

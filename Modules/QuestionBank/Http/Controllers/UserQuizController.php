@@ -424,6 +424,8 @@ class UserQuizController extends Controller
             $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
             $attemps['Attempts'] = userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
+            // $attemps['Attempts'] = userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)
+            //                             ->with('quiz_lesson.quiz')->get();
             $final->push($attemps);
         }
       return HelperController::api_response_format(200, $final, 'Students attempts are ...');

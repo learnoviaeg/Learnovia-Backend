@@ -224,7 +224,8 @@ class UserController extends Controller
         $request->validate([
             'search' => 'nullable'
         ]);
-        $users = User::with('roles');
+        $users = User::with('roles')->get();
+
         if ($request->filled('search'))
             $users->where('username', 'LIKE', "%$request->search%");
         $users = $users->paginate(HelperController::GetPaginate($request));
@@ -233,7 +234,7 @@ class UserController extends Controller
                 $value->setHidden(['password']);
             }
         }
-        HelperController::api_response_format(200 , $users);
+        return HelperController::api_response_format(200 , $users);
     }
 
     /**
