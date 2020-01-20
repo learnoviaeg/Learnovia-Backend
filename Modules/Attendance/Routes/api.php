@@ -30,7 +30,7 @@ Route::group(['prefix' => 'attendance', 'middleware' => 'auth:api'], function ()
     Route::get('get-session', 'AttendanceController@get_session_byID')->name('getsessionbyid')->middleware('permission:attendance/get-session');
     Route::get('get-all-sessions', 'AttendanceController@getAllSessions')->name('getallsession')->middleware('permission:attendance/get-all-sessions');
 
-    
+
     Route::group(['prefix' => 'status', 'middleware' => 'auth:api'], function () {
         Route::get('get','StatusController@get')->middleware('permission:attendance/status/get');
         Route::post('add','StatusController@Add')->middleware('permission:attendance/status/add');
