@@ -92,6 +92,7 @@ class AssigmentsController extends Controller
             'course' => 'required_with:class|integer|exists:courses,id',
             'class' => 'required_with:course|integer|exists:classes,id',
         ]);
+        $userID = Auth::id();
         $ASSIGNMENTS = collect([]);
 
         if(isset($request->class)){
@@ -110,7 +111,13 @@ class AssigmentsController extends Controller
                             $assignments = $AssignmentLesson->where('visiable',1)->Assignment;
 
                             foreach ($assignments as $assignment) {
-
+                                $st_answer = UserAssigment::where('user_id',$userID)->where('assignment_id',$assignment->id)->first();
+                                $Ans  = Null;
+                                if(isset($st_answer))
+                                    $Ans = $st_answer;     
+                                if(isset($st_answer->attachment_id))
+                                    $Ans = $st_answer->attachment;              
+                                $assignment->student_answer =  $Ans;
                                 $attachment =  $assignment->attachment;
                                 if(isset($attachment)){
                                     $assignment->path  = URL::asset('storage/files/'.$attachment->type.'/'.$attachment->name);
@@ -130,6 +137,15 @@ class AssigmentsController extends Controller
             $assignments = assignment::all();
 
             foreach ($assignments as $assignment) {
+                $st_answer = UserAssigment::where('user_id',$userID)->where('assignment_id',$assignment->id)->first();
+                $Ans  = Null;
+                if(isset($st_answer))
+                    $Ans = $st_answer;                    
+                if(isset($st_answer->attachment_id))
+                    $Ans = $st_answer->attachment;
+
+                $assignment->student_answer =  $Ans;
+                
                 $attachment =  $assignment->attachment;
                 if(isset($attachment)){
                     $assignment->path  = URL::asset('storage/files/'.$attachment->type.'/'.$attachment->name);
