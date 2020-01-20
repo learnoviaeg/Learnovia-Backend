@@ -93,7 +93,6 @@ class AssigmentsController extends Controller
             'class' => 'required_with:course|integer|exists:classes,id',
         ]);
         $ASSIGNMENTS = collect([]);
-
         if(isset($request->class)){
 
             $class = Classes::with([
@@ -110,7 +109,17 @@ class AssigmentsController extends Controller
                             $assignments = $AssignmentLesson->where('visiable',1)->Assignment;
 
                             foreach ($assignments as $assignment) {
-
+                                $Answer= collect([]);
+                                $st_answer = UserAssigment::where('assignment_id',$assignment->id)->get();
+                                foreach($st_answer as $st_answer){
+                                $Ans  = Null;
+                                if(isset($st_answer))
+                                    $Ans = $st_answer;                    
+                                if(isset($st_answer->attachment_id))
+                                    $Ans = $st_answer->attachment;
+                                    $Answer ->push($Ans);
+                             }
+                             $assignment->student_answer =   $Answer;
                                 $attachment =  $assignment->attachment;
                                 if(isset($attachment)){
                                     $assignment->path  = URL::asset('storage/files/'.$attachment->type.'/'.$attachment->name);
@@ -128,8 +137,19 @@ class AssigmentsController extends Controller
         }
         else{
             $assignments = assignment::all();
-
             foreach ($assignments as $assignment) {
+                $Answer= collect([]);
+                $st_answer = UserAssigment::where('assignment_id',$assignment->id)->get();
+                foreach($st_answer as $st_answer){
+                $Ans  = Null;
+                if(isset($st_answer))
+                    $Ans = $st_answer;                    
+                if(isset($st_answer->attachment_id))
+                    $Ans = $st_answer->attachment;
+                    $Answer ->push($Ans);
+             }
+             $assignment->student_answer =   $Answer;
+ 
                 $attachment =  $assignment->attachment;
                 if(isset($attachment)){
                     $assignment->path  = URL::asset('storage/files/'.$attachment->type.'/'.$attachment->name);
