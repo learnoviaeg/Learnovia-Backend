@@ -146,14 +146,15 @@ class ScaleController extends Controller
             $scale_id->formate = unserialize($scale_id->formate);
             return HelperController::api_response_format(200,$scale_id );
         }
-        $scales1=scale::whereNUll('course_segment')->get();
+        $scales1[]=scale::whereNUll('course_segment')->get();
         $scales2=[];
         if(isset($course_segment))
-            $scales2=scale::where('course_segment',$course_segment->id)->get();
+            $scales2[]=scale::where('course_segment',$course_segment->id)->get();
 
-        $scales=array_merge($scales1->toArray(),$scales2->toArray());
-        foreach($scales as $scale)
-            $scale['formate'] = unserialize($scale['formate']);
+        $scales=array_merge($scales1,$scales2);
+        foreach($scales as $ss)
+            foreach($ss as $scale)
+                $scale['formate'] = unserialize($scale['formate']);
 
         return HelperController::api_response_format(200,$scales);
     }
