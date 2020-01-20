@@ -8,7 +8,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('install', 'QuestionBankController@install_question_bank');
 
     //Add/Update Question and Quiz
-        Route::post('add', 'QuizController@store');//->middleware('permission:quiz/add');
+        Route::post('add', 'QuizController@store')->middleware('permission:quiz/add');
         Route::post('grading-method', 'QuizController@gradeing_method')->middleware('permission:quiz/grading-method');
         Route::post('update', 'QuizController@update')->middleware('permission:quiz/update');
 
@@ -20,7 +20,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('sortup', 'QuizController@SortUp')->middleware('permission:quiz/sortup');
 
     //Quiz Lesson Routes
-    Route::post('add-quiz-lesson', 'QuizLessonController@store');//->middleware('permission:quiz/add-quiz-lesson');
+    Route::post('add-quiz-lesson', 'QuizLessonController@store')->middleware('permission:quiz/add-quiz-lesson');
     Route::post('update-quiz-lesson', 'QuizLessonController@update')->middleware('permission:quiz/update-quiz-lesson');
     Route::post('destroy-quiz-lesson', 'QuizLessonController@destroy')->middleware('permission:quiz/destroy-quiz-lesson');
     Route::get('get-all-types', 'QuestionBankController@getAllTypes')->middleware('permission:quiz/get-all-types');
@@ -30,7 +30,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 
 
     //User Quiz
-    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz');//->middleware('permission:quiz/store-user-quiz');
+    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz')->middleware('permission:quiz/store-user-quiz');
     Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer')->middleware('permission:quiz/store-user-quiz-answer');
     Route::post('feedback', 'UserQuizController@feedback');
 
@@ -43,8 +43,8 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('correct-user-quiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
     Route::post('get-attempts', 'UserQuizController@get_user_quiz')->middleware('permission:quiz/get-attempts');
     Route::post('grade-user-quiz', 'UserQuizController@gradeUserQuiz')->middleware('permission:quiz/grade-user-quiz');
-    Route::post('get-all-attempts', 'UserQuizController@get_all_users_quiz_attempts');//->middleware('permission:quiz/get-users-all-attempts');
-    Route::post('get-fully-detailed-attempt', 'UserQuizController@get_fully_detailed_attempt')->middleware('permission:quiz/get-fully-detailed-attempt');
+    Route::post('get-all-attempts', 'UserQuizController@get_all_users_quiz_attempts')->middleware('permission:quiz/get-users-all-attempts');
+    // Route::post('get-fully-detailed-attempt', 'UserQuizController@get_fully_detailed_attempt')->middleware('permission:quiz/get-fully-detailed-attempt');
 
     
 });

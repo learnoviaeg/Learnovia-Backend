@@ -419,13 +419,17 @@ class UserQuizController extends Controller
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
 
         $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('user_id')->unique();
+
         foreach ($users as $user_id){
             $user = User::where('id',$user_id)->first();
+            $attem=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->first();
+            $req=new Request([
+                'attempt_id' => $attem->id,
+                'user_id' => $user->id
+            ]);
             $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
-            $attemps['Attempts'] = userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
-            // $attemps['Attempts'] = userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)
-            //                             ->with('quiz_lesson.quiz')->get();
+            $attemps['Attempts'] = self::get_fully_detailed_attempt($req);
             $final->push($attemps);
         }
       return HelperController::api_response_format(200, $final, 'Students attempts are ...');
@@ -437,21 +441,23 @@ class UserQuizController extends Controller
             'user_id' => 'required|integer|exists:users,id',
         ]);
         $user_quiz = userQuiz::where('user_id', $request->user_id)->where('id',$request->attempt_id)->first();
-        $total[]= quiz::where('id',$user_quiz->quiz_lesson->quiz_id)->with(['Question.question_answer'])->first();
-                foreach($total as $quest){
-                    foreach($quest->question as $q){
-                        $q->question_answer;
-                        $Question_id =  $q->pivot->question_id;
-                    $Ans_ID = userQuizAnswer::where('user_quiz_id',$user_quiz->id)->where('question_id',$Question_id)->first();
-                        if(isset($Ans_ID->answer_id)){
-                            $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
-                            $q->user_grade =$Ans_ID->user_grade;
-                        }
-                        if(!isset($q->student_answer))
-                        $q->student_answer = Null;
-                        if(!isset($q->user_grade))
-                        $q->user_grade = Null;
-                    }}
+        $total= quiz::where('id',$user_quiz->quiz_lesson->quiz_id)->with(['Question.question_answer'])->get();
+        return($total);
+        foreach($total as $quest){
+            foreach($quest->question as $q){
+                $q->question_answer;
+                $Question_id =  $q->pivot->question_id;
+                $Ans_ID = userQuizAnswer::where('user_quiz_id',$user_quiz->id)->where('question_id',$Question_id)->first();
+                if(isset($Ans_ID->answer_id)){
+                    $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
+                    $q->user_grade =$Ans_ID->user_grade;
+                }
+                if(!isset($q->student_answer))
+                    $q->student_answer = Null;
+                if(!isset($q->user_grade))
+                    $q->user_grade = Null;
+            }
+        }
        return $total;
 
     }
