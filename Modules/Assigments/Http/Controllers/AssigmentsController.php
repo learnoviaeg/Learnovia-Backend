@@ -202,9 +202,13 @@ class AssigmentsController extends Controller
             }
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
+        if (isset($request->opening_date)) {
+            $assigment->start_date = $request->opening_date;
+        }
         if (isset($request->mark)) {
             $assigment->mark = $request->mark;
         }
+
         if (isset($request->content)) 
             $assigment->content = $request->content;
 
@@ -260,6 +264,7 @@ class AssigmentsController extends Controller
             'mark' => 'integer',
             'allow_attachment' => 'integer|min:0|max:3',
             'closing_date' => 'date|date_format:Y-m-d H:i:s',
+            'opening_date' => 'date|date_format:Y-m-d H:i:s',
         ]);
 
         $assigment = assignment::find($request->id);
@@ -286,8 +291,8 @@ class AssigmentsController extends Controller
         if (isset($request->closing_date)) 
             $assigment->due_date = $request->closing_date;
 
-        if (isset($request->start_date)) 
-        $assigment->start_date = $request->start_date;
+        if (isset($request->opening_date)) 
+         $assigment->start_date = $request->opening_date;
 
         if (isset($request->mark)) 
             $assigment->mark = $request->mark;
