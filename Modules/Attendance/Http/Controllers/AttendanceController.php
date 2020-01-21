@@ -596,6 +596,10 @@ class AttendanceController extends Controller
     public function getAllSessions(Request $request)
     { 
         $Sessions = AttendanceSession::all();
+        $final=[];
+        if(count($Sessions) == 0)
+            return HelperController::api_response_format(200, 'there is no sessions');
+
         foreach($Sessions as $session){
             $sess['id'] = $session->id;
             $sess['course'] = (isset($session->course_segment_id)) ? $session->Course_Segment->courses[0]->name:'-';
@@ -605,6 +609,6 @@ class AttendanceController extends Controller
             $sess['date'] = $session->date;
             $final[]=$sess;
         }
-        return $final;
+        return HelperController::api_response_format(200, $final);
     }
 }

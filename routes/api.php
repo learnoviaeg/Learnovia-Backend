@@ -334,7 +334,7 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api'], function () {
-    Route::post('add', 'ContractController@create')->name('addcontract')->middleware(['ContractRestrict']);
+    Route::post('add', 'ContractController@create')->name('addcontract')->middleware(['permission:contract/add']);
     Route::post('update', 'ContractController@update')->name('updatecontract')->middleware('permission:contract/update');
 });
 

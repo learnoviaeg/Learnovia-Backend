@@ -291,28 +291,30 @@ class UserGradeController extends Controller
 
     public function courseGrades(Request $request)
     {
-        $courseseg=Enroll::where('user_id',$request->user()->id)->pluck('course_segment');
+        $courseseg=Enroll::where('user_id',$request->user()->id)->pluck('course_segment')->unique();
         $cour=array();
         $i = 0;
-        $gradeCat = GradeCategory::where('name','Course Total')->whereIn('course_segment_id', $courseseg)
-            ->with('GradeItems')->get();
-        foreach($gradeCat as $grade)
+        foreach($courseseg as $course)
         {
-            foreach ($grade['GradeItems'] as $items) {
-                if (!isset($items))
-                    continue;
-                $temp = UserGrade::where('user_id',$request->user()->id)->where('grade_item_id', $items->id)->get();
-                if (count($temp) > 0)
-                    $userGrade[] = $temp;
-            }
-            foreach ($userGrade as $userGra)
-                foreach ($userGra as $useG) {
-                    //grade of course total
-                    $cour[$i] = $useG->GradeItems->GradeCategory->CourseSegment->courses[0];
-                    $cour[$i]['grade'] = $useG->calculateGrade();
-                    $cour[$i]['class'] = User::find($useG->user_id)->class_id;
+            $gradeCat = GradeCategory::where('name','Course Total')->where('course_segment_id', $course)
+                            ->with('GradeItems')->first();
+            if(isset($gradeCat)){
+                foreach ($gradeCat['GradeItems'] as $items) {
+                    if (!isset($items))
+                        continue;
+                    $temp = UserGrade::where('user_id',$request->user()->id)->where('grade_item_id', $items->id)->get();
+                    if (count($temp) > 0)
+                        $userGrade[] = $temp;
                 }
-                $i++;
+                foreach ($userGrade as $userGra)
+                    foreach ($userGra as $useG) {
+                        //grade of course total
+                        $cour[$i] = $useG->GradeItems->GradeCategory->CourseSegment->courses[0];
+                        $cour[$i]['grade'] = $useG->calculateGrade();
+                        $cour[$i]['class'] = User::find($useG->user_id)->class_id;
+                    }
+                    $i++;
+            }
         }
         return HelperController::api_response_format(200, $cour);
     }
