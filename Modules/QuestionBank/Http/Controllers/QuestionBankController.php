@@ -65,7 +65,9 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/store_user_quiz','title' => 'notify quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-users-all-attempts','title' => 'get all users attempts']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-fully-detailed-attempt','title' => 'get fully detailed attempts']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
 
+        
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('site/quiz/getStudentinQuiz');
         $role->givePermissionTo('site/quiz/notify_quiz');
@@ -99,8 +101,10 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/correct-user-quiz');
         $role->givePermissionTo('quiz/get-grade-category');
         $role->givePermissionTo('quiz/toggle');
-
-
+        $role->givePermissionTo('quiz/grading-method');
+        $role->givePermissionTo('quiz/get-attempts');
+        $role->givePermissionTo('quiz/grade-user-quiz');
+        
         Component::create([
             'name' => 'Quiz',
             'module'=>'QuestionBank',

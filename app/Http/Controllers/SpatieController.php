@@ -41,7 +41,9 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/mythreads', 'title' => 'my threads']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/users-assosiated-roles', 'title' => 'get roles assosiated with users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/bulk-messages', 'title' => 'send message to bulk users']);
-
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/search-messages', 'title' => 'search messages']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/search-specific-thread', 'title' => 'search specific thread']);
+            
             //Notifications Permissiosns
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/get-all', 'title' => 'get all notifications']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/get-unread', 'title' => 'get unread notifications']);
@@ -161,6 +163,7 @@ class SpatieController extends Controller
             //Contact Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/add', 'title' => 'add contact']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/get', 'title' => 'get contact']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/search', 'title' => 'search contact']);
 
             //USER CRUD Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/add', 'title' => 'add user']);
@@ -288,7 +291,8 @@ class SpatieController extends Controller
             //payment
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/add', 'title' => 'Add payment']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/delete', 'title' => 'delete payment']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/postpond-payment', 'title' => 'postpond payment']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/postponed-payment', 'title' => 'postpond payment']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/pay-payment', 'title' => 'pay payment']);
 
             //Add Roles
             $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin']);

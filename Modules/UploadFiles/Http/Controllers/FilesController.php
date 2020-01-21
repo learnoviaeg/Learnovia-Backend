@@ -31,6 +31,7 @@ class FilesController extends Controller
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add', 'title' => 'add file']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/assign', 'title' => 'assign file']);        
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update', 'title' => 'update file']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete', 'title' => 'delete file']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle', 'title' => 'toggle file']);
@@ -49,8 +50,7 @@ class FilesController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get', 'title' => 'get file']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/file/edit', 'title' => 'update file']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/media/edit', 'title' => 'update media']);
-
-
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/assign', 'title' => 'assign media']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('file/add');
@@ -72,7 +72,9 @@ class FilesController extends Controller
         $role->givePermissionTo('file/get');
         $role->givePermissionTo('site/file/edit');
         $role->givePermissionTo('site/media/edit');
-
+        $role->givePermissionTo('file/assign');
+        $role->givePermissionTo('media/assign');
+        
         Component::create([
             'name' => 'Media',
             'module' => 'UploadFiles',

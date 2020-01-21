@@ -227,12 +227,16 @@ Route::group(['prefix' => 'messages', 'middleware' => ['auth:api']], function ()
     Route::get('mythreads', 'MessageController@GetMyThreads')->name('mythreads')->middleware('permission:messages/mythreads');
     Route::get('users-assosiated-roles', 'MessageController@RolesWithAssiocatedUsers')->name('users-assosiated-roles')->middleware('permission:messages/users-assosiated-roles');
     Route::post('bulk-messages', 'MessageController@BulkMessage')->name('bulk-messages')->middleware('permission:messages/bulk-messages');
+    Route::post('search-messages', 'MessageController@SearchMessage')->name('search-messages')->middleware('permission:messages/search-messages');
+    Route::post('search-specific-thread', 'MessageController@SearchSpecificThread')->name('search-specific-thread')->middleware('permission:messages/search-specific-thread');
 });
 
 //Contact Route
 Route::group(['prefix' => 'contact', 'middleware' => ['auth:api']], function () {
     Route::post('add', 'ContactController@addContact')->name('addContact')->middleware('permission:contact/add');
     Route::get('get', 'ContactController@ViewMyContact')->name('ViewMyContact')->middleware('permission:contact/get');
+    Route::post('search-contacts', 'ContactController@SearchMyContacts')->name('searchContact')->middleware('permission:contact/search');
+
 });
 
 //component routes
@@ -340,8 +344,3 @@ Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
     Route::post('postponed-payment', 'PaymentController@postponedPayment')->name('deletepayment')->middleware('permission:payment/postponed-payment');
     Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
 });
-
-Route::post('search-contacts', 'ContactController@SearchMyContacts');
-Route::post('search-messages', 'MessageController@SearchMessage');
-Route::post('change-color', 'ComponentController@ChangeColor');
-Route::post('search-specific-thread', 'MessageController@SearchSpecificThread')->middleware(['auth:api']);
