@@ -116,21 +116,18 @@ class GradeCategory extends Model
             $usergrade = UserGrade::where('grade_item_id' , $item->id)->where('user_id' , $userid)->first();
             if(isset($usergrade))
             {
-                if($usergrade->GradeItems->GradeCategory->CourseSegment->letter_id != null);
+                if($usergrade != null)
                 {
-                    if($usergrade != null)
-                    {
-                        $item->grade = $usergrade->final_grade;
-                        $item->feedback=$usergrade->feedback;
-                        if($usergrade->raw_grade_max != 0)
-                            $item->precentage=((($usergrade->final_grade)*100)/$usergrade->raw_grade_max);
-                        $gpa_letter=Letter::find($usergrade->GradeItems->GradeCategory->CourseSegment->letter_id);
-                        $gpa_letter = unserialize($gpa_letter['formate']);
-                        if($gpa_letter)
-                            foreach($gpa_letter as $gpa)
-                                if($item->percentage < $gpa['boundary'])
-                                    $item->letter=$gpa['name'];
-                    }
+                    $item->grade = $usergrade->final_grade;
+                    $item->feedback=$usergrade->feedback;
+                    if($usergrade->raw_grade_max != 0)
+                        $item->precentage=((($usergrade->final_grade)*100)/$usergrade->raw_grade_max);
+                    $gpa_letter=Letter::find($usergrade->GradeItems->GradeCategory->CourseSegment->letter_id);
+                    $gpa_letter = unserialize($gpa_letter['formate']);
+                    if($gpa_letter)
+                    foreach($gpa_letter as $gpa)
+                            if($item->percentage < $gpa['boundary'])
+                                $item->letter=$gpa['name'];
                 }
             }
 
