@@ -37,6 +37,7 @@ class AssigmentsController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/add', 'title' => 'add assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/update', 'title' => 'update assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/update-assignemnt-lesson', 'title' => 'update assignemnt lesson']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/delete-assign-lesson', 'title' => 'delete assignemnt lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/submit', 'title' => 'submit assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/grade', 'title' => 'grade assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/override', 'title' => 'override assignment']);
@@ -62,8 +63,7 @@ class AssigmentsController extends Controller
         $role->givePermissionTo('assignment/editgrade');
         $role->givePermissionTo('site/assignment/assigned-users');
         $role->givePermissionTo('site/assignment/getAssignment');
-
-
+        $role->givePermissionTo('delete-assign-lesson');
 
         Component::create([
             'name' => 'Assigments',
@@ -91,6 +91,7 @@ class AssigmentsController extends Controller
         $request->validate([
             'course' => 'required_with:class|integer|exists:courses,id',
             'class' => 'required_with:course|integer|exists:classes,id',
+            'assignment_id' => 'exists:assignments,id',
         ]);
         $ASSIGNMENTS = collect([]);
         if(isset($request->class)){
@@ -107,7 +108,8 @@ class AssigmentsController extends Controller
                     foreach($courseSegment->lessons as $lesson){
                         foreach($lesson->AssignmentLesson as $AssignmentLesson){
                             $assignments = $AssignmentLesson->where('visiable',1)->Assignment;
-
+                            if($request->filled('assignment_id'))
+                            $assignments = $AssignmentLesson->where('visiable',1)->where('assignment_id',$request->assignment_id)->Assignment;
                             foreach ($assignments as $assignment) {
                                 $Answer= collect([]);
                                 $st_answer = UserAssigment::where('assignment_id',$assignment->id)->get();
@@ -137,6 +139,9 @@ class AssigmentsController extends Controller
         }
         else{
             $assignments = assignment::all();
+
+            if($request->filled('assignment_id'))
+            $assignments = assignment::where('id',$request->assignment_id)->get();
             foreach ($assignments as $assignment) {
                 $Answer= collect([]);
                 $st_answer = UserAssigment::where('assignment_id',$assignment->id)->get();

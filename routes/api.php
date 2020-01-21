@@ -13,7 +13,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
     Route::get('logout', 'AuthController@logout')->name('logout');
     Route::get('getuserPermession', 'AuthController@getuserPermession');
-    Route::get('user', 'AuthController@user')->name('user');//->middleware('ContractRestrict');
+    Route::get('user', 'AuthController@user')->name('user')->middleware('ContractRestrict');
     Route::post('CheckPermission', 'SpatieController@checkPermessionOnCourse')->name('checkPermessionOnCourse');
     Route::get('getMyLimits', 'AuthController@getuserPermessionFlags')->name('getuserPermessionFlags');
     Route::post('comparepermissions', 'SpatieController@comparepermissions')->name('comparepermissions');
@@ -227,12 +227,16 @@ Route::group(['prefix' => 'messages', 'middleware' => ['auth:api']], function ()
     Route::get('mythreads', 'MessageController@GetMyThreads')->name('mythreads')->middleware('permission:messages/mythreads');
     Route::get('users-assosiated-roles', 'MessageController@RolesWithAssiocatedUsers')->name('users-assosiated-roles')->middleware('permission:messages/users-assosiated-roles');
     Route::post('bulk-messages', 'MessageController@BulkMessage')->name('bulk-messages')->middleware('permission:messages/bulk-messages');
+    Route::post('search-messages', 'MessageController@SearchMessage')->name('search-messages')->middleware('permission:messages/search-messages');
+    Route::post('search-specific-thread', 'MessageController@SearchSpecificThread')->name('search-specific-thread')->middleware('permission:messages/search-specific-thread');
 });
 
 //Contact Route
 Route::group(['prefix' => 'contact', 'middleware' => ['auth:api']], function () {
     Route::post('add', 'ContactController@addContact')->name('addContact')->middleware('permission:contact/add');
     Route::get('get', 'ContactController@ViewMyContact')->name('ViewMyContact')->middleware('permission:contact/get');
+    Route::post('search-contacts', 'ContactController@SearchMyContacts')->name('searchContact')->middleware('permission:contact/search');
+
 });
 
 //component routes
@@ -251,7 +255,6 @@ Route::group(['prefix' => 'lesson', 'middleware' => ['auth:api']], function () {
     Route::get('get', 'LessonController@ShowLesson')->name('showlesson')->middleware('permission:lesson/get');
     Route::post('delete', 'LessonController@deleteLesson')->name('deleteLesson')->middleware('permission:lesson/delete');
     Route::post('update', 'LessonController@updateLesson')->name('updateLesson')->middleware('permission:lesson/update');
-    Route::post('sort', 'LessonController@Sorting')->name('sortlesson')->middleware('permission:lesson/sort');
     Route::post('sort', 'LessonController@Sorting')->name('sortlesson')->middleware('permission:lesson/sort');
     Route::post('addLessons', 'LessonController@AddNumberOfLessons')->name('addnumberoflessons')->middleware('permission:lesson/addBulk');
 });
@@ -302,7 +305,7 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api']], function () {
     Route::group(['prefix' => 'report'] , function(){
         Route::get('grader' ,'UserGradeController@graderReport')->name('graderReport')->middleware('permission:grade/report/grader');
         Route::get('user', 'UserGradeController@SingleUserInSingleCourse')->name('getallusergrades')->middleware(['permission:grade/report/user' , 'ParentCheck']);
-        //Route::post('getallGrades', 'UserGradeController@AllUserInCourse')->name('getallusersgrades')->middleware('permission:grade/report/overview');
+        Route::post('getallGrades', 'UserGradeController@AllUserInCourse')->name('getallusersgrades')->middleware('permission:grade/report/overview');
         Route::post('over-all', 'UserGradeController@AllUserInAllCourses')->name('getalluserscoursesgrades')->middleware(['permission:grade/report/over-all' , 'ParentCheck']);
     });
 });
@@ -311,7 +314,7 @@ Route::group(['prefix' => 'scale', 'middleware' => ['auth:api']], function () {
     Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
     Route::post('delete', 'ScaleController@DeleteScale')->name('deletescale')->middleware('permission:scale/delete');
     Route::get('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
-    Route::get('get-with-course', 'ScaleController@GetScaleWithCourse');//->name('getscale')->middleware('permission:scale/get-with-course');
+    Route::get('get-with-course', 'ScaleController@GetScaleWithCourse')->name('getscale')->middleware('permission:scale/get-with-course');
 });
 
 Route::group(['prefix' => 'letter', 'middleware' => ['auth:api']], function () {
@@ -341,8 +344,3 @@ Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
     Route::post('postponed-payment', 'PaymentController@postponedPayment')->name('deletepayment')->middleware('permission:payment/postponed-payment');
     Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
 });
-
-Route::post('search-contacts', 'ContactController@SearchMyContacts');
-Route::post('search-messages', 'MessageController@SearchMessage');
-Route::post('change-color', 'ComponentController@ChangeColor');
-Route::post('search-specific-thread', 'MessageController@SearchSpecificThread')->middleware(['auth:api']);
