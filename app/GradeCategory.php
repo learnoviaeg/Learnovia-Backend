@@ -115,9 +115,9 @@ class GradeCategory extends Model
             $usergrade = UserGrade::where('grade_item_id' , $item->id)->where('user_id' , $userid)->first();
             if(isset($usergrade))
             {
-                if($usergrade->GradeItems->GradeCategory->CourseSegment->letter != null);
+                if($usergrade->GradeItems->GradeCategory->CourseSegment->letter_id != null);
                 {
-                    $gpa_letter=Letter::find($usergrade->GradeItems->GradeCategory->CourseSegment->letter);
+                    $gpa_letter=Letter::find($usergrade->GradeItems->GradeCategory->CourseSegment->letter_id);
                     $gpa_letter = unserialize($gpa_letter['formate']);
         
                     if($usergrade != null)
@@ -132,6 +132,7 @@ class GradeCategory extends Model
                     }
                 }
             }
+
         }
         foreach($children as $child){
             $child->getUsergrades($userid);
