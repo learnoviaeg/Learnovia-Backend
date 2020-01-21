@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class assignment extends Model
 {
-    protected $fillable = ['name', 'content', 'attachment_id'];
+    protected $fillable = ['name', 'content', 'attachment_id','is_graded','start_date','end_date','mark','scale_id','allow_attachment','grade_category'];
     protected $appends = ['url' , 'url2'];
     public function attachment()
     {
