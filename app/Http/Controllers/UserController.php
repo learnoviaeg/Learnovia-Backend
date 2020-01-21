@@ -54,6 +54,7 @@ class UserController extends Controller
             'course' => 'array',
             'role.*' => 'required|exists:roles,id',
             'class_id' => 'required|array',
+            'class_id.*' => 'required|exists:classes,id',
             'picture' => 'nullable|array','arabicname' => 'nullable|array', 'gender' => 'nullable|array', 'phone' => 'nullable|array',
             'address' => 'nullable|array','nationality' => 'nullable|array','country' => 'nullable|array', 'birthdate' => 'nullable|array',
             'notes' => 'nullable|array','email' => 'nullable|array', 'language' => 'nullable|array','timezone' => 'nullable|array',
@@ -79,7 +80,7 @@ class UserController extends Controller
 
         if((count($users) + $count) > $max_allowed_users)
             return HelperController::api_response_format(404 ,$max_allowed_users, 'exceed MAX, U Can\'t add users any more');
-        
+
         foreach ($request->firstname as $key => $firstname) {
             $user = User::create([
                 'firstname' => $firstname,
@@ -92,7 +93,7 @@ class UserController extends Controller
 
             foreach ($optionals as $optional)
                 if ($request->filled($optional)){
-                    if ($optional == 'picture') 
+                    if ($optional == 'picture')
                         $user->$optional = attachment::upload_attachment($request->$optional[$i], 'User')->id;
                     if($optional =='birthdate')
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');

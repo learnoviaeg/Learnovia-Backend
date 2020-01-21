@@ -129,10 +129,10 @@ class EventController extends Controller
                 $users_ids = [];
         }
         $events = Event::where('name', $request->name);
-        if (count($users_ids) > 0) { 
+        if (count($users_ids) > 0) {
             $events->whereIn('user_id', $users_ids);
-        } 
-        $events->delete(); 
+        }
+        $events->delete();
         return HelperController::api_response_format(201, 'deleted Successfully');
     }
 
@@ -220,13 +220,13 @@ class EventController extends Controller
             'to' => 'nullable|date',
         ]);
         $events = Event::where('user_id',Auth::user()->id);
-        
+
         if($request->filled('from') && !$request->filled('to'))
             $events->where('from' , $request->from);
-        
+
         if($request->filled('to'))
             $events->whereBetween('from' , [$request->from , $request->to]);
-        
+
         return HelperController::api_response_format(201,$events->get(),'there are your events ... ' );
     }
 
@@ -244,10 +244,10 @@ class EventController extends Controller
         ]);
         $users=collect();
         $events = Event::whereNotNull('id');
-        
+
         if($request->filled('from') && !$request->filled('to'))
             $events->where('from' , $request->from);
-        
+
         if($request->filled('to'))
             $events->whereBetween('from' , [$request->from , $request->to]);
 
@@ -261,7 +261,7 @@ class EventController extends Controller
         if ($request->filled('levels')) {
             $users->push(User::whereIn('level', $request->levels)->pluck('id'));
         }
-        if($users != null)
+        if(count($users) > 0)
             $events->whereIn('user_id',$users[0]);
 
         return HelperController::api_response_format(201,$events->get(),'there are all events ... ' );

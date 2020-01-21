@@ -15,7 +15,7 @@ class ContractController extends Controller
     public function create(Request $request){
         $request->validate([
             'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
-            'start_date' => 'date',
+            'start_date' => 'required|date',
             'end_date' => 'date',
             'numbers_of_users' => 'integer',
             'total' => 'integer',
