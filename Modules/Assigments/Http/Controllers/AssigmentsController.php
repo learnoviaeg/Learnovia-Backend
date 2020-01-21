@@ -202,10 +202,17 @@ class AssigmentsController extends Controller
             }
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
-        if (isset($request->content)) {
-            $assigment->content = $request->content;
+        if (isset($request->mark)) {
+            $assigment->mark = $request->mark;
         }
+        if (isset($request->content)) 
+            $assigment->content = $request->content;
+
+        if (isset($request->closing_date)) 
+        $assigment->due_date = $request->closing_date;
+        
         $assigment->name = $request->name;
+        $assigment->is_graded = $request->is_graded;
         $assigment->save();
         $data = array(
             "course_segment" => $segments->id,
@@ -252,7 +259,7 @@ class AssigmentsController extends Controller
             'grade_category'=>'exists:grade_categories,id',
             'mark' => 'integer',
             'allow_attachment' => 'integer|min:0|max:3',
-            'visible'=> 'boolean'
+            'closing_date' => 'date|date_format:Y-m-d H:i:s',
         ]);
 
         $assigment = assignment::find($request->id);
@@ -276,8 +283,8 @@ class AssigmentsController extends Controller
         if (isset($request->is_graded)) 
             $assigment->is_graded = $request->is_graded;
         
-        if (isset($request->due_date)) 
-            $assigment->due_date = $request->due_date;
+        if (isset($request->closing_date)) 
+            $assigment->due_date = $request->closing_date;
 
         if (isset($request->start_date)) 
         $assigment->start_date = $request->start_date;
