@@ -214,7 +214,7 @@ class AssigmentsController extends Controller
             "publish_date"=>$request->opening_date,
             "class"=>$request->class
         );
-        $check=$this->assignAsstoUsers($data);
+        $this->assignAsstoUsers($data);
 
         foreach($request->Lesson_id as $lessons)
         {
