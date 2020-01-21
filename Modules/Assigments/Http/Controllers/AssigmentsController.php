@@ -248,31 +248,50 @@ class AssigmentsController extends Controller
             'id' => 'required|exists:assignments,id',
             'name' => 'required|string',
             'file_description' => 'string',
+            'is_graded'=>'boolean',
+            'grade_category'=>'exists:grade_categories,id',
+            'mark' => 'integer',
+            'allow_attachment' => 'integer|min:0|max:3',
+            'visible'=> 'boolean'
         ]);
 
         $assigment = assignment::find($request->id);
-
-        if (!isset($assigment->attachment_id) && !isset($assigment->content)) {
-            return HelperController::api_response_format(400, $body = [], $message = 'please enter file or content');
-        }
+        $CheckIfAnswered= UserAssigment::where('assignment_id',$request->id)->where('submit_date','!=',null)->get();
+        if(count($CheckIfAnswered) > 0)
+            return HelperController::api_response_format(200, 'Cannot update,Assigment was submitted before!');
 
         if ($request->hasFile('file')) {
 
             $request->validate([
                 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             ]);
-            if (isset($request->file_description)) {
+            if (isset($request->file_description)) 
                 $description = $request->file_description;
-            } else {
-                $description = Null;
-            }
+            
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
-        if (isset($request->content)) {
+        if (isset($request->content)) 
             $assigment->content = $request->content;
-        }else {
-            $assigment->content = null;
-        }
+        
+        if (isset($request->is_graded)) 
+            $assigment->is_graded = $request->is_graded;
+        
+        if (isset($request->due_date)) 
+            $assigment->due_date = $request->due_date;
+
+        if (isset($request->start_date)) 
+        $assigment->start_date = $request->start_date;
+
+        if (isset($request->mark)) 
+            $assigment->mark = $request->mark;
+            
+        if (isset($request->grade_category)) 
+            $assigment->grade_category = $request->grade_category;  
+
+        if (isset($request->allow_attachment)) 
+            $assigment->allow_attachment = $request->allow_attachment;   
+            
+        
         $assigment->name = $request->name;
         $assigment->save();
 
