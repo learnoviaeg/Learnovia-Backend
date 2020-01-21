@@ -110,6 +110,9 @@ class NotificationController extends Controller
     public function GetNotifcations(Request $request)
     {
         $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->pluck('data');
+        if(count($noti) == 0)
+            return HelperController::api_response_format(200, 'there is no user notifications');
+        $data=[];
         foreach ($noti as $not) {
             $not= json_decode($not, true);
             if($not['publish_date'] < Carbon::now())
