@@ -144,7 +144,6 @@ class AC_year_type extends Controller
 
         $AC->update($req->all());
         if ($req->filled('year')) {
-
             $yearType = AcademicYearType::checkRelation($AC->AC_year[0]->id, $req->id);
             $yearType->delete();
             AcademicYearType::create([

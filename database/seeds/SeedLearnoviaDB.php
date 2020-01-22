@@ -180,7 +180,8 @@ class SeedLearnoviaDB extends Seeder
         }
         $components = [
             ['name' => 'Quiz', 'module' => 'QuestionBank', 'model' => 'Quiz', 'type' => '1'],
-            ['name' => 'Media', 'module' => 'test', 'model' => 'test', 'type' => '1'],
+            ['name' => 'Media', 'module' => 'UploadFiles', 'model' => 'Media', 'type' => '1'],
+            ['name' => 'File', 'module' => 'UploadFiles', 'model' => 'File', 'type' => '1'],
             ['name' => 'Assignment', 'module' => 'Assigments', 'model' => 'Assignment', 'type' => '1'],
         ];
         foreach ($components as $component) {

@@ -184,9 +184,16 @@ class segment_class_Controller extends Controller
                 $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
                 $class_level = ClassLevel::checkRelation($request->class[$count], $year_level->id);
 
-                $segment = Segment::Get_current($request->type[$count])->id;
                 if (isset($request->segment[$count])) {
                     $segment = $request->segment[$count];
+                }
+                else
+                {
+                    $segment = Segment::Get_current($request->type[$count]);
+                    if(!isset($segment))
+                        return HelperController::api_response_format(201, 'there is no current segment');
+                    else
+                    $segment =$segment->id;
                 }
                 SegmentClass::checkRelation($class_level->id,$segment);
                 $count++;
