@@ -57,6 +57,9 @@ class StatusController extends Controller
         if($request->filled('visible')) {
             $status->visible = $request->visible;
         }
+        if($request->filled('grade')) {
+            $status->grade = $request->grade;
+        }
         $status->save();
         return HelperController::api_response_format(200,$status,'Status Updated Successfully');
     }

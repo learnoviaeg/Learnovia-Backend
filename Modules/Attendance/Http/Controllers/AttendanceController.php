@@ -75,7 +75,7 @@ class AttendanceController extends Controller
         $role->givePermissionTo('attendance/update-session');
         $role->givePermissionTo('attendance/delete-session');
         $role->givePermissionTo('attendance/get-all-sessions');
-        
+
         Component::create([
             'name' => 'Attendance',
             'module' => 'Attendance',
@@ -378,8 +378,23 @@ class AttendanceController extends Controller
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
         ]);
-        $course_segment = AttendanceSession::where('id', $request->session_id)->pluck('course_segment_id');
-        $users_ids = Enroll::where('course_segment', $course_segment[0])->pluck('user_id');
+        $session = AttendanceSession::where('id', $request->session_id)->first();
+        $flag = true;
+        if($session->course_segment_id == null){
+            $flag = false;
+            $request = new Request([
+                'year' => $session->Attendence->year_id,
+                'segments' => [$session->Attendence->segment_id],
+                'type' => [$session->Attendence->type_id],
+                'levels' => $session->Attendence->allowed_levels,
+                'classes' => $session->Attendence->allowed_classes,
+                'courses' => $session->Attendence->allowed_courses
+            ]);
+            $course_segment = GradeCategoryController::getCourseSegmentWithArray($request);
+        }
+        if($flag)
+            $course_segment = [$session->course_segment_id];
+        $users_ids = Enroll::whereIn('course_segment', $course_segment)->get()->pluck('user_id');
         $logs = AttendanceLog::where('session_id', $request->session_id)->whereIn('student_id', $users_ids)->get();
         $users = User::whereIn('id', $users_ids)->get();
         foreach ($users as $user) {
@@ -519,7 +534,7 @@ class AttendanceController extends Controller
         ]);
         $session = AttendanceSession::find($request->session_id);
         $session ->delete();
-        return HelperController::api_response_format(400, null ,'Session is deleted successfully');
+        return HelperController::api_response_format(200, null ,'Session is deleted successfully');
     }
 
     public function get_session_byID(Request $request){
@@ -594,7 +609,7 @@ class AttendanceController extends Controller
     }
 
     public function getAllSessions(Request $request)
-    { 
+    {
         $Sessions = AttendanceSession::all();
         $final=[];
         if(count($Sessions) == 0)
