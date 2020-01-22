@@ -154,7 +154,8 @@ class CourseController extends Controller
         $editable = ['name', 'category_id', 'description', 'mandatory'];
         $course = Course::find($request->id);
         $course->name = $request->name;
-        $course->category_id = $request->category;
+        if($request->filled('category_id'))
+            $course->category_id = $request->category_id;
 
         // if course has an image
         if ($request->hasFile('image')) {

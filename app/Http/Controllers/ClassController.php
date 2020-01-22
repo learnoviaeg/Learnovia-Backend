@@ -176,9 +176,9 @@ class ClassController extends Controller
         $rules =[
             'year' => 'array',
             'year.*' => 'exists:academic_years,id',
-            'type' => 'array',
+            'type' => 'required|array',
             'type.*' => 'required|exists:academic_types,id',
-            'level' => 'array',
+            'level' => 'required|array',
             'level.*' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id'
         ];
@@ -191,9 +191,16 @@ class ClassController extends Controller
         {
             while(isset($request->type[$count]))
                 {
-                    $year = AcademicYear::Get_current()->id;
                     if (isset($request->year[$count])) {
                         $year = $request->year[$count];
+                    }
+                    else
+                    {
+                        $year = AcademicYear::Get_current();
+                        if(isset($year))
+                            return HelperController::api_response_format(201, 'there is no current segment');
+                        else
+                            $year=$year->id;
                     }
                     $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
                     $Year_level=YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
