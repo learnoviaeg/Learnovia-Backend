@@ -174,7 +174,9 @@ class PageController extends Controller
             'lesson_id' => 'required|exists:lessons,id'
         ]);
         $page = PageLesson::where('page_id', $request->page_id)->where('lesson_id', $request->lesson_id)->first();
-        if ($page->delete()) {
+        if($page)
+        {
+            $page->delete();
             $tempReturn = Lesson::find($request->lesson_id)->module('Page', 'page')->get();
             return HelperController::api_response_format(200, $tempReturn, 'Page Deleted Successfully');
         }
