@@ -465,13 +465,14 @@ class AttendanceController extends Controller
     {
         $request->validate([
             'id' => 'exists:attendances',
+            'search' => 'nullable',
         ]);
         if($request->filled('id'))
         {
             $attendance=Attendance::where('id',$request->id)->get();
             return HelperController::api_response_format(200, $attendance);
         }
-        $attendance=Attendance::get(['name','allowed_levels','type' , 'id']);
+        $attendance=Attendance::where('name', 'LIKE' , "%$request->search%")->get(['name','allowed_levels','type' , 'id']);
         foreach($attendance as $attend)
         {
             $temp = [];
