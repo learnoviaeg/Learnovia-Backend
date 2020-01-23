@@ -52,6 +52,7 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-all-sessions', 'title' => 'get all sessions']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-taken-in-session', 'title' => 'get all taken users in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-sessions', 'title' => 'get all taken users in session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/view-students-in-session', 'title' => 'view students in session']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('attendance/add');
@@ -75,6 +76,7 @@ class AttendanceController extends Controller
         $role->givePermissionTo('attendance/update-session');
         $role->givePermissionTo('attendance/delete-session');
         $role->givePermissionTo('attendance/get-all-sessions');
+        $role->givePermissionTo('attendance/view-students-in-session');
 
         Component::create([
             'name' => 'Attendance',
@@ -465,13 +467,14 @@ class AttendanceController extends Controller
     {
         $request->validate([
             'id' => 'exists:attendances',
+            'search' => 'nullable',
         ]);
         if($request->filled('id'))
         {
             $attendance=Attendance::where('id',$request->id)->get();
             return HelperController::api_response_format(200, $attendance);
         }
-        $attendance=Attendance::get(['name','allowed_levels','type' , 'id']);
+        $attendance=Attendance::where('name', 'LIKE' , "%$request->search%")->get(['name','allowed_levels','type' , 'id']);
         foreach($attendance as $attend)
         {
             $temp = [];
