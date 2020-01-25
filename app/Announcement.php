@@ -24,5 +24,6 @@ class Announcement extends Model
     public function attachment()
     {
         return $this->hasOne('App\attachment', 'id', 'attached_file');
+
     }
 }
