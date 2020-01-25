@@ -579,10 +579,9 @@ class AnnouncementController extends Controller
         'announce_id' => 'required|integer|exists:announcements,id',
         ]);
 
-        $announce=Announcement::where ('id',$request->announce_id)->with('attachment')->first(['id','title','description','start_date','due_date','assign',
-            'class_id','year_id','level_id','course_id','type_id','segment_id' , 'publish_date']);
-       // if(isset($announce->))
-
+        $announce=Announcement::where ('id',$request->announce_id)
+        ->with('attachment')
+        ->first(['id','title','description','start_date','due_date','assign','class_id','year_id','level_id','course_id','type_id','segment_id' , 'publish_date']);
         switch ($announce->assign){
             case 'class':
                 $class = Classes::where('id',$announce->class_id)->first(['name','id']);
