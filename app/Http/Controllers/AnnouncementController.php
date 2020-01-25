@@ -46,7 +46,7 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required',
             'description' => 'required',
-            'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
+            'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,mp4',
             'start_date' => 'required|before:due_date',
             'due_date' => 'required|after:' . Carbon::now(),
             'publish_date' => 'nullable|after:' . Carbon::now(),

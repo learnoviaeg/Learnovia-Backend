@@ -109,7 +109,7 @@ class QuestionBankController extends Controller
             'name' => 'Quiz',
             'module'=>'QuestionBank',
             'model' => 'quiz',
-            'type' => 1,
+            'type' => 3,
             'active' => 1
         ]);
 

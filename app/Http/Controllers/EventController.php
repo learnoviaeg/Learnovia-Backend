@@ -30,40 +30,45 @@ class EventController extends Controller
             'levels.*' => 'nullable|exists:users,level'
         ]);
         $user_ids = collect();
-        $flag = false;
-        $file_id = null;
-        $cover_id = null;
-        $id_number = null;
-        if ($request->filled('classes')) {
-            $user_ids->push(User::whereIn('class_id', $request->classes)->pluck('id'));
-            $flag = true;
-        }
-        if ($request->filled('levels')) {
-            $user_ids->push(User::whereIn('level', $request->levels)->pluck('id'));
-            $flag = true;
-        }
-        if ($request->filled('users')) {
-            $user_ids->push(User::whereIn('id', $request->users)->pluck('id'));
-        }
+            $flag = false;
+            $file_id = null;
+            $cover_id = null;
+            $id_number = null;
+            if(Auth::user()->can('event/add-bulk')){
+            if ($request->filled('classes')) {
+                $user_ids->push(User::whereIn('class_id', $request->classes)->pluck('id'));
+                $flag = true;
+            }
+            if ($request->filled('levels')) {
+                $user_ids->push(User::whereIn('level', $request->levels)->pluck('id'));
+                $flag = true;
+            }
+            if ($request->filled('users')) {
+                $user_ids->push(User::whereIn('id', $request->users)->pluck('id'));
+            }
 
-        if ($flag) {
-            $id_number = Event::max('id') + 1;
-        }
+            if ($flag) {
+                $id_number = Event::max('id') + 1;
+            }
+            $users_ids = [];
+            switch (count($user_ids)) {
+                case 1 :
+                    $users_ids = $user_ids[0]->toArray();
+                    break;
+                case 2 :
+                    $users_ids = array_values(array_unique(array_merge($user_ids[0]->toArray(), $user_ids[1]->toArray())));
+                    break;
+                case 3 :
+                    $users_ids = array_values(array_unique(array_merge($user_ids[0]->toArray(), $user_ids[1]->toArray(), $user_ids[2]->toArray())));
+                    break;
+                default:
+                    $users_ids = [];
+            }
+    }else{
         $users_ids = [];
-        switch (count($user_ids)) {
-            case 1 :
-                $users_ids = $user_ids[0]->toArray();
-                break;
-            case 2 :
-                $users_ids = array_values(array_unique(array_merge($user_ids[0]->toArray(), $user_ids[1]->toArray())));
-                break;
-            case 3 :
-                $users_ids = array_values(array_unique(array_merge($user_ids[0]->toArray(), $user_ids[1]->toArray(), $user_ids[2]->toArray())));
-                break;
-            default:
-                $users_ids = [];
-        }
-
+        array_push($users_ids,Auth::id());
+    }
+    
         if (isset($request->attached_file)) {
             $fileName = attachment::upload_attachment($request->attached_file, 'Event');
             $file_id = $fileName->id;

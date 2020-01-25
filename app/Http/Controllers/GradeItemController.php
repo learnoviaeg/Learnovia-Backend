@@ -40,8 +40,8 @@ class GradeItemController extends Controller
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
             'item_type' => 'nullable|exists:item_types,id',
             'item_Entity' => 'nullable',
-            'hidden' => 'boolean',
-            'locked' => 'boolean'
+            'hidden' => 'required|boolean',
+            'locked' => 'required|boolean'
         ]);
 
         $GradeCat = GradeCategory::find($request->grade_category);
@@ -59,8 +59,8 @@ class GradeItemController extends Controller
             'item_type' => (isset($request->item_type)) ? $request->item_type : null,
             'id_number' => $GradeCat->id_number,
             'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : null,
-            'locked' => (isset($request->locked)) ? $request->locked : null,
-            'hidden' => (isset($request->hidden)) ? $request->hidden : null,
+            'locked' => $request->locked,
+            'hidden' => $request->hidden,
             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
             'name' => (isset($request->name)) ? $request->name : 'Grade Item',
             'weight' => (isset($request->weight)) ? $request->weight : 0,
@@ -114,8 +114,8 @@ class GradeItemController extends Controller
             'items.*.aggregationcoef2' => 'numeric|nullable|between:0,99.99',
             'items.*.item_type' => 'nullable|exists:item_types,id',
             'items.*.item_Entity' => 'nullable',
-            'items.*.hidden' => 'boolean',
-            'items.*.locked' => 'boolean',
+            'items.*.hidden' => 'boolean|required',
+            'items.*.locked' => 'boolean|required',
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id|required_with:level',
             'level' => 'exists:levels,id|required_with:class',
@@ -223,7 +223,7 @@ class GradeItemController extends Controller
             'plusfactor' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
-            'item_type' => 'required|exists:item_types,id',
+            'item_type' => 'exists:item_types,id',
             'item_Entity' => 'required',
             'hidden' => 'nullable|integer',
             'name' => 'nullable|string',
