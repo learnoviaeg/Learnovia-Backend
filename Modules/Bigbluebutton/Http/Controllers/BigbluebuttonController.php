@@ -40,7 +40,7 @@ class BigbluebuttonController extends Controller
             'name' => 'Bigbluebutton',
             'module'=>'Bigbluebutton',
             'model' => 'BigbluebuttonModel',
-            'type' => 1,
+            'type' => 2,
             'active' => 1
         ]);
 
