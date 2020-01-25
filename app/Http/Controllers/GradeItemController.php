@@ -223,7 +223,7 @@ class GradeItemController extends Controller
             'plusfactor' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef' => 'nullable|numeric|between:0,99.99',
             'aggregationcoef2' => 'nullable|numeric|between:0,99.99',
-            'item_type' => 'required|exists:item_types,id',
+            'item_type' => 'exists:item_types,id',
             'item_Entity' => 'required',
             'hidden' => 'nullable|integer',
             'name' => 'nullable|string',
