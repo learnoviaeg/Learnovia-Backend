@@ -82,7 +82,7 @@ class AttendanceController extends Controller
             'name' => 'Attendance',
             'module' => 'Attendance',
             'model' => 'Attendance',
-            'type' => 1,
+            'type' => 2,
             'active' => 1
         ]);
 
