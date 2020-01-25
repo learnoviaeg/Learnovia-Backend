@@ -448,7 +448,7 @@ class FilesController extends Controller
         } else {
             $this->sortUp($fileLesson, $currentIndex, $request->index);
         }
-        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
+        $tempReturn = Lesson::find($fileLesson->lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, ' Successfully');
     }
 
