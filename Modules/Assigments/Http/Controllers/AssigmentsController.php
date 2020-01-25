@@ -69,7 +69,7 @@ class AssigmentsController extends Controller
             'name' => 'Assigments',
             'module'=>'Assigments',
             'model' => 'assignment',
-            'type' => 1,
+            'type' => 3,
             'active' => 1
         ]);
 

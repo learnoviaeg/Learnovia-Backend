@@ -159,6 +159,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/update', 'title' => 'update event']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/my-events', 'title' => 'get my event']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/all-events', 'title' => 'get all events']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/add-bulk', 'title' => 'add bulk events']);
+
 
             //Contact Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'contact/add', 'title' => 'add contact']);
