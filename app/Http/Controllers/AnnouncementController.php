@@ -258,9 +258,9 @@ class AnnouncementController extends Controller
         }
         return HelperController::api_response_format(201, $notificatin, 'Announcement Sent Successfully');*/
 
-        $anounce = AnnouncementController::get_announcement();
+        $anounce = AnnouncementController::get_announcement($request);
         // return $anounce;
-        $anouncenew = AnnouncementController::new_user_announcements();
+        $anouncenew = AnnouncementController::new_user_announcements($request);
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Sent Successfully');
     }
 
@@ -341,8 +341,8 @@ class AnnouncementController extends Controller
         ]);
 
         // return HelperController::api_response_format(201, $announce, 'Announcement Updated Successfully');
-        $anounce = AnnouncementController::get_announcement();
-        $anouncenew = AnnouncementController::new_user_announcements();
+        $anounce = AnnouncementController::get_announcement($request);
+        $anouncenew = AnnouncementController::new_user_announcements($request);
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Sent Successfully');
 
     }
@@ -375,8 +375,8 @@ class AnnouncementController extends Controller
                 ->delete();
         }
         $announce->delete();
-        $anounce = AnnouncementController::get_announcement();
-        $anouncenew = AnnouncementController::new_user_announcements();
+        $anounce = AnnouncementController::get_announcement($request);
+        $anouncenew = AnnouncementController::new_user_announcements($request);
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Deleted Successfully');
 //        return HelperController::api_response_format(200, $announce, 'Announcement Deleted Successfully');
     }
@@ -388,8 +388,11 @@ class AnnouncementController extends Controller
      * @return : return all announcement for this user.
      */
 
-    public function new_user_announcements()
+    public function new_user_announcements(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable',
+        ]);
         $user_id = Auth::user()->id;
         $user = User::find($user_id);
         $courses = array();
@@ -403,14 +406,15 @@ class AnnouncementController extends Controller
         }
         //get general Announcements
         $all_ann = array();
-        $all_ann['General Announcements'] = Announcement::where('assign', 'all')->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+        $all_ann['General Announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('assign', 'all')
+                    ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
         $g = 0;
         foreach ($all_ann['General Announcements'] as $all) {
             $all_ann['General Announcements'][$g]['attached_file'] = attachment::where('id', $all['attached_file'])->first();
             $g++;
         }
 
-        //get Class announcements
+        //get Class/segment announcements
         $uniq_seg = array_unique($seg_class);
         $class_level_id = array();
         $year_level_id = array();
@@ -421,7 +425,8 @@ class AnnouncementController extends Controller
             $segmentname = Segment::find($segmentclass->segment_id);
             $all_ann['segment'][$s]['name'] = $segmentname->name;
             $all_ann['segment'][$s]['id'] = $segmentname->id;
-            $all_ann['segment'][$s]['announcements'] = Announcement::where('segment_id', $segmentclass->segment_id)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+            $all_ann['segment'][$s]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('segment_id', $segmentclass->segment_id)
+                        ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
             foreach ($all_ann['segment'][$s]['announcements'] as $ann) {
                 $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
             }
@@ -430,7 +435,8 @@ class AnnouncementController extends Controller
                 $classname = Classes::find($scl->class_id);
                 $all_ann['class'][$cl]['name'] = $classname->name;
                 $all_ann['class'][$cl]['id'] = $classname->id;
-                $all_ann['class'][$cl]['announcements'] = Announcement::where('class_id', $scl->class_id)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                $all_ann['class'][$cl]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('class_id', $scl->class_id)
+                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
 
                 foreach ($all_ann['class'][$cl]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
@@ -450,7 +456,8 @@ class AnnouncementController extends Controller
                 $levelename = Level::find($yl->level_id);
                 $all_ann['level'][$l]['name'] = $levelename->name;
                 $all_ann['level'][$l]['id'] = $levelename->id;
-                $all_ann['level'][$l]['announcements'] = Announcement::where('level_id', $yl->level_id)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                $all_ann['level'][$l]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('level_id', $yl->level_id)
+                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
                 foreach ($all_ann['level'][$l]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
                 }
@@ -469,7 +476,8 @@ class AnnouncementController extends Controller
                 $typename = AcademicType::find($ayt->academic_type_id);
                 $all_ann['type'][$t]['name'] = $typename->name;
                 $all_ann['type'][$t]['id'] = $typename->id;
-                $all_ann['type'][$t]['announcements'] = Announcement::where('type_id', $ayt->academic_type_id)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                $all_ann['type'][$t]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('type_id', $ayt->academic_type_id)
+                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
                 foreach ($all_ann['type'][$t]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
                 }
@@ -477,7 +485,8 @@ class AnnouncementController extends Controller
                 $yearname = AcademicYear::find($ayt->academic_year_id);
                 $all_ann['year'][$y]['name'] = $yearname->name;
                 $all_ann['year'][$y]['id'] = $yearname->id;
-                $all_ann['year'][$y]['announcements'] = Announcement::where('year_id', $ayt->academic_year_id)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                $all_ann['year'][$y]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('year_id', $ayt->academic_year_id)
+                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
 
                 foreach ($all_ann['year'][$y]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
@@ -494,7 +503,9 @@ class AnnouncementController extends Controller
             $coursename = Course::find($cou);
             $all_ann['courses'][$co]['name'] = $coursename->name;
             $all_ann['courses'][$co]['id'] = $coursename->id;
-            $all_ann['courses'][$co]['announcements'] = Announcement::where('course_id', $cou)->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+            $all_ann['courses'][$co]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")
+                        ->where('course_id', $cou)->where('publish_date', '<=', Carbon::now())
+                            ->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
 
             foreach ($all_ann['courses'][$co]['announcements'] as $couann) {
                 $couann->attached_file = attachment::where('id', $couann->attached_file)->first();
@@ -512,8 +523,11 @@ class AnnouncementController extends Controller
      * @return : return all currently published announcement for this user .
      */
 
-    public function get_announcement()
+    public function get_announcement(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable',
+        ]);
         $user_id = Auth::user()->id;
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
             ->orderBy('created_at')
@@ -528,7 +542,8 @@ class AnnouncementController extends Controller
                 $annocument = announcement::find($announce_id);
                 if($annocument!= null){
                     if ($annocument->publish_date <= Carbon::now()) {
-                        $customize = announcement::whereId($announce_id)->first(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                        $customize = announcement::where('title', 'LIKE' , "%$request->search%")->whereId($announce_id)
+                                    ->first(['id', 'title', 'description', 'attached_file','start_date','due_date']);
                         $customize->seen = $not->read_at;
                         $notif->push($customize);
                     }
@@ -545,10 +560,10 @@ class AnnouncementController extends Controller
      * @return : return all currently published announcement for this user .
      */
 
-    public function get()
+    public function get(Request $request)
     {
-        $anounce = AnnouncementController::get_announcement();
-        $anouncenew = AnnouncementController::new_user_announcements();
+        $anounce = AnnouncementController::get_announcement($request);
+        $anouncenew = AnnouncementController::new_user_announcements($request);
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew]);
     }
 
@@ -606,7 +621,5 @@ class AnnouncementController extends Controller
                 $announce['type']=$type;
         }
         return HelperController::api_response_format(200, $announce);
-
-
     }
 }

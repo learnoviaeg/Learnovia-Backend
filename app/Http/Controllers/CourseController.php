@@ -63,7 +63,9 @@ class CourseController extends Controller
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
             'description' => 'string',
             'mandatory' => 'nullable',
-            'typical' => 'nullable|boolean'
+            'typical' => 'nullable|boolean',
+            'start_date' => 'required|date',
+            'end_date' =>'required|date|after:start_date'
         ]);
         $no_of_lessons = 4;
         $course = Course::firstOrCreate([
@@ -105,7 +107,9 @@ class CourseController extends Controller
                                 'course_id' => $course->id,
                                 'segment_class_id' => $segmentClass->id,
                                 'is_active' => 1,
-                                'typical' => $request->typical
+                                'typical' => $request->typical,
+                                'start_date' => $request->start_date,
+                                'end_date' => $request->end_date
                             ]);
                             $gradeCat = GradeCategory::firstOrCreate([
                                 'name' => 'Course Total',
@@ -555,6 +559,8 @@ class CourseController extends Controller
             'segment' => 'array',
             'segment.*' => 'exists:segments,id',
             'course' => 'required|exists:courses,id',
+            'start_date' => 'required|date',
+            'end_date' =>'required|date|after:start_date'
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
@@ -586,6 +592,10 @@ class CourseController extends Controller
                     $class_level = ClassLevel::checkRelation($class, $year_level->id);
                     $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
                     $course_Segment = CourseSegment::checkRelation($segment_class->id, $request->course);
+                    CourseSegment::where('id',$course_Segment->id)->update([
+                        'start_date' => $request->start_date,
+                        'end_date' => $request->end_date,
+                    ]);
                     $gradeCat = GradeCategory::firstOrCreate([
                         'name' => 'Course Total',
                         'course_segment_id' => $course_Segment->id,
