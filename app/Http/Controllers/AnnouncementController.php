@@ -31,14 +31,14 @@ class AnnouncementController extends Controller
 {
     /**
      *
-     * @Description : create an announcement. 
+     * @Description : create an announcement.
      * @param : Title, description, start_date, due_date and assign are required parameters.
      *          assign has 4 cases : all => announcement for all users.
      *                               level => announcement for all users in a specific level.
      *                               class => announcement for all users in a specific class.
      *                               year => announcement for all users in a specific year.
      *          attached_file and publish_date as optional parameters.
-     * @return : return all announcement of this user.  
+     * @return : return all announcement of this user.
      */
     public function announcement(Request $request)
     {
@@ -266,10 +266,10 @@ class AnnouncementController extends Controller
 
     /**
      *
-     * @Description : update an announcement. 
+     * @Description : update an announcement.
      * @param : id, title and description required parameters.
      *          attached_file, publish_date, start_date and due_date as optional parameters.
-     * @return : return all announcement of this user.  
+     * @return : return all announcement of this user.
     */
     public function update_announce(Request $request)
     {
@@ -349,9 +349,9 @@ class AnnouncementController extends Controller
 
     /**
      *
-     * @Description : delete_announcement deletes an announcement. 
+     * @Description : delete_announcement deletes an announcement.
      * @param : id of the announcement as a required parameter.
-     * @return : return all announcement of this user.  
+     * @return : return all announcement of this user.
     */
     public function delete_announcement(Request $request)
     {
@@ -383,9 +383,9 @@ class AnnouncementController extends Controller
 
  /**
      *
-     * @Description :new_user_announcements gets all announcements for a new user. 
+     * @Description :new_user_announcements gets all announcements for a new user.
      * @param : No parameters.
-     * @return : return all announcement for this user.  
+     * @return : return all announcement for this user.
      */
 
     public function new_user_announcements()
@@ -507,9 +507,9 @@ class AnnouncementController extends Controller
     }
  /**
      *
-     * @Description :get_announcement gets all announcements for logged in user. 
+     * @Description :get_announcement gets all announcements for logged in user.
      * @param : No parameters.
-     * @return : return all currently published announcement for this user .  
+     * @return : return all currently published announcement for this user .
      */
 
     public function get_announcement()
@@ -540,9 +540,9 @@ class AnnouncementController extends Controller
     }
  /**
      *
-     * @Description :get all announcements for logged in user. 
+     * @Description :get all announcements for logged in user.
      * @param : No parameters.
-     * @return : return all currently published announcement for this user .  
+     * @return : return all currently published announcement for this user .
      */
 
     public function get()
@@ -554,9 +554,9 @@ class AnnouncementController extends Controller
 
  /**
      *
-     * @Description :get an announcement  for logged in user. 
+     * @Description :get an announcement  for logged in user.
      * @param : No parameters.
-     * @return : return all currently published announcement for this user .  
+     * @return : return all currently published announcement for this user .
      */
 
     public function getAnnounceByID(Request $request){
@@ -564,7 +564,7 @@ class AnnouncementController extends Controller
         'announce_id' => 'required|integer|exists:announcements,id',
         ]);
 
-        $announce=Announcement::where ('id',$request->announce_id)->first(['id','title','description','start_date','due_date','assign',
+        $announce=Announcement::where ('id',$request->announce_id)->with('attachment')->first(['id','title','description','start_date','due_date','assign',
             'class_id','year_id','level_id','course_id','type_id','segment_id']);
        // if(isset($announce->))
 

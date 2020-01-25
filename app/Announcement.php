@@ -21,4 +21,10 @@ class Announcement extends Model
         'segment_id',
         'publish_date'
     ];
+    public function attachment()
+    {
+        if($this->image == null)
+            $this->image= 1;
+        return $this->hasOne('App\attachment', 'id', 'image');
+    }
 }
