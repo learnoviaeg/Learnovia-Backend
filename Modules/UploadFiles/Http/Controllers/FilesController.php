@@ -351,7 +351,7 @@ class FilesController extends Controller
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
             'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-            'lesson_id'        => 'required|integer|exists:lessons,id',
+            'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable',
         ]);
         $file = file::find($request->id);
