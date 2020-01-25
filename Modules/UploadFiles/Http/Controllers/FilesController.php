@@ -31,7 +31,7 @@ class FilesController extends Controller
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add', 'title' => 'add file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/assign', 'title' => 'assign file']);        
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/assign', 'title' => 'assign file']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update', 'title' => 'update file']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete', 'title' => 'delete file']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle', 'title' => 'toggle file']);
@@ -74,7 +74,7 @@ class FilesController extends Controller
         $role->givePermissionTo('site/media/edit');
         $role->givePermissionTo('file/assign');
         $role->givePermissionTo('media/assign');
-        
+
         Component::create([
             'name' => 'Media',
             'module' => 'UploadFiles',
@@ -182,7 +182,8 @@ class FilesController extends Controller
             'description' => 'string|min:1',
             'Imported_file' => 'required|array',
             'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
-            'lesson_id' => 'required|array|exists:lessons,id',
+            'lesson_id' => 'required|array',
+            'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable',
         ]);
 
@@ -214,7 +215,7 @@ class FilesController extends Controller
                 $check = $file->save();
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-                $usersIDs = Enroll::where('course_segment', $tempLesson->courseSegment->id)->pluck('user_id')->toarray();
+                $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $tempLesson->courseSegment->id)->pluck('user_id')->toarray())->get('id');
                 User::notify([
                     'id' => $file->id,
                     'message' => 'new file is added',
@@ -224,7 +225,7 @@ class FilesController extends Controller
                     'class_id' => $class_id,
                     'type' => 'file',
                     'link' => $file->url,
-                    'publish_date' => $publishdate, 
+                    'publish_date' => $publishdate,
                 ]);
                 if ($check) {
                     $fileLesson = new FileLesson;
