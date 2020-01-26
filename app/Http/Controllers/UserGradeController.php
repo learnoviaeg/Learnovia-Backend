@@ -123,8 +123,7 @@ class UserGradeController extends Controller
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if ($courseSegment == null)
             return HelperController::api_response_format(200, null, 'This Course not assigned to this class');
-        $users = User::whereIn('id', Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('id'));
-
+        $users = User::whereIn('id', Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('user_id'));
         if($request->filled('user'))
             $users->whereId($request->user);
 

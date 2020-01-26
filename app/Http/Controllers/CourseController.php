@@ -620,27 +620,31 @@ class CourseController extends Controller
     {
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id',
-            'class_id'  => 'required|exists:classes,id'
         ]);
         $result = [];
-        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class_id, $request->course_id);
-        if ($courseSegment != null) {
-            $i = 0;
-            foreach ($courseSegment->lessons as $lesson) {
-                $components = LessonComponent::whereLesson_id($lesson->id)->get();
-                $result[$i]['name'] = $lesson->name;
-                $result[$i]['data'] = [];
-                foreach ($components as $component) {
-                    eval('$res = \Modules\\' . $component->module . '\Entities\\' . $component->model . '::find(' . $component->comp_id . ');');
-                    if ($res == null)
-                        continue;
-                    $res->flag = $component->model;
-                    $result[$i]['data'][] = $res;
+        $courseSegments = CourseSegment::whereIn('id' , Auth::user()->enroll->pluck('course_segment'))->get();
+        $j = 0;
+        foreach($courseSegments as $courseSegment){
+            if ($courseSegment != null) {
+                $result[$j] = [];
+                $i = 0;
+                foreach ($courseSegment->lessons as $lesson) {
+                    $components = LessonComponent::whereLesson_id($lesson->id)->get();
+                    $result[$j][$i]['name'] = $lesson->name;
+                    $result[$j][$i]['data'] = [];
+                    foreach ($components as $component) {
+                        eval('$res = \Modules\\' . $component->module . '\Entities\\' . $component->model . '::find(' . $component->comp_id . ');');
+                        if ($res == null)
+                            continue;
+                        $res->flag = $component->model;
+                        $result[$j][$i]['data'][] = $res;
+                    }
+                    $i++;
                 }
-                $i++;
             }
+            $j++;
         }
-        return HelperController::api_response_format(200, $result);
+        return HelperController::api_response_format(200, $result , null);
     }
 
     /**
