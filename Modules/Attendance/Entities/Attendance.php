@@ -150,9 +150,17 @@ class Attendance extends Model
             return $value;
         $temp = [];
         $value = unserialize($value);
-        foreach ($value as $classes){
-                $temp[] = $classes;
+        if(count($value) == 1){
+            foreach ($value as $classes){
+                    $temp[] = $classes;
+            }
         }
+        else{
+            foreach ($value as $classes){
+                foreach($classes as $class)
+                    $temp[] = $class;
+        }
+    }
         return $temp;
     }
 
@@ -162,8 +170,16 @@ class Attendance extends Model
             return $value;
         $temp = [];
         $value = unserialize($value);
-        foreach ($value as $levels){
-            $temp[] = $levels;
+        if(count($value) == 1){
+            foreach ($value as $levels){
+                    $temp[] = $levels;
+            }
+        }
+        else{
+            foreach ($value as $levels){
+                foreach($levels as $level)
+                    $temp[] = $level;
+            }
         }
         return $temp;
     }
@@ -174,8 +190,16 @@ class Attendance extends Model
             return $value;
         $temp = [];
         $value = unserialize($value);
-        foreach ($value as $courses){
-                $temp[] = $courses;
+        if(count($value) == 1){
+            foreach ($value as $Courses){
+                    $temp[] = $Courses;
+            }
+        }
+        else{
+            foreach ($value as $Courses){
+                foreach($Courses as $Course)
+                    $temp[] = $Course;
+            }
         }
         return $temp;
     }
