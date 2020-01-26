@@ -173,20 +173,8 @@ class AssigmentsController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'Lesson_id' => 'required|array|exists:lessons,id',
-            'is_graded' => 'required|boolean',
-            'mark' => 'required|integer',
-            'allow_attachment' => 'required|integer|min:0|max:3',
-            'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
-            'closing_date' => 'required|date|date_format:Y-m-d H:i:s',
-            'class' => 'required|exists:classes,id',
-            'course' => 'required|exists:courses,id',
-            'visible'=> 'required|boolean'
+            'content' => 'string',
         ]);
-
-        $segments = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
-        if($segments == null)
-            return HelperController::api_response_format(400 , [], 'No Active segment to this class in this course');
         if (!isset($request->file) && !isset($request->content)) {
             return HelperController::api_response_format(400, $body = [], $message = 'please enter file or content');
         }
@@ -202,51 +190,10 @@ class AssigmentsController extends Controller
             }
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
-        if (isset($request->opening_date)) {
-            $assigment->start_date = $request->opening_date;
-        }
-        if (isset($request->mark)) {
-            $assigment->mark = $request->mark;
-        }
-
-        if (isset($request->content)) 
-            $assigment->content = $request->content;
-
-        if (isset($request->closing_date)) 
-        $assigment->due_date = $request->closing_date;
-        
+        if($request->filled('content'))
+            $assigment->content = $request->content;    
         $assigment->name = $request->name;
-        $assigment->is_graded = $request->is_graded;
-        $assigment->save();
-        $data = array(
-            "course_segment" => $segments->id,
-            "assignments_id" => $assigment->id,
-            "submit_date" => Carbon::now(),
-            "publish_date"=>$request->opening_date,
-            "class"=>$request->class
-        );
-        $this->assignAsstoUsers($data);
-
-        foreach($request->Lesson_id as $lessons)
-        {
-            $assilesson=AssignmentLesson::firstOrCreate(
-                [
-                    'assignment_id' => $assigment->id,
-                    'lesson_id' => $lessons,
-                    'publish_date'=>$request->opening_date,
-                    'visible' => $request->visible
-                ]
-            );        
-    
-            LessonComponent::create([
-                'lesson_id' => $lessons,
-                'comp_id' => $assigment->id,
-                'module' => 'Assigments',
-                'model' =>'assignment',
-                'index' => LessonComponent::getNextIndex($lessons)
-            ]);
-        }
-        
+        $assigment->save();        
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
     }
 
@@ -257,16 +204,11 @@ class AssigmentsController extends Controller
     {
         $request->validate([
             'id' => 'required|exists:assignments,id',
-            'name' => 'required|string',
+            'name' => 'string',
             'file_description' => 'string',
-            'is_graded'=>'boolean',
-            'grade_category'=>'exists:grade_categories,id',
-            'mark' => 'integer',
-            'allow_attachment' => 'integer|min:0|max:3',
-            'closing_date' => 'date|date_format:Y-m-d H:i:s',
-            'opening_date' => 'date|date_format:Y-m-d H:i:s',
+            'content'  => 'string',
+    
         ]);
-
         $assigment = assignment::find($request->id);
         $CheckIfAnswered= UserAssigment::where('assignment_id',$request->id)->where('submit_date','!=',null)->get();
         if(count($CheckIfAnswered) > 0)
@@ -282,46 +224,62 @@ class AssigmentsController extends Controller
             
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
-        if (isset($request->content)) 
+        if ($request->filled('content')) 
             $assigment->content = $request->content;
-        
-        if (isset($request->is_graded)) 
-            $assigment->is_graded = $request->is_graded;
-        
-        if (isset($request->closing_date)) 
-            $assigment->due_date = $request->closing_date;
-
-        if (isset($request->opening_date)) 
-         $assigment->start_date = $request->opening_date;
-
-        if (isset($request->mark)) 
-            $assigment->mark = $request->mark;
-            
-        if (isset($request->grade_category)) 
-            $assigment->grade_category = $request->grade_category;  
-
-        if (isset($request->allow_attachment)) 
-            $assigment->allow_attachment = $request->allow_attachment;   
-            
-        
-        $assigment->name = $request->name;
+        if ($request->filled('name')) 
+            $assigment->name = $request->name;
         $assigment->save();
 
-        // return $assigment;
-        $usersIDs = UserAssigment::where('assignment_id', $assigment->id)->pluck('user_id')->toArray();
+        return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment edited');
+    }
+    public function updateAssignmentLesson(Request $request)
+    {
+        $request->validate([
+            'is_graded' => 'boolean',
+            'mark' => 'integer',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'assignment_id' => 'required|exists:assignments,id',
+            'allow_attachment' => 'integer|min:0|max:3',
+            'opening_date' => 'date |date_format:Y-m-d H:i:s|before:closing_date',
+            'closing_date' => 'date |date_format:Y-m-d H:i:s',
+            'visible' => 'boolean',
+            'publish_date' => 'date |date_format:Y-m-d H:i:s|before:closing_date',
+            'grade_category'=>'exists:grade_categories,id',
 
-        $lessonId=AssignmentLesson::where('assignment_id',$request->assignment_id)->pluck('lesson_id')->first();
+        ]);
+        $AssignmentLesson=AssignmentLesson::where('assignment_id',$request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
+        if(!isset($AssignmentLesson)){
+            return HelperController::api_response_format(400, $message = 'Assignment Lesson Not Found');
+        }  
+         if($request->filled('is_graded'))
+            $AssignmentLesson->is_graded = $request->is_graded;
+        if($request->filled('mark'))
+            $AssignmentLesson->mark = $request->mark;
+        if($request->filled('grade_category'))
+            $AssignmentLesson->grade_category = $request->grade_category;
+        if($request->filled('visible'))
+            $AssignmentLesson->visible = $request->visible;
+        if($request->filled('allow_attachment'))
+            $AssignmentLesson->allow_attachment = $request->allow_attachment;
+        if($request->filled('mark'))
+            $AssignmentLesson->start_date = $request->opening_date;
+        if($request->filled('closing_date'))
+            $AssignmentLesson->due_date = $request->closing_date;
+        if($request->filled('publish_date'))
+            $AssignmentLesson->publish_date = $request->publish_date;
+        $AssignmentLesson->save();
 
+
+        $usersIDs = UserAssigment::where('assignment_id',$request->assignment_id)->pluck('user_id')->toArray();
+        $lessonId=AssignmentLesson::where('assignment_id',$request->lesson_id)->pluck('lesson_id')->first();
         $courseSegment=Lesson::where('id',$lessonId)->pluck('course_segment_id')->first();
         $courseID=CourseSegment::where('id',$courseSegment)->pluck('course_id')->first();
-
-        // $classId=HelperController::GetClassIdFromCourseSegment($courseSegment);
         $segmentClass=CourseSegment::where('id',$courseSegment)->pluck('segment_class_id')->first();
         $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
         $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
 
         user::notify([
-            'id' => $assigment->id,
+            'id' => $request->assignment_id,
             'message' => 'Assignment is updated',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
@@ -329,34 +287,8 @@ class AssigmentsController extends Controller
             'class_id'=>$classId,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
-            'publish_date' => $assigment->start_date
+            'publish_date' => $AssignmentLesson->start_date
         ]);
-
-        return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment edited');
-    }
-    public function updateAssignmentLesson(Request $request)
-    {
-        $request->validate([
-            'is_graded' => 'required|boolean',
-            'mark' => 'required|integer',
-            'lesson_id' => 'required|integer|exists:lessons,id',
-            'assignment_id' => 'required|exists:assignments,id',
-            'allow_attachment' => 'required|integer|min:0|max:3',
-            'opening_date' => 'required|date |date_format:Y-m-d H:i:s|before:closing_date',
-            'closing_date' => 'required|date |date_format:Y-m-d H:i:s',
-            'visiable' => 'required|boolean',
-        ]);
-        $AssignmentLesson=AssignmentLesson::where('assignment_id',$request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
-        if(!isset($AssignmentLesson)){
-            return HelperController::api_response_format(400, $message = 'Assignment Lesson Not Found');
-
-        }            
-            $AssignmentLesson->is_graded = $request->is_graded;
-            $AssignmentLesson->mark = $request->mark;
-            $AssignmentLesson->allow_attachment = $request->allow_attachment;
-            $AssignmentLesson->start_date = $request->opening_date;
-            $AssignmentLesson->due_date = $request->closing_date;
-            $AssignmentLesson->save();
             return HelperController::api_response_format(200,$AssignmentLesson, $message = 'Assignment Lesson Updated Successfully');
     }
 
@@ -637,19 +569,53 @@ class AssigmentsController extends Controller
     }
     public function AssignAssignmentToLesson(Request $request)
     {
-        try {
-            $request->validate([
-                'assignment_id' => 'required|exists:assignments,id',
-                'lesson_id' => 'required|exists:lessons,id'
-            ]);
-            $assigment = assignment::find($request->assignment_id);
+     $request->validate([
+        'assignment_id' => 'required|exists:assignments,id',
+        'lesson_id' => 'required|exists:lessons,id',
+        'is_graded' => 'required|boolean',
+        'mark' => 'required|integer',
+        'allow_attachment' => 'required|integer|min:0|max:3',
+        'publish_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
+        'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
+        'closing_date' => 'date|date_format:Y-m-d H:i:s',
+        'grade_category'=>'exists:grade_categories,id',
+        'scale'=>'exists:scales,id',
+        'visible'=> 'boolean',
+        ]);
+        $assignment_lesson = new AssignmentLesson;
+        $assignment_lesson->lesson_id = $request->lesson_id;
+        $assignment_lesson->assignment_id = $request->assignment_id;
+        $assignment_lesson->publish_date = $request->publish_date;
+        $assignment_lesson->start_date = $request->opening_date;
+        $assignment_lesson->mark = $request->mark;
+        $assignment_lesson->is_graded = $request->is_graded;
+        if($request->filled('closing_date'))
+            $assignment_lesson->due_date = $request->closing_date;
+        if($request->filled('scale'))
+            $assignment_lesson->scale_id = $request->scale;
+        if($request->filled('visible'))
+            $assignment_lesson->visible = $request->visible;
+        if($request->filled('grade_category'))
+            $assignment_lesson->grade_category = $request->grade_category;
+        $assignment_lesson->save();
 
-            $assignment_lesson = AssignmentLesson::create(['lesson_id' => $request->lesson_id
-            ,'assignment_id'=>$request->assignment_id
-            ,'publish_date'=>$assigment->start_date]);
-            return HelperController::api_response_format(200, $assignment_lesson, 'Assigned Successfully');
-    } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
+        LessonComponent::create([
+            'lesson_id' => $request->lesson_id,
+            'comp_id' => $request->assignment_id,
+            'module' => 'Assigments',
+            'model' =>'assignment',
+            'index' => LessonComponent::getNextIndex($request->lesson_id),
+        ]);
+        $lesson = Lesson::find($request->lesson_id);
+        $data = array(
+            "course_segment" => $lesson->course_segment_id,
+            "assignments_id" => $request->assignment_id,
+            "submit_date" => Carbon::now(),
+            "publish_date"=>$request->opening_date,
+            "class"=>$request->class
+        );
+        $this->assignAsstoUsers($data);
+        return HelperController::api_response_format(200, $assignment_lesson, 'Assignment is assigned to a lesson Successfully');
         }
-    }
+    
 }
