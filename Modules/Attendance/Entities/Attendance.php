@@ -34,9 +34,9 @@ class Attendance extends Model
             'levels' => 'required|array|min:1',
             'levels.*.id' => 'exists:levels,id',
             'levels.*.classes' => 'required|array',
-            'levels.*.classes.*' => 'required|exists:classes,id',
+            'levels..classes.' => 'required|exists:classes,id',
             'levels.*.courses' => 'required|array',
-            'levels.*.courses.*' => 'required|exists:courses,id',
+            'levels..courses.' => 'required|exists:courses,id',
             'levels.*.grade_category_name' => 'required|string|exists:grade_categories,name',
         ];
     }
@@ -58,12 +58,12 @@ class Attendance extends Model
             'levels' => 'required_if:graded,1|array|min:1',
             'levels.*.id' => 'required_if:graded,1|exists:levels,id',
             'levels.*.classes' => 'required_if:graded,1|array',
-            'levels.*.classes.*' => 'required|exists:classes,id',
+            'levels..classes.' => 'required|exists:classes,id',
             'levels.*.periods' => 'required_if:graded,1|array',
-            'levels.*.periods.*.courses' => 'required|exists:courses,id',
-            'levels.*.periods.*.from' => 'required|date',
-            'levels.*.periods.*.to' => 'required|date',
-            'levels.*.periods.*.grade_category_name' => 'required|string|exists:grade_categories,name',
+            'levels..periods..courses' => 'required|exists:courses,id',
+            'levels..periods..from' => 'required|date',
+            'levels..periods..to' => 'required|date',
+            'levels..periods..grade_category_name' => 'required|string|exists:grade_categories,name',
         ];
         $array['sessions.time'] = 'required|array|size:' . $times;
         $array[ 'sessions.time.*.start'] = 'required|regex:/(\d+\:\d+)/';
@@ -152,8 +152,12 @@ class Attendance extends Model
         $value = unserialize($value);
         foreach ($value as $classes){
                 $temp[] = $classes;
+                if(gettype($classes) =='array' || gettype($classes) =='array'  ){
+                    foreach($classes as $class)
+                    $temp[] = $class;
+                }
         }
-        return $temp;
+         return $temp;
     }
 
     public function getAllowedLevelsAttribute($value)
@@ -163,7 +167,11 @@ class Attendance extends Model
         $temp = [];
         $value = unserialize($value);
         foreach ($value as $levels){
-            $temp[] = $levels;
+                $temp[] = $levels;
+                if(gettype($levels) =='array' || gettype($levels) =='array'  ){
+                    foreach($levels as $level)
+                    $temp[] = $level;
+                }
         }
         return $temp;
     }
@@ -176,6 +184,10 @@ class Attendance extends Model
         $value = unserialize($value);
         foreach ($value as $courses){
                 $temp[] = $courses;
+                if(gettype($courses) =='array' || gettype($courses) =='array'  ){
+                    foreach($courses as $course)
+                    $temp[] = $course;
+                }
         }
         return $temp;
     }

@@ -28,9 +28,7 @@ class Sendnotify implements ShouldQueue
         $this->title=$title;
         $this->type=$type;
         $this->publish_date=$publish_date;
-        foreach ($this->touserid as $u){
-            dd($u->id);
-        }
+       
     }
 
     /**
