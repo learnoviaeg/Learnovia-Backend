@@ -440,13 +440,38 @@ class AttendanceController extends Controller
     {
         $enrolls=Enroll::where('user_id',Auth::id())->get();
         $CourseSeg=$enrolls->pluck('course_segment');
-        $role=$enrolls->pluck('role_id')->first();
+        // return $CourseSeg;
+        // $role=$enrolls->pluck('role_id')->first();
 
-        $All_Sessions=AttendanceSession::whereIn('course_segment_id', $CourseSeg)->get();
+        $attend_course=AttendanceSession::whereIn('course_segment_id', $CourseSeg)->pluck('attendance_id');
+        
+        $attendancesNull=AttendanceSession::whereNull('course_segment_id')->pluck('attendance_id');
+        $All_attend=array_merge($attend_course->toArray(),$attendancesNull->toArray());
+        $attendances=Attendance::whereIn('id',$All_attend)->get();
+        foreach($attendances as $attendance)
+        {
+            $req = new Request([
+                'year' => $attendance->year_id,
+                'type' => [$attendance->type_id],
+                'levels' => $attendance->allowed_levels,
+                'classes' => $attendance->allowed_classes,
+                'segments' => [$attendance->segment_id],
+                'courses' => $attendance->allowed_courses,
+            ]);
+            $courseseg=GradeCategoryController::getCourseSegmentWithArray($req);
+            // return $courseseg;
+            if(isset($courseseg) && isset($CourseSeg))
+            {
+                $intersecCourseSeg=array_intersect($courseseg->toArray(),$CourseSeg->toArray());
+                if(isset($intersecCourseSeg))
+                    $attends[]=$attendance->id;
+            }
+        }
+        $All_sessions=AttendanceSession::whereIn('attendance_id',$attends)->get();
 
         ////if user is teacher ///if($role == 4)
         if($request->user()->can('site/course/teacher'))
-            return HelperController::api_response_format(200, $All_Sessions, 'there is all your sessions');
+            return HelperController::api_response_format(200, $All_sessions, 'there is all your sessions');
 
         ////get all attendance assoicated the user|student ///if($role == 3)
         if($request->user()->can('site/course/student'))
