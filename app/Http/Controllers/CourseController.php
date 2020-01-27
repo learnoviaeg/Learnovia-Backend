@@ -89,49 +89,49 @@ class CourseController extends Controller
             $course->mandatory = $request->mandatory;
             $course->save();
         }
-        foreach ($request->year as $year) {
-            # code...
-            foreach ($request->type as $type) {
+        if($request->filled('year')){
+            foreach ($request->year as $year) {
                 # code...
-                $yeartype = AcademicYearType::checkRelation($year, $type);
-                foreach ($request->level as $level) {
+                foreach ($request->type as $type) {
                     # code...
-                    $yearlevel = YearLevel::checkRelation($yeartype->id, $level);
-                    foreach ($request->class as $class) {
+                    $yeartype = AcademicYearType::checkRelation($year, $type);
+                    foreach ($request->level as $level) {
                         # code...
-                        $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
-                        foreach ($request->segment as $segment) {
+                        $yearlevel = YearLevel::checkRelation($yeartype->id, $level);
+                        foreach ($request->class as $class) {
                             # code...
-                            $segmentClass = SegmentClass::checkRelation($classLevel->id, $segment);
-                            $courseSegment = CourseSegment::firstOrCreate([
-                                'course_id' => $course->id,
-                                'segment_class_id' => $segmentClass->id,
-                                'is_active' => 1,
-                                'typical' => $request->typical,
-                                'start_date' => $request->start_date,
-                                'end_date' => $request->end_date
-                            ]);
-                            $gradeCat = GradeCategory::firstOrCreate([
-                                'name' => 'Course Total',
-                                'course_segment_id' => $courseSegment->id,
-                                'id_number' => $yearlevel->id
-                            ]);
-                            if ($request->filled('no_of_lessons')) {
-                                $no_of_lessons = $request->no_of_lessons;
-                            }
-
-                            for ($i = 1; $i <= $no_of_lessons; $i++) {
-                                $courseSegment->lessons()->firstOrCreate([
-                                    'name' => 'Lesson ' . $i,
-                                    'index' => $i,
+                            $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
+                            foreach ($request->segment as $segment) {
+                                # code...
+                                $segmentClass = SegmentClass::checkRelation($classLevel->id, $segment);
+                                $courseSegment = CourseSegment::firstOrCreate([
+                                    'course_id' => $course->id,
+                                    'segment_class_id' => $segmentClass->id,
+                                    'is_active' => 1,
+                                    'typical' => $request->typical,
+                                    'start_date' => $request->start_date,
+                                    'end_date' => $request->end_date
                                 ]);
+                                $gradeCat = GradeCategory::firstOrCreate([
+                                    'name' => 'Course Total',
+                                    'course_segment_id' => $courseSegment->id,
+                                    'id_number' => $yearlevel->id
+                                ]);
+                                if ($request->filled('no_of_lessons')) {
+                                    $no_of_lessons = $request->no_of_lessons;
+                                }
+                                for ($i = 1; $i <= $no_of_lessons; $i++) {
+                                    $courseSegment->lessons()->firstOrCreate([
+                                        'name' => 'Lesson ' . $i,
+                                        'index' => $i,
+                                    ]);
+                                }
                             }
                         }
                     }
                 }
             }
         }
-
         $course->attachment;
         return HelperController::api_response_format(201, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Created Successfully');
     }
