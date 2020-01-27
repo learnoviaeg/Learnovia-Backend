@@ -150,18 +150,14 @@ class Attendance extends Model
             return $value;
         $temp = [];
         $value = unserialize($value);
-        if(count($value) > 1){
-            foreach ($value as $classes){
-                foreach($classes as $class)
-                    $temp[] = $class;
-            }
-        }
-        else{
-            foreach ($value as $classes){
+        foreach ($value as $classes){
                 $temp[] = $classes;
+                if(gettype($classes) =='array' || gettype($classes) =='array'  ){
+                    foreach($classes as $class)
+                    $temp[] = $class;
+                }
         }
-    }
-        return $temp;
+         return $temp;
     }
 
     public function getAllowedLevelsAttribute($value)
@@ -170,16 +166,12 @@ class Attendance extends Model
             return $value;
         $temp = [];
         $value = unserialize($value);
-        if(count($value) > 1){
-            foreach ($value as $levels){
-                foreach($levels as $level)
-                    $temp[] = $level;
-            }
-        }
-        else{
-            foreach ($value as $levels){
+        foreach ($value as $levels){
                 $temp[] = $levels;
-            }
+                if(gettype($levels) =='array' || gettype($levels) =='array'  ){
+                    foreach($levels as $level)
+                    $temp[] = $level;
+                }
         }
         return $temp;
     }
@@ -190,16 +182,12 @@ class Attendance extends Model
             return $value;
         $temp = [];
         $value = unserialize($value);
-        if(count($value) > 1){
-            foreach ($value as $Courses){
-                foreach($Courses as $Course)
-                    $temp[] = $Course;
-            }
-        }
-        else{
-            foreach ($value as $Courses){
-                $temp[] = $Courses;
-        }
+        foreach ($value as $courses){
+                $temp[] = $courses;
+                if(gettype($courses) =='array' || gettype($courses) =='array'  ){
+                    foreach($courses as $course)
+                    $temp[] = $course;
+                }
         }
         return $temp;
     }
