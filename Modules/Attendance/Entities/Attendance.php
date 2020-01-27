@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Attendance extends Model
 {
-    protected $fillable = ['name', 'type', 'graded', 'allowed_courses','start_date','end_date','year_id','segment_id','type_id', 'allowed_classes', 'allowed_levels'];
+    protected $fillable = ['name', 'type', 'graded', 'allowed_courses', 'start_date', 'end_date', 'year_id', 'segment_id', 'type_id', 'allowed_classes', 'allowed_levels'];
     public static $FIRST_TYPE = 1;
     public static $SECOND_TYPE = 2;
     public function session()
@@ -34,9 +34,9 @@ class Attendance extends Model
             'levels' => 'required|array|min:1',
             'levels.*.id' => 'exists:levels,id',
             'levels.*.classes' => 'required|array',
-            'levels.*.classes.*' => 'required|exists:classes,id',
+            'levels..classes.' => 'required|exists:classes,id',
             'levels.*.courses' => 'required|array',
-            'levels.*.courses.*' => 'required|exists:courses,id',
+            'levels..courses.' => 'required|exists:courses,id',
             'levels.*.grade_category_name' => 'required|string|exists:grade_categories,name',
         ];
     }
@@ -58,16 +58,16 @@ class Attendance extends Model
             'levels' => 'required_if:graded,1|array|min:1',
             'levels.*.id' => 'required_if:graded,1|exists:levels,id',
             'levels.*.classes' => 'required_if:graded,1|array',
-            'levels.*.classes.*' => 'required|exists:classes,id',
+            'levels..classes.' => 'required|exists:classes,id',
             'levels.*.periods' => 'required_if:graded,1|array',
-            'levels.*.periods.*.courses' => 'required|exists:courses,id',
-            'levels.*.periods.*.from' => 'required|date',
-            'levels.*.periods.*.to' => 'required|date',
-            'levels.*.periods.*.grade_category_name' => 'required|string|exists:grade_categories,name',
+            'levels..periods..courses' => 'required|exists:courses,id',
+            'levels..periods..from' => 'required|date',
+            'levels..periods..to' => 'required|date',
+            'levels..periods..grade_category_name' => 'required|string|exists:grade_categories,name',
         ];
         $array['sessions.time'] = 'required|array|size:' . $times;
-        $array[ 'sessions.time.*.start'] = 'required|regex:/(\d+\:\d+)/';
-        $array[ 'sessions.time.*.end'] = 'required|regex:/(\d+\:\d+)/';
+        $array['sessions.time.*.start'] = 'required|regex:/(\d+\:\d+)/';
+        $array['sessions.time.*.end'] = 'required|regex:/(\d+\:\d+)/';
         return $array;
     }
 
@@ -130,15 +130,15 @@ class Attendance extends Model
             }
         }
         return $alldays;
-
     }
 
     public static function getHolidays()
     {
         return ['friday', 'saturday'];
     }
-    public static function check_in_array($all,$small){
-        if( count(array_intersect($small, $all)) == count($small)){
+    public static function check_in_array($all, $small)
+    {
+        if (count(array_intersect($small, $all)) == count($small)) {
             return true;
         }
         return false;
@@ -146,38 +146,32 @@ class Attendance extends Model
 
     public function getAllowedClassesAttribute($value)
     {
-        if(is_null($value))
+        if (is_null($value))
             return $value;
         $temp = [];
         $value = unserialize($value);
-        if(count($value) > 1){
-            foreach ($value as $classes){
-                foreach($classes as $class)
+        foreach ($value as $classes) {
+            if (gettype($classes) == 'array' || gettype($classes) == 'array') {
+                foreach ($classes as $class)
                     $temp[] = $class;
+            } else {
+                $temp[] = $classes;
             }
         }
-        else{
-            foreach ($value as $classes){
-                $temp[] = $classes;
-        }
-    }
         return $temp;
     }
 
     public function getAllowedLevelsAttribute($value)
     {
-        if(is_null($value))
+        if (is_null($value))
             return $value;
         $temp = [];
         $value = unserialize($value);
-        if(count($value) > 1){
-            foreach ($value as $levels){
-                foreach($levels as $level)
+        foreach ($value as $levels) {
+            if (gettype($levels) == 'array' || gettype($levels) == 'array') {
+                foreach ($levels as $level)
                     $temp[] = $level;
-            }
-        }
-        else{
-            foreach ($value as $levels){
+            } else {
                 $temp[] = $levels;
             }
         }
@@ -186,20 +180,17 @@ class Attendance extends Model
 
     public function getAllowedCoursesAttribute($value)
     {
-        if(is_null($value))
+        if (is_null($value))
             return $value;
         $temp = [];
         $value = unserialize($value);
-        if(count($value) > 1){
-            foreach ($value as $Courses){
-                foreach($Courses as $Course)
-                    $temp[] = $Course;
+        foreach ($value as $courses) {
+            if (gettype($courses) == 'array' || gettype($courses) == 'array') {
+                foreach ($courses as $course)
+                    $temp[] = $course;
+            } else {
+                $temp[] = $courses;
             }
-        }
-        else{
-            foreach ($value as $Courses){
-                $temp[] = $Courses;
-        }
         }
         return $temp;
     }

@@ -222,10 +222,11 @@ class AssigmentsController extends Controller
             $request->validate([
                 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             ]);
-            if (isset($request->file_description)) 
+            if (isset($request->file_description)) {
                 $description = $request->file_description;
             
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
+        }
         }
         if ($request->filled('content')) 
             $assigment->content = $request->content;
@@ -280,7 +281,6 @@ class AssigmentsController extends Controller
         $segmentClass=CourseSegment::where('id',$courseSegment)->pluck('segment_class_id')->first();
         $ClassLevel=SegmentClass::where('id',$segmentClass)->pluck('class_level_id')->first();
         $classId=ClassLevel::where('id',$ClassLevel)->pluck('class_id')->first();
-
         user::notify([
             'id' => $request->assignment_id,
             'message' => 'Assignment is updated',
