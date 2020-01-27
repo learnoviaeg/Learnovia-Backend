@@ -9,7 +9,7 @@ class ExcelController extends Controller
 {
     /**
      * Import enroll/courses/users depended on type of import
-     * 
+     *
      * @param  [string] type
      * @param  [string .. path] file
      * @return [string] Data Imported Successfully
@@ -17,7 +17,7 @@ class ExcelController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xls,xlsx',
+            'file' => 'required|mimes:xls,xlsx,csv',
             'type' => 'required',
         ]);
         $type = $request->type;
