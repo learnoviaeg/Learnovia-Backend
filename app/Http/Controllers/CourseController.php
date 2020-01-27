@@ -49,7 +49,7 @@ class CourseController extends Controller
         $request->validate([
             'name' => 'required',
             'category' => 'required|exists:categories,id',
-            'year' => 'array|required',
+            'year' => 'array',
             'year.*' => 'required|exists:academic_years,id',
             'type' => 'array|required_with:year',
             'type.*' => 'exists:academic_types,id',
@@ -64,8 +64,8 @@ class CourseController extends Controller
             'description' => 'string',
             'mandatory' => 'nullable',
             'typical' => 'nullable|boolean',
-            'start_date' => 'required|date',
-            'end_date' =>'required|date|after:start_date'
+            'start_date' => 'required_with:year|date',
+            'end_date' =>'required_with:year|date|after:start_date'
         ]);
         $no_of_lessons = 4;
         $course = Course::firstOrCreate([
