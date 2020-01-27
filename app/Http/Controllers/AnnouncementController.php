@@ -340,10 +340,9 @@ class AnnouncementController extends Controller
             'publish_date' => $publishdate
         ]);
 
-        // return HelperController::api_response_format(201, $announce, 'Announcement Updated Successfully');
         $anounce = AnnouncementController::get_announcement($request);
         $anouncenew = AnnouncementController::new_user_announcements($request);
-        return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Sent Successfully');
+        return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Updated Successfully');
 
     }
 

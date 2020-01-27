@@ -296,7 +296,10 @@ class CourseController extends Controller
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
                 $flag->year = AcademicYear::find($AC_type->academic_type_id)->name;
                 $flag->type = AcademicYear::find($AC_type->academic_type_id)->name;
-                $teacher = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
+                $teacher = User::whereId(Enroll::where('role_id', 4)
+                    ->where('course_segment', $enroll->CourseSegment->id)
+                    ->pluck('user_id')
+                )->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
                 $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
                 $course->teacher = $teacher;
