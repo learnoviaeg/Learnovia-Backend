@@ -151,10 +151,12 @@ class Attendance extends Model
         $temp = [];
         $value = unserialize($value);
         foreach ($value as $classes){
-                $temp[] = $classes;
                 if(gettype($classes) =='array' || gettype($classes) =='array'  ){
                     foreach($classes as $class)
                     $temp[] = $class;
+                }
+                else{
+                    $temp[] = $classes;
                 }
         }
          return $temp;
@@ -167,10 +169,12 @@ class Attendance extends Model
         $temp = [];
         $value = unserialize($value);
         foreach ($value as $levels){
-                $temp[] = $levels;
                 if(gettype($levels) =='array' || gettype($levels) =='array'  ){
                     foreach($levels as $level)
                     $temp[] = $level;
+                }
+                else{
+                $temp[] = $levels;
                 }
         }
         return $temp;
@@ -183,10 +187,13 @@ class Attendance extends Model
         $temp = [];
         $value = unserialize($value);
         foreach ($value as $courses){
-                $temp[] = $courses;
                 if(gettype($courses) =='array' || gettype($courses) =='array'  ){
                     foreach($courses as $course)
                     $temp[] = $course;
+                }
+                else
+                {
+                    $temp[] = $courses;
                 }
         }
         return $temp;
