@@ -230,11 +230,12 @@ class QuestionBankController extends Controller
     {
         $request->validate([
             'course_id' => 'required|integer|exists:courses,id',
+            'class_id' => 'required|integer|exists:classes,id',
             'randomNumber' => 'required|integer|min:1'
         ]);
-
+        $courseSeg = CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
         $questions = Questions::inRandomOrder()
-            ->where('course_id', $request->course_id)
+            ->where('course_segment_id', $courseSeg->id)
             ->where('parent', null)
             ->limit($request->randomNumber)
             ->with('childeren.question_answer')

@@ -229,7 +229,7 @@ class QuizLessonController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
-                ->where('lesson_id',$request->quiz_id)->first();
+                ->where('lesson_id',$request->lesson_id)->first();
         return HelperController::api_response_format(200, $quizLesson);
     }
 }
