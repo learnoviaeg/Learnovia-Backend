@@ -209,7 +209,8 @@ class MediaController extends Controller
                 }
             }
         }
-        return HelperController::api_response_format(200, $media, 'Upload Successfully');
+        $tempReturn = Lesson::find($mediaLesson->lesson_id)->module('UploadFiles', 'media')->get();
+        return HelperController::api_response_format(200, $tempReturn, 'Upload Successfully');
     }
 
     /**

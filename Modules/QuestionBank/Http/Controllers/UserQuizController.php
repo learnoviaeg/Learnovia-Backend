@@ -471,6 +471,8 @@ class UserQuizController extends Controller
         $quiz = quiz::where('id',$request->quiz_id)->first();
         $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
         $user_quiz = userQuiz::where('quiz_lesson_id',$quiz_lesson->id)->where('user_id',$request->user_id)->get();
+        if($user_quiz ->count() == 0){
+            return HelperController::api_response_format(200, 'No Submitted quizzes to be shown');}
         $Due_date= QuizLesson::find($quiz_lesson->id);
         $show_is_true=1;
         if($quiz->feedback == 3)

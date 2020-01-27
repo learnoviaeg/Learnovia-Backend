@@ -63,7 +63,7 @@ class QuizController extends Controller
             foreach ($request->Question as $question) {
                 switch ($question['Question_Type_id']) {
                     case 1: // True/false
-                        $validator = Validator::make($question, [
+                       $request->validate([
                             'answers' => 'required|array|distinct|min:2|max:2',
                             'text' => 'required|string',
                             'answers.*' => 'required|boolean|distinct',
@@ -78,9 +78,7 @@ class QuizController extends Controller
                             'class' => 'required|exists:classes,id',
                             'parent' => 'integer|exists:questions,id',
                         ]);
-                        if ($validator->fails()) {
-                            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
-                        }
+
                         break;
 
                     case 2: // MCQ
@@ -319,7 +317,7 @@ class QuizController extends Controller
     {
         $request->validate([
             'quiz_id' => 'required|integer|exists:quiz_lessons,quiz_id',
-            'lesson_id' => 'required|exists:quiz_lessons,lesson_id'
+            'lesson_id' => 'required|exists:quiz_lessons,id'
         ]);
 
         $quiz=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
@@ -331,10 +329,15 @@ class QuizController extends Controller
     public function get(Request $request)
     {
         $request->validate([
-            'quiz_id' => 'required|integer|exists:quizzes,id'
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|exists:lessons,id'
         ]);
         $quiz = Quiz::where('id', $request->quiz_id)->pluck('shuffle')->first();
         $qq = Quiz::where('id', $request->quiz_id)->first();
+        $quizles=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+        if(!isset($quizles))
+            return HelperController::api_response_format(200, 'This Quiz is not assigned to this lesson');
+
         $max_attemp= $qq->quizLessson[0]->max_attemp;
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
 
@@ -444,10 +447,10 @@ class QuizController extends Controller
     public function sortDown($quiz_id, $index)
     {
 
-        $course_id = Quiz::where('id', $quiz_id)->pluck('course_id')->first();
+        $CourseSeg = Quiz::where('id', $quiz_id)->pluck('course_segment_id')->first();
         $quiz_index = Quiz::where('id', $quiz_id)->pluck('index')->first();
 
-        $quizes = Quiz::where('course_id', $course_id)->get();
+        $quizes = Quiz::where('course_segment_id', $CourseSeg)->get();
         foreach ($quizes as $quiz) {
             if ($quiz->index > $quiz_index || $quiz->index < $index) {
                 continue;
@@ -467,9 +470,9 @@ class QuizController extends Controller
 
     public function SortUp($quiz_id, $index)
     {
-        $course_id = Quiz::where('id', $quiz_id)->pluck('course_id');
+        $CourseSeg = Quiz::where('id', $quiz_id)->pluck('course_segment_id');
         $quiz_index = Quiz::where('id', $quiz_id)->pluck('index')->first();
-        $quizes = Quiz::where('course_id', $course_id)->get();
+        $quizes = Quiz::where('course_segment_id', $CourseSeg)->get();
         foreach ($quizes as $quiz) {
             if ($quiz->index > $index || $quiz->index < $quiz_index) {
                 continue;
@@ -633,6 +636,9 @@ class QuizController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id'
         ]);
         $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!isset($quizLesson))
+            return HelperController::api_response_format(400, 'This quiz is not assigned to this lesson');
+
         $students = userQuiz::where('quiz_lesson_id', $quizLesson->id)->with(['quiz_lesson', 'quiz_lesson.quiz', 'quiz_lesson.quiz.Question'])->get();
         //return $students;
         $Sts = collect([]);
@@ -658,6 +664,8 @@ class QuizController extends Controller
         ]);
         $quiz = Quiz::find($request->quiz_id);
         $qq = Quiz::where('id', $request->quiz_id)->first();
+        if(!isset($qq->quizLessson[0]))
+            return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
