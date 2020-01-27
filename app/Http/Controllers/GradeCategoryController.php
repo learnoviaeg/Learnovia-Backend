@@ -659,4 +659,24 @@ class GradeCategoryController extends Controller
             }
         return HelperController::api_response_format(200, $result);
     }
+
+    public function getgradecat(Request $request)
+    {
+        $request->validate([
+            'class_id' => 'required|exists:classes,id',
+            'course_id' => 'required|exists:courses,id'
+        ]);
+
+        $coursesegment=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
+        if($coursesegment)
+        {
+            $gradeCategories=$coursesegment->GradeCategory;
+            return HelperController::api_response_format(200, $gradeCategories);
+        }
+        else
+        {
+            return HelperController::api_response_format(200, null,'No available course segment');
+        }
+        
+    }
 }
