@@ -58,7 +58,7 @@ class CourseSegment extends Model
 
     public function lessons()
     {
-        return $this->hasMany('App\Lesson')->orderBy('index');
+        return $this->hasMany('App\Lesson' , 'course_segment_id' , 'id')->orderBy('index');
     }
 
     public function Enroll()

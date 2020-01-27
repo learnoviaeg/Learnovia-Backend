@@ -14,7 +14,7 @@ class AlterQuizzesTable extends Migration
     public function up()
     {
         Schema::table('quizzes', function (Blueprint $table) {
-            $table->integer('feedback')->nullable();
+            $table->integer('feedback')->nullable()->default('1');
         });
     }
 

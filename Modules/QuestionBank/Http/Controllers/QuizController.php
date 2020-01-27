@@ -44,7 +44,7 @@ class QuizController extends Controller
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
             'shuffle' => 'boolean',
-            'feedback' => 'required|integer| in:1,2,3',
+            'feedback' => 'integer| in:1,2,3',
             /**
              * feedback 1 => After submission
              * feedback 2 =>After due date,
