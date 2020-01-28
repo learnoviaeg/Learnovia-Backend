@@ -1,7 +1,7 @@
 <?php
 
 use App\User;
-use Spatie\Permission\Contracts\Role;
+use Spatie\Permission\Models\Role;
 
 Route::get('test' , function(){
     User::role(Role::find(4))->get()->each(function($user){
