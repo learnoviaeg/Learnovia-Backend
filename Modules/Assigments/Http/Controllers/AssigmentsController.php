@@ -292,7 +292,7 @@ class AssigmentsController extends Controller
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
             'publish_date' => $AssignmentLesson->start_date
         ]);
-        $all = Assignment::all();
+        $all = AssignmentLesson::all();
             return HelperController::api_response_format(200,$all, $message = 'Assignment Lesson Updated Successfully');
     }
 
