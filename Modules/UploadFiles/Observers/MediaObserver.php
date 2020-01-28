@@ -10,6 +10,6 @@ class MediaObserver
     public function deleted(MediaLesson $lesson)
     {
         LessonComponent::where('comp_id',$lesson->media_id)->where('lesson_id',$lesson->lesson_id)
-        ->where('module','Media')->delete();
+        ->where('module','media')->delete();
     }
 }
