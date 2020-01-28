@@ -10,7 +10,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     //Add/Update Question and Quiz
         Route::post('add', 'QuizController@store')->middleware('permission:quiz/add');
         Route::post('grading-method', 'QuizController@gradeing_method')->middleware('permission:quiz/grading-method');
-        Route::post('update', 'QuizController@update');//->middleware('permission:quiz/update');
+        Route::post('update', 'QuizController@update')->middleware('permission:quiz/update');
 
 
     //Quiz Routes
