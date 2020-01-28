@@ -4,11 +4,11 @@ use App\User;
 use Spatie\Permission\Models\Role;
 
 Route::get('test' , function(){
-    return Role::find(4)->users;
-    User::role('Teacher')->get()->each(function($user){
-        $user->update([
+    User::where('id' , '>' , '889')->get()->each(function($user){
+        $user->updated([
             'password' => bcrypt(123456),
             'real_password' => 123456
-        ]);
+        ]
+        );
     });
 });
