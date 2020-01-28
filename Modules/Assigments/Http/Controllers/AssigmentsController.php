@@ -292,7 +292,8 @@ class AssigmentsController extends Controller
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
             'publish_date' => $AssignmentLesson->start_date
         ]);
-            return HelperController::api_response_format(200,$AssignmentLesson, $message = 'Assignment Lesson Updated Successfully');
+        $all = AssignmentLesson::all();
+            return HelperController::api_response_format(200,$all, $message = 'Assignment Lesson Updated Successfully');
     }
 
     /*
@@ -597,6 +598,8 @@ class AssigmentsController extends Controller
         $assignment_lesson->start_date = $request->opening_date;
         $assignment_lesson->mark = $request->mark;
         $assignment_lesson->is_graded = $request->is_graded;
+        $assignment_lesson->allow_attachment = $request->allow_attachment;
+
         if($request->filled('closing_date'))
             $assignment_lesson->due_date = $request->closing_date;
         if($request->filled('scale'))
@@ -623,7 +626,8 @@ class AssigmentsController extends Controller
             "class"=>$request->class
         );
         $this->assignAsstoUsers($data);
-        return HelperController::api_response_format(200, $assignment_lesson, 'Assignment is assigned to a lesson Successfully');
+        $all = AssignmentLesson::all();
+        return HelperController::api_response_format(200, $all, 'Assignment is assigned to a lesson Successfully');
         }
     
 }
