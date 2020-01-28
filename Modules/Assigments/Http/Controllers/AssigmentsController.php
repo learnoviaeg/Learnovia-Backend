@@ -48,7 +48,8 @@ class AssigmentsController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/editgrade', 'title' => 'edit assignments grades']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/assignment/assigned-users', 'title' => 'assign Assignment to Users']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/assignment/getAssignment', 'title' => 'get Assignment']);
-        
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'delete-assign-lesson', 'title' => 'Delete assign']);
+
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('assignment/add');
         $role->givePermissionTo('assignment/update');
@@ -106,7 +107,7 @@ class AssigmentsController extends Controller
                     // return $courseSegment;
 
                     foreach($courseSegment->lessons as $lesson){
-                        
+
                         foreach($lesson->AssignmentLesson as $AssignmentLesson){
                             $assignments = $AssignmentLesson->where('visible',1)->Assignment;
                             if($request->filled('assignment_id'))
@@ -117,7 +118,7 @@ class AssigmentsController extends Controller
                                 foreach($st_answer as $st_answer){
                                 $Ans  = Null;
                                 if(isset($st_answer))
-                                    $Ans = $st_answer;                    
+                                    $Ans = $st_answer;
                                 if(isset($st_answer->attachment_id))
                                     $Ans = $st_answer->attachment;
                                     $Answer ->push($Ans);
@@ -149,13 +150,13 @@ class AssigmentsController extends Controller
                 foreach($st_answer as $st_answer){
                 $Ans  = Null;
                 if(isset($st_answer))
-                    $Ans = $st_answer;                    
+                    $Ans = $st_answer;
                 if(isset($st_answer->attachment_id))
                     $Ans = $st_answer->attachment;
                     $Answer ->push($Ans);
              }
              $assignment->student_answer =   $Answer;
-             if($request->filled('lesson_id')) 
+             if($request->filled('lesson_id'))
                 $assignment->lesson = AssignmentLesson::where('assignment_id',$assignment->id)->where('lesson_id',$request->lesson_id)->first();
 
                $attachment =  $assignment->attachment;
@@ -194,9 +195,9 @@ class AssigmentsController extends Controller
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
         if($request->filled('content'))
-            $assigment->content = $request->content;    
+            $assigment->content = $request->content;
         $assigment->name = $request->name;
-        $assigment->save();        
+        $assigment->save();
         return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment added');
     }
 
@@ -210,7 +211,7 @@ class AssigmentsController extends Controller
             'name' => 'string',
             'file_description' => 'string',
             'content'  => 'string',
-    
+
         ]);
         $assigment = assignment::find($request->id);
         $CheckIfAnswered= UserAssigment::where('assignment_id',$request->id)->where('submit_date','!=',null)->get();
@@ -224,13 +225,13 @@ class AssigmentsController extends Controller
             ]);
             if (isset($request->file_description)) {
                 $description = $request->file_description;
-            
+
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
         }
-        if ($request->filled('content')) 
+        if ($request->filled('content'))
             $assigment->content = $request->content;
-        if ($request->filled('name')) 
+        if ($request->filled('name'))
             $assigment->name = $request->name;
         $assigment->save();
 
@@ -254,7 +255,7 @@ class AssigmentsController extends Controller
         $AssignmentLesson=AssignmentLesson::where('assignment_id',$request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if(!isset($AssignmentLesson)){
             return HelperController::api_response_format(400, $message = 'Assignment Lesson Not Found');
-        }  
+        }
          if($request->filled('is_graded'))
             $AssignmentLesson->is_graded = $request->is_graded;
         if($request->filled('mark'))
@@ -499,7 +500,7 @@ class AssigmentsController extends Controller
     }
 
 
-    
+
     public function GetAssignment(Request $request)
     {
         $request->validate([
@@ -629,5 +630,5 @@ class AssigmentsController extends Controller
         $all = AssignmentLesson::all();
         return HelperController::api_response_format(200, $all, 'Assignment is assigned to a lesson Successfully');
         }
-    
+
 }
