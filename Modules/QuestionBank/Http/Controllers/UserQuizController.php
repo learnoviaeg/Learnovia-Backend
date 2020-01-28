@@ -427,7 +427,6 @@ class UserQuizController extends Controller
         if(count ($users) == 0)
             return HelperController::api_response_format(200, 'This quiz is not assigned to this user');
         }
-        // return $users;
         foreach ($users as $user_id){
             $user = User::where('id',$user_id)->first();
             $attem=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->first();
