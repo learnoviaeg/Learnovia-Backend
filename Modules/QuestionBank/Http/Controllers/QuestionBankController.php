@@ -135,12 +135,10 @@ class QuestionBankController extends Controller
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
 
-
     /**
      * Display a listing of the resource.
      * @return Response
      */
-
     public function index(Request $request)
     {
         $valid = Validator::make($request->all(), [
@@ -341,7 +339,6 @@ class QuestionBankController extends Controller
         ]);
         $Questions->push($cat);
         return $cat;
-
     }
 
     public function TrueFalse($Question,$parent)
@@ -358,7 +355,6 @@ class QuestionBankController extends Controller
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
         }
-
 
         $cat = $this::CreateOrFirstQuestion($Question,$parent);
         if (isset($cat->id)) {
@@ -381,10 +377,8 @@ class QuestionBankController extends Controller
                 ]);
                 $is_true += 1;
             }
-
         }
         return $cat;
-
     }
 
     public function MCQ($Question,$parent)
@@ -530,12 +524,11 @@ class QuestionBankController extends Controller
         $request->validate([
             'Question' => 'required|array',
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
-
         ]);
 
         $re = collect([]);
         foreach ($request->Question as $question) {
-
+            $question['class']=$request->class;
             switch ($question['Question_Type_id']) {
                 case 1: // True/false
                     $true_false = $this->TrueFalse($question,null);
