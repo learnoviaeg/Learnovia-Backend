@@ -232,11 +232,13 @@ class UserQuizController extends Controller
                 return HelperController::api_response_format(400, null, 'No type determine to this question');
             }
         }
-        userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->where('question_id',$question['id'])->update($data);
+        $answer1= userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->where('question_id',$question['id'])->first();
+        $answer1->update($data);
         }
 
-        userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->update(['answered'=>'1']);
-
+        $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->get();
+        foreach($answer2 as $ans)
+            $ans->update(['answered'=>'1']);
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
     }
 
