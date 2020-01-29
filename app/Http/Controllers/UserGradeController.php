@@ -32,6 +32,7 @@ class UserGradeController extends Controller
             'users.*.items.*.grade'     => 'required',
             'users.*.items.*.feedback'  => 'nullable|string',
         ]);
+        $message = 'User Grade Added Successfully';
         foreach ($request->users as $user) {
             foreach ($user['items'] as $item) {
                 $enroll = Enroll::where('course_segment', GradeItems::find($item['id'])->GradeCategory->course_segment_id)
@@ -39,6 +40,11 @@ class UserGradeController extends Controller
                     ->first();
                 if ($enroll == null)
                     continue;
+                $gradeItem = GradeItems::find($item['id']);
+                if($gradeItem->grademin < $item['grade'] ||$gradeItem->grademax > $item['grade']){
+                    $message = 'Some Grades are invalid please check your inputs again';
+                    continue;
+                }
                 $check = UserGrade::where('grade_item_id',$item['id'])
                 ->where('user_id' , $user['id'])
                 ->first();
@@ -55,7 +61,7 @@ class UserGradeController extends Controller
                 }
             }
         }
-        return HelperController::api_response_format(200, null, 'User Grade Added Successfully');
+        return HelperController::api_response_format(200, null, $message);
     }
 
     /**
