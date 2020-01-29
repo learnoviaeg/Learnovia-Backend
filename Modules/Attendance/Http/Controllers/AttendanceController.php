@@ -401,10 +401,12 @@ class AttendanceController extends Controller
         $users = User::whereIn('id', $users_ids)->get();
         foreach ($users as $user) {
             $user['flag'] = false;
+            $user['status_id'] = null;
             $temp = collect();
             foreach ($logs as $log) {
                 if ($log->student_id == $user->id) {
                     $user['flag'] = true;
+                    $user['status_id'] = $log->status_id;
                     $temp->push($log);
                 }
             }
@@ -444,7 +446,7 @@ class AttendanceController extends Controller
         // $role=$enrolls->pluck('role_id')->first();
 
         $attend_course=AttendanceSession::whereIn('course_segment_id', $CourseSeg)->pluck('attendance_id');
-        
+
         $attendancesNull=AttendanceSession::whereNull('course_segment_id')->pluck('attendance_id');
         $All_attend=array_merge($attend_course->toArray(),$attendancesNull->toArray());
         $attendances=Attendance::whereIn('id',$All_attend)->get();
