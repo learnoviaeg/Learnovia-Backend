@@ -159,7 +159,7 @@ class UserGradeController extends Controller
                     $usergrade->name = $item->name;
                     $usergrade->id = $item->id;
                     $ids[] = $item->id;
-                    $usergrade->final_grade = ' - ';
+                    $usergrade->final_grade = null;
                     $usergrade->max = $item->grademax;
                     if ($temp != null)
                         $usergrade->final_grade = $temp->final_grade;
