@@ -42,16 +42,16 @@ class UserGradeController extends Controller
                 $check = UserGrade::where('grade_item_id',$item['id'])
                 ->where('user_id' , $user['id'])
                 ->first();
-                if($check != null)
-                    return HelperController::api_response_format(200, null, 'User graded before in thi item with grade : ' . $check->final_grade);
-                $temp = UserGrade::create([
-                    'grade_item_id' => $item['id'],
-                    'user_id' => $user['id'],
-                    'raw_grade' => $item['grade'],
-                ]);
-                if (isset($item['feedback'])) {
-                    $temp->feedback = $item['feedback'];
-                    $temp->save();
+                if($check != null){
+                    $temp = UserGrade::create([
+                        'grade_item_id' => $item['id'],
+                        'user_id' => $user['id'],
+                        'raw_grade' => $item['grade'],
+                    ]);
+                    if (isset($item['feedback'])) {
+                        $temp->feedback = $item['feedback'];
+                        $temp->save();
+                    }
                 }
             }
         }
