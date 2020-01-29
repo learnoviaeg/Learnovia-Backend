@@ -8,6 +8,6 @@ class UserQuizAnswerObserver
 {
     public function updated(UserQuizAnswer $answer)
     {
-        dd($answer);
+        // dd($answer);
     }
 }
