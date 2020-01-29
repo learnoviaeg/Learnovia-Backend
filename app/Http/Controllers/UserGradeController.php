@@ -38,24 +38,24 @@ class UserGradeController extends Controller
                     ->where('user_id', $user['id'])
                     ->first();
                 if ($enroll == null)
-                    return HelperController::api_response_format(200, null, 'User with id : ' . $user['id'] . ' have not assigned to have grade in grade item ' . $item['id']);
+                    continue;
                 $check = UserGrade::where('grade_item_id',$item['id'])
                 ->where('user_id' , $user['id'])
                 ->first();
-                if($check != null)
-                    return HelperController::api_response_format(200, null, 'User graded before in thi item with grade : ' . $check->final_grade);
-                $temp = UserGrade::create([
-                    'grade_item_id' => $item['id'],
-                    'user_id' => $user['id'],
-                    'raw_grade' => $item['grade'],
-                ]);
-                if (isset($item['feedback'])) {
-                    $temp->feedback = $item['feedback'];
-                    $temp->save();
+                if($check == null){
+                    $temp = UserGrade::create([
+                        'grade_item_id' => $item['id'],
+                        'user_id' => $user['id'],
+                        'raw_grade' => $item['grade'],
+                    ]);
+                    if (isset($item['feedback'])) {
+                        $temp->feedback = $item['feedback'];
+                        $temp->save();
+                    }
                 }
             }
         }
-        return HelperController::api_response_format(200, null, 'User Grade Updated Successfully');
+        return HelperController::api_response_format(200, null, 'User Grade Added Successfully');
     }
 
     /**
@@ -159,7 +159,7 @@ class UserGradeController extends Controller
                     $usergrade->name = $item->name;
                     $usergrade->id = $item->id;
                     $ids[] = $item->id;
-                    $usergrade->final_grade = ' - ';
+                    $usergrade->final_grade = null;
                     $usergrade->max = $item->grademax;
                     if ($temp != null)
                         $usergrade->final_grade = $temp->final_grade;

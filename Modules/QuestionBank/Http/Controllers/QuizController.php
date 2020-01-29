@@ -205,6 +205,7 @@ class QuizController extends Controller
     // New Questions
     public function storeWithNewQuestions(Request $request)
     {
+        // dd($request);
         $questionsIDs = app('Modules\QuestionBank\Http\Controllers\QuestionBankController')->store($request, 1);
         return $questionsIDs;
     }
@@ -278,7 +279,8 @@ class QuizController extends Controller
         else{
             $questionsIDs = [];
         }
-        if (count($questionsIDs) == 0) { // In case of delete all questions
+        
+        if ($questionsIDs == null) { // In case of delete all questions
 
             $quiz->update([
                 'name' => $request->name,
@@ -298,6 +300,7 @@ class QuizController extends Controller
         ]);
 
         $quiz->Question()->detach();
+        // return $questionsIDs;
         $quiz->Question()->attach($questionsIDs);
 
         $quiz->Question;
