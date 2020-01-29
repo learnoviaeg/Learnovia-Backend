@@ -568,6 +568,7 @@ class CourseController extends Controller
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
             return ['result' => false, 'value' => $validator->errors()];
+        $no_of_lessons = 4;
         if ((count($request->type) == count($request->level)) && (count($request->level) == count($request->segment))) {
             foreach ($request->class as $class) {
                 $count = 0;
@@ -595,10 +596,19 @@ class CourseController extends Controller
                     $class_level = ClassLevel::checkRelation($class, $year_level->id);
                     $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
                     $course_Segment = CourseSegment::checkRelation($segment_class->id, $request->course);
-                    CourseSegment::where('id',$course_Segment->id)->update([
+                    $courseSegment = CourseSegment::where('id',$course_Segment->id)->update([
                         'start_date' => $request->start_date,
                         'end_date' => $request->end_date,
                     ]);
+                    if ($request->filled('no_of_lessons')) {
+                        $no_of_lessons = $request->no_of_lessons;
+                    }
+                    for ($i = 1; $i <= $no_of_lessons; $i++) {
+                        $courseSegment->lessons()->firstOrCreate([
+                            'name' => 'Lesson ' . $i,
+                            'index' => $i,
+                        ]);
+                    }
                     $gradeCat = GradeCategory::firstOrCreate([
                         'name' => 'Course Total',
                         'course_segment_id' => $course_Segment->id,

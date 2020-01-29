@@ -1,13 +1,18 @@
 <?php
 
+use App\CourseSegment;
+use App\Lesson;
 use App\User;
 use Spatie\Permission\Models\Role;
 
-Route::get('test' , function(){
-    $users = User::where('id' , '>' , 899)->get();
-    foreach ($users as $user) {
-        $user->real_password = 123456;
-        $user->password = bcrypt(123456);
-        $user->save();
+Route::get('test', function () {
+    $c = CourseSegment::get();
+    foreach ($c as $x) {
+        for ($i = 0; $i < 4; $i++) {
+            $x->lessons()->firstOrCreate([
+                'name' => 'Lesson ' . $i,
+                'index' => $i,
+            ]);
+        }
     }
 });
