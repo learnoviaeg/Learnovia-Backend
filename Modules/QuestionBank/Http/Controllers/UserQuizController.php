@@ -108,7 +108,6 @@ class UserQuizController extends Controller
             'Questions' => 'required|array',
             'Questions.*.id' => 'integer|exists:questions,id',
         ]);
-        return $request;
         $Q_IDS= array();
         // check that question exist in the Quiz
         $user_quiz = userQuiz::find($request->user_quiz_id);
@@ -121,13 +120,13 @@ class UserQuizController extends Controller
 
                 $check_question = Questions::find($question['id']);
 
-                if (isset($check_question->parent)) {
-                    if (!$questions_ids->contains($check_question->parent)) {
-                        return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
-                    }
-                } else {
-                    return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
-                }
+                // if (isset($check_question->parent)) {
+                //     if (!$questions_ids->contains($check_question->parent)) {
+                //         return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+                //     }
+                // } else {
+                //     return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+                // }
             }
 
             $currentQuestion = Questions::find($question['id']);
@@ -234,13 +233,11 @@ class UserQuizController extends Controller
             }
         }
         userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->where('question_id',$question['id'])->update($data);
-
         }
 
-        $restOfAns =  userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->update(['answered'=>'1']);
+        userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->update(['answered'=>'1']);
 
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
-
     }
 
     public function estimateEssayandAndWhy(Request $request)

@@ -8,10 +8,9 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('install', 'QuestionBankController@install_question_bank');
 
     //Add/Update Question and Quiz
-        Route::post('add', 'QuizController@store')->middleware('permission:quiz/add');
-        Route::post('grading-method', 'QuizController@gradeing_method')->middleware('permission:quiz/grading-method');
-        Route::post('update', 'QuizController@update')->middleware('permission:quiz/update');
-
+    Route::post('add', 'QuizController@store')->middleware('permission:quiz/add');
+    Route::post('grading-method', 'QuizController@gradeing_method')->middleware('permission:quiz/grading-method');
+    Route::post('update', 'QuizController@update')->middleware('permission:quiz/update');
 
     //Quiz Routes
     Route::post('delete', 'QuizController@destroy')->middleware('permission:quiz/delete');
@@ -28,10 +27,9 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('get-quiz-lesson', 'QuizLessonController@getQuizInLesson')->middleware('permission:quiz/get-quiz-lesson');
     Route::get('get-grade-category', 'QuizLessonController@getGradeCategory')->middleware('permission:quiz/get-grade-category');
 
-
     //User Quiz
-    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz')->middleware('permission:quiz/store-user-quiz');
-    Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer')->middleware('permission:quiz/store-user-quiz-answer');
+    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz');//->middleware('permission:quiz/store-user-quiz');
+    Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer');//->middleware('permission:quiz/store-user-quiz-answer');
     Route::post('feedback', 'UserQuizController@feedback');
 
     Route::get('get-all-quizes', 'QuizController@getAllQuizes')->middleware('permission:quiz/get-all-quizes');

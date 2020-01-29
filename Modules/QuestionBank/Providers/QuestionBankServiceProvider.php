@@ -5,7 +5,9 @@ namespace Modules\QuestionBank\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Observers\QuizObserver;
+use Modules\QuestionBank\Observers\UserQuizAnswerObserver;
 
 class QuestionBankServiceProvider extends ServiceProvider
 {
@@ -23,7 +25,7 @@ class QuestionBankServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         QuizLesson::observe(QuizObserver::class);
-
+        UserQuizAnswer::observe(UserQuizAnswerObserver::class);
     }
 
     /**
