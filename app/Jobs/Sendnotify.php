@@ -28,7 +28,7 @@ class Sendnotify implements ShouldQueue
         $this->title=$title;
         $this->type=$type;
         $this->publish_date=$publish_date;
-       
+        
     }
 
     /**
@@ -39,7 +39,8 @@ class Sendnotify implements ShouldQueue
     public function handle()
     {
         foreach ($this->touserid as $u){
-            event(new \App\Events\notify($u->id ,$this->message,$this->publish_date,$this->title,$this->type));
+            if($u != null)
+                event(new \App\Events\notify($u->id ,$this->message,$this->publish_date,$this->title,$this->type));
         }
     }
 }
