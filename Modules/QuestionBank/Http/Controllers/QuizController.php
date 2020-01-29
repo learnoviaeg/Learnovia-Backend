@@ -279,7 +279,8 @@ class QuizController extends Controller
         else{
             $questionsIDs = [];
         }
-        if (count($questionsIDs) == 0) { // In case of delete all questions
+        
+        if ($questionsIDs == null) { // In case of delete all questions
 
             $quiz->update([
                 'name' => $request->name,
