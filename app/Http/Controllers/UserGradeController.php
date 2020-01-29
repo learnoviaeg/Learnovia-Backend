@@ -38,11 +38,11 @@ class UserGradeController extends Controller
                     ->where('user_id', $user['id'])
                     ->first();
                 if ($enroll == null)
-                    return HelperController::api_response_format(200, null, 'User with id : ' . $user['id'] . ' have not assigned to have grade in grade item ' . $item['id']);
+                    continue;
                 $check = UserGrade::where('grade_item_id',$item['id'])
                 ->where('user_id' , $user['id'])
                 ->first();
-                if($check != null){
+                if($check == null){
                     $temp = UserGrade::create([
                         'grade_item_id' => $item['id'],
                         'user_id' => $user['id'],
@@ -55,7 +55,7 @@ class UserGradeController extends Controller
                 }
             }
         }
-        return HelperController::api_response_format(200, null, 'User Grade Updated Successfully');
+        return HelperController::api_response_format(200, null, 'User Grade Added Successfully');
     }
 
     /**
