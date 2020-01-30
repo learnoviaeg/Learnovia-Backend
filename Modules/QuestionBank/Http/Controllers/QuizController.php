@@ -63,7 +63,7 @@ class QuizController extends Controller
             foreach ($request->Question as $question) {
                 switch ($question['Question_Type_id']) {
                     case 1: // True/false
-                       $request->validate([
+                        $validator = Validator::make($question, [
                             'answers' => 'required|array|distinct|min:2|max:2',
                             'text' => 'required|string',
                             'answers.*' => 'required|boolean|distinct',
@@ -79,6 +79,9 @@ class QuizController extends Controller
                             'parent' => 'integer|exists:questions,id',
                         ]);
 
+                        if ($validator->fails()) {
+                            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+                        }
                         break;
 
                     case 2: // MCQ
@@ -279,7 +282,7 @@ class QuizController extends Controller
         else{
             $questionsIDs = [];
         }
-        
+
         if ($questionsIDs == null) { // In case of delete all questions
 
             $quiz->update([
