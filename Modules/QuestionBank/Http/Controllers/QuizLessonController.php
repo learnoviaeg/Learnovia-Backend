@@ -100,12 +100,17 @@ class QuizLessonController extends Controller
                 }
                 $grade_category=GradeCategory::find($request->grade_category_id);
                 $grade_category->GradeItems()->create([
-                    'name' => 'Quiz',
-                    'grademin'=>$request->grade_min,
-                    'grademax'=>$request->grade_max,
-                    'grade_pass'=>$request->grade_to_pass,
-                    'item_type'=>1,
-                    'item_Entity'=>$quizLesson[0]->id
+                    'grademin' => $request->grademin,
+                    'grademax' => $request->grademax,
+                    'item_no' => 1,
+                    'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
+                    'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : null,
+                    'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
+                    'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
+                    'item_type' => (isset($request->item_type)) ? $request->item_type : null,
+                    'item_Entity' => $quizLesson[0]->id,
+                    'name' => $quizLesson[0]->quiz->name,
+                    'weight' => 0,
                 ]);
             }
             LessonComponent::create([
