@@ -183,7 +183,7 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(400, $body = [], $message = 'please enter file or content');
         }
         $assigment = new assignment;
-        if (isset($request->file)) {
+        if ($request->hasFile('file')) {
             $request->validate([
                 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             ]);
