@@ -16,6 +16,7 @@ class Sendnotify implements ShouldQueue
     public $type;
     public $publish_date;
     public $touserid;
+    public $users;
     /**
      * Create a new job instance.
      *
@@ -28,7 +29,13 @@ class Sendnotify implements ShouldQueue
         $this->title=$title;
         $this->type=$type;
         $this->publish_date=$publish_date;
-        
+        $this->touserid;
+        $this->users = [];
+        foreach($this->touserid as $index => $user){
+            if($user == null)
+                continue;
+            $this->users[] = $user->id;
+        }
     }
 
     /**
@@ -39,8 +46,8 @@ class Sendnotify implements ShouldQueue
     public function handle()
     {
         foreach ($this->touserid as $u){
-            if($u != null)
-                event(new \App\Events\notify($u->id ,$this->message,$this->publish_date,$this->title,$this->type));
+            // if($u != null)
+            //     event(new \App\Events\notify($u->id ,$this->message,$this->publish_date,$this->title,$this->type));
         }
     }
 }
