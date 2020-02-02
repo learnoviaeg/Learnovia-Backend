@@ -28,8 +28,8 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('get-grade-category', 'QuizLessonController@getGradeCategory')->middleware('permission:quiz/get-grade-category');
 
     //User Quiz
-    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz');//->middleware('permission:quiz/store-user-quiz');
-    Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer');//->middleware('permission:quiz/store-user-quiz-answer');
+    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz')->middleware('permission:quiz/store-user-quiz');
+    Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer')->middleware('permission:quiz/store-user-quiz-answer');
     Route::post('feedback', 'UserQuizController@feedback');
 
     Route::get('get-all-quizes', 'QuizController@getAllQuizes')->middleware('permission:quiz/get-all-quizes');
@@ -51,6 +51,14 @@ Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
     Route::group(['middleware' => 'Restrict'], function () {
         Route::post('add', 'QuestionBankController@store')->middleware('permission:question/add');
         Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
+        Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
+    });
+    
+    Route::group(['prefix' => 'category'], function () {
+        Route::post('add', 'QuestionCategoryController@create')->middleware('permission:question/category/add');
+        Route::get('get', 'QuestionCategoryController@show')->middleware('permission:question/category/get');
+        Route::get('update', 'QuestionCategoryController@update')->middleware('permission:question/category/update');
+        Route::get('delete', 'QuestionCategoryController@destroy')->middleware('permission:question/category/delete');
     });
 
     Route::get('get', 'QuestionBankController@index')->middleware(['permission:question/get' , 'ParentCheck']);

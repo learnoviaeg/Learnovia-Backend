@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuestionsCategory extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['name','course_segment_id'];
     protected $hidden = [
         'created_at', 'updated_at',
     ];
