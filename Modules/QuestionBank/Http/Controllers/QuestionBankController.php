@@ -259,17 +259,13 @@ class QuestionBankController extends Controller
             'Question_Category_id' => 'required|exists:questions_categories,id',
             'Category_id' => 'required|exists:categories,id',
             'course_id' => 'required|exists:courses,id',
-            'class' => 'required|exists:classes,id',
             'parent' => 'integer|exists:questions,id',
 
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
         }
-        $course_segment = CourseSegment::GetWithClassAndCourse($Question['class'],$Question['course_id']);
-        if(!isset($course_segment)){
-            return HelperController::api_response_format(400, null, 'Something went wrong :doesn\'t exist course segment');
-        }
+     
         $arr = array();
         if (isset($Question['parent'])) {
             $arr = Questions::where('id', $Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
@@ -287,7 +283,7 @@ class QuestionBankController extends Controller
             'parent' => $parent,
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
-            'course_segment_id' => $course_segment->id,
+            'course_id' => $Question['course_id'],
         ]);
 
         $Questions->push($cat);
@@ -304,17 +300,12 @@ class QuestionBankController extends Controller
             'Question_Category_id' => 'required|exists:questions_categories,id',
             'Category_id' => 'required|exists:categories,id',
             'course_id' => 'required|exists:courses,id',
-            'class' => 'required|exists:classes,id',
             'parent' => 'integer|exists:questions,id',
 
         ]);
 
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
-        }
-        $course_segment=  CourseSegment::GetWithClassAndCourse($Question['class'],$Question['course_id']);
-        if(!isset($course_segment)){
-            return HelperController::api_response_format(400, null, 'Something went wrong :doesn\'t exist course segment');
         }
 
         $Questions = collect([]);
@@ -335,7 +326,7 @@ class QuestionBankController extends Controller
             'category_id' => $Question['Category_id'],
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
-            'course_segment_id' => $course_segment->id,
+            'course_id' => $Question['course_id'],
         ]);
         $Questions->push($cat);
         return $cat;
@@ -522,13 +513,14 @@ class QuestionBankController extends Controller
     public function store(Request $request,$type = 0)
     {
         $request->validate([
+            'course_id' => 'required|integer|exists:courses,id',
             'Question' => 'required|array',
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
         ]);
 
         $re = collect([]);
         foreach ($request->Question as $question) {
-            $question['class']=$request->class;
+            // $question['class']=$request->class;
             switch ($question['Question_Type_id']) {
                 case 1: // True/false
                     $true_false = $this->TrueFalse($question,null);
