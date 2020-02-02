@@ -409,6 +409,8 @@ class UserQuizController extends Controller
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
+            'user_id' => 'integer|exists:users,id',
+
         ]);
         $final= collect([]);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
@@ -416,7 +418,12 @@ class UserQuizController extends Controller
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
 
         $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('user_id')->unique();
-
+        if($request->filled('user_id')){
+            unset($users);
+            $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$request->user_id)->pluck('user_id')->unique();
+        if(count ($users) == 0)
+            return HelperController::api_response_format(200, 'This quiz is not assigned to this user');
+        }
         foreach ($users as $user_id){
             $user = User::where('id',$user_id)->first();
             $attem=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->first();
