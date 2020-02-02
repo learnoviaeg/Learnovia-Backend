@@ -46,11 +46,11 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
+    Route::post('add', 'QuestionBankController@store')->middleware('permission:question/add');
+    Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
 
     //Add/Update Question
     Route::group(['middleware' => 'Restrict'], function () {
-        Route::post('add', 'QuestionBankController@store')->middleware('permission:question/add');
-        Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
     });
 
     Route::get('get', 'QuestionBankController@index')->middleware(['permission:question/get' , 'ParentCheck']);
