@@ -113,7 +113,9 @@ class User extends Authenticatable
         $touserid = array();
         foreach($request['users'] as $user)
         {
-            $touserid[] = User::find($user);
+            $temp = User::find($user);
+            if($temp != null)
+                $touserid[] = $temp;
         }
         $date=Carbon::parse($request['publish_date']);
         $seconds = $date->diffInSeconds(Carbon::now());
@@ -131,8 +133,7 @@ class User extends Authenticatable
             $touserid, $request['message'], $date, $request['title'], $request['type']
         ))->delay($seconds);
         dispatch($job);
-        
-        //Notification::send($touserid, new NewMessage($request));
+        Notification::send($touserid, new NewMessage($request));
         return 1;
     }
 

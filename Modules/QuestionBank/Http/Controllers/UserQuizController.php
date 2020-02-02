@@ -450,7 +450,7 @@ class UserQuizController extends Controller
         ]);
         $user_quiz = userQuiz::where('user_id', $request->user_id)->where('id',$request->attempt_id)->first();
         $total= quiz::where('id',$user_quiz->quiz_lesson->quiz_id)->with(['Question.question_answer'])->get();
-        return($total);
+        
         foreach($total as $quest){
             foreach($quest->question as $q){
                 $q->question_answer;
