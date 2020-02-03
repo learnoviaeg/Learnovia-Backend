@@ -159,20 +159,8 @@ class QuestionBankController extends Controller
         }
 
         $questions = Questions::with('question_answer');
-        if (isset($request->course_id) && isset($request->class)){
-            $course_segment = CourseSegment::GetWithClassAndCourse($request->class,$request->course_id);
-            if(!isset($course_segment)) {
-                return HelperController::api_response_format(400, null, 'Something went wrong :doesn\'t exist course segment');
-            }
-            $questions->where('course_segment_id', $course_segment->id);
-        }
-        elseif (isset($request->course_id)) {
-            $course_segment_ids = Course::find($request->course_id)->courseSegments->pluck('id');
-            $questions->whereIn('course_segment_id', $course_segment_ids);
-        }
-        elseif(isset($request->class)){
-            $course_segment= CourseSegment::GetWithClass($request->class);
-            $questions->where('course_segment_id', $course_segment->id);
+        if(isset($request->course_id)) {
+            $questions->where('course_id', $request->course_id);
         }
         if (isset($request->Question_Category_id)) {
             $questions->where('question_category_id', $request->Question_Category_id);
@@ -235,12 +223,10 @@ class QuestionBankController extends Controller
     {
         $request->validate([
             'course_id' => 'required|integer|exists:courses,id',
-            'class_id' => 'required|integer|exists:classes,id',
             'randomNumber' => 'required|integer|min:1'
         ]);
-        $courseSeg = CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
         $questions = Questions::inRandomOrder()
-            ->where('course_segment_id', $courseSeg->id)
+            ->where('course_id', $request->course_id)
             ->where('parent', null)
             ->limit($request->randomNumber)
             ->with('childeren.question_answer')
