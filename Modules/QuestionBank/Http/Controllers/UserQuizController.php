@@ -446,7 +446,7 @@ class UserQuizController extends Controller
             $attemps['Attempts'] = $All_attemp;
             $final->push($attemps);
         }
-      return HelperController::api_response_format(200, $final, 'Student attempts are ...');
+      return HelperController::api_response_format(200, $final, 'Students attempts are ...');
     }
 
     public function get_fully_detailed_attempt(Request $request){
@@ -460,6 +460,7 @@ class UserQuizController extends Controller
             foreach($quest->question as $q){
                 $q->question_answer;
                 $Question_id =  $q->pivot->question_id;
+                $q->question_type;
                 $Ans_ID = userQuizAnswer::where('user_quiz_id',$user_quiz->id)->where('question_id',$Question_id)->first();
                 if(isset($Ans_ID->answer_id)){
                     $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
