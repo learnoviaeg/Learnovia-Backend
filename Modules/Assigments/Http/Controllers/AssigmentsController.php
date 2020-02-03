@@ -571,7 +571,8 @@ class AssigmentsController extends Controller
     {
         $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
-            'lesson_id' => 'required|exists:lessons,id',
+            'lesson_id' => 'required|array',
+            'lesson_id.*' => 'exists:lessons,id',
             'is_graded' => 'required|boolean',
             'mark' => 'required|integer',
             'allow_attachment' => 'required|integer|min:0|max:3',
@@ -582,8 +583,9 @@ class AssigmentsController extends Controller
             'scale' => 'exists:scales,id',
             'visible' => 'boolean',
         ]);
+        foreach($request->lesson_id as $lesson){
         $assignment_lesson = new AssignmentLesson;
-        $assignment_lesson->lesson_id = $request->lesson_id;
+        $assignment_lesson->lesson_id = $lesson;
         $assignment_lesson->assignment_id = $request->assignment_id;
         $assignment_lesson->publish_date = $request->publish_date;
         $assignment_lesson->start_date = $request->opening_date;
@@ -602,13 +604,13 @@ class AssigmentsController extends Controller
         $assignment_lesson->save();
 
         LessonComponent::create([
-            'lesson_id' => $request->lesson_id,
+            'lesson_id' => $lesson,
             'comp_id' => $request->assignment_id,
             'module' => 'Assigments',
             'model' => 'assignment',
-            'index' => LessonComponent::getNextIndex($request->lesson_id),
+            'index' => LessonComponent::getNextIndex($lesson),
         ]);
-        $lesson = Lesson::find($request->lesson_id);
+        $lesson = Lesson::find($lesson);
         $data = array(
             "course_segment" => $lesson->course_segment_id,
             "assignments_id" => $request->assignment_id,
@@ -617,6 +619,7 @@ class AssigmentsController extends Controller
             "class" => $request->class
         );
         $this->assignAsstoUsers($data);
+    }
         $all = AssignmentLesson::all();
         return HelperController::api_response_format(200, $all, 'Assignment is assigned to a lesson Successfully');
     }
