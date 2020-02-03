@@ -29,6 +29,10 @@ class QuestionBankController extends Controller
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
 
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/add','title' => 'add question category']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/delete','title' => 'delete question category']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/update','title' => 'update question category']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/get','title' => 'get question categories']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add','title' => 'add question']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/update','title' => 'update question']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/get','title' => 'get question']);
@@ -73,6 +77,10 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('site/quiz/notify_quiz');
         $role->givePermissionTo('site/quiz/store_user_quiz');
         $role->givePermissionTo('question/add');
+        $role->givePermissionTo('question/category/add');
+        $role->givePermissionTo('question/category/update');
+        $role->givePermissionTo('question/category/delete');
+        $role->givePermissionTo('question/category/get');
         $role->givePermissionTo('question/update');
         $role->givePermissionTo('question/delete');
         $role->givePermissionTo('question/get');
@@ -165,7 +173,6 @@ class QuestionBankController extends Controller
         elseif(isset($request->class)){
             $course_segment= CourseSegment::GetWithClass($request->class);
             $questions->where('course_segment_id', $course_segment->id);
-
         }
         if (isset($request->Question_Category_id)) {
             $questions->where('question_category_id', $request->Question_Category_id);

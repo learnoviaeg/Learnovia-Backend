@@ -237,10 +237,10 @@ class UserQuizController extends Controller
         }
 
         $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->get();
-        
+
         foreach($answer2 as $ans)
             $ans->update(['answered'=>'1']);
-        
+
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
     }
 
@@ -450,7 +450,6 @@ class UserQuizController extends Controller
         ]);
         $user_quiz = userQuiz::where('user_id', $request->user_id)->where('id',$request->attempt_id)->first();
         $total= quiz::where('id',$user_quiz->quiz_lesson->quiz_id)->with(['Question.question_answer'])->get();
-        
         foreach($total as $quest){
             foreach($quest->question as $q){
                 $q->question_answer;
@@ -467,7 +466,6 @@ class UserQuizController extends Controller
             }
         }
        return $total;
-
     }
 
     public function feedback(Request $request){
