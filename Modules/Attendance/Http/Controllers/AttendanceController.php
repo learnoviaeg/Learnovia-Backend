@@ -440,11 +440,9 @@ class AttendanceController extends Controller
 
     public function Attendance_Report(Request $request)
     {
-        $enrolls=Enroll::where('user_id',Auth::id())->get();
-        $CourseSeg=$enrolls->pluck('course_segment');
-        // return $CourseSeg;
-        // $role=$enrolls->pluck('role_id')->first();
 
+        $enrolls=Enroll::where('user_id',351)->get();
+        $CourseSeg=$enrolls->pluck('course_segment');
         $attend_course=AttendanceSession::whereIn('course_segment_id', $CourseSeg)->pluck('attendance_id');
 
         $attendancesNull=AttendanceSession::whereNull('course_segment_id')->pluck('attendance_id');
@@ -461,7 +459,6 @@ class AttendanceController extends Controller
                 'courses' => $attendance->allowed_courses,
             ]);
             $courseseg=GradeCategoryController::getCourseSegmentWithArray($req);
-            // return $courseseg;
             if(isset($courseseg) && isset($CourseSeg))
             {
                 $intersecCourseSeg=array_intersect($courseseg->toArray(),$CourseSeg->toArray());
@@ -469,27 +466,34 @@ class AttendanceController extends Controller
                     $attends[]=$attendance->id;
             }
         }
-        $All_sessions=AttendanceSession::whereIn('attendance_id',$attends)->get();
+        $All_sessions=AttendanceSession::whereIn('attendance_id',$attends)->pluck('id');
 
-        ////if user is teacher ///if($role == 4)
-        if($request->user()->can('site/course/teacher'))
-            return HelperController::api_response_format(200, $All_sessions, 'there is all your sessions');
-
-        ////get all attendance assoicated the user|student ///if($role == 3)
-        if($request->user()->can('site/course/student'))
-        {
-            $All_Attendance=AttendanceLog::where('student_id', Auth::id())->with('status')->get();
-            if($request->filled('session'))
-                $All_Attendance=AttendanceLog::where('session_id',$request->session)->where('student_id', Auth::id())
-                                                ->with('status')->get();
-
-            foreach($All_Attendance as $all)
-                $all->getPrecentageStatus(count($All_Attendance));
-
-            return HelperController::api_response_format(200, $All_Attendance, 'there is all your logs');
+        $total= collect([]);
+       $statusIDs = AttendanceLog::where('student_id', 351)->whereIn('session_id',$All_sessions)->pluck('status_id');
+       foreach($statusIDs->unique() as $statusID){
+           unset($Letterobject);
+        $letter = AttendanceStatus::find($statusID);
+        $countOfLetter = AttendanceLog::where('student_id', 351)->where('status_id',$statusID)->whereIn('session_id',$All_sessions)->count();
+        $Letterobject['name']  = $letter->letter;
+        $Letterobject['label'] = self::name_of_label($letter->letter);
+        $Letterobject['count']  = $countOfLetter;
+        $Letterobject['percentage'] = $countOfLetter/$statusIDs->count() .'%';
+        $total->push($Letterobject);
         }
+        return $total;
     }
-
+    
+    public function name_of_label($letter){
+        if($letter == 'A')
+            return 'Absent';
+        if($letter == 'E')
+            return 'Excuse';
+        if($letter == 'L')
+            return 'Late';
+        if($letter == 'P')
+            return 'Present';
+    return '-';
+    }
     public function getAttendance(Request $request)
     {
         $request->validate([
