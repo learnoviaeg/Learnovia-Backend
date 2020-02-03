@@ -37,10 +37,10 @@ class QuizLessonController extends Controller
             'grading_method_id' => 'required',
             'grade' => 'required|integer|min:1',
             'graded' => 'required|boolean',
-            'grade_category_id' => 'required_if:graded,=,true|integer|exists:grade_categories,id',
-            'grade_min' => 'required_if:graded,=,1|integer',
-            'grade_max' => 'required_if:graded,=,1|integer',
-            'grade_to_pass' => 'required_if:graded,=,1|integer',
+            // 'grade_category_id' => 'integer|exists:grade_categories,id',
+            // 'grade_min' => 'integer',
+            // 'grade_max' => 'integer',
+            // 'grade_to_pass' => 'integer',
         ]);
 
         $quiz = quiz::find($request->quiz_id);
@@ -52,11 +52,11 @@ class QuizLessonController extends Controller
             $lesson = Lesson::find($lessons);
             $gradeCats= $lesson->courseSegment->GradeCategory;
             $flag= false;
-            foreach ($gradeCats as $grade){
-                if($grade->id==$request->grade_category_id){
-                    $flag =true;
-                }
-            }
+            // foreach ($gradeCats as $grade){
+            //     if($grade->id==$request->grade_category_id){
+            //         $flag =true;
+            //     }
+            // }
             $course_Quiz=CourseSegment::where('id',$quiz->course_segment_id)->pluck('course_id')->first();
             $coueseSegment = $lesson->courseSegment;
             if($course_Quiz != $coueseSegment->course_id){
@@ -78,7 +78,7 @@ class QuizLessonController extends Controller
                 'max_attemp' => $request->max_attemp,
                 'grading_method_id' => $request->grading_method_id,
                 'grade' => $request->grade,
-                'grade_category_id' => $request->grade_category_id,
+                // 'grade_category_id' => $request->grade_category_id,
                 'publish_date' => $request->opening_time
             ]);
 
@@ -94,25 +94,25 @@ class QuizLessonController extends Controller
             ]);
             // return $requ;
             $ss= user::notify($requ);
-            if($request->graded == true){
-                if($flag==false){
-                    return HelperController::api_response_format(400, null,'this grade category invalid');
-                }
-                $grade_category=GradeCategory::find($request->grade_category_id);
-                $grade_category->GradeItems()->create([
-                    'grademin' => $request->grade_min,
-                    'grademax' => $request->grade_max,
-                    'item_no' => 1,
-                    'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
-                    'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : null,
-                    'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
-                    'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
-                    'item_type' => (isset($request->item_type)) ? $request->item_type : null,
-                    'item_Entity' => $quizLesson[0]->id,
-                    'name' => $quizLesson[0]->quiz->name,
-                    'weight' => 0,
-                ]);
-            }
+            // if($request->graded == true){
+            //     if($flag==false){
+            //         return HelperController::api_response_format(400, null,'this grade category invalid');
+            //     }
+            //     $grade_category=GradeCategory::find($request->grade_category_id);
+            //     $grade_category->GradeItems()->create([
+            //         'grademin' => (isset($request->grade_min)) ? $request->grade_min : null,
+            //         'grademax' => (isset($request->grade_max)) ? $request->grade_max : null,
+            //         'item_no' => 1,
+            //         'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
+            //         'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : null,
+            //         'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
+            //         'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
+            //         'item_type' => (isset($request->item_type)) ? $request->item_type : null,
+            //         'item_Entity' => $quizLesson[0]->id,
+            //         'name' => $quizLesson[0]->quiz->name,
+            //         'weight' => 0,
+            //     ]);
+            // }
             LessonComponent::create([
                 'lesson_id' => $lessons,
                 'comp_id'   => $request->quiz_id,
@@ -140,7 +140,7 @@ class QuizLessonController extends Controller
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
             'grade' => 'required',
-            'grade_category_id' => 'required|integer|exists:grade_categories,id'
+            // 'grade_category_id' => 'required|integer|exists:grade_categories,id'
         ]);
 
         $quiz = quiz::find($request->quiz_id);
@@ -150,11 +150,11 @@ class QuizLessonController extends Controller
         $lesson = Lesson::find($request->lesson_id);
         $gradeCats= $lesson->courseSegment->GradeCategory;
         $flag= false;
-        foreach ($gradeCats as $grade){
-            if($grade->id==$request->grade_category_id){
-                $flag =true;
-            }
-        }
+        // foreach ($gradeCats as $grade){
+        //     if($grade->id==$request->grade_category_id){
+        //         $flag =true;
+        //     }
+        // }
         $coueseSegment = $lesson->courseSegment;
 
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
@@ -174,7 +174,7 @@ class QuizLessonController extends Controller
             'max_attemp' => $request->max_attemp,
             'grading_method_id' => $request->grading_method_id,
             'grade' => $request->grade,
-            'grade_category_id' => $request->grade_category_id
+            // 'grade_category_id' => $request->grade_category_id
         ]);
         $requ = ([
             'message' => 'the quiz is updated',
