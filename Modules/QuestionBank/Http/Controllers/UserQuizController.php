@@ -417,6 +417,7 @@ class UserQuizController extends Controller
 
         ]);
         $final= collect([]);
+        $All_attemp=[];
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if (!isset($quiz_lesson))
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
@@ -425,22 +426,27 @@ class UserQuizController extends Controller
         if($request->filled('user_id')){
             unset($users);
             $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$request->user_id)->pluck('user_id')->unique();
-        if(count ($users) == 0)
-            return HelperController::api_response_format(200, 'This quiz is not assigned to this user');
+            if(count ($users) == 0)
+                return HelperController::api_response_format(200, 'This quiz is not assigned to this user');
         }
         foreach ($users as $user_id){
             $user = User::where('id',$user_id)->first();
-            $attem=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->first();
-            $req=new Request([
-                'attempt_id' => $attem->id,
-                'user_id' => $user->id
-            ]);
+            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
+            foreach($attems as $attem)
+            {
+                $req=new Request([
+                    'attempt_id' => $attem->id,
+                    'user_id' => $user->id
+                ]);
+                $All_attemp[]=self::get_fully_detailed_attempt($req);
+            }
+
             $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
-            $attemps['Attempts'] = self::get_fully_detailed_attempt($req);
+            $attemps['Attempts'] = $All_attemp;
             $final->push($attemps);
         }
-      return HelperController::api_response_format(200, $final, 'Students attempts are ...');
+      return HelperController::api_response_format(200, $final, 'Student attempts are ...');
     }
 
     public function get_fully_detailed_attempt(Request $request){
