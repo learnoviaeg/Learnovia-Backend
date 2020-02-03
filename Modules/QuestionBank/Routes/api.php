@@ -50,11 +50,8 @@ Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
 
     //Add/Update Question
-    Route::group(['middleware' => 'Restrict'], function () {
-        Route::post('add', 'QuestionBankController@store')->middleware('permission:question/add');
-        Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
-        Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
-    });
+    Route::post('add', 'QuestionBankController@store')->middleware('permission:question/add');
+    Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
 
     Route::group(['prefix' => 'category'], function () {
         Route::post('add', 'QuestionCategoryController@create')->middleware('permission:question/category/add');
