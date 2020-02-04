@@ -201,12 +201,11 @@ class FilesController extends Controller
                 $extension = $singlefile->getClientOriginalExtension();
                 $fileName = $singlefile->getClientOriginalName();
                 $size = $singlefile->getSize();
-                $description = $request->description;
                 $name = uniqid() . '.' . $extension;
                 $file = new file;
                 $file->type = $extension;
                 $file->name = $name;
-                $file->description = $description;
+                $file->description = ($request->filled('description')) ? $request->description : $fileName;
                 $file->size = $size;
                 $file->attachment_name = $fileName;
                 $file->user_id = Auth::user()->id;
