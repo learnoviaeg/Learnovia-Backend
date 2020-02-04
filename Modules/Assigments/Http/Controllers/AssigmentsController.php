@@ -306,13 +306,14 @@ class AssigmentsController extends Controller
             $userassigment->save();
         }
         $courseID = CourseSegment::where('id', $request['course_segment'])->pluck('course_id')->first();
+        $classId = CourseSegment::find($request['course_segment'])->segmentClasses[0]->classLevel[0]->class_id;
         user::notify([
             'id' => $request['assignments_id'],
             'message' => 'A new Assignment is added',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
-            'class_id' => $request['class'],
+            'class_id' => $classId,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request['assignments_id'],
             'publish_date' => $request['publish_date']
@@ -615,8 +616,7 @@ class AssigmentsController extends Controller
             "course_segment" => $lesson->course_segment_id,
             "assignments_id" => $request->assignment_id,
             "submit_date" => Carbon::now(),
-            "publish_date" => $request->opening_date,
-            "class" => $request->class
+            "publish_date" => $request->opening_date
         );
         $this->assignAsstoUsers($data);
     }
