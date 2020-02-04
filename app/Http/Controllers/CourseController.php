@@ -646,11 +646,19 @@ class CourseController extends Controller
                     $result[$j][$i]['name'] = $lesson->name;
                     $result[$j][$i]['data'] = [];
                     foreach ($components as $component) {
-                        eval('$res = \Modules\\' . $component->module . '\Entities\\' . $component->model . '::find(' . $component->comp_id . ');');
-                        if ($res == null)
+                        $temp = $lesson->module($component->module, $component->model);
+                        if ($request->user()->can('site/course/student')) {
+                            $temp->where('visible', '=', 1)
+                                ->where('publish_date', '<=', Carbon::now());
+                        }
+                        if(count($temp->get()) == 0)
                             continue;
-                        $res->flag = $component->model;
-                        $result[$j][$i]['data'][] = $res;
+                        $tempBulk = $temp->get();
+                        foreach($tempBulk as $item){
+                            $item->flag = $component->model;
+                            if(!in_array($item, $result[$j][$i]['data']))
+                                $result[$j][$i]['data'][] = $item;
+                        }
                     }
                     $i++;
                 }
