@@ -441,7 +441,7 @@ class AttendanceController extends Controller
     public function Attendance_Report(Request $request)
     {
 
-        $enrolls=Enroll::where('user_id',351)->get();
+        $enrolls=Enroll::where('user_id',Auth::id())->get();
         $CourseSeg=$enrolls->pluck('course_segment');
         $attend_course=AttendanceSession::whereIn('course_segment_id', $CourseSeg)->pluck('attendance_id');
 
@@ -469,31 +469,20 @@ class AttendanceController extends Controller
         $All_sessions=AttendanceSession::whereIn('attendance_id',$attends)->pluck('id');
 
         $total= collect([]);
-       $statusIDs = AttendanceLog::where('student_id', 351)->whereIn('session_id',$All_sessions)->pluck('status_id');
+       $statusIDs = AttendanceLog::where('student_id', Auth::id())->whereIn('session_id',$All_sessions)->pluck('status_id');
        foreach($statusIDs->unique() as $statusID){
            unset($Letterobject);
         $letter = AttendanceStatus::find($statusID);
-        $countOfLetter = AttendanceLog::where('student_id', 351)->where('status_id',$statusID)->whereIn('session_id',$All_sessions)->count();
+        $countOfLetter = AttendanceLog::where('student_id', Auth::id())->where('status_id',$statusID)->whereIn('session_id',$All_sessions)->count();
         $Letterobject['name']  = $letter->letter;
-        $Letterobject['label'] = self::name_of_label($letter->letter);
+        $Letterobject['label'] = $letter->descrption;
         $Letterobject['count']  = $countOfLetter;
         $Letterobject['percentage'] = $countOfLetter/$statusIDs->count() .'%';
         $total->push($Letterobject);
         }
-        return $total;
+        return HelperController::api_response_format(200, $total);
     }
     
-    public function name_of_label($letter){
-        if($letter == 'A')
-            return 'Absent';
-        if($letter == 'E')
-            return 'Excuse';
-        if($letter == 'L')
-            return 'Late';
-        if($letter == 'P')
-            return 'Present';
-    return '-';
-    }
     public function getAttendance(Request $request)
     {
         $request->validate([
