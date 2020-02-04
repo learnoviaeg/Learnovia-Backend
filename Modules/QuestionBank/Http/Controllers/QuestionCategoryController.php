@@ -24,6 +24,7 @@ class QuestionCategoryController extends Controller
             'class' => 'array|exists:classes,id',
             'name' => 'string|required'
         ]);
+        $quest_cat=[];
         if($request->filled('class'))
         {
             foreach($request->class as $class)
@@ -34,7 +35,9 @@ class QuestionCategoryController extends Controller
             }
         }
         $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
-        $course_seg_id=CourseSegment::whereIn('id',$myCourseSeg)->where('course_id',$request->course)->pluck('id'); 
+        $course_seg_id=CourseSegment::whereIn('id',$myCourseSeg)->where('course_id',$request->course)->pluck('id');
+        if(count($course_seg_id) == 0)
+            return HelperController::api_response_format(200, 'there is no course segment');
 
         foreach($course_seg_id as $CourseSeg)
         {
@@ -75,32 +78,36 @@ class QuestionCategoryController extends Controller
      */
     public function update(Request $request)
     {
+        $request->validate([
+            'course' => 'integer|exists:courses,id',
+            'class' => 'exists:classes,id',
+            'name' => 'string',
+            'id' => 'required|exists:questions_categories,id'
+        ]);
+        $questioncat=QuestionsCategory::find($request->id);
+        $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
+        $course_seg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
         if($request->user()->can('question/category/update'))
         {
-            $request->validate([
-                'course' => 'integer|exists:courses,id',
-                'class' => 'exists:classes,id',
-                'name' => 'string',
-                'id' => 'required|exists:questions_categories,id'
-            ]);
-            $questioncat=QuestionsCategory::find($request->id);
-            $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
-            if($request->filled('class') && $request->filled('course')){
-                $course_seg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
-                if(!isset($course_seg))
-                    return HelperController::api_response_format(200,'Can\'t update Question Category');
-                if(in_array($course_seg->id,$myCourseSeg->toArray()))
-                    $course_seg_id=$course_seg->id;
-                else
-                    return HelperController::api_response_format(200,'Can\'t update Question Category');
-            }
             $questioncat->update([
                 'name' => isset($request->name) ? $request->name : $questioncat->name,
-                'course_segment_id' => isset($course_seg) ? $course_seg_id : $questioncat->course_segment_id
+                'course_segment_id' => isset($course_seg) ? $course_seg->id : $questioncat->course_segment_id
             ]);
-            return HelperController::api_response_format(200, $questioncat, 'Question Category updated Successfully');
         }
-        return HelperController::api_response_format(200, 'you doesn\'t have permission');
+        if($request->filled('class') && $request->filled('course')){
+            $course_seg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+            if(!isset($course_seg))
+                return HelperController::api_response_format(200,'Can\'t update Question Category');
+            if(in_array($course_seg->id,$myCourseSeg->toArray()))
+                $course_seg_id=$course_seg->id;
+            else
+                return HelperController::api_response_format(200,'Can\'t update Question Category');
+        }
+        $questioncat->update([
+            'name' => isset($request->name) ? $request->name : $questioncat->name,
+            'course_segment_id' => isset($course_seg) ? $course_seg_id : $questioncat->course_segment_id
+        ]);
+        return HelperController::api_response_format(200, $questioncat, 'Question Category updated Successfully');
     }
 
     /**
@@ -118,6 +125,9 @@ class QuestionCategoryController extends Controller
         $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
         if(in_array($questioncat->course_segment_id,$myCourseSeg->toArray()))
             $check=$questioncat->delete();
+        else
+            return HelperController::api_response_format(200, 'you can\'t delete this question category');
+        
         if($check)
             return HelperController::api_response_format(200, $questioncat, 'Question Category deleted Successfully');
     }

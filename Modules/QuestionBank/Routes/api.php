@@ -56,8 +56,8 @@ Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'category'], function () {
         Route::post('add', 'QuestionCategoryController@create')->middleware('permission:question/category/add');
         Route::get('get', 'QuestionCategoryController@show')->middleware('permission:question/category/get');
-        Route::get('update', 'QuestionCategoryController@update')->middleware('permission:question/category/update');
-        Route::get('delete', 'QuestionCategoryController@destroy')->middleware('permission:question/category/delete');
+        Route::post('update', 'QuestionCategoryController@update')->middleware('permission:question/category/update');
+        Route::post('delete', 'QuestionCategoryController@destroy')->middleware('permission:question/category/delete');
     });
 
     Route::get('get', 'QuestionBankController@index')->middleware(['permission:question/get' , 'ParentCheck']);
