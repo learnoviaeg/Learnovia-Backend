@@ -628,8 +628,6 @@ class QuestionBankController extends Controller
             'And_why_mark' => 'integer|min:1|required_if:And_why,==,1'
         ]);
 
-
-
         if ($parent==null){
             $question = $this->updateQuestion($request,$parent);
             $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
