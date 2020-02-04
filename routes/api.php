@@ -133,6 +133,7 @@ Route::group(['prefix' => 'class', 'middleware' => ['auth:api']], function () {
     Route::post('update', 'ClassController@update')->name('updateclass')->middleware('permission:class/update');
     Route::post('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:class/delete');
     Route::post('assign', 'ClassController@Assign_class_to')->name('assignclass')->middleware('permission:class/assign');
+    Route::get('get-lessons', 'ClassController@get_lessons_of_class')->middleware('permission:class/get-lessons');
 });
 
 //Segment Routes
@@ -174,6 +175,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api']], function () {
     Route::get('chain', 'CourseController@getAllCoursesWithChain')->middleware('permission:course/chain');
     Route::get('components', 'CourseController@getAllMyComponenets')->middleware(['permission:course/components' , 'ParentCheck']);
     Route::get('lessons', 'CourseController@getLessonsFromCourseAndClass')->middleware('permission:course/lessons');
+    Route::get('get-class', 'CourseController@get_class_from_course')->middleware('permission:course/get-classes-by-course');
 });
 
 //USER CRUD ROUTES

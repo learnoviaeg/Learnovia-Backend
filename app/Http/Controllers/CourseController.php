@@ -804,4 +804,35 @@ class CourseController extends Controller
             return HelperController::api_response_format(200, null, 'This Course have no activated to this class');
         return HelperController::api_response_format(200, $courseSegment->lessons);
     }
+    public function get_class_from_course(Request $request){
+        $request->validate([
+            'course_id' => 'required|exists:course_segments,course_id'
+        ]);
+        $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+        $seggg = array();
+        foreach ($CourseSeg as $cour) {
+            $check = CourseSegment::where('course_id', $request->course_id)->where('id', $cour)->pluck('id')->first();
+            if ($check != null) {
+                $seggg[] = $check;
+            }
+        }
+        $CourseSeg = array();
+        foreach ($seggg as $segggg) {
+            $CourseSeg[] = CourseSegment::where('id', $segggg)->get();
+        }
+        $classs = array();
+        $i = 0;       
+        foreach ($CourseSeg as $seg) {
+            $lessons = $seg->first()->lessons;
+            foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
+                foreach ($segmentClas->classLevel as $key => $classlev) {
+                    foreach ($classlev->classes as $key => $class) {
+                        $classs[$i] = $class;
+                        $i++;
+                    }
+                }
+            }
+        }
+        return HelperController::api_response_format(200,$classs,'classes are.....');
+    }
 }

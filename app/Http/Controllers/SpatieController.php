@@ -102,6 +102,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/update', 'title' => 'update class']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/delete', 'title' => 'delete class']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/assign', 'title' => 'assign class']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/get-lessons', 'title' => 'get class lessons']);
 
             //Segment Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/add', 'title' => 'add segment']);
@@ -139,6 +140,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/chain', 'title' => 'Get All Courses with Chain']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/components', 'title' => 'Get All Course components']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/lessons', 'title' => 'Get All Course Lessons']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-classes-by-course', 'title' => 'Get All Classes by course']);
 
             //Enroll Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/single', 'title' => 'enroll single user']);

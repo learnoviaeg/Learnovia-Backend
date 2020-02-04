@@ -6,6 +6,7 @@ use App\AcademicYearType;
 use App\YearLevel;
 use Illuminate\Http\Request;
 use App\Classes;
+use App\CourseSegment;
 use App\ClassLevel;
 use App\Http\Resources\Classes as Classs;
 use Validator;
@@ -212,5 +213,12 @@ class ClassController extends Controller
              return HelperController::api_response_format(201, 'Arrays must have same length');
         }
         return HelperController::api_response_format(201, 'Class Assigned Successfully');
+    }
+    public function get_lessons_of_class(Request $request){
+        $request->validate([
+            'class'    => 'required|integer|exists:classes,id',
+        ]);
+        $lessons = CourseSegment::GetWithClass($request->class)->lessons;
+        return HelperController::api_response_format(200, $lessons,'Lessons are ....');
     }
 }
