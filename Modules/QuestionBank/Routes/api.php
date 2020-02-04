@@ -41,7 +41,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('correct-user-quiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
     Route::post('get-attempts', 'UserQuizController@get_user_quiz')->middleware('permission:quiz/get-attempts');
     Route::post('grade-user-quiz', 'UserQuizController@gradeUserQuiz')->middleware('permission:quiz/grade-user-quiz');
-    Route::post('get-all-attempts', 'UserQuizController@get_all_users_quiz_attempts')->middleware('permission:quiz/get-users-all-attempts');
+    Route::post('get-all-attempts', 'UserQuizController@get_all_users_quiz_attempts');//->middleware('permission:quiz/get-users-all-attempts');
     // Route::post('get-fully-detailed-attempt', 'UserQuizController@get_fully_detailed_attempt')->middleware('permission:quiz/get-fully-detailed-attempt');
 });
 
@@ -54,10 +54,10 @@ Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
     Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
 
     Route::group(['prefix' => 'category'], function () {
-        Route::post('add', 'QuestionCategoryController@create')->middleware('permission:question/category/add');
-        Route::get('get', 'QuestionCategoryController@show')->middleware('permission:question/category/get');
-        Route::get('update', 'QuestionCategoryController@update')->middleware('permission:question/category/update');
-        Route::get('delete', 'QuestionCategoryController@destroy')->middleware('permission:question/category/delete');
+        Route::post('add', 'QuestionCategoryController@create');//->middleware('permission:question/category/add');
+        Route::get('get', 'QuestionCategoryController@show');//->middleware('permission:question/category/get');
+        Route::post('update', 'QuestionCategoryController@update');//->middleware('permission:question/category/update');
+        Route::post('delete', 'QuestionCategoryController@destroy');//->middleware('permission:question/category/delete');
     });
 
     Route::get('get', 'QuestionBankController@index')->middleware(['permission:question/get' , 'ParentCheck']);
