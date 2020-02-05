@@ -119,7 +119,7 @@ class MediaController extends Controller
             'url' => 'required_if:type,==,1|array',
             'url.*' => 'required|active_url',
             'type' => 'required|in:0,1',
-            'name' => 'required_if:type,==,1',
+            'name' => 'required',
             'show' => 'nullable|in:0,1'
         ]);
 
@@ -147,7 +147,7 @@ class MediaController extends Controller
                     $size = $item->getSize();
                     $name = uniqid() . '.' . $extension;
                     $media->type = $item->getClientMimeType();
-                    $media->name = $name;
+                    // $media->name = $name;
                     $media->size = $size;
                     $media->attachment_name = $fileName;
                     $media->link = url('public/storage/media/' . $name);
@@ -168,10 +168,12 @@ class MediaController extends Controller
                     if (!isset($urlparts['path'])) {
                         return HelperController::api_response_format(400, $item, 'Link is invalid');
                     }
-                    $media->name = $request->name;
+                    // $media->name = $request->name;
                     $media->attachment_name = $request->name;
                     $media->link = $item;
                 }
+
+                $media->name = $request->name;
 
                 if ($request->filled('description'))
                     $media->description = $request->description;
