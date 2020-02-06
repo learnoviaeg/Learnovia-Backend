@@ -31,7 +31,7 @@ class Course extends Model
     }
 
     public  function courseSegments(){
-        return $this->hasMany('App\CourseSegment');
+        return $this->hasMany('App\CourseSegment','course_id','id');
     }
 
     public function activeSegment(){
