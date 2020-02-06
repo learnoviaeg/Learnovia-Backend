@@ -725,7 +725,7 @@ class QuizController extends Controller
     }
     public function gradeing_method()
     {
-        return[
+        $total = [
             [
                 'id' => 1,
                 'name' =>'First'
@@ -747,6 +747,6 @@ class QuizController extends Controller
                 'name' =>'Lowest'
             ]
     ];
-
+    return HelperController::api_response_format(200, $total, 'Grading methods are....');
     }
 }
