@@ -181,7 +181,7 @@ class FilesController extends Controller
         $request->validate([
             'name' => 'string|min:1',
             'Imported_file' => 'required|array',
-            // 'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
+            'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable',
