@@ -193,15 +193,11 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
     Route::get('filter-with-role', 'UserController@allUserFilterRole')->name('filterallbyrole')->middleware('permission:user/filter-with-role');
     Route::get('search-all-users', 'UserController@getAllUsersInCourseSegment')->name('searchusers')->middleware('permission:user/search-all-users');
     Route::get('overview-report', 'UserController@Overview_Report')->name('getusergrade')->middleware('permission:grade/user/get');
-
     Route::get('get-someone-children', 'UserController@getSomeoneChildren')->name('getsomeonechild')->middleware('permission:user/get-someone-child');
-
     Route::get('get-someone-parent', 'UserController@getSomeoneParent')->name('getsomeoneparent')->middleware('permission:user/get-someone-parent');
-
     Route::get('get-my-children', 'UserController@getMyChildren')->name('getmychild')->middleware('permission:user/get-my-child');
-
     Route::post('current-child', 'UserController@SetCurrentChild')->name('currentchild')->middleware('permission:user/current-child');
-
+    Route::get('get_my_users', 'UserController@get_my_users')->name('getmyusers')->middleware('permission:user/get-my-users');
 });
 //Enroll Routes
 Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api']], function () {
