@@ -187,8 +187,8 @@ class QuizLessonController extends Controller
             'from' => Auth::id(),
         ]);
         user::notify($requ);
-
-        return HelperController::api_response_format(200, $quizLesson,'Quiz updated atteched to lesson Successfully');
+        $all = Lesson::find($request->lesson_id)->module('QuestionBank', 'quiz')->get();
+        return HelperController::api_response_format(200, $all,'Quiz updated atteched to lesson Successfully');
     }
 
     public function getGradeCategory(Request $request)
@@ -220,7 +220,8 @@ class QuizLessonController extends Controller
             return HelperController::api_response_format(404, null,'This quiz doesn\'t belongs to the lesson');
 
         $quizLesson->delete();
-        return HelperController::api_response_format(200, [],'Quiz lesson deleted Successfully');
+        $all = Lesson::find($request->lesson_id)->module('QuestionBank', 'quiz')->get();
+        return HelperController::api_response_format(200, $all,'Quiz lesson deleted Successfully');
     }
 
     public function getQuizInLesson(Request $request)
