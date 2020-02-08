@@ -580,46 +580,60 @@ class AssigmentsController extends Controller
             'publish_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date|date_format:Y-m-d H:i:s',
-            'grade_category' => 'exists:grade_categories,id',
+            'grade_category' => 'array|required_if:is_graded,==,1',
+            'grade_category.*' => 'exists:grade_categories,id',
             'scale' => 'exists:scales,id',
             'visible' => 'boolean',
         ]);
-        foreach($request->lesson_id as $lesson){
-        $assignment_lesson = new AssignmentLesson;
-        $assignment_lesson->lesson_id = $lesson;
-        $assignment_lesson->assignment_id = $request->assignment_id;
-        $assignment_lesson->publish_date = $request->publish_date;
-        $assignment_lesson->start_date = $request->opening_date;
-        $assignment_lesson->mark = $request->mark;
-        $assignment_lesson->is_graded = $request->is_graded;
-        $assignment_lesson->allow_attachment = $request->allow_attachment;
+        foreach($request->lesson_id as $key => $lesson){
+            $assignment_lesson = new AssignmentLesson;
+            $assignment_lesson->lesson_id = $lesson;
+            $assignment_lesson->assignment_id = $request->assignment_id;
+            $assignment_lesson->publish_date = $request->publish_date;
+            $assignment_lesson->start_date = $request->opening_date;
+            $assignment_lesson->mark = $request->mark;
+            $assignment_lesson->is_graded = $request->is_graded;
+            $assignment_lesson->allow_attachment = $request->allow_attachment;
 
-        if ($request->filled('closing_date'))
-            $assignment_lesson->due_date = $request->closing_date;
-        if ($request->filled('scale'))
-            $assignment_lesson->scale_id = $request->scale;
-        if ($request->filled('visible'))
-            $assignment_lesson->visible = $request->visible;
-        if ($request->filled('grade_category'))
-            $assignment_lesson->grade_category = $request->grade_category;
-        $assignment_lesson->save();
+            if ($request->filled('closing_date'))
+                $assignment_lesson->due_date = $request->closing_date;
+            if ($request->filled('scale'))
+                $assignment_lesson->scale_id = $request->scale;
+            if ($request->filled('visible'))
+                $assignment_lesson->visible = $request->visible;
+            if ($request->filled('grade_category'))
+            {
+                $lessonAll = Lesson::find($lesson);
+                $gradeCats = $lessonAll->courseSegment->GradeCategory;
+                $flag = false;
+                foreach ($gradeCats as $grade){
+                    if($grade->id == $request->grade_category[$key]){
+                        $flag =true;
+                    }
+                }
+                if($flag==false){
+                    return HelperController::api_response_format(400, null,'this grade category invalid');
+                }
+            }
+                $assignment_lesson->grade_category = $request->grade_category[$key];
+            $assignment_lesson->save();
 
-        LessonComponent::create([
-            'lesson_id' => $lesson,
-            'comp_id' => $request->assignment_id,
-            'module' => 'Assigments',
-            'model' => 'assignment',
-            'index' => LessonComponent::getNextIndex($lesson),
-        ]);
-        $lesson = Lesson::find($lesson);
-        $data = array(
-            "course_segment" => $lesson->course_segment_id,
-            "assignments_id" => $request->assignment_id,
-            "submit_date" => Carbon::now(),
-            "publish_date" => $request->opening_date
-        );
-        $this->assignAsstoUsers($data);
-    }
+            LessonComponent::create([
+                'lesson_id' => $lesson,
+                'comp_id' => $request->assignment_id,
+                'module' => 'Assigments',
+                'model' => 'assignment',
+                'index' => LessonComponent::getNextIndex($lesson),
+            ]);
+            $lesson = Lesson::find($lesson);
+            $data = array(
+                "course_segment" => $lesson->course_segment_id,
+                "assignments_id" => $request->assignment_id,
+                "submit_date" => Carbon::now(),
+                "publish_date" => $request->opening_date
+            );
+            $this->assignAsstoUsers($data);
+        }
         $all = AssignmentLesson::all();
         return HelperController::api_response_format(200, $all, 'Assignment is assigned to a lesson Successfully');
     }

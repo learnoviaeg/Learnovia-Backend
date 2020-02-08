@@ -37,29 +37,33 @@ class QuizLessonController extends Controller
             'grading_method_id' => 'required',
             'grade' => 'required|integer|min:1',
             'graded' => 'required|boolean',
-            'grade_category_id' => 'integer|required_if:graded,==,true|exists:grade_categories,id',
-            'grade_min' => 'integer',
-            'grade_max' => 'integer',
-            'grade_to_pass' => 'integer',
+            'grade_category_id' => 'array|required_if:graded,==,1',
+            'grade_category_id.*' => 'exists:grade_categories,id',
+            'grade_min' => 'integer|required_if:graded,==,1',
+            'grade_max' => 'integer|required_if:graded,==,1',
+            'grade_to_pass' => 'integer|required_if:graded,==,1',
         ]);
 
         $quiz = quiz::find($request->quiz_id);
-        $users=Enroll::where('course_segment',$quiz->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
-        $class=CourseSegment::find($quiz->course_segment_id)->segmentClasses[0]->classLevel[0]->classes[0]->id;
-        $course=CourseSegment::find($quiz->course_segment_id)->courses[0]->id;
-        foreach ($request->lesson_id as $lessons)
+        $users=Enroll::where('course_segment',$quiz->course_id)->where('role_id',3)->pluck('user_id')->toArray();
+        foreach ($request->lesson_id as $key => $lessons)
         {
             $lesson = Lesson::find($lessons);
+
+            //for notification
+            $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('role_id',3)->pluck('user_id')->toArray();
+            $course = $lesson->courseSegment->course_id;
+            $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+
             $gradeCats= $lesson->courseSegment->GradeCategory;
             $flag= false;
              foreach ($gradeCats as $grade){
-                 if($grade->id==$request->grade_category_id){
+                if($grade->id==$request->grade_category_id[$key]){
                     $flag =true;
-                 }
-             }
-            $course_Quiz=CourseSegment::where('id',$quiz->course_segment_id)->pluck('course_id')->first();
-            $coueseSegment = $lesson->courseSegment;
-            if($course_Quiz != $coueseSegment->course_id){
+                }
+            }
+
+            if($quiz->course_id != $lesson->courseSegment->course_id){
                 return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
             }
 
@@ -69,7 +73,11 @@ class QuizLessonController extends Controller
             if(count($check) > 0){
                 return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
             }
-
+            if($flag==false){
+                return HelperController::api_response_format(400, null,'this grade category invalid');
+            }
+            $index = QuizLesson::where('lesson_id',$lessons)->get()->max('index');
+            $Next_index = $index + 1;
             $quizLesson[] = QuizLesson::create([
                 'quiz_id' => $request->quiz_id,
                 'lesson_id' => $lessons,
@@ -78,8 +86,9 @@ class QuizLessonController extends Controller
                 'max_attemp' => $request->max_attemp,
                 'grading_method_id' => $request->grading_method_id,
                 'grade' => $request->grade,
-                'grade_category_id' => $request->grade_category_id,
-                'publish_date' => $request->opening_time
+                'grade_category_id' => $request->grade_category_id[$key],
+                'publish_date' => $request->opening_time,
+                'index' => $Next_index
             ]);
 
             $requ = ([
@@ -95,16 +104,13 @@ class QuizLessonController extends Controller
             user::notify($requ);
 
              if($request->graded == true){
-                 if($flag==false){
-                    return HelperController::api_response_format(400, null,'this grade category invalid');
-                 }
-                 $grade_category=GradeCategory::find($request->grade_category_id);
+                 $grade_category=GradeCategory::find($request->grade_category_id[$key]);
                  $grade_category->GradeItems()->create([
-                    'grademin' => (isset($request->grade_min)) ? $request->grade_min : null,
-                    'grademax' => (isset($request->grade_max)) ? $request->grade_max : null,
+                    'grademin' => $request->grade_min,
+                    'grademax' => $request->grade_max,
                     'item_no' => 1,
                     'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
-                    'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : null,
+                    'grade_to_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
                     'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
                     'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
                     'item_type' => (isset($request->item_type)) ? $request->item_type : null,
@@ -144,9 +150,9 @@ class QuizLessonController extends Controller
         ]);
 
         $quiz = quiz::find($request->quiz_id);
-        $users=Enroll::where('course_segment',$quiz->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
-        $class=CourseSegment::find($quiz->course_segment_id)->segmentClasses[0]->classLevel[0]->classes[0]->id;
-        $course=CourseSegment::find($quiz->course_segment_id)->courses[0]->id;
+        $users=Enroll::where('course_segment',$quiz->course_id)->where('role_id',3)->pluck('user_id')->toArray();
+        $class=CourseSegment::find($quiz->course_id)->segmentClasses[0]->classLevel[0]->classes[0]->id;
+        $course=CourseSegment::find($quiz->course_id)->courses[0]->id;
         $lesson = Lesson::find($request->lesson_id);
         $gradeCats= $lesson->courseSegment->GradeCategory;
         $flag= false;
