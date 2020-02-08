@@ -284,7 +284,7 @@ class AssigmentsController extends Controller
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
             'publish_date' => $AssignmentLesson->start_date
         ]);
-        $all = AssignmentLesson::all();
+        $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
         return HelperController::api_response_format(200, $all, $message = 'Assignment Lesson Updated Successfully');
     }
 
@@ -477,8 +477,12 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id'
         ]);
         $assigment = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!isset($assigment))
+            return HelperController::api_response_format(400,null,'This assigment is not assigned to this lesson');
         $assigment->delete();
-        return HelperController::api_response_format(200, $body = [], $message = 'Assigment Lesson deleted succesfully');
+        $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
+
+        return HelperController::api_response_format(200, $all, $message = 'Assigment Lesson deleted succesfully');
     }
 
     public function deleteAssignment(Request $request)
@@ -488,7 +492,8 @@ class AssigmentsController extends Controller
         ]);
         $assign = Assignment::where('id', $request->assignment_id);
         $assign->delete();
-        return HelperController::api_response_format(200, $body = [], $message = 'Assigment deleted succesfully');
+
+        return HelperController::api_response_format(200, Assignment::all(), $message = 'Assigment deleted succesfully');
     }
 
 
