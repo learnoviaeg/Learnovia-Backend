@@ -18,9 +18,11 @@ use Modules\Attendance\Entities\AttendanceSession;
 use App\Enroll;
 use App\Level;
 use App\CourseSegment;
+use Illuminate\Support\Facades\DB;
 use Modules\Attendance\Entities\AttendanceStatus;
 use Modules\Attendance\Jobs\AttendanceGradeItems;
 use Modules\Attendance\Jobs\AttendanceSessionsJob;
+use stdClass;
 
 class AttendanceController extends Controller
 {
@@ -440,49 +442,28 @@ class AttendanceController extends Controller
 
     public function Attendance_Report(Request $request)
     {
-
-        $enrolls=Enroll::where('user_id',Auth::id())->get();
-        $CourseSeg=$enrolls->pluck('course_segment');
-        $attend_course=AttendanceSession::whereIn('course_segment_id', $CourseSeg)->pluck('attendance_id');
-
-        $attendancesNull=AttendanceSession::whereNull('course_segment_id')->pluck('attendance_id');
-        $All_attend=array_merge($attend_course->toArray(),$attendancesNull->toArray());
-        $attendances=Attendance::whereIn('id',$All_attend)->get();
-        foreach($attendances as $attendance)
-        {
-            $req = new Request([
-                'year' => $attendance->year_id,
-                'type' => [$attendance->type_id],
-                'levels' => $attendance->allowed_levels,
-                'classes' => $attendance->allowed_classes,
-                'segments' => [$attendance->segment_id],
-                'courses' => $attendance->allowed_courses,
-            ]);
-            $courseseg=GradeCategoryController::getCourseSegmentWithArray($req);
-            if(isset($courseseg) && isset($CourseSeg))
-            {
-                $intersecCourseSeg=array_intersect($courseseg->toArray(),$CourseSeg->toArray());
-                if(isset($intersecCourseSeg))
-                    $attends[]=$attendance->id;
-            }
+        //return Hosts::select(['URL' , DB::raw("COUNT(*) as hits")])->groupBy('URL')->get();
+        $logs = AttendanceLog::select(['*' , DB::raw("COUNT(*) as count")])
+        ->where('student_id', Auth::user()->id)
+        ->groupBy('status_id');
+        if($request->filled('session_id'))
+            $logs = $logs->where('session_id' , $request->session_id);
+        $logs = $logs->get();
+        $total = 0;
+        if(count($logs) > 0)
+            $total = array_sum($logs->pluck('count')->toArray());
+        $result = [];
+        foreach($logs as $log){
+            $temp = new stdClass();
+            $temp->count = $log->count;
+            $temp->label = $log->status->letter;
+            $temp->description = $log->status->descrption;
+            $temp->percentage = ($log->count * 100) / $total;
+            $result[] = $temp;
         }
-        $All_sessions=AttendanceSession::whereIn('attendance_id',$attends)->pluck('id');
-
-        $total= collect([]);
-       $statusIDs = AttendanceLog::where('student_id', Auth::id())->whereIn('session_id',$All_sessions)->pluck('status_id');
-       foreach($statusIDs->unique() as $statusID){
-           unset($Letterobject);
-        $letter = AttendanceStatus::find($statusID);
-        $countOfLetter = AttendanceLog::where('student_id', Auth::id())->where('status_id',$statusID)->whereIn('session_id',$All_sessions)->count();
-        $Letterobject['name']  = $letter->letter;
-        $Letterobject['label'] = $letter->descrption;
-        $Letterobject['count']  = $countOfLetter;
-        $Letterobject['percentage'] = $countOfLetter/$statusIDs->count() .'%';
-        $total->push($Letterobject);
-        }
-        return HelperController::api_response_format(200, $total);
+        return HelperController::api_response_format(200 , $result , '');
     }
-    
+
     public function getAttendance(Request $request)
     {
         $request->validate([
