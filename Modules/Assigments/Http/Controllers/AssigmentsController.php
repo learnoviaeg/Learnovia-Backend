@@ -175,13 +175,12 @@ class AssigmentsController extends Controller
     //Create assignment
     public function createAssigment(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'required|string',
             'content' => 'string|required_without:file',
-            'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif|required_without:content',
+            'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,csv,doc,docx,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls,|required_without:content',
         ]);
-        if($validator->fails())
-            return HelperController::api_response_format(200, $validator->errors());
+       
         $assignment = new assignment;
         if ($request->hasFile('file')) {
             $assignment->attachment_id = attachment::upload_attachment($request->file, 'assignment', null)->id;
@@ -208,7 +207,7 @@ class AssigmentsController extends Controller
         $assigment = assignment::find($request->id);
         $CheckIfAnswered = UserAssigment::where('assignment_id', $request->id)->where('submit_date', '!=', null)->get();
         if (count($CheckIfAnswered) > 0)
-            return HelperController::api_response_format(200, 'Cannot update,Assigment was submitted before!');
+            return HelperController::api_response_format(400, 'Cannot update,Assigment was submitted before!');
 
         if ($request->hasFile('file')) {
 
@@ -258,7 +257,7 @@ class AssigmentsController extends Controller
             $AssignmentLesson->visible = $request->visible;
         if ($request->filled('allow_attachment'))
             $AssignmentLesson->allow_attachment = $request->allow_attachment;
-        if ($request->filled('mark'))
+        if ($request->filled('opening_date'))
             $AssignmentLesson->start_date = $request->opening_date;
         if ($request->filled('closing_date'))
             $AssignmentLesson->due_date = $request->closing_date;
