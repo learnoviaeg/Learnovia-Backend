@@ -150,10 +150,17 @@ class QuizLessonController extends Controller
         ]);
 
         $quiz = quiz::find($request->quiz_id);
-        $users=Enroll::where('course_segment',$quiz->course_id)->where('role_id',3)->pluck('user_id')->toArray();
-        $class=CourseSegment::find($quiz->course_id)->segmentClasses[0]->classLevel[0]->classes[0]->id;
-        $course=CourseSegment::find($quiz->course_id)->courses[0]->id;
         $lesson = Lesson::find($request->lesson_id);
+
+        //for notification
+        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('role_id',3)->pluck('user_id')->toArray();
+        $course = $lesson->courseSegment->course_id;
+        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+
+        if($quiz->course_id != $lesson->courseSegment->course_id){
+            return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
+        }
+
         $gradeCats= $lesson->courseSegment->GradeCategory;
         $flag= false;
         foreach ($gradeCats as $grade){
@@ -161,7 +168,6 @@ class QuizLessonController extends Controller
                 $flag =true;
             }
         }
-        $coueseSegment = $lesson->courseSegment;
 
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
                         ->where('lesson_id',$request->lesson_id)->first();
