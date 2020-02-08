@@ -179,7 +179,7 @@ class FilesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'description' => 'string|min:1',
+            'name' => 'string|min:1',
             'Imported_file' => 'required|array',
             'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
             'lesson_id' => 'required|array',
@@ -204,10 +204,10 @@ class FilesController extends Controller
                 $name = uniqid() . '.' . $extension;
                 $file = new file;
                 $file->type = $extension;
-                $file->name = $name;
-                $file->description = ($request->filled('description')) ? $request->description : $fileName;
+                $file->name = $fileName;
+                $file->description = ($request->filled('name')) ? $request->name : $fileName;
                 $file->size = $size;
-                $file->attachment_name = $fileName;
+                $file->attachment_name = $name;
                 $file->user_id = Auth::user()->id;
                 $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $name);
                 $file->url2 = url('public/storage/files/' . $name);

@@ -635,7 +635,7 @@ class CourseController extends Controller
             'course_id' => 'required|exists:course_segments,course_id',
         ]);
         $result = [];
-        $courseSegments = CourseSegment::whereIn('id' , Auth::user()->enroll->pluck('course_segment'))->get();
+        $courseSegments = CourseSegment::whereIn('id' , Auth::user()->enroll->pluck('course_segment'))->where('course_id',$request->course_id)->get();
         $j = 0;
         foreach($courseSegments as $courseSegment){
             if ($courseSegment != null) {
