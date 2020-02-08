@@ -32,5 +32,4 @@ Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function ()
     Route::get('get','AssigmentsController@GetAssignment')->name('getAssignment')->middleware(['permission:assignment/get' , 'ParentCheck']);
     Route::post('toggle', 'AssigmentsController@toggleAssignmentVisibity')->middleware('permission:assignment/toggle');
     Route::get('get-all', 'AssigmentsController@getAllAssigment')->middleware('permission:assignment/get-all');
-
 });
