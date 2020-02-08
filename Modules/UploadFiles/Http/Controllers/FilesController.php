@@ -204,10 +204,10 @@ class FilesController extends Controller
                 $name = uniqid() . '.' . $extension;
                 $file = new file;
                 $file->type = $extension;
-                $file->description = $fileName;
+                $file->description = $name;
                 $file->name = ($request->filled('name')) ? $request->name : $fileName;
                 $file->size = $size;
-                $file->attachment_name = $name;
+                $file->attachment_name = $fileName;
                 $file->user_id = Auth::user()->id;
                 $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $name);
                 $file->url2 = url('public/storage/files/' . $name);
@@ -360,13 +360,13 @@ class FilesController extends Controller
         if ($request->hasFile('Imported_file')) {
             $extension = $request->Imported_file->getClientOriginalExtension();
             $name = uniqid() . '.' . $extension;
-            $file->attachment_name = $name;
+            $file->attachment_name = $fileName;
             Storage::disk('public')->putFileAs('files/', $request->Imported_file, $name);
             $file->url = 'https://docs.google.com/viewer?url=' . url('public/storage/files/' . $name);
             $file->url2 = url('public/storage/files/' . $name);
             $file->type = $extension;
             $fileName =  $request->Imported_file->getClientOriginalName();
-            $file->description = $fileName;
+            $file->description = $name;
 
         }
         $tempReturn = null;
