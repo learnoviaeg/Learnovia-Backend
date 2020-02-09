@@ -35,7 +35,6 @@ class QuizController extends Controller
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
             'type' => 'required|in:0,1,2',
-            'class' => 'required|exists:classes,id',
             /**
              * type 0 => new Question OR OLD
              * type 1 => random Questions
@@ -75,7 +74,6 @@ class QuizController extends Controller
                             'Question_Category_id' => 'required|exists:questions_categories,id',
                             'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
-                            'class' => 'required|exists:classes,id',
                             'parent' => 'integer|exists:questions,id',
                         ]);
 
@@ -95,7 +93,6 @@ class QuizController extends Controller
                             'Question_Category_id' => 'required|exists:questions_categories,id',
                             'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
-                            'class' => 'required|exists:classes,id',
                             'parent' => 'integer|exists:questions,id',
                         ]);
 
@@ -120,7 +117,6 @@ class QuizController extends Controller
                             'Question_Category_id' => 'required|exists:questions_categories,id',
                             'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
-                            'class' => 'required|exists:classes,id',
                             'parent' => 'integer|exists:questions,id',
                         ]);
                         if ($validator->fails()) {
@@ -138,7 +134,6 @@ class QuizController extends Controller
                             'Question_Category_id' => 'required|exists:questions_categories,id',
                             'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
-                            'class' => 'required|exists:classes,id',
                             'parent' => 'integer|exists:questions,id',
                             'subQuestions' => 'required|array|distinct'/*|min:2*/,
                             'subQuestions.*' => 'required|distinct',
@@ -151,12 +146,6 @@ class QuizController extends Controller
                 }
             }
         }
-        $course_segment = CourseSegment::GetWithClassAndCourse($request->class,$request->course_id);
-        if(!isset($course_segment)) {
-            return HelperController::api_response_format(400, null, 'Something went wrong :doesn\'t exist course segment');
-        }
-        $index = Quiz::where('course_segment_id',$request->course_id)->get()->max('index');
-        $Next_index = $index + 1;
         if ($request->type == 0) { // new or new
             $newQuestionsIDs = $this->storeWithNewQuestions($request);
             $oldQuestionsIDs = $this->storeWithOldQuestions($request);
@@ -166,12 +155,11 @@ class QuizController extends Controller
         } else { // create Quiz without Question
             $quiz = quiz::create([
                 'name' => $request->name,
-                'course_segment_id' => $course_segment->id,
+                'course_id' => $request->course_id,
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
                 'Shuffle' => quiz::checkSuffle($request),
-                'index' => $Next_index,
                 'feedback' => $request->feedback,
             ]);
             return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
@@ -180,12 +168,11 @@ class QuizController extends Controller
         if ($questionsIDs != null) {
             $quiz = quiz::create([
                 'name' => $request->name,
-                'course_segment_id' => $course_segment->id,
+                'course_id' => $request->course_id,
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
                 'Shuffle' => quiz::checkSuffle($request),
-                'index' => $Next_index,
                 'feedback' => $request->feedback,
             ]);
 
@@ -227,12 +214,9 @@ class QuizController extends Controller
         $request->validate([
             'randomNumber' => 'required|integer|min:1'
         ]);
-        $course_segment = CourseSegment::GetWithClassAndCourse($request->class,$request->course_id);
-        if(!isset($course_segment)){
-            return HelperController::api_response_format(400, null, 'Something went wrong :doesn\'t exist course segment');
-        }
+
         $questionIDs = Questions::inRandomOrder()
-            ->where('course_segment_id', $course_segment->id)
+            ->where('course_id', $request->course_id)
             ->limit($request->randomNumber)
             ->get();
 
@@ -256,7 +240,6 @@ class QuizController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'name' => 'required|string|min:3',
             'course_id' => 'required|exists:courses,id',
-            'class' => 'required|exists:classes,id',
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
             /**

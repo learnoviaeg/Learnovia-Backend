@@ -16,7 +16,7 @@ class QuizLesson extends Model
         'grade',
         'grade_category_id',
         'publish_date',
-        'visible'
+        'visible','index'
     ];
     protected $table = 'quiz_lessons';
 

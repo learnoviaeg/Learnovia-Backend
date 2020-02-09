@@ -8,6 +8,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes;
 use App\Enroll;
 use App\GradeCategory;
 use App\Parents;
@@ -449,4 +450,42 @@ class UserController extends Controller
         $parent =  User::find($parentID);
         return $parent;
     }
+    Public function get_my_users(Request $request){
+        $request->validate([
+            'course_id' => 'exists:courses,id',
+            'class_id' => 'exists:classes,id',
+            'role_id' => 'exists:roles,id'
+        ]);
+        $total = array();
+        if($request->filled('course_id')){
+            $course_segment = CourseSegment::where('course_id',$request->course_id)->pluck('id')->unique();
+            $users = Enroll::whereIn('course_segment',$course_segment)->pluck('user_id')->unique();
+            if($request->filled('role_id'))
+                 $users = Enroll::whereIn('course_segment',$course_segment)->where('role_id',$request->role_id)->pluck('user_id')->unique();
+
+        }elseif($request->filled('class_id')){
+            $class = Classes::where('id',$request->class_id)->with(['classlevel.segmentClass'])->first();
+            $Segmentclass = $class->classlevel->segmentClass[0]->id;
+            if(!isset($Segmentclass))
+            return HelperController::api_response_format(200 ,'This class is not assigned to a course segment');
+            $course_segment = CourseSegment::where('segment_class_id',$Segmentclass)->pluck('id')->unique();
+            $users = Enroll::whereIn('course_segment',$course_segment)->pluck('user_id')->unique();
+            if($request->filled('role_id'))
+             $users = Enroll::whereIn('course_segment',$course_segment)->where('role_id',$request->role_id)->pluck('user_id')->unique();
+
+        }else{
+            $course_segments = Enroll::where('user_id',Auth::id())->pluck('course_segment')->unique();
+            $users = Enroll::whereIn('course_segment',$course_segments)->pluck('user_id')->unique();
+            if($request->filled('role_id'))
+                 $users = Enroll::whereIn('course_segment',$course_segments)->where('role_id',$request->role_id)->pluck('user_id')->unique();
+
+        }
+        $students = user::whereIn('id',$users)->get();
+        foreach($students as $student){
+            if($student->can('site/course/student'))
+                array_push($total ,$student) ;
+        }
+        return HelperController::api_response_format(200,$total ,'Users are.......');
+    }
+    
 }
