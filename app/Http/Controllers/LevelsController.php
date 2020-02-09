@@ -7,6 +7,9 @@ use App\YearLevel;
 use Illuminate\Http\Request;
 use App\AcademicYear;
 use App\Level;
+use App\Enroll;
+use App\CourseSegment;
+use Auth;
 use Illuminate\Support\Collection;
 use Validator;
 
@@ -168,5 +171,16 @@ class LevelsController extends Controller
         }
         $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(200, $levels);
+    }
+
+    public function GetMyLevels()
+    {
+        $courseSegs=Enroll::where('user_id',Auth::id())->pluck('course_segment');
+        foreach($courseSegs as $course)
+        {
+            $levels[] = CourseSegment::find($course)->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
+        }
+        $AllLevels = Level::whereIn('id',$levels)->get()->unique();
+        return $AllLevels;
     }
 }

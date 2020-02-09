@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Classes;
 use App\CourseSegment;
 use App\ClassLevel;
+use App\Enroll;
+use Auth;
 use App\Http\Resources\Classes as Classs;
 use Validator;
 use App\AcademicYear;
@@ -214,11 +216,23 @@ class ClassController extends Controller
         }
         return HelperController::api_response_format(201, 'Class Assigned Successfully');
     }
+
     public function get_lessons_of_class(Request $request){
         $request->validate([
             'class'    => 'required|integer|exists:classes,id',
         ]);
         $lessons = CourseSegment::GetWithClass($request->class)->lessons;
         return HelperController::api_response_format(200, $lessons,'Lessons are ....');
+    }
+
+    public function GetMyclasses()
+    {
+        $courseSegs=Enroll::where('user_id',Auth::id())->pluck('course_segment');
+        foreach($courseSegs as $course)
+        {
+            $classes[] = CourseSegment::find($course)->segmentClasses[0]->classLevel[0]->class_id;
+        }
+        $Allclasses = Classes::whereIn('id',$classes)->get()->unique();
+        return $Allclasses;
     }
 }
