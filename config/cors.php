@@ -22,6 +22,7 @@ return [
         'allow_origins' => [
             'http://localhost:4200',
             'http://159.8.28.131/',
+	    'http://qaitbay.learnovia.com'
         ],
 
         'allow_methods' => [
