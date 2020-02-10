@@ -18,7 +18,8 @@ class EventController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
+            'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,
+                                            jpeg,jpg,png,gif,mp4,avi,flv,wav,mpga,ogg,ogv,oga',
             'from' => 'required|date',
             'to' => 'date',
             'cover' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,avi,flv,wav,mpga,ogg,ogv,oga',
