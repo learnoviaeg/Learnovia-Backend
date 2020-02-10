@@ -72,7 +72,7 @@ class QuizController extends Controller
                             'Question_Type_id' => 'required|integer|exists:questions_types,id',
                             'mark' => 'required|integer|min:1',
                             'Question_Category_id' => 'required|exists:questions_categories,id',
-                            'Category_id' => 'required|exists:categories,id',
+                            // 'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
                             'parent' => 'integer|exists:questions,id',
                         ]);
@@ -91,7 +91,7 @@ class QuizController extends Controller
                             'Question_Type_id' => 'required|integer|exists:questions_types,id',
                             'mark' => 'required|integer|min:1',
                             'Question_Category_id' => 'required|exists:questions_categories,id',
-                            'Category_id' => 'required|exists:categories,id',
+                            // 'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
                             'parent' => 'integer|exists:questions,id',
                         ]);
@@ -115,7 +115,7 @@ class QuizController extends Controller
                             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
                             'mark' => 'required|integer|min:1',
                             'Question_Category_id' => 'required|exists:questions_categories,id',
-                            'Category_id' => 'required|exists:categories,id',
+                            // 'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
                             'parent' => 'integer|exists:questions,id',
                         ]);
@@ -132,7 +132,7 @@ class QuizController extends Controller
                             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
                             'mark' => 'required|integer|min:1',
                             'Question_Category_id' => 'required|exists:questions_categories,id',
-                            'Category_id' => 'required|exists:categories,id',
+                            // 'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
                             'parent' => 'integer|exists:questions,id',
                             'subQuestions' => 'required|array|distinct'/*|min:2*/,

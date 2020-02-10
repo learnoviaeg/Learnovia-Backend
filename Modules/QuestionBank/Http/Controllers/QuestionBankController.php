@@ -248,7 +248,7 @@ class QuestionBankController extends Controller
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
             'mark' => 'required|integer|min:1',
             'Question_Category_id' => 'required|exists:questions_categories,id',
-            'Category_id' => 'required|exists:categories,id',
+            // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'required|exists:courses,id',
             'parent' => 'integer|exists:questions,id',
 
@@ -270,7 +270,7 @@ class QuestionBankController extends Controller
             'mark' => $Question['mark'],
             'And_why' => ($Question['Question_Type_id'] == 1) ? $Question['And_why'] : null,
             'And_why_mark' => ($Question['Question_Type_id'] == 1 && $Question['And_why'] == 1) ? $Question['And_why_mark'] : null,
-            'category_id' => $Question['Category_id'],
+            // 'category_id' => $Question['Category_id'],
             'parent' => $parent,
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
@@ -289,7 +289,7 @@ class QuestionBankController extends Controller
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
             'mark' => 'required|integer|min:1',
             'Question_Category_id' => 'required|exists:questions_categories,id',
-            'Category_id' => 'required|exists:categories,id',
+            // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'required|exists:courses,id',
             'parent' => 'integer|exists:questions,id',
 
@@ -314,7 +314,7 @@ class QuestionBankController extends Controller
             'parent' => $parent,
             'And_why' => ($Question['Question_Type_id'] == 1) ? $Question['And_why'] : null,
             'And_why_mark' => ($Question['Question_Type_id'] == 1 && $Question['And_why'] == 1) ? $Question['And_why_mark'] : null,
-            'category_id' => $Question['Category_id'],
+            // 'category_id' => $Question['Category_id'],
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
             'course_id' => $Question['course_id'],
@@ -550,7 +550,7 @@ class QuestionBankController extends Controller
         $request->validate([
             'question_id' => 'required|integer|exists:questions,id',
             'mark' => 'required|integer|min:1',
-            'category_id' => 'required|integer|exists:categories,id',
+            // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'required|integer|exists:questions_categories,id',
             'parent' => 'integer|exists:questions,id',
         ]);
@@ -573,7 +573,7 @@ class QuestionBankController extends Controller
         $question->update([
             'text' => ($request->text == null) ? "Match the correct Answer" : $request->text,
             'mark' => $request->mark,
-            'category_id' => $request->category_id,
+            // 'category_id' => $request->category_id,
             'parent' => (isset($request->parent) && $request->Question_Type_id != 5) ? $request->parent : null,
             'question_category_id' => $request->question_category_id,
             'And_why' => ($request->question_type_id == 1) ? $request->And_why : null,
@@ -587,7 +587,7 @@ class QuestionBankController extends Controller
     {
         $validator = Validator::make($squestion->all(), [
             'mark' => 'required|integer|min:1',
-            'category_id' => 'required|integer|exists:categories,id',
+            // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'required|integer|exists:questions_categories,id',
         ]);
         if ($validator->fails()) {
@@ -606,7 +606,7 @@ class QuestionBankController extends Controller
         $question->update([
             'text' => ($squestion['text'] == null) ? "Match the correct Answer" : $squestion['text'],
             'mark' =>$squestion['mark'],
-            'category_id' => $squestion['category_id'],
+            // 'category_id' => $squestion['category_id'],
             'parent' => $parent,
             'question_category_id' => $squestion['question_category_id'],
             'And_why' => ($Question_Type_id== 1) ? $squestion['And_why'] : null,
