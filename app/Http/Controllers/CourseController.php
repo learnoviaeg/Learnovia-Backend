@@ -25,6 +25,8 @@ use App\AcademicType;
 use App\attachment;
 use App\LessonComponent;
 use App\User;
+use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\Assigments\Entities\AssignmentLesson;
 use Carbon\Carbon;
 use App\Letter;
 use Illuminate\Support\Facades\Validator;
@@ -783,7 +785,10 @@ class CourseController extends Controller
             if ($enroll->courseSegment != null) {
                 foreach ($enroll->courseSegment->lessons as $lesson) {
                     foreach ($components as $component) {
+                        // return $component;
                         $temp = $lesson->module($component->module, $component->model);
+                        // dd($temp);
+                        // return $lesson;
                         if ($request->user()->can('site/course/student')) {
                             $temp->where('visible', '=', 1)
                                 ->where('publish_date', '<=', Carbon::now());
@@ -792,6 +797,15 @@ class CourseController extends Controller
                             continue;
                         $tempBulk = $temp->get();
                         foreach($tempBulk as $item){
+                            if(isset($item->pivot))
+                            {
+                                $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+                                $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+                                if($item->pivot->quiz_id)
+                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
+                                if($item->pivot->assignment_id)
+                                    $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
+                            }
                             $result[$component->name][] = $item;
                         }
                     }

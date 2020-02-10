@@ -197,7 +197,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
     Route::get('get-someone-parent', 'UserController@getSomeoneParent')->name('getsomeoneparent')->middleware('permission:user/get-someone-parent');
     Route::get('get-my-children', 'UserController@getMyChildren')->name('getmychild')->middleware('permission:user/get-my-child');
     Route::post('current-child', 'UserController@SetCurrentChild')->name('currentchild')->middleware('permission:user/current-child');
-    Route::get('get_my_users', 'UserController@get_my_users')->name('getmyusers')->middleware('permission:user/get-my-users');
+    Route::get('get-my-users', 'UserController@get_my_users')->name('getmyusers')->middleware('permission:user/get-my-users');
 });
 //Enroll Routes
 Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api']], function () {
