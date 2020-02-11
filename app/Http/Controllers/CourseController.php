@@ -241,10 +241,14 @@ class CourseController extends Controller
     public function CurrentCourses(Request $request)
     {
         $all = collect();
+        $testCourse=array();
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+                if(in_array($course->id,$testCourse))
+                    continue;
+                array_push($testCourse,$course->id);
                 $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $flag = new stdClass();
                 $flag->segment = Segment::find($segment->segment_id)->name;
@@ -283,11 +287,15 @@ class CourseController extends Controller
     public function PastCourses(Request $request)
     {
         $all = collect();
+        $testCourse=array();
         $i = 0;
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+                if(in_array($course->id,$testCourse))
+                    continue;
+                array_push($testCourse,$course->id);
                 $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $flag = new stdClass();
                 $flag->segment = Segment::find($segment->segment_id)->name;
@@ -322,11 +330,15 @@ class CourseController extends Controller
     public function FutureCourses(Request $request)
     {
         $all = collect();
+        $testCourse=array();
         $i = 0;
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+                if(in_array($course->id,$testCourse))
+                    continue;
+                array_push($testCourse,$course->id);
                 $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $flag = new stdClass();
                 $flag->segment = Segment::find($segment->segment_id)->name;
