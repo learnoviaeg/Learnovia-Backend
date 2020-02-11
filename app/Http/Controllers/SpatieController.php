@@ -84,6 +84,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/add', 'title' => 'add type']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/get-all', 'title' => 'get all types']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/get', 'title' => 'get type']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/get-my-types', 'title' => 'get my type']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/update', 'title' => 'update type']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/assign', 'title' => 'assign type']);
 
@@ -92,12 +93,14 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/update', 'title' => 'update level']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/get-all', 'title' => 'get all levels']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/get', 'title' => 'get level']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/get-my-levels', 'title' => 'get my levels']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/delete', 'title' => 'delete level']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'level/assign', 'title' => 'assign level']);
 
             //Class Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/add', 'title' => 'add class']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/get-all', 'title' => 'get all classes']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/get-my-classes', 'title' => 'get my classes']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/get', 'title' => 'get class']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/update', 'title' => 'update class']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'class/delete', 'title' => 'delete class']);

@@ -7,6 +7,9 @@ use App\AcademicYear;
 use App\AcademicYearType;
 use App\Enroll;
 use App\Segment;
+use App\User;
+use Auth;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Resources\Year_type_resource;
 use Validator;
@@ -183,6 +186,33 @@ class AC_year_type extends Controller
             $counter++;
         }
          return HelperController::api_response_format(200, 'Academic Year-Type Relation Created Succssesfully');
+    }
 
+    public function GetMytypes(Request $request)
+    {
+        $result=array();
+        $lev=array();
+        $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
+            //validate that course in my current course start < now && now < end
+            $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
+        },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
+            if ($request->filled('type'))
+                $query->where('academic_type_id', $request->type);            
+        }])->first();
+
+        foreach($users ->enroll as $enrolls)
+            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+                foreach($segmetClas->classLevel as $clas)
+                        foreach($clas->yearLevels as $level)
+                            foreach($level->yearType as $typ)
+                                if(!in_array($typ->academic_type_id, $result))
+                                {
+                                    $result[]=$typ->academic_type_id;
+                                    $type[]=AcademicType::find($typ->academic_type_id);
+                                }
+        if(count($type) > 0)
+            return HelperController::api_response_format(201,$type, 'There are your types');
+        
+        return HelperController::api_response_format(201, 'You haven\'t types');
     }
 }

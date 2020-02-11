@@ -7,6 +7,11 @@ use App\YearLevel;
 use Illuminate\Http\Request;
 use App\AcademicYear;
 use App\Level;
+use App\Enroll;
+use App\User;
+use Carbon\Carbon;
+use App\CourseSegment;
+use Auth;
 use Illuminate\Support\Collection;
 use Validator;
 
@@ -168,5 +173,34 @@ class LevelsController extends Controller
         }
         $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(200, $levels);
+    }
+
+    public function GetMyLevels(Request $request)
+    {
+        $result=array();
+        $lev=array();
+        $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
+            //validate that course in my current course start < now && now < end
+            $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
+        },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
+            if ($request->filled('type'))
+                $query->where('academic_type_id', $request->type);            
+        }])->first();
+
+        foreach($users ->enroll as $enrolls)
+            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+                foreach($segmetClas->classLevel as $clas)
+                        foreach($clas->yearLevels as $level)
+                            if(count($level->yearType) > 0)
+                                if(!in_array($level->level_id, $result))
+                                {
+                                    $result[]=$level->level_id;
+                                    $lev[]=Level::find($level->level_id);
+                                }
+                                
+        if(count($lev) > 0)
+            return HelperController::api_response_format(201,$lev, 'There are your Levels');
+        
+        return HelperController::api_response_format(201, 'You haven\'t Levels');
     }
 }
