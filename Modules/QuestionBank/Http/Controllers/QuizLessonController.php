@@ -106,8 +106,8 @@ class QuizLessonController extends Controller
              if($request->graded == true){
                  $grade_category=GradeCategory::find($request->grade_category_id[$key]);
                  $grade_category->GradeItems()->create([
-                    'grademin' => $request->grade_min,
-                    'grademax' => $request->grade_max,
+                    'grademin' => 0,
+                    'grademax' => $request->grade,
                     'item_no' => 1,
                     'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
                     'grade_to_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,

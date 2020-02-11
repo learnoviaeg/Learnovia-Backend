@@ -512,11 +512,11 @@ class UserController extends Controller
 
         }
         $students = user::whereIn('id',$users)->get();
-        foreach($students as $student){
-            if($student->can('site/course/student'))
-                array_push($total ,$student) ;
-        }
-        return HelperController::api_response_format(200,$total ,'Users are.......');
+        // foreach($students as $student){
+        //     if($student->can('site/course/student'))
+        //         array_push($total ,$student) ;
+        // }
+        return HelperController::api_response_format(200,$students ,'Users are.......');
     }
     
 }

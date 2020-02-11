@@ -383,8 +383,8 @@ class FilesController extends Controller
             ]);
         }
         $file->save();
-        // $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
-        return HelperController::api_response_format(200, $file, 'Update Successfully');
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
+        return HelperController::api_response_format(200, $tempReturn, 'Update Successfully');
     }
 
     /**
