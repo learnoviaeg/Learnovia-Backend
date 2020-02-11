@@ -39,9 +39,9 @@ class QuizLessonController extends Controller
             'graded' => 'required|boolean',
             'grade_category_id' => 'array|required_if:graded,==,1',
             'grade_category_id.*' => 'exists:grade_categories,id',
-            'grade_min' => 'integer|required_if:graded,==,1',
-            'grade_max' => 'integer|required_if:graded,==,1',
-            'grade_to_pass' => 'integer|required_if:graded,==,1',
+            'grade_min' => 'integer',
+            'grade_max' => 'integer',
+            'grade_to_pass' => 'integer',
         ]);
 
         $quiz = quiz::find($request->quiz_id);
