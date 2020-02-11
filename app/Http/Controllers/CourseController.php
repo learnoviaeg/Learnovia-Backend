@@ -25,8 +25,6 @@ use App\AcademicType;
 use App\attachment;
 use App\LessonComponent;
 use App\User;
-use Modules\QuestionBank\Entities\QuizLesson;
-use Modules\Assigments\Entities\AssignmentLesson;
 use Carbon\Carbon;
 use App\Letter;
 use Illuminate\Support\Facades\Validator;
@@ -70,7 +68,7 @@ class CourseController extends Controller
             'end_date' =>'required_with:year|date|after:start_date'
         ]);
         $no_of_lessons = 4;
-        $course = Course::create([
+        $course = Course::firstOrCreate([
             'name' => $request->name,
             'category_id' => $request->category,
         ]);
@@ -241,14 +239,10 @@ class CourseController extends Controller
     public function CurrentCourses(Request $request)
     {
         $all = collect();
-        $testCourse=array();
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
-                if(in_array($course->id,$testCourse))
-                    continue;
-                array_push($testCourse,$course->id);
                 $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $flag = new stdClass();
                 $flag->segment = Segment::find($segment->segment_id)->name;
@@ -287,15 +281,11 @@ class CourseController extends Controller
     public function PastCourses(Request $request)
     {
         $all = collect();
-        $testCourse=array();
         $i = 0;
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
-                if(in_array($course->id,$testCourse))
-                    continue;
-                array_push($testCourse,$course->id);
                 $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $flag = new stdClass();
                 $flag->segment = Segment::find($segment->segment_id)->name;
@@ -330,15 +320,11 @@ class CourseController extends Controller
     public function FutureCourses(Request $request)
     {
         $all = collect();
-        $testCourse=array();
         $i = 0;
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
-                if(in_array($course->id,$testCourse))
-                    continue;
-                array_push($testCourse,$course->id);
                 $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $flag = new stdClass();
                 $flag->segment = Segment::find($segment->segment_id)->name;
@@ -792,21 +778,12 @@ class CourseController extends Controller
         $user = User::whereId($request->user()->id)->with(['enroll.courseSegment' => function ($query) use ($request) {
             if ($request->filled('course'))
                 $query->where('course_id', $request->course);
-            if ($request->filled('start'))
-                $query->where('start_date', $request->start);
-            if ($request->filled('end'))
-                $query->where('end_date', $request->end);
-            if($request->filled('start') && $request->filled('end'))
-                $events->where('end_date', '>', $request->end)->where('start_date' , '<' , $request->start);
         }])->first();
         foreach ($user->enroll as $enroll) {
             if ($enroll->courseSegment != null) {
                 foreach ($enroll->courseSegment->lessons as $lesson) {
                     foreach ($components as $component) {
-                        // return $component;
                         $temp = $lesson->module($component->module, $component->model);
-                        // dd($temp);
-                        // return $lesson;
                         if ($request->user()->can('site/course/student')) {
                             $temp->where('visible', '=', 1)
                                 ->where('publish_date', '<=', Carbon::now());
@@ -815,15 +792,6 @@ class CourseController extends Controller
                             continue;
                         $tempBulk = $temp->get();
                         foreach($tempBulk as $item){
-                            if(isset($item->pivot))
-                            {
-                                $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
-                                $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-                                if($item->pivot->quiz_id)
-                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
-                                if($item->pivot->assignment_id)
-                                    $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
-                            }
                             $result[$component->name][] = $item;
                         }
                     }
