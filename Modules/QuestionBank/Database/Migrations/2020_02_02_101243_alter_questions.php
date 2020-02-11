@@ -14,8 +14,8 @@ class AlterQuestions extends Migration
     public function up()
     {
         Schema::table('questions', function (Blueprint $table) {
-            $table->dropForeign('questions_course_segment_id_foreign');
-            $table->dropColumn('course_segment_id');
+            $table->dropForeign(['course_segment_id']);
+            $table->dropColumn(['course_segment_id']);
             $table->unsignedBigInteger('course_id');
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade')->onUpdate('cascade');
         });
