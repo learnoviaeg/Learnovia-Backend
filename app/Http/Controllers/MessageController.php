@@ -289,14 +289,13 @@ class MessageController extends Controller
             $messages = Message::where(function ($query) use ($request, $current_user) {
                 $query->whereIn('From', [$request->user_id, $current_user])->whereIn('To', [$request->user_id, $current_user]);
             });
-            return ($messages);
-
             if($request->filled('search')){
                 $messages->where(function ($query) use ($request) {
                     $query->where('text', 'LIKE' , "%$request->search%");
                 });
             }
             $messages =$messages->get();
+            // return ($messages);
             $msg = MessageFromToResource::collection($messages);
             return HelperController::api_response_format(200, $msg);
         }
