@@ -7,8 +7,10 @@ use App\YearLevel;
 use Illuminate\Http\Request;
 use App\Classes;
 use App\CourseSegment;
+use App\User;
 use App\ClassLevel;
 use App\Enroll;
+use Carbon\Carbon;
 use Auth;
 use App\Http\Resources\Classes as Classs;
 use Validator;
@@ -225,14 +227,35 @@ class ClassController extends Controller
         return HelperController::api_response_format(200, $lessons,'Lessons are ....');
     }
 
-    public function GetMyclasses()
+    public function GetMyclasses(Request $request)
     {
-        $courseSegs=Enroll::where('user_id',Auth::id())->pluck('course_segment');
-        foreach($courseSegs as $course)
-        {
-            $classes[] = CourseSegment::find($course)->segmentClasses[0]->classLevel[0]->class_id;
-        }
-        $Allclasses = Classes::whereIn('id',$classes)->get()->unique();
-        return $Allclasses;
+        $result=array();
+        $class=array();
+        $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
+            //validate that course in my current course start < now && now < end
+            $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
+        },'enroll.courseSegment.segmentClasses.classLevel.yearLevels' => function($query) use ($request){
+            if ($request->filled('level'))
+                $query->where('level_id', $request->level);
+        },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
+            if ($request->filled('type'))
+                $query->where('academic_type_id', $request->type);            
+        }])->first();
+
+        foreach($users ->enroll as $enrolls)
+            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+                foreach($segmetClas->classLevel as $clas)
+                    if(isset($clas->yearLevels))
+                        foreach($clas->yearLevels as $level)
+                            if(count($level->yearType) > 0)
+                                if(!in_array($clas->class_id, $result))
+                                {
+                                    $result[]=$clas->class_id;
+                                    $class[]=Classes::find($clas->class_id);
+                                }
+        if(count($class) > 0)
+            return HelperController::api_response_format(201,$class, 'There are your Classes');
+        
+        return HelperController::api_response_format(201, 'You haven\'t Classes');
     }
 }

@@ -84,6 +84,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/add', 'title' => 'add type']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/get-all', 'title' => 'get all types']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/get', 'title' => 'get type']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/get-my-types', 'title' => 'get my type']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/update', 'title' => 'update type']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/assign', 'title' => 'assign type']);
 

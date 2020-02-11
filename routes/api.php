@@ -108,6 +108,7 @@ Route::group(['prefix' => 'type', 'middleware' => ['auth:api']], function () {
     Route::post('delete', 'AC_year_type@deleteType')->name('deletetype')->middleware('permission:type/delete');
     Route::post('add', 'AC_year_type@Add_type_to_Year')->name('addtype')->middleware('permission:type/add');
     Route::get('get', 'AC_year_type@List_Years_with_types')->name('getyearswithtype')->middleware('permission:type/get');
+    Route::get('get-my-types', 'AC_year_type@getMytypes');//->name('getmytype')->middleware('permission:type/get-my-types');
     Route::get('get-all', 'AC_year_type@get')->name('gettypes')->middleware('permission:type/get-all');
     Route::post('update', 'AC_year_type@updateType')->name('updatetype')->middleware('permission:type/update');
     Route::post('assign', 'AC_year_type@Assign_to_anther_year')->name('assigntype')->middleware('permission:type/assign');

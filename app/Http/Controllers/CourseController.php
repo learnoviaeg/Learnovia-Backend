@@ -778,6 +778,12 @@ class CourseController extends Controller
         $user = User::whereId($request->user()->id)->with(['enroll.courseSegment' => function ($query) use ($request) {
             if ($request->filled('course'))
                 $query->where('course_id', $request->course);
+            if ($request->filled('start'))
+                $query->where('start_date', $request->start);
+            if ($request->filled('end'))
+                $query->where('end_date', $request->end);
+            if($request->filled('start') && $request->filled('end'))
+                $events->where('end_date', '>', $request->end)->where('start_date' , '<' , $request->start);
         }])->first();
         foreach ($user->enroll as $enroll) {
             if ($enroll->courseSegment != null) {
