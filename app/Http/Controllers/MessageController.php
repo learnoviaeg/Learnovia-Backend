@@ -294,7 +294,7 @@ class MessageController extends Controller
                     $query->where('text', 'LIKE' , "%$request->search%");
                 });
             }
-            $messages =$messages->get();
+            $messages =$messages->orderBy('id')->get();
             // return ($messages);
             $msg = MessageFromToResource::collection($messages);
             return HelperController::api_response_format(200, $msg);
