@@ -430,6 +430,8 @@ class UserController extends Controller
     Public Function getMyChildren(){
         $childrenIDS = Parents::where('parent_id',Auth::id())->pluck('child_id');
         $children =  User::whereIn('id',$childrenIDS)->get();
+        foreach($children as $child)
+            $child->picture = $child->attachment->path;
         return HelperController::api_response_format(200,$children ,'Children are.......');
 
     }
