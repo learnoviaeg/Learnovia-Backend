@@ -78,7 +78,7 @@ class CourseController extends Controller
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
             $course->save();
         }
-        if ($request->hasFile('category_id')) {
+        if ($request->filled('category_id')) {
             $course->image = $request->category_id;
             $course->save();
         }
