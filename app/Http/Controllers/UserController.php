@@ -55,8 +55,8 @@ class UserController extends Controller
             'course.*' => 'exists:courses,name',
             'course' => 'array',
             'role.*' => 'required|exists:roles,id',
-            'class_id' => 'required|array',
-            'class_id.*' => 'required|exists:classes,id',
+            'class_id' => 'array',
+            'class_id.*' => 'exists:classes,id',
             'picture' => 'nullable|array','arabicname' => 'nullable|array', 'gender' => 'nullable|array', 'phone' => 'nullable|array',
             'address' => 'nullable|array','nationality' => 'nullable|array','country' => 'nullable|array', 'birthdate' => 'nullable|array',
             'notes' => 'nullable|array','email' => 'nullable|array', 'language' => 'nullable|array','timezone' => 'nullable|array',
@@ -89,8 +89,7 @@ class UserController extends Controller
                 'lastname' => $request->lastname[$key],
                 'username' => User::generateUsername(),
                 'password' => bcrypt($request->password[$key]),
-                'real_password' => $request->password[$key],
-                'class_id' => $request->class_id[$key]
+                'real_password' => $request->password[$key]
             ]);
 
             foreach ($optionals as $optional)
@@ -150,7 +149,6 @@ class UserController extends Controller
             $users_is->push($user);
         }
         return HelperController::api_response_format(201, $users_is, 'User Created Successfully');
-
     }
 
     /**
