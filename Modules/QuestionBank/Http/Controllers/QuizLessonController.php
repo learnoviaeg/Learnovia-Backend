@@ -67,12 +67,12 @@ class QuizLessonController extends Controller
                 return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
             }
 
-            $check = QuizLesson::where('quiz_id',$request->quiz_id)
-                ->where('lesson_id',$request->lesson_id)->get();
+            //$check = QuizLesson::where('quiz_id',$request->quiz_id)
+               // ->where('lesson_id',$request->lesson_id)->get();
 
-            if(count($check) > 0){
-                return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
-            }
+            //if(count($check) > 0){
+            //    return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
+           // }
             if($flag==false){
                 return HelperController::api_response_format(400, null,'this grade category invalid');
             }
