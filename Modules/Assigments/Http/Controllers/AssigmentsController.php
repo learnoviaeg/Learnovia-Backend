@@ -549,7 +549,7 @@ class AssigmentsController extends Controller
             if (isset($studentassigment['user_submit']->attachment_id)) {
                 $studentassigment['user_submit']->attachment = attachment::where('id', $stuassignment['user_submit']->attachment_id)->first();
             }
-                return $assignment;
+            return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
 
     }
