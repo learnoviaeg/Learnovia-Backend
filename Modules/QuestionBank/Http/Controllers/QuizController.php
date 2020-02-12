@@ -173,7 +173,7 @@ class QuizController extends Controller
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
                 'Shuffle' => quiz::checkSuffle($request),
-                'feedback' => $request->feedback,
+                'feedback' => isset($request->feedback) ? $request->feedback : 1,
             ]);
 
             $quiz->Question()->attach($questionsIDs);
