@@ -79,7 +79,7 @@ class CourseController extends Controller
             $course->save();
         }
         if ($request->filled('category_id')) {
-            $course->image = $request->category_id;
+            $course->category_id = $request->category_id;
             $course->save();
         }
 
