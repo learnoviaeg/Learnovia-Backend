@@ -50,7 +50,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'category' => 'required|exists:categories,id',
+            'category' => 'exists:categories,id',
             'year' => 'array',
             'year.*' => 'required|exists:academic_years,id',
             'type' => 'array|required_with:year',
@@ -70,13 +70,16 @@ class CourseController extends Controller
             'end_date' =>'required_with:year|date|after:start_date'
         ]);
         $no_of_lessons = 4;
-        $course = Course::firstOrCreate([
+        $course = Course::create([
             'name' => $request->name,
-            'category_id' => $request->category,
         ]);
         // if course has an image
         if ($request->hasFile('image')) {
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
+            $course->save();
+        }
+        if ($request->hasFile('category_id')) {
+            $course->image = $request->category_id;
             $course->save();
         }
 
@@ -187,7 +190,6 @@ class CourseController extends Controller
      */
     public function get(Request $request)
     {
-
         $request->validate([
             'id' => 'exists:courses,id',
             'category_id' => 'nullable|exists:categories,id',
