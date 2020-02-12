@@ -160,7 +160,7 @@ class QuizController extends Controller
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
                 'Shuffle' => quiz::checkSuffle($request),
-                'feedback' => $request->feedback,
+                'feedback' => isset($request->feedback) ? $request->feedback : 1,
             ]);
             return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
         }
