@@ -131,7 +131,7 @@ class UserController extends Controller
                     EnrollUserToCourseController::EnrollCourses($option);
                     $enrollcounter++;
                 }
-            } else {
+            } else { 
                 $teachercounter = 0;
 
                 while (isset($request->$teacheroptional[$key][$teachercounter])) {
