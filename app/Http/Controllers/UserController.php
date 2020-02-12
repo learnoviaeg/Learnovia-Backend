@@ -48,7 +48,7 @@ class UserController extends Controller
             'lastname' => 'required|array',
             'lastname.*' => 'required|string|min:3|max:50',
             'password' => 'required|array',
-            'password.*' => 'required|string|min:8|max:191',
+            'password.*' => 'required|string|min:6|max:191',
             'role' => 'required|array',
             'optional.*' => 'exists:courses,name',
             'optional' => 'array',

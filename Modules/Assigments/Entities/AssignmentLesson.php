@@ -12,5 +12,9 @@ class AssignmentLesson extends Model
     {
         return $this->hasMany('Modules\Assigments\Entities\assignment', 'id', 'assignment_id');
     }
+    public function UserAssignment()
+    {
+        return $this->hasMany('Modules\Assigments\Entities\UserAssigment', 'id', 'assignment_lesson_id');
+    }
 }
 
