@@ -73,9 +73,9 @@ class QuizLessonController extends Controller
             //if(count($check) > 0){
             //    return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
            // }
-            if($flag==false){
-                return HelperController::api_response_format(400, null,'this grade category invalid');
-            }
+            //if($flag==false){
+              //  return HelperController::api_response_format(400, null,'this grade category invalid');
+            //}
             $index = QuizLesson::where('lesson_id',$lessons)->get()->max('index');
             $Next_index = $index + 1;
             $quizLesson[] = QuizLesson::create([
