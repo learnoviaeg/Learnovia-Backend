@@ -55,11 +55,18 @@ class QuizLessonController extends Controller
             $course = $lesson->courseSegment->course_id;
             $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-            $gradeCats= $lesson->courseSegment->GradeCategory;
-            $flag= false;
-             foreach ($gradeCats as $grade){
-                if($grade->id==$request->grade_category_id[$key]){
-                    $flag =true;
+            if($request->grade_category_id[$key] != null)
+            {
+                $gradeCats= $lesson->courseSegment->GradeCategory;
+                $flag= false;
+                 foreach ($gradeCats as $grade){
+                    if($grade->id==$request->grade_category_id[$key]){
+                        $flag =true;
+                    }
+                }
+
+                if($flag==false){
+                    return HelperController::api_response_format(400, $request->grade_category_id[$key],'there is a grade category invalid');
                 }
             }
 
@@ -67,15 +74,13 @@ class QuizLessonController extends Controller
                 return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
             }
 
-            //$check = QuizLesson::where('quiz_id',$request->quiz_id)
-               // ->where('lesson_id',$request->lesson_id)->get();
+            // $check = QuizLesson::where('quiz_id',$request->quiz_id)
+            //     ->where('lesson_id',$lessons)->get();
 
-            //if(count($check) > 0){
-            //    return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
-           // }
-            //if($flag==false){
-              //  return HelperController::api_response_format(400, null,'this grade category invalid');
-            //}
+            // if(count($check) > 0){
+            //     return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
+            // }
+
             $index = QuizLesson::where('lesson_id',$lessons)->get()->max('index');
             $Next_index = $index + 1;
             $quizLesson[] = QuizLesson::create([
@@ -160,12 +165,18 @@ class QuizLessonController extends Controller
         if($quiz->course_id != $lesson->courseSegment->course_id){
             return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
         }
+        if($request->grade_category_id[$key] != null)
+        {
+            $gradeCats= $lesson->courseSegment->GradeCategory;
+            $flag= false;
+             foreach ($gradeCats as $grade){
+                if($grade->id==$request->grade_category_id[$key]){
+                    $flag =true;
+                }
+            }
 
-        $gradeCats= $lesson->courseSegment->GradeCategory;
-        $flag= false;
-        foreach ($gradeCats as $grade){
-            if($grade->id==$request->grade_category_id){
-                $flag =true;
+            if($flag==false){
+                return HelperController::api_response_format(400, null,'there is a grade category invalid');
             }
         }
 
@@ -175,9 +186,7 @@ class QuizLessonController extends Controller
         if(!isset($quizLesson)){
             return HelperController::api_response_format(404, null,'This quiz doesn\'t belongs to the lesson');
         }
-        if($flag==false){
-            return HelperController::api_response_format(400, null,'this grade category invalid');
-        }
+
         $quizLesson->update([
             'quiz_id' => $request->quiz_id,
             'lesson_id' => $request->lesson_id,
