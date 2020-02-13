@@ -652,6 +652,11 @@ class CourseController extends Controller
         ]);
         $result = [];
         $courseSegments = CourseSegment::whereIn('id' , Auth::user()->enroll->pluck('course_segment'))->where('course_id',$request->course_id)->get();
+
+        if($request->filled('class_id')){
+            $course_Segment = CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
+            $courseSegments=[CourseSegment::find($course_Segment->id)];
+        }
         $j = 0;
         foreach($courseSegments as $courseSegment){
             if ($courseSegment != null) {
@@ -660,6 +665,12 @@ class CourseController extends Controller
                 foreach ($courseSegment->lessons as $lesson) {
                     $components = LessonComponent::whereLesson_id($lesson->id)->get();
                     $result[$j][$i]['name'] = $lesson->name;
+                    $result[$j][$i]['LessonID'] =$lesson->id;
+                    
+                    $class=Classes::find(Lesson::find($lesson->id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+                    $result[$j][$i]['ClassName']=$class->name ;
+                    $result[$j][$i]['ClassID']= $class->id;
+
                     $result[$j][$i]['data'] = [];
                     foreach ($components as $component) {
                         $temp = $lesson->module($component->module, $component->model);
