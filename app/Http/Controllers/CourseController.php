@@ -670,7 +670,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id',
-            'class_id' => 'required|exists:classes,id',
+            'class_id' => 'exists:classes,id',
         ]);
         $result = [];
         $courseSegments = CourseSegment::whereIn('id' , Auth::user()->enroll->pluck('course_segment'))->where('course_id',$request->course_id)->get();
