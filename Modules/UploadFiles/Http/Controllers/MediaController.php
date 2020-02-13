@@ -154,20 +154,20 @@ class MediaController extends Controller
                 }
 
                 if ($request->type == 1) {
-                    $avaiableHosts = collect([
-                        'www.youtube.com',
-                        'vimeo.com',
-                        'soundcloud.com',
-                    ]);
+                    // $avaiableHosts = collect([
+                    //     'www.youtube.com',
+                    //     'vimeo.com',
+                    //     'soundcloud.com',
+                    // ]);
 
-                    $urlparts = parse_url($item);
-                    if (!$avaiableHosts->contains($urlparts['host'])) {
-                        return HelperController::api_response_format(400, $item, 'Link is invalid');
-                    }
+                    // $urlparts = parse_url($item);
+                    // if (!$avaiableHosts->contains($urlparts['host'])) {
+                    //     return HelperController::api_response_format(400, $item, 'Link is invalid');
+                    // }
 
-                    if (!isset($urlparts['path'])) {
-                        return HelperController::api_response_format(400, $item, 'Link is invalid');
-                    }
+                    // if (!isset($urlparts['path'])) {
+                    //     return HelperController::api_response_format(400, $item, 'Link is invalid');
+                    // }
                     // $media->name = $request->name;
                     $media->attachment_name = $request->name;
                     $media->link = $item;
