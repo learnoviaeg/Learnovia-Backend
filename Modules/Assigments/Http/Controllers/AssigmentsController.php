@@ -215,11 +215,11 @@ class AssigmentsController extends Controller
             $request->validate([
                 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             ]);
-            if (isset($request->file_description)) {
-                $description = $request->file_description;
+            // if (isset($request->file_description)) {
+                $description = (isset($request->file_description))? $request->file_description :null;
 
                 $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
-            }
+            // }
         }
         if ($request->filled('content'))
             $assigment->content = $request->content;
