@@ -31,13 +31,13 @@ class Message extends Model
     }
 
     private static function getLastMessage($auth_user , $other_user){
-        $message = Message::where('From' , $auth_user)->Where('To' , $other_user)->orderBy('created_at' , 'desc')->first();
+        $message = Message::whereIn('From' , [$auth_user,$other_user])->whereIn('To' , [$auth_user,$other_user])->orderBy('created_at' , 'desc')->first();
         $attachment=null;
         $type=null;
         $exten=null;
         $name =null;
         if($message == null)
-            $message = Message::where('From' , $other_user)->Where('To' , $auth_user)->orderBy('created_at' , 'desc')->first();
+            $message = Message::whereIn('From' , [$auth_user,$other_user])->whereIn('To' , [$auth_user,$other_user])->orderBy('created_at' , 'desc')->first();
             
         if($message->file != null)
         {
