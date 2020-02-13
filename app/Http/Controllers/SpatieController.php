@@ -311,6 +311,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Manager']);
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Supervisor']);
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Parent']);
+            $Authenticated = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Authenticated']);
 
             //site internal permessions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/user/search-all-users', 'title' => 'Search all users assigned to my course segments and search all site wide for users give permission to search site wide']);
@@ -319,7 +320,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/course/student', 'title' => 'detect the course student']);
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
             $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->get());
-
+            $Authenticated->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%bulk%')->where('name', 'like', '%messages%')->get());
             $user = new User([
                 'firstname' => 'Learnovia',
                 'lastname' => 'Company',

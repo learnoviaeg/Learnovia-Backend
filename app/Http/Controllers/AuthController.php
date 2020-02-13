@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Spatie\Permission\Models\Role;
 use App\Parents;
 use App\SystemSetting;
 use Illuminate\Http\Request;
@@ -36,6 +37,8 @@ class AuthController extends Controller
             'real_password' => $request->password
         ]);
         $user->save();
+        $role = Role::find(8);
+        $user->assignRole($role);
         return HelperController::api_response_format(200, $user, 'User Created Successfully');
     }
 

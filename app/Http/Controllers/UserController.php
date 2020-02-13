@@ -110,6 +110,8 @@ class UserController extends Controller
             $user->save();
             $role = Role::find($request->role[$key]);
             $user->assignRole($role);
+            $Auth_role = Role::find(8);
+            $user->assignRole($Auth_role);
             if ($request->role[$key] == 3) {
                 $option = new Request([
                     'users' => [$user->id],
