@@ -299,7 +299,7 @@ class AssigmentsController extends Controller
         foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
             $userassigment->user_id = $userId;
-            $userassigment->assignment_id = $request['assignments_id'];
+            $userassigment->assignment_lesson_id = $request['assignment_lesson_id'];
             $userassigment->status_id = 2;
             $userassigment->override = 0;
             $userassigment->save();
@@ -636,7 +636,7 @@ class AssigmentsController extends Controller
             $lesson = Lesson::find($lesson);
             $data = array(
                 "course_segment" => $lesson->course_segment_id,
-                "assignments_id" => $request->assignment_id,
+                "assignment_lesson_id" => $assignment_lesson->id,
                 "submit_date" => Carbon::now(),
                 "publish_date" => $request->opening_date
             );
