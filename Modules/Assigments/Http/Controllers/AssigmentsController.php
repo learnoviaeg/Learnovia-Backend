@@ -205,7 +205,8 @@ class AssigmentsController extends Controller
 
         ]);
         $assigment = assignment::find($request->id);
-        $CheckIfAnswered = UserAssigment::where('assignment_id', $request->id)->where('submit_date', '!=', null)->get();
+        $assigmentLessons = AssignmentLesson::where('assignment_id',$request->id)->pluck('id');
+        $CheckIfAnswered = UserAssigment::whereIn('assignment_lesson_id', $assigmentLessons)->where('submit_date', '!=', null)->get();
         if (count($CheckIfAnswered) > 0)
             return HelperController::api_response_format(400, 'Cannot update,Assigment was submitted before!');
 
