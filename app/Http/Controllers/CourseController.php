@@ -248,6 +248,13 @@ class CourseController extends Controller
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+
+                $request->validate([
+                    'course_id' => 'exists:courses,id'
+                ]);
+                if($request->filled('course_id'))
+                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
+                    
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
@@ -295,6 +302,13 @@ class CourseController extends Controller
             if ($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+
+                $request->validate([
+                    'course_id' => 'exists:courses,id'
+                ]);
+                if($request->filled('course_id'))
+                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
+                    
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
@@ -338,6 +352,13 @@ class CourseController extends Controller
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+
+                $request->validate([
+                    'course_id' => 'exists:courses,id'
+                ]);
+                if($request->filled('course_id'))
+                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
+
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
