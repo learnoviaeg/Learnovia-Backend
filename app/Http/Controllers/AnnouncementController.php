@@ -419,9 +419,15 @@ class AnnouncementController extends Controller
         $year_level_id = array();
         $s = 0;
         $cl = 0;
+        // $testsegment = [];
         foreach ($uniq_seg as $seg) {
             $segmentclass = SegmentClass::find($seg);
             $segmentname = Segment::find($segmentclass->segment_id);
+            
+            // if(in_array($segmentclass->id,$testsegment))
+            //     continue;
+            // array_push($testsegment,$segmentclass->id);
+
             $all_ann['segment'][$s]['name'] = $segmentname->name;
             $all_ann['segment'][$s]['id'] = $segmentname->id;
             $all_ann['segment'][$s]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('segment_id', $segmentclass->segment_id)
