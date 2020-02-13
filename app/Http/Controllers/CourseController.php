@@ -126,7 +126,7 @@ class CourseController extends Controller
                                     $no_of_lessons = $request->no_of_lessons;
                                 }
                                 for ($i = 1; $i <= $no_of_lessons; $i++) {
-                                    $courseSegment->lessons()->firstOrCreate([
+                                    $courseSegment->lessons()->create([
                                         'name' => 'Lesson ' . $i,
                                         'index' => $i,
                                     ]);
@@ -248,6 +248,13 @@ class CourseController extends Controller
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+
+                $request->validate([
+                    'course_id' => 'exists:courses,id'
+                ]);
+                if($request->filled('course_id'))
+                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
+                    
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
@@ -295,6 +302,13 @@ class CourseController extends Controller
             if ($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+
+                $request->validate([
+                    'course_id' => 'exists:courses,id'
+                ]);
+                if($request->filled('course_id'))
+                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
+
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
@@ -338,6 +352,13 @@ class CourseController extends Controller
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+
+                $request->validate([
+                    'course_id' => 'exists:courses,id'
+                ]);
+                if($request->filled('course_id'))
+                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
+
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
@@ -620,7 +641,7 @@ class CourseController extends Controller
                         $no_of_lessons = $request->no_of_lessons;
                     }
                     for ($i = 1; $i <= $no_of_lessons; $i++) {
-                        $courseSegment->lessons()->firstOrCreate([
+                        $courseSegment->lessons()->create([
                             'name' => 'Lesson ' . $i,
                             'index' => $i,
                         ]);
@@ -649,6 +670,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id',
+            'class_id' => 'required|exists:classes,id',
         ]);
         $result = [];
         $courseSegments = CourseSegment::whereIn('id' , Auth::user()->enroll->pluck('course_segment'))->where('course_id',$request->course_id)->get();
