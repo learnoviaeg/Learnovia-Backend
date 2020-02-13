@@ -126,7 +126,7 @@ class CourseController extends Controller
                                     $no_of_lessons = $request->no_of_lessons;
                                 }
                                 for ($i = 1; $i <= $no_of_lessons; $i++) {
-                                    $courseSegment->lessons()->firstOrCreate([
+                                    $courseSegment->lessons()->create([
                                         'name' => 'Lesson ' . $i,
                                         'index' => $i,
                                     ]);
@@ -308,7 +308,7 @@ class CourseController extends Controller
                 ]);
                 if($request->filled('course_id'))
                     $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
-                    
+
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
@@ -641,7 +641,7 @@ class CourseController extends Controller
                         $no_of_lessons = $request->no_of_lessons;
                     }
                     for ($i = 1; $i <= $no_of_lessons; $i++) {
-                        $courseSegment->lessons()->firstOrCreate([
+                        $courseSegment->lessons()->create([
                             'name' => 'Lesson ' . $i,
                             'index' => $i,
                         ]);
