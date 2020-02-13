@@ -26,9 +26,10 @@ class attachment extends Model
         $extension = $singlefile->getClientOriginalExtension();
 
         $fileName = uniqid() . $singlefile->getClientOriginalName();
+        $Name = $singlefile->getClientOriginalName();
 
         $size = $singlefile->getSize();
-        $attachment->name = $fileName;
+        $attachment->name = $Name;
         $attachment->path = $type . '/' . $fileName;
         $attachment->description = $description;
         $attachment->type = $type;
