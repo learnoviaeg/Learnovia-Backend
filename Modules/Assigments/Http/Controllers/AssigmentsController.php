@@ -307,14 +307,14 @@ class AssigmentsController extends Controller
         $courseID = CourseSegment::where('id', $request['course_segment'])->pluck('course_id')->first();
         $classId = CourseSegment::find($request['course_segment'])->segmentClasses[0]->classLevel[0]->class_id;
         user::notify([
-            'id' => $request['assignments_id'],
+            'id' => $request["assignment_lesson_id"],
             'message' => 'A new Assignment is added',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
             'class_id' => $classId,
             'type' => 'assignment',
-            'link' => url(route('getAssignment')) . '?assignment_id=' . $request['assignments_id'],
+            'link' => url(route('getAssignment')) . '?assignment_id=' . $request["assignment_lesson_id"],
             'publish_date' => $request['publish_date']
         ]);
     }
@@ -622,8 +622,8 @@ class AssigmentsController extends Controller
                 if($flag==false){
                     return HelperController::api_response_format(400, null,'this grade category invalid');
                 }
-            }
                 $assignment_lesson->grade_category = $request->grade_category[$key];
+            }
             $assignment_lesson->save();
 
             LessonComponent::create([
