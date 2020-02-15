@@ -377,16 +377,14 @@ class AnnouncementController extends Controller
         $anounce = AnnouncementController::get_announcement($request);
         $anouncenew = AnnouncementController::new_user_announcements($request);
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Deleted Successfully');
-//        return HelperController::api_response_format(200, $announce, 'Announcement Deleted Successfully');
     }
 
- /**
+    /**
      *
      * @Description :new_user_announcements gets all announcements for a new user.
      * @param : No parameters.
      * @return : return all announcement for this user.
      */
-
     public function new_user_announcements(Request $request)
     {
         $request->validate([
@@ -539,13 +537,13 @@ class AnnouncementController extends Controller
 
         return $all_ann;
     }
- /**
+
+    /**
      *
      * @Description :get_announcement gets all announcements for logged in user.
      * @param : No parameters.
      * @return : return all currently published announcement for this user .
      */
-
     public function get_announcement(Request $request)
     {
         $request->validate([
@@ -555,7 +553,6 @@ class AnnouncementController extends Controller
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
             ->orderBy('created_at')
             ->get(['data' , 'read_at']);
-      //  return $noti;
         $notif = collect([]);
         $count = 0;
         foreach ($noti as $not) {
@@ -578,13 +575,13 @@ class AnnouncementController extends Controller
         }
         return $notif;
     }
- /**
+
+    /**
      *
      * @Description :get all announcements for logged in user.
      * @param : No parameters.
      * @return : return all currently published announcement for this user .
      */
-
     public function get(Request $request)
     {
         $anounce = AnnouncementController::get_announcement($request);
@@ -592,13 +589,12 @@ class AnnouncementController extends Controller
         return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew]);
     }
 
- /**
+     /**
      *
      * @Description :get an announcement  for logged in user.
      * @param : No parameters.
      * @return : return all currently published announcement for this user .
      */
-
     public function getAnnounceByID(Request $request){
         $request->validate([
         'announce_id' => 'required|integer|exists:announcements,id',
