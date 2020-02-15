@@ -372,9 +372,10 @@ class AssigmentsController extends Controller
                 $description = Null;
             }
             $userassigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
-        } else {
-            $userassigment->attachment_id = null;
-        }
+        } 
+        // else {
+        //     $userassigment->attachment_id = null;
+        // }
         if (isset($request->content)) {
             $userassigment->content = $request->content;
         } else {
