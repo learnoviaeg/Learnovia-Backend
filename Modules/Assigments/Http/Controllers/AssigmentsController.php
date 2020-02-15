@@ -548,7 +548,7 @@ class AssigmentsController extends Controller
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-            $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->get();
+            $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
                 $assignment['user_submit'] = $studentassigment;
             if (isset($studentassigment['user_submit']->attachment_id)) {
                 $studentassigment['user_submit']->attachment = attachment::where('id', $stuassignment['user_submit']->attachment_id)->first();
