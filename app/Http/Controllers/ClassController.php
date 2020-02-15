@@ -243,6 +243,7 @@ class ClassController extends Controller
         }])->first();
 
         foreach($users ->enroll as $enrolls)
+        if(isset($enrolls->courseSegment->segmentClasses)){
             foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
                 foreach($segmetClas->classLevel as $clas)
                     if(isset($clas->yearLevels))
@@ -253,6 +254,7 @@ class ClassController extends Controller
                                     $result[]=$clas->class_id;
                                     $class[]=Classes::find($clas->class_id);
                                 }
+                            }
         if(count($class) > 0)
             return HelperController::api_response_format(201,$class, 'There are your Classes');
         
