@@ -351,7 +351,7 @@ class AssigmentsController extends Controller
         if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) || (!isset($request->file)))) {
             return HelperController::api_response_format(400, $body = [], $message = 'you must enter both the content and the file');
         }
-        $userassigment = UserAssigment::where('user_id', Auth::user()->id)->where('assignment_id', $request->assignment_id)->first();
+        $userassigment = UserAssigment::where('user_id', Auth::user()->id)->where('assignment_lesson_id', $assilesson->id)->first();
 
         if (!isset($userassigment)) {
             return HelperController::api_response_format(400, $body = [], $message = 'This user isn\'t assign to this assignment');
