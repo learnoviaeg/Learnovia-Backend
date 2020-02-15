@@ -421,10 +421,10 @@ class AssigmentsController extends Controller
             'grade' => 'required|integer',
             'feedback' => 'string'
         ]);
-
-        $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_id', $request->assignment_id)->first();
+        $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first(); 
+        $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
         $assigment = assignment::where('id', $request->assignment_id)->first();
-        $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->first();
+        $assilesson = AssignmentLesson::where('assignment_lesson_id', $assilesson->id)->first();
         if ($assilesson->mark < $request->grade) {
             return HelperController::api_response_format(400, $body = [], $message = 'please put grade less than ' . $assilesson->mark);
         }
