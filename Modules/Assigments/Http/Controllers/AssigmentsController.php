@@ -326,10 +326,11 @@ class AssigmentsController extends Controller
     public function submitAssigment(Request $request)
     {
         $request->validate([
-            'assignment_id' => 'required|exists:user_assigments,assignment_id',
+            'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
+            'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
         ]);
         $assigment = assignment::where('id', $request->assignment_id)->first();
-        $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->first();
+        $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         /*
             0===================>content
             1===================>attached_file
