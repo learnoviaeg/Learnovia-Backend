@@ -482,13 +482,13 @@ class UserController extends Controller
             $course_segment = CourseSegment::whereIn('segment_class_id',$SegmentClasses)->pluck('id')->unique();
             $users = Enroll::whereIn('course_segment',$course_segment)->pluck('user_id')->unique();
     
-            if($request->filled('role'))
+            if($request->filled('roles'))
                  $users = Enroll::whereIn('course_segment',$course_segment)->where('role_id',$request->roles)->pluck('user_id')->unique();
         }
         elseif($request->filled('course')){
             $course_segment = CourseSegment::whereIn('course_id',$request->course)->pluck('id')->unique();
             $users = Enroll::whereIn('course_segment',$course_segment)->pluck('user_id')->unique();
-            if($request->filled('role'))
+            if($request->filled('roles'))
                  $users = Enroll::whereIn('course_segment',$course_segment)->whereIn('role_id',$request->roles)->pluck('user_id')->unique();
 
         }elseif($request->filled('class')){
@@ -503,13 +503,13 @@ class UserController extends Controller
                 return HelperController::api_response_format(400 ,'This class is not assigned to a course segment');
             $course_segment = CourseSegment::whereIn('segment_class_id',$SegmentClasses)->pluck('id')->unique();
             $users = Enroll::whereIn('course_segment',$course_segment)->pluck('user_id')->unique();
-            if($request->filled('role'))
+            if($request->filled('roles'))
                 $users = Enroll::whereIn('course_segment',$course_segment)->whereIn('role_id',$request->roles)->pluck('user_id')->unique();
 
         }else{
             $course_segments = Enroll::where('user_id',Auth::id())->pluck('course_segment')->unique();
             $users = Enroll::whereIn('course_segment',$course_segments)->pluck('user_id')->unique();
-            if($request->filled('role'))
+            if($request->filled('roles'))
                  $users = Enroll::whereIn('course_segment',$course_segments)->whereIn('role_id',$request->roles)->pluck('user_id')->unique();
 
         }
