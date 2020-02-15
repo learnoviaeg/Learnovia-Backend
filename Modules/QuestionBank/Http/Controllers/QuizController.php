@@ -657,12 +657,24 @@ class QuizController extends Controller
             return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
+
+        $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->get();
+        $quiz['allow_edit'] = true;
+        foreach($userquizzes as $userQuiz)
+        {
+            $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->pluck('answered')->first();
+            if ($user_quiz_answer == 1)
+                $quiz['allow_edit'] = false;
+        }
+
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
-            $quiz['max_attemp']=$quiz_lesson->max_attemp;
-            $quiz['start_date']=$quiz_lesson->start_date;
-            $quiz['due_date']=$quiz_lesson->due_date;
-            $quiz['mark']=$quiz_lesson->grade;
-            $quiz['grade_category']=$gradecat;
+
+        $quiz['grading_method']=$quiz_lesson->grading_method_id;
+        $quiz['max_attemp']=$quiz_lesson->max_attemp;
+        $quiz['start_date']=$quiz_lesson->start_date;
+        $quiz['due_date']=$quiz_lesson->due_date;
+        $quiz['mark']=$quiz_lesson->grade;
+        $quiz['grade_category']=$gradecat;
 
         foreach($quiz->Question as $question){
             if(count($question->childeren) > 0){
@@ -681,9 +693,9 @@ class QuizController extends Controller
             $question->question_type;
             unset($question->pivot);
         }
-
         return HelperController::api_response_format(200,$quiz);
     }
+    
     public function toggleQuizVisibity(Request $request)
     {
         try {
