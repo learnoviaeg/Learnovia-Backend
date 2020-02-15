@@ -9,6 +9,8 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\UserQuiz;
+use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
 use App\SegmentClass;
@@ -253,6 +255,15 @@ class QuizLessonController extends Controller
         ]);
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
                 ->where('lesson_id',$request->lesson_id)->first();
+
+        $userquizzes = UserQuiz::where('quiz_lesson_id', $quizLesson->id)->get();
+        $quizLesson['allow_edit'] = true;
+        foreach($userquizzes as $userQuiz)
+        {
+            $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->pluck('answered')->first();
+            if ($user_quiz_answer == 1)
+                $quizLesson['allow_edit'] = false;
+        }
         return HelperController::api_response_format(200, $quizLesson);
     }
 }
