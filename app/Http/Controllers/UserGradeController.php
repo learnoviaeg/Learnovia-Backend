@@ -299,6 +299,7 @@ class UserGradeController extends Controller
         $courseseg=Enroll::where('user_id',$request->user()->id)->pluck('course_segment')->unique();
         $cour=array();
         $i = 0;
+        $userGrade=[];
         foreach($courseseg as $course)
         {
             $gradeCat = GradeCategory::where('name','Course Total')->where('course_segment_id', $course)
@@ -311,7 +312,9 @@ class UserGradeController extends Controller
                     if (count($temp) > 0)
                         $userGrade[] = $temp;
                 }
-                foreach ($userGrade as $userGra)
+                if(isset($userGrade))
+                {
+                    foreach ($userGrade as $userGra)
                     foreach ($userGra as $useG) {
                         //grade of course total
                         $cour[$i] = $useG->GradeItems->GradeCategory->CourseSegment->courses[0];
@@ -319,6 +322,7 @@ class UserGradeController extends Controller
                         $cour[$i]['class'] = User::find($useG->user_id)->class_id;
                     }
                     $i++;
+                }
             }
         }
         return HelperController::api_response_format(200, $cour);
