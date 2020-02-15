@@ -353,13 +353,14 @@ class AssigmentsController extends Controller
         }
         $userassigment = UserAssigment::where('user_id', Auth::user()->id)->where('assignment_lesson_id', $assilesson->id)->first();
 
-        // if (isset($userassigment)) {
-        //     return HelperController::api_response_format(400, $body = [], $message = 'This assignment is already solved');
-        // }
+        if (isset($userassigment)) {
+            // return HelperController::api_response_format(400, $body = [], $message = 'This user isn\'t assign to this assignment');
 
-        if (isset($userassigment) && ((($assilesson->start_date >  Carbon::now()) || (Carbon::now() > $assilesson->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
+        if (((($assilesson->start_date >  Carbon::now()) || (Carbon::now() > $assilesson->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
             return HelperController::api_response_format(400, $body = [], $message = 'sorry you are not allowed to submit anymore');
         }
+    }
+
         if (isset($request->file)) {
 
             $request->validate([
