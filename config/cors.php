@@ -17,10 +17,10 @@ return [
      */
     'default_profile' => [
 
-        //'allow_credentials' => false,
+        'allow_credentials' => true,
 
         'allow_origins' => [
-           '*'
+           'http://localhost:80'
         ],
 
         'allow_methods' => [
