@@ -76,6 +76,8 @@ class UsersImport implements ToModel, WithHeadingRow
             }
         }
         $user->save();
+        $role = Role::find($row['role_id']);
+        $user->assignRole($role);
 
         if (isset($row['type'])&&isset($row['level'])&&isset($row['class_id']))
         {
@@ -114,9 +116,7 @@ class UsersImport implements ToModel, WithHeadingRow
                 'role_id'=>'required|exists:roles,id',
             ])->validate();
 
-            $role = Role::find($row['role_id']);
             $userId[] =User::FindByName($user->username)->id;
-            $user->assignRole($role);
 
             if ($row['role_id'] == 3) {
                 $request = new Request([
