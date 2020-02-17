@@ -31,7 +31,7 @@ class Message extends Model
     }
 
     private static function getLastMessage($auth_user , $other_user){
-        $message = Message::whereIn('From' , [$auth_user,$other_user])->whereIn('To' , [$auth_user,$other_user])->orderBy('created_at' , 'desc')->first();
+        $message = Message::whereIn('From' , [$auth_user,$other_user])->whereIn('To' , [$auth_user,$other_user])->where('deleted','!=',1)->orderBy('created_at' , 'desc')->first();
         $attachment=null;
         $type=null;
         $exten=null;
