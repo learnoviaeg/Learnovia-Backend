@@ -24,7 +24,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
-use App\Attachment;
+use App\attachment;
 use App\SegmentClass;
 
 class UserController extends Controller
@@ -59,9 +59,10 @@ class UserController extends Controller
             'class_id.*' => 'exists:classes,id',
             'picture' => 'nullable|array','arabicname' => 'nullable|array', 'gender' => 'nullable|array', 'phone' => 'nullable|array',
             'address' => 'nullable|array','nationality' => 'nullable|array','country' => 'nullable|array', 'birthdate' => 'nullable|array',
-            'notes' => 'nullable|array','email' => 'nullable|array', 'language' => 'nullable|array','timezone' => 'nullable|array',
+            'notes' => 'nullable|array','email' => 'nullable|array|unique:users', 'language' => 'nullable|array','timezone' => 'nullable|array',
             'religion' => 'nullable|array','second language' => 'nullable|array', 'username' => 'nullable|array', 'type' => 'nullable|array',
-            'level' => 'nullable|array', 'real_password' => 'nullable|array'
+            'level' => 'nullable|array', 'real_password' => 'nullable|array',
+            'suspend'=>'array'
         ]);
 
         // return User::max('id');
@@ -93,15 +94,19 @@ class UserController extends Controller
             ]);
 
             foreach ($optionals as $optional)
+            if(isset($request->suspend[$i])){
+                $user->suspend =$request->suspend[$i];
+            }
+            if (isset($request->picture[$i]))
+                    $user->picture = attachment::upload_attachment($request->picture[$i], 'User')->id;
                 if ($request->filled($optional)){
-                    if ($optional == 'picture')
-                        $user->$optional = attachment::upload_attachment($request->$optional[$i], 'User')->id;
                     if($optional =='birthdate')
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
                     if($optional =='real_password'){
                         $user->$optional = $request->$optional[$i];
                         $user->password =   bcrypt($request->$optional[$i]);
                     }
+                    
                     $user->$optional =$request->$optional[$i];
                 }
 
