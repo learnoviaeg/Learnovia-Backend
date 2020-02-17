@@ -233,7 +233,8 @@ class UserQuizController extends Controller
             }
         }
         $answer1= userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->where('question_id',$question['id'])->first();
-        $answer1->update($data);
+        if(isset($answer1))
+            $answer1->update($data);
         }
 
         $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->get();

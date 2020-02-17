@@ -19,7 +19,7 @@ class userQuizAnswer extends Model
     public function getMcqAnswersArrayAttribute()
     {
         if (is_null($this->attributes['mcq_answers_array']))
-            return $this->attributes['mcq_answers_array'];
+            return [$this->attributes['mcq_answers_array']];
         $mimi = unserialize($this->attributes['mcq_answers_array']);
         return $mimi;
     }
