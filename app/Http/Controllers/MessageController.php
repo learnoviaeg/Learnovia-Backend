@@ -335,7 +335,7 @@ class MessageController extends Controller
      */
     public function GetMyThreads(Request $request)
     {
-        $messages = Message::where('From', $request->user()->id)->orWhere('To', $request->user()->id)->orderBy('id','desc')->get();
+        $messages = Message::where('From', $request->user()->id)->orWhere('To', $request->user()->id)->orderBy('created_at','desc')->get();
         $users = Message::GetMessageDetails($messages , $request->user()->id);
         return HelperController::api_response_format(200 , $users);
     }
