@@ -575,7 +575,7 @@ class CourseController extends Controller
             if ($test > 0)
                 return HelperController::api_response_format(200, $optional);
             else
-                return HelperController::api_response_format(200, 'there is no course optional here');
+                return HelperController::api_response_format(200,null, 'there is no course optional here');
         }
     }
 
