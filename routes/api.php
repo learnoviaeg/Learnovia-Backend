@@ -276,7 +276,6 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api']], function () {
         Route::post('bulk-update', 'GradeCategoryController@bulkupdate')->middleware('permission:grade/category/bulk-update');
         Route::get('bulk-get', 'GradeCategoryController@GetAllGradeCategory')->middleware('permission:grade/category/bulk-get');
         Route::get('bulk-all-get', 'GradeCategoryController@GetGradeCategoryTree')->middleware('permission:grade/category/bulk-all-get');
-        
         Route::get('get-gradecategories', 'GradeCategoryController@getgradecat');
     });
 
@@ -294,7 +293,6 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api']], function () {
         Route::post('bulk-update', 'GradeItemController@bulkupdate')->middleware('permission:grade/item/bulk-update');
         Route::post('bulk-assign', 'GradeItemController@AssignBulk')->middleware('permission:grade/item/bulk-assign');
         Route::get('get-allowed-functions', 'GradeItemController@get_allowed_functions')->middleware('permission:grade/item/get-allowed-functions');
-
     });
 
     Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
@@ -312,6 +310,7 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api']], function () {
         Route::post('over-all', 'UserGradeController@AllUserInAllCourses')->name('getalluserscoursesgrades')->middleware(['permission:grade/report/over-all' , 'ParentCheck']);
     });
 });
+
 Route::group(['prefix' => 'scale', 'middleware' => ['auth:api']], function () {
     Route::post('add', 'ScaleController@AddScale')->name('addscale')->middleware('permission:scale/add');
     Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
