@@ -122,8 +122,11 @@ class MessageController extends Controller
                             }
                             $message->save();
                             $message->about=User::find($message->about);
+                            $message->about->picture=$message->about->attachment->path;
                             $message->From=User::find($message->From);
+                            $message->From->picture=$message->From->attachment->path;
                             $message->To=User::find($message->To);
+                            $message->To->picture=$message->To->attachment->path;
                             $message->Message = $message->text;
                             $message->type='text';
 
@@ -180,8 +183,7 @@ class MessageController extends Controller
                 if($messag->id == $req->id)
                     return HelperController::api_response_format(201, $messag, 'message was deleted');
         }
-            return HelperController::api_response_format(404,null , 'You do not have permission delete this message');
-        // }
+        return HelperController::api_response_format(404,null , 'You do not have permission delete this message');
     }
 
     /*
