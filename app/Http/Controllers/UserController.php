@@ -138,7 +138,7 @@ class UserController extends Controller
 
                 while (isset($request->$teacheroptional[$key][$teachercounter])) {
                     // $course_id = Course::findByName($request->$teacheroptional[$key][$teachercounter]);
-                    $segmentid = CourseSegment::getidfromcourse($$request->$teacheroptional[$key]);
+                    $segmentid = CourseSegment::getidfromcourse($request->$teacheroptional[$key]);
                     $option = new Request([
                         'course_segment' => array($segmentid),
                         'users' => array($user->id),
