@@ -168,7 +168,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
-            'language', 'timezone', 'religion', 'second language'];
+            'language', 'timezone', 'religion', 'second language', 'username'];
         $request->validate([
             'id' => 'required|exists:users,id',
         ]);
@@ -176,12 +176,10 @@ class UserController extends Controller
         $user = User::find($request->id);
 
         $request->validate([
-            'name' => 'required|string|min:3|max:50',
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => 'required|string|min:8|max:191'
         ]);
         $check = $user->update([
-            'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'real_password' => $request->password,
@@ -193,7 +191,6 @@ class UserController extends Controller
         }
         $user->save();
         return HelperController::api_response_format(200, $user, 'User Updated Successfully');
-
     }
 
     /**
@@ -213,7 +210,6 @@ class UserController extends Controller
         $user->delete();
 
         return HelperController::api_response_format(201, null, 'User Deleted Successfully');
-
     }
 
     /**
@@ -257,7 +253,6 @@ class UserController extends Controller
             'suspend' => 1
         ]);
         return HelperController::api_response_format(201, $user, 'User Blocked Successfully');
-
     }
 
     /**
@@ -408,6 +403,7 @@ class UserController extends Controller
         $users = $users ->get();
         return HelperController::api_response_format(200, $users, 'all users are  ...');
     }
+
     Public Function Overview_Report()
     {
         $user_id=Auth::id();
@@ -427,6 +423,7 @@ class UserController extends Controller
         return HelperController::api_response_format(200, 'Child is choosen successfully');
 
     }
+
     Public Function getMyChildren(){
         $childrenIDS = Parents::where('parent_id',Auth::id())->pluck('child_id');
         $children =  User::whereIn('id',$childrenIDS)->get();
@@ -435,6 +432,7 @@ class UserController extends Controller
         return HelperController::api_response_format(200,$children ,'Children are.......');
 
     }
+
     Public Function getSomeoneChildren(Request $request){
         $request->validate([
             'parent_id' => 'required|exists:parents,parent_id'
@@ -444,6 +442,7 @@ class UserController extends Controller
         return HelperController::api_response_format(200,$children ,'Children are.......');
 
     }
+
     Public Function getSomeoneParent(Request $request)
     {
         $request->validate([
@@ -453,6 +452,7 @@ class UserController extends Controller
         $parent =  User::find($parentID);
         return $parent;
     }
+
     Public function get_my_users(Request $request){
         $request->validate([
             'course' => 'array',
@@ -520,5 +520,4 @@ class UserController extends Controller
         // }
         return HelperController::api_response_format(200,$students ,'Users are.......');
     }
-    
 }

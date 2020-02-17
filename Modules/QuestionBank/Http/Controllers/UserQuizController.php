@@ -348,28 +348,27 @@ class UserQuizController extends Controller
         return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
     }
 
-    public function get_user_quiz(Request $request)
-    {
-        $user_id = Auth::User()->id;
+    // public function get_user_quiz(Request $request)
+    // {
+    //     $user_id = Auth::User()->id;
 
-        $request->validate([
-            'quiz_id' => 'required|integer|exists:quizzes,id',
-            'lesson_id' => 'required|integer|exists:lessons,id',
-            'user_id' => 'integer|exists:users,id',
-        ]);
-        if (isset($request->user_id))
-            $user_id = $request->user_id;
+    //     $request->validate([
+    //         'quiz_id' => 'required|integer|exists:quizzes,id',
+    //         'lesson_id' => 'required|integer|exists:lessons,id',
+    //         'user_id' => 'integer|exists:users,id',
+    //     ]);
+    //     if (isset($request->user_id))
+    //         $user_id = $request->user_id;
 
-        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)
-            ->where('lesson_id', $request->lesson_id)->first();
+    //     $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)
+    //         ->where('lesson_id', $request->lesson_id)->first();
 
-        if (!isset($quiz_lesson)) {
-            return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
-        }
-        $attemps = userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
-        return HelperController::api_response_format(200, $attemps, 'your attempts are ...');
-
-    }
+    //     if (!isset($quiz_lesson)) {
+    //         return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
+    //     }
+    //     $attemps = userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
+    //     return HelperController::api_response_format(200, $attemps, 'your attempts are ...');
+    // }
 
     public function gradeUserQuiz(Request $request)
     {
@@ -405,17 +404,17 @@ class UserQuizController extends Controller
             $userQuiz->feedback = $request->feedback;
             $user_grade->update(['feedback'=> $request->feedback]);
         }
-
         return HelperController::api_response_format(200, $body = $user_grade, $message = 'Quiz graded sucess');
     }
+
     public function get_all_users_quiz_attempts(Request $request)
     {
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
             'user_id' => 'integer|exists:users,id',
-
         ]);
+
         $final= collect([]);
         $All_attemp=[];
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
@@ -446,7 +445,7 @@ class UserQuizController extends Controller
             $attemps['Attempts'] = $All_attemp;
             $final->push($attemps);
         }
-      return HelperController::api_response_format(200, $final, 'Students attempts are ...');
+        return HelperController::api_response_format(200, $final, 'Students attempts are ...');
     }
 
     public function get_fully_detailed_attempt(Request $request){
@@ -506,27 +505,24 @@ class UserQuizController extends Controller
     public function get_feedback($request,$show_is_true , $user_quiz){
         foreach($user_quiz as $UserQuiz){
             $total[]= quiz::where('id',$request->quiz_id)->with(['Question.question_answer'])->first();
-         foreach($total as $quest){
-            foreach($quest->question as $q){
-            $q->question_answer;
-            $Question_id =  $q->pivot->question_id;
-            $Ans_ID = userQuizAnswer::where('user_quiz_id',$UserQuiz->id)->where('question_id',$Question_id)->first();
-            if(isset($Ans_ID->answer_id)){
-                $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
-                $q->user_grade =$Ans_ID->user_grade;
-                if($show_is_true == 0){
-                    unset($q->student_answer['is_true']);
+            foreach($total as $quest){
+                foreach($quest->question as $q){
+                    $q->question_answer;
+                    $Question_id =  $q->pivot->question_id;
+                    $Ans_ID = userQuizAnswer::where('user_quiz_id',$UserQuiz->id)->where('question_id',$Question_id)->first();
+                    if(isset($Ans_ID->answer_id)){
+                        $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
+                        $q->user_grade =$Ans_ID->user_grade;
+                        if($show_is_true == 0){
+                            unset($q->student_answer['is_true']);
+                        }
+                    }
+                    if($show_is_true == 0)
+                        foreach($q->question_answer as $ans)
+                            unset($ans['is_true']);
                 }
             }
-            if($show_is_true == 0){
-                foreach($q->question_answer as $ans)
-                {
-                    unset($ans['is_true']);
-                }
-                }
-        }}
+        }
+        return $total;
     }
-    return $total;
-    }
-
 }
