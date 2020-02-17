@@ -325,6 +325,6 @@ class UserGradeController extends Controller
                 }
             }
         }
-        return HelperController::api_response_format(200, $cour);
+        return HelperController::api_response_format(200, array_values($cour));
     }
 }

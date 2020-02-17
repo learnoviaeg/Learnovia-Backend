@@ -50,9 +50,9 @@ class UserController extends Controller
             'password' => 'required|array',
             'password.*' => 'required|string|min:6|max:191',
             'role' => 'required|array',
-            'optional.*' => 'exists:courses,name',
+            'optional.*' => 'exists:courses,id',
             'optional' => 'array',
-            'course.*' => 'exists:courses,name',
+            'course.*' => 'exists:courses,id',
             'course' => 'array',
             'role.*' => 'required|exists:roles,id',
             'class_id' => 'array',
@@ -123,8 +123,8 @@ class UserController extends Controller
 
                 $enrollcounter = 0;
                 while (isset($request->$enrollOptional[$key][$enrollcounter])) {
-                    $course_id = Course::findByName($request->$enrollOptional[$key][$enrollcounter]);
-                    $segmentid = CourseSegment::getidfromcourse($course_id);
+                    // $course_id = Course::findByName($request->$enrollOptional[$key][$enrollcounter]);
+                    $segmentid = CourseSegment::getidfromcourse($request->$enrollOptional[$key]);
                     $option = new Request([
                         'course_segment' => array($segmentid),
                         'users' => array($user->id),
@@ -137,8 +137,8 @@ class UserController extends Controller
                 $teachercounter = 0;
 
                 while (isset($request->$teacheroptional[$key][$teachercounter])) {
-                    $course_id = Course::findByName($request->$teacheroptional[$key][$teachercounter]);
-                    $segmentid = CourseSegment::getidfromcourse($course_id);
+                    // $course_id = Course::findByName($request->$teacheroptional[$key][$teachercounter]);
+                    $segmentid = CourseSegment::getidfromcourse($request->$teacheroptional[$key]);
                     $option = new Request([
                         'course_segment' => array($segmentid),
                         'users' => array($user->id),

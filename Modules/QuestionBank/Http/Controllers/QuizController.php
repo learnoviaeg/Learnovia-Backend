@@ -750,6 +750,8 @@ class QuizController extends Controller
             return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
+        if(!isset($quiz_lesson))
+            return HelperController::api_response_format(200, 'there is quiz in this lesson');
 
         $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->get();
         $quiz['allow_edit'] = true;
