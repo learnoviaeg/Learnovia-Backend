@@ -515,7 +515,7 @@ class AssigmentsController extends Controller
         
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
-        $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->get();
+        $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
         
         if (count($userassigments) > 0) {
             $assignment['allow_edit'] = false;
