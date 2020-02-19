@@ -14,6 +14,10 @@ use App\Enroll;
 use App\GradeCategory;
 use App\Parents;
 use App\User;
+use App\AcademicYear;
+use App\AcademicType;
+use App\YearLevel;
+use App\AcademicYearType;
 use Carbon\Carbon;
 use App\Course;
 use App\Contract;
@@ -49,12 +53,14 @@ class UserController extends Controller
             'lastname.*' => 'required|string|min:3|max:50',
             'password' => 'required|array',
             'password.*' => 'required|string|min:6|max:191',
-            'role' => 'required|array',
+            // 'role' => 'required|array',
+            // 'role.*' => 'required|exists:roles,id',
+            'role' => 'exists:roles,id', /// in all system
+            'role_id' => 'required_with:level|exists:roles,id', /// chain role
             'optional.*' => 'exists:courses,id',
             'optional' => 'array',
             'course.*' => 'exists:courses,id',
             'course' => 'array',
-            'role.*' => 'required|exists:roles,id',
             'class_id' => 'array',
             'class_id.*' => 'exists:classes,id',
             'picture' => 'nullable|array','arabicname' => 'nullable|array', 'gender' => 'nullable|array', 'phone' => 'nullable|array',
@@ -68,7 +74,7 @@ class UserController extends Controller
         // return User::max('id');
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email', 'suspend',
-            'language', 'timezone', 'religion', 'second language', 'real_password', 'level', 'type', 'class_id', 'username'
+            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id', 'username'
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
@@ -77,9 +83,8 @@ class UserController extends Controller
         $count=0;
         $max_allowed_users = Contract::whereNotNull('id')->pluck('numbers_of_users')->first();
         $users=Enroll::where('role_id',3)->get();
-        foreach($request->role as $role)
-            if($role == 3)
-                $count++;
+        if($request->role == 3)
+            $count+=1;
 
         if((count($users) + $count) > $max_allowed_users)
             return HelperController::api_response_format(404 ,$max_allowed_users, 'exceed MAX, U Can\'t add users any more');
@@ -102,21 +107,17 @@ class UserController extends Controller
                 if ($request->filled($optional)){
                     if($optional =='birthdate')
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
-                    if($optional =='real_password'){
-                        $user->$optional = $request->$optional[$i];
-                        $user->password =   bcrypt($request->$optional[$i]);
-                    }
                     $user->$optional =$request->$optional[$i];
                 }
 
             $i++;
 
             $user->save();
-            $role = Role::find($request->role[$key]);
+            $role = Role::find($request->role);
             $user->assignRole($role);
             $Auth_role = Role::find(8);
             $user->assignRole($Auth_role);
-            if ($request->role[$key] == 3) {
+            if ($request->role_id == 3) {
                 $option = new Request([
                     'users' => [$user->id],
                     'level' => $request->level[$key] ,
@@ -167,34 +168,6 @@ class UserController extends Controller
      *              timezone, religion, second language
      * @return [object] and [string] User updated Successfully
     */
-    // public function update(Request $request)
-    // {
-    //     $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
-    //         'language', 'timezone', 'religion', 'second language', 'username'];
-    //     $request->validate([
-    //         'id' => 'required|exists:users,id',
-    //     ]);
-
-    //     $user = User::find($request->id);
-
-    //     $request->validate([
-    //         'email' => ['required', 'email', 'unique:users,email'],
-    //         'password' => 'required|string|min:8|max:191'
-    //     ]);
-    //     $check = $user->update([
-    //         'email' => $request->email,
-    //         'password' => bcrypt($request->password),
-    //         'real_password' => $request->password,
-    //     ]);
-
-    //     foreach ($optionals as $optional) {
-    //         if ($request->filled($optional))
-    //             $user->$optional = $request->$optional;
-    //     }
-    //     $user->save();
-    //     return HelperController::api_response_format(200, $user, 'User Updated Successfully');
-    // }
-
     public function update(Request $request)
     {
         $request->validate([
@@ -204,12 +177,12 @@ class UserController extends Controller
             'email' => ['email', 'unique:users,email'],
             'password' => 'string|min:6|max:191',
             'role' => 'exists:roles,id', /// in all system
-            'role_id' => 'required_with:level|exists:roles,id' /// chain role
+            'role_id' => 'required_with:level|exists:roles,id', /// chain role
         ]);
 
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address','nationality', 'notes', 'email', 'suspend',
-            'language', 'timezone', 'religion', 'second language','picture', 'real_password', 'level', 'type', 'class_id', 'username'
+            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id',
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
@@ -221,6 +194,17 @@ class UserController extends Controller
             'lastname' => $request->lastname,
             'username' => User::generateUsername(),
         ]);
+
+        if (isset($request->password))
+            if (Auth::user()->can('user/update-password')) {
+                $user->real_password=$request->password;
+                $user->password =   bcrypt($request->password);
+            }
+
+        if (isset($request->username))
+            if (Auth::user()->can('user/update-username')) {
+                $user->username=$request->username;
+            }
 
         if (isset($request->picture))
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
@@ -370,7 +354,34 @@ class UserController extends Controller
         ]);
         $user = User::find($request->id);
         $user->roles;
-        return HelperController::api_response_format(201, $user, null);
+
+        $i = 0;
+        foreach ($user->enroll as $enroll) {
+            $all[$i]['id'] = $enroll->CourseSegment->id;
+            $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
+            $all[$i]['Course'] = Course::where('id', $segment_Class_id->course_id)->pluck('name')->first();
+            $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
+
+            $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
+            $all[$i]['class'] = Classes::find($class_id->class_id)->name;
+
+            $level = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
+            $all[$i]['level'] = level::find($level->level_id)->name;
+
+            $year_type = AcademicYearType::where('id', $level->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
+            $all[$i]['type'] = AcademicType::find($year_type->academic_year_id)->name;
+
+            $all[$i]['year'] = AcademicYear::find($year_type->academic_type_id)->name;
+            $i++;
+        }
+        if (isset($all))
+        {
+            unset($user->enroll);
+            $user->Chain=$all;
+            return HelperController::api_response_format(201, $user, null);
+        }
+
+        return HelperController::api_response_format(200, null, 'there is no courses');
     }
 
     /**
