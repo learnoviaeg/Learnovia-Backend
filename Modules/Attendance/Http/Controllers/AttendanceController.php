@@ -427,7 +427,7 @@ class AttendanceController extends Controller
         foreach($users as $user)
         {
             $user->picture=$user->attachment->path;
-            // unset($user->attachment);
+            //unset($user->attachment);
         }
         return HelperController::api_response_format(200, $users, 'Users are.....');
     }
