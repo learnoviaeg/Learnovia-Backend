@@ -100,8 +100,10 @@ class AttendanceController extends Controller
         $Course_Segments = Attendance::get_CourseSegments_by_AttendenceID($request->id);
         $users =   User::whereIn('level', $attendane->allowed_levels)->get();
         if(($Course_Segments)== null){
-        $users = Enroll::whereIn('course_segment', $Course_Segments)->with('user')->get();
+            $users = Enroll::whereIn('course_segment', $Course_Segments)->with('user')->get();
         }
+        foreach($users as $user)
+            $user->picture=$user->attachment->path;
         return HelperController::api_response_format(200, $users, 'Users are.....');
     }
 
