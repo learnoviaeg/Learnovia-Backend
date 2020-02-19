@@ -202,6 +202,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
     Route::post('current-child', 'UserController@SetCurrentChild')->name('currentchild')->middleware('permission:user/current-child');
     Route::post('get-my-users', 'UserController@get_my_users')->name('getmyusers')->middleware('permission:user/get-my-users');
 });
+
 //Enroll Routes
 Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api']], function () {
     Route::post('enroll-single-user', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/single');
