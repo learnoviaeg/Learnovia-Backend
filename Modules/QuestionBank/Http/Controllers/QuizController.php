@@ -743,6 +743,7 @@ class QuizController extends Controller
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
+            'attempt_index'=>'integer|exists:user_quizzes,attempt_index'
         ]);
         $quiz = Quiz::find($request->quiz_id);
         $qq = Quiz::where('id', $request->quiz_id)->first();
@@ -754,6 +755,7 @@ class QuizController extends Controller
             return HelperController::api_response_format(200, 'there is quiz in this lesson');
 
         $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->get();
+        
         $quiz['allow_edit'] = true;
         foreach($userquizzes as $userQuiz)
         {
@@ -770,8 +772,12 @@ class QuizController extends Controller
         $quiz['due_date']=$quiz_lesson->due_date;
         $quiz['mark']=$quiz_lesson->grade;
         $quiz['grade_category']=$gradecat;
+        $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',Auth::id())->pluck('attempt_index');
 
         $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',Auth::id())->get();
+        if($request->filled('attempt_index'))
+            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',Auth::id())->where('attempt_index',$request->attempt_index)->get();
+
         foreach($user_quizzes as $user_Quiz)
         {
             $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz->id)->get();
