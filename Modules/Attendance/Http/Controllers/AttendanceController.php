@@ -103,7 +103,10 @@ class AttendanceController extends Controller
             $users = Enroll::whereIn('course_segment', $Course_Segments)->with('user')->get();
         }
         foreach($users as $user)
+        {
             $user->picture=$user->attachment->path;
+            unset($user->attachment);
+        }
         return HelperController::api_response_format(200, $users, 'Users are.....');
     }
 
