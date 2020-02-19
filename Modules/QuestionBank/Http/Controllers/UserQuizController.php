@@ -91,7 +91,8 @@ class UserQuizController extends Controller
             'ip' => $request->ip(),
             'device_data' => $deviceData,
             'browser_data' => $browserData,
-            'open_time' => Carbon::now()
+            'open_time' => Carbon::now(),
+            'submit_time'=> Carbon::now(),
         ]);
 
            foreach($quiz_lesson->quiz->Question as $question){
