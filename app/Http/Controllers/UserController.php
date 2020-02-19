@@ -68,7 +68,7 @@ class UserController extends Controller
         // return User::max('id');
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email', 'suspend',
-            'language', 'timezone', 'religion', 'second language','picture', 'real_password', 'level', 'type', 'class_id', 'username'
+            'language', 'timezone', 'religion', 'second language', 'real_password', 'level', 'type', 'class_id', 'username'
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
@@ -94,10 +94,10 @@ class UserController extends Controller
             ]);
 
             foreach ($optionals as $optional)
-            if(isset($request->suspend[$i])){
-                $user->suspend =$request->suspend[$i];
-            }
-            if (isset($request->picture[$i]))
+                if(isset($request->suspend[$i])){
+                    $user->suspend =$request->suspend[$i];
+                }
+                if (isset($request->picture[$i]))
                     $user->picture = attachment::upload_attachment($request->picture[$i], 'User')->id;
                 if ($request->filled($optional)){
                     if($optional =='birthdate')
@@ -106,7 +106,6 @@ class UserController extends Controller
                         $user->$optional = $request->$optional[$i];
                         $user->password =   bcrypt($request->$optional[$i]);
                     }
-                    
                     $user->$optional =$request->$optional[$i];
                 }
 
@@ -128,10 +127,9 @@ class UserController extends Controller
 
                 $enrollcounter = 0;
                 while (isset($request->$enrollOptional[$key][$enrollcounter])) {
-                    // $course_id = Course::findByName($request->$enrollOptional[$key][$enrollcounter]);
-                    $segmentid = CourseSegment::getidfromcourse($request->$enrollOptional[$key]);
                     $option = new Request([
-                        'course_segment' => array($segmentid),
+                        'course' => [$request->$enrollOptional[$key]],
+                        'class' =>$request->class_id[$key],
                         'users' => array($user->id),
                         'role_id' => array(3)
                     ]);
@@ -142,12 +140,11 @@ class UserController extends Controller
                 $teachercounter = 0;
 
                 while (isset($request->$teacheroptional[$key][$teachercounter])) {
-                    // $course_id = Course::findByName($request->$teacheroptional[$key][$teachercounter]);
-                    $segmentid = CourseSegment::getidfromcourse($request->$teacheroptional[$key]);
                     $option = new Request([
-                        'course_segment' => array($segmentid),
+                        'course' => [$request->$teacheroptional[$key]],
+                        'class' =>$request->class_id[$key],
                         'users' => array($user->id),
-                        'role_id' => array($role->id)
+                        'role_id' => array(4)
                     ]);
                     EnrollUserToCourseController::EnrollCourses($option);
                     $teachercounter++;
@@ -170,32 +167,114 @@ class UserController extends Controller
      *              timezone, religion, second language
      * @return [object] and [string] User updated Successfully
     */
+    // public function update(Request $request)
+    // {
+    //     $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
+    //         'language', 'timezone', 'religion', 'second language', 'username'];
+    //     $request->validate([
+    //         'id' => 'required|exists:users,id',
+    //     ]);
+
+    //     $user = User::find($request->id);
+
+    //     $request->validate([
+    //         'email' => ['required', 'email', 'unique:users,email'],
+    //         'password' => 'required|string|min:8|max:191'
+    //     ]);
+    //     $check = $user->update([
+    //         'email' => $request->email,
+    //         'password' => bcrypt($request->password),
+    //         'real_password' => $request->password,
+    //     ]);
+
+    //     foreach ($optionals as $optional) {
+    //         if ($request->filled($optional))
+    //             $user->$optional = $request->$optional;
+    //     }
+    //     $user->save();
+    //     return HelperController::api_response_format(200, $user, 'User Updated Successfully');
+    // }
+
     public function update(Request $request)
     {
-        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
-            'language', 'timezone', 'religion', 'second language', 'username'];
         $request->validate([
+            'firstname' => 'required|string|min:3|max:50',
+            'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
+            'email' => ['email', 'unique:users,email'],
+            'password' => 'string|min:6|max:191',
+            'role' => 'exists:roles,id', /// in all system
+            'role_id' => 'required_with:level|exists:roles,id' /// chain role
         ]);
+
+        $users_is = collect([]);
+        $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address','nationality', 'notes', 'email', 'suspend',
+            'language', 'timezone', 'religion', 'second language','picture', 'real_password', 'level', 'type', 'class_id', 'username'
+        ];
+        $enrollOptional = 'optional';
+        $teacheroptional = 'course';
 
         $user = User::find($request->id);
 
-        $request->validate([
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => 'required|string|min:8|max:191'
-        ]);
         $check = $user->update([
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'real_password' => $request->password,
+            'firstname' => $request->firstname,
+            'lastname' => $request->lastname,
+            'username' => User::generateUsername(),
         ]);
+
+        if (isset($request->picture))
+            $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
 
         foreach ($optionals as $optional) {
             if ($request->filled($optional))
+                if($optional =='birthdate')
+                    $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
                 $user->$optional = $request->$optional;
         }
         $user->save();
-        return HelperController::api_response_format(200, $user, 'User Updated Successfully');
+
+        // role is in all system
+        $role = Role::find($request->role);
+        $user->assignRole($role);       
+
+        if ($request->role_id == 3) {
+            $oldChain=Enroll::where('user_id',$user->id)->where('role_id',$request->role_id)->get();
+            foreach($oldChain as $old)
+                $old->delete();
+            $option = new Request([
+                'users' => [$user->id],
+                'level' => $request->level ,
+                'type' => $request->type,
+                'class' => $request->class_id
+            ]);
+            EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
+
+            $enrollcounter = 0;
+            while (isset($request->$enrollOptional[$enrollcounter])) {
+                $option = new Request([
+                    'course' => [$request->$enrollOptional],
+                    'class' =>$request->class_id,
+                    'users' => array($user->id),
+                    'role_id' => array(3)
+                ]);
+                EnrollUserToCourseController::EnrollCourses($option);
+                $enrollcounter++;
+            }
+        } else { 
+            $teachercounter = 0;
+
+            while (isset($request->$teacheroptional[$teachercounter])) {
+                $option = new Request([
+                    'course' => [$request->$teacheroptional],
+                    'class' =>$request->class_id,
+                    'users' => array($user->id),
+                    'role_id' => array(4)
+                ]);
+                EnrollUserToCourseController::EnrollCourses($option);
+                $teachercounter++;
+            }
+        }
+        return HelperController::api_response_format(201, $user, 'User updated Successfully');
     }
 
     /**

@@ -37,7 +37,7 @@ class EnrollUserToCourseController extends Controller
     {
         $request->validate([
             'users' => 'required|array',
-            'users.*' => 'required|string|exists:users,id',
+            'users.*' => 'required|exists:users,id',
             'role_id' => 'required|array|exists:roles,id',
             'class' => 'required|exists:classes,id',
             'course' => 'required|array',
@@ -56,7 +56,7 @@ class EnrollUserToCourseController extends Controller
             foreach ($course_segment as $courses) {
                 foreach ($request->users as $user_id) {
                     $username = User::find($user_id)->username;
-                    $check = Enroll::IsExist($courses->id, $user_id);
+                    $check = Enroll::IsExist($courses->id, $user_id,$request->role_id[$rolecount]);
                     if (!$check) {
                         $enroll = new Enroll;
                         $enroll->setAttribute('user_id', $user_id);
@@ -421,7 +421,7 @@ class EnrollUserToCourseController extends Controller
             $count = 0;
             foreach ($request->users as $user) {
                 foreach ($courseSeg as $course) {
-                    $check = Enroll::IsExist($course, $user);
+                    $check = Enroll::IsExist($course, $user,$request->role_id[$count]);
                     if ($check == null) {
                         Enroll::Create([
                             'user_id' => $user,
