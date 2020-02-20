@@ -108,11 +108,20 @@ class UserQuizController extends Controller
             'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
             'Questions' => 'required|array',
             'Questions.*.id' => 'integer|exists:questions,id',
+            'forced' => 'boolean',
         ]);
         $Q_IDS= array();
         // check that question exist in the Quiz
         $user_quiz = userQuiz::find($request->user_quiz_id);
         $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
+        if($request->filled('forced') && $request->forced == 1){
+            $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereIn('question_id',$questions_ids)->get();
+
+        foreach($answer2 as $ans)
+            $ans->update(['answered'=>'1']);
+
+        return HelperController::api_response_format(200, $answer2, 'Quiz Answers are Registered Successfully(forced)');
+        }
 
         $allData = collect([]);
         foreach ($request->Questions as $index => $question) {
