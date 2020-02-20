@@ -17,6 +17,7 @@ use App\SegmentClass;
 use App\ClassLevel;
 use App\CourseSegment;
 use App\Enroll;
+use Carbon\Carbon;
 use App\LessonComponent;
 use App\User;
 use Auth;
@@ -256,14 +257,18 @@ class QuizLessonController extends Controller
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
                 ->where('lesson_id',$request->lesson_id)->first();
 
-        $userquizzes = UserQuiz::where('quiz_lesson_id', $quizLesson->id)->get();
-        $quizLesson['allow_edit'] = true;
-        foreach($userquizzes as $userQuiz)
+        if($quizLesson->publish_date <= Carbon::now())
         {
-            $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->pluck('answered')->first();
-            if ($user_quiz_answer == 1)
-                $quizLesson['allow_edit'] = false;
+            $userquizzes = UserQuiz::where('quiz_lesson_id', $quizLesson->id)->get();
+            $quizLesson['allow_edit'] = true;
+            foreach($userquizzes as $userQuiz)
+            {
+                $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->pluck('answered')->first();
+                if ($user_quiz_answer == 1)
+                    $quizLesson['allow_edit'] = false;
+            }
+            return HelperController::api_response_format(200, $quizLesson);
         }
-        return HelperController::api_response_format(200, $quizLesson);
+        return HelperController::api_response_format(200, null, 'publish_date isn\'t comming yet');
     }
 }
