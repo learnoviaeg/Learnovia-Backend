@@ -837,20 +837,22 @@ class CourseController extends Controller
                             $temp->where('visible', '=', 1)
                                 ->where('publish_date', '<=', Carbon::now());
                         }
+                        return $temp->get();
                         if(count($temp->get()) == 0)
                             continue;
                         $tempBulk = $temp->get();
                         foreach($tempBulk as $item){
                             if(isset($item->pivot))
                             {
+
                                 $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                 $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
                                 if($item->pivot->quiz_id)
                                     $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
                                 if($item->pivot->assignment_id)
-                                    $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
+                                    $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
+                                    $result[$component->name][] = $item;
                             }
-                            $result[$component->name][] = $item;
                         }
                     }
                 }
