@@ -332,7 +332,8 @@ class EnrollUserToCourseController extends Controller
             'class' => 'required|exists:classes,id',
             'segment' => 'exists:segments,id',
             'courses' => 'required|array',
-            'courses.*' => 'required|exists:courses,id'
+            'courses.*' => 'required|exists:courses,id',
+            'search' => 'nullable'
         ]);
         $year = AcademicYear::Get_current()->id;
         if (isset($request->year)) {
@@ -355,9 +356,9 @@ class EnrollUserToCourseController extends Controller
             return HelperController::api_response_format(200, null, 'No current segment or year');
 
         $ids = Enroll::whereIn('course_segment', $course_segment->pluck('id'))->pluck('user_id');
-        $userUnenrolls = User::whereNotIn('id', $ids)->get();
+        $userUnenrolls = User::where('username', 'LIKE', "%$request->search%")->whereNotIn('id', $ids)->get();
 
-        return HelperController::api_response_format(200, $userUnenrolls, 'students are ... ');
+        return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'students are ... ');
     }
 
     /**
@@ -374,6 +375,9 @@ class EnrollUserToCourseController extends Controller
      */
     public function unEnrolledUsersBulk(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable'
+        ]);
         $courseSegments = HelperController::Get_Course_segment($request);
         if ($courseSegments['result'] == false) {
             return HelperController::api_response_format(400, $courseSegments['value']);
@@ -383,8 +387,8 @@ class EnrollUserToCourseController extends Controller
         }
 
         $ids = Enroll::whereIn('course_segment', $courseSegments['value']->pluck('id'))->pluck('user_id');
-        $userUnenrolls = User::whereNotIn('id', $ids)->get();
-        return HelperController::api_response_format(200, $userUnenrolls, 'students are ... ');
+        $userUnenrolls = User::where('username', 'LIKE', "%$request->search%")->whereNotIn('id', $ids)->get();
+        return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'students are ... ');
     }
 
     /**
