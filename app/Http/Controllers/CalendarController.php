@@ -54,8 +54,10 @@ class CalendarController extends Controller
         $announcefinal = array();
         $counter = 0;
         foreach ($allannounce as $announ) {
-            $announcefinal[$counter]['id'] = "$announ->id";
+            $announcefinal[$counter]['id'] = $announ->id;
             $announcefinal[$counter]['type'] = 'announcement';
+            $announcefinal[$counter]['message'] = 'A new announcement will be published';
+            $announcefinal[$counter]['publish_date'] = $announ->publish_date;
             $counter++;
         }
 
@@ -104,7 +106,7 @@ class CalendarController extends Controller
 
             $Lessons[] = $checkLesson;
         }
-        $components  = Component::where('active', 1)->where('type', 1);
+        $components  = Component::where('active', 1)->where('type', 3)->get();
         $result = [];
         foreach ($components as $component) {
             $result[$component->name] = [];
