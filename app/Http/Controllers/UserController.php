@@ -98,9 +98,9 @@ class UserController extends Controller
                 'real_password' => $request->password[$key]
             ]);
 
-            foreach ($optionals as $optional)
-                if(isset($request->suspend[$i])){
-                    $user->suspend =$request->suspend[$i];
+            foreach ($optionals as $optional){
+                if($request->filled($optional[$i])){
+                    $user->optional =$request->optional[$i];
                 }
                 if (isset($request->picture[$i]))
                     $user->picture = attachment::upload_attachment($request->picture[$i], 'User')->id;
@@ -109,7 +109,7 @@ class UserController extends Controller
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
                     $user->$optional =$request->$optional[$i];
                 }
-
+            }
             $i++;
 
             $user->save();
