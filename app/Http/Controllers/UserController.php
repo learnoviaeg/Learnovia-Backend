@@ -55,7 +55,7 @@ class UserController extends Controller
             'password.*' => 'required|string|min:6|max:191',
             // 'role' => 'required|array',
             // 'role.*' => 'required|exists:roles,id',
-            'role' => 'exists:roles,id', /// in all system
+            'role' => 'requird|exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
             'optional.*' => 'exists:courses,id',
             'optional' => 'array',
