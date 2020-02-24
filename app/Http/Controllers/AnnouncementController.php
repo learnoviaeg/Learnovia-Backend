@@ -57,7 +57,8 @@ class AnnouncementController extends Controller
         if (isset($request->publish_date)) {
             $publishdate = $request->publish_date;
         }else {
-            $publishdate = Carbon::now();
+            $date=Carbon::now();
+            $publishdate = Carbon::parse($date)->format('Y-m-d H:i:s');
         }
 
         if($request->start_date < Carbon::now())
