@@ -17,7 +17,7 @@ class Lesson extends Model
     }
     public function module($name,$model)
     {
-        return $this->belongsToMany('Modules\\'.$name.'\Entities\\'.$model, $model.'_lessons', 'lesson_id', $model.'_id')->withPivot('publish_date');
+        return $this->belongsToMany('Modules\\'.$name.'\Entities\\'.$model, $model.'_lessons', 'lesson_id', $model.'_id')->withPivot('publish_date','created_at');
     }
     protected $hidden = [
         'created_at','updated_at'
