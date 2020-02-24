@@ -291,10 +291,11 @@ class UserController extends Controller
         $request->validate([
             'search' => 'nullable'
         ]);
-        $users = User::with('roles')->get();
+        $users = User::with('roles');
 
         if ($request->filled('search'))
             $users->where('username', 'LIKE', "%$request->search%");
+        $users->get();
         $users = $users->paginate(HelperController::GetPaginate($request));
         if (Auth::user()->can('show/real-password')) {
             foreach ($users->items() as $value) {
