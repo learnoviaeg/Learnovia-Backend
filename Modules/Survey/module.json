@@ -1,0 +1,13 @@
+{
+    "name": "Survey",
+    "alias": "survey",
+    "description": "",
+    "keywords": [],
+    "order": 0,
+    "providers": [
+        "Modules\\Survey\\Providers\\SurveyServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
