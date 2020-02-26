@@ -172,7 +172,7 @@ class MessageController extends Controller
             return HelperController::api_response_format(404, $valid->errors());
         }
         $message = Message::find($req->id);
-        if ($message->From == $session_id || $message->To == $session_id) {
+        if ($message->From == $session_id) {
             $message->update(array(
             'deleted' => Message::$DELETE_FROM_ALL
             ));
