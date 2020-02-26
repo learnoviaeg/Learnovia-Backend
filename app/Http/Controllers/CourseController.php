@@ -837,7 +837,6 @@ class CourseController extends Controller
                             $temp->where('visible', '=', 1)
                                 ->where('publish_date', '<=', Carbon::now());
                         }
-                        return $temp->get();
                         if(count($temp->get()) == 0)
                             continue;
                         $tempBulk = $temp->get();
