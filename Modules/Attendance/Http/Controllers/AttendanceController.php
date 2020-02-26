@@ -473,7 +473,8 @@ class AttendanceController extends Controller
             $temp->count = $log->count;
             $temp->label = $log->status->letter;
             $temp->description = $log->status->descrption;
-            $temp->percentage = ($log->count * 100) / $total;
+            $temp->percentage = (double)(($log->count * 100) / $total);
+            $temp->session_id = $log->session_id;
             $result[] = $temp;
         }
         return HelperController::api_response_format(200 , $result , '');
