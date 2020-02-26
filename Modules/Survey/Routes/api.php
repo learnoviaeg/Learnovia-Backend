@@ -18,5 +18,4 @@ Route::group(['prefix' => 'survey', 'middleware' => 'auth:api'], function () {
     Route::get('install', 'SurveyController@install_survey');
 
     Route::post('add', 'SurveyController@store')->middleware('permission:survey/add');
-    Route::post('add', 'SurveyController@create');//->middleware('permission:UserSurvey/create');
 });
