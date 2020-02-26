@@ -507,7 +507,7 @@ class AssigmentsController extends Controller
     {
         $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
-            'lesson_id' => 'exists:assignment_lessons,lesson_id'
+            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'
         ]);
 
         $user = Auth::user();
@@ -533,10 +533,11 @@ class AssigmentsController extends Controller
                 }
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
+            // return $studentassigment->attachment_id;
             if(isset($studentassigment)){
             $assignment['user_submit'] =$studentassigment;
-            if (isset($studentassigment['user_submit']->attachment_id)) {
-                $studentassigment['user_submit']->attachment = attachment::where('id', $stuassignment['user_submit']->attachment_id)->first();
+            if (isset($studentassigment->attachment_id)) {
+                $assignment['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
             }
             }
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
@@ -549,11 +550,13 @@ class AssigmentsController extends Controller
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-            $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
-                $assignment['user_submit'] = $studentassigment;
-            if (isset($studentassigment['user_submit']->attachment_id)) {
-                $studentassigment['user_submit']->attachment = attachment::where('id', $stuassignment['user_submit']->attachment_id)->first();
+            $studentassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
+            foreach($studentassigments as $studentassigment){
+            if (isset($studentassigment->attachment_id)) {
+                $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
             }
+        }
+            $assignment['user_submit'] = $studentassigments;
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
 
