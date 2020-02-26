@@ -6,5 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Survey extends Model
 {
-    protected $fillable = [];
+    protected $fillable = ['name', 'template', 'years', 'types','levels', 'classes', 'courses', 'segments', 'start_date',
+     'end_date'];
 }
