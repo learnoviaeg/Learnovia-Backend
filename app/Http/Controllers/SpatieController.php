@@ -181,7 +181,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/suspend', 'title' => 'suspend user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/un-suspend', 'title' => 'un suspend user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/show-hide-real-pass', 'title' => 'shor and hide real password']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/user/Show_and_hide_real_password_with_permission', 'title' => 'Show and hide real password with permission']);
+            // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/user/Show-and-hide-real-password-with-permission', 'title' => 'Show and hide real password with permission']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/parent-child', 'title' => 'user parent/child']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-by-id', 'title' => 'get user by id']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-with-role-cs', 'title' => 'get users  in couse segment with filter role_id ']);
@@ -385,7 +385,7 @@ class SpatieController extends Controller
         $request->validate([
             'id' => 'required|exists:roles,id',
             'name' => 'required|string',
-            'description' => 'required|string',
+            'description' => 'string',
             'permissions' => 'nullable|array',
             'permissions.*' => 'nullable|string|exists:permissions,name',
         ]);
@@ -393,7 +393,7 @@ class SpatieController extends Controller
 
         $update = $role->update([
             'name' => $request->name,
-            'description' => $request->description
+            'description' => isset($request->description) ? $request->description: null,
         ]);
 
         if (isset($request->permissions)) {
