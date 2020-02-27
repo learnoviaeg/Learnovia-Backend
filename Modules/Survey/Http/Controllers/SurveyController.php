@@ -55,7 +55,7 @@ class SurveyController extends Controller
         $survey=Survey::find($id);
 
         $req=new Request([
-            'year' => $year,
+            'year' => $survey->year,
             'type' => $survey->types,
             'segments' => $survey->segments,
             'levels' => $survey->levels,
@@ -113,9 +113,8 @@ class SurveyController extends Controller
             'courses' => isset($request->courses) ? serialize($request->courses) : null,
             'created_by' => Auth::id()
         ]);
-        // return $survey->year;
-        $check=self::assignSuvey($survey->id);
-        return $check;
+
+        self::assignSuvey($survey->id);
 
         return HelperController::api_response_format(200, $survey, 'Survey Created and assigned Successfully');
     }
