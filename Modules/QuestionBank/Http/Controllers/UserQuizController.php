@@ -5,6 +5,8 @@ namespace Modules\QuestionBank\Http\Controllers;
 use App\GradeCategory;
 use App\GradeItems;
 use App\User;
+use App\Enroll;
+use App\Lesson;
 use App\UserGrade;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -429,10 +431,11 @@ class UserQuizController extends Controller
         $final= collect([]);
         $All_attemp=[];
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        $users=Enroll::where('course_segment',Lesson::find($request->lesson_id)->course_segment_id)->pluck('user_id')->toArray();
+        
         if (!isset($quiz_lesson))
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
 
-        $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('user_id')->unique();
         if($request->filled('user_id')){
             unset($users);
             $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$request->user_id)->pluck('user_id')->unique();
@@ -441,6 +444,8 @@ class UserQuizController extends Controller
         }
         foreach ($users as $user_id){
             $user = User::where('id',$user_id)->first();
+            if(!$user->can('site/quiz/store_user_quiz'))
+                continue;
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
             foreach($attems as $attem)
             {
