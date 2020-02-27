@@ -192,7 +192,7 @@ class ClassController extends Controller
             return ['result' => false, 'value' => $validator->errors()];
 
         $count=0;
-        if( count($request->type) == count ($request->level))
+        if(count($request->type) == count ($request->level))
         {
             while(isset($request->type[$count]))
                 {
@@ -202,8 +202,8 @@ class ClassController extends Controller
                     else
                     {
                         $year = AcademicYear::Get_current();
-                        if(isset($year))
-                            return HelperController::api_response_format(201, 'there is no current segment');
+                        if(!isset($year))
+                            return HelperController::api_response_format(201, 'there is no current year');
                         else
                             $year=$year->id;
                     }

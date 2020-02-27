@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserSurvey extends Model
 {
-    protected $fillable = [];
+    protected $fillable = ['user_id', 'survey_id'];
 }

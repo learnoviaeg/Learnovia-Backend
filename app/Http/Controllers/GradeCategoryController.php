@@ -449,7 +449,7 @@ class GradeCategoryController extends Controller
                 foreach ($request->type as $type){
                     $ids= Segment::Get_current($type);
                     if(isset($ids))
-                        $ids=$ids->id;
+                        $ids=[$ids->id];
                 }
                 if ($request->filled('segments'))
                     $ids = $request->segments;

@@ -156,7 +156,7 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, $valid->errors());
         }
 
-        $questions = Questions::with('question_answer');
+        $questions = Questions::where('survey',0)->with('question_answer');
         if(isset($request->course_id)) {
             $questions->where('course_id', $request->course_id);
         }
@@ -251,7 +251,7 @@ class QuestionBankController extends Controller
             // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'required|exists:courses,id',
             'parent' => 'integer|exists:questions,id',
-
+            'survey' => 'boolean',
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
@@ -275,6 +275,7 @@ class QuestionBankController extends Controller
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
             'course_id' => $Question['course_id'],
+            'survey' => isset($Question['survey']) ? $Question['survey'] : 0,
         ]);
 
         $Questions->push($cat);
@@ -283,7 +284,6 @@ class QuestionBankController extends Controller
 
     public static function CreateQuestion($Question,$parent=null)
     {
-
         $valid = Validator::make($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
@@ -292,7 +292,7 @@ class QuestionBankController extends Controller
             // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'required|exists:courses,id',
             'parent' => 'integer|exists:questions,id',
-
+            'survey' => 'boolean'
         ]);
 
         if ($valid->fails()) {
@@ -318,6 +318,7 @@ class QuestionBankController extends Controller
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
             'course_id' => $Question['course_id'],
+            'survey' => isset($Question['survey']) ? $Question['survey'] : 0,
         ]);
         $Questions->push($cat);
         return $cat;
@@ -332,6 +333,7 @@ class QuestionBankController extends Controller
             'And_why' => 'integer|required',
             'And_why_mark' => 'integer|min:1|required_if:And_why,==,1',
             'Is_True' => 'required|boolean',
+            'survey' => 'boolean'
         ]);
 
         if ($validator->fails()) {
@@ -370,8 +372,8 @@ class QuestionBankController extends Controller
             'answers' => 'required|array|distinct|min:2',
             'answers.*' => 'required|string|distinct',
             'Is_True' => 'required|integer',
-            'text' => 'required|string'
-
+            'text' => 'required|string',
+            'survey' => 'boolean'
         ]);
 
         if ($validator->fails()) {
@@ -469,6 +471,7 @@ class QuestionBankController extends Controller
             'subQuestions' => 'required|array|distinct'/*|min:2*/,
             'subQuestions.*' => 'required|distinct',
             'subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+            'survey' => 'boolean'
         ]);
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors());
@@ -507,11 +510,11 @@ class QuestionBankController extends Controller
             'course_id' => 'required|integer|exists:courses,id',
             'Question' => 'required|array',
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+            'Question.*.survey' => 'boolean',
         ]);
 
         $re = collect([]);
         foreach ($request->Question as $question) {
-            // $question['class']=$request->class;
             switch ($question['Question_Type_id']) {
                 case 1: // True/false
                     $true_false = $this->TrueFalse($question,null);

@@ -14,8 +14,8 @@ class Segment extends Model
 
     public static function Get_current($type)
     {
-        $year = self::where('academic_type_id', $type)->where('current',1)->first();
-        return $year;
+        $segment = self::where('academic_type_id', $type)->where('current',1)->first();
+        return $segment;
     }
 
     protected $hidden = [
