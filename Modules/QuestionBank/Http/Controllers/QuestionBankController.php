@@ -249,7 +249,7 @@ class QuestionBankController extends Controller
             'mark' => 'required|integer|min:1',
             'Question_Category_id' => 'required|exists:questions_categories,id',
             // 'Category_id' => 'required|exists:categories,id',
-            'course_id' => 'required|exists:courses,id',
+            'course_id' => 'exists:courses,id',
             'parent' => 'integer|exists:questions,id',
             'survey' => 'boolean',
         ]);
@@ -274,7 +274,7 @@ class QuestionBankController extends Controller
             'parent' => $parent,
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
-            'course_id' => $Question['course_id'],
+            'course_id' => isset($Question['course_id']) ? $Question['course_id'] : null,
             'survey' => isset($Question['survey']) ? $Question['survey'] : 0,
         ]);
 
@@ -290,7 +290,7 @@ class QuestionBankController extends Controller
             'mark' => 'required|integer|min:1',
             'Question_Category_id' => 'required|exists:questions_categories,id',
             // 'Category_id' => 'required|exists:categories,id',
-            'course_id' => 'required|exists:courses,id',
+            'course_id' => 'exists:courses,id',
             'parent' => 'integer|exists:questions,id',
             'survey' => 'boolean'
         ]);
@@ -317,7 +317,7 @@ class QuestionBankController extends Controller
             // 'category_id' => $Question['Category_id'],
             'question_type_id' => $Question['Question_Type_id'],
             'question_category_id' => $Question['Question_Category_id'],
-            'course_id' => $Question['course_id'],
+            'course_id' => isset($Question['course_id']) ? $Question['course_id'] : null,
             'survey' => isset($Question['survey']) ? $Question['survey'] : 0,
         ]);
         $Questions->push($cat);
@@ -507,7 +507,7 @@ class QuestionBankController extends Controller
     public function store(Request $request,$type = 0)
     {
         $request->validate([
-            'course_id' => 'required|integer|exists:courses,id',
+            'course_id' => 'integer|exists:courses,id',
             'Question' => 'required|array',
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
             'Question.*.survey' => 'boolean',

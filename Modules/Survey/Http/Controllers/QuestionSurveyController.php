@@ -5,6 +5,9 @@ namespace Modules\Survey\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Modules\Survey\Entities\SurveyQuestion;
+
+use Modules\QuestionBank\Http\Controllers\QuestionBankController;
 
 class QuestionSurveyController extends Controller
 {
@@ -17,13 +20,31 @@ class QuestionSurveyController extends Controller
         return view('survey::index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Response
-     */
-    public function create()
+    public function QuestionSurvey(Request $request)
     {
-        return view('survey::create');
+        if($request->filled('template_id'))
+        {
+            $qustions =SurveyQuestion::where('survey_id',$request->template_id)->pluck('question_id');
+            foreach($qustions as $quest)
+            {
+                $check=SurveyQuestion::firstOrCreate([
+                    'question_id' => $quest,
+                    'survey_id' => $request['survey_id'],
+                ]);
+            }
+        }
+        else
+        {
+            $quest = new QuestionBankController();
+            $questions =$quest->store($request,3);
+            foreach($questions as $question)
+            {
+                $check=SurveyQuestion::firstOrCreate([
+                    'question_id' => $question,
+                    'survey_id' => $request['survey_id'],
+                ]);
+            }
+        }
     }
 
     /**

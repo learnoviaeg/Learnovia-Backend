@@ -26,15 +26,17 @@ class SurveyController extends Controller
         }
 
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/add','title' => 'add survey']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/add-question','title' => 'add question survey']);
         
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('survey/add');
+        $role->givePermissionTo('survey/add-question');
         
         Component::create([
             'name' => 'Survey',
             'module'=>'Survey',
             'model' => 'Survey',
-            'type' => 3,
+            'type' => 4,
             'active' => 0
         ]);
 
@@ -87,6 +89,7 @@ class SurveyController extends Controller
             'start_date' => 'date',
             'end_date' => 'after:' . Carbon::now(),
             'template' => 'required|integer|boolean',
+            'template_id' => 'required_if:template,==,1|exists:surveys,id',
             'year' => 'nullable|exists:academic_years,id',
             'types' => 'array',
             'types.*' => 'nullable|exists:academic_types,id',
@@ -114,7 +117,10 @@ class SurveyController extends Controller
             'created_by' => Auth::id()
         ]);
 
+        $request['survey_id']=$survey->id;
         self::assignSuvey($survey->id);
+        $QSC= new QuestionSurveyController();
+        $QSC->QuestionSurvey($request);
 
         return HelperController::api_response_format(200, $survey, 'Survey Created and assigned Successfully');
     }
@@ -158,5 +164,10 @@ class SurveyController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function submitSurvey(Request $request)
+    {
+        
     }
 }
