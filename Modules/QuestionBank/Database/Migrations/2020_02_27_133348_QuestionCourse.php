@@ -13,10 +13,7 @@ class QuestionCourse extends Migration
      */
     public function up()
     {
-        Schema::table('questions', function (Blueprint $table) {
-            $table->dropForeign(['course_id']);
-            $table->dropColumn(['course_id']);
-        });
+       
     }
 
     /**
@@ -26,6 +23,8 @@ class QuestionCourse extends Migration
      */
     public function down()
     {
-        //
-    }
+        Schema::table('questions', function (Blueprint $table) {
+            $table->dropForeign('questions_course_id_foreign');
+            $table->dropColumn(['course_id']);
+        });    }
 }
