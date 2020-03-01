@@ -185,4 +185,8 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\UserGrade');
     }
+    public function userSurvey()
+    {
+        return $this->belongsToMany('Modules\Survey\Entities\UserSurvey', 'user_id', 'id');
+    }
 }

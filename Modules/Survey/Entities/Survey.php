@@ -93,4 +93,9 @@ class Survey extends Model
          }
          return $temp;
      }
+
+     public function Question()
+     {
+         return $this->belongsToMany('Modules\QuestionBank\Entities\Questions', 'survey_questions', 'survey_id', 'question_id');
+     }
 }
