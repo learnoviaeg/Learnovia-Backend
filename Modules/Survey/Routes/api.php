@@ -21,5 +21,5 @@ Route::group(['prefix' => 'survey', 'middleware' => 'auth:api'], function () {
     Route::post('add-question', 'QuestionSurveyController@QuestionSurvey')->middleware('permission:survey/add-question');
     Route::post('submit', 'UserSurveyController@submitSurvey')->middleware('permission:survey/add-question');
     Route::get('my-survey', 'UserSurveyController@get_my_surveys')->middleware('permission:survey/my-serveys');
-    Route::get('view-all-surveys', 'UserSurveyController@Review_all_Submissions_of_survey')->middleware('permission:survey/add-question');
+    Route::get('view-all-surveys', 'UserSurveyController@Review_all_Submissions_of_survey')->middleware('permission:survey/view-all-surveys');
 });

@@ -21,11 +21,11 @@ class UserSurveyController extends Controller
     public function submitSurvey(Request $request)
     {
         $Q_IDS = array();
-       $request->validate([
+        $request->validate([
          'survey_id' => 'required|integer|exists:user_surveys,survey_id',
          'Questions' => 'required|array',
          'Questions.*.id' => 'integer|exists:questions,id',
-         ]);
+        ]);
 
         $userSurvey = UserSurvey::where('survey_id',$request->survey_id)->where('user_id',Auth::id())->first();
         $questionss = SurveyQuestion::where('survey_id',$request->survey_id)->pluck('question_id');
@@ -167,16 +167,15 @@ class UserSurveyController extends Controller
         if(!count($UserSurveys) > 0)
             return HelperController::api_response_format(400, 'No unsubmitted surveys');
         return HelperController::api_response_format(200, $sur, 'Surveys are ....');
-
-
     }
+
     public function Review_all_Submissions_of_survey(Request $request)
     {
         $request->validate([
             'survey_id' => 'required|integer|exists:surveys,id',
             ]);
         $allSurvs=UserSurvey::where('survey_id',$request->survey_id)->with('UserSurveyAnswer')->get();
-        return HelperController::api_response_format(200, $allSurvs, 'User_Serveys with them surveysAnswers');
+        return HelperController::api_response_format(200, $allSurvs, 'User_Surveys with them surveysAnswers');
     }
 }
     
