@@ -21,10 +21,10 @@ class AttendanceLogController extends Controller
 
     public function create(Request $request)
     {
-
         $ip = \Request::ip();
         $user_id = Auth::User()->id;
         $date = Carbon::now();
+        $AttendanceLog=array();
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
             'users' => 'required|array',
@@ -54,7 +54,11 @@ class AttendanceLogController extends Controller
                 $result['message'] = 'Those Users are not belong to this Attendance';
             }
             foreach ($attendance->allowed_classes as $classID) {
-                if(CourseSegment::GetWithClassAndCourse($classID,$courseID->course_id)->id==$attendance_sessions->course_segment_id)
+                $courseSeg= CourseSegment::GetWithClassAndCourse($classID,$courseID->course_id);
+                if(!isset($courseSeg))
+                    continue;
+
+                if($courseSeg->id==$attendance_sessions->course_segment_id)
                 {
                     User::notify([
                     'id' => $AttendanceLog[0]->id,
@@ -73,6 +77,4 @@ class AttendanceLogController extends Controller
             $result['users'] = $AttendanceLog;
         return HelperController::api_response_format(200, $result['users'], $result['message']);
     }
-
-
 }
