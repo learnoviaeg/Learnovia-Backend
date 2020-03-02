@@ -175,11 +175,8 @@ class UserSurveyController extends Controller
         $request->validate([
             'survey_id' => 'required|integer|exists:surveys,id',
             ]);
-        $allSurvs=UserSurvey::where('survey_id',$request->survey_id)->pluck('user_id');
-        foreach($allSurvs as $surv)
-            $users[]=User::find($surv)->with('userSurvey');
-        return $users;
+        $allSurvs=UserSurvey::where('survey_id',$request->survey_id)->with('UserSurveyAnswer')->get();
+        return HelperController::api_response_format(200, $allSurvs, 'User_Serveys with them surveysAnswers');
     }
-        
 }
     

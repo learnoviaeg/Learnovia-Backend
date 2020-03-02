@@ -47,15 +47,6 @@ class SurveyController extends Controller
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
 
-    /**
-     * Display a listing of the resource.
-     * @return Response
-     */
-    public function index()
-    {
-        return view('survey::index');
-    }
-
     public function assignSuvey($id)
     {
         $survey=Survey::find($id);
@@ -130,26 +121,6 @@ class SurveyController extends Controller
     }
 
     /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Response
-     */
-    public function show($id)
-    {
-        return view('survey::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        return view('survey::edit');
-    }
-
-    /**
      * Update the specified resource in storage.
      * @param Request $request
      * @param int $id
@@ -169,6 +140,4 @@ class SurveyController extends Controller
     {
         //
     }
-
-    
 }
