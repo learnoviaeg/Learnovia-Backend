@@ -41,7 +41,7 @@ class UserGradeController extends Controller
                 if ($enroll == null)
                     continue;
                 $gradeItem = GradeItems::find($item['id']);
-                if($gradeItem->grademin < $item['grade'] || $gradeItem->grademax < $item['grade']){
+                if($gradeItem->grademin > $item['grade'] || $gradeItem->grademax < $item['grade']){
                     $message = 'Some Grades are invalid please check your inputs again';
                     continue;
                 }
