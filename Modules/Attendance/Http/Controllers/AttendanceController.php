@@ -462,7 +462,7 @@ class AttendanceController extends Controller
         $logs = AttendanceLog::select(['*' , DB::raw("COUNT(*) as count")])
         ->where('student_id', Auth::user()->id)
         ->groupBy('status_id');
-        $sessions = AttendanceLog::where('student_id', Auth::user()->id)->pluck('session_id')->unique();
+        $sessions = AttendanceLog::where('student_id', Auth::user()->id)->distinct('session_id')->pluck('session_id');
         if($request->filled('session_id'))
             $logs = $logs->where('session_id' , $request->session_id);
         $logs = $logs->get();
@@ -479,7 +479,7 @@ class AttendanceController extends Controller
             $result['data'][$i] = $temp;
             $i++;
         }
-        $result['sessions']=$sessions->toArray();
+        $result['sessions']=$sessions;
         return HelperController::api_response_format(200 , $result , '');
     }
 
