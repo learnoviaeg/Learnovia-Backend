@@ -431,13 +431,14 @@ class UserQuizController extends Controller
         $final= collect([]);
         $All_attemp=[];
         $all_users = array();
+        $user_attempts = array();
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         $users=Enroll::where('course_segment',Lesson::find($request->lesson_id)->course_segment_id)->pluck('user_id')->toArray();
         $Submitted_users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('user_id')->count();
 
-        $all_users['unsubmitted_users']= count($users) -$Submitted_users ;
-        $all_users['submitted_users']= $Submitted_users ;
-        $final->push($all_users);
+        // $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
+        // $all_users['submitted_users'] = $Submitted_users ;
+        // $final->push($all_users);
 
         if (!isset($quiz_lesson))
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
@@ -467,8 +468,13 @@ class UserQuizController extends Controller
             $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
             $attemps['Attempts'] = $All_attemp;
-            $final->push($attemps);
+            array_push($user_attempts, $attemps);
         }
+        $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
+        $all_users['submitted_users'] = $Submitted_users ;
+        $final->put('submittedAndNotSub',$all_users);
+        $final->put('users',$user_attempts);
+
         return HelperController::api_response_format(200, $final, 'Students attempts are ...');
     }
 
