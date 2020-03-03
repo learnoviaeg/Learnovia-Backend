@@ -12,6 +12,7 @@ use App\Level;
 use App\Classes;
 use App\Enroll;
 use App\GradeCategory;
+use App\Segment;
 use App\Parents;
 use App\User;
 use App\AcademicYear;
@@ -29,7 +30,6 @@ use App\Http\Controllers\EnrollUserToCourseController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\attachment;
-use App\Segment;
 use App\SegmentClass;
 
 class UserController extends Controller
@@ -359,26 +359,24 @@ class UserController extends Controller
 
         $i = 0;
         foreach ($user->enroll as $enroll) {
-            // $all[$i]['id'] = $enroll->CourseSegment->id;
+            $all[$i]['role'] = $enroll->roles;
+            
             $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
-            $coursess=Course::where('id', $segment_Class_id->course_id)->get(['name','id','mandatory'])->first();
-            if($coursess->mandatory == 0)
-                $all['optional'][]=$coursess;
-            else
-                $all['course'][] = $coursess;
+            $all[$i]['Course'] = Course::where('id', $segment_Class_id->course_id)->first();
+
             $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
-            $all['segment'] = Segment::find($segment->segment_id)->get(['name','id'])->first();
+            $all[$i]['segment'] = Segment::find($segment->segment_id);
 
             $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
-            $all['class'] = Classes::find($class_id->class_id)->get(['name','id'])->first();
+            $all[$i]['class'] = Classes::find($class_id->class_id);
 
             $level = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
-            $all['level'] = level::find($level->level_id)->get(['name','id'])->first();
+            $all[$i]['level'] = level::find($level->level_id);
 
             $year_type = AcademicYearType::where('id', $level->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
-            $all['type'] = AcademicType::find($year_type->academic_year_id)->get(['name','id'])->first();
+            $all[$i]['type'] = AcademicType::find($year_type->academic_year_id);
 
-            $all['year'] = AcademicYear::find($year_type->academic_type_id)->get(['name','id'])->first();
+            $all[$i]['year'] = AcademicYear::find($year_type->academic_type_id);
             $i++;
         }
         if (isset($all))
