@@ -458,9 +458,11 @@ class AttendanceController extends Controller
     public function Attendance_Report(Request $request)
     {
         //return Hosts::select(['URL' , DB::raw("COUNT(*) as hits")])->groupBy('URL')->get();
+        $i=0;
         $logs = AttendanceLog::select(['*' , DB::raw("COUNT(*) as count")])
         ->where('student_id', Auth::user()->id)
         ->groupBy('status_id');
+        $sessions = AttendanceLog::where('student_id', Auth::user()->id)->pluck('session_id')->unique();
         if($request->filled('session_id'))
             $logs = $logs->where('session_id' , $request->session_id);
         $logs = $logs->get();
@@ -474,9 +476,10 @@ class AttendanceController extends Controller
             $temp->label = $log->status->letter;
             $temp->description = $log->status->descrption;
             $temp->percentage = (double)(($log->count * 100) / $total);
-            $temp->session_id = $log->session_id;
-            $result[] = $temp;
+            $result['data'][$i] = $temp;
+            $i++;
         }
+        $result['sessions']=$sessions;
         return HelperController::api_response_format(200 , $result , '');
     }
 
