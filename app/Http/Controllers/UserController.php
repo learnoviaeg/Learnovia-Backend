@@ -480,6 +480,11 @@ class UserController extends Controller
             'roles.*' => 'required|exists:roles,id',
             'search' => 'nullable'
         ]);
+        // $users=User::whereHas("roles", function ($q) use ($request) {
+        //     $q->whereIn("id", $request->roles);
+        // });
+        // return $users->get();
+        // return HelperController::api_response_format(200, $users->paginate(HelperController::GetPaginate($request)));
         return HelperController::api_response_format(200, User::whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
             $q->where('firstname', 'LIKE', "%$request->search%");
