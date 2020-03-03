@@ -451,7 +451,8 @@ class UserQuizController extends Controller
             {
                 $req=new Request([
                     'attempt_id' => $attem->id,
-                    'user_id' => $user->id
+                    'user_id' => $user->id,
+                    'quiz_id' => $request->quiz_id,
                 ]);
                 $All_attemp[]=self::get_fully_detailed_attempt($req);
             }
@@ -471,21 +472,37 @@ class UserQuizController extends Controller
         ]);
         $user_quiz = userQuiz::where('user_id', $request->user_id)->where('id',$request->attempt_id)->first();
         $total= quiz::where('id',$user_quiz->quiz_lesson->quiz_id)->with(['Question.question_answer'])->get();
+        $quiz = quiz::where('id',$request->quiz_id)->first();
+
+        if($quiz->feedback == 1 )
+            $show_is_true=1;
+        elseif($quiz->feedback == 2 && Carbon::now() < $Due_date->due_date )
+            $show_is_true=1;
+        else
+            $show_is_true=0;
+            
         foreach($total as $quest){
+
             foreach($quest->question as $q){
                 $q->question_answer;
                 $Question_id =  $q->pivot->question_id;
-                $q->question_type;
                 $Ans_ID = userQuizAnswer::where('user_quiz_id',$user_quiz->id)->where('question_id',$Question_id)->first();
                 if(isset($Ans_ID->answer_id)){
                     $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
                     $q->user_grade =$Ans_ID->user_grade;
+                    if($show_is_true == 0){
+                        unset($q->student_answer['is_true']);
+                    }
                 }
+                if($show_is_true == 0)
+                    foreach($q->question_answer as $ans){
+                        unset( $q->question_answer);
+                        unset($ans['is_true']);
+                    }
                 if(!isset($q->student_answer))
-                    $q->student_answer = Null;
-                if(!isset($q->user_grade))
-                    $q->user_grade = Null;
+                $q->student_answer = Null;
             }
+
         }
        return $total;
     }

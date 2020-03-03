@@ -655,7 +655,6 @@ class QuizController extends Controller
         $quiz['allow_edit'] = true;
         $userquizze = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('id');
         $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('answered','1')->pluck('user_quiz_id')->unique()->count();
-
         $quiz['taken_attempts'] = $count_answered;
         foreach($userquizzes as $userQuiz)
         {
