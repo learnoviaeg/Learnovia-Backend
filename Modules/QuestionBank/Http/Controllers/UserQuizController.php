@@ -430,9 +430,15 @@ class UserQuizController extends Controller
 
         $final= collect([]);
         $All_attemp=[];
+        $all_users = array();
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         $users=Enroll::where('course_segment',Lesson::find($request->lesson_id)->course_segment_id)->pluck('user_id')->toArray();
-        
+        $Submitted_users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('user_id')->count();
+
+        $all_users['unsubmitted_users']= count($users) -$Submitted_users ;
+        $all_users['submitted_users']= $Submitted_users ;
+        $final->push($all_users);
+
         if (!isset($quiz_lesson))
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
 
@@ -446,6 +452,7 @@ class UserQuizController extends Controller
             $user = User::where('id',$user_id)->first();
             if(!$user->can('site/quiz/store_user_quiz'))
                 continue;
+            
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
             foreach($attems as $attem)
             {
@@ -502,7 +509,6 @@ class UserQuizController extends Controller
                 if(!isset($q->student_answer))
                 $q->student_answer = Null;
             }
-
         }
        return $total;
     }
