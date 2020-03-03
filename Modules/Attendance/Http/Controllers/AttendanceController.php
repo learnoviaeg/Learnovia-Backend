@@ -479,7 +479,7 @@ class AttendanceController extends Controller
             $result['data'][$i] = $temp;
             $i++;
         }
-        $result['sessions']=$sessions;
+        $result['sessions']=$sessions->toArray();
         return HelperController::api_response_format(200 , $result , '');
     }
 
