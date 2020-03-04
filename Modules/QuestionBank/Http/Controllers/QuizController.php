@@ -20,6 +20,7 @@ use Spatie\Permission\Models\Permission;
 use Validator;
 use App\Classes;
 use Auth;
+use Carbon\Carbon;
 
 class QuizController extends Controller
 {
@@ -746,16 +747,28 @@ class QuizController extends Controller
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
-            'attempt_index'=>'integer|exists:user_quizzes,attempt_index'
+            'attempt_index'=>'integer|exists:user_quizzes,attempt_index',
+            'user_id' => 'integer|exists:users,id',
         ]);
+        $user_id = ($request->filled('user_id'))? $request->user_id : Auth::id();
         $quiz = Quiz::find($request->quiz_id);
         $qq = Quiz::where('id', $request->quiz_id)->first();
         if(!isset($qq->quizLessson[0]))
             return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
+        // return $quiz_lesson->due_date;
         if(!isset($quiz_lesson))
             return HelperController::api_response_format(200, 'there is quiz in this lesson');
+        if(User::find($user_id)->can('site/quiz/store_user_quiz')){
+        if($quiz->feedback == 1 )
+            $show_is_true=1;
+        elseif($quiz->feedback == 2 && Carbon::now() > $quiz_lesson->due_date )
+            $show_is_true=1;
+        else
+            $show_is_true=0;
+        }else
+            $show_is_true=1;
 
         $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->get();
         
@@ -775,11 +788,11 @@ class QuizController extends Controller
         $quiz['due_date']=$quiz_lesson->due_date;
         $quiz['mark']=$quiz_lesson->grade;
         $quiz['grade_category']=$gradecat;
-        $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',Auth::id())->pluck('attempt_index');
+        $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('attempt_index');
 
-        $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',Auth::id())->get();
+        $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->get();
         if($request->filled('attempt_index'))
-            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',Auth::id())->where('attempt_index',$request->attempt_index)->get();
+            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('attempt_index',$request->attempt_index)->get();
 
         foreach($user_quizzes as $user_Quiz)
         {
@@ -789,6 +802,26 @@ class QuizController extends Controller
         }
 
 
+        // foreach($quest->question as $q){
+        //     $q->question_answer;
+        //     $Question_id =  $q->pivot->question_id;
+        //     $Ans_ID = userQuizAnswer::where('user_quiz_id',$user_quiz->id)->where('question_id',$Question_id)->first();
+        //     if(isset($Ans_ID->answer_id)){
+        //         $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
+        //         $q->user_grade =$Ans_ID->user_grade;
+        //         // if($show_is_true == 0){
+        //         //     unset($q->student_answer['is_true']);
+        //         // }
+        //     }
+        //     // if($show_is_true == 0)
+        //     //     foreach($q->question_answer as $ans){
+        //     //         unset( $q->question_answer);
+        //     //         unset($ans['is_true']);
+        //     //     }
+        //     if(!isset($q->student_answer))
+        //     $q->student_answer = Null;
+        // }
+
         foreach($quiz->Question as $question){
             if(count($question->childeren) > 0){
                 foreach($question->childeren as $single){
@@ -797,7 +830,8 @@ class QuizController extends Controller
                             if($userAnswer->question_id == $question->id)
                                 $question->User_Answer=$userAnswer;
                     $single->question_type;
-                    $single->question_answer;
+                    if($show_is_true == 1)
+                        $single->question_answer;
                     $question->question_category;
                     unset($single->pivot);
                 }
@@ -809,6 +843,7 @@ class QuizController extends Controller
                 foreach($userAnswers as $userAnswer)
                     if($userAnswer->question_id == $question->id)
                         $question->User_Answer=$userAnswer;
+            if($show_is_true == 1)
             $question->question_answer;
             $question->question_category;
             $question->question_type;
