@@ -29,6 +29,7 @@ class SurveyController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/submit','title' => 'submit']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/my-surveys','title' => 'get my surveys']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/view-all-serveys','title' => 'view all submissions']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'template/get','title' => 'get template']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('survey/add');
@@ -119,25 +120,16 @@ class SurveyController extends Controller
 
         return HelperController::api_response_format(200, $survey, 'Survey Created and assigned Successfully');
     }
-
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
-    public function update(Request $request, $id)
+   
+    public function get_template(Request $request)
     {
-        //
+        $request->validate([
+            'template_id' => 'exists:surveys,id,template,1',
+        ]);
+        $templates = Survey::where('template',1)->with('Question.question_answer')->get();
+        if($request->filled('template_id'))
+            $templates = Survey::where('template',1)->with('Question.question_answer')->first();
+        return HelperController::api_response_format(200, $templates, 'Templates .....');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }
