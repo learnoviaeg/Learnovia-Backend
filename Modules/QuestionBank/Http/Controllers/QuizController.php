@@ -760,7 +760,7 @@ class QuizController extends Controller
         // return $quiz_lesson->due_date;
         if(!isset($quiz_lesson))
             return HelperController::api_response_format(200, 'there is quiz in this lesson');
-        if(User::find($user_id)->can('site/quiz/store_user_quiz')){
+        if(User::find(Auth::id())->can('site/quiz/store_user_quiz')){
         if($quiz->feedback == 1 )
             $show_is_true=1;
         elseif($quiz->feedback == 2 && Carbon::now() > $quiz_lesson->due_date )
