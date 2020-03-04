@@ -429,7 +429,6 @@ class UserQuizController extends Controller
         ]);
 
         $final= collect([]);
-        $All_attemp=[];
         $all_users = array();
         $user_attempts = array();
         $quiz_questions = quiz_questions::where('quiz_id',$request->quiz_id)->pluck('question_id');
@@ -452,6 +451,7 @@ class UserQuizController extends Controller
         $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->count();
 
         foreach ($users as $user_id){
+            $All_attemp=[];
             $user = User::where('id',$user_id)->first();
             if(!$user->can('site/quiz/store_user_quiz'))
                 continue;
