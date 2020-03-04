@@ -59,11 +59,20 @@ class UserGradeController extends Controller
                         $temp->save();
                     }
                 }
+                else 
+                {
+                    $check->update([
+                        'grade_item_id' => $item['id'],
+                        'user_id' => $user['id'],
+                        'raw_grade' => $item['grade'],
+                    ]);
+                    if (isset($item['feedback'])) {
+                        $check->feedback = $item['feedback'];
+                        $check->save();
+                    }
+                }
             }
         }
-        if(!isset($temp))
-            return HelperController::api_response_format(200, null, 'you must be enroll in course of grade item');
-
         return HelperController::api_response_format(200, null, $message);
     }
 
