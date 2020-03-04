@@ -199,11 +199,11 @@ class EnrollUserToCourseController extends Controller
                     if ($mand == 1)
                         return HelperController::api_response_format(400, [], 'This Course not Optional_Course');
 
-                    foreach ($request->course as $course) {
-                        $courseSegment = HelperController::Get_Course_segment_course($request);
+                    $courseSegment = GradeCategoryController::getCourseSegment($request);
+                    foreach($courseSegment as $one){
                         Enroll::Create([
                             'user_id' => $user,
-                            'course_segment' => $courseSegment['value']['id'],
+                            'course_segment' => $one,
                             'role_id' => 3,
                         ]);
                     }
