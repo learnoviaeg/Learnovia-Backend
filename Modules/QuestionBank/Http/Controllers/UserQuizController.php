@@ -108,7 +108,7 @@ class UserQuizController extends Controller
     {
         $request->validate([
             'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
-            'Questions' => 'required|array',
+            'Questions' => 'array',
             'Questions.*.id' => 'integer|exists:questions,id',
             'forced' => 'boolean',
         ]);
@@ -116,7 +116,7 @@ class UserQuizController extends Controller
         // check that question exist in the Quiz
         $user_quiz = userQuiz::find($request->user_quiz_id);
         $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
-        if($request->filled('forced') && $request->forced == 1){
+        if(count($request->Questions)<0){
             $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereIn('question_id',$questions_ids)->get();
 
         foreach($answer2 as $ans)
