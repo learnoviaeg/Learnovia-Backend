@@ -26,15 +26,15 @@ class SurveyController extends Controller
         }
 
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/add','title' => 'add survey']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/add-question','title' => 'add question survey']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/my-serveys','title' => 'get my surveys']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/view-all-serveys','title' => 'view all surveys']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/submit','title' => 'submit']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/my-surveys','title' => 'get my surveys']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/view-all-serveys','title' => 'view all submissions']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('survey/add');
-        $role->givePermissionTo('survey/add-question');
-        $role->givePermissionTo('survey/get-my-serveys');
-        $role->givePermissionTo('survey/view-all-surveys');
+        $role->givePermissionTo('survey/submit');
+        $role->givePermissionTo('survey/get-my-surveys');
+        $role->givePermissionTo('survey/view-all-submissions');
         
         Component::create([
             'name' => 'Survey',
