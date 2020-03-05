@@ -788,11 +788,11 @@ class QuizController extends Controller
         $quiz['due_date']=$quiz_lesson->due_date;
         $quiz['mark']=$quiz_lesson->grade;
         $quiz['grade_category']=$gradecat;
-        $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('attempt_index');
+        $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
 
         $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->get();
         if($request->filled('attempt_index'))
-            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('attempt_index',$request->attempt_index)->get();
+            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->get();
 
         foreach($user_quizzes as $user_Quiz)
         {
