@@ -157,7 +157,7 @@ class UserSurveyController extends Controller
         return HelperController::api_response_format(200, $allData, 'Survey Answer Registered Successfully');
     }
 
-    public function get_my_surveys(Request $request)
+    public function assigned_surveys(Request $request)
     {
        $UserSurveys = UserSurvey::where('user_id',Auth::id())->pluck('id');
        $check = UserSurveyAnswers::whereIn('user_survey_id',$UserSurveys)->where('answered',1)->pluck('user_survey_id');
@@ -176,6 +176,14 @@ class UserSurveyController extends Controller
             ]);
         $allSurvs=UserSurvey::where('survey_id',$request->survey_id)->with('UserSurveyAnswer')->get();
         return HelperController::api_response_format(200, $allSurvs, 'User_Surveys with them surveysAnswers');
+    }
+
+    public function get_my_surveys(Request $request)
+    {
+        $surveys = Survey::where('created_by',Auth::id())->with(['Question.question_type','Question.question_category','Question.question_answer'])->get();
+        if(!count($surveys) > 0)
+            return HelperController::api_response_format(400, 'You didn\'t create any survey');
+        return HelperController::api_response_format(200, $surveys, 'Surveys are ....');
     }
 }
     

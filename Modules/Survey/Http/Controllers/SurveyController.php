@@ -30,6 +30,7 @@ class SurveyController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/my-surveys','title' => 'get my surveys']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/view-all-serveys','title' => 'view all submissions']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'template/get','title' => 'get template']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'survey/assigned-surveys','title' => 'get assigned surveys']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('survey/add');

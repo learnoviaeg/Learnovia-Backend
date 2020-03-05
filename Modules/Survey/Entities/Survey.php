@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Survey extends Model
 {
     protected $fillable = ['name', 'template', 'year', 'types','levels', 'classes', 'courses', 'segments', 'start_date',
-     'end_date'];
+     'end_date','created_by'];
 
      public function getClassesAttribute($value)
      {
