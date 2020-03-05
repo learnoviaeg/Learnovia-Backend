@@ -148,8 +148,8 @@ class QuizLessonController extends Controller
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
-            'opening_time' => 'required|date|date_format:Y-m-d H:i:s',
-            'closing_time' => 'required|date|date_format:Y-m-d H:i:s|after:opening_time',
+            'opening_time' => 'required|date',
+            'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
             'grade' => 'required',
