@@ -159,6 +159,10 @@ class UserSurveyController extends Controller
 
     public function get_my_surveys(Request $request)
     {
+        $request->validate([
+            'survey_id' => 'integer|exists:surveys,id',
+            ]);
+
         $final = collect([]);
         $created_surveys = array();
        $UserSurveys = UserSurvey::where('user_id',Auth::id())->pluck('id');
@@ -170,10 +174,12 @@ class UserSurveyController extends Controller
         $surveys = Survey::where('created_by',Auth::id())->with(['Question.question_type','Question.question_category','Question.question_answer'])->get();
         if(count($surveys) > 0)
             $created_surveys = $surveys;
-
+        if($request->filled('survey_id'))
+            $final ->push (Survey::where('id',$request->survey_id)->with(['Question.question_type','Question.question_category','Question.question_answer'])->first());
+        else{
             $final ->put ('created_',$created_surveys);
             $final ->put ('assigned',$sur);
-
+        }
         return HelperController::api_response_format(200, $final, 'Surveys are ....');
     }
 
