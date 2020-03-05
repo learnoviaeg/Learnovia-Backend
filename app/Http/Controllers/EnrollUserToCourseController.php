@@ -97,7 +97,7 @@ class EnrollUserToCourseController extends Controller
     public function UnEnroll(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|array|exists:enrolls,id',
+            'user_id' => 'required|array|exists:enrolls,user_id',
             'year' => 'exists:academic_years,id',
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
