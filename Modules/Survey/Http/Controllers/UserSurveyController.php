@@ -157,16 +157,24 @@ class UserSurveyController extends Controller
         return HelperController::api_response_format(200, $allData, 'Survey Answer Registered Successfully');
     }
 
-    public function assigned_surveys(Request $request)
+    public function get_my_surveys(Request $request)
     {
+        $final = collect([]);
+        $created_surveys = array();
        $UserSurveys = UserSurvey::where('user_id',Auth::id())->pluck('id');
        $check = UserSurveyAnswers::whereIn('user_survey_id',$UserSurveys)->where('answered',1)->pluck('user_survey_id');
 
         $UserSurveys = UserSurvey::where('user_id',Auth::id())->whereNotIn('survey_id', $check)->pluck('survey_id');
         $sur = Survey::whereIn('id',$UserSurveys)->with(['Question.question_type','Question.question_category','Question.question_answer'])->get();
-        if(!count($UserSurveys) > 0)
-            return HelperController::api_response_format(400, 'No unsubmitted surveys');
-        return HelperController::api_response_format(200, $sur, 'Surveys are ....');
+
+        $surveys = Survey::where('created_by',Auth::id())->with(['Question.question_type','Question.question_category','Question.question_answer'])->get();
+        if(count($surveys) > 0)
+            $created_surveys = $surveys;
+
+            $final ->put ('created_',$created_surveys);
+            $final ->put ('assigned',$sur);
+
+        return HelperController::api_response_format(200, $final, 'Surveys are ....');
     }
 
     public function Review_all_Submissions_of_survey(Request $request)
@@ -176,14 +184,6 @@ class UserSurveyController extends Controller
             ]);
         $allSurvs=UserSurvey::where('survey_id',$request->survey_id)->with('UserSurveyAnswer')->get();
         return HelperController::api_response_format(200, $allSurvs, 'User_Surveys with them surveysAnswers');
-    }
-
-    public function get_my_surveys(Request $request)
-    {
-        $surveys = Survey::where('created_by',Auth::id())->with(['Question.question_type','Question.question_category','Question.question_answer'])->get();
-        if(!count($surveys) > 0)
-            return HelperController::api_response_format(400, 'You didn\'t create any survey');
-        return HelperController::api_response_format(200, $surveys, 'Surveys are ....');
     }
 }
     
