@@ -153,7 +153,7 @@ class QuizLessonController extends Controller
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
             'grade' => 'required',
-            'grade_category_id' => 'required|integer|exists:grade_categories,id'
+            // 'grade_category_id' => 'required|integer|exists:grade_categories,id'
         ]);
 
         $quiz = quiz::find($request->quiz_id);
@@ -167,12 +167,12 @@ class QuizLessonController extends Controller
         if($quiz->course_id != $lesson->courseSegment->course_id){
             return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
         }
-        if($request->grade_category_id[$key] != null)
+        if($request->grade_category_id != null)
         {
             $gradeCats= $lesson->courseSegment->GradeCategory;
             $flag= false;
              foreach ($gradeCats as $grade){
-                if($grade->id==$request->grade_category_id[$key]){
+                if($grade->id==$request->grade_category_id){
                     $flag =true;
                 }
             }
@@ -197,7 +197,7 @@ class QuizLessonController extends Controller
             'max_attemp' => $request->max_attemp,
             'grading_method_id' => $request->grading_method_id,
             'grade' => $request->grade,
-            'grade_category_id' => $request->grade_category_id
+            'grade_category_id' => ($request->filled('grade_category_id')) ? $request->grade_category_id : null,
         ]);
         $requ = ([
             'message' => 'the quiz is updated',
