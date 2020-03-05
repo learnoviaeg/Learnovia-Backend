@@ -163,7 +163,7 @@ class UserSurveyController extends Controller
        $check = UserSurveyAnswers::whereIn('user_survey_id',$UserSurveys)->where('answered',1)->pluck('user_survey_id');
 
         $UserSurveys = UserSurvey::where('user_id',Auth::id())->whereNotIn('survey_id', $check)->pluck('survey_id');
-        $sur = Survey::whereIn('id',$UserSurveys)->with(['Question.question_type.question_category.question_answer'])->get();
+        $sur = Survey::whereIn('id',$UserSurveys)->with(['Question.question_type','Question.question_category','Question.question_answer'])->get();
         if(!count($UserSurveys) > 0)
             return HelperController::api_response_format(400, 'No unsubmitted surveys');
         return HelperController::api_response_format(200, $sur, 'Surveys are ....');
