@@ -126,7 +126,7 @@ class SurveyController extends Controller
         $request->validate([
             'template_id' => 'exists:surveys,id,template,1',
         ]);
-        $templates = Survey::where('template',1)->with(['Question.question_answer'])->get();
+        $templates = Survey::where('template',1)->with(['Question.question_type.question_category.question_answer'])->get();
         if($request->filled('template_id'))
             $templates = Survey::where('template',1)->with('Question.question_answer')->first();
         return HelperController::api_response_format(200, $templates, 'Templates .....');
