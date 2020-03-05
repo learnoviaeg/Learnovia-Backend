@@ -175,7 +175,7 @@ class UserController extends Controller
             'firstname' => 'required|string|min:3|max:50',
             'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
-            'email' => ['email', 'unique:users,email'],
+            'email' => 'unique:users,email,'.$request->id,
             'password' => 'string|min:6|max:191',
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
