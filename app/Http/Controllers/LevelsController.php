@@ -177,6 +177,10 @@ class LevelsController extends Controller
 
     public function GetMyLevels(Request $request)
     {
+        $request->validate([
+            'type' => 'array',
+            'type.*' => 'exists:academic_types,id',
+        ]);
         $result=array();
         $lev=array();
         $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
@@ -184,7 +188,7 @@ class LevelsController extends Controller
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
         },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
             if ($request->filled('type'))
-                $query->where('academic_type_id', $request->type);            
+                $query->whereIn('academic_type_id', $request->type);            
         }])->first();
 
         foreach($users ->enroll as $enrolls)
