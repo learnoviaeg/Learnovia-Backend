@@ -468,7 +468,7 @@ class UserQuizController extends Controller
                 $All_attemp[]['attempt_id'] = $attem->id;
             }
 
-            $attemps['user'] = $user->id;
+            $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
             $attemps['picture'] = $user->attachment;
             $attemps['Attempts'] = $All_attemp;
