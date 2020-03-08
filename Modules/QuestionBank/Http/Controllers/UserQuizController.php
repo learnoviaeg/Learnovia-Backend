@@ -465,10 +465,12 @@ class UserQuizController extends Controller
                     'quiz_id' => $request->quiz_id,
                 ]);
                 $All_attemp[]=self::get_fully_detailed_attempt($req);
+                $All_attemp[]['attempt_id'] = $attem->id;
             }
 
-            $attemps['id'] = $user->id;
+            $attemps['user'] = $user->id;
             $attemps['username'] = $user->username;
+            $attemps['picture'] = $user->attachment;
             $attemps['Attempts'] = $All_attemp;
             array_push($user_attempts, $attemps);
         }
@@ -517,7 +519,9 @@ class UserQuizController extends Controller
                 //     }
                 if(!isset($q->student_answer))
                 $q->student_answer = Null;
+                
             }
+    
         }
        return $total;
     }
