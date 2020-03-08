@@ -213,7 +213,7 @@ class UserController extends Controller
         foreach ($optionals as $optional) {
             if ($request->filled($optional))
                 if($optional =='birthdate')
-                    $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
+                    $user->$optional = Carbon::parse($request->$optional)->format('Y-m-d');
                 $user->$optional = $request->$optional;
         }
         $user->save();
