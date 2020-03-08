@@ -113,7 +113,7 @@ class MediaController extends Controller
         $request->validate([
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'required_if:type,==,0|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc',
+            'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'url' => 'required_if:type,==,1|array',
