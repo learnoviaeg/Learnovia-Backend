@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 class UsersExport implements FromCollection, WithHeadings
 {
 
-    protected $fields = ['id', 'firstname', 'lastname', 'arabicname', 'real_password', 'created_at', 'level', 'type', 'class_id'];
+    protected $fields = ['id', 'firstname', 'lastname', 'arabicname', 'created_at', 'level', 'type', 'class_id'];
 
     /**
      * @return \Illuminate\Support\Collection
@@ -19,9 +19,10 @@ class UsersExport implements FromCollection, WithHeadings
     {
         $users =  User::get();
         if (request()->user()->can('show/real-password')) {
-            foreach ($users as $value) {
-                $value->setHidden([])->setVisible($this->fields);
-            }
+            $this->fields[] = 'real_password';
+        }
+        foreach ($users as $value) {
+            $value->setHidden([])->setVisible($this->fields);
         }
         return $users;
     }
