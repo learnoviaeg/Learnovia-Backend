@@ -16,7 +16,7 @@ class NullCourseId extends Migration
         Schema::table('questions', function (Blueprint $table) {
             $table->unsignedBigInteger('course_id')->nullable()->change();
         });   
-     }
+    }
 
     /**
      * Reverse the migrations.
