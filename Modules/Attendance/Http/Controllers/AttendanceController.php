@@ -443,6 +443,7 @@ class AttendanceController extends Controller
         foreach($Sessions as $session)
         {
             $data[$i]['course']=$session->Course_Segment->courses[0]->name;
+            $data[$i]['attendance']=$session->Attendence;
             $data[$i]['from']= $session->from;
             $data[$i]['to']= $session->to;
             $data[$i]['status']= '-';
