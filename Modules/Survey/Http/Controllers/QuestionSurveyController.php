@@ -13,10 +13,9 @@ class QuestionSurveyController extends Controller
 {
     public function QuestionSurvey(Request $request)
     {
-        if($request->filled('template_id'))
+        if(isset($request->Quest))
         {
-            $qustions =SurveyQuestion::where('survey_id',$request->template_id)->pluck('question_id');
-            foreach($qustions as $quest)
+            foreach($request->Quest as $quest)
             {
                 $check=SurveyQuestion::firstOrCreate([
                     'question_id' => $quest,
@@ -24,7 +23,7 @@ class QuestionSurveyController extends Controller
                 ]);
             }
         }
-        else
+        if(isset($request->Question))
         {
             $quest = new QuestionBankController();
             $questions =$quest->store($request,3);
