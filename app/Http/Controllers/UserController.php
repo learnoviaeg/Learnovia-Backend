@@ -31,7 +31,8 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\attachment;
 use App\SegmentClass;
-
+use App\Exports\UsersExport;
+use Maatwebsite\Excel\Facades\Excel;
 class UserController extends Controller
 {
     /**
@@ -138,7 +139,7 @@ class UserController extends Controller
                     EnrollUserToCourseController::EnrollCourses($option);
                     $enrollcounter++;
                 }
-            } else { 
+            } else {
                 $teachercounter = 0;
 
                 while (isset($request->$teacheroptional[$key][$teachercounter])) {
@@ -220,7 +221,7 @@ class UserController extends Controller
 
         // role is in all system
         $role = Role::find($request->role);
-        $user->assignRole($role);       
+        $user->assignRole($role);
 
         if ($request->role_id == 3) {
             $oldChain=Enroll::where('user_id',$user->id)->where('role_id',$request->role_id)->get();
@@ -245,7 +246,7 @@ class UserController extends Controller
                 EnrollUserToCourseController::EnrollCourses($option);
                 $enrollcounter++;
             }
-        } else { 
+        } else {
             $teachercounter = 0;
 
             while (isset($request->$teacheroptional[$teachercounter])) {
@@ -360,7 +361,7 @@ class UserController extends Controller
         $i = 0;
         foreach ($user->enroll as $enroll) {
             $all[$i]['role'] = $enroll->roles;
-            
+
             $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
             $all[$i]['Course'] = Course::where('id', $segment_Class_id->course_id)->first();
 
@@ -581,10 +582,10 @@ class UserController extends Controller
             }
             if(!isset($SegmentClasses))
                 return HelperController::api_response_format(400 ,'This class is not assigned to a course segment');
-            
+
             $course_segment = CourseSegment::whereIn('segment_class_id',$SegmentClasses)->pluck('id')->unique();
             $users = Enroll::whereIn('course_segment',$course_segment)->pluck('user_id')->unique();
-    
+
             if($request->filled('roles'))
                  $users = Enroll::whereIn('course_segment',$course_segment)->where('role_id',$request->roles)->pluck('user_id')->unique();
         }
@@ -622,5 +623,10 @@ class UserController extends Controller
         //         array_push($total ,$student) ;
         // }
         return HelperController::api_response_format(200,$students ,'Users are.......');
+    }
+
+    public function export()
+    {
+        return Excel::download(new UsersExport, 'users.csv');
     }
 }
