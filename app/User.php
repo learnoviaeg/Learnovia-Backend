@@ -65,11 +65,18 @@ class User extends Authenticatable
         }
     }
 
-    public static function generateUsername()
+    public static function generateUsername($id=0)
     {
         $last_user = User::latest('id')->first();
         if ($last_user)
-            return env('PREFIX') . self::getUserCounter($last_user->id);
+        {
+            $check = env('PREFIX') . self::getUserCounter($last_user->id+$id);
+            $check2 = User::where('username',$check)->get();
+            if(count($check2) > 0)
+                self::generateUsername($id+1);
+            else
+                return $check;
+        }
         return env('PREFIX') . "0001";
     }
 

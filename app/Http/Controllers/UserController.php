@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: Huda
@@ -57,7 +58,7 @@ class UserController extends Controller
             'password.*' => 'required|string|min:6|max:191',
             // 'role' => 'required|array',
             // 'role.*' => 'required|exists:roles,id',
-            'role' => 'requird|exists:roles,id', /// in all system
+            'role' => 'required|exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
             'optional.*' => 'exists:courses,id',
             'optional' => 'array',
@@ -178,6 +179,7 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
             'password' => 'string|min:6|max:191',
+            'username' => 'unique:users,username',
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
         ]);
@@ -194,18 +196,18 @@ class UserController extends Controller
         $check = $user->update([
             'firstname' => $request->firstname,
             'lastname' => $request->lastname,
-            'username' => User::generateUsername(),
         ]);
 
-        if (isset($request->password))
             if (Auth::user()->can('user/update-password')) {
-                $user->real_password=$request->password;
-                $user->password =   bcrypt($request->password);
+                if (isset($request->password)){
+                    $user->real_password=$request->password;
+                    $user->password =   bcrypt($request->password);
+                }
             }
 
-        if (isset($request->username))
             if (Auth::user()->can('user/update-username')) {
-                $user->username=$request->username;
+                if (isset($request->username))
+                    $user->username=$request->username;
             }
 
         if (isset($request->picture))
