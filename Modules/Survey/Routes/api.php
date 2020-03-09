@@ -22,6 +22,6 @@ Route::group(['prefix' => 'survey', 'middleware' => 'auth:api'], function () {
     Route::get('view-all-submissions', 'UserSurveyController@Review_all_Submissions_of_survey')->middleware('permission:survey/view-all-submissions');
     
     Route::group(['prefix' => 'template'], function () {
-        Route::get('get', 'SurveyController@get_template')->middleware('permission:template/get');
+        Route::get('get', 'SurveyController@get_template');//->middleware('permission:template/get');
     });
 });

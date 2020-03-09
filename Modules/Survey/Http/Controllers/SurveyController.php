@@ -131,7 +131,7 @@ class SurveyController extends Controller
         ]);
         $templates = Survey::where('template',1)->with(['Question.question_type','Question.question_category','Question.question_answer'])->get();
         if($request->filled('template_id'))
-            $templates = Survey::where('template',1)->with('Question.question_answer')->first();
+            $templates = Survey::where('id',$request->template_id)->with('Question.question_type','Question.question_category','Question.question_answer')->first();
         return HelperController::api_response_format(200, $templates, 'Templates .....');
     }
 }
