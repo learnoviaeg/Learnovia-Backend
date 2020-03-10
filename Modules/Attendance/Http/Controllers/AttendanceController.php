@@ -47,13 +47,13 @@ class AttendanceController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/delete', 'title' => 'delete attendance status']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/attend-report', 'title' => 'report of attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/status/get', 'title' => 'get attendance status']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-session', 'title' => 'get session and status']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-session', 'title' => 'get session and status', 'dashboard' => 1]);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/update-session', 'title' => 'update session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-session', 'title' => 'delete session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-session-by-id', 'title' => 'get session by id']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-all-sessions', 'title' => 'get all sessions']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-taken-in-session', 'title' => 'get all taken users in session']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-sessions', 'title' => 'get all taken users in session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-sessions', 'title' => 'get all taken users in session', 'dashboard' => 1]);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/view-students-in-session', 'title' => 'view students in session']);
 
         $role = \Spatie\Permission\Models\Role::find(1);

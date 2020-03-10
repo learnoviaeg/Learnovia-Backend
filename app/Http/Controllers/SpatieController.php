@@ -53,9 +53,9 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/seen', 'title' => 'seen notifications']);
 
             //Spatie Permissions
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/add', 'title' => 'add role']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/add', 'title' => 'add role' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/delete', 'title' => 'delete role']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/get', 'title' => 'get role']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/get', 'title' => 'get role', 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/update', 'title' => 'update role']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/assign', 'title' => 'assign role to user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'permissions/assign-to-role', 'title' => 'assign permission to role']);
@@ -64,7 +64,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'spatie/list-permissions-and-roles', 'title' => 'list all permissions and roles']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'permissions/assign-to-user', 'title' => 'assign permission to user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'spatie/list-role-with-permissions', 'title' => 'list role with permissions']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'spatie/get-role-with-permissions', 'title' => 'get role with permissions']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'spatie/get-role-with-permissions', 'title' => 'get role with permissions', 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'spatie/add-role-with-permissions', 'title' => 'add role with permissions']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'spatie/export', 'title' => 'export roles and permissions']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'spatie/import', 'title' => 'import roles and permissions']);
@@ -123,10 +123,10 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'category/get-all', 'title' => 'get all categories']);
 
             //Course Permissions
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/add', 'title' => 'add course']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/add', 'title' => 'add course' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/update', 'title' => 'update course']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/delete', 'title' => 'delete course']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-all', 'title' => 'get all courses']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-all', 'title' => 'get all courses' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/all-courses', 'title' => 'get all course']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/my-courses', 'title' => 'get my courses']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/past-courses', 'title' => 'get past courses']);
@@ -146,10 +146,10 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-classes-by-course', 'title' => 'Get All Classes by course']);
 
             //Enroll Permissions
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/single', 'title' => 'enroll single user']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/single', 'title' => 'enroll single user' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/un-enroll-single-user', 'title' => 'un enroll single user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-enrolled-courses', 'title' => 'get enrolled courses']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/mandatory', 'title' => 'enroll mandatory courses']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/mandatory', 'title' => 'enroll mandatory courses' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/bulk-of-exist-users', 'title' => 'enroll bulk of exist users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/add-and-enroll-bulk-of-new-users', 'title' => 'add and enroll bulk of new users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/enrolled-users', 'title' => 'enrolled users']);
@@ -176,7 +176,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/add', 'title' => 'add user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/update', 'title' => 'update user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/delete', 'title' => 'delete user']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-all', 'title' => 'get all user']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-all', 'title' => 'get all user' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/user/list', 'title' => 'get all user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/suspend', 'title' => 'suspend user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/un-suspend', 'title' => 'un suspend user']);
@@ -204,7 +204,7 @@ class SpatieController extends Controller
             //Announcements Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/delete', 'title' => 'delete announcements']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/send', 'title' => 'send announcements']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/get', 'title' => 'get announcements']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/get', 'title' => 'get announcements', 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/update', 'title' => 'update announcements']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/getbyid', 'title' => 'get announcements by id']);
 
