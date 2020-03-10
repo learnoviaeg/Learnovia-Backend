@@ -482,10 +482,7 @@ class UserController extends Controller
         ]);
         // $users=User::whereHas("roles", function ($q) use ($request) {
         //     $q->whereIn("id", $request->roles);
-        // })->get()
-        //   ->filter(function($item) use ($request) {
-        //             $item->fullname === "$request->search";
-        //         });
+        // })->get();
         // return HelperController::api_response_format(200, $users->paginate(HelperController::GetPaginate($request)));
         return HelperController::api_response_format(200, User::whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);

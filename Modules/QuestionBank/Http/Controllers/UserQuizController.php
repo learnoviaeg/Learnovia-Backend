@@ -265,7 +265,7 @@ class UserQuizController extends Controller
             'Questions.*.id' => 'required|integer|exists:questions,id',
             'Questions.*.mark' => 'required|numeric',
             'Questions.*.feedback' => 'string',
-
+            'Questions.*.answer' => 'boolean',
         ]);
 
         // check that question exist in the Quiz
@@ -330,7 +330,8 @@ class UserQuizController extends Controller
                         }
 
                         $data['user_grade'] = $question['mark'];
-                        $data['feedback'] = $question['feedback'];
+                        $data['correct'] = $question['answer'];
+                        $data['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
 
                         break;
 
