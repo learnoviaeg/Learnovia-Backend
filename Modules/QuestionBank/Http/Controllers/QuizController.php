@@ -747,7 +747,7 @@ class QuizController extends Controller
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
-            'attempt_index'=>'integer|exists:user_quizzes,attempt_index',
+            'attempt_index'=>'integer|exists:user_quizzes,id',
             'user_id' => 'integer|exists:users,id',
         ]);
         $user_id = ($request->filled('user_id'))? $request->user_id : Auth::id();
