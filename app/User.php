@@ -50,6 +50,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected $appends = ['fullname'];
+
     private static function getUserCounter($lastid)
     {
         if ($lastid < 10) {
@@ -188,12 +190,18 @@ class User extends Authenticatable
     {
         return $this->hasMany('Modules\QuestionBank\Entities\userQuiz', 'user_id', 'id');
     }
+
     public function UserGrade()
     {
         return $this->hasMany('App\UserGrade');
     }
+
     public function userSurvey()
     {
         return $this->belongsToMany('Modules\Survey\Entities\UserSurvey', 'user_id', 'id');
+    }
+
+    public function getFullNameAttribute() {
+        return ucfirst($this->firstname) . ' ' . ucfirst($this->lastname);
     }
 }
