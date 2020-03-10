@@ -255,11 +255,14 @@ class CourseController extends Controller
         if($request->filled('type') || $request->filled('levels') || $request->filled('classes') )
             $CS = GradeCategoryController::getCourseSegmentWithArray($request);
 
-        foreach ($request->user()->enroll as $enroll) {
-            if($request->filled('type') || $request->filled('levels') || $request->filled('classes') )
-            if(!in_array($enroll->CourseSegment->id, $CS->toArray()))
-                continue;
+            foreach ($request->user()->enroll as $enroll) {
+           
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
+                if($request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
+                    if(!in_array($enroll->CourseSegment->id, $CS->toArray()))
+                        continue;
+                }
+
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
 
@@ -280,8 +283,9 @@ class CourseController extends Controller
                 $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
                 $flag->level = Level::find($level_id->level_id)->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
+                if(isset($AC_type->academic_type_id)){
                 $flag->year = AcademicYear::find($AC_type->academic_type_id)->name;
-                $flag->type = AcademicYear::find($AC_type->academic_type_id)->name;
+                $flag->type = AcademicYear::find($AC_type->academic_type_id)->name;}
                 $teacher = User::whereIn('id',
                     Enroll::where('role_id', '4')
                     ->where('course_segment', $enroll->CourseSegment->id)
