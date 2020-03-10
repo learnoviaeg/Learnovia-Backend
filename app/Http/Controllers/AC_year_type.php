@@ -46,7 +46,9 @@ class AC_year_type extends Controller
     public function get(Request $request){
 
         $request->validate([
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'years' => 'array',
+            'years.*' => 'exists:academic_years,id'
         ]);
         if($request->filled('search'))
         {
