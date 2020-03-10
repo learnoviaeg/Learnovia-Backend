@@ -465,8 +465,8 @@ class UserQuizController extends Controller
                     'user_id' => $user->id,
                     'quiz_id' => $request->quiz_id,
                 ]);
-                $All_attemp[]=self::get_fully_detailed_attempt($req);
-                $All_attemp[]['attempt_id'] = $attem->id;
+                // $All_attemp[]=self::get_fully_detailed_attempt($req);
+                $All_attemp[]= $attem->id;
             }
 
             $attemps['id'] = $user->id;
