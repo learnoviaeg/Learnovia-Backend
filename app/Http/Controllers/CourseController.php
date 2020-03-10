@@ -283,7 +283,7 @@ class CourseController extends Controller
                 $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
                 $flag->level = Level::find($level_id->level_id)->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
-                if(isset($AC_type->academic_type_id)){
+                if(isset(AcademicYear::find($AC_type->academic_type_id)->name)){
                 $flag->year = AcademicYear::find($AC_type->academic_type_id)->name;
                 $flag->type = AcademicYear::find($AC_type->academic_type_id)->name;}
                 $teacher = User::whereIn('id',
