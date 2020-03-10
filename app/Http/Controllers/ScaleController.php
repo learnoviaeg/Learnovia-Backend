@@ -126,6 +126,7 @@ class ScaleController extends Controller
         $scales=scale::get();
         foreach($scales as $scale)
             $scale->formate = unserialize($scale->formate);
+            // $scale['formate'] = unserialize($scale['formate']);
 
         return HelperController::api_response_format(200,$scales);
     }
@@ -153,9 +154,9 @@ class ScaleController extends Controller
 
         $scales=array_merge($scales1,$scales2);
         foreach($scales as $ss)
-            foreach($ss as $scale)
-                $scale['formate'] = unserialize($scale['formate']);
-
-        return HelperController::api_response_format(200,$scales);
+            if(count($ss) > 0)
+                foreach($ss as $scale)
+                    $scale['formate'] = unserialize($scale['formate']);
+        return HelperController::api_response_format(200,$scale);
     }
 }
