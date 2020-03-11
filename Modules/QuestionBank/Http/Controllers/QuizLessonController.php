@@ -193,6 +193,7 @@ class QuizLessonController extends Controller
             'quiz_id' => $request->quiz_id,
             'lesson_id' => $request->lesson_id,
             'start_date' => $request->opening_time,
+            'publish_date' => $request->opening_time,
             'due_date' => $request->closing_time,
             'max_attemp' => $request->max_attemp,
             'grading_method_id' => $request->grading_method_id,
