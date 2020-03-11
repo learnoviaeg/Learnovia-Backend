@@ -115,7 +115,9 @@ class CourseController extends Controller
                                     'is_active' => 1,
                                     'typical' => $request->typical,
                                     'start_date' => $request->start_date,
-                                    'end_date' => $request->end_date
+                                    'end_date' => $request->end_date,
+                                    'letter' => 1,
+                                    'letter_id' => 1
                                 ]);
                                 $gradeCat = GradeCategory::firstOrCreate([
                                     'name' => 'Course Total',

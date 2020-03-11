@@ -62,11 +62,10 @@ class AddGradeItemJob implements ShouldQueue
                         'calculation' => (isset($item['calculation'])) ? $item['calculation'] : null,
                         'hidden' => (isset($item['hidden'])) ? $item['hidden'] : 0,
                         'item_no' => (isset($item['item_no'])) ? $item['item_no']: null,
-                        'scale_id' => (isset($item['scale_id'])) ? $item['scale_id']: null,
+                        'scale_id' => (isset($item['scale_id'])) ? $item['scale_id']: 1,
                     ]);
                 }
             }
-            
         }
     }
 }

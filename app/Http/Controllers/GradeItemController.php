@@ -52,7 +52,7 @@ class GradeItemController extends Controller
             'grademax' => (isset($request->grademax)) ? $request->grademax : null,
             'calculation' => (isset($request->calculation) && in_array($request->calculation,GradeItems::Allowed_functions())) ? $request->calculation : null,
             'item_no' => (isset($request->item_no)) ? $request->item_no : null,
-            'scale_id' => (isset($request->scale_id)) ? $request->scale_id : null,
+            'scale_id' => (isset($request->scale_id)) ? $request->scale_id : 1,
             'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : null,
             'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
             'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
