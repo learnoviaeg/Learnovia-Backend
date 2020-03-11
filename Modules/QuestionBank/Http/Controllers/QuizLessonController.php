@@ -44,6 +44,7 @@ class QuizLessonController extends Controller
             'grade_min' => 'integer',
             'grade_max' => 'integer',
             'grade_to_pass' => 'integer',
+            'publish_date'=> 'date'
         ]);
 
         $quiz = quiz::find($request->quiz_id);
@@ -94,7 +95,7 @@ class QuizLessonController extends Controller
                 'grading_method_id' => $request->grading_method_id,
                 'grade' => $request->grade,
                 'grade_category_id' => $request->grade_category_id[$key],
-                'publish_date' => $request->opening_time,
+                'publish_date' => $request->publish_date,
                 'index' => $Next_index
             ]);
 
@@ -153,6 +154,7 @@ class QuizLessonController extends Controller
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
             'grade' => 'required',
+            'publish_date' => 'date',
             // 'grade_category_id' => 'required|integer|exists:grade_categories,id'
         ]);
 
@@ -204,7 +206,7 @@ class QuizLessonController extends Controller
             'id' => $quizLesson->id,
             'users' => $users,
             'type' =>'quiz',
-            'publish_date'=> $request->opening_time,
+            'publish_date'=> $request->publish_date,
             'course_id' => $course,
             'class_id'=> $class,
             'from' => Auth::id(),
