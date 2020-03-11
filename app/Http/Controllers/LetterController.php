@@ -99,12 +99,19 @@ class LetterController extends Controller
     public function get(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:letters,id'
+            'id' => 'exists:letters,id'
         ]);
 
-        $letter_id = Letter::find($request->id);
-        $letter_id->formate = unserialize($letter_id->formate);
-        return HelperController::api_response_format(200, $letter_id);
+        if($request->filled('id'))
+        {
+            $letter_id = Letter::find($request->id);
+            $letter_id->formate = unserialize($letter_id->formate);
+            return HelperController::api_response_format(200, $letter_id);
+        }
+        $letters=Letter::get();
+        foreach($letters as $letter)
+            $letter->formate = unserialize($letter->formate);
+        return HelperController::api_response_format(200, $letters);
     }
 
     public function assignLetterToCourse(Request $request){

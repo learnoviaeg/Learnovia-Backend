@@ -332,6 +332,37 @@ class SpatieController extends Controller
             $user->save();
             $user->assignRole($super);
             return "System Installed Your User is $user->email and Password is LeaRnovia_H_M_A";
+
+            $formateScale = [
+                ['name' => 'Fair','grade' => 0 ],
+                ['name' => 'Good','grade' => 1],
+                ['name' => 'Very Good','grade' => 2],
+                ['name' => 'Excellent','grade' => 3]
+            ];
+            $scale=Scale::create([
+               'name' => 'Default Scale',
+               'formate' => serialize($formateScale),
+            ]);
+
+            $formateLetter = [
+                ['name' => 'A+','boundary' => 96],
+                ['name' => 'A','boundary' => 93],
+                ['name' => 'A-','boundary' => 89],
+                ['name' => 'B+','boundary' => 86],
+                ['name' => 'B','boundary' => 83],
+                ['name' => 'B-','boundary' => 79],
+                ['name' => 'C+','boundary' => 76],
+                ['name' => 'C','boundary' => 73],
+                ['name' => 'C-','boundary' => 69],
+                ['name' => 'D+','boundary' => 66],
+                ['name' => 'D','boundary' => 63],
+                ['name' => 'D-','boundary' => 60],
+                ['name' => 'F','boundary' => 0 ]
+            ];
+            $letter=Letter::create([
+               'name' => 'Default Letter',
+               'formate' => serialize($formateLetter),
+            ]);
         }
     }
 
@@ -340,7 +371,6 @@ class SpatieController extends Controller
       @param: name
       @output: Role Added!
     */
-
     public function Add_Role(Request $request)
     {
         $request->validate([
