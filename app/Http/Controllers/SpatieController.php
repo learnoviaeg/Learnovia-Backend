@@ -318,6 +318,9 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/show/real-password', 'title' => 'Show Real Password']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/course/teacher', 'title' => 'detect the course teacher']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/course/student', 'title' => 'detect the course student']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/update-password', 'title' => 'update password']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/update-username', 'title' => 'update username']);
+
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
             $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->get());
             $Authenticated->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%bulk%')->where('name', 'like', '%messages%')->get());
