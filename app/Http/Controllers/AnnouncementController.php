@@ -405,7 +405,7 @@ class AnnouncementController extends Controller
         //get general Announcements
         $all_ann = array();
         $all_ann['General Announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('assign', 'all')
-                    ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                    ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date','publish_date']);
         $g = 0;
         foreach ($all_ann['General Announcements'] as $all) {
             $all_ann['General Announcements'][$g]['attached_file'] = attachment::where('id', $all['attached_file'])->first();
@@ -434,7 +434,7 @@ class AnnouncementController extends Controller
             $all_ann['segment'][$s]['name'] = $segmentname->name;
             $all_ann['segment'][$s]['id'] = $segmentname->id;
             $all_ann['segment'][$s]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('segment_id', $segmentclass->segment_id)
-                        ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                        ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date','publish_date']);
             foreach ($all_ann['segment'][$s]['announcements'] as $ann) {
                 $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
             }
@@ -449,7 +449,7 @@ class AnnouncementController extends Controller
                 $all_ann['class'][$cl]['name'] = $classname->name;
                 $all_ann['class'][$cl]['id'] = $classname->id;
                 $all_ann['class'][$cl]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('class_id', $scl->class_id)
-                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date','publish_date']);
 
                 foreach ($all_ann['class'][$cl]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
@@ -473,7 +473,7 @@ class AnnouncementController extends Controller
                 $all_ann['level'][$l]['name'] = $levelename->name;
                 $all_ann['level'][$l]['id'] = $levelename->id;
                 $all_ann['level'][$l]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('level_id', $yl->level_id)
-                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date','publish_date']);
                 foreach ($all_ann['level'][$l]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
                 }
@@ -496,7 +496,7 @@ class AnnouncementController extends Controller
                 $all_ann['type'][$t]['name'] = $typename->name;
                 $all_ann['type'][$t]['id'] = $typename->id;
                 $all_ann['type'][$t]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('type_id', $ayt->academic_type_id)
-                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date','publish_date']);
                 foreach ($all_ann['type'][$t]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
                 }
@@ -508,7 +508,7 @@ class AnnouncementController extends Controller
                 $all_ann['year'][$y]['name'] = $yearname->name;
                 $all_ann['year'][$y]['id'] = $yearname->id;
                 $all_ann['year'][$y]['announcements'] = Announcement::where('title', 'LIKE' , "%$request->search%")->where('year_id', $ayt->academic_year_id)
-                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                            ->where('publish_date', '<=', Carbon::now())->get(['id', 'title', 'description', 'attached_file','start_date','due_date','publish_date']);
 
                 foreach ($all_ann['year'][$y]['announcements'] as $ann) {
                     $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
@@ -564,7 +564,7 @@ class AnnouncementController extends Controller
                 if($annocument!= null){
                     if ($annocument->publish_date <= Carbon::now()) {
                         $customize = announcement::where('title', 'LIKE' , "%$request->search%")->whereId($announce_id)
-                                    ->first(['id', 'title', 'description', 'attached_file','start_date','due_date']);
+                                    ->first(['id', 'title', 'description', 'attached_file','start_date','due_date','publish_date']);
                         if(!$customize)
                             continue;
                         $customize->seen = $not->read_at;
