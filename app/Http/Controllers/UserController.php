@@ -389,7 +389,7 @@ class UserController extends Controller
             return HelperController::api_response_format(201, $user, null);
         }
 
-        return HelperController::api_response_format(200, null, 'there is no courses');
+        return HelperController::api_response_format(200, $user, 'there is no courses');
     }
 
     /**
