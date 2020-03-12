@@ -568,6 +568,7 @@ class AnnouncementController extends Controller
                         if(!$customize)
                             continue;
                         $customize->seen = $not->read_at;
+                        $customize->attached_file = attachment::where('id', $customize->attached_file)->first();
                         $notif->push($customize);
                     }
                 }
