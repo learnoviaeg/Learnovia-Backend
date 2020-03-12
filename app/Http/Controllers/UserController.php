@@ -487,15 +487,15 @@ class UserController extends Controller
             'roles.*' => 'required|exists:roles,id',
             'search' => 'nullable'
         ]);
-        // $users=User::whereHas("roles", function ($q) use ($request) {
-        //     $q->whereIn("id", $request->roles);
-        // })->get();
-        // return HelperController::api_response_format(200, $users->paginate(HelperController::GetPaginate($request)));
-        return HelperController::api_response_format(200, User::whereHas("roles", function ($q) use ($request) {
+        $users=User::whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
-            $q->where('firstname', 'LIKE', "%$request->search%");
-            $q->orwhere('lastname', 'LIKE', "%$request->search%");
-        })->paginate(HelperController::GetPaginate($request)));
+        })->get();
+        return HelperController::api_response_format(200, $users->paginate(HelperController::GetPaginate($request)));
+        // return HelperController::api_response_format(200, User::whereHas("roles", function ($q) use ($request) {
+        //     $q->whereIn("id", $request->roles);
+        //     $q->where('firstname', 'LIKE', "%$request->search%");
+        //     $q->orwhere('lastname', 'LIKE', "%$request->search%");
+        // })->paginate(HelperController::GetPaginate($request)));
     }
 
     public function getAllUsersInCourseSegment()
