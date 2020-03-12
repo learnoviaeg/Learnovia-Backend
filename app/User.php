@@ -7,6 +7,7 @@ use Illuminate\Notifications\Notifiable;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
+use DB;
 use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\NewMessage;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -69,7 +70,7 @@ class User extends Authenticatable
 
     public static function generateUsername($id=0)
     {
-        $last_user = User::latest('id')->first();
+        $last_user = DB::table('users')->latest('id')->first();
         if ($last_user)
         {
             $check = env('PREFIX') . self::getUserCounter($last_user->id+$id);
