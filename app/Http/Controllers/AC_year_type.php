@@ -210,7 +210,7 @@ class AC_year_type extends Controller
                                     $result[]=$typ->academic_type_id;
                                     $type[]=AcademicType::find($typ->academic_type_id);
                                 }
-        if(count($type) > 0)
+        if(isset($type) && count($type) > 0)
             return HelperController::api_response_format(201,$type, 'There are your types');
         
         return HelperController::api_response_format(201, 'You haven\'t types');
