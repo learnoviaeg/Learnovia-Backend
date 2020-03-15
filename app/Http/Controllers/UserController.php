@@ -179,7 +179,7 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
             'password' => 'string|min:6|max:191',
-            'username' => 'unique:users,username',
+            'username' => 'unique:users,username,'.$request->id,
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
         ]);
@@ -579,6 +579,7 @@ class UserController extends Controller
         $Given_courseSegments = GradeCategoryController::getCourseSegmentWithArray($request);
         $course_segments = Enroll::where('user_id',Auth::id())->pluck('course_segment')->unique();
         $CS =  array_intersect($course_segments->toArray(),$Given_courseSegments->toArray());
+        // return $ ;
         $users = Enroll::whereIn('course_segment',$CS)->pluck('user_id')->unique();
 
         if($request->filled('roles')){
