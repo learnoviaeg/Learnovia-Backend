@@ -358,6 +358,7 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
         ]);
         $user = User::find($request->id);
+        $user->picture=$user->attachment->path;
         $user->roles;
 
         $i = 0;
