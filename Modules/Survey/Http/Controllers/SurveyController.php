@@ -99,7 +99,9 @@ class SurveyController extends Controller
             'segments' => 'array',
             'segments.*' => 'nullable|exists:segments,id',
             'courses' => 'array',
-            'courses.*' => 'nullable|exists:courses,id'
+            'courses.*' => 'nullable|exists:courses,id',
+            'Quest' => 'array',
+            'Quest.*' => 'integer|exists:questions,id',
         ]);
 
         $survey = Survey::create([
