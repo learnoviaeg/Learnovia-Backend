@@ -213,6 +213,6 @@ class AC_year_type extends Controller
         if(isset($type) && count($type) > 0)
             return HelperController::api_response_format(201,$type, 'There are your types');
         
-        return HelperController::api_response_format(201, 'You haven\'t types');
+        return HelperController::api_response_format(201,null, 'You haven\'t types');
     }
 }
