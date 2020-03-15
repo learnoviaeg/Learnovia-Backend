@@ -196,8 +196,8 @@ class AC_year_type extends Controller
             //validate that course in my current course start < now && now < end
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
         },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
-            if ($request->filled('type'))
-                $query->where('academic_type_id', $request->type);            
+            if ($request->filled('year'))
+                $query->where('academic_year_id', $request->year);            
         }])->first();
 
         foreach($users ->enroll as $enrolls)
