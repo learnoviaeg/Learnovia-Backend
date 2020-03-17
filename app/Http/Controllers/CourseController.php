@@ -293,10 +293,12 @@ class CourseController extends Controller
                     ->where('course_segment', $enroll->CourseSegment->id)
                     ->pluck('user_id')
                     )->get(['id', 'username', 'firstname', 'lastname', 'picture']);
+                foreach($teacher as $one)
+                    $one->picture=$one->attachment->path;
                 $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
                 $course->teacher = $teacher;
-                if($course->attachment == null){
+                if(!isset($course->attachment)){
                     $course->attachment = attachment::find(1);
                 }
                 $all->push($course);
