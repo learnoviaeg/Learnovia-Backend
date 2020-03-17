@@ -181,7 +181,8 @@ class FilesController extends Controller
         $request->validate([
             'name' => 'string|min:1',
             'Imported_file' => 'required|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
+            'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,
+                        wpd,rpm,z,ods,xlsm,pps,odp',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable',
@@ -349,7 +350,8 @@ class FilesController extends Controller
             'id'            => 'required|exists:files,id',
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar',
+            'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,
+            wpd,rpm,z,ods,xlsm,pps,odp',
             'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable',
         ]);
