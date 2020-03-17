@@ -218,6 +218,7 @@ class FilesController extends Controller
                 User::notify([
                     'id' => $file->id,
                     'message' => 'new file is added',
+                    'message' => $file->name .'is added',
                     'from' => Auth::user()->id,
                     'users' => $usersIDs,
                     'course_id' => $courseID,

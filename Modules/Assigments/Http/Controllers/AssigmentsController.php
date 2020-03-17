@@ -146,7 +146,8 @@ class AssigmentsController extends Controller
                 $assignments = assignment::where('id', $request->assignment_id)->get();
             foreach ($assignments as $assignment) {
                 $Answer = collect([]);
-                $st_answer = UserAssigment::where('assignment_id', $assignment->id)->get();
+                $assign_less = AssignmentLesson::where('assignment_id', $assignment->id)->get();
+                $st_answer = UserAssigment::whereIn('assignment_lesson_id', $assign_less)->get();
                 foreach ($st_answer as $st_answer) {
                     $Ans  = Null;
                     if (isset($st_answer))
@@ -501,8 +502,6 @@ class AssigmentsController extends Controller
         return HelperController::api_response_format(200, Assignment::all(), $message = 'Assigment deleted succesfully');
     }
 
-
-
     public function GetAssignment(Request $request)
     {
         $request->validate([
@@ -535,10 +534,10 @@ class AssigmentsController extends Controller
             $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
             // return $studentassigment->attachment_id;
             if(isset($studentassigment)){
-            $assignment['user_submit'] =$studentassigment;
-            if (isset($studentassigment->attachment_id)) {
-                $assignment['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-            }
+                $assignment['user_submit'] =$studentassigment;
+                if (isset($studentassigment->attachment_id)) {
+                    $assignment['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                }
             }
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
             }
@@ -559,7 +558,6 @@ class AssigmentsController extends Controller
             $assignment['user_submit'] = $studentassigments;
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
-
     }
 
     public function toggleAssignmentVisibity(Request $request)
