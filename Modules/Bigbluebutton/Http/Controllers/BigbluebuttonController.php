@@ -115,7 +115,7 @@ class BigbluebuttonController extends Controller
 
                 User::notify([
                     'id' => $bigbb->id,
-                    'message' => 'A new Meeting is created',
+                    'message' => $request->name.'meeting is created',
                     'from' => Auth::user()->id,
                     'users' => $usersIDs,
                     'course_id' => $request->course_id,
@@ -177,9 +177,14 @@ class BigbluebuttonController extends Controller
     public function get(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:bigbluebutton_models,id'
+            'id' => 'exists:bigbluebutton_models,id|required_without:class,course',
+            'class'=> 'exists:bigbluebutton_models,class_id|required_without:id',
+            'course'=> 'exists:bigbluebutton_models,course_id|required_without:id',
         ]);
-        $meet = BigbluebuttonModel::whereId($request->id)->first();
+        if($request->filled('id'))
+            $meet = BigbluebuttonModel::whereId($request->id)->first();
+        if($request->filled('course') && $request->filled('class'))
+            $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)->get();
         if($meet == null)
             return HelperController::api_response_format(200 , null , 'This Meeting is not found');
         return HelperController::api_response_format(200 , $meet);
