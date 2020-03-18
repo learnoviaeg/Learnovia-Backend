@@ -64,8 +64,8 @@ class SurveyController extends Controller
             'courses' => $survey->courses,
         ]);
         $courseSegs=GradeCategoryController::getCourseSegmentWithArray($req);
-
-        $users=Enroll::whereIn('course_segment',$courseSegs)->pluck('user_id')->unique();
+        if($courseSegs != null)
+            $users=Enroll::whereIn('course_segment',$courseSegs->toArray())->pluck('user_id')->unique();
         
         foreach($users as $user)
         {
