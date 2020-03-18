@@ -20,7 +20,6 @@ use App\Http\Controllers\HelperController;
 
 class BigbluebuttonController extends Controller
 {
-
     public function install()
     {
         if (\Spatie\Permission\Models\Permission::whereName('bigbluebutton/create')->first() != null) {
@@ -67,7 +66,7 @@ class BigbluebuttonController extends Controller
             $attendee= $request->attendee_password;
         }
         else{
-            $attendee= 'laernovia123';
+            $attendee= 'learnovia123';
         }
 
         if(isset($request->duration)){
@@ -87,14 +86,15 @@ class BigbluebuttonController extends Controller
         $bigbb->duration=$duration;
         $bigbb->save();
 
-
         //Creating the meeting
         $bbb = new BigBlueButton();
 
+        $bbb->getJSessionId();
         $createMeetingParams = new CreateMeetingParameters($bigbb->id, $request->name);
         $createMeetingParams->setAttendeePassword($attendee);
         $createMeetingParams->setModeratorPassword($request->moderator_password);
         $createMeetingParams->setDuration($duration);
+        // $createMeetingParams->setRedirect(false);
         $createMeetingParams->setLogoutUrl('http://itsmart.com.eg');
         if ($request->isRecordingTrue) {
             $createMeetingParams->setRecord(true);
