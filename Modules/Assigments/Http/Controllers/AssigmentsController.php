@@ -357,15 +357,12 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(400, $body = [], $message = 'This user isn\'t assign to this assignment');
 
         if (isset($userassigment)) {
-            // return HelperController::api_response_format(400, $body = [], $message = 'This user isn\'t assign to this assignment');
-
             if (((($assilesson->start_date >  Carbon::now()) || (Carbon::now() > $assilesson->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
                 return HelperController::api_response_format(400, $body = [], $message = 'sorry you are not allowed to submit anymore');
             }
         }
 
         if (isset($request->file)) {
-
             $request->validate([
                 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
             ]);
@@ -379,12 +376,13 @@ class AssigmentsController extends Controller
         // else {
         //     $userassigment->attachment_id = null;
         // }
-        return $userassigment;
+        
         if (isset($request->content)) {
             $userassigment->content = $request->content;
         } else {
             $userassigment->content = null;
         }
+
         $userassigment->submit_date = Carbon::now();
         $userassigment->save();
         return HelperController::api_response_format(200, $body = $userassigment, $message = 'your answer is submitted');
