@@ -579,13 +579,15 @@ class UserController extends Controller
         $Given_courseSegments = GradeCategoryController::getCourseSegmentWithArray($request);
         $course_segments = Enroll::where('user_id',Auth::id())->pluck('course_segment')->unique();
         $CS =  array_intersect($course_segments->toArray(),$Given_courseSegments->toArray());
-        // return $ ;
         $users = Enroll::whereIn('course_segment',$CS)->pluck('user_id')->unique();
 
         if($request->filled('roles')){
             $users = Enroll::whereIn('course_segment',$CS)->whereIn('role_id',$request->roles)->pluck('user_id')->unique();
         }
-        $students = user::whereIn('id',$users->toArray())->where('id','!=',Auth::id())->with('attachment')->get();
+        $students = user::whereIn('id',$users->toArray())->where('id','!=',Auth::id())->get();
+        foreach ($students as $student)
+            $student->picture = $student->attachment->path;
+
         return HelperController::api_response_format(200,$students ,'Users are.......');
     }
 
