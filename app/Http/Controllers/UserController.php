@@ -585,7 +585,7 @@ class UserController extends Controller
         if($request->filled('roles')){
             $users = Enroll::whereIn('course_segment',$CS)->whereIn('role_id',$request->roles)->pluck('user_id')->unique();
         }
-        $students = user::whereIn('id',$users->toArray())->where('id','!=',Auth::id())->get();
+        $students = user::whereIn('id',$users->toArray())->where('id','!=',Auth::id())->with('attachment')->get();
         return HelperController::api_response_format(200,$students ,'Users are.......');
     }
 
