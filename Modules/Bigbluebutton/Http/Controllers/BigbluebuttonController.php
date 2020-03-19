@@ -115,7 +115,7 @@ class BigbluebuttonController extends Controller
 
                 User::notify([
                     'id' => $bigbb->id,
-                    'message' => $request->name.'meeting is created',
+                    'message' => $request->name.' meeting is created',
                     'from' => Auth::user()->id,
                     'users' => $usersIDs,
                     'course_id' => $request->course_id,
