@@ -516,6 +516,9 @@ class AssigmentsController extends Controller
         
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!isset($assigLessonID))
+            return HelperController::api_response_format(200, null, 'this assigment doesn\'t belong to this lesson');
+
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
         
         if (count($userassigments) > 0) {
