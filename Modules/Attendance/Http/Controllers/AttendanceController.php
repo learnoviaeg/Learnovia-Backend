@@ -634,11 +634,12 @@ class AttendanceController extends Controller
 
     public function getAllSessions(Request $request)
     {
-        $Sessions = AttendanceSession::all();
         $final=[];
+        $test=[];
+
+        $Sessions = AttendanceSession::all();
         if(isset($request->attendance_id))
             $Sessions = AttendanceSession::where('attendance_id',$request->attendance_id)->get();
-
         if(count($Sessions) == 0)
             return HelperController::api_response_format(200, 'there is no sessions');
 
@@ -650,6 +651,23 @@ class AttendanceController extends Controller
             $sess['to'] = (isset( $session->to)) ? $session->to:'-';
             $sess['date'] = $session->date;
             $final[]=$sess;
+        }
+        if(isset($request->search))
+        {
+            foreach($final as $one){
+                $course=strpos($one['course'], $request->search);
+                if($course > -1)
+                    $test[]=$one;
+                    
+                $class=strpos($one['class'], $request->search);
+                if($class > -1)
+                    $test[]=$one;
+
+                $date=strpos($one['date'], $request->search);
+                if($date > -1)
+                    $test[]=$one;
+            }
+            return HelperController::api_response_format(200, $test);
         }
         return HelperController::api_response_format(200, $final);
     }
