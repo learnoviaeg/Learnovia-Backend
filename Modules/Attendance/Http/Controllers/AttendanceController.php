@@ -634,8 +634,11 @@ class AttendanceController extends Controller
 
     public function getAllSessions(Request $request)
     {
-        $Sessions = AttendanceSession::where('attendance_id',$request->attendance_id)->get();
+        $Sessions = AttendanceSession::all();
         $final=[];
+        if(isset($request->attendance_id))
+            $Sessions = AttendanceSession::where('attendance_id',$request->attendance_id)->get();
+
         if(count($Sessions) == 0)
             return HelperController::api_response_format(200, 'there is no sessions');
 
