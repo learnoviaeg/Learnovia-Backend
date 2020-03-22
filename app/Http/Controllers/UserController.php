@@ -12,6 +12,7 @@ namespace App\Http\Controllers;
 use App\Level;
 use App\Classes;
 use App\Enroll;
+use stdClass;
 use App\GradeCategory;
 use App\Segment;
 use App\Parents;
@@ -488,15 +489,25 @@ class UserController extends Controller
             'roles.*' => 'required|exists:roles,id',
             'search' => 'nullable'
         ]);
+
+        $searched=collect();
+        
         $users=User::whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
         })->get();
+
+        if(isset($request->search))
+        {
+            foreach($users as $user)
+            {
+                $test=strpos($user->fullname, $request->search);
+                if($test > -1)
+                    $searched->push($user);
+            }
+            return HelperController::api_response_format(200, $searched->paginate(HelperController::GetPaginate($request)));
+        }
+
         return HelperController::api_response_format(200, $users->paginate(HelperController::GetPaginate($request)));
-        // return HelperController::api_response_format(200, User::whereHas("roles", function ($q) use ($request) {
-        //     $q->whereIn("id", $request->roles);
-        //     $q->where('firstname', 'LIKE', "%$request->search%");
-        //     $q->orwhere('lastname', 'LIKE', "%$request->search%");
-        // })->paginate(HelperController::GetPaginate($request)));
     }
 
     public function getAllUsersInCourseSegment()
