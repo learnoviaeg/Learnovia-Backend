@@ -78,17 +78,18 @@ class segment_class_Controller extends Controller
             {
                 $arrayYear=Segment::where('academic_type_id',$request->type)->with(['academicType.yearType' => function($query) use ($request){
                     $query->where('academic_year_id', $request->year);         
-                }])->first();
-                if(count($arrayYear->academicType->yearType) == 0)
-                    return HelperController::api_response_format(202, null);   
+                }])->get();
+                foreach($arrayYear as $year)
+                    if(count($year->academicType->yearType) == 0)
+                        return HelperController::api_response_format(202, null);   
                 else
-                    return HelperController::api_response_format(202, $arrayYear);   
+                    return HelperController::api_response_format(202, $arrayYear->paginate(HelperController::GetPaginate($request)));   
             }
 
             return HelperController::api_response_format(200, $segments);
         } else {
-            $class = Segment::find($request->id);
-            return HelperController::api_response_format(200, $class);
+            $segment = Segment::find($request->id);
+            return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)));
         }
     }
 
