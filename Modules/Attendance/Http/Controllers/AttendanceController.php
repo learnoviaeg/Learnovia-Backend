@@ -566,7 +566,7 @@ class AttendanceController extends Controller
             'session_id' => 'required|exists:attendance_sessions,id',
         ]);
         $session = AttendanceSession::find($request->session_id);
-        return HelperController::api_response_format(400, $session);
+        return HelperController::api_response_format(200, $session);
     }
 
     public function deleteAttendance(Request $request)
