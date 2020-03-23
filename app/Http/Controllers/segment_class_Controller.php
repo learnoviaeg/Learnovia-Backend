@@ -61,15 +61,30 @@ class segment_class_Controller extends Controller
     {
         if ($request->id == null) {
             $request->validate([
-                'search' => 'nullable'
+                'search' => 'nullable',
+                'year' => 'exists:academic_years,id',
+                'type' => 'exists:academic_types,id|required_with:year',
             ]);
+
+            $segments = Segment::paginate(HelperController::GetPaginate($request));
+
             if($request->filled('search'))
             {
                 $segments = Segment::where('name', 'LIKE' , "%$request->search%")->get()
                 ->paginate(HelperController::GetPaginate($request));
                 return HelperController::api_response_format(202, $segments);   
             }
-            $segments = Segment::paginate(HelperController::GetPaginate($request));
+            if(isset($request->year))
+            {
+                $arrayYear=Segment::where('academic_type_id',$request->type)->with(['academicType.yearType' => function($query) use ($request){
+                    $query->where('academic_year_id', $request->year);         
+                }])->first();
+                if(count($arrayYear->academicType->yearType) == 0)
+                    return HelperController::api_response_format(202, null);   
+                else
+                    return HelperController::api_response_format(202, $arrayYear);   
+            }
+
             return HelperController::api_response_format(200, $segments);
         } else {
             $class = Segment::find($request->id);
@@ -119,7 +134,7 @@ class segment_class_Controller extends Controller
         ]);
 
         if ($segment) {
-            return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), 'Type insertion sucess');
+            return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), 'segment insertion sucess');
         }
         return HelperController::NOTFOUND();
 

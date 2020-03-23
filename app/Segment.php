@@ -12,6 +12,11 @@ class Segment extends Model
         return $this->belongsToMany('App\ClassLevel', 'segment_classes','segment_id','class_level_id');
     }
 
+    public function academicType()
+    {
+        return $this->belongsTo('App\AcademicType', 'academic_type_id', 'id');
+    }
+
     public static function Get_current($type)
     {
         $segment = self::where('academic_type_id', $type)->where('current',1)->first();
