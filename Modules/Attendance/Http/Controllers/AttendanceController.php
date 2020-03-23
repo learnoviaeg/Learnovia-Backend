@@ -347,7 +347,7 @@ class AttendanceController extends Controller
                     'levels' => 'required|array|min:1',
                     'levels.*.id' => 'exists:levels,id',
                     'levels.*.classes' => 'required|array',
-                    'levels.*.classes.*' => 'required|exists:classes,id',
+                    'levels.*.classes' => 'required|exists:classes,id',
                     'levels.*.periods' => 'required|array',
                     'levels.*.periods.*.courses' => 'required|exists:courses,id',
                     'levels.*.periods.*.from' => 'required|date',
