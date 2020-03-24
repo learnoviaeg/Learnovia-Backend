@@ -144,6 +144,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/components', 'title' => 'Get All Course components']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/lessons', 'title' => 'Get All Course Lessons']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-classes-by-course', 'title' => 'Get All Classes by course']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-courses-by-classes', 'title' => 'Get Courses By Classes']);
 
             //Enroll Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/single', 'title' => 'enroll single user' , 'dashboard' => 1]);
