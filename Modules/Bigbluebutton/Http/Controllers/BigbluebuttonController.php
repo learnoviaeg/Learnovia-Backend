@@ -223,7 +223,7 @@ class BigbluebuttonController extends Controller
         $request->validate([
             'id'=>'required|exists:bigbluebutton_models,id',
         ]);
-
+        $urls=null;
         $bigbb=BigbluebuttonModel::find($request->id);
         $bbb = new BigBlueButton();
         $recordingParams = new GetRecordingsParameters();
@@ -247,6 +247,7 @@ class BigbluebuttonController extends Controller
             $output = array(
                 'name' => $bigbb->name,
                 'duration' => $bigbb->duration,
+                'created_at'=> $bigbb->created_at,
                 'link'=> $urls
               
             );
