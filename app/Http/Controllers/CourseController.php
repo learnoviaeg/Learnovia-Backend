@@ -924,4 +924,37 @@ class CourseController extends Controller
         }
         return HelperController::api_response_format(200,$classs,'classes are.....');
     }
+
+    public function get_courses_with_classes(Request $request){
+        $request->validate([
+            'class' => 'array',
+            'class.*' => 'nullable|exists:classes,id',
+        ]);
+
+        
+        if($request->filled('class'))
+        {
+            $courseSeg=[];
+            $allcourses=[];
+            $i=0;
+            $j=0;
+            foreach($request->class as $cId)
+            {
+                $courseSeg[$i]=CourseSegment::GetWithClass($cId)->id;
+                $i++;
+            }
+
+            foreach($courseSeg as $csegId)
+            {
+                $cseg=CourseSegment::find($csegId);
+                $allcourses[$j]=$cseg->courses;
+                $j++;
+                
+            }
+            return HelperController::api_response_format(200,$allcourses,'Here is all courses Linked to provided Classes');
+        }
+
+        $courses=Course::get();
+        return HelperController::api_response_format(200,$courses,'Here is all courses');
+    }
 }
