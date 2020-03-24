@@ -13,6 +13,7 @@ use Auth;
 use App\CourseSegment;
 use BigBlueButton\Parameters\CreateMeetingParameters;
 use BigBlueButton\Parameters\JoinMeetingParameters;
+use BigBlueButton\Parameters\GetRecordingsParameters;
 use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\HelperController;
@@ -25,15 +26,18 @@ class BigbluebuttonController extends Controller
         if (\Spatie\Permission\Models\Permission::whereName('bigbluebutton/create')->first() != null) {
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
-
+        
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/create','title' => 'create meeting']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/join','title' => 'join meeting']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get','title' => 'get meeting']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/getRecord','title' => 'get Record']);
+
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('bigbluebutton/create');
         $role->givePermissionTo('bigbluebutton/join');
         $role->givePermissionTo('bigbluebutton/get');
+        $role->givePermissionTo('bigbluebutton/getRecord');
 
         Component::create([
             'name' => 'Bigbluebutton',
@@ -89,6 +93,7 @@ class BigbluebuttonController extends Controller
         //Creating the meeting
         $bbb = new BigBlueButton();
 
+
         $bbb->getJSessionId();
         $createMeetingParams = new CreateMeetingParameters($bigbb->id, $request->name);
         $createMeetingParams->setAttendeePassword($attendee);
@@ -96,11 +101,10 @@ class BigbluebuttonController extends Controller
         $createMeetingParams->setDuration($duration);
         // $createMeetingParams->setRedirect(false);
         $createMeetingParams->setLogoutUrl('http://itsmart.com.eg');
-        if ($request->isRecordingTrue) {
-            $createMeetingParams->setRecord(true);
-            $createMeetingParams->setAllowStartStopRecording(true);
-            $createMeetingParams->setAutoStartRecording(true);
-        }
+        $createMeetingParams->setRecord(true);
+        $createMeetingParams->setAllowStartStopRecording(true);
+        $createMeetingParams->setAutoStartRecording(true);
+
         $response = $bbb->createMeeting($createMeetingParams);
 
         if ($response->getReturnCode() == 'FAILED') {
@@ -130,10 +134,17 @@ class BigbluebuttonController extends Controller
                 $joinMeetingParams->setRedirect(true);
                 $url = $bbb->getJoinMeetingURL($joinMeetingParams);
 
+                $createrecordParams = new GetRecordingsParameters();
+                $createrecordParams->setMeetingId($bigbb->id);
+                $createrecordParams->setRecordId($bigbb->id);
+                $createrecordParams->setState(true);
+
+                $res= $bbb->getRecordings($createrecordParams);
+
                 $output = array(
                     'name' => $request->name,
                     'duration' => $duration,
-                    'link'=> $url
+                    'link'=> $url,
                 );
 
                 return HelperController::api_response_format(200, $output,'Meeting created Successfully');
@@ -206,9 +217,43 @@ class BigbluebuttonController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, $id)
+    public function getRecord(Request $request)
     {
-        //
+        //Validating the Input
+        $request->validate([
+            'id'=>'required|exists:bigbluebutton_models,id',
+        ]);
+
+        $bigbb=BigbluebuttonModel::find($request->id);
+        $bbb = new BigBlueButton();
+        $recordingParams = new GetRecordingsParameters();
+        $response = $bbb->getRecordings($recordingParams);
+        if ($response->getReturnCode() == 'SUCCESS') {
+            foreach ($response->getRawXml()->recordings->recording as $recording) {
+                if($recording->meetingID == $request->id)
+                {
+                    foreach($recording->playback->format as $form)
+                    {
+                        if($form->type == 'presentation')
+                        {
+                            $urls = $form->url;
+                        }
+                    }
+                }
+            }
+        }
+        if($urls)
+        {
+            $output = array(
+                'name' => $bigbb->name,
+                'duration' => $bigbb->duration,
+                'link'=> $urls
+              
+            );
+            return HelperController::api_response_format(200 ,$output, 'Here is Record Found' );
+        }
+        return HelperController::api_response_format(200 , null , 'No Records Found!');
+
     }
 
     /**
