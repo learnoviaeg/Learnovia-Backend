@@ -673,10 +673,27 @@ class GradeCategoryController extends Controller
             $gradeCategories=$coursesegment->GradeCategory;
             return HelperController::api_response_format(200, $gradeCategories);
         }
-        else
-        {
-            return HelperController::api_response_format(200, null,'No available course segment');
-        }
-        
+        return HelperController::api_response_format(200, null,'No available course segment');
+    }
+
+    public function getgradecatArray(Request $request)
+    {
+        $request->validate([
+            'levels' => 'array',
+            'levels' => 'exists:levels,id',
+            'classes' => 'required|array',
+            'classes.*' => 'required|exists:classes,id',
+            'courses' => 'required|array',
+            'courses.*' => 'required|exists:courses,id'
+        ]);
+
+        $coursesegment=self::getCourseSegmentWithArray($request);
+        if(!isset($coursesegment))
+            return HelperController::api_response_format(200, $gradeCategories,'No available course segment');
+            
+        $courses=CourseSegment::whereIn('id',$coursesegment)->get();
+        foreach($courses as $course)
+            $gradeCategories[]=$course->GradeCategory;
+        return HelperController::api_response_format(200, $gradeCategories);
     }
 }
