@@ -14,6 +14,7 @@ use App\CourseSegment;
 use BigBlueButton\Parameters\CreateMeetingParameters;
 use BigBlueButton\Parameters\JoinMeetingParameters;
 use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
+use BigBlueButton\Parameters\GetMeetingInfoParameters;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\HelperController;
 
@@ -162,7 +163,7 @@ class BigbluebuttonController extends Controller
         $url = $bbb->getJoinMeetingURL($joinMeetingParams);
 
         $output = array(
-            'name' => $request->name,
+            'name' => $bigbb->name,
             'duration' => $bigbb->duration,
             'link'=> $url
         );
@@ -181,10 +182,33 @@ class BigbluebuttonController extends Controller
             'class'=> 'exists:bigbluebutton_models,class_id|required_without:id',
             'course'=> 'exists:bigbluebutton_models,course_id|required_without:id',
         ]);
+
         if($request->filled('id'))
+        {
+            $bbb = new BigBlueButton();
             $meet = BigbluebuttonModel::whereId($request->id)->first();
+            $getMeetingInfoParams = new GetMeetingInfoParameters($request->id, '', $meet->moderator_password);
+            $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+            if ($response->getReturnCode() == 'FAILED') {
+                $meet['join'] = false;
+            } else {
+                $meet['join'] = true;
+            }
+          
+        }
         if($request->filled('course') && $request->filled('class'))
+        {
+            $bbb = new BigBlueButton();
             $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)->get();
+            $getMeetingInfoParams = new GetMeetingInfoParameters($meet->id, '', $meet->moderator_password);
+            $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+            if ($response->getReturnCode() == 'FAILED') {
+                $meet['join'] = false;
+            } else {
+                $meet['join'] = true;
+            }
+        }
+
         if($meet == null)
             return HelperController::api_response_format(200 , null , 'This Meeting is not found');
         return HelperController::api_response_format(200 , $meet);
