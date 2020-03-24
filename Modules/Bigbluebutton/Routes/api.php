@@ -22,6 +22,6 @@ Route::group(['prefix' => 'bigbluebutton', 'middleware' => 'auth:api'], function
     Route::get('create', 'BigbluebuttonController@create')->middleware('permission:bigbluebutton/create');
     Route::get('join', 'BigbluebuttonController@join')->middleware('permission:bigbluebutton/join');
     Route::get('get', 'BigbluebuttonController@get')->name('getmeeting')->middleware('permission:bigbluebutton/get');
-    Route::get('getRecord', 'BigbluebuttonController@getRecord')->name('getRecord');//->middleware('permission:bigbluebutton/getRecord');
+    Route::get('getRecord', 'BigbluebuttonController@getRecord')->name('getRecord')->middleware('permission:bigbluebutton/getRecord');
 
 });
