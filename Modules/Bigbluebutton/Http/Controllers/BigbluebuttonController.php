@@ -211,12 +211,16 @@ class BigbluebuttonController extends Controller
         {
             $bbb = new BigBlueButton();
             $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)->get();
-            $getMeetingInfoParams = new GetMeetingInfoParameters($meet->id, '', $meet->moderator_password);
-            $response = $bbb->getMeetingInfo($getMeetingInfoParams);
-            if ($response->getReturnCode() == 'FAILED') {
-                $meet['join'] = false;
-            } else {
-                $meet['join'] = true;
+            // return $meet;
+            foreach($meet as $m)
+            {
+                $getMeetingInfoParams = new GetMeetingInfoParameters($m->id, '', $m->moderator_password);
+                $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+                if ($response->getReturnCode() == 'FAILED') {
+                    $m['join'] = false;
+                } else {
+                    $m['join'] = true;
+                }
             }
         }
 
