@@ -33,7 +33,7 @@ class UserSurveyController extends Controller
             UserSurveyAnswers::firstOrCreate([
             'user_survey_id' => $userSurvey->id,
             'question_id' => $Quest,
-            'answered'=>0,
+            'answered'=>1,
             ]);
         }
         
