@@ -33,7 +33,7 @@ class UserSurveyController extends Controller
             UserSurveyAnswers::firstOrCreate([
             'user_survey_id' => $userSurvey->id,
             'question_id' => $Quest,
-            'answered'=>0,
+            'answered'=>1,
             ]);
         }
         
@@ -168,7 +168,7 @@ class UserSurveyController extends Controller
        $UserSurveys = UserSurvey::where('user_id',Auth::id())->pluck('id');
        $check = UserSurveyAnswers::whereIn('user_survey_id',$UserSurveys)->where('answered',1)->pluck('user_survey_id');
 
-        $UserSurveys = UserSurvey::where('user_id',Auth::id())->whereNotIn('survey_id', $check)->pluck('survey_id');
+        $UserSurveys = UserSurvey::where('user_id',Auth::id())->whereNotIn('id', $check)->pluck('survey_id');
         $sur = Survey::whereIn('id',$UserSurveys)->with(['Question.question_type','Question.question_category','Question.question_answer'])->get();
 
         $surveys = Survey::where('created_by',Auth::id())->with(['Question.question_type','Question.question_category','Question.question_answer'])->get();
