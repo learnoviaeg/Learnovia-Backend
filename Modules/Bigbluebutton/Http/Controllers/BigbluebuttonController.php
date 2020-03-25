@@ -219,7 +219,7 @@ class BigbluebuttonController extends Controller
                 $meet['join'] = true;
             }
             
-            if($hasornot)
+            if(count($hasornot) > 0 )
             {
                 $meet['show']=1;
             }
@@ -239,7 +239,7 @@ class BigbluebuttonController extends Controller
                 } else {
                     $m['join'] = true;
                 }
-                if($hasornot)
+                if(count($hasornot) > 0 )
                 {
                     $m['show']=1;
                 }
