@@ -32,6 +32,8 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/join','title' => 'join meeting']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get','title' => 'get meeting']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/getRecord','title' => 'get Record']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/delete','title' => 'Delete Record']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/toggle','title' => 'Toggle Record']);
 
 
         $role = \Spatie\Permission\Models\Role::find(1);
@@ -39,6 +41,9 @@ class BigbluebuttonController extends Controller
         $role->givePermissionTo('bigbluebutton/join');
         $role->givePermissionTo('bigbluebutton/get');
         $role->givePermissionTo('bigbluebutton/getRecord');
+        $role->givePermissionTo('bigbluebutton/delete');
+        $role->givePermissionTo('bigbluebutton/toggle');
+
 
         Component::create([
             'name' => 'Bigbluebutton',
@@ -101,7 +106,7 @@ class BigbluebuttonController extends Controller
         $createMeetingParams->setModeratorPassword($request->moderator_password);
         $createMeetingParams->setDuration($duration);
         // $createMeetingParams->setRedirect(false);
-        $createMeetingParams->setLogoutUrl('http://itsmart.com.eg');
+        $createMeetingParams->setLogoutUrl('dev.learnovia.com/#/');
         $createMeetingParams->setRecord(true);
         $createMeetingParams->setAllowStartStopRecording(true);
         $createMeetingParams->setAutoStartRecording(true);
@@ -290,8 +295,33 @@ class BigbluebuttonController extends Controller
      * @param int $id
      * @return Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        //
+        //Validating the Input
+        $request->validate([
+            'id'=>'required|exists:bigbluebutton_models,id',
+        ]);
+        $meet = BigbluebuttonModel::whereId($request->id)->delete();
+        return HelperController::api_response_format(200 , null , 'Meeting Deleted!');
+    }
+
+    public function toggle (Request $request)
+    {
+        //Validating the Input
+        $request->validate([
+            'id'=>'required|exists:bigbluebutton_models,id',
+        ]);
+        $bigbb=BigbluebuttonModel::find($request->id);
+
+        if($bigbb->show == 1){
+            BigbluebuttonModel::where('id',$request->id)->update(['show' => 0]);
+        }
+        else{
+            BigbluebuttonModel::where('id',$request->id)->update(['show' => 1]);
+        }
+
+        $b=BigbluebuttonModel::find($request->id);
+
+        return HelperController::api_response_format(200 , $b , 'Toggled!');
     }
 }
