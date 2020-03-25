@@ -18,6 +18,8 @@ use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
 use BigBlueButton\Parameters\GetMeetingInfoParameters;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\HelperController;
+use DB;
+
 
 
 class BigbluebuttonController extends Controller
@@ -199,6 +201,12 @@ class BigbluebuttonController extends Controller
             'course'=> 'exists:bigbluebutton_models,course_id|required_without:id',
         ]);
 
+        $user_id = Auth::user()->id;
+        $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
+        $permission_id = DB::table('permissions')->where('name','bigbluebutton/toggle')->pluck('id')->first();
+        $hasornot = DB::table('role_has_permissions')->where('role_id', $role_id)->where('permission_id', $permission_id)->get();
+
+
         if($request->filled('id'))
         {
             $bbb = new BigBlueButton();
@@ -209,6 +217,11 @@ class BigbluebuttonController extends Controller
                 $meet['join'] = false;
             } else {
                 $meet['join'] = true;
+            }
+            
+            if($hasornot)
+            {
+                $meet['show']=1;
             }
           
         }
@@ -225,6 +238,10 @@ class BigbluebuttonController extends Controller
                     $m['join'] = false;
                 } else {
                     $m['join'] = true;
+                }
+                if($hasornot)
+                {
+                    $m['show']=1;
                 }
             }
         }
