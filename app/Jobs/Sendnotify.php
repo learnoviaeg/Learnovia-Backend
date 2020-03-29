@@ -46,8 +46,8 @@ class Sendnotify implements ShouldQueue
     public function handle()
     {
         foreach ($this->touserid as $u){
-            // if($u != null)
-            //     event(new \App\Events\notify($u->id ,$this->message,$this->publish_date,$this->title,$this->type));
+            if($u != null)
+                event(new \App\Events\notify($u->id ,$this->message,$this->publish_date,$this->title,$this->type));
         }
     }
 }
