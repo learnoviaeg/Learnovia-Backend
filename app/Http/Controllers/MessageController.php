@@ -120,6 +120,7 @@ class MessageController extends Controller
                                 $message->file = $attachment->path;
                                 $message->attachment_id = $attachment->id;
                             }
+
                             $message->save();
                             $message->about=User::find($message->about);
                             $message->about->picture=$message->about->attachment->path;
@@ -149,6 +150,8 @@ class MessageController extends Controller
                     // return HelperController::api_response_format(404, User::find($userId), 'Fail ,  you do not have a permission to send message to this user!');
                     return HelperController::api_response_format(404, $userId, 'Fail ,  you do not have a permission to send message to this user!');
                 }
+                event(new \App\Events\sendMessage($message));
+
             } else {
                 return HelperController::api_response_format(404, null, 'Fail , you can not send message for yourself!');
             }
