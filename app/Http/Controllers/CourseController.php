@@ -863,9 +863,10 @@ class CourseController extends Controller
                             continue;
                         $tempBulk = $temp->get();
                         foreach($tempBulk as $item){
+                            
                             if(isset($item->pivot))
                             {
-                                $item->course = Course::find($item->course_id);
+                                $item->course = Course::find(Lesson::find($item->pivot->lesson_id)->courseSegment->course_id);
                                 $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                 $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
                                 if($item->pivot->quiz_id)
