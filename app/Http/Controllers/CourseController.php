@@ -958,8 +958,7 @@ class CourseController extends Controller
                     $final->push($a);
                 }
             }
-            
-            return HelperController::api_response_format(200,$final->unique(),'Here is all courses Linked to provided Classes');
+            return HelperController::api_response_format(200,$final->unique()->values(),'Here is all courses Linked to provided Classes');
         }
 
         $courses=Course::get();
