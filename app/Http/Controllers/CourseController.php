@@ -931,28 +931,35 @@ class CourseController extends Controller
             'class' => 'array',
             'class.*' => 'nullable|exists:classes,id',
         ]);
-
         
         if($request->filled('class'))
         {
-            $courseSeg=[];
-            $allcourses=[];
+            $courseId=[];
+            $allcourses=collect([]);
+            $final=collect([]);
             $i=0;
-            $j=0;
             foreach($request->class as $cId)
             {
-                $courseSeg[$i]=CourseSegment::GetWithClass($cId)->id;
+                $courseId[$i]=CourseSegment::Join('segment_classes' , 'segment_classes.id' , 'course_segments.segment_class_id')
+                ->Join('class_levels' , 'class_levels.id' , 'segment_classes.class_level_id')
+                ->where('class_levels.class_id' , '=' , $cId)
+                ->where('course_segments.is_active' , '=' , 1)->pluck('course_id');
                 $i++;
             }
 
-            foreach($courseSeg as $csegId)
+            foreach($courseId as $cou)
             {
-                $cseg=CourseSegment::find($csegId);
-                $allcourses[$j]=$cseg->courses;
-                $j++;
-                
+                $allcourses->push(Course::whereIn('id' , $cou)->get());
             }
-            return HelperController::api_response_format(200,$allcourses,'Here is all courses Linked to provided Classes');
+            foreach($allcourses as $all)
+            {
+                foreach($all as $a)
+                {
+                    $final->push($a);
+                }
+            }
+            
+            return HelperController::api_response_format(200,$final->unique(),'Here is all courses Linked to provided Classes');
         }
 
         $courses=Course::get();
