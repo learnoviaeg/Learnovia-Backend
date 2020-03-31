@@ -186,6 +186,7 @@ class AttendanceController extends Controller
             $status['attendance_id'] = $attendance->id;
             AttendanceStatus::create($status);
         }
+        $attendance->periods=$periods;
         return $attendance;
     }
 
@@ -492,10 +493,10 @@ class AttendanceController extends Controller
         ]);
         if($request->filled('id'))
         {
-            $attendance=Attendance::where('id',$request->id)->get();
+            $attendance=Attendance::where('id',$request->id)->with('session')->get();
             return HelperController::api_response_format(200, $attendance);
         }
-        $attendance=Attendance::where('name', 'LIKE' , "%$request->search%")->get(['name','allowed_levels','type' , 'id']);
+        $attendance=Attendance::where('name', 'LIKE' , "%$request->search%")->with('session')->get(['name','allowed_levels','type' , 'id']);
         foreach($attendance as $attend)
         {
             $temp = [];
