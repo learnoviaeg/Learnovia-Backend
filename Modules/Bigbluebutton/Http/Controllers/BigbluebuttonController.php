@@ -222,6 +222,7 @@ class BigbluebuttonController extends Controller
             
             if(count($hasornot) > 0 )
             {
+                $meet['student_view']=$meet['show'];
                 $meet['show']=1;
             }
           
