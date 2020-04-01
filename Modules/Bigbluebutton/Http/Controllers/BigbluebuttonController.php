@@ -138,7 +138,7 @@ class BigbluebuttonController extends Controller
                 ]);
 
                 // moderator join the meeting
-                $joinMeetingParams = new JoinMeetingParameters($bigbb->id, $request->name, $request->moderator_password);
+                $joinMeetingParams = new JoinMeetingParameters($bigbb->id, Auth::user()->username , $request->moderator_password);
                 $joinMeetingParams->setRedirect(true);
                 $url = $bbb->getJoinMeetingURL($joinMeetingParams);
 
@@ -174,9 +174,10 @@ class BigbluebuttonController extends Controller
             'id'=>'required|exists:bigbluebutton_models,id',
         ]);
 
+        $user_name = Auth::user()->username;
         $bigbb=BigbluebuttonModel::find($request->id);
 
-        $joinMeetingParams = new JoinMeetingParameters($request->id, $bigbb->name, $bigbb->attendee_password);
+        $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
         $joinMeetingParams->setRedirect(true);
         $url = $bbb->getJoinMeetingURL($joinMeetingParams);
 
