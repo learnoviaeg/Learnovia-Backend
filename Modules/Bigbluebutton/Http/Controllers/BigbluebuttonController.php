@@ -243,6 +243,7 @@ class BigbluebuttonController extends Controller
                 }
                 if(count($hasornot) > 0 )
                 {
+                    $m['student_view']=$m['show'];
                     $m['show']=1;
                 }
             }
