@@ -85,7 +85,7 @@ class BigbluebuttonController extends Controller
             $duration= $request->duration;
         }
         else{
-            $duration= '00:40:00';
+            $duration= '40';
         }
 
         //Creating the meeting in DB
