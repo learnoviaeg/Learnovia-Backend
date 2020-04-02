@@ -459,11 +459,31 @@ class AttendanceController extends Controller
     public function Attendance_Report(Request $request)
     {
         //return Hosts::select(['URL' , DB::raw("COUNT(*) as hits")])->groupBy('URL')->get();
+        $request->validate([
+            'session_id' => 'exists:attendance_sessions,id',
+        ]);
+        $logs=[];
+        $sessions=[];
         $i=0;
-        $logs = AttendanceLog::select(['*' , DB::raw("COUNT(*) as count")])
-        ->where('student_id', Auth::user()->id)
-        ->groupBy('status_id');
-        $sessions = AttendanceLog::where('student_id', Auth::user()->id)->distinct('session_id')->pluck('session_id');
+
+        if ($request->user()->can('site/course/student')) {
+            $sessions = AttendanceLog::where('student_id', Auth::user()->id)->distinct('session_id')->pluck('session_id');
+            $logs = AttendanceLog::select(['*' , DB::raw("COUNT(*) as count")])
+            ->where('student_id', Auth::user()->id)
+            ->groupBy('status_id');
+        }
+        else if($request->user()->can('site/course/teacher')) {
+            $sessions = AttendanceLog::where('taker_id', Auth::user()->id)->distinct('session_id')->pluck('session_id');
+            $logs = AttendanceLog::select(['*' , DB::raw("COUNT(*) as count")])
+            ->where('taker_id', Auth::user()->id)
+            ->groupBy('status_id');
+        }
+        else if($request->user()->can('site/restrict'))
+        {
+            $logs = AttendanceLog::select(['*' , DB::raw("COUNT(*) as count")])->groupBy('status_id');
+            $sessions = AttendanceLog::distinct('session_id')->pluck('session_id');
+        }
+        
         if($request->filled('session_id'))
             $logs = $logs->where('session_id' , $request->session_id);
         $logs = $logs->get();
