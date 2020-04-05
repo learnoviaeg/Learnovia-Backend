@@ -146,12 +146,13 @@ class BigbluebuttonController extends Controller
 
                 $url = $bbb->getJoinMeetingURL($joinMeetingParams);
 
-                $createrecordParams = new GetRecordingsParameters();
-                $createrecordParams->setMeetingId($bigbb->id);
-                $createrecordParams->setRecordId($bigbb->id);
-                $createrecordParams->setState(true);
-
-                $res= $bbb->getRecordings($createrecordParams);
+                if($request->is_recorded == 1){
+                    $createrecordParams = new GetRecordingsParameters();
+                    $createrecordParams->setMeetingId($bigbb->id);
+                    $createrecordParams->setRecordId($bigbb->id);
+                    $createrecordParams->setState(true);
+                    $res= $bbb->getRecordings($createrecordParams);
+                }
 
                 $output = array(
                     'name' => $request->name,
@@ -159,7 +160,7 @@ class BigbluebuttonController extends Controller
                     'link'=> $url,
                 );
 
-                return HelperController::api_response_format(200, $output,'Meeting created Successfully');
+                return HelperController::api_response_format(200, BigbluebuttonModel::find($bigbb->id) ,'Meeting created Successfully');
             }
             else
             {
@@ -180,9 +181,10 @@ class BigbluebuttonController extends Controller
 
         $user_name = Auth::user()->firstname.' '.Auth::user()->lastname;
         $bigbb=BigbluebuttonModel::find($request->id);
-
+        
         $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
         $joinMeetingParams->setRedirect(true);
+        $joinMeetingParams->setJoinViaHtml5(true);
         $url = $bbb->getJoinMeetingURL($joinMeetingParams);
 
         $output = array(
