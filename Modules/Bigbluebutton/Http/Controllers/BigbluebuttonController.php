@@ -140,6 +140,8 @@ class BigbluebuttonController extends Controller
                 // moderator join the meeting
                 $joinMeetingParams = new JoinMeetingParameters($bigbb->id, Auth::user()->username , $request->moderator_password);
                 $joinMeetingParams->setRedirect(true);
+                $joinMeetingParams->setJoinViaHtml5(true);
+
                 $url = $bbb->getJoinMeetingURL($joinMeetingParams);
 
                 $createrecordParams = new GetRecordingsParameters();
