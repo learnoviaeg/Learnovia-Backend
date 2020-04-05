@@ -161,7 +161,16 @@ class BigbluebuttonController extends Controller
                     'link'=> $url,
                 );
 
-                return HelperController::api_response_format(200, BigbluebuttonModel::find($bigbb->id) ,'Meeting created Successfully');
+                $final_out = BigbluebuttonModel::find($bigbb->id);
+                $getMeetingInfoParams = new GetMeetingInfoParameters($bigbb->id, '', $bigbb->moderator_password);
+                $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+                if ($response->getReturnCode() == 'FAILED') {
+                    $final_out['join'] = false;
+                } else {
+                    $final_out['join'] = true;
+                }
+
+                return HelperController::api_response_format(200, $final_out ,'Meeting created Successfully');
             }
             else
             {
