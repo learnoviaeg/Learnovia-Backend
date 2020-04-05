@@ -72,6 +72,7 @@ class BigbluebuttonController extends Controller
             'attendee_password' => 'nullable|string',
             'moderator_password' => 'required|string',
             'duration' => 'nullable',
+            'is_recorded' => 'required|bool'
         ]);
 
         if(isset($request->attendee_password)){
@@ -109,10 +110,11 @@ class BigbluebuttonController extends Controller
         $createMeetingParams->setDuration($duration);
         // $createMeetingParams->setRedirect(false);
         $createMeetingParams->setLogoutUrl('dev.learnovia.com/#/');
-        $createMeetingParams->setRecord(true);
-        $createMeetingParams->setAllowStartStopRecording(true);
-        $createMeetingParams->setAutoStartRecording(true);
-
+        if($request->is_recorded == 1){
+            $createMeetingParams->setRecord(true);
+            $createMeetingParams->setAllowStartStopRecording(true);
+            $createMeetingParams->setAutoStartRecording(true);
+        }
         $response = $bbb->createMeeting($createMeetingParams);
 
         if ($response->getReturnCode() == 'FAILED') {
@@ -138,7 +140,7 @@ class BigbluebuttonController extends Controller
                 ]);
 
                 // moderator join the meeting
-                $joinMeetingParams = new JoinMeetingParameters($bigbb->id, Auth::user()->username , $request->moderator_password);
+                $joinMeetingParams = new JoinMeetingParameters($bigbb->id, Auth::user()->firstname.' '.Auth::user()->lastname , $request->moderator_password);
                 $joinMeetingParams->setRedirect(true);
                 $joinMeetingParams->setJoinViaHtml5(true);
 
@@ -176,7 +178,7 @@ class BigbluebuttonController extends Controller
             'id'=>'required|exists:bigbluebutton_models,id',
         ]);
 
-        $user_name = Auth::user()->username;
+        $user_name = Auth::user()->firstname.' '.Auth::user()->lastname;
         $bigbb=BigbluebuttonModel::find($request->id);
 
         $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
