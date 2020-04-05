@@ -97,6 +97,7 @@ class BigbluebuttonController extends Controller
         $bigbb->attendee_password=$attendee;
         $bigbb->moderator_password=$request->moderator_password;
         $bigbb->duration=$duration;
+        $bigbb->user_id = Auth::user()->id;
         $bigbb->save();
 
         //Creating the meeting
@@ -181,8 +182,11 @@ class BigbluebuttonController extends Controller
 
         $user_name = Auth::user()->firstname.' '.Auth::user()->lastname;
         $bigbb=BigbluebuttonModel::find($request->id);
-        
-        $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
+        if($bigbb->user_id == Auth::user()->id){
+            $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
+        }else{
+            $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
+        }
         $joinMeetingParams->setRedirect(true);
         $joinMeetingParams->setJoinViaHtml5(true);
         $url = $bbb->getJoinMeetingURL($joinMeetingParams);
@@ -231,7 +235,6 @@ class BigbluebuttonController extends Controller
                 $meet['student_view']=$meet['show'];
                 $meet['show']=1;
             }
-          
         }
         if($request->filled('course') && $request->filled('class'))
         {
