@@ -641,16 +641,18 @@ class AssigmentsController extends Controller
             if($request->is_graded)
             {
                 $grade_category=GradeCategory::find($request->grade_category[$key]);
+                $name_assignment = Assignment::find($request->assignment_id)->name;
                 $grade_category->GradeItems()->create([
-                   'grademin' => 0,
-                   'grademax' => $request->mark,
-                   'item_no' => 1,
-                   'scale_id' => (isset($request->scale)) ? $request->scale : 1,
-                   'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
-                   'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
-                   'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
-                   'item_type' => (isset($request->item_type)) ? $request->item_type : null,
-                   'weight' => 0,
+                    'grademin' => 0,
+                    'grademax' => $request->mark,
+                    'item_no' => 1,
+                    'scale_id' => (isset($request->scale)) ? $request->scale : 1,
+                    'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
+                    'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
+                    'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
+                    'item_type' => (isset($request->item_type)) ? $request->item_type : null,
+                    'name' => $name_assignment,
+                    'weight' => 0,
                 ]);
             }
             $assignment_lesson->save();
