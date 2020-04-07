@@ -890,6 +890,7 @@ class CourseController extends Controller
           foreach($assignmet as $item){
             $ass[] = $item;
             }
+            $result['Assigments']   = $ass;  
           foreach($quizzesSorted as $q){
             $quiz[] = $q;
             }
