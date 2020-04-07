@@ -862,6 +862,7 @@ class CourseController extends Controller
                         if(count($temp->get()) == 0)
                             continue;
                         $tempBulk = $temp->get();
+
                         foreach($tempBulk as $item){
                             
                             if(isset($item->pivot))
@@ -870,9 +871,10 @@ class CourseController extends Controller
                                 $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                 $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
                                 if($item->pivot->quiz_id)
-                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
-                                if($item->pivot->assignment_id)
-                                    $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
+{                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
+}                                if($item->pivot->assignment_id)
+                                    $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)->orderBy('due_date','asc')
+                                    ->pluck('due_date')->first();
                                     $result[$component->name][] = $item;
                             }
                         }
@@ -880,6 +882,19 @@ class CourseController extends Controller
                 }
             }
         }
+        //sort assignments and quiz bt due_date
+          $assignmet = collect($result["Assigments"])->sortBy('due_date');
+          $quizzesSorted = collect($result["Quiz"])->sortBy('due_date');
+          $ass=collect();
+          $quiz=collect();
+          foreach($assignmet as $item){
+            $ass[] = $item;
+            }
+          foreach($quizzesSorted as $q){
+            $quiz[] = $q;
+            }
+            $result['Quiz']   = $quiz;  
+
         return HelperController::api_response_format(200,$result);
     }
     public function getLessonsFromCourseAndClass(Request $request){
