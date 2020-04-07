@@ -9,6 +9,7 @@ use App\User;
 use App\Lesson;
 use App\SegmentClass;
 use App\ClassLevel;
+use App\GradeCategory;
 use App\Classes;
 use Spatie\Permission\Models\Permission;
 use URL;
@@ -636,6 +637,21 @@ class AssigmentsController extends Controller
                     return HelperController::api_response_format(400, null,'this grade category invalid');
                 }
                 $assignment_lesson->grade_category = $request->grade_category[$key];
+            }
+            if($request->is_graded)
+            {
+                $grade_category=GradeCategory::find($request->grade_category[$key]);
+                $grade_category->GradeItems()->create([
+                   'grademin' => 0,
+                   'grademax' => $request->mark,
+                   'item_no' => 1,
+                   'scale_id' => (isset($request->scale)) ? $request->scale : 1,
+                   'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
+                   'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
+                   'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
+                   'item_type' => (isset($request->item_type)) ? $request->item_type : null,
+                   'weight' => 0,
+                ]);
             }
             $assignment_lesson->save();
 
