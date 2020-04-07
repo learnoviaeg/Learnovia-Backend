@@ -474,10 +474,10 @@ class CourseController extends Controller
                                 $lessonn[$com->name] = $Component->get();
                                 if($com->name == 'Quiz'){
                                  foreach ($lessonn['Quiz'] as $one){
-                                    if($one->pivot->publish_date <= Carbon::now())
-                                        $one->Started = true;
-                                        else
+                                    if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
+                                        else
+                                        $one->Started = true;
 
                                  }
                                 }
