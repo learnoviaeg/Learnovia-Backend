@@ -902,8 +902,8 @@ class CourseController extends Controller
             }
         }
         //sort assignments and quiz bt due_date
-          $assignmet = collect($result["Assigments"])->sortBy('due_date');
-          $quizzesSorted = collect($result["Quiz"])->sortBy('due_date');
+          $assignmet = collect($result["Assigments"])->sortByDesc('due_date');
+          $quizzesSorted = collect($result["Quiz"])->sortByDesc('due_date');
           $ass=collect();
           $quiz=collect();
           foreach($assignmet as $item){
