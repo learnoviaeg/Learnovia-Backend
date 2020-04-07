@@ -151,6 +151,7 @@ class QuestionBankController extends Controller
             'Question_Category_id' => 'integer|exists:questions_categories,id',
             'class' => 'integer|exists:classes,id',
             'course_id' => 'integer|exists:courses,id',
+            'question_type' => 'integer|exists:questions_types,id',
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors());
@@ -162,7 +163,9 @@ class QuestionBankController extends Controller
         }
         if (isset($request->Question_Category_id)) {
             $questions->where('question_category_id', $request->Question_Category_id);
-
+        }
+        if (isset($request->question_type)) {
+            $questions->where('question_type_id', $request->question_type);
         }
         if (isset($request->Category_id)) {
             $questions->where('category_id', $request->Category_id);
