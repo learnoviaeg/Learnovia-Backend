@@ -154,12 +154,17 @@ class QuestionBankController extends Controller
             'course_id' => 'integer|exists:courses,id',
             'question_type' => 'array',
             'question_type.*' => 'integer|exists:questions_types,id',
+            'search' => 'nullable'
         ]);
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors());
         }
-
+       
         $questions = Questions::where('survey',0)->with('question_answer');
+        if($request->filled('search'))
+        {
+           $questions->where('text', 'LIKE' , "%$request->search%");
+        }
         if(isset($request->course_id)) {
             $questions->where('course_id', $request->course_id);
         }
