@@ -468,11 +468,19 @@ class CourseController extends Controller
                             foreach ($comp as $com) {
                                 $Component = $lessoncounter->module($com->module, $com->model);
                                 if ($request->user()->can('site/course/student')) {
-                                    $Component->where('visible', '=', 1)
-                                        ->where('publish_date', '<=', Carbon::now());
+                                    $Component->where('visible', '=', 1);
+                                        // ->where('publish_date', '<=', Carbon::now());
                                 }
-
                                 $lessonn[$com->name] = $Component->get();
+                                if($com->name == 'Quiz'){
+                                 foreach ($lessonn['Quiz'] as $one){
+                                    if($one->pivot->publish_date <= Carbon::now())
+                                        $one->Started = true;
+                                        else
+                                        $one->Started = false;
+
+                                 }
+                                }
 
                                 // $lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
                                 // if (isset($com->name))
