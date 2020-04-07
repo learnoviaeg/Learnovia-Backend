@@ -471,6 +471,9 @@ class CourseController extends Controller
                                     $Component->where('visible', '=', 1);
                                         // ->where('publish_date', '<=', Carbon::now());
                                 }
+                                if($component->model != 'quiz'){ 
+                                    $Component->where('publish_date', '<=', Carbon::now()); }
+
                                 $lessonn[$com->name] = $Component->get();
                                 if($com->name == 'Quiz'){
                                  foreach ($lessonn['Quiz'] as $one){
@@ -864,8 +867,11 @@ class CourseController extends Controller
                     foreach ($components as $component) {
                         $temp = $lesson->module($component->module, $component->model);
                         if ($request->user()->can('site/course/student')) {
-                            $temp->where('visible', '=', 1)
-                                ->where('publish_date', '<=', Carbon::now());
+                            $temp->where('visible', '=', 1);
+                                // ->where('publish_date', '<=', Carbon::now());
+                        }
+                        if($component->model != 'quiz'){
+                            $temp->where('publish_date', '<=', Carbon::now());
                         }
                         if(count($temp->get()) == 0)
                             continue;
@@ -878,8 +884,13 @@ class CourseController extends Controller
                                 $item->course = Course::find(Lesson::find($item->pivot->lesson_id)->courseSegment->course_id);
                                 $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                 $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-                                if($item->pivot->quiz_id)
+                                if($item->pivot->quiz_id){
                                     $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
+                                    if($item->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
+                                    $item->Started = false;
+                                    else
+                                    $item->Started = true;
+                                }
                                 if($item->pivot->assignment_id)
                                     $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)
                                     ->pluck('due_date')->first();
