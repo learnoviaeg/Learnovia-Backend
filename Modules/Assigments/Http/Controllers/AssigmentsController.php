@@ -280,6 +280,7 @@ class AssigmentsController extends Controller
                 'users' => $usersIDs,
                 'course_id' => $courseID,
                 'class_id' => $classId,
+                'lesson_id' => $lessonId,
                 'type' => 'assignment',
                 'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
                 'publish_date' => $AssignmentLesson->start_date
@@ -308,13 +309,15 @@ class AssigmentsController extends Controller
         }
         $courseID = CourseSegment::where('id', $request['course_segment'])->pluck('course_id')->first();
         $classId = CourseSegment::find($request['course_segment'])->segmentClasses[0]->classLevel[0]->class_id;
+        $lesson_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('lesson_id');
         user::notify([
-            'id' => $request["assignment_lesson_id"],
+            'id' => $request['assignment_lesson_id'],
             'message' => 'A new Assignment is added',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
             'class_id' => $classId,
+            'lesson_id' => $lesson_id,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request["assignment_lesson_id"],
             'publish_date' => $request['publish_date']

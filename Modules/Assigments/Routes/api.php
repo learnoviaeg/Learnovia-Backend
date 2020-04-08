@@ -31,5 +31,5 @@ Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function ()
     Route::post('delete-assign-lesson', 'AssigmentsController@deleteAssignmentLesson')->middleware('permission:assignment/delete-assign-lesson');
     Route::get('get','AssigmentsController@GetAssignment')->name('getAssignment')->middleware(['permission:assignment/get' , 'ParentCheck']);
     Route::post('toggle', 'AssigmentsController@toggleAssignmentVisibity')->middleware('permission:assignment/toggle');
-    Route::get('get-all', 'AssigmentsController@getAllAssigment')->middleware('permission:assignment/get-all');
+    // Route::get('get-all', 'AssigmentsController@getAllAssigment')->middleware('permission:assignment/get-all');
 });

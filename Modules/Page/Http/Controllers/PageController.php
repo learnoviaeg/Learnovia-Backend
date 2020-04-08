@@ -105,6 +105,7 @@ class PageController extends Controller
                 'users' => $usersIDs,
                 'course_id' => $TempLesson->courseSegment->courses[0]->id,
                 'class_id' => $TempLesson->courseSegment->segmentClasses[0]->classLevel[0]->classes[0]->id,
+                'lesson_id' => $lesson,
                 'type' => 'Page',
                 'link' => url(route('getPage')) . '?id=' . $page->id,
                 'publish_date' => $publishdate

@@ -99,7 +99,9 @@ class User extends Authenticatable
             'users'=>'required|array',
             'users.*' => 'required|integer|exists:users,id',
             'type' => 'required|string',
-            'publish_date' => 'required|date'
+            'publish_date' => 'required|date',
+            'course_id' => 'required|integer|exists:courses,id',
+            'class_id'=>'required|integer|exists:classes,id'
         ]);
 
         if ($validater->fails()) {
@@ -140,7 +142,8 @@ class User extends Authenticatable
         }
 
         $job = ( new \App\Jobs\Sendnotify(
-            $touserid, $request['message'], $date, $request['title'], $request['type']
+            $touserid, $request['message'], $date, $request['title'], $request['type'], $request['course_id'], $request['class_id'],
+            $request['lesson_id']
         ))->delay($seconds);
         dispatch($job);
         Notification::send($touserid, new NewMessage($request));
