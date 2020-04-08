@@ -471,7 +471,7 @@ class CourseController extends Controller
                                     $Component->where('visible', '=', 1);
                                         // ->where('publish_date', '<=', Carbon::now());
                                 }
-                                if($component->model != 'quiz'){ 
+                                if($com->model != 'quiz'){ 
                                     $Component->where('publish_date', '<=', Carbon::now()); }
 
                                 $lessonn[$com->name] = $Component->get();
