@@ -883,19 +883,24 @@ class CourseController extends Controller
             }
         }
         //sort assignments and quiz bt due_date
-          $assignmet = collect($result["Assigments"])->sortByDesc('due_date');
+        if(isset($result["Assigments"])){
+            $assignmet = collect($result["Assigments"])->sortByDesc('due_date');
+            $ass=collect();
+            foreach($assignmet as $item){
+                $ass[] = $item;
+                }
+                $result['Assigments']   = $ass;  
+        }
+        if(isset($result["Quiz"])){
+
           $quizzesSorted = collect($result["Quiz"])->sortByDesc('due_date');
-          $ass=collect();
           $quiz=collect();
-          foreach($assignmet as $item){
-            $ass[] = $item;
-            }
-            $result['Assigments']   = $ass;  
+          
           foreach($quizzesSorted as $q){
             $quiz[] = $q;
             }
             $result['Quiz']   = $quiz;  
-
+        }
         return HelperController::api_response_format(200,$result);
     }
     public function getLessonsFromCourseAndClass(Request $request){
