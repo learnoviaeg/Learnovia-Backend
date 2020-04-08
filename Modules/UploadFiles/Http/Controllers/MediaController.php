@@ -196,6 +196,7 @@ class MediaController extends Controller
                     'users' => $usersIDs,
                     'course_id' => $courseID,
                     'class_id' => $class_id,
+                    'lesson_id' => $mediaLesson->lesson_id,
                     'type' => 'media',
                     'publish_date' => $publishdate,
                 ]);

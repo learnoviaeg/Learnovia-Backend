@@ -215,14 +215,15 @@ class FilesController extends Controller
                 $check = $file->save();
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-                $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $tempLesson->courseSegment->id)->pluck('user_id')->toarray())->get('id');
+                $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $tempLesson->courseSegment->id)->pluck('user_id')->toArray())->pluck('id');
                 User::notify([
                     'id' => $file->id,
                     'message' => $file->name.' file is added',
                     'from' => Auth::user()->id,
-                    'users' => $usersIDs,
+                    'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
                     'course_id' => $courseID,
                     'class_id' => $class_id,
+                    'lesson_id' => $lesson,
                     'type' => 'file',
                     'link' => $file->url,
                     'publish_date' => $publishdate,

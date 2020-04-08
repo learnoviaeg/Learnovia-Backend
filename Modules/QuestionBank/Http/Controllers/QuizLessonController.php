@@ -106,6 +106,7 @@ class QuizLessonController extends Controller
                 'publish_date'=> $request->opening_time,
                 'course_id' => $course,
                 'class_id'=> $class,
+                'lesson_id'=> $lessons,
                 'from' => Auth::id(),
             ]);
             user::notify($requ);
@@ -208,6 +209,7 @@ class QuizLessonController extends Controller
             'publish_date'=> $request->opening_time,
             'course_id' => $course,
             'class_id'=> $class,
+            'lesson_id'=> $request->lesson_id,
             'from' => Auth::id(),
         ]);
         user::notify($requ);
