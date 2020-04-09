@@ -28,7 +28,7 @@ class NotificationController extends Controller
             $not->data= json_decode($not->data, true);
 
             if(isset($not->data['publish_date'])){
-                if($not->data['publish_date'] < Carbon::now() && $not->data['type'] != 'announcement')
+                if(Carbon::parse($not->data['publish_date']) < Carbon::now() && $not->data['type'] != 'announcement')
                 {
                     $data[$i]['id'] = $not->data['id'];
                     $data[$i]['read_at'] = $not->read_at;
