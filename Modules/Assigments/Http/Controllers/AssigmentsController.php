@@ -310,8 +310,9 @@ class AssigmentsController extends Controller
         $courseID = CourseSegment::where('id', $request['course_segment'])->pluck('course_id')->first();
         $classId = CourseSegment::find($request['course_segment'])->segmentClasses[0]->classLevel[0]->class_id;
         $lesson_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('lesson_id');
+        $assignment_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('assignment_id')->first();
         user::notify([
-            'id' => $request['assignment_lesson_id'],
+            'id' => $assignment_id,
             'message' => 'A new Assignment is added',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
