@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use DB;
+use GuzzleHttp\Client;
 use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\NewMessage;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -95,6 +96,44 @@ class User extends Authenticatable
 
     public static function notify($request)
     {
+        
+    //////////////
+
+        // $client = new \Google_Client();
+        // $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-5615ba073d.json'));
+        // $client->setApplicationName("learnovia-notifications");
+        // $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
+
+        // $client->useApplicationDefaultCredentials();
+        // if ($client->isAccessTokenExpired()) {
+        //     $client->fetchAccessTokenWithAssertion();
+        // }
+
+        // $access_token = $client->getAccessToken()['access_token'];
+        /*المفروض هنا احط الtoken في ال notification بس ما عرفتش */
+
+    //      $data = json_encode(array(
+    //         'message' => array(
+    //             "topic" => "mirna",
+    //             "notification" => array(
+    //                 "body" => "This is an FCM notification message!",
+    //                 "title" => "FCM Message .."
+    //             )
+    //         )
+    
+    //     ));
+    //     $clientt = new Client();
+    //     $res = $clientt->request('POST', 'https://fcm.googleapis.com/v1/projects/notiproject-63ad8/messages:send', [
+    //         'headers'   => [
+    //             'Authorization' => 'Bearer '. $access_token,
+    //             'Content-Type' => 'application/json'
+    //         ], 
+    //         'body' => $data
+    //     ]);
+    //     $result= $res->getBody();
+    //     dd($result);
+
+    /////////////
         $validater = Validator::make($request, [
             'users'=>'required|array',
             'users.*' => 'required|integer|exists:users,id',
