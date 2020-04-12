@@ -100,7 +100,7 @@ class QuizLessonController extends Controller
 
             $requ = ([
                 'message' => 'the quiz is added',
-                'id' => $quizLesson[0]->id,
+                'id' => $request->quiz_id,
                 'users' => $users,
                 'type' =>'quiz',
                 'publish_date'=> $request->opening_time,
@@ -203,7 +203,7 @@ class QuizLessonController extends Controller
         ]);
         $requ = ([
             'message' => 'the quiz is updated',
-            'id' => $quizLesson->id,
+            'id' => $request->quiz_id,
             'users' => $users,
             'type' =>'quiz',
             'publish_date'=> $request->opening_time,
