@@ -57,20 +57,6 @@ class NotificationController extends Controller
     */
     public function getallnotifications(Request $request)
     {
-
-        $client = new \Google_Client();
-        $client->setAuthConfig(base_path('notiproject.json'));
-         $client->setApplicationName("notiproject-63ad8");
-         $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
-
-       $client->useApplicationDefaultCredentials();
-       if ($client->isAccessTokenExpired()) {
-         $client->fetchAccessTokenWithAssertion();
-     }
-
-     dd($client->getAccessToken());
-
-
         $noti = DB::table('notifications')->select('data','read_at','id')->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();
         $data=array();
         $i=0;
@@ -221,5 +207,18 @@ class NotificationController extends Controller
             return $print;
         }
         return HelperController::api_response_format(400, $body = [], $message = 'you cannot seen this notification');
+    }
+
+    public function Notification_token(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string',
+        ]);
+
+        $user=$request->user();
+        $user->token=$request->token;
+        $user->save();
+        
+        return HelperController::api_response_format(200, 'token added Done');
     }
 }
