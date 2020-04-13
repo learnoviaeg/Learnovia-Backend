@@ -98,9 +98,9 @@ class User extends Authenticatable
     {
         
     //////////////
-
+        
         // $client = new \Google_Client();
-        // $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-5615ba073d.json'));
+        // $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
         // $client->setApplicationName("learnovia-notifications");
         // $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
 
@@ -110,7 +110,7 @@ class User extends Authenticatable
         // }
 
         // $access_token = $client->getAccessToken()['access_token'];
-        /*المفروض هنا احط الtoken في ال notification بس ما عرفتش */
+        // dd($access_token);
 
     //      $data = json_encode(array(
     //         'message' => array(

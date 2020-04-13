@@ -13,7 +13,7 @@ class EditNotiToken extends Migration
      */
     public function up()
     {
-        Schema::table('notifications', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             $table->longText('token')->nullable();
         });
     }
@@ -25,7 +25,7 @@ class EditNotiToken extends Migration
      */
     public function down()
     {
-        Schema::table('notifications', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             //
         });
     }
