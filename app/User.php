@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use DB;
+use GuzzleHttp\Client;
 use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\NewMessage;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,7 +31,7 @@ class User extends Authenticatable
     protected $fillable = [
         'firstname', 'email', 'password', 'real_password', 'lastname', 'username','suspend','class_id','picture', 'level',
         'type', 'arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'language',
-        'timezone', 'religion', 'second language'
+        'timezone', 'religion', 'second language', 'token'
     ];
 
     /**
@@ -95,6 +96,46 @@ class User extends Authenticatable
 
     public static function notify($request)
     {
+    //////////////
+    // dd($request);
+        
+        $client = new \Google_Client();
+        $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
+        $client->setApplicationName("learnovia-notifications");
+        $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
+
+        $client->useApplicationDefaultCredentials();
+        if ($client->isAccessTokenExpired()) {
+            $client->fetchAccessTokenWithAssertion();
+        }
+
+        $access_token = $client->getAccessToken()['access_token'];
+        $user_token=User::whereIn('id',$request['users'])->whereNotNull('token')->pluck('token');
+
+        foreach($user_token as $token)
+        {
+            $data = json_encode(array(
+                'message' => array(
+                    "token" => $token,
+                    "notification" => array(
+                        "body" => $request['message'],
+                        "title" => 'Learnovia'
+                    )
+                )
+            ));
+            $clientt = new Client();
+            $res = $clientt->request('POST', 'https://fcm.googleapis.com/v1/projects/learnovia-notifications/messages:send', [
+                'headers'   => [
+                    'Authorization' => 'Bearer '. $access_token,
+                    'Content-Type' => 'application/json'
+                ], 
+                'body' => $data
+            ]);
+            // $result= $res->getBody();
+            // dd($result);
+        }
+
+    /////////////
         $validater = Validator::make($request, [
             'users'=>'required|array',
             'users.*' => 'required|integer|exists:users,id',
