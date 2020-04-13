@@ -883,8 +883,6 @@ class CourseController extends Controller
                         }
                         if($component->model != 'quiz' && $component->model != 'assignment'){
                             $temp->where('publish_date', '<=', Carbon::now());
-                            return $temp->get();
-
                         }
                         if(count($temp->get()) == 0)
                             continue;
