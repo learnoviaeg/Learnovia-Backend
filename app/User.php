@@ -123,8 +123,7 @@ class User extends Authenticatable
                     "token" => $token,
                     "notification" => array(
                         "body" => $request['message'],
-                        "title" => 'Learnovia',
-                        "image" => "http://169.44.167.50/backend/public/storage/Announcement/5e958c73bf38bindex.jpg"
+                        "title" => 'Learnovia'
                     )
                 )
             ));
