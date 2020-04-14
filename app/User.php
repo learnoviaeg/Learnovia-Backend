@@ -144,9 +144,7 @@ class User extends Authenticatable
             'users'=>'required|array',
             'users.*' => 'required|integer|exists:users,id',
             'type' => 'required|string',
-            'publish_date' => 'required|date',
-            'course_id' => 'required|integer|exists:courses,id',
-            'class_id'=>'required|integer|exists:classes,id'
+            'publish_date' => 'required|date'
         ]);
 
         if ($validater->fails()) {
