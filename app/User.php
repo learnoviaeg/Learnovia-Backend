@@ -114,6 +114,10 @@ class User extends Authenticatable
 
         foreach($user_token as $token)
         {
+            if($request['type']=='announcement')
+            {
+                $request['message']='A New Announcement Added';
+            }
             $data = json_encode(array(
                 'message' => array(
                     "token" => $token,
@@ -182,11 +186,11 @@ class User extends Authenticatable
             $request['title']=Announcement::whereId($request['id'])->first()->title;
         }
 
-        $job = ( new \App\Jobs\Sendnotify(
-            $touserid, $request['message'], $date, $request['title'], $request['type'], $request['course_id'], $request['class_id'],
-            $request['lesson_id']
-        ))->delay($seconds);
-        dispatch($job);
+        // $job = ( new \App\Jobs\Sendnotify(
+        //     $touserid, $request['message'], $date, $request['title'], $request['type'], $request['course_id'], $request['class_id'],
+        //     $request['lesson_id']
+        // ))->delay($seconds);
+        // dispatch($job);
         Notification::send($touserid, new NewMessage($request));
         return 1;
     }
