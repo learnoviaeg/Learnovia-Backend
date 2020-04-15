@@ -47,13 +47,13 @@ class QuizLessonController extends Controller
         ]);
 
         $quiz = quiz::find($request->quiz_id);
-        $users=Enroll::where('course_segment',$quiz->course_id)->where('role_id',3)->pluck('user_id')->toArray();
+        // $users=Enroll::where('course_segment',$quiz->course_id)->where('role_id',3)->pluck('user_id')->toArray();
         foreach ($request->lesson_id as $key => $lessons)
         {
             $lesson = Lesson::find($lessons);
 
             //for notification
-            $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('role_id',3)->pluck('user_id')->toArray();
+            $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
             $course = $lesson->courseSegment->course_id;
             $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
@@ -161,7 +161,7 @@ class QuizLessonController extends Controller
         $lesson = Lesson::find($request->lesson_id);
 
         //for notification
-        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('role_id',3)->pluck('user_id')->toArray();
+        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 

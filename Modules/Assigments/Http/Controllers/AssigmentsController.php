@@ -266,7 +266,7 @@ class AssigmentsController extends Controller
                 $AssignmentLesson->publish_date = $request->publish_date;
             $AssignmentLesson->save();
 
-            $usersIDs = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->pluck('user_id')->toArray();
+            $usersIDs = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
             $lessonId = AssignmentLesson::where('assignment_id', $request->assignment_id)->pluck('lesson_id')->first();
             $courseSegment = Lesson::where('id', $request->lesson_id)->pluck('course_segment_id')->first();
             $courseID = CourseSegment::where('id', $courseSegment)->pluck('course_id')->first();
@@ -296,9 +296,10 @@ class AssigmentsController extends Controller
     */
     public function assignAsstoUsers($request)
     {
-        $roles = Permission::where('name', 'assignment/submit')->first();
-        $roles_id = $roles->roles->pluck('id');
-        $usersIDs = Enroll::where('course_segment', $request['course_segment'])->whereIn('role_id', $roles_id)->pluck('user_id')->toarray();
+        // $roles = Permission::where('name', 'assignment/submit')->first();
+        // $roles_id = $roles->roles->pluck('id');
+        // $usersIDs = Enroll::where('course_segment', $request['course_segment'])->whereIn('role_id', $roles_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
+        $usersIDs = Enroll::where('course_segment', $request['course_segment'])->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
             $userassigment->user_id = $userId;
