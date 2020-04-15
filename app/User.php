@@ -123,8 +123,15 @@ class User extends Authenticatable
                     "token" => $token,
                     "notification" => array(
                         "body" => $request['message'],
-                        "title" => 'Learnovia'
-                    )
+                        "title" => 'Learnovia',
+                        "image" => "http://169.44.167.50/backend/public/storage/Announcement/5e958c73bf38bindex.jpg"
+                    ),
+                    "webpush" => array(
+                        "fcm_options" => array(
+                            "link" => "http://dev.learnovia.com",
+                            "analytics_label" => "Learnovia"
+                        )
+                    ) 
                 )
             ));
             $clientt = new Client();
@@ -135,11 +142,8 @@ class User extends Authenticatable
                 ], 
                 'body' => $data
             ]);
-            // $result= $res->getBody();
-            // dd($result);
         }
 
-    /////////////
         $validater = Validator::make($request, [
             'users'=>'required|array',
             'users.*' => 'required|integer|exists:users,id',
