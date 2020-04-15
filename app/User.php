@@ -108,15 +108,32 @@ class User extends Authenticatable
         if ($client->isAccessTokenExpired()) {
             $client->fetchAccessTokenWithAssertion();
         }
-
         $access_token = $client->getAccessToken()['access_token'];
         $user_token=User::whereIn('id',$request['users'])->whereNotNull('token')->pluck('token');
-
         foreach($user_token as $token)
         {
             if($request['type']=='announcement')
             {
                 $request['message']='A New Announcement Added';
+                $fordata = array(
+                    "id" => (string)$request['id'],
+                    "type" => $request['type'],
+                    "message" => $request['message'],
+                    "publish_date" => $request['publish_date'],
+                    "read_at" => null
+                );
+            }else{
+                $fordata = array(
+                    "id" => (string)$request['id'],
+                    "message" => $request['message'],
+                    "fromm" => (string)$request['from'],
+                    "type" => $request['type'],
+                    "course_id" => (string)$request['course_id'],
+                    "class_id" => (string)$request['class_id'],
+                    "lesson_id"=> $request['lesson_id'],
+                    "publish_date" => $request['publish_date'],
+                    "read_at" => null
+                );
             }
             $data = json_encode(array(
                 'message' => array(
@@ -130,7 +147,8 @@ class User extends Authenticatable
                         "fcm_options" => array(
                             "link" => "http://dev.learnovia.com",
                             "analytics_label" => "Learnovia"
-                        )
+                        ),
+                        "data" => $fordata
                     ) 
                 )
             ));
