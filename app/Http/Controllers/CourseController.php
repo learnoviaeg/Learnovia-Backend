@@ -468,6 +468,12 @@ class CourseController extends Controller
                         $clase[$i]->lessons = $lessons;
                         foreach ($clase[$i]->lessons as $lessonn) {
                             $lessoncounter = Lesson::find($lessonn->id);
+                            if(file_exists($lessoncounter->attachment->path))
+                                $lessonn->image=$lessoncounter->attachment->path;
+                            else {
+                                $path= storage_path('lesson.jpg');
+                                $lessonn->image=$path;
+                            }
                             foreach ($comp as $com) {
                                 $Component = $lessoncounter->module($com->module, $com->model);
                                 if ($request->user()->can('site/course/student')) {
