@@ -109,6 +109,7 @@ class LessonController extends Controller
         if ($request->hasFile('image')) {
             $lesson->image = attachment::upload_attachment($request->image, 'lesson', '')->path;
         }
+         $lesson->description = "";
         if ($request->filled('description')) {
             $lesson->description = $request->description;
         }
