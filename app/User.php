@@ -130,7 +130,7 @@ class User extends Authenticatable
                     "type" => $request['type'],
                     "course_id" => (string)$request['course_id'],
                     "class_id" => (string)$request['class_id'],
-                    "lesson_id"=> $request['lesson_id'],
+                    "lesson_id"=> (string)$request['lesson_id'],
                     "publish_date" => $request['publish_date'],
                     "read_at" => null
                 );
