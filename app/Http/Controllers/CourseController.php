@@ -435,7 +435,9 @@ class CourseController extends Controller
             'course_id' => 'required|exists:course_segments,course_id'
         ]);
         $CourseSeg = Enroll::where('user_id', $request->user()->id)->pluck('course_segment');
+        
         $seggg = array();
+        $userrole = array();
         foreach ($CourseSeg as $cour) {
             $check = CourseSegment::where('course_id', $request->course_id)->where('id', $cour)->pluck('id')->first();
             if ($check != null) {
@@ -444,6 +446,7 @@ class CourseController extends Controller
         }
         $CourseSeg = array();
         foreach ($seggg as $segggg) {
+            $userrole[$segggg] = Enroll::where('user_id', $request->user()->id)->where('course_segment', $segggg)->pluck('role_id')->first();
             $CourseSeg[] = CourseSegment::where('id', $segggg)->get();
         }
         $clase = array();
@@ -452,8 +455,8 @@ class CourseController extends Controller
         $count = 'Counter';
         $lessoncounter = array();
         $comp = Component::where('type', 1)->orWhere('type', 3)->get();
-
         foreach ($CourseSeg as $seg) {
+            $role = $userrole[$seg[0]['id']];
             $lessons = $seg->first()->lessons;
             foreach ($seg->first()->segmentClasses as $key => $segmentClas) {
                 # code...
@@ -472,7 +475,10 @@ class CourseController extends Controller
                                         // ->where('publish_date', '<=', Carbon::now());
                                 }
                                 if($com->model != 'quiz' && $com->model != 'assignment' ){ 
-                                    $Component->where('publish_date', '<=', Carbon::now()); }
+                                    if($role == 3){
+                                        $Component->where('publish_date', '<=', Carbon::now()); 
+                                    }
+                                }
 
                                 $lessonn[$com->name] = $Component->get();
                                 if($com->name == 'Quiz'){
@@ -871,6 +877,7 @@ class CourseController extends Controller
             if ($request->filled('course'))
                 $query->where('course_id', $request->course);
         }])->first();
+
         foreach ($user->enroll as $enroll) {
             if ($enroll->courseSegment != null) {
                 foreach ($enroll->courseSegment->lessons as $lesson) {
@@ -882,7 +889,9 @@ class CourseController extends Controller
                                 // ->where('publish_date', '<=', Carbon::now());
                         }
                         if($component->model != 'quiz' && $component->model != 'assignment'){
-                            $temp->where('publish_date', '<=', Carbon::now());
+                            if($enroll['role_id'] == 3){
+                                $temp->where('publish_date', '<=', Carbon::now());
+                            }
                         }
                         if(count($temp->get()) == 0)
                             continue;
