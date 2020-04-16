@@ -252,7 +252,7 @@ class FilesController extends Controller
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
 
-        return HelperController::api_response_format(200,$file , 'Upload Successfully');
+        return HelperController::api_response_format(200,$file , 'Added Successfully');
     }
 
     /**
