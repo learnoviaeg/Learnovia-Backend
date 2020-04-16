@@ -612,7 +612,10 @@ class AssigmentsController extends Controller
             'scale' => 'exists:scales,id',
             'visible' => 'boolean',
         ]);
+        $assignmentLesson =AssignmentLesson::all();
+
         foreach($request->lesson_id as $key => $lesson){
+
             $assignment_lesson = new AssignmentLesson;
             $assignment_lesson->lesson_id = $lesson;
             $assignment_lesson->assignment_id = $request->assignment_id;
@@ -644,7 +647,7 @@ class AssigmentsController extends Controller
                 $assignment_lesson->grade_category = $request->grade_category[$key];
             }
             if($request->is_graded)
-            {
+            { 
                 $grade_category=GradeCategory::find($request->grade_category[$key]);
                 $name_assignment = Assignment::find($request->assignment_id)->name;
                 $grade_category->GradeItems()->create([
@@ -659,9 +662,12 @@ class AssigmentsController extends Controller
                     'name' => $name_assignment,
                     'weight' => 0,
                 ]);
-            }
+                $assignment_lesson->save();
+             $assignment_lesson['grade_items']=$grade_category->GradeItems;
+            }else{
             $assignment_lesson->save();
-
+            }
+            $assignmentLesson [] = $assignment_lesson;
             LessonComponent::create([
                 'lesson_id' => $lesson,
                 'comp_id' => $request->assignment_id,
@@ -677,8 +683,10 @@ class AssigmentsController extends Controller
                 "publish_date" => $request->opening_date
             );
             $this->assignAsstoUsers($data);
+
         }
-        $all = AssignmentLesson::all();
-        return HelperController::api_response_format(200, $all, 'Assignment is assigned to a lesson Successfully');
+        // $all = AssignmentLesson::where('assignment_id','!=', $request->assignment_id)->get();
+
+        return HelperController::api_response_format(200, $assignmentLesson, 'Assignment is assigned to a lesson Successfully');
     }
 }

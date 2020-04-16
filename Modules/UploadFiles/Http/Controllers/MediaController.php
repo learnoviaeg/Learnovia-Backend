@@ -131,7 +131,6 @@ class MediaController extends Controller
         } else {
             $publishdate = Carbon::now();
         }
-
         foreach ($request->lesson_id as $lesson) {
             $tempLesson = Lesson::find($lesson);
             if ($request->type == 0)
