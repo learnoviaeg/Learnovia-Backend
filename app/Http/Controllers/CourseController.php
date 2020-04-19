@@ -289,17 +289,20 @@ class CourseController extends Controller
                 $flag->year = AcademicYear::find($AC_type->academic_type_id)->name;
                 $flag->type = AcademicYear::find($AC_type->academic_type_id)->name;}
                 $teacher = User::whereIn('id',
-                    Enroll::where('role_id', '4')
+                Enroll::where('role_id', '4')
                     ->where('course_segment', $enroll->CourseSegment->id)
                     ->pluck('user_id')
                     )->get(['id', 'username', 'firstname', 'lastname', 'picture']);
+                    
                 foreach($teacher as $one)
-                    $one->picture=$one->attachment->path;
+                    if(isset($one->attachment))
+                        $one->picture=$one->attachment->path;
+
                 $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
                 $course->teacher = $teacher;
                 if(!isset($course->attachment)){
-                    $course->attachment = attachment::find(1);
+                    $course->attachment = null;
                 }
                 $all->push($course);
             }
@@ -468,12 +471,6 @@ class CourseController extends Controller
                         $clase[$i]->lessons = $lessons;
                         foreach ($clase[$i]->lessons as $lessonn) {
                             $lessoncounter = Lesson::find($lessonn->id);
-                            if(file_exists($lessoncounter->attachment->path))
-                                $lessonn->image=$lessoncounter->attachment->path;
-                            else {
-                                $path= storage_path('lesson.jpg');
-                                $lessonn->image=$path;
-                            }
                             foreach ($comp as $com) {
                                 $Component = $lessoncounter->module($com->module, $com->model);
                                 if ($request->user()->can('site/course/student')) {

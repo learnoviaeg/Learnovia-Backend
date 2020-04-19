@@ -663,7 +663,7 @@ class AssigmentsController extends Controller
                     'weight' => 0,
                 ]);
                 $assignment_lesson->save();
-             $assignment_lesson['grade_items']=$grade_category->GradeItems;
+                $assignment_lesson['grade_items']=$grade_category->GradeItems;
             }else{
             $assignment_lesson->save();
             }

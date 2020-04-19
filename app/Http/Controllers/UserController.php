@@ -359,7 +359,8 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
         ]);
         $user = User::find($request->id);
-        $user->picture=$user->attachment->path;
+        if(isset($user->attachment))
+            $user->picture = $user->attachment->path;
         $user->roles;
 
         $i = 0;
@@ -550,7 +551,9 @@ class UserController extends Controller
         $childrenIDS = Parents::where('parent_id',Auth::id())->pluck('child_id');
         $children =  User::whereIn('id',$childrenIDS)->get();
         foreach($children as $child)
-            $child->picture = $child->attachment->path;
+            if(isset($child->attachment))
+                $child->picture = $child->attachment->path;
+
         return HelperController::api_response_format(200,$children ,'Children are.......');
 
     }
@@ -597,7 +600,8 @@ class UserController extends Controller
         }
         $students = user::whereIn('id',$users->toArray())->where('id','!=',Auth::id())->get();
         foreach ($students as $student)
-            $student->picture = $student->attachment->path;
+            if(isset($student->attachment))
+                $student->picture = $student->attachment->path;
 
         return HelperController::api_response_format(200,$students ,'Users are.......');
     }

@@ -15,14 +15,16 @@ class Contactresource extends JsonResource
      */
     public function toArray($request)
     {
-
+        $path=null;
+        if($this->attachment)
+            $path=$this->attachment->path;
         return [
             'id' => $this->id,
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'email' => $this->email,
             'username' => $this->username,
-            'picture' => $this->attachment->path,
+            'picture' => $path,
         ];
     }
 }

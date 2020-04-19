@@ -250,8 +250,6 @@ class User extends Authenticatable
 
     public function attachment()
     {
-        if($this->picture == null)
-            $this->picture = 1;
         return $this->hasOne('App\attachment', 'id', 'picture');
     }
 

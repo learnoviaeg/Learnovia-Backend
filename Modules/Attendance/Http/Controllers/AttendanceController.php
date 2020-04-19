@@ -104,7 +104,8 @@ class AttendanceController extends Controller
         }
         foreach($users as $user)
         {
-            $user->picture=$user->attachment->path;
+            if(isset($user->attachment))
+                $user->picture=$user->attachment->path;
             // unset($user->attachment);
         }
         return HelperController::api_response_format(200, $users, 'Users are.....');
@@ -131,7 +132,8 @@ class AttendanceController extends Controller
         }])->get()->pluck('users');
         foreach($users as $user)
         {
-            $user->picture=$user->attachment->path;
+            if(isset($user->attachment))
+                $user->picture=$user->attachment->path;
             // unset($user->attachment);
         }
         return HelperController::api_response_format(200, $users, 'Users are.....');
@@ -426,7 +428,8 @@ class AttendanceController extends Controller
         }
         foreach($users as $user)
         {
-            $user->picture=$user->attachment->path;
+            if(isset($user->attachment))
+                $user->picture=$user->attachment->path;
             //unset($user->attachment);
         }
         return HelperController::api_response_format(200, $users, 'Users are.....');
