@@ -123,11 +123,14 @@ class MessageController extends Controller
 
                             $message->save();
                             $message->about=User::find($message->about);
-                            $message->about->picture=$message->about->attachment->path;
+                            if(isset($message->about->attachment))
+                                $message->about->picture=$message->about->attachment->path;
                             $message->From=User::find($message->From);
-                            $message->From->picture=$message->From->attachment->path;
+                            if(isset($message->From->attachment))
+                                $message->From->picture=$message->From->attachment->path;
                             $message->To=User::find($message->To);
-                            $message->To->picture=$message->To->attachment->path;
+                            if(isset($message->To->attachment))
+                                $message->To->picture=$message->To->attachment->path;
                             $message->Message = $message->text;
                             $message->type='text';
 

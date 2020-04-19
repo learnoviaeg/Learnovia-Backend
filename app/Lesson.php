@@ -28,13 +28,6 @@ class Lesson extends Model
         return $this->hasMany('Modules\UploadFiles\Entities\FileLesson', 'lesson_id', 'id');
     }
 
-    public function attachment()
-    {
-        if($this->image == null)
-            $this->image= 1;
-        return $this->hasOne('App\attachment', 'id', 'image');
-    }
-
     public function MediaLesson()
     {
         return $this->hasMany('Modules\UploadFiles\Entities\MediaLesson', 'lesson_id', 'id');

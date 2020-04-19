@@ -358,7 +358,8 @@ class EnrollUserToCourseController extends Controller
         $ids = Enroll::whereIn('course_segment', $course_segment->pluck('id'))->pluck('user_id');
         $userUnenrolls = User::where('username', 'LIKE', "%$request->search%")->whereNotIn('id', $ids)->get();
         foreach($userUnenrolls as $user)
-            $user->picture=$user->attachment->path;
+            if(isset($user->attachment))
+                $user->picture = $user->attachment->path;
 
         return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'students are ... ');
     }
