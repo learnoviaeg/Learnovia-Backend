@@ -870,7 +870,8 @@ class CourseController extends Controller
             'components' => 'nullable|array',
             'components.*' => 'required|integer|exists:components,id'
         ]);
-        $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
+        // $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
+        $components  = Component::where('active', 1)->whereIn('type', [3,1]);
         if ($request->filled('components')) {
             $components->whereIn('id', $request->components);
         };
