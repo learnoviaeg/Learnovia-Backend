@@ -252,7 +252,7 @@ class FilesController extends Controller
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
 
-        return HelperController::api_response_format(200,$file , 'Added Successfully');
+        return HelperController::api_response_format(200,$file , 'File uploaded successfully');
     }
 
     /**
@@ -387,7 +387,7 @@ class FilesController extends Controller
         }
         $file->save();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
-        return HelperController::api_response_format(200, $tempReturn, 'Update Successfully');
+        return HelperController::api_response_format(200, $tempReturn, 'File edited successfully');
     }
 
     /**
@@ -407,7 +407,7 @@ class FilesController extends Controller
         $file = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
         $file->delete();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
-        return HelperController::api_response_format(200, $tempReturn, $message = 'File deleted succesfully');
+        return HelperController::api_response_format(200, $tempReturn, $message = 'File deleted successfully');
     }
 
     /**
@@ -430,7 +430,7 @@ class FilesController extends Controller
         $fileLesson->visible = ($fileLesson->visible == 1) ? 0 : 1;
         $fileLesson->save();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
-        return HelperController::api_response_format(200, $tempReturn, 'Toggle Successfully');
+        return HelperController::api_response_format(200, $tempReturn, 'File toggled successfully');
     }
 
     public function sortLessonFile(Request $request)
@@ -521,7 +521,7 @@ class FilesController extends Controller
             $file_lessons = FileLesson::create([
                 'lesson_id' => $request->lesson_id, 'file_id' => $request->file_id, 'publish_date' => $request->publish_date
             ]);
-            return HelperController::api_response_format(200, $file_lessons, 'Assigned Successfully');
+            return HelperController::api_response_format(200, $file_lessons, 'File assigned successfully');
         } catch (Exception $ex) {
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
