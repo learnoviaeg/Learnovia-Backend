@@ -112,7 +112,7 @@ class PageController extends Controller
             ]);
         }
         $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
-        return HelperController::api_response_format(200, $tempReturn, 'Page added Successfully');
+        return HelperController::api_response_format(200, $tempReturn, 'Page added successfully');
 
     }
 
@@ -131,7 +131,7 @@ class PageController extends Controller
         $page->page_id = $request->page_id;
         $page->lesson_id = $request->lesson_id;
         $page->save();
-        return HelperController::api_response_format(200, $page, 'Page linked with lesson Successfully');
+        return HelperController::api_response_format(200, $page, 'Page linked with lesson successfully');
 
     }
 
@@ -160,7 +160,7 @@ class PageController extends Controller
         if($request->filled('lesson_id')){
             $page = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
         }
-        return HelperController::api_response_format(200, $page, 'Page Updated Successfully');
+        return HelperController::api_response_format(200, $page, 'Page edited successfully');
     }
 
     /**
@@ -179,7 +179,7 @@ class PageController extends Controller
         {
             $page->delete();
             $tempReturn = Lesson::find($request->lesson_id)->module('Page', 'page')->get();
-            return HelperController::api_response_format(200, $tempReturn, 'Page Deleted Successfully');
+            return HelperController::api_response_format(200, $tempReturn, 'Page deleted successfully');
         }
         return HelperController::api_response_format(404, [], 'Not Found');
     }
@@ -192,7 +192,7 @@ class PageController extends Controller
         ]);
         $page = page::whereId($request->id)->first();
         if ($page == null)
-            return HelperController::api_response_format(200, null, 'This Page is not Visible');
+            return HelperController::api_response_format(200, null, 'This page is not visible');
         return HelperController::api_response_format(200, $page);
     }
 

@@ -141,6 +141,7 @@ class MediaController extends Controller
                 $media = new media;
                 $media->user_id = Auth::user()->id;
                 if ($request->type == 0) {
+                    $formsg=$item->getClientMimeType();
                     $extension = $item->getClientOriginalExtension();
                     $fileName = $item->getClientOriginalName();
                     $size = $item->getSize();
@@ -212,7 +213,27 @@ class MediaController extends Controller
             }
         }
         $tempReturn = Lesson::find($mediaLesson->lesson_id)->module('UploadFiles', 'media')->get();
-        return HelperController::api_response_format(200, $tempReturn, 'Upload Successfully');
+        if($request->type == 0)
+        {
+            if(str_contains($formsg , 'image'))
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'Image added successfully');
+            }else if(str_contains($formsg , 'video'))
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'Video added successfully');
+            }else if(str_contains($formsg , 'audio'))
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'Audio added successfully');
+            }else{
+                return HelperController::api_response_format(200, $tempReturn, 'Media added successfully');
+            }
+        }else if($request->type == 1){
+            if($request->show == 1){
+                return HelperController::api_response_format(200, $tempReturn, 'URL added successfully');
+            }else{
+                return HelperController::api_response_format(200, $tempReturn, 'Link added successfully');
+            }
+        }
     }
 
     /**
@@ -270,8 +291,30 @@ class MediaController extends Controller
             }
             $mediaLesson->update(['publish_date' => $publishdate]);
         }
-        $tempReturn = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'media')->get();;
-        return HelperController::api_response_format(200, $tempReturn, 'Update Successfully');
+        $tempReturn = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'media')->get();
+
+        if($media->type != null)
+        {
+            if(str_contains($media->type , 'image'))
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'Image edited successfully');
+            }else if(str_contains($media->type , 'video'))
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'Video edited successfully');
+            }else if(str_contains($media->type , 'audio'))
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'Audio edited successfully');
+            }else{
+                return HelperController::api_response_format(200, $tempReturn, 'Media edited successfully');
+            }
+        }else{
+            if($media->show == 1)
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'URL edited successfully');
+            }else{
+                return HelperController::api_response_format(200, $tempReturn, 'Link edited successfully');
+            }
+        }
     }
 
     /**
@@ -288,10 +331,28 @@ class MediaController extends Controller
             'lesson_id' => 'required|exists:media_lessons,lesson_id'
         ]);
 
+        $media_type = media::whereId($request->mediaId)->pluck('type')->first();
         $file = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id', $request->lesson_id)->first();
         $file->delete();
-        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();;
-        return HelperController::api_response_format(200, $tempReturn, $message = 'File deleted succesfully');
+        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
+
+        if($media_type != null)
+        {
+            if(str_contains($media_type , 'image'))
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'Image deleted successfully');
+            }else if(str_contains($media_type , 'video'))
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'Video deleted successfully');
+            }else if(str_contains($media_type , 'audio'))
+            {
+                return HelperController::api_response_format(200, $tempReturn, 'Audio deleted successfully');
+            }else{
+                return HelperController::api_response_format(200, $tempReturn, 'Media deleted successfully');
+            }
+        }else{
+            return HelperController::api_response_format(200, $tempReturn, 'URL/Link deleted successfully');
+        }
     }
 
     /**
@@ -318,7 +379,7 @@ class MediaController extends Controller
             $mediaLesson->visible = ($mediaLesson->visible == 1) ? 0 : 1;
             $mediaLesson->save();
 
-            return HelperController::api_response_format(200, $media, 'Toggle Successfully');
+            return HelperController::api_response_format(200, $media, 'Toggled successfully');
         } catch (Exception $ex) {
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
