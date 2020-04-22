@@ -190,7 +190,7 @@ class AssigmentsController extends Controller
             $assignment->content = $request->content;
         $assignment->name = $request->name;
         $assignment->save();
-        return HelperController::api_response_format(200, $body = $assignment, $message = 'assignment added');
+        return HelperController::api_response_format(200, $body = $assignment, $message = 'Assignment added successfully');
     }
 
     /*
@@ -228,7 +228,7 @@ class AssigmentsController extends Controller
             $assigment->name = $request->name;
         $assigment->save();
 
-        return HelperController::api_response_format(200, $body = $assigment, $message = 'assigment edited');
+        return HelperController::api_response_format(200, $body = $assigment, $message = 'Assignment edited successfully');
     }
     public function updateAssignmentLesson(Request $request)
     {
@@ -246,7 +246,7 @@ class AssigmentsController extends Controller
         ]);
             $AssignmentLesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             if (!isset($AssignmentLesson)) {
-                return HelperController::api_response_format(400, $message = 'Assignment Lesson Not Found');
+                return HelperController::api_response_format(400, $message = 'Assignment lesson not found');
             }
             if ($request->filled('is_graded'))
                 $AssignmentLesson->is_graded = $request->is_graded;
@@ -288,7 +288,7 @@ class AssigmentsController extends Controller
             // $all[] = Lesson::find($lesson_id)->module('Assigments', 'assignment')->get();
         $all = AssignmentLesson::all();
 
-        return HelperController::api_response_format(200, $all, $message = 'Assignment Lesson Updated Successfully');
+        return HelperController::api_response_format(200, $all, $message = 'Assignment lesson edited successfully');
     }
 
     /*
@@ -391,7 +391,7 @@ class AssigmentsController extends Controller
 
         $userassigment->submit_date = Carbon::now();
         $userassigment->save();
-        return HelperController::api_response_format(200, $body = $userassigment, $message = 'your answer is submitted');
+        return HelperController::api_response_format(200, $body = $userassigment, $message = 'Answer submitted successfully');
     }
 
     /*
@@ -419,7 +419,7 @@ class AssigmentsController extends Controller
         $userassigment->grade = $request->grade;
         $userassigment->status_id = 1;
         $userassigment->save();
-        return HelperController::api_response_format(200, $body = $userassigment, $message = 'assigment graded sucess');
+        return HelperController::api_response_format(200, $body = $userassigment, $message = 'Grade submitted successfully');
     }
     public function editGradeAssignment(Request $request)
     {
@@ -440,7 +440,7 @@ class AssigmentsController extends Controller
         }
         $userassigment->grade = $request->grade;
         $userassigment->save();
-        return HelperController::api_response_format(200, $body = $userassigment, $message = 'assigment graded sucess');
+        return HelperController::api_response_format(200, $body = $userassigment, $message = 'Grade edited successfully');
     }
 
     /*
@@ -476,7 +476,7 @@ class AssigmentsController extends Controller
                 $userassigment->override = 1;
                 $userassigment->save();
             }
-            return HelperController::api_response_format(200, $body =  $usersIDs, $message = 'those users now can submit');
+            return HelperController::api_response_format(200, $body =  $usersIDs, $message = 'Those users now can submit');
         }
     }
 
@@ -495,7 +495,7 @@ class AssigmentsController extends Controller
         $assigment->delete();
         $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
 
-        return HelperController::api_response_format(200, $all, $message = 'Assigment Lesson deleted succesfully');
+        return HelperController::api_response_format(200, $all, $message = 'Assignment lesson deleted successfully');
     }
 
     public function deleteAssignment(Request $request)
@@ -506,7 +506,7 @@ class AssigmentsController extends Controller
         $assign = Assignment::where('id', $request->assignment_id);
         $assign->delete();
 
-        return HelperController::api_response_format(200, Assignment::all(), $message = 'Assigment deleted succesfully');
+        return HelperController::api_response_format(200, Assignment::all(), $message = 'Assignment deleted successfully');
     }
 
 
@@ -687,6 +687,6 @@ class AssigmentsController extends Controller
         }
         // $all = AssignmentLesson::where('assignment_id','!=', $request->assignment_id)->get();
 
-        return HelperController::api_response_format(200, $assignmentLesson, 'Assignment is assigned to a lesson Successfully');
+        return HelperController::api_response_format(200, $assignmentLesson, 'Assignment assigned to lesson successfully');
     }
 }
