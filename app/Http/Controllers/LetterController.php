@@ -129,4 +129,5 @@ class LetterController extends Controller
         return HelperController::api_response_format(200, 'Letter Assigned Successfully');
     }
 
+    
 }
