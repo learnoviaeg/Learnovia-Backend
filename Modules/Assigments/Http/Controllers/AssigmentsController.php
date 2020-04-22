@@ -288,7 +288,7 @@ class AssigmentsController extends Controller
             // $all[] = Lesson::find($lesson_id)->module('Assigments', 'assignment')->get();
         $all = AssignmentLesson::all();
 
-        return HelperController::api_response_format(200, $all, $message = 'Assignment lesson edited successfully');
+        return HelperController::api_response_format(200, $all, $message = 'Assignment edited successfully');
     }
 
     /*
@@ -495,7 +495,7 @@ class AssigmentsController extends Controller
         $assigment->delete();
         $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
 
-        return HelperController::api_response_format(200, $all, $message = 'Assignment lesson deleted successfully');
+        return HelperController::api_response_format(200, $all, $message = 'Assignment deleted successfully');
     }
 
     public function deleteAssignment(Request $request)
@@ -687,6 +687,6 @@ class AssigmentsController extends Controller
         }
         // $all = AssignmentLesson::where('assignment_id','!=', $request->assignment_id)->get();
 
-        return HelperController::api_response_format(200, $assignmentLesson, 'Assignment assigned to lesson successfully');
+        return HelperController::api_response_format(200, $assignmentLesson, 'Assignment added successfully');
     }
 }
