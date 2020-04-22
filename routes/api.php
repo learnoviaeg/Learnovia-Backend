@@ -331,6 +331,7 @@ Route::group(['prefix' => 'letter', 'middleware' => ['auth:api']], function () {
     Route::post('delete', 'LetterController@delete')->name('deleteletter')->middleware('permission:letter/delete');
     Route::get('get', 'LetterController@get')->name('getletter')->middleware('permission:letter/get');
     Route::post('assign', 'LetterController@assignLetterToCourse')->name('assignletter')->middleware('permission:letter/assign');
+    Route::get('get-with-course', 'LetterController@GetLettersWithCourse')->name('getwithcourse')->middleware('permission:letter/get-with-course');
 });
 
 Route::group(['prefix' => 'event', 'middleware' => 'auth:api'], function () {
