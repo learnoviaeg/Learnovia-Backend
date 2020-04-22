@@ -140,11 +140,10 @@ class ScaleController extends Controller
         ]);
 
         $course_segment=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
-
         if(isset($request->id))
         {
             $scale_id=scale::find($request->id);
-            $scale_id->formate = unserialize($scale_id->formate);
+            $scale_id->formate = @unserialize($scale_id->formate);
             return HelperController::api_response_format(200,$scale_id );
         }
         $scales1[]=scale::whereNUll('course_segment')->get();
@@ -156,8 +155,9 @@ class ScaleController extends Controller
         foreach($scales as $key=>$ss)
         {
             if(count($ss) > 0)
-                foreach($ss as $scale)
-                    $scale['formate'] = unserialize($scale['formate']);
+                {foreach($ss as $scale)
+                   { 
+                        $scale['formate'] = @unserialize($scale['formate']);}}
             else
                 unset($scales[$key]);
         }
