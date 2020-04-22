@@ -292,6 +292,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/delete', 'title' => 'Delete Letter']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/get', 'title' => 'Get Letter']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/assign', 'title' => 'assign Letter']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'letter/get-with-course', 'title' => 'get letter with course']);
 
 
             //contract
