@@ -652,7 +652,7 @@ class QuizController extends Controller
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
 
-        $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->get();
+        $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', Auth::id())->get();
         $quiz['allow_edit'] = true;
         $userquizze = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('id');
         $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('answered','1')->pluck('user_quiz_id')->unique()->count();
