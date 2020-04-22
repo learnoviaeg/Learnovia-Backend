@@ -454,7 +454,7 @@ class UserQuizController extends Controller
         foreach ($users as $user_id){
             $All_attemp=[];
             $user = User::where('id',$user_id)->first();
-            if(!$user->can('site/quiz/store_user_quiz'))
+            if( $user != null && !$user->can('site/quiz/store_user_quiz'))
                 continue;
             
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
