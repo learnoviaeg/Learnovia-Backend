@@ -437,6 +437,7 @@ class UserQuizController extends Controller
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
 
         $users=Enroll::where('course_segment',Lesson::find($request->lesson_id)->course_segment_id)->pluck('user_id')->toArray();
+        
         $Submitted_users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->distinct('user_id')->pluck('user_id')->count();
 
         if (!isset($quiz_lesson))
@@ -454,7 +455,12 @@ class UserQuizController extends Controller
         foreach ($users as $user_id){
             $All_attemp=[];
             $user = User::where('id',$user_id)->first();
-            if($user == null && !$user->can('site/quiz/store_user_quiz'))
+            if($user == null)
+            {
+                unset($user);
+                continue;
+            }
+            if( !$user->can('site/quiz/store_user_quiz'))
                 continue;
             
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
