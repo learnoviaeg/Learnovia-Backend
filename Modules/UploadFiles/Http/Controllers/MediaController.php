@@ -332,6 +332,7 @@ class MediaController extends Controller
         ]);
 
         $media_type = media::whereId($request->mediaId)->pluck('type')->first();
+        $media_show = media::whereId($request->mediaId)->pluck('show')->first();
         $file = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id', $request->lesson_id)->first();
         $file->delete();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
@@ -351,7 +352,12 @@ class MediaController extends Controller
                 return HelperController::api_response_format(200, $tempReturn, 'Media deleted successfully');
             }
         }else{
-            return HelperController::api_response_format(200, $tempReturn, 'URL/Link deleted successfully');
+            if($media_show == 1)
+            {
+                 return HelperController::api_response_format(200, $tempReturn, 'URL deleted successfully');
+            }else{
+                return HelperController::api_response_format(200, $tempReturn, 'Link deleted successfully');
+            }
         }
     }
 
