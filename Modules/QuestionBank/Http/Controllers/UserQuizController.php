@@ -418,7 +418,7 @@ class UserQuizController extends Controller
             $userQuiz->feedback = $request->feedback;
             $user_grade->update(['feedback'=> $request->feedback]);
         }
-        return HelperController::api_response_format(200, $body = $user_grade, $message = 'Quiz graded sucess');
+        return HelperController::api_response_format(200, $body = $user_grade, $message = 'Grade submitted successfully');
     }
 
     public function get_all_users_quiz_attempts(Request $request)

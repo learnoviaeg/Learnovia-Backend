@@ -135,7 +135,7 @@ class QuizLessonController extends Controller
                 'index'     => LessonComponent::getNextIndex($lessons)
             ]);
         }
-        return HelperController::api_response_format(200, $quizLesson,'Quiz added to lesson Successfully');
+        return HelperController::api_response_format(200, $quizLesson,'Quiz added successfully');
     }
 
     /**
@@ -214,7 +214,7 @@ class QuizLessonController extends Controller
         ]);
         user::notify($requ);
         $all = Lesson::find($request->lesson_id)->module('QuestionBank', 'quiz')->get();
-        return HelperController::api_response_format(200, $all,'Quiz updated atteched to lesson Successfully');
+        return HelperController::api_response_format(200, $all,'Quiz edited successfully');
     }
 
     public function getGradeCategory(Request $request)
@@ -247,7 +247,7 @@ class QuizLessonController extends Controller
 
         $quizLesson->delete();
         $all = Lesson::find($request->lesson_id)->module('QuestionBank', 'quiz')->get();
-        return HelperController::api_response_format(200, $all,'Quiz lesson deleted Successfully');
+        return HelperController::api_response_format(200, $all,'Quiz deleted successfully');
     }
 
     public function getQuizInLesson(Request $request)
