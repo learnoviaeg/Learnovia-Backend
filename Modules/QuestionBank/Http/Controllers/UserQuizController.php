@@ -254,7 +254,7 @@ class UserQuizController extends Controller
         foreach($answer2 as $ans)
             $ans->update(['answered'=>'1']);
 
-        return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
+        return HelperController::api_response_format(200, $allData, 'Answer submitted successfully');
     }
 
     public function estimateEssayandAndWhy(Request $request)
@@ -359,7 +359,7 @@ class UserQuizController extends Controller
             $userAnswer->save();
         }
 
-        return HelperController::api_response_format(200, $allData, 'Quiz Answer Registered Successfully');
+        return HelperController::api_response_format(200, $allData, 'Grade submitted successfully');
     }
 
     // public function get_user_quiz(Request $request)
