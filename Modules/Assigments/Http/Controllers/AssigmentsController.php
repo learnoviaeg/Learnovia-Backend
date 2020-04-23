@@ -551,6 +551,7 @@ class AssigmentsController extends Controller
                 $assignment['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
             }
             }
+            $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
             }
             ////////teacher
@@ -568,6 +569,7 @@ class AssigmentsController extends Controller
             }
         }
             $assignment['user_submit'] = $studentassigments;
+            $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
 
