@@ -162,7 +162,7 @@ class QuizController extends Controller
                 'Shuffle' => quiz::checkSuffle($request),
                 'feedback' => isset($request->feedback) ? $request->feedback : 1,
             ]);
-            return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
+            return HelperController::api_response_format(200, $quiz,'Quiz added successfully');
         }
 
         if ($questionsIDs != null) {
@@ -186,7 +186,7 @@ class QuizController extends Controller
                 $question->question_course;
                 $question->question_answer;
             }
-            return HelperController::api_response_format(200, $quiz,'Quiz added Successfully');
+            return HelperController::api_response_format(200, $quiz,'Quiz added successfully');
         }
         return HelperController::api_response_format(200, null, 'There\'s no Questions for this course in Question Bank');
     }
@@ -275,7 +275,7 @@ class QuizController extends Controller
 
             $quiz->Question()->detach();
 
-            return HelperController::api_response_format(200, $quiz,'Quiz Updated Successfully');
+            return HelperController::api_response_format(200, $quiz,'Quiz edited successfully');
         }
 
         $quiz->update([
@@ -298,7 +298,7 @@ class QuizController extends Controller
             $question->question_course;
             $question->question_answer;
         }
-        return HelperController::api_response_format(200, $quiz,'Quiz Updated Successfully');
+        return HelperController::api_response_format(200, $quiz,'Quiz edited successfully');
     }
 
     public function destroy(Request $request)
@@ -311,7 +311,7 @@ class QuizController extends Controller
         $quiz=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
         // destroy($request->quiz_id);
         $quiz->delete();
-        return HelperController::api_response_format(200, [], 'Quiz deleted Successfully');
+        return HelperController::api_response_format(200, [], 'Quiz deleted successfully');
     }
 
     public function get(Request $request)
