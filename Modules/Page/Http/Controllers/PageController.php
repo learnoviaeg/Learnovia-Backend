@@ -97,7 +97,7 @@ class PageController extends Controller
                 'index' => LessonComponent::getNextIndex($request->Lesson_id)
             ]);
             $TempLesson = Lesson::find($lesson);
-            $usersIDs = Enroll::where('course_segment', $TempLesson->courseSegment->id)->pluck('user_id')->toarray();
+            $usersIDs = Enroll::where('course_segment', $TempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
             User::notify([
                 'id' => $page->id,
                 'message' => 'A new Page is added',
