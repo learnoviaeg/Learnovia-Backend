@@ -33,6 +33,7 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/create','title' => 'create meeting']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/join','title' => 'join meeting']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get','title' => 'get meeting']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-all','title' => 'get meetings']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/getRecord','title' => 'get Record']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/delete','title' => 'Delete Record']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/toggle','title' => 'Toggle Record']);
@@ -42,6 +43,7 @@ class BigbluebuttonController extends Controller
         $role->givePermissionTo('bigbluebutton/create');
         $role->givePermissionTo('bigbluebutton/join');
         $role->givePermissionTo('bigbluebutton/get');
+        $role->givePermissionTo('bigbluebutton/get-all');
         $role->givePermissionTo('bigbluebutton/getRecord');
         $role->givePermissionTo('bigbluebutton/delete');
         $role->givePermissionTo('bigbluebutton/toggle');
@@ -72,7 +74,8 @@ class BigbluebuttonController extends Controller
             'attendee_password' => 'nullable|string',
             'moderator_password' => 'required|string',
             'duration' => 'nullable',
-            'is_recorded' => 'required|bool'
+            'is_recorded' => 'required|bool',
+            'start_date' => 'required|date'
         ]);
 
         if(isset($request->attendee_password)){
@@ -97,86 +100,90 @@ class BigbluebuttonController extends Controller
         $bigbb->attendee_password=$attendee;
         $bigbb->moderator_password=$request->moderator_password;
         $bigbb->duration=$duration;
+        $bigbb->start_date=$request->start_date;
         $bigbb->user_id = Auth::user()->id;
         $bigbb->save();
 
+        $courseseg=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
+        if(!isset($courseseg))
+            return HelperController::api_response_format(200, null ,'Please check active course segments');
+
+        $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
+
+        User::notify([
+            'id' => $bigbb->id,
+            'message' => $request->name.' meeting is created',
+            'from' => Auth::user()->id,
+            'users' => $usersIDs,
+            'course_id' => $request->course_id,
+            'class_id'=>$request->class_id,
+            'lesson_id'=> null,
+            'type' => 'meeting',
+            'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
+            'publish_date'=>Carbon::now()
+        ]);
+
+        return HelperController::api_response_format(200, $bigbb ,'Meeting created Successfully');
+    }
+
+    public function get_meetings()
+    {
+        $meetings=BigbluebuttonModel::where('start_date','<=', Carbon::now())->get();
+        return HelperController::api_response_format(200, $meetings ,'all meetings');
+    }
+
+    public function start_meeting($request)
+    {
         //Creating the meeting
         $bbb = new BigBlueButton();
 
-
         $bbb->getJSessionId();
-        $createMeetingParams = new CreateMeetingParameters($bigbb->id, $request->name);
-        $createMeetingParams->setAttendeePassword($attendee);
-        $createMeetingParams->setModeratorPassword($request->moderator_password);
-        $createMeetingParams->setDuration($duration);
+        $createMeetingParams = new CreateMeetingParameters($request['id'], $request['name']);
+        $createMeetingParams->setAttendeePassword($request['attendee']);
+        $createMeetingParams->setModeratorPassword($request['moderator_password']);
+        $createMeetingParams->setDuration($request['duration']);
         // $createMeetingParams->setRedirect(false);
         $createMeetingParams->setLogoutUrl('dev.learnovia.com/#/');
-        if($request->is_recorded == 1){
+        if($request['is_recorded'] == 1){
             $createMeetingParams->setRecord(true);
             $createMeetingParams->setAllowStartStopRecording(true);
             $createMeetingParams->setAutoStartRecording(true);
         }
         $response = $bbb->createMeeting($createMeetingParams);
-
         if ($response->getReturnCode() == 'FAILED') {
             return 'Can\'t create room! please contact our administrator.';
         } else {
 
-            //Notify students for the Meeting
-            $courseseg=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
-            if(isset($courseseg))
-            {
-                $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
-
-                User::notify([
-                    'id' => $bigbb->id,
-                    'message' => $request->name.' meeting is created',
-                    'from' => Auth::user()->id,
-                    'users' => $usersIDs,
-                    'course_id' => $request->course_id,
-                    'class_id'=>$request->class_id,
-                    'lesson_id'=> null,
-                    'type' => 'meeting',
-                    'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
-                    'publish_date'=>Carbon::now()
-                ]);
-
                 // moderator join the meeting
-                $joinMeetingParams = new JoinMeetingParameters($bigbb->id, Auth::user()->firstname.' '.Auth::user()->lastname , $request->moderator_password);
-                $joinMeetingParams->setRedirect(true);
-                $joinMeetingParams->setJoinViaHtml5(true);
+            $joinMeetingParams = new JoinMeetingParameters($request['id'], Auth::user()->firstname.' '.Auth::user()->lastname , $request->moderator_password);
+            $joinMeetingParams->setRedirect(true);
+            $joinMeetingParams->setJoinViaHtml5(true);
+            $url = $bbb->getJoinMeetingURL($joinMeetingParams);
 
-                $url = $bbb->getJoinMeetingURL($joinMeetingParams);
-
-                if($request->is_recorded == 1){
-                    $createrecordParams = new GetRecordingsParameters();
-                    $createrecordParams->setMeetingId($bigbb->id);
-                    $createrecordParams->setRecordId($bigbb->id);
-                    $createrecordParams->setState(true);
-                    $res= $bbb->getRecordings($createrecordParams);
-                }
-
-                $output = array(
-                    'name' => $request->name,
-                    'duration' => $duration,
-                    'link'=> $url,
-                );
-
-                $final_out = BigbluebuttonModel::find($bigbb->id);
-                $getMeetingInfoParams = new GetMeetingInfoParameters($bigbb->id, '', $bigbb->moderator_password);
-                $response = $bbb->getMeetingInfo($getMeetingInfoParams);
-                if ($response->getReturnCode() == 'FAILED') {
-                    $final_out['join'] = false;
-                } else {
-                    $final_out['join'] = true;
-                }
-
-                return HelperController::api_response_format(200, $final_out ,'Meeting created Successfully');
+            if($request->is_recorded == 1){
+                $createrecordParams = new GetRecordingsParameters();
+                $createrecordParams->setMeetingId($request['id']);
+                $createrecordParams->setRecordId($request['id']);
+                $createrecordParams->setState(true);
+                $res= $bbb->getRecordings($createrecordParams);
             }
-            else
-            {
-                return HelperController::api_response_format(200, null ,'Please check active course segments');
+
+            $output = array(
+                'name' => $request['name'],
+                'duration' => $request['duration'],
+                'link'=> $url,
+            );
+
+            $final_out = BigbluebuttonModel::find($request['id']);
+            $getMeetingInfoParams = new GetMeetingInfoParameters($request['id'], '', $request['moderator_password']);
+            $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+            if ($response->getReturnCode() == 'FAILED') {
+                $final_out['join'] = false;
+            } else {
+                $final_out['join'] = true;
             }
+
+            return $final_out;
         }
     }
 
@@ -191,7 +198,10 @@ class BigbluebuttonController extends Controller
         ]);
 
         $user_name = Auth::user()->firstname.' '.Auth::user()->lastname;
-        $bigbb=BigbluebuttonModel::find($request->id);
+        // $bigbb=BigbluebuttonModel::find($request->id);
+        $bigbb=BigbluebuttonModel::whereId($request->id)->where('start_date','<=', Carbon::now())->first();
+        if(!isset($bigbb))
+            return HelperController::api_response_format(400, null, 'you can\'t access this meeting for now');
         if($bigbb->user_id == Auth::user()->id){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
@@ -231,7 +241,20 @@ class BigbluebuttonController extends Controller
         if($request->filled('id'))
         {
             $bbb = new BigBlueButton();
-            $meet = BigbluebuttonModel::whereId($request->id)->first();
+            // $meet = BigbluebuttonModel::whereId($request->id)->first();
+            $meet=BigbluebuttonModel::whereId($request->id)->where('start_date','<=', Carbon::now())->first();
+            if(!isset($meet))
+                return HelperController::api_response_format(400, null, 'you can\'t access this meeting for now');
+
+            $req = new Request([
+                'duration' => $meet->duration,
+                'attendee' =>$meet->attendee,
+                'id' => $meet->id,
+                'name' => $meet->name,
+                'moderator_password' => $meet->moderator_password,
+                'is_recorded' => $meet->is_recorded
+            ]);
+            self::start_meeting($req);
             $getMeetingInfoParams = new GetMeetingInfoParameters($request->id, '', $meet->moderator_password);
             $response = $bbb->getMeetingInfo($getMeetingInfoParams);
             if ($response->getReturnCode() == 'FAILED') {
