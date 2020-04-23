@@ -484,6 +484,9 @@ class CourseController extends Controller
                                 }
 
                                 $lessonn[$com->name] = $Component->get();
+                                foreach($lessonn[$com->name] as $le){
+                                    $le['course_id']=(int)$request->course_id;
+                                }
                                 if($com->name == 'Quiz'){
                                  foreach ($lessonn['Quiz'] as $one){
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
