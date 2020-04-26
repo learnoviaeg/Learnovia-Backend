@@ -472,7 +472,10 @@ class UserQuizController extends Controller
                     'quiz_id' => $request->quiz_id,
                 ]);
                 // $All_attemp[]=self::get_fully_detailed_attempt($req);
-                $All_attemp[]= $attem->id;
+                $user_Attemp['id']= $attem->id;
+                $user_Attemp["submit_time"]= $attem->submit_time;
+                array_push($All_attemp, $user_Attemp);
+                
             }
 
             $attemps['id'] = $user->id;
