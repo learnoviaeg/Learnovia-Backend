@@ -150,7 +150,7 @@ class MediaController extends Controller
                     // $media->name = $name;
                     $media->size = $size;
                     $media->attachment_name = $fileName;
-                    $media->link = url('public/storage/media/' . $name);
+                    $media->link = url('storage/media/' . $name);
                 }
 
                 if ($request->type == 1) {
@@ -270,7 +270,7 @@ class MediaController extends Controller
             $media->type = $request->Imported_file->getClientMimeType();
             $media->size = $size;
             $media->attachment_name = $fileName;
-            $media->link = url('public/storage/media/' . $name);
+            $media->link = url('storage/media/' . $name);
             Storage::disk('public')->putFileAs('media/', $request->Imported_file, $fileName);
         }
 
