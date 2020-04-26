@@ -11,7 +11,7 @@ class userQuiz extends Model
         'quiz_lesson_id','user_id','status_id',
         'override','feedback','grade','attempt_index',
         'device_data','browser_data','ip',
-        'open_time'
+        'open_time','submit_time'
     ];
 
     public function quiz_lesson()
