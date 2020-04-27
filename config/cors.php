@@ -25,6 +25,7 @@ return [
            'http://qaitbay.learnovia.com/',
            'http://localhost:4200',
            'https://dev.learnovia.com',
+           'https://us-central1-learnovia-notifications.cloudfunctions.net/subscribeToTopic',
         ],
 
         'allow_methods' => [
