@@ -28,4 +28,7 @@ class file extends Model
     public function getUrl2Attribute() {
         return url(Storage::url($this->attributes['url2']));
       }
+      public function getUrl1Attribute() {
+        return 'https://docs.google.com/viewer?url=' .url(Storage::url($this->attributes['url2']));
+      }
 }
