@@ -463,7 +463,7 @@ class UserQuizController extends Controller
             if( !$user->can('site/quiz/store_user_quiz'))
                 continue;
             
-            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
+            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
             foreach($attems as $attem)
             {
                 $req=new Request([
