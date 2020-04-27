@@ -211,7 +211,7 @@ class FilesController extends Controller
                 $file->attachment_name = $fileName;
                 $file->user_id = Auth::user()->id;
                 $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-                $file->url2 = url('storage/files/' . $name);
+                $file->url2 = 'files/' . $name;
                 $check = $file->save();
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
@@ -365,7 +365,7 @@ class FilesController extends Controller
             $name = uniqid() . '.' . $extension;
             Storage::disk('public')->putFileAs('files/', $request->Imported_file, $name);
             $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-            $file->url2 = url('storage/files/' . $name);
+            $file->url2 = 'files/' . $name;
             $file->type = $extension;
             $fileName =  $request->Imported_file->getClientOriginalName();
             $file->description = $name;
