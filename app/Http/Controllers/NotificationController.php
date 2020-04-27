@@ -55,6 +55,7 @@ class NotificationController extends Controller
     * @param no required parameters
     * @return all notifications.
     */
+
     public function getallnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data','read_at','id')->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();
@@ -79,24 +80,6 @@ class NotificationController extends Controller
                         $data[$i]['title'] = $not->data['title'];
                     $data[$i]['title'] = null;
                 }
-            else{
-                if ($not->data['type'] == 'announcement')
-                    {
-                        $announce_id = $not->data['id'];
-                        $annocument = announcement::find($announce_id);
-                        if($annocument!= null){
-                            if ($annocument->publish_date <= Carbon::now()) {
-                                $customize = announcement::whereId($announce_id)->first(['id','title']);
-                                $data[$i]=$customize;
-                                $data[$i]['read_at'] = $not->read_at;
-                                $data[$i]['notification_id'] = $not->id;
-                                $data[$i]['message'] = $not->data['message'];
-                                $data[$i]['publish_date'] = $not->data['publish_date'];
-                                $data[$i]['type'] = $not->data['type'];
-                            }
-                        }
-                    }
-                }
             }
             $i++;
         }
@@ -119,14 +102,17 @@ class NotificationController extends Controller
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
         foreach ($noti as $not) {
             $not->data= json_decode($not->data, true);
-            $parse=Carbon::parse($not->data['publish_date']);
-
-            if(!isset($parse)){
-                $data[] = $not->data;
-            }
-            elseif($parse < Carbon::now())
+            if($not->data['type'] != 'announcement')
             {
-                $data[] = $not->data;
+                $parse=Carbon::parse($not->data['publish_date']);
+
+                if(!isset($parse)){
+                    $data[] = $not->data;
+                }
+                elseif($parse < Carbon::now())
+                {
+                    $data[] = $not->data;
+                }
             }
         }
         return HelperController::api_response_format(200, $data,'all user Unread notifications');

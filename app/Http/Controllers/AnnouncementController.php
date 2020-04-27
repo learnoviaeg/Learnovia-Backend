@@ -80,12 +80,14 @@ class AnnouncementController extends Controller
         //Assign Conditions
         if ($request->assign == 'all') {
             $toUser = User::get();
+            $topic = 'all';
         } else if ($request->assign == 'course') {
             $request->validate([
                 'course_id' => 'required|exists:courses,id',
             ]);
 
             $course = Course::find($request->course_id);
+            $topic = $course->name.'Course';
             $course_seg = $course->courseSegments;
             foreach ($course_seg as $cs) {
                 foreach ($cs->enroll as $enroll) {
@@ -98,6 +100,7 @@ class AnnouncementController extends Controller
             ]);
 
             $class = Classes::find($request->class_id);
+            $topic = $class->name.'Class';
             $seg_class = $class->classlevel->segmentClass;
             $course_seg_id = array();
             foreach ($seg_class as $sg) {
@@ -117,6 +120,7 @@ class AnnouncementController extends Controller
             ]);
 
             $level = Level::find($request->level_id);
+            $topic = $level->name.'Level';
             $class_level_id = $level->yearlevel->classLevels;
 
             foreach ($class_level_id as $cl) {
@@ -134,6 +138,7 @@ class AnnouncementController extends Controller
             ]);
 
             $year = AcademicYear::find($request->year);
+            $topic = $year->name.'Year';
             $year_level = $year->Acyeartype->yearLevel;
 
             foreach ($year_level as $yea) {
@@ -153,6 +158,7 @@ class AnnouncementController extends Controller
             ]);
 
             $type = AcademicType::find($request->type_id);
+            $topic = $type->name.'Type';
             $year_level = $type->Actypeyear->yearLevel;
 
             foreach ($year_level as $yea) {
@@ -171,7 +177,9 @@ class AnnouncementController extends Controller
                 'segment_id' => 'required|exists:segments,id',
             ]);
 
-            $segmentclass = SegmentClass::find($request->segment_id);
+            $segmentclass = SegmentClass::where('segment_id',$request->segment_id)->first();
+            $segment = Segment::find($request->segment_id)->pluck('name')->first();
+            $topic = $segment.'Segment';
             foreach ($segmentclass->courseSegment as $cs) {
                 foreach ($cs->enroll as $enroll) {
                     $users[] = $enroll->user_id;
@@ -209,7 +217,8 @@ class AnnouncementController extends Controller
         $requ = ([
             'id' => $ann->id,
             'type' => 'announcement',
-            'publish_date' => $publishdate
+            'publish_date' => $publishdate,
+            'topic' => $topic
         ]);
 
         // return $requ;
@@ -553,7 +562,8 @@ class AnnouncementController extends Controller
         $user_id = Auth::user()->id;
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
             ->orderBy('created_at')
-            ->get(['data' , 'read_at']);
+            ->get(['data' , 'read_at','id']);
+     
         $notif = collect([]);
         $count = 0;
         foreach ($noti as $not) {
@@ -567,7 +577,8 @@ class AnnouncementController extends Controller
                                     ->first(['id', 'title', 'description', 'attached_file','start_date','due_date','publish_date']);
                         if(!$customize)
                             continue;
-                        $customize->seen = $not->read_at;
+                        $customize->read_at = $not->read_at;
+                        $customize->notification_id = $not->id;
                         $customize->attached_file = attachment::where('id', $customize->attached_file)->first();
                         $notif->push($customize);
                     }
@@ -643,5 +654,29 @@ class AnnouncementController extends Controller
                 $announce['type']=$type;
         }
         return HelperController::api_response_format(200, $announce);
+    }
+
+
+
+    public function unreadannouncements(Request $request)
+    {
+        $data = [];
+        $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
+        foreach ($noti as $not) {
+            $not->data= json_decode($not->data, true);
+            if($not->data['type'] == 'announcement')
+            {
+                $parse=Carbon::parse($not->data['publish_date']);
+
+                if(!isset($parse)){
+                    $data[] = $not->data;
+                }
+                elseif($parse < Carbon::now())
+                {
+                    $data[] = $not->data;
+                }
+            }
+        }
+        return HelperController::api_response_format(200, $data,'all user unread announcements');
     }
 }
