@@ -706,4 +706,17 @@ class AnnouncementController extends Controller
         }
         return HelperController::api_response_format(200, $data,'all user unread announcements');
     }
+
+    public function markasread(Request $request)
+    {
+        $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+        foreach ($noti as $not) {
+            $not->data= json_decode($not->data, true);
+            if($not->data['type'] == 'announcement')
+            {
+                DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+            }
+        }
+        return HelperController::api_response_format(200, null, 'Read');
+    }
 }
