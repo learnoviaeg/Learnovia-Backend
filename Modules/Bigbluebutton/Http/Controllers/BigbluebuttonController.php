@@ -241,9 +241,6 @@ class BigbluebuttonController extends Controller
             $meet = BigbluebuttonModel::whereId($request->id)->first();
             $meet['join'] = false;
 
-            if(!isset($meet))
-                return HelperController::api_response_format(400, null, 'you can\'t access this meeting for now');
-
             $req = new Request([
                 'duration' => $meet->duration,
                 'attendee' =>$meet->attendee,
