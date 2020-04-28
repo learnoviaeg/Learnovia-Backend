@@ -243,8 +243,8 @@ class BigbluebuttonController extends Controller
             $bbb = new BigBlueButton();
             // $meet = BigbluebuttonModel::whereId($request->id)->first();
             $meet=BigbluebuttonModel::whereId($request->id)->where('start_date','<=', Carbon::now())->first();
-            if(!isset($meet))
-                return HelperController::api_response_format(400, null, 'you can\'t access this meeting for now');
+            // if(!isset($meet))
+            //     return HelperController::api_response_format(400, null, 'you can\'t access this meeting for now');
 
             $req = new Request([
                 'duration' => $meet->duration,
@@ -272,7 +272,8 @@ class BigbluebuttonController extends Controller
         if($request->filled('course') && $request->filled('class'))
         {
             $bbb = new BigBlueButton();
-            $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)->get();
+            $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)
+                            ->where('start_date','<=', Carbon::now())->get();
             // return $meet;
             foreach($meet as $m)
             {
