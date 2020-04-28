@@ -709,14 +709,34 @@ class AnnouncementController extends Controller
 
     public function markasread(Request $request)
     {
-        $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
-        foreach ($noti as $not) {
-            $not->data= json_decode($not->data, true);
-            if($not->data['type'] == 'announcement')
-            {
-                DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+        $request->validate([
+            'id' => 'exists:notifications,id',
+        ]);
+        $session_id = Auth::User()->id;
+        if(isset($request->id))
+        {
+            $note = DB::table('notifications')->where('id', $request->id)->first();
+            if ($note->notifiable_id == $session_id){
+                $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
+                $print=self::get($request);
+                return $print;
             }
         }
-        return HelperController::api_response_format(200, null, 'Read');
+        else
+        {
+            // $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+            foreach ($noti as $not) {
+                $not->data= json_decode($not->data, true);
+                if($not->data['type'] == 'announcement')
+                {
+                    DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                }
+            }
+            $print=self::get($request);
+            return $print;
+
+        }
+        return HelperController::api_response_format(400, $body = [], $message = 'You cannot seen this announcement');
     }
 }
