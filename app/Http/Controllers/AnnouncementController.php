@@ -80,14 +80,12 @@ class AnnouncementController extends Controller
         //Assign Conditions
         if ($request->assign == 'all') {
             $toUser = User::get();
-            $topic = 'all';
         } else if ($request->assign == 'course') {
             $request->validate([
                 'course_id' => 'required|exists:courses,id',
             ]);
 
             $course = Course::find($request->course_id);
-            $topic = $course->name.'Course';
             $course_seg = $course->courseSegments;
             foreach ($course_seg as $cs) {
                 foreach ($cs->enroll as $enroll) {
@@ -100,7 +98,6 @@ class AnnouncementController extends Controller
             ]);
 
             $class = Classes::find($request->class_id);
-            $topic = $class->name.'Class';
             $seg_class = $class->classlevel->segmentClass;
             $course_seg_id = array();
             foreach ($seg_class as $sg) {
@@ -120,7 +117,6 @@ class AnnouncementController extends Controller
             ]);
 
             $level = Level::find($request->level_id);
-            $topic = $level->name.'Level';
             $class_level_id = $level->yearlevel->classLevels;
 
             foreach ($class_level_id as $cl) {
@@ -138,7 +134,6 @@ class AnnouncementController extends Controller
             ]);
 
             $year = AcademicYear::find($request->year);
-            $topic = $year->name.'Year';
             $year_level = $year->Acyeartype->yearLevel;
 
             foreach ($year_level as $yea) {
@@ -158,7 +153,6 @@ class AnnouncementController extends Controller
             ]);
 
             $type = AcademicType::find($request->type_id);
-            $topic = $type->name.'Type';
             $year_level = $type->Actypeyear->yearLevel;
 
             foreach ($year_level as $yea) {
@@ -179,7 +173,6 @@ class AnnouncementController extends Controller
 
             $segmentclass = SegmentClass::where('segment_id',$request->segment_id)->first();
             $segment = Segment::find($request->segment_id)->pluck('name')->first();
-            $topic = $segment.'Segment';
             foreach ($segmentclass->courseSegment as $cs) {
                 foreach ($cs->enroll as $enroll) {
                     $users[] = $enroll->user_id;
@@ -218,24 +211,26 @@ class AnnouncementController extends Controller
             'id' => $ann->id,
             'type' => 'announcement',
             'publish_date' => $publishdate,
-            'topic' => $topic
         ]);
 
         // return $requ;
         //sending announcements
         if ($request->assign == 'all') {
             foreach ($toUser as $use) {
-                if($request->filled('role'))
+                if($use->id != Auth::user()->id)
                 {
-                    $role_id=$use->roles->pluck('id')->first();
-                    if($role_id == $request->role)
-                        $requ['users'][] = $use->id;
-                    else
-                        continue;
-                }
+                    if($request->filled('role'))
+                    {
+                        $role_id=$use->roles->pluck('id')->first();
+                        if($role_id == $request->role)
+                            $requ['users'][] = $use->id;
+                        else
+                            continue;
+                    }
 
-                else
-                    $requ['users'][] = $use->id;
+                    else
+                        $requ['users'][] = $use->id;
+                }
             }
             // return $requ;
             if(!isset($requ['users']))
@@ -247,18 +242,29 @@ class AnnouncementController extends Controller
             {
                 foreach($user as $use)
                 {
-                    $user_obj=User::where('id',$use)->get()->first();
-                    $role_id=$user_obj->roles->pluck('id')->first();
-                    if($role_id == $request->role)
-                        $requ['users'][] = $use;
-                    else
-                        continue;
+                    if($use != Auth::user()->id){
+
+                        $user_obj=User::where('id',$use)->get()->first();
+                        $role_id=$user_obj->roles->pluck('id')->first();
+                        if($role_id == $request->role)
+                            $requ['users'][] = $use;
+                        else
+                            continue;
+                    }
                 }
                 if(!isset($requ['users']))
                     return HelperController::api_response_format(201,'No User');
             }
-            else
-                $requ['users'] = $user;
+            else{
+                foreach($user as $use)
+                {
+                    if($use != Auth::user()->id)
+                    {
+                         $requ['users'] = $user;
+                    }
+                }
+            }
+            
             $notificatin = User::notify($requ);
         }
 

@@ -110,21 +110,30 @@ class User extends Authenticatable
         }
         $access_token = $client->getAccessToken()['access_token'];
         $user_token=User::whereIn('id',$request['users'])->whereNotNull('token')->pluck('token');
-
-    if($request['type'] !='announcement'){
         foreach($user_token as $token)
         {
-            $fordata = array(
+            if($request['type'] !='announcement'){
+                $fordata = array(
+                        "id" => (string)$request['id'],
+                        "message" => $request['message'],
+                        "fromm" => (string)$request['from'],
+                        "type" => $request['type'],
+                        "course_id" => (string)$request['course_id'],
+                        "class_id" => (string)$request['class_id'],
+                        "lesson_id"=> (string)$request['lesson_id'],
+                        "publish_date" => $request['publish_date'],
+                        "read_at" => null
+                    );
+            }else{
+                $request['message']='A new announcement is added';
+                $fordata = array(
                     "id" => (string)$request['id'],
-                    "message" => $request['message'],
-                    "fromm" => (string)$request['from'],
                     "type" => $request['type'],
-                    "course_id" => (string)$request['course_id'],
-                    "class_id" => (string)$request['class_id'],
-                    "lesson_id"=> (string)$request['lesson_id'],
+                    "message" => $request['message'],
                     "publish_date" => $request['publish_date'],
                     "read_at" => null
                 );
+            }
             $data = json_encode(array(
                 'message' => array(
                     "token" => $token,
@@ -150,43 +159,7 @@ class User extends Authenticatable
                 ], 
                 'body' => $data
             ]);
-    }}else{
-        $request['message']='A new announcement is added';
-        $fordata = array(
-            "id" => (string)$request['id'],
-            "type" => $request['type'],
-            "message" => $request['message'],
-            "publish_date" => $request['publish_date'],
-            "read_at" => null
-        );
-        $top = str_replace(' ','',$request['topic']);
-    $data = json_encode(array(
-        'message' => array(
-            "topic" => $top,
-            "notification" => array(
-                "body" => $request['message'],
-                "title" => 'Learnovia',
-                "image" => "http://169.44.167.50/backend/public/storage/Announcement/5e958c73bf38bindex.jpg"
-            ),
-            "webpush" => array(
-                "fcm_options" => array(
-                    "link" => "http://dev.learnovia.com",
-                    "analytics_label" => "Learnovia"
-                ),
-                "data" => $fordata
-            ) 
-        )
-    ));
-    $clientt = new Client();
-    $res = $clientt->request('POST', 'https://fcm.googleapis.com/v1/projects/learnovia-notifications/messages:send', [
-        'headers'   => [
-            'Authorization' => 'Bearer '. $access_token,
-            'Content-Type' => 'application/json'
-        ], 
-        'body' => $data
-    ]);
-
-    }
+        }
         $validater = Validator::make($request, [
             'users'=>'required|array',
             'users.*' => 'required|integer|exists:users,id',
