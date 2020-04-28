@@ -198,10 +198,7 @@ class BigbluebuttonController extends Controller
         ]);
 
         $user_name = Auth::user()->firstname.' '.Auth::user()->lastname;
-        // $bigbb=BigbluebuttonModel::find($request->id);
-        $bigbb=BigbluebuttonModel::whereId($request->id)->where('start_date','<=', Carbon::now())->first();
-        if(!isset($bigbb))
-            return HelperController::api_response_format(400, null, 'you can\'t access this meeting for now');
+        $bigbb=BigbluebuttonModel::find($request->id);
         if($bigbb->user_id == Auth::user()->id){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
@@ -244,7 +241,6 @@ class BigbluebuttonController extends Controller
             $meet = BigbluebuttonModel::whereId($request->id)->first();
             $meet['join'] = false;
 
-            // $meet_valid=$meet->where('start_date','<=', Carbon::now());
             if(!isset($meet))
                 return HelperController::api_response_format(400, null, 'you can\'t access this meeting for now');
 
