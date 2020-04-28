@@ -272,7 +272,8 @@ class BigbluebuttonController extends Controller
         if($request->filled('course') && $request->filled('class'))
         {
             $bbb = new BigBlueButton();
-            $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)->get();
+            $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)
+                            ->where('start_date','<=', Carbon::now())->get();
             // return $meet;
             foreach($meet as $m)
             {
