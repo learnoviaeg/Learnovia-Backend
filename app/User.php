@@ -126,6 +126,11 @@ class User extends Authenticatable
                     );
             }else{
                 $request['message']='A new announcement is added';
+                if($request['attached_file'] != null)
+                    $att= (string) $request['attached_file'];
+                else
+                    $att=$request['attached_file'];
+                    
                     $fordata = array(
                         "id" => (string)$request['id'],
                         "type" => $request['type'],
@@ -136,7 +141,7 @@ class User extends Authenticatable
                         "description" => $request['description'],
                         "start_date" => $request['start_date'],
                         "due_date" => $request['due_date'],
-                        "attached_file" => (string) $request['attached_file'],
+                        "attached_file" => $att,
                     );
             }
             $data = json_encode(array(
