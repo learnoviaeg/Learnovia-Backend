@@ -207,12 +207,33 @@ class AnnouncementController extends Controller
             $ann->save();
         }
 
-        $requ = ([
-            'id' => $ann->id,
-            'type' => 'announcement',
-            'publish_date' => $publishdate,
-        ]);
+        if($file_id == null )
+        {
+            $requ = ([
+                'id' => $ann->id,
+                'type' => 'announcement',
+                'publish_date' => $publishdate,
+                'title' => $request->title,
+                'description' => $request->description,
+                'attached_file' => $file_id,
+                'start_date' => $start_date,
+                'due_date' => $request->due_date
+            ]);
+        }else{
+            $attached = attachment::where('id', $file_id)->first();
+            $requ = ([
+                'id' => $ann->id,
+                'type' => 'announcement',
+                'publish_date' => $publishdate,
+                'title' => $request->title,
+                'description' => $request->description,
+                'attached_file' => $attached,
+                'start_date' => $start_date,
+                'due_date' => $request->due_date
+            ]);
 
+        }
+        
         // return $requ;
         //sending announcements
         if ($request->assign == 'all') {
