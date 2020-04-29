@@ -41,6 +41,6 @@ class attachment extends Model
         return $attachment;
     }
     public function getPathAttribute() {
-        return url('storage/'. $this->attributes['path']);
+      return url(Storage::url($this->attributes['path']));
     }
 }

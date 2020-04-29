@@ -356,9 +356,13 @@ class UserController extends Controller
     public function GetUserById(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+            'id' => 'nullable|exists:users,id',
         ]);
-        $user = User::find($request->id);
+        if(isset($request->id)){
+            $user = User::find($request->id);
+        }else{
+            $user = User::find(Auth::user()->id);
+        }
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
         $user->roles;

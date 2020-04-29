@@ -104,11 +104,30 @@ class BigbluebuttonController extends Controller
         $bigbb->user_id = Auth::user()->id;
         $bigbb->save();
 
+        $bigbb['join'] = false;
+
         $courseseg=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
         if(!isset($courseseg))
             return HelperController::api_response_format(200, null ,'Please check active course segments');
 
         $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
+
+        $req = new Request([
+            'duration' => $request->duration,
+            'attendee' =>$request->attendee,
+            'id' => $request->id,
+            'name' => $request->name,
+            'moderator_password' => $request->moderator_password,
+            'is_recorded' => $request->is_recorded,
+            'join' => $bigbb['join']
+        ]);
+        if(Carbon::parse($request->start_date)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') < Carbon::parse($request->start_date)
+        ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
+        {
+            $check =self::start_meeting($req);
+            if($check)
+                $bigbb['join'] = true;
+        }
 
         User::notify([
             'id' => $bigbb->id,
@@ -178,12 +197,12 @@ class BigbluebuttonController extends Controller
             $getMeetingInfoParams = new GetMeetingInfoParameters($request['id'], '', $request['moderator_password']);
             $response = $bbb->getMeetingInfo($getMeetingInfoParams);
             if ($response->getReturnCode() == 'FAILED') {
-                $final_out['join'] = false;
+                $request['join'] = false;
             } else {
-                $final_out['join'] = true;
+                $request['join'] = true;
             }
 
-            return $final_out;
+            return 1;
         }
     }
 
@@ -198,10 +217,7 @@ class BigbluebuttonController extends Controller
         ]);
 
         $user_name = Auth::user()->firstname.' '.Auth::user()->lastname;
-        // $bigbb=BigbluebuttonModel::find($request->id);
-        $bigbb=BigbluebuttonModel::whereId($request->id)->where('start_date','<=', Carbon::now())->first();
-        if(!isset($bigbb))
-            return HelperController::api_response_format(400, null, 'you can\'t access this meeting for now');
+        $bigbb=BigbluebuttonModel::find($request->id);
         if($bigbb->user_id == Auth::user()->id){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
@@ -241,10 +257,8 @@ class BigbluebuttonController extends Controller
         if($request->filled('id'))
         {
             $bbb = new BigBlueButton();
-            // $meet = BigbluebuttonModel::whereId($request->id)->first();
-            $meet=BigbluebuttonModel::whereId($request->id)->where('start_date','<=', Carbon::now())->first();
-            if(!isset($meet))
-                return HelperController::api_response_format(400, null, 'you can\'t access this meeting for now');
+            $meet = BigbluebuttonModel::whereId($request->id)->first();
+            $meet['join'] = false;
 
             $req = new Request([
                 'duration' => $meet->duration,
@@ -254,13 +268,18 @@ class BigbluebuttonController extends Controller
                 'moderator_password' => $meet->moderator_password,
                 'is_recorded' => $meet->is_recorded
             ]);
-            self::start_meeting($req);
+            // dd($meet->start_date);
+            if(Carbon::parse($meet->start_date)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') < Carbon::parse($meet->start_date)
+            ->addMinutes($meet->duration)->format('Y-m-d H:i:s'))
+            {
+                $check =self::start_meeting($req);
+                if($check)
+                    $meet['join'] = true;
+            }
             $getMeetingInfoParams = new GetMeetingInfoParameters($request->id, '', $meet->moderator_password);
             $response = $bbb->getMeetingInfo($getMeetingInfoParams);
             if ($response->getReturnCode() == 'FAILED') {
                 $meet['join'] = false;
-            } else {
-                $meet['join'] = true;
             }
             
             if(count($hasornot) > 0 )
@@ -272,16 +291,31 @@ class BigbluebuttonController extends Controller
         if($request->filled('course') && $request->filled('class'))
         {
             $bbb = new BigBlueButton();
+            // $meet = BigbluebuttonModel::whereId($request->id)->first();
             $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)->get();
-            // return $meet;
+
             foreach($meet as $m)
             {
+                $m['join'] = false;
+                if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') < Carbon::parse($m->start_date)
+                ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
+                {
+                    $req = new Request([
+                        'duration' => $m->duration,
+                        'attendee' =>$m->attendee,
+                        'id' => $m->id,
+                        'name' => $m->name,
+                        'moderator_password' => $m->moderator_password,
+                        'is_recorded' => $m->is_recorded
+                    ]);
+                    $check=self::start_meeting($req);
+                    if($check)
+                        $m['join'] = true;
+                }
                 $getMeetingInfoParams = new GetMeetingInfoParameters($m->id, '', $m->moderator_password);
                 $response = $bbb->getMeetingInfo($getMeetingInfoParams);
                 if ($response->getReturnCode() == 'FAILED') {
                     $m['join'] = false;
-                } else {
-                    $m['join'] = true;
                 }
                 if(count($hasornot) > 0 )
                 {

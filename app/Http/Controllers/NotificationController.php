@@ -55,6 +55,7 @@ class NotificationController extends Controller
     * @param no required parameters
     * @return all notifications.
     */
+
     public function getallnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data','read_at','id')->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();
@@ -79,24 +80,6 @@ class NotificationController extends Controller
                         $data[$i]['title'] = $not->data['title'];
                     $data[$i]['title'] = null;
                 }
-            else{
-                if ($not->data['type'] == 'announcement')
-                    {
-                        $announce_id = $not->data['id'];
-                        $annocument = announcement::find($announce_id);
-                        if($annocument!= null){
-                            if ($annocument->publish_date <= Carbon::now()) {
-                                $customize = announcement::whereId($announce_id)->first(['id','title']);
-                                $data[$i]=$customize;
-                                $data[$i]['read_at'] = $not->read_at;
-                                $data[$i]['notification_id'] = $not->id;
-                                $data[$i]['message'] = $not->data['message'];
-                                $data[$i]['publish_date'] = $not->data['publish_date'];
-                                $data[$i]['type'] = $not->data['type'];
-                            }
-                        }
-                    }
-                }
             }
             $i++;
         }
@@ -119,14 +102,17 @@ class NotificationController extends Controller
         $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
         foreach ($noti as $not) {
             $not->data= json_decode($not->data, true);
-            $parse=Carbon::parse($not->data['publish_date']);
-
-            if(!isset($parse)){
-                $data[] = $not->data;
-            }
-            elseif($parse < Carbon::now())
+            if($not->data['type'] != 'announcement')
             {
-                $data[] = $not->data;
+                $parse=Carbon::parse($not->data['publish_date']);
+
+                if(!isset($parse)){
+                    $data[] = $not->data;
+                }
+                elseif($parse < Carbon::now())
+                {
+                    $data[] = $not->data;
+                }
             }
         }
         return HelperController::api_response_format(200, $data,'all user Unread notifications');
@@ -139,7 +125,14 @@ class NotificationController extends Controller
     */
     public function markasread(Request $request)
     {
-        $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+        $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+        foreach ($noti as $not) {
+            $not->data= json_decode($not->data, true);
+            if($not->data['type'] != 'announcement')
+            {
+                DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+            }
+        }
         return HelperController::api_response_format(200, null, 'Read');
     }
 
@@ -190,23 +183,49 @@ class NotificationController extends Controller
     public function SeenNotifications(Request $request)
     {
         $request->validate([
-            'id' => 'exists:notifications,id',
+            // 'id' => 'exists:notifications,id',
+            'type' => 'string|in:assignment,Attendance,meeting,Page,quiz,file,media',
+            'id' => 'int',
+            'message' => 'string'
         ]);
         $session_id = Auth::User()->id;
         if(isset($request->id))
         {
-            $note = DB::table('notifications')->where('id', $request->id)->first();
-            if ($note->notifiable_id == $session_id){
-                $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
-                $print=self::getallnotifications($request);
-                return $print;
+            // $note = DB::table('notifications')->where('id', $request->id)->first();
+            // if ($note->notifiable_id == $session_id){
+            //     $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
+                // $print=self::getallnotifications($request);
+                // return $print;
+            // }
+
+            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+            foreach ($noti as $not) {
+                $not->data= json_decode($not->data, true);
+                if($not->data['type'] != 'announcement')
+                {
+                    if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message)
+                    {
+                        DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                    }
+                }
             }
+            $print=self::getallnotifications($request);
+            return $print;
         }
         else
         {
-            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+            // $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+            foreach ($noti as $not) {
+                $not->data= json_decode($not->data, true);
+                if($not->data['type'] != 'announcement')
+                {
+                    DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                }
+            }
             $print=self::getallnotifications($request);
             return $print;
+
         }
         return HelperController::api_response_format(400, $body = [], $message = 'you cannot seen this notification');
     }

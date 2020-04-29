@@ -171,7 +171,8 @@ class AnnouncementController extends Controller
                 'segment_id' => 'required|exists:segments,id',
             ]);
 
-            $segmentclass = SegmentClass::find($request->segment_id);
+            $segmentclass = SegmentClass::where('segment_id',$request->segment_id)->first();
+            $segment = Segment::find($request->segment_id)->pluck('name')->first();
             foreach ($segmentclass->courseSegment as $cs) {
                 foreach ($cs->enroll as $enroll) {
                     $users[] = $enroll->user_id;
@@ -206,27 +207,51 @@ class AnnouncementController extends Controller
             $ann->save();
         }
 
-        $requ = ([
-            'id' => $ann->id,
-            'type' => 'announcement',
-            'publish_date' => $publishdate
-        ]);
+        if($file_id == null )
+        {
+            $requ = ([
+                'id' => $ann->id,
+                'type' => 'announcement',
+                'publish_date' => $publishdate,
+                'title' => $request->title,
+                'description' => $request->description,
+                'attached_file' => $file_id,
+                'start_date' => $start_date,
+                'due_date' => $request->due_date
+            ]);
+        }else{
+            $attached = attachment::where('id', $file_id)->first();
+            $requ = ([
+                'id' => $ann->id,
+                'type' => 'announcement',
+                'publish_date' => $publishdate,
+                'title' => $request->title,
+                'description' => $request->description,
+                'attached_file' => $attached,
+                'start_date' => $start_date,
+                'due_date' => $request->due_date
+            ]);
 
+        }
+        
         // return $requ;
         //sending announcements
         if ($request->assign == 'all') {
             foreach ($toUser as $use) {
-                if($request->filled('role'))
+                if($use->id != Auth::user()->id)
                 {
-                    $role_id=$use->roles->pluck('id')->first();
-                    if($role_id == $request->role)
-                        $requ['users'][] = $use->id;
-                    else
-                        continue;
-                }
+                    if($request->filled('role'))
+                    {
+                        $role_id=$use->roles->pluck('id')->first();
+                        if($role_id == $request->role)
+                            $requ['users'][] = $use->id;
+                        else
+                            continue;
+                    }
 
-                else
-                    $requ['users'][] = $use->id;
+                    else
+                        $requ['users'][] = $use->id;
+                }
             }
             // return $requ;
             if(!isset($requ['users']))
@@ -238,18 +263,29 @@ class AnnouncementController extends Controller
             {
                 foreach($user as $use)
                 {
-                    $user_obj=User::where('id',$use)->get()->first();
-                    $role_id=$user_obj->roles->pluck('id')->first();
-                    if($role_id == $request->role)
-                        $requ['users'][] = $use;
-                    else
-                        continue;
+                    if($use != Auth::user()->id){
+
+                        $user_obj=User::where('id',$use)->get()->first();
+                        $role_id=$user_obj->roles->pluck('id')->first();
+                        if($role_id == $request->role)
+                            $requ['users'][] = $use;
+                        else
+                            continue;
+                    }
                 }
                 if(!isset($requ['users']))
                     return HelperController::api_response_format(201,'No User');
             }
-            else
-                $requ['users'] = $user;
+            else{
+                foreach($user as $use)
+                {
+                    if($use != Auth::user()->id)
+                    {
+                         $requ['users'] = $user;
+                    }
+                }
+            }
+            
             $notificatin = User::notify($requ);
         }
 
@@ -553,7 +589,7 @@ class AnnouncementController extends Controller
         $user_id = Auth::user()->id;
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
             ->orderBy('created_at')
-            ->get(['data' , 'read_at']);
+            ->get(['data' , 'read_at','id']);
         $notif = collect([]);
         $count = 0;
         foreach ($noti as $not) {
@@ -567,7 +603,10 @@ class AnnouncementController extends Controller
                                     ->first(['id', 'title', 'description', 'attached_file','start_date','due_date','publish_date']);
                         if(!$customize)
                             continue;
-                        $customize->seen = $not->read_at;
+                        $customize->read_at = $not->read_at;
+                        $customize->notification_id = $not->id;
+                        $customize->message = $not->data['message'];
+                        $customize->type = $not->data['type'];
                         $customize->attached_file = attachment::where('id', $customize->attached_file)->first();
                         $notif->push($customize);
                     }
@@ -643,5 +682,78 @@ class AnnouncementController extends Controller
                 $announce['type']=$type;
         }
         return HelperController::api_response_format(200, $announce);
+    }
+
+
+
+    public function unreadannouncements(Request $request)
+    {
+        $data = [];
+        $noti = DB::table('notifications')->select('data')->where('notifiable_id', $request->user()->id)->where('read_at', null)->get();
+        foreach ($noti as $not) {
+            $not->data= json_decode($not->data, true);
+            if($not->data['type'] == 'announcement')
+            {
+                $parse=Carbon::parse($not->data['publish_date']);
+
+                if(!isset($parse)){
+                    $data[] = $not->data;
+                }
+                elseif($parse < Carbon::now())
+                {
+                    $data[] = $not->data;
+                }
+            }
+        }
+        return HelperController::api_response_format(200, $data,'all user unread announcements');
+    }
+
+    public function markasread(Request $request)
+    {
+        $request->validate([
+            // 'id' => 'exists:notifications,id',
+            'type' => 'string|in:announcement',
+            'id' => 'int',
+            'message' => 'string'
+        ]);
+        $session_id = Auth::User()->id;
+        if(isset($request->id))
+        {
+            // $note = DB::table('notifications')->where('id', $request->id)->first();
+            // if ($note->notifiable_id == $session_id){
+            //     $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
+            //     $print=self::get($request);
+            //     return $print;
+            // }
+            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+            foreach ($noti as $not) {
+                $not->data= json_decode($not->data, true);
+                if($not->data['type'] == 'announcement')
+                {
+                    if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message)
+                    {
+                        DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                    }
+                }
+            }
+            $print=self::get($request);
+            return $print;
+        }
+        else
+        {
+            // $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+            foreach ($noti as $not) {
+                $not->data= json_decode($not->data, true);
+                if($not->data['type'] == 'announcement')
+                {
+                    DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                }
+            }
+            $print=self::get($request);
+            return $print;
+
+        }
+        return HelperController::api_response_format(400, $body = [], $message = 'You cannot seen this announcement');
     }
 }

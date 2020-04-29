@@ -8,6 +8,10 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Notifications\NewMessage;
+use GuzzleHttp\Client;
+use App\User;
+
+
 
 
 class Sendnotify implements ShouldQueue
@@ -23,12 +27,7 @@ class Sendnotify implements ShouldQueue
     public function __construct( $request)
     {
         $this->request=$request;
-        // $this->users = [];
-        // foreach($this->touserid as $index => $user){
-        //     if($user == null)
-        //         continue;
-        //     $this->users[] = $user->id;
-        // }
+  
     }
 
     /**
@@ -38,41 +37,51 @@ class Sendnotify implements ShouldQueue
      */
     public function handle()
     {
+     
         $client = new \Google_Client();
         $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
         $client->setApplicationName("learnovia-notifications");
         $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
-
         $client->useApplicationDefaultCredentials();
         if ($client->isAccessTokenExpired()) {
             $client->fetchAccessTokenWithAssertion();
         }
         $access_token = $client->getAccessToken()['access_token'];
         $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token')->pluck('token');
+
         foreach($user_token as $token)
         {
-            if($this->request['type']=='announcement')
-            {
-                $this->request['message']='A New Announcement Added';
+            if($this->request['type'] !='announcement'){
                 $fordata = array(
-                    "id" => (string)$this->request['id'],
-                    "type" => $this->request['type'],
-                    "message" => $this->request['message'],
-                    "publish_date" => $this->request['publish_date'],
-                    "read_at" => null
-                );
+                        "id" => (string)$this->request['id'],
+                        "message" => $this->request['message'],
+                        "fromm" => (string)$this->request['from'],
+                        "type" => $this->request['type'],
+                        "course_id" => (string)$this->request['course_id'],
+                        "class_id" => (string)$this->request['class_id'],
+                        "lesson_id"=> (string)$this->request['lesson_id'],
+                        "publish_date" => $this->request['publish_date'],
+                        "read_at" => null
+                    );
             }else{
-                $fordata = array(
-                    "id" => (string)$this->request['id'],
-                    "message" => $this->request['message'],
-                    "fromm" => (string)$this->request['from'],
-                    "type" => $this->request['type'],
-                    "course_id" => (string)$this->request['course_id'],
-                    "class_id" => (string)$this->request['class_id'],
-                    "lesson_id"=> (string)$this->request['lesson_id'],
-                    "publish_date" => $this->request['publish_date'],
-                    "read_at" => null
-                );
+                $this->request['message']='A new announcement is added';
+                if($this->request['attached_file'] != null)
+                    $att= (string) $this->request['attached_file'];
+                else
+                    $att=$this->request['attached_file'];
+                    
+                    $fordata = array(
+                        "id" => (string)$this->request['id'],
+                        "type" => $this->request['type'],
+                        "message" => $this->request['message'],
+                        "publish_date" => $this->request['publish_date'],
+                        "read_at" => null,
+                        "title" => $this->request['title'],
+                        "description" => $this->request['description'],
+                        "start_date" => $this->request['start_date'],
+                        "due_date" => $this->request['due_date'],
+                        "attached_file" => $att,
+                    );
             }
             $data = json_encode(array(
                 'message' => array(
@@ -101,10 +110,6 @@ class Sendnotify implements ShouldQueue
             ]);
         }
 
-        // foreach ($this->touserid as $u){
-        //     if($u != null)
-        //         event(new \App\Events\notify($u->id, $this->message, $this->publish_date, $this->title, $this->type, $this->course_id,
-        //          $this->class_id, $this->lesson_id));
-        // }
+     
     }
 }

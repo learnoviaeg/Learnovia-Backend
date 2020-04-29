@@ -1,6 +1,7 @@
 <?php
 
 namespace Modules\UploadFiles\Entities;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,4 +24,11 @@ class file extends Model
     {
         return $this->belongsTo('App\User', 'user_id', 'id');
     }
+
+    public function getUrl2Attribute() {
+        return url(Storage::url($this->attributes['url2']));
+      }
+      public function getUrl1Attribute() {
+        return 'https://docs.google.com/viewer?url=' .url(Storage::url($this->attributes['url2']));
+      }
 }
