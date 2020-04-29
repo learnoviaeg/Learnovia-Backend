@@ -104,11 +104,30 @@ class BigbluebuttonController extends Controller
         $bigbb->user_id = Auth::user()->id;
         $bigbb->save();
 
+        $bigbb['join'] = false;
+
         $courseseg=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
         if(!isset($courseseg))
             return HelperController::api_response_format(200, null ,'Please check active course segments');
 
         $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
+
+        $req = new Request([
+            'duration' => $request->duration,
+            'attendee' =>$request->attendee,
+            'id' => $request->id,
+            'name' => $request->name,
+            'moderator_password' => $request->moderator_password,
+            'is_recorded' => $request->is_recorded,
+            'join' => $bigbb['join']
+        ]);
+        if(Carbon::parse($request->start_date)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') < Carbon::parse($request->start_date)
+        ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
+        {
+            $check =self::start_meeting($req);
+            if($check)
+                $bigbb['join'] = true;
+        }
 
         User::notify([
             'id' => $bigbb->id,
@@ -178,9 +197,9 @@ class BigbluebuttonController extends Controller
             $getMeetingInfoParams = new GetMeetingInfoParameters($request['id'], '', $request['moderator_password']);
             $response = $bbb->getMeetingInfo($getMeetingInfoParams);
             if ($response->getReturnCode() == 'FAILED') {
-                $final_out['join'] = false;
+                $request['join'] = false;
             } else {
-                $final_out['join'] = true;
+                $request['join'] = true;
             }
 
             return 1;
