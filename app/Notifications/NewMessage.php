@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use App\Message;
 use Illuminate\Support\Facades\Validator;
 
-class NewMessage extends Notification
+class NewMessage extends Notification implements ShouldQueue
 {
     use Queueable;
     public $mess;
