@@ -590,7 +590,6 @@ class AnnouncementController extends Controller
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
             ->orderBy('created_at')
             ->get(['data' , 'read_at','id']);
-     
         $notif = collect([]);
         $count = 0;
         foreach ($noti as $not) {
@@ -606,6 +605,8 @@ class AnnouncementController extends Controller
                             continue;
                         $customize->read_at = $not->read_at;
                         $customize->notification_id = $not->id;
+                        $customize->message = $not->data['message'];
+                        $customize->type = $not->data['type'];
                         $customize->attached_file = attachment::where('id', $customize->attached_file)->first();
                         $notif->push($customize);
                     }
@@ -710,17 +711,33 @@ class AnnouncementController extends Controller
     public function markasread(Request $request)
     {
         $request->validate([
-            'id' => 'exists:notifications,id',
+            // 'id' => 'exists:notifications,id',
+            'type' => 'string|in:announcement',
+            'id' => 'int',
+            'message' => 'string'
         ]);
         $session_id = Auth::User()->id;
         if(isset($request->id))
         {
-            $note = DB::table('notifications')->where('id', $request->id)->first();
-            if ($note->notifiable_id == $session_id){
-                $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
-                $print=self::get($request);
-                return $print;
+            // $note = DB::table('notifications')->where('id', $request->id)->first();
+            // if ($note->notifiable_id == $session_id){
+            //     $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
+            //     $print=self::get($request);
+            //     return $print;
+            // }
+            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+            foreach ($noti as $not) {
+                $not->data= json_decode($not->data, true);
+                if($not->data['type'] == 'announcement')
+                {
+                    if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message)
+                    {
+                        DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                    }
+                }
             }
+            $print=self::get($request);
+            return $print;
         }
         else
         {
