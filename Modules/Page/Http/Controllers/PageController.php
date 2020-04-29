@@ -188,11 +188,17 @@ class PageController extends Controller
     public function get(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:pages,id'
+            'id' => 'required|exists:pages,id',
+            'lesson_id' => 'required|exists:lessons,id'
         ]);
         $page = page::whereId($request->id)->first();
         if ($page == null)
             return HelperController::api_response_format(200, null, 'This page is not visible');
+        $lesson = $page->lesson->where('id', $request->lesson_id)->first();
+        $course_id= $lesson->courseSegment->course_id;
+        $page->course_id=$course_id;
+        unset($page->lesson);
+        
         return HelperController::api_response_format(200, $page);
     }
 
