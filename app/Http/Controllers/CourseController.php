@@ -912,7 +912,11 @@ class CourseController extends Controller
                                 $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                 $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
                                 if($item->pivot->quiz_id){
-                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('due_date')->first();
+                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->where('due_date','>=',Carbon::now())
+                                    ->pluck('due_date')->first();
+                                    if(!isset ($item->due_date)){
+                                        continue;
+                                    }
                                     if($item->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                     $item->Started = false;
                                     else
@@ -920,7 +924,11 @@ class CourseController extends Controller
                                 }
                                 if($item->pivot->assignment_id)
                                  {   $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)
+                                    ->where('due_date','>=',Carbon::now())
                                     ->pluck('due_date')->first();
+                                    if(!isset ($item->due_date)){
+                                        continue;
+                                    }
                                     $item->start_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)
                                     ->pluck('start_date')->first();
                                     if($item->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
