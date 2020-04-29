@@ -23,7 +23,6 @@ class Sendnotify implements ShouldQueue
     public function __construct( $request)
     {
         $this->request=$request;
-        dd($request);
         // $this->users = [];
         // foreach($this->touserid as $index => $user){
         //     if($user == null)
