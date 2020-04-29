@@ -183,17 +183,34 @@ class NotificationController extends Controller
     public function SeenNotifications(Request $request)
     {
         $request->validate([
-            'id' => 'exists:notifications,id',
+            // 'id' => 'exists:notifications,id',
+            'type' => 'string|in:assignment,Attendance,meeting,Page,quiz,file,media',
+            'id' => 'int',
+            'message' => 'string'
         ]);
         $session_id = Auth::User()->id;
         if(isset($request->id))
         {
-            $note = DB::table('notifications')->where('id', $request->id)->first();
-            if ($note->notifiable_id == $session_id){
-                $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
-                $print=self::getallnotifications($request);
-                return $print;
+            // $note = DB::table('notifications')->where('id', $request->id)->first();
+            // if ($note->notifiable_id == $session_id){
+            //     $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
+                // $print=self::getallnotifications($request);
+                // return $print;
+            // }
+
+            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+            foreach ($noti as $not) {
+                $not->data= json_decode($not->data, true);
+                if($not->data['type'] != 'announcement')
+                {
+                    if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message)
+                    {
+                        DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                    }
+                }
             }
+            $print=self::getallnotifications($request);
+            return $print;
         }
         else
         {
