@@ -434,7 +434,7 @@ class UserQuizController extends Controller
         $user_attempts = array();
         $quiz_questions = quiz_questions::where('quiz_id',$request->quiz_id)->pluck('question_id');
         $essayQues = Questions::whereIn('id',$quiz_questions)->where('question_type_id',4)->pluck('id');
-        if($essayQues != null)
+        if(count($essayQues) > 0)
             $essay = 1;
         else
             $essay = 0;
