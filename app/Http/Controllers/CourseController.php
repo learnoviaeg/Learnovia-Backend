@@ -868,7 +868,8 @@ class CourseController extends Controller
             'start'     => 'nullable|date',
             'end'       => 'nullable|date',
             'components' => 'nullable|array',
-            'components.*' => 'required|integer|exists:components,id'
+            'components.*' => 'required|integer|exists:components,id',
+            'timeline' => 'integer' 
         ]);
         // $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
         $components  = Component::where('active', 1)->whereIn('type', [3,1]);
@@ -912,8 +913,11 @@ class CourseController extends Controller
                                 $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                 $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
                                 if($item->pivot->quiz_id){
-                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->where('due_date','>=',Carbon::now())
-                                    ->pluck('due_date')->first();
+                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id);
+                                    if(isset($request->timeline) && $request->timeline == 1 ){
+                                        $item->due_date->where('due_date','>=',Carbon::now());
+                                    }
+                                    $item->due_date=  $item->due_date->pluck('due_date')->first();
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
@@ -923,9 +927,11 @@ class CourseController extends Controller
                                     $item->Started = true;
                                 }
                                 if($item->pivot->assignment_id)
-                                 {   $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)
-                                    ->where('due_date','>=',Carbon::now())
-                                    ->pluck('due_date')->first();
+                                 {   $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id);
+                                    if(isset($request->timeline) && $request->timeline == 1 ){
+                                        $item->due_date->where('due_date','>=',Carbon::now());
+                                    }
+                                    $item->due_date=  $item->due_date->pluck('due_date')->first();
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
