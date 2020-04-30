@@ -434,6 +434,11 @@ class UserQuizController extends Controller
         $user_attempts = array();
         $quiz_questions = quiz_questions::where('quiz_id',$request->quiz_id)->pluck('question_id');
         $essayQues = Questions::whereIn('id',$quiz_questions)->where('question_type_id',4)->pluck('id');
+        if($essayQues != null)
+            $essay = 1;
+        else
+            $essay = 0;
+        
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
 
         $users=Enroll::where('course_segment',Lesson::find($request->lesson_id)->course_segment_id)->pluck('user_id')->toArray();
@@ -474,8 +479,14 @@ class UserQuizController extends Controller
                 // $All_attemp[]=self::get_fully_detailed_attempt($req);
                 $user_Attemp['id']= $attem->id;
                 $user_Attemp["submit_time"]= $attem->submit_time;
+                $useranswer = userQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade' , '==' , null)->count();
+                if($useranswer > 0) 
+                    $user_Attemp["grade"]= null;
+                else
+                    $user_Attemp["grade"]= $attem->grade;
+                    
                 array_push($All_attemp, $user_Attemp);
-                
+                // return $All_attemp;
             }
 
             $attemps['id'] = $user->id;
@@ -484,12 +495,13 @@ class UserQuizController extends Controller
             $attemps['Attempts'] = $All_attemp;
             array_push($user_attempts, $attemps);
         }
+
+        $all_users['essay']=$essay;
         $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
         $all_users['submitted_users'] = $Submitted_users ;
         $all_users['notGraded'] = $countOfNotGraded ;
         $final->put('submittedAndNotSub',$all_users);
         $final->put('users',$user_attempts);
-
         return HelperController::api_response_format(200, $final, 'Students attempts are ...');
     }
 
