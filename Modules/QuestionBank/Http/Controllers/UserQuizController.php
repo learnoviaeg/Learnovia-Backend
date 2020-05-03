@@ -479,7 +479,7 @@ class UserQuizController extends Controller
                 // $All_attemp[]=self::get_fully_detailed_attempt($req);
                 $user_Attemp['id']= $attem->id;
                 $user_Attemp["submit_time"]= $attem->submit_time;
-                $useranswer = userQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade' , '==' , null)->count();
+                $useranswer = userQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
                 if($useranswer > 0) 
                     $user_Attemp["grade"]= null;
                 else
