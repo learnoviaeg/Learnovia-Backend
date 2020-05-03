@@ -116,14 +116,14 @@ class UserQuizController extends Controller
         // check that question exist in the Quiz
         $user_quiz = userQuiz::find($request->user_quiz_id);
         $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
-        if(count($request->Questions)<0){
-            $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereIn('question_id',$questions_ids)->get();
+        // if(count($request->Questions)<0){
+        //     $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereIn('question_id',$questions_ids)->get();
 
-        foreach($answer2 as $ans)
-            $ans->update(['answered'=>'1']);
+        // foreach($answer2 as $ans)
+        //     $ans->update(['answered'=>'1']);
 
-        return HelperController::api_response_format(200, $answer2, 'Quiz Answers are Registered Successfully(forced)');
-        }
+        // return HelperController::api_response_format(200, $answer2, 'Quiz Answers are Registered Successfully(forced)');
+        // }
 
         $allData = collect([]);
         foreach ($request->Questions as $index => $question) {
@@ -249,10 +249,13 @@ class UserQuizController extends Controller
             $answer1->update($data);
         }
 
-        $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->get();
+        if($request->forced)
+        {
+            $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->get();
 
-        foreach($answer2 as $ans)
-            $ans->update(['answered'=>'1']);
+            foreach($answer2 as $ans)
+                $ans->update(['answered'=>'1']);
+        }
 
         return HelperController::api_response_format(200, $allData, 'Answer submitted successfully');
     }
