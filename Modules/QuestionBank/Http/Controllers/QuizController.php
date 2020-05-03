@@ -654,6 +654,19 @@ class QuizController extends Controller
         $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', Auth::id())->get();
         $quiz['allow_edit'] = true;
         $userquizze = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', Auth::id())->pluck('id');
+
+        //case of cash
+        $duration_time = $quiz->duration;
+        $max_id = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', Auth::id())->max('id');
+        $user_quiz=UserQuiz::find($max_id);
+        $open_time = strtotime(Carbon::parse($user_quiz->open_time));
+        $now = strtotime(Carbon::now());
+        $check_time = ($duration_time) - ($now - $open_time);
+        if($check_time < 0)
+            $check_time= 0;
+        $user_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->get();
+        $quiz->duration_time = $check_time;
+
         $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('answered','1')->pluck('user_quiz_id')->unique()->count();
         $quiz['taken_attempts'] = $count_answered;
         foreach($userquizzes as $userQuiz)
@@ -683,6 +696,12 @@ class QuizController extends Controller
             }
             else{
                 unset($question->childeren);
+            }
+            if($user_answer)
+            {
+                foreach($user_answer as $U_Ans)
+                    if($U_Ans->question_id == $question->id)
+                        $question->User_Answer=$U_Ans;
             }
             $question->question_answer;
             $question->question_category;
