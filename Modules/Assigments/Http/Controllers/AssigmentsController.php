@@ -23,6 +23,7 @@ use Carbon\Carbon;
 use Modules\Assigments\Entities\assignment;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\UserAssigment;
+use Modules\Assigments\Entities\assignmentOverride;
 use App\Component;
 use App\LessonComponent;
 use App\status;
@@ -51,7 +52,9 @@ class AssigmentsController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/assignment/assigned-users', 'title' => 'assign Assignment to Users']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/assignment/getAssignment', 'title' => 'get Assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'delete-assign-lesson', 'title' => 'Delete assign']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/assignment-override', 'title' => 'assignment override']);
 
+        
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('assignment/add');
         $role->givePermissionTo('assignment/update');
@@ -67,6 +70,7 @@ class AssigmentsController extends Controller
         $role->givePermissionTo('site/assignment/assigned-users');
         $role->givePermissionTo('site/assignment/getAssignment');
         $role->givePermissionTo('delete-assign-lesson');
+        $role->givePermissionTo('assignment/assignment-override');
 
         Component::create([
             'name' => 'Assigments',
@@ -690,5 +694,44 @@ class AssigmentsController extends Controller
         // $all = AssignmentLesson::where('assignment_id','!=', $request->assignment_id)->get();
 
         return HelperController::api_response_format(200, $assignmentLesson, 'Assignment added successfully');
+    }
+
+    public function overrideAssignment(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|array',
+            'user_id.*' => 'exists:user_assigments,user_id',
+            'assignment_lesson_id' => 'string|exists:assignment_lessons,id',
+            'start_date' => 'required|before:due_date',
+            'due_date' => 'required|after:' . Carbon::now(),
+        ]);
+
+        foreach($request->user_id as $user)
+        {
+            $assignmentOerride[] = assignmentOverride::firstOrCreate([
+                'user_id' => $user,
+                'assignment_lesson_id' => $request->assignment_lesson_id,
+                'start_date' =>  $request->start_date,
+                'due_date' => $request->due_date,
+            ]);
+        }
+        $assignment = AssignmentLesson::find($request->assignment_lesson_id);
+        $lesson = Lesson::find($assignment->lesson_id);
+        $course = $lesson->courseSegment->course_id;
+        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+
+        user::notify([
+            'id' => $assignment->assignment_id,
+            'message' => 'You can answer this assignment now',
+            'from' => Auth::user()->id,
+            'users' => $request->user_id,
+            'course_id' => $course,
+            'class_id' => $class,
+            'lesson_id' => $assignment->lesson_id,
+            'type' => 'assignment',
+            'link' => url(route('getAssignment')) . '?assignment_id=' . $assignment->assignment_id,
+            'publish_date' => $request->start_date
+        ]);
+        return HelperController::api_response_format(200, $assignmentOerride, 'Assignment override successfully');
     }
 }
