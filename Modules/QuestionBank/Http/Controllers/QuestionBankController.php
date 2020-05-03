@@ -111,6 +111,7 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/grading-method');
         $role->givePermissionTo('quiz/get-attempts');
         $role->givePermissionTo('quiz/grade-user-quiz');
+        $role->givePermissionTo('quiz/override');
         
         Component::create([
             'name' => 'Quiz',
