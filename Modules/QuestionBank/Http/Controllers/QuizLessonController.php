@@ -11,6 +11,7 @@ use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuiz;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
+use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
 use App\SegmentClass;
@@ -19,6 +20,8 @@ use App\CourseSegment;
 use App\Enroll;
 use App\LessonComponent;
 use App\User;
+use Carbon\Carbon;
+
 use Auth;
 
 class QuizLessonController extends Controller
@@ -268,5 +271,43 @@ class QuizLessonController extends Controller
                 $quizLesson['allow_edit'] = false;
         }
         return HelperController::api_response_format(200, $quizLesson);
+    }
+    public function overrideQuiz(Request $request)
+    {
+
+        $request->validate([
+        'users_id' => 'required|array',
+        'users_id.*' => 'required|integer|exists:users,id',
+        'quiz_lesson_id' => 'required|integer|exists:quiz_lessons,id',
+        'start_date' => 'required|before:due_date',
+        'due_date' => 'required|after:' . Carbon::now(),
+    ]);
+    $usersOverride =array();
+    foreach ($request->users_id as $user_id) {
+        $usersOverride [] =  QuizOverride::firstOrCreate([
+        'user_id'=> $user_id,
+        'quiz_lesson_id'=> $request->quiz_lesson_id ,
+        'start_date' => $request->start_date ,
+        'due_date'=>$request->due_date 
+    ]);
+
+        }
+        $quizLesson = QuizLesson::find($request->quiz_lesson_id);
+        $lesson= Lesson::find( $quizLesson->lesson_id);
+        $course = $lesson->courseSegment->course_id;
+        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            user::notify([
+                'message' => 'you can answer this quiz now',
+                'id' => $quizLesson->quiz_id,
+                'users' => $request->users_id,
+                'type' =>'quiz',
+                'publish_date'=> $request->start_date,
+                'course_id' => $course,
+                'class_id'=> $class,
+                'lesson_id'=> $quizLesson->lesson_id,
+                'from' => Auth::id(),
+            ]);
+    return HelperController::api_response_format(201, $usersOverride, 'Quiz override successfully');
+
     }
 }
