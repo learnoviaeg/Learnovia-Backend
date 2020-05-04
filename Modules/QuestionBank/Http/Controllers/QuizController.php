@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use App\Http\Controllers\HelperController;
+use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
@@ -19,6 +20,7 @@ use Modules\QuestionBank\Entities\userQuiz;
 use Spatie\Permission\Models\Permission;
 use Validator;
 use App\Classes;
+
 use Auth;
 use Carbon\Carbon;
 
@@ -652,6 +654,13 @@ class QuizController extends Controller
             return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
+        $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where("user_id",Auth::id())->first();
+        $quiz['start_date']=$quiz_lesson->start_date;
+        $quiz['due_date']=$quiz_lesson->due_date;
+        if(isset($override_user)){
+            $quiz['start_date']=$override_user->start_date;
+            $quiz['due_date']=$override_user->due_date;
+        }
         $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', Auth::id())->get();
         $quiz['allow_edit'] = true;
         $userquizze = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', Auth::id())->pluck('id');
@@ -684,8 +693,6 @@ class QuizController extends Controller
 
         $quiz['grading_method']=$quiz_lesson->grading_method_id;
         $quiz['max_attemp']=$quiz_lesson->max_attemp;
-        $quiz['start_date']=$quiz_lesson->start_date;
-        $quiz['due_date']=$quiz_lesson->due_date;
         $quiz['mark']=$quiz_lesson->grade;
         $quiz['grade_category']=$gradecat;
 
