@@ -58,8 +58,7 @@ class UserQuizController extends Controller
             $attempt_index = 1;
         } else if (isset($userQuiz)) {
             if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp) {
-                // return Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s');
-                if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s') <= Carbon::now()->format('y-m-d H:i:s'))
+                if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
                 {
                     $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->where('answered','!=',1)->get();
                     foreach($user_quiz_answer as $user_ans)
@@ -113,8 +112,8 @@ class UserQuizController extends Controller
             'ip' => $request->ip(),
             'device_data' => $deviceData,
             'browser_data' => $browserData,
-            'open_time' => Carbon::now()->format('y-m-d H:i:s'),
-            'submit_time'=> Carbon::now()->format('y-m-d H:i:s'),
+            'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
+            'submit_time'=> Carbon::now()->format('Y-m-d H:i:s'),
         ]);
 
            foreach($quiz_lesson->quiz->Question as $question){
