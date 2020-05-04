@@ -123,7 +123,7 @@ class UserQuizController extends Controller
     {
         $request->validate([
             'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
-            'Questions' => 'requiired|array',
+            'Questions' => 'required|array',
             'Questions.*.id' => 'required|integer|exists:questions,id',
             'forced' => 'boolean',
         ]);
