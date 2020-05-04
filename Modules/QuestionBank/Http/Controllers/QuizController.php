@@ -645,6 +645,7 @@ class QuizController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
+        $user_answer=[];
         $quiz = Quiz::find($request->quiz_id);
         $qq = Quiz::where('id', $request->quiz_id)->first();
         if(!isset($qq->quizLessson[0]))
