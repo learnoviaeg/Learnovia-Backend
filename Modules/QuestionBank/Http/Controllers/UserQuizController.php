@@ -62,11 +62,15 @@ class UserQuizController extends Controller
                 if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s') <= Carbon::now()->format('y-m-d H:i:s'))
                 {
                     $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->where('answered','!=',1)->get();
-                    if(isset($user_quiz_answer)){
-                        $user_quiz_answer->update([
-                            'answered' => 1,
-                        ]);
+                    foreach($user_quiz_answer as $user_ans)
+                    {
+                        if(isset($user_ans)){
+                            $user_ans->update([
+                                'answered' => 1,
+                            ]);
+                        }
                     }
+
                     $attempt_index = ++$max_attempt_index;
                 }
                 else if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s') > Carbon::now()->format('y-m-d H:i:s'))
