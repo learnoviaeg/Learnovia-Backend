@@ -510,10 +510,13 @@ class CourseController extends Controller
                                            else
                                            $one->Started = true;
                                         
-                                        if($override_satrtdate != null && $override_satrtdate <= Carbon::now() && $request->user()->can('site/course/student')){
+                                        if($override_satrtdate != null){
                                             $one->start_date = $override_satrtdate;
-                                            $one->Started = true;
                                             $one->pivot->publish_date = $override_satrtdate;
+                                            if($one->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
+                                                $one->Started = false;
+                                            else
+                                                $one->Started = true;
                                         }  
                                     }
                                 }
@@ -967,11 +970,14 @@ class CourseController extends Controller
             foreach($assignmet as $item){
                 $assignLesson = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('id')->first();
                 $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignLesson)->first();
-                if($override != null && $override->start_date <= Carbon::now() && $request->user()->can('site/course/student')){
+                if($override != null){
                     $item->start_date = $override->start_date;
                     $item->due_date = $override->due_date;
-                    $item->Started = true;
                     $item->pivot->publish_date = $override->start_date;
+                    if($item->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
+                        $item->Started = false;
+                    else
+                        $item->Started = true;
                 }
                 $ass[] = $item;
             }
