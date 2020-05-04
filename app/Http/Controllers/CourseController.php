@@ -33,6 +33,8 @@ use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use stdClass;
+use Modules\Assigments\Entities\assignmentOverride;
+
 
 class CourseController extends Controller
 {
@@ -498,14 +500,23 @@ class CourseController extends Controller
                                 }
                                 if($com->name == 'Assigments'){
                                     foreach ($lessonn['Assigments'] as $one){
+                                        $assignLesson = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
+                                        ->pluck('id')->first();
+                                        $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignLesson)->pluck('start_date')->first();
                                         $one->start_date = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
-                                    ->pluck('start_date')->first();
+                                        ->pluck('start_date')->first();
                                        if($one->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                            $one->Started = false;
                                            else
                                            $one->Started = true;
+                                        
+                                        if($override_satrtdate != null && $override_satrtdate <= Carbon::now() && $request->user()->can('site/course/student')){
+                                            $one->start_date = $override_satrtdate;
+                                            $one->Started = true;
+                                            $one->pivot->publish_date = $override_satrtdate;
+                                        }  
                                     }
-                                   }
+                                }
 
                                 // $lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
                                 // if (isset($com->name))
@@ -954,8 +965,16 @@ class CourseController extends Controller
             $assignmet = collect($result["Assigments"])->sortByDesc('due_date');
             $ass=collect();
             foreach($assignmet as $item){
-                $ass[] = $item;
+                $assignLesson = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('id')->first();
+                $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignLesson)->first();
+                if($override != null && $override->start_date <= Carbon::now() && $request->user()->can('site/course/student')){
+                    $item->start_date = $override->start_date;
+                    $item->due_date = $override->due_date;
+                    $item->Started = true;
+                    $item->pivot->publish_date = $override->start_date;
                 }
+                $ass[] = $item;
+            }
                 $result['Assigments']   = $ass;  
         }
         if(isset($result["Quiz"])){
