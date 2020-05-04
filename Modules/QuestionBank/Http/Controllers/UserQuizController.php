@@ -73,8 +73,7 @@ class UserQuizController extends Controller
 
                     $attempt_index = ++$max_attempt_index;
                 }
-                else if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s') > Carbon::now()->format('y-m-d H:i:s'))
-                {
+                else {
                     return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
                 }
             } else {                                                                                                                
