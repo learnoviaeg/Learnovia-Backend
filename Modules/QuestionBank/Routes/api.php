@@ -32,7 +32,6 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('store-user-quiz', 'UserQuizController@store_user_quiz')->middleware('permission:quiz/store-user-quiz');
     Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer')->middleware('permission:quiz/store-user-quiz-answer');
     Route::post('feedback', 'UserQuizController@feedback');
-
     Route::get('get-all-quizes', 'QuizController@getAllQuizes')->middleware('permission:quiz/get-all-quizes');
     Route::get('get-student-in-quiz', 'QuizController@getStudentinQuiz')->middleware('permission:quiz/get-student-in-quiz');
     Route::get('get-student-answer-quiz', 'QuizController@getStudentAnswerinQuiz')->middleware('permission:quiz/get-student-answer-quiz');

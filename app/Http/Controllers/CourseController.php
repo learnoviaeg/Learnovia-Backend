@@ -21,6 +21,7 @@ use App\Enroll;
 use App\Segment;
 use App\AcademicYear;
 use App\GradeCategory;
+use Modules\QuestionBank\Entities\QuizOverride;
 use App\AcademicType;
 use App\attachment;
 use App\LessonComponent;
@@ -490,7 +491,7 @@ class CourseController extends Controller
                                     $le['course_id']=(int)$request->course_id;
                                 }
                                 if($com->name == 'Quiz'){
-                                 foreach ($lessonn['Quiz'] as $one){
+                                 foreach ($lessonn['Quiz'] as $one){                                        
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
                                         else
@@ -512,7 +513,7 @@ class CourseController extends Controller
                                         
                                         if($override_satrtdate != null){
                                             $one->start_date = $override_satrtdate;
-                                            $one->pivot->publish_date = $override_satrtdate;
+                                            // $one->pivot->publish_date = $override_satrtdate;
                                             if($one->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                                 $one->Started = false;
                                             else
@@ -973,7 +974,7 @@ class CourseController extends Controller
                 if($override != null){
                     $item->start_date = $override->start_date;
                     $item->due_date = $override->due_date;
-                    $item->pivot->publish_date = $override->start_date;
+                    // $item->pivot->publish_date = $override->start_date;
                     if($item->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                         $item->Started = false;
                     else
@@ -989,6 +990,16 @@ class CourseController extends Controller
           $quiz=collect();
           
           foreach($quizzesSorted as $q){
+            $quizLesson = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('id')->first();
+            $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quizLesson)->first();
+            if($override != null){
+                $item->start_date = $override->start_date;
+                $item->due_date = $override->due_date;
+                if($item->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
+                    $item->Started = false;
+                else
+                    $item->Started = true;
+            }
             $quiz[] = $q;
             }
             $result['Quiz']   = $quiz;  
