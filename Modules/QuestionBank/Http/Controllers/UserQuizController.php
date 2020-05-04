@@ -58,6 +58,7 @@ class UserQuizController extends Controller
             $attempt_index = 1;
         } else if (isset($userQuiz)) {
             if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp) {
+                
                 if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
                 {
                     $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->where('answered','!=',1)->get();
