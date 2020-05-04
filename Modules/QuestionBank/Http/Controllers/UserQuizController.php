@@ -113,8 +113,8 @@ class UserQuizController extends Controller
             'ip' => $request->ip(),
             'device_data' => $deviceData,
             'browser_data' => $browserData,
-            'open_time' => Carbon::now(),
-            'submit_time'=> Carbon::now(),
+            'open_time' => Carbon::now()->format('y-m-d H:i:s'),
+            'submit_time'=> Carbon::now()->format('y-m-d H:i:s'),
         ]);
 
            foreach($quiz_lesson->quiz->Question as $question){
@@ -274,6 +274,8 @@ class UserQuizController extends Controller
 
             foreach($answer2 as $ans)
                 $ans->update(['answered'=>'1']);
+            
+            $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
         }
 
         return HelperController::api_response_format(200, $allData, 'Answer submitted successfully');
