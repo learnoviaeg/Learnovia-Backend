@@ -715,7 +715,7 @@ class AssigmentsController extends Controller
         $request->validate([
             'user_id' => 'required|array',
             'user_id.*' => 'exists:user_assigments,user_id',
-            'assignment_lesson_id' => 'string|exists:assignment_lessons,id',
+            'assignment_lesson_id' => 'exists:assignment_lessons,id',
             'start_date' => 'required|before:due_date',
             'due_date' => 'required|after:' . Carbon::now(),
         ]);
