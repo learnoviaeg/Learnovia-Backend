@@ -58,7 +58,8 @@ class UserQuizController extends Controller
             $attempt_index = 1;
         } else if (isset($userQuiz)) {
             if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp) {
-                if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s') > Carbon::now()->format('y-m-d H:i:s'))
+                // return Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s');
+                if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s') <= Carbon::now()->format('y-m-d H:i:s'))
                 {
                     $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->where('answered','!=',1)->get();
                     if(isset($user_quiz_answer)){
@@ -68,11 +69,11 @@ class UserQuizController extends Controller
                     }
                     $attempt_index = ++$max_attempt_index;
                 }
-                else if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s') <= Carbon::now()->format('y-m-d H:i:s'))
+                else if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('y-m-d H:i:s') > Carbon::now()->format('y-m-d H:i:s'))
                 {
                     return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
                 }
-            } else {
+            } else {                                                                                                                
                 return HelperController::api_response_format(400, null, 'Max Attempt number reached');
             }
         }
