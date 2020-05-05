@@ -144,7 +144,6 @@ class User extends Authenticatable
              $request))->delay($seconds);
             dispatch($job);
          Notification::send( $touserid, new NewMessage($request));
-
         return 1;
     }
 
