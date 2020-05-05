@@ -19,7 +19,7 @@ class Announcement extends Model
         'year_id',
         'type_id',
         'segment_id',
-        'publish_date'
+        'publish_date',
     ];
     public function attachment()
     {
