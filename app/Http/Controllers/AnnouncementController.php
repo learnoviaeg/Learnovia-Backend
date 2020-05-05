@@ -249,8 +249,8 @@ class AnnouncementController extends Controller
         ]);
 
         $anounce = AnnouncementController::get_announcement($request);
-        $anouncenew = AnnouncementController::new_user_announcements($request);
-        return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Updated Successfully');
+        // $anouncenew = AnnouncementController::new_user_announcements($request);
+        return HelperController::api_response_format(201, ['notify' => $anounce],'Announcement Updated Successfully');
 
     }
 
@@ -283,8 +283,8 @@ class AnnouncementController extends Controller
         }
         $announce->delete();
         $anounce = AnnouncementController::get_announcement($request);
-        $anouncenew = AnnouncementController::new_user_announcements($request);
-        return HelperController::api_response_format(201, ['notify' => $anounce, 'assoicate' => $anouncenew],'Announcement Deleted Successfully');
+        // $anouncenew = AnnouncementController::new_user_announcements($request);
+        return HelperController::api_response_format(201, ['notify' => $anounce],'Announcement Deleted Successfully');
     }
 
     /**
