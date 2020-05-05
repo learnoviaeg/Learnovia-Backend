@@ -135,7 +135,7 @@ class AnnouncementController extends Controller
             ]);
 
         }
-            $user = array_unique($users);
+            $user = array_unique($users->toArray());
             if($request->filled('role'))
             {
                 foreach($user as $use)
