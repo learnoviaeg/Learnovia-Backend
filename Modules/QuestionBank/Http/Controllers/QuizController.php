@@ -676,8 +676,7 @@ class QuizController extends Controller
             $check_time = ($duration_time) - ($now - $open_time);
             if($check_time < 0)
                 $check_time= 0;
-            $user_answer_max=UserQuizAnswer::where('user_quiz_id',$max_id)->max('id');
-            $user_answer=UserQuizAnswer::find($user_answer_max);
+            $user_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->get();
             $quiz->duration_time = $check_time;
         }
 
