@@ -49,9 +49,10 @@ class UserQuizController extends Controller
             ->where('user_id', Auth::user()->id)
             ->get()->max('attempt_index');
 
-        $userQuiz = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
+        $max_id = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
             ->where('user_id', Auth::user()->id)
-            ->first();
+            ->get()->max('id');
+        $userQuiz=userQuiz::find($max_id);
 
         $attempt_index = 0;
         if ($max_attempt_index == null) {
@@ -60,7 +61,7 @@ class UserQuizController extends Controller
             if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp) {
                 if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
                 {
-                    $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->where('answered','!=',1)->get();
+                    $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get();
                     foreach($user_quiz_answer as $user_ans)
                     {
                         if(isset($user_ans)){
@@ -72,10 +73,15 @@ class UserQuizController extends Controller
 
                     $attempt_index = ++$max_attempt_index;
                 }
+
                 else {
-                    return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
+                    $answered=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get()->count();
+                    if($answered < 1)
+                        $attempt_index = ++$max_attempt_index;
+                    else
+                        return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
                 }
-            } else {                                                                                                                
+            } else {  
                 return HelperController::api_response_format(400, null, 'Max Attempt number reached');
             }
         }
