@@ -75,7 +75,7 @@ class UserQuizController extends Controller
                 }
 
                 else {
-                    $answered=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get()->count();
+                    $answered=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
                     if($answered < 1)
                         $attempt_index = ++$max_attempt_index;
                     else
@@ -278,7 +278,10 @@ class UserQuizController extends Controller
             $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->get();
 
             foreach($answer2 as $ans)
+            {
                 $ans->update(['answered'=>'1']);
+                $ans->update(['force_submit'=>'1']);
+            }
             
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
         }
