@@ -78,6 +78,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/delete', 'title' => 'delete year']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/set-current', 'title' => 'set current year']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/get-all', 'title' => 'get all years']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'year/get-my-years', 'title' => 'get all my years']);
 
             //Type Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'type/delete', 'title' => 'delete type']);

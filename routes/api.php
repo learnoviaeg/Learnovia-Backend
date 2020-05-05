@@ -104,6 +104,7 @@ Route::group(['prefix' => 'year', 'middleware' => ['auth:api']], function () {
     Route::post('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
     Route::post('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
     Route::post('set-current', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/set-current');
+    Route::get('get-my-years', 'AcademicYearController@GetMyYears')->name('getmyyear')->middleware('permission:year/get-my-years');
 });
 
 //Type Routes
@@ -151,6 +152,7 @@ Route::group(['prefix' => 'segment', 'middleware' => ['auth:api']], function () 
     Route::get('get-all', "segment_class_Controller@get")->name('getclasses')->middleware('permission:segment/get-all');
     Route::post('update', "segment_class_Controller@update")->name('updatesegment')->middleware('permission:segment/update');
     Route::post('set-current', 'segment_class_Controller@setCurrent_segmant')->name('SetCurrentSegment')->middleware('permission:segment/set-current');
+    Route::get('get-my-segments', "segment_class_Controller@GetMySegments")->name('getsegments');//here->middleware('permission:segment/get-my-segments');
 });
 
 //Category Routes
