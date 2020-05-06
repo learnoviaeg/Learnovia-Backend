@@ -269,7 +269,7 @@ class BigbluebuttonController extends Controller
                 'is_recorded' => $meet->is_recorded
             ]);
             // dd($meet->start_date);
-            if(Carbon::parse($meet->start_date)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') < Carbon::parse($meet->start_date)
+            if(Carbon::parse($meet->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($meet->start_date)
             ->addMinutes($meet->duration)->format('Y-m-d H:i:s'))
             {
                 $check =self::start_meeting($req);
@@ -297,7 +297,7 @@ class BigbluebuttonController extends Controller
             foreach($meet as $m)
             {
                 $m['join'] = false;
-                if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') < Carbon::parse($m->start_date)
+                if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
                 ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
                 {
                     $req = new Request([
