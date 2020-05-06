@@ -26,7 +26,7 @@ class GradeItemController extends Controller
     {
         $request->validate([
             'name' => 'nullable|string',
-            'weight' => 'nullable|integer',
+            'weight' => 'required|integer|min:5|max:100',
             'grade_category' => 'required|exists:grade_categories,id',
             'grademin' => 'required|integer|min:0',
             'grademax' => 'required|integer|gt:grademin',
@@ -41,7 +41,8 @@ class GradeItemController extends Controller
             'item_type' => 'nullable|exists:item_types,id',
             'item_Entity' => 'nullable',
             'hidden' => 'required|boolean',
-            'locked' => 'required|boolean'
+            'locked' => 'required|boolean',
+            'type' => 'required|in:scale,value'
         ]);
 
         $GradeCat = GradeCategory::find($request->grade_category);
@@ -61,6 +62,7 @@ class GradeItemController extends Controller
             'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : null,
             'locked' => $request->locked,
             'hidden' => $request->hidden,
+            'type' => $request->type,
             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
             'name' => (isset($request->name)) ? $request->name : 'Grade Item',
             'weight' => (isset($request->weight)) ? $request->weight : 0,
@@ -77,6 +79,7 @@ class GradeItemController extends Controller
             $allWeight += $childs->weight();
             $weight[] = $childs->weight();
         }
+        // return $allWeight;
         if ($allWeight != 100) {
             $message = "Your grades adjusted to get 100!";
             $gcd = GradeItemController::findGCD($weight, sizeof($weight));
@@ -90,6 +93,7 @@ class GradeItemController extends Controller
                 $count++;
             }
         }
+
         $grade->weight=GradeItems::where('id',$grade->id)->pluck('weight')->first();
 
         return HelperController::api_response_format(201, $grade, 'Grade item Created Successfully');
@@ -476,7 +480,6 @@ class GradeItemController extends Controller
         $result = $arr[0];
         for ($i = 1; $i < $n; $i++)
             $result = self::gcd($arr[$i], $result);
-
         return $result;
     }
     public function gradeing_method()
