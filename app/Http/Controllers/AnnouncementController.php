@@ -99,6 +99,7 @@ class AnnouncementController extends Controller
             'type_id' => $request->type,
             'segment_id' => $request->segment_id,
             'publish_date' => $publishdate,
+            'created_by' => Auth::id(),
         ]);
         if ($request->filled('start_date')) {
             $ann->start_date = $start_date;
@@ -167,8 +168,11 @@ class AnnouncementController extends Controller
             // return $notificatin;
 
         $anounce = AnnouncementController::get_announcement($request);
- 
-        return HelperController::api_response_format(201, ['notify' => $anounce],'Announcement Sent Successfully');
+        $myAnnouncements = Announcement::where('created_by',Auth::id())->get();
+        foreach ($myAnnouncements as $ann) {
+            $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
+        }
+        return HelperController::api_response_format(201, ['notify' => $anounce , 'created'=>$myAnnouncements ],'Announcement Sent Successfully');
     }
 
     /**
@@ -249,7 +253,11 @@ class AnnouncementController extends Controller
 
         $anounce = AnnouncementController::get_announcement($request);
         // $anouncenew = AnnouncementController::new_user_announcements($request);
-        return HelperController::api_response_format(201, ['notify' => $anounce],'Announcement Updated Successfully');
+        $myAnnouncements = Announcement::where('created_by',Auth::id())->get();
+        foreach ($myAnnouncements as $ann) {
+            $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
+        }
+        return HelperController::api_response_format(201,  ['notify' => $anounce , 'created'=>$myAnnouncements ],'Announcement Updated Successfully');
 
     }
 
@@ -283,7 +291,11 @@ class AnnouncementController extends Controller
         $announce->delete();
         $anounce = AnnouncementController::get_announcement($request);
         // $anouncenew = AnnouncementController::new_user_announcements($request);
-        return HelperController::api_response_format(201, ['notify' => $anounce],'Announcement Deleted Successfully');
+        $myAnnouncements = Announcement::where('created_by',Auth::id())->get();
+        foreach ($myAnnouncements as $ann) {
+            $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
+        }
+        return HelperController::api_response_format(201,  ['notify' => $anounce , 'created'=>$myAnnouncements ],'Announcement Deleted Successfully');
     }
 
     /**
@@ -505,7 +517,11 @@ class AnnouncementController extends Controller
     {
         $anounce = AnnouncementController::get_announcement($request);
         // $anouncenew = AnnouncementController::new_user_announcements($request);
-        return HelperController::api_response_format(201, ['notify' => $anounce]);
+        $myAnnouncements = Announcement::where('created_by',Auth::id())->get();
+        foreach ($myAnnouncements as $ann) {
+                    $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
+                }
+        return HelperController::api_response_format(201, ['notify' => $anounce , 'created'=>$myAnnouncements ]);
     }
 
      /**
