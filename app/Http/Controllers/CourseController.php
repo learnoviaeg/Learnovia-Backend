@@ -969,10 +969,25 @@ class CourseController extends Controller
         //sort assignments and quiz bt due_date
         if(isset($result["Assigments"])){
             $assignmet = collect($result["Assigments"])->sortByDesc('due_date');
+            $ass=collect();
+            foreach($assignmet as $item){
+                $assignLesson = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('id')->first();
+                $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignLesson)->first();
+                if($override != null){
+                    $item->start_date = $override->start_date;
+                    $item->due_date = $override->due_date;
+                    // $item->pivot->publish_date = $override->start_date;
+                    if($item->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
+                        $item->Started = false;
+                    else
+                        $item->Started = true;
+                }
+                $ass[] = $item;
+            }
             if(isset($request->assort)){
                 if($request->assort == 'course'){
                     $i=0;
-                    foreach($assignmet as $assign){
+                    foreach($ass as $assign){
                         $course_sort[$i]['id'] = $assign->id;
                         $course_sort[$i]['name'] = $assign->course->name; 
                         $i++;
@@ -988,29 +1003,14 @@ class CourseController extends Controller
                         $try [$j]= collect($result["Assigments"])->where('id', $as['id'])->values()[0];
                         $j++;
                     }
-                     $assignmet = $try;
+                     $ass = $try;
                 }
                 else{
                     if($request->order == 'asc')
-                        $assignmet = collect($result["Assigments"])->sortBy($request->assort);
+                        $ass = collect($ass)->sortBy($request->assort)->values();
                     else
-                        $assignmet = collect($result["Assigments"])->sortByDesc($request->assort);
+                        $ass = collect($ass)->sortByDesc($request->assort)->values();
                 }
-            }
-            $ass=collect();
-            foreach($assignmet as $item){
-                $assignLesson = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('id')->first();
-                $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignLesson)->first();
-                if($override != null){
-                    $item->start_date = $override->start_date;
-                    $item->due_date = $override->due_date;
-                    // $item->pivot->publish_date = $override->start_date;
-                    if($item->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
-                        $item->Started = false;
-                    else
-                        $item->Started = true;
-                }
-                $ass[] = $item;
             }
                 $result['Assigments']   = $ass;  
         }
