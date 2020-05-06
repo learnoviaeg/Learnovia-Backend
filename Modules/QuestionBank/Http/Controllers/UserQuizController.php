@@ -79,12 +79,12 @@ class UserQuizController extends Controller
             }
         }
 
-        $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quizLesson->id)->first();
-        if(isset($override)){
-            if($override->attemps <= $quiz_lesson->max_attemp &&  $override->attemps > 0   ){
-                   $override->attemps=$override->attemps-- ;
-            }
-        }
+        // $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quizLesson->id)->first();
+        // if(isset($override)){
+        //     if($override->attemps <= $quiz_lesson->max_attemp &&  $override->attemps > 0   ){
+        //            $override->attemps=$override->attemps-- ;
+        //     }
+        // }
         $deviceData = collect([]);
         $deviceData->put('isDesktop', Browser::isDesktop());
         $deviceData->put('isMobile', Browser::isMobile());
