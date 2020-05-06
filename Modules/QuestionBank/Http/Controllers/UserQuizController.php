@@ -55,23 +55,23 @@ class UserQuizController extends Controller
         $userQuiz=userQuiz::find($max_id);
         $override_flag = false;
         $attempt_index = 0;
-         $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quiz_lesson->id)->first();
+        $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quiz_lesson->id)->first();
         if(isset($override)){
+            $override_flag = true;
             if($override->attemps <= $quiz_lesson->max_attemp &&  $override->attemps >= 0  ){
                 $max_attempt_index  =  $quiz_lesson->max_attemp - $override->attemps ; 
-                $override_flag = true;
                 if($max_attempt_index==0)
-{    
+                {    
                     $max_attempt_index=null;
-}                    
+                }                    
             }
         }
         if ($max_attempt_index == null) {
             $attempt_index = 1;
             if($override_flag)
-            {$override->attemps=$override->attemps-1;
+            {
+                $override->attemps=$override->attemps-1;
                 $override->save();
-
             }
 
         } else if (isset($userQuiz)) {
@@ -88,12 +88,14 @@ class UserQuizController extends Controller
                         }
                     }
                     $attempt_index = ++$max_attempt_index;
-                    return $attempt_index;
                     if($override_flag)
-                            {$override->attemps=$override->attemps-1;
-                                $override->save();
+                        {
+                            if($override->attemps == 0)
+                                return HelperController::api_response_format(400, null, 'Max Attempt number reached and you can\'t answer again');
 
-                            }
+                            $override->attemps=$override->attemps-1;
+                            $override->save();
+                        }
                 }
 
                 else {
@@ -101,15 +103,15 @@ class UserQuizController extends Controller
                     $answered=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
                     
                     if($answered < 1)
-                      {  
-                          $attempt_index = ++$max_attempt_index;
-                          if($override_flag)
-                          {
-                              
+                    {  
+                        $attempt_index = ++$max_attempt_index;
+                        if($override->attemps == 0)
+                            return HelperController::api_response_format(400, null, 'Max Attempt number reached and you can\'t answer again');
+                        if($override_flag)
+                        {
                             $override->attemps--;
-                              $override->save();
-
-                          }
+                            $override->save();
+                        }
                     }
                     else
                         return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
@@ -155,9 +157,9 @@ class UserQuizController extends Controller
             'submit_time'=> Carbon::now()->format('Y-m-d H:i:s'),
         ]);
 
-           foreach($quiz_lesson->quiz->Question as $question){
+        foreach($quiz_lesson->quiz->Question as $question){
             userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
-           }
+        }
         return HelperController::api_response_format(200, $userQuiz);
     }
 

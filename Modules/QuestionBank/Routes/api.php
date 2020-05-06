@@ -29,8 +29,8 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('override', 'QuizLessonController@overrideQuiz');//->middleware('permission:quiz/override');
 
     //User Quiz
-    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz')->middleware('permission:quiz/answer');
-    Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer')->middleware('permission:quiz/answer');
+    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz');//->middleware('permission:quiz/answer');
+    Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer');//->middleware('permission:quiz/answer');
     Route::post('feedback', 'UserQuizController@feedback');
     Route::get('get-all-quizes', 'QuizController@getAllQuizes')->middleware('permission:quiz/get-all-quizes');
     Route::get('get-student-in-quiz', 'QuizController@getStudentinQuiz')->middleware('permission:quiz/get-student-in-quiz');
