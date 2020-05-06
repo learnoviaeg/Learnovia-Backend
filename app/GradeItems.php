@@ -8,7 +8,7 @@ class GradeItems extends Model
 {
     protected $fillable = [
         'grade_category', 'grademin', 'grademax', 'calculation', 'item_no', 'grade_pass', 'multifactor',
-        'plusfactor', 'aggregationcoef', 'aggregationcoef2', 'item_type', 'name', 'item_Entity', 'hidden', 'weight', 'id_number'
+        'plusfactor', 'aggregationcoef', 'aggregationcoef2', 'item_type', 'name', 'item_Entity', 'hidden','type', 'weight', 'id_number',
     ];
 
     protected $appends = ['parent_aggregation'];
