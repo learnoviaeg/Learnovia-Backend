@@ -42,10 +42,14 @@ class GradeItemController extends Controller
             'item_Entity' => 'nullable',
             'hidden' => 'required|boolean',
             'locked' => 'required|boolean',
-            'type' => 'required|in:scale,value'
+            'type' => 'required|in:0,1'
         ]);
 
         $GradeCat = GradeCategory::find($request->grade_category);
+        if($request->type == 0)
+            $type = 'scale';
+        else
+            $type = 'value';
 
         $data = [
             'grade_category' => $request->grade_category,
@@ -62,7 +66,7 @@ class GradeItemController extends Controller
             'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : null,
             'locked' => $request->locked,
             'hidden' => $request->hidden,
-            'type' => $request->type,
+            'type' => $type,
             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
             'name' => (isset($request->name)) ? $request->name : 'Grade Item',
             'weight' => (isset($request->weight)) ? $request->weight : 0,
