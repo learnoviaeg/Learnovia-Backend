@@ -810,7 +810,6 @@ class QuizController extends Controller
         }
 
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
-
         $quiz['grading_method']=$quiz_lesson->grading_method_id;
         $quiz['max_attemp']=$quiz_lesson->max_attemp;
         $quiz['start_date']=$quiz_lesson->start_date;
@@ -818,7 +817,14 @@ class QuizController extends Controller
         $quiz['mark']=$quiz_lesson->grade;
         $quiz['grade_category']=$gradecat;
         $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
-
+        // return $quiz_lesson;
+        $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where("user_id",$user_id)->first();
+        // return $override_user;
+        if(isset($override_user)){
+            
+            $quiz['start_date']=$override_user->start_date;
+            $quiz['due_date']=$override_user->due_date;
+        }
         $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->get();
         if($request->filled('attempt_index'))
             $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->get();
@@ -867,11 +873,13 @@ class QuizController extends Controller
             }
             else
                 unset($question->childeren);
-
-            foreach($userAnswerss as $userAnswers)
+            if(isset($userAnswerss))
+           { foreach($userAnswerss as $userAnswers)
                 foreach($userAnswers as $userAnswer)
                     if($userAnswer->question_id == $question->id)
                         $question->User_Answer=$userAnswer;
+                    
+            }
             if($show_is_true == 1)
             $question->question_answer;
             $question->question_category;

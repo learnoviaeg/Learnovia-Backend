@@ -282,13 +282,15 @@ class QuizLessonController extends Controller
         'start_date' => 'required|before:due_date',
         'due_date' => 'required|after:' . Carbon::now(),
     ]);
+    $quizLesson = QuizLesson::find($request->quiz_lesson_id);
     $usersOverride =array();
     foreach ($request->users_id as $user_id) {
         $usersOverride [] =  QuizOverride::firstOrCreate([
         'user_id'=> $user_id,
         'quiz_lesson_id'=> $request->quiz_lesson_id ,
         'start_date' => $request->start_date ,
-        'due_date'=>$request->due_date 
+        'due_date'=>$request->due_date ,
+        'attemps' => $quizLesson->max_attemp
     ]);
 
         }

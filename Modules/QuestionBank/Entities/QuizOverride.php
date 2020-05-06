@@ -10,7 +10,8 @@ class QuizOverride extends Model
     'user_id',
     'quiz_lesson_id',
     'start_date',
-    'due_date'
+    'due_date',
+    'attemps'
 ];
 
 

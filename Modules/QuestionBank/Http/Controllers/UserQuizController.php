@@ -40,10 +40,12 @@ class UserQuizController extends Controller
         
         $quiz =Quiz::find($request->quiz_id);
         $quiz_duration=$quiz->duration;
-
+        
         if (!isset($quiz_lesson)) {
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
         }
+        
+
 
         $max_attempt_index = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
             ->where('user_id', Auth::user()->id)
@@ -86,6 +88,12 @@ class UserQuizController extends Controller
             }
         }
 
+        // $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quizLesson->id)->first();
+        // if(isset($override)){
+        //     if($override->attemps <= $quiz_lesson->max_attemp &&  $override->attemps > 0   ){
+        //            $override->attemps=$override->attemps-- ;
+        //     }
+        // }
         $deviceData = collect([]);
         $deviceData->put('isDesktop', Browser::isDesktop());
         $deviceData->put('isMobile', Browser::isMobile());
