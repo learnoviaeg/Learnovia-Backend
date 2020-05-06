@@ -99,7 +99,6 @@ class AnnouncementController extends Controller
             'type_id' => $request->type,
             'segment_id' => $request->segment_id,
             'publish_date' => $publishdate,
-            'allowed_course_segments'=>$courseSegments,
         ]);
         if ($request->filled('start_date')) {
             $ann->start_date = $start_date;

@@ -152,7 +152,7 @@ Route::group(['prefix' => 'segment', 'middleware' => ['auth:api']], function () 
     Route::get('get-all', "segment_class_Controller@get")->name('getclasses')->middleware('permission:segment/get-all');
     Route::post('update', "segment_class_Controller@update")->name('updatesegment')->middleware('permission:segment/update');
     Route::post('set-current', 'segment_class_Controller@setCurrent_segmant')->name('SetCurrentSegment')->middleware('permission:segment/set-current');
-    Route::get('get-my-segments', "segment_class_Controller@GetMySegments")->name('getsegments');//here->middleware('permission:segment/get-my-segments');
+    Route::get('get-my-segments', "segment_class_Controller@GetMySegments")->name('getsegments')->middleware('permission:segment/get-my-segments');
 });
 
 //Category Routes
