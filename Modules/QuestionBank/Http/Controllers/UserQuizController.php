@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\QuizOverride;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuestionsAnswer;
@@ -44,9 +45,6 @@ class UserQuizController extends Controller
         if (!isset($quiz_lesson)) {
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
         }
-        
-
-
         $max_attempt_index = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
             ->where('user_id', Auth::user()->id)
             ->get()->max('attempt_index');
@@ -55,14 +53,31 @@ class UserQuizController extends Controller
             ->where('user_id', Auth::user()->id)
             ->get()->max('id');
         $userQuiz=userQuiz::find($max_id);
-
+        $override_flag = false;
         $attempt_index = 0;
+         $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quiz_lesson->id)->first();
+        if(isset($override)){
+            if($override->attemps <= $quiz_lesson->max_attemp &&  $override->attemps >= 0  ){
+                $max_attempt_index  =  $quiz_lesson->max_attemp - $override->attemps ; 
+                $override_flag = true;
+                if($max_attempt_index==0)
+{    
+                    $max_attempt_index=null;
+}                    
+            }
+        }
         if ($max_attempt_index == null) {
             $attempt_index = 1;
+            if($override_flag)
+            {$override->attemps=$override->attemps-1;
+                $override->save();
+
+            }
+
         } else if (isset($userQuiz)) {
-            if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp) {
+            if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp  || $override_flag ) {
                 if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
-                {
+                {  
                     $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get();
                     foreach($user_quiz_answer as $user_ans)
                     {
@@ -72,14 +87,30 @@ class UserQuizController extends Controller
                             ]);
                         }
                     }
-
                     $attempt_index = ++$max_attempt_index;
+                    return $attempt_index;
+                    if($override_flag)
+                            {$override->attemps=$override->attemps-1;
+                                $override->save();
+
+                            }
                 }
 
                 else {
+
                     $answered=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
+                    
                     if($answered < 1)
-                        $attempt_index = ++$max_attempt_index;
+                      {  
+                          $attempt_index = ++$max_attempt_index;
+                          if($override_flag)
+                          {
+                              
+                            $override->attemps--;
+                              $override->save();
+
+                          }
+                    }
                     else
                         return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
                 }
@@ -88,12 +119,6 @@ class UserQuizController extends Controller
             }
         }
 
-        // $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quizLesson->id)->first();
-        // if(isset($override)){
-        //     if($override->attemps <= $quiz_lesson->max_attemp &&  $override->attemps > 0   ){
-        //            $override->attemps=$override->attemps-- ;
-        //     }
-        // }
         $deviceData = collect([]);
         $deviceData->put('isDesktop', Browser::isDesktop());
         $deviceData->put('isMobile', Browser::isMobile());
