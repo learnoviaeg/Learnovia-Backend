@@ -883,7 +883,9 @@ class CourseController extends Controller
             'end'       => 'nullable|date',
             'components' => 'nullable|array',
             'components.*' => 'required|integer|exists:components,id',
-            'timeline' => 'integer' 
+            'timeline' => 'integer',
+            'assort' => 'string|in:name,due_date,course',
+            'order' => 'string|in:asc,desc'
         ]);
         // $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
         $components  = Component::where('active', 1)->whereIn('type', [3,1]);
@@ -966,6 +968,34 @@ class CourseController extends Controller
         //sort assignments and quiz bt due_date
         if(isset($result["Assigments"])){
             $assignmet = collect($result["Assigments"])->sortByDesc('due_date');
+            if(isset($request->assort)){
+                if($request->assort == 'course'){
+                    $i=0;
+                    foreach($assignmet as $assign){
+                        $course_sort[$i]['id'] = $assign->id;
+                        $course_sort[$i]['name'] = $assign->course->name; 
+                        $i++;
+                    }
+                    if($request->order == 'asc')
+                        $a = collect($course_sort)->sortBy('name')->values();
+                    else
+                        $a = collect($course_sort)->sortByDesc('name')->values();
+
+                    $j=0;
+                    foreach($a as $as)
+                    {
+                        $try [$j]= collect($result["Assigments"])->where('id', $as['id'])->values()[0];
+                        $j++;
+                    }
+                     $assignmet = $try;
+                }
+                else{
+                    if($request->order == 'asc')
+                        $assignmet = collect($result["Assigments"])->sortBy($request->assort);
+                    else
+                        $assignmet = collect($result["Assigments"])->sortByDesc($request->assort);
+                }
+            }
             $ass=collect();
             foreach($assignmet as $item){
                 $assignLesson = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)->pluck('id')->first();
@@ -991,6 +1021,36 @@ class CourseController extends Controller
           foreach($quizzesSorted as $q){
             $quiz[] = $q;
             }
+
+            if(isset($request->assort)){
+                if($request->assort == 'course'){
+                    $i=0;
+                    foreach($quiz as $qu){
+                        $course_sort[$i]['id'] = $qu->id;
+                        $course_sort[$i]['name'] = $qu->course->name; 
+                        $i++;
+                    }
+                    if($request->order == 'asc')
+                        $a = collect($course_sort)->sortBy('name')->values();
+                    else
+                        $a = collect($course_sort)->sortByDesc('name')->values();
+
+                    $j=0;
+                    foreach($a as $as)
+                    {
+                        $try [$j]= collect($result["Quiz"])->where('id', $as['id'])->values()[0];
+                        $j++;
+                    }
+                     $quiz = $try;
+                }
+                else{
+                    if($request->order == 'asc')
+                        $quiz = collect($result["Quiz"])->sortBy($request->assort)->values();
+                    else
+                        $quiz = collect($result["Quiz"])->sortByDesc($request->assort)->values();
+                }
+            }
+
             $result['Quiz']   = $quiz;  
         }
         return HelperController::api_response_format(200,$result);
