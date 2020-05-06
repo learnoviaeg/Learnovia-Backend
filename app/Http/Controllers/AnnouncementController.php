@@ -85,7 +85,7 @@ class AnnouncementController extends Controller
         }
         $courseSegments = GradeCategoryController::getCourseSegment($request);
         // return $courseSegments;
-        $users = Enroll::whereIn('course_segment',$courseSegments)->pluck('user_id');
+        $users = Enroll::whereIn('course_segment',$courseSegments)->where('user_id','!=' ,Auth::id())->pluck('user_id');
         //Creating announcement in DB
         $ann = Announcement::create([
             'title' => $request->title,
