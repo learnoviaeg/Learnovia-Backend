@@ -116,6 +116,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/get-all', 'title' => 'get all segment']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/get', 'title' => 'get segment']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/set-current', 'title' => 'set current segment']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'segment/get-my-segments', 'title' => 'get my segment']);
 
             //Cetegory Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'category/add', 'title' => 'add category']);
