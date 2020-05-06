@@ -99,7 +99,6 @@ class UserQuizController extends Controller
                 }
 
                 else {
-
                     $answered=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
                     
                     if($answered < 1)
