@@ -37,13 +37,15 @@ class GradeCategoryController extends Controller
             'aggregation' => 'nullable|integer',
             'aggregatedOnlyGraded' => 'nullable|integer',
             'hidden' => 'boolean|required',
-            'grademin' => 'nullable|required_if:type,==,1|integer|min:0',
-            'grademax' => 'nullable|required_if:type,==,1|integer|gt:grademin',
+            'grademin' => 'nullable|required_if:type,==,0|integer|min:0',
+            'grademax' => 'nullable|required_if:type,==,0|integer|gt:grademin',
             'type' => 'boolean|required',
             'exclude_flag' => 'boolean|required',
             'locked' => 'required|boolean',
             'weight' => 'nullable|integer|required_if:exclude_flag,==,1'
         ]);
+        ///type 1 => value
+        ///type 2 => scale
         $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (isset($course_segment_id)) {
             $segclass=CourseSegment::find($course_segment_id->id)->segmentClasses;
@@ -57,8 +59,8 @@ class GradeCategoryController extends Controller
                 'locked' => $request->locked,
                 'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
                 'hidden' => $request->hidden,
-                'grademax' => ($request->type==1) ? $request->grademax : null,
-                'grademin' => ($request->type==1) ? $request->grademin : null,
+                'grademax' => ($request->type==0) ? $request->grademax : null,
+                'grademin' => ($request->type==0) ? $request->grademin : null,
                 'type' => $request->type,
                 'exclude_flag' => $request->exclude_flag,
                 'id_number' => $year_level[0]->id
