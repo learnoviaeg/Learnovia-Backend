@@ -141,7 +141,7 @@ class AnnouncementController extends Controller
             {
                 foreach($user as $use)
                 {
-                    if($use != Auth::user()->id){
+                    if($use != Auth::id()){
 
                         $user_obj=User::where('id',$use)->get()->first();
                         $role_id=$user_obj->roles->pluck('id')->first();
@@ -157,7 +157,7 @@ class AnnouncementController extends Controller
             else{
                 foreach($user as $use)
                 {
-                    if($use != Auth::user()->id)
+                    if($use != Auth::id())
                     {
                          $requ['users'] = $user;
                     }
