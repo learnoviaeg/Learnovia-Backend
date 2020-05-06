@@ -281,6 +281,12 @@ class segment_class_Controller extends Controller
         $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
             //validate that course in my current course start < now && now < end
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
+        },'enroll.courseSegment.segmentClasses.classLevel' => function($query) use ($request){
+            if ($request->filled('class'))
+                $query->where('class_id', $request->class);
+        },'enroll.courseSegment.segmentClasses.classLevel.yearLevels' => function($query) use ($request){
+            if ($request->filled('level'))
+                $query->where('level_id', $request->level);
         },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
             if ($request->filled('type'))
                 $query->where('academic_type_id', $request->type);   
