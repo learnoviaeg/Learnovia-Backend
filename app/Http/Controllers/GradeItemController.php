@@ -28,8 +28,8 @@ class GradeItemController extends Controller
             'name' => 'nullable|string',
             'weight' => 'required|integer|min:5|max:100',
             'grade_category' => 'required|exists:grade_categories,id',
-            'grademin' => 'required',
-            'grademax' => 'required',
+            'grademin' => 'nullable',
+            'grademax' => 'nullable',
             'calculation' => 'nullable|string',
             'item_no' => 'nullable|integer',
             'scale_id' => 'nullable|exists:scales,id',
@@ -48,19 +48,21 @@ class GradeItemController extends Controller
         $GradeCat = GradeCategory::find($request->grade_category);
         if($request->type == 0){
             $type = 'scale';
+            $request->grademin = null;
+            $request->grademax = null;
         }
         else{
             $request->validate([
-                'grademin' => 'integer|min:0',
-                'grademax' => 'integer|gt:grademin',
+                'grademin' => 'required|integer|min:0',
+                'grademax' => 'required|integer|gt:grademin',
             ]);
             $type = 'value';
         }
 
         $data = [
             'grade_category' => $request->grade_category,
-            'grademin' => (isset($request->grademin)) ? $request->grademin : null,
-            'grademax' => (isset($request->grademax)) ? $request->grademax : null,
+            'grademin' => $request->grademin,
+            'grademax' => $request->grademax,
             'calculation' => (isset($request->calculation) && in_array($request->calculation,GradeItems::Allowed_functions())) ? $request->calculation : null,
             'item_no' => (isset($request->item_no)) ? $request->item_no : null,
             'scale_id' => (isset($request->scale_id)) ? $request->scale_id : 1,
