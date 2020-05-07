@@ -26,13 +26,13 @@ class GradeItemController extends Controller
     {
         $request->validate([
             'name' => 'nullable|string',
-            'weight' => 'required|integer|min:5|max:100',
+            'weight' => 'nullable|integer',
             'grade_category' => 'required|exists:grade_categories,id',
             'grademin' => 'nullable',
             'grademax' => 'nullable',
             'calculation' => 'nullable|string',
             'item_no' => 'nullable|integer',
-            'scale_id' => 'nullable|exists:scales,id',
+            'scale_id' => 'nullable',
             'grade_pass' => 'nullable|integer',
             'multifactor' => 'nullable|numeric|between:0,99.99',
             'plusfactor' => 'nullable|numeric|between:0,99.99',
@@ -47,6 +47,9 @@ class GradeItemController extends Controller
 
         $GradeCat = GradeCategory::find($request->grade_category);
         if($request->type == 0){
+            $request->validate([
+                'scale_id' => 'required|integer|exists:scales,id',
+            ]);
             $type = 'scale';
             $request->grademin = null;
             $request->grademax = null;
@@ -57,15 +60,16 @@ class GradeItemController extends Controller
                 'grademax' => 'required|integer|gt:grademin',
             ]);
             $type = 'value';
+            $request->scale_id = null;
         }
-
+        
         $data = [
             'grade_category' => $request->grade_category,
             'grademin' => $request->grademin,
             'grademax' => $request->grademax,
             'calculation' => (isset($request->calculation) && in_array($request->calculation,GradeItems::Allowed_functions())) ? $request->calculation : null,
             'item_no' => (isset($request->item_no)) ? $request->item_no : null,
-            'scale_id' => (isset($request->scale_id)) ? $request->scale_id : 1,
+            'scale_id' => $request->scale_id,
             'grade_pass' => (isset($request->grade_pass)) ? $request->grade_pass : null,
             'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
             'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
