@@ -66,16 +66,19 @@ class UserQuizController extends Controller
                 }                    
             }
         }
+        //first attempt
         if ($max_attempt_index == null) {
             $attempt_index = 1;
+
+            //first attempt in case override
             if($override_flag)
             {
                 $override->attemps=$override->attemps-1;
                 $override->save();
             }
-
         } else if (isset($userQuiz)) {
             if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp  || $override_flag ) {
+                //When Time finish, he can't enter on same attempt
                 if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
                 {  
                     $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get();
@@ -87,31 +90,41 @@ class UserQuizController extends Controller
                             ]);
                         }
                     }
+                    //create one more then continue api
                     $attempt_index = ++$max_attempt_index;
+                    
+                    //in case override
                     if($override_flag)
-                        {
-                            if($override->attemps == 0)
-                                return HelperController::api_response_format(400, null, 'Max Attempt number reached and you can\'t answer again');
+                    {
+                        //case in last attempt in override
+                        if($override->attemps == 0)
+                            return HelperController::api_response_format(400, null, 'Max Attempt number reached and you can\'t answer again');
 
-                            $override->attemps=$override->attemps-1;
-                            $override->save();
-                        }
+                        $override->attemps=$override->attemps-1;
+                        $override->save();
+                    }
                 }
 
                 else {
                     $answered=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
-                    
+
+                    //his time isn't ended, but he submits so he creates one more attempt 
                     if($answered < 1)
                     {  
                         $attempt_index = ++$max_attempt_index;
+
+                        //case in last attempt in override
                         if($override->attemps == 0)
                             return HelperController::api_response_format(400, null, 'Max Attempt number reached and you can\'t answer again');
+                        //case override
                         if($override_flag)
                         {
                             $override->attemps--;
                             $override->save();
                         }
                     }
+
+                    //his time isn't ended 
                     else
                         return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
                 }
