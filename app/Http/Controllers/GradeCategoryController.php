@@ -45,7 +45,7 @@ class GradeCategoryController extends Controller
             'weight' => 'nullable|integer|required_if:exclude_flag,==,1'
         ]);
         ///type 1 => value
-        ///type 2 => scale
+        ///type 0 => scale
         $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (isset($course_segment_id)) {
             $segclass=CourseSegment::find($course_segment_id->id)->segmentClasses;
