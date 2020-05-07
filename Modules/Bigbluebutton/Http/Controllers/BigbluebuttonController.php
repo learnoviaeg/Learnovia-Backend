@@ -121,7 +121,7 @@ class BigbluebuttonController extends Controller
             'is_recorded' => $request->is_recorded,
             'join' => $bigbb['join']
         ]);
-        if(Carbon::parse($request->start_date)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') < Carbon::parse($request->start_date)
+        if(Carbon::parse($request->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($request->start_date)
         ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
         {
             $check =self::start_meeting($req);
