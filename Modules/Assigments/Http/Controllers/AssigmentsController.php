@@ -715,21 +715,24 @@ class AssigmentsController extends Controller
         $request->validate([
             'user_id' => 'required|array',
             'user_id.*' => 'exists:user_assigments,user_id',
-            'assignment_lesson_id' => 'required|exists:assignment_lessons,id',
+            'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
+            'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'start_date' => 'required|before:due_date',
             'due_date' => 'required|after:' . Carbon::now(),
         ]);
+
+        $assigmentlesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->pluck('id')->first();
 
         foreach($request->user_id as $user)
         {
             $assignmentOerride[] = assignmentOverride::firstOrCreate([
                 'user_id' => $user,
-                'assignment_lesson_id' => $request->assignment_lesson_id,
+                'assignment_lesson_id' => $assigmentlesson,
                 'start_date' =>  $request->start_date,
                 'due_date' => $request->due_date,
             ]);
         }
-        $assignment = AssignmentLesson::find($request->assignment_lesson_id);
+        $assignment = AssignmentLesson::find($assigmentlesson);
         $lesson = Lesson::find($assignment->lesson_id);
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;

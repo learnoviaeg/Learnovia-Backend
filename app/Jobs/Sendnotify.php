@@ -93,7 +93,7 @@ class Sendnotify implements ShouldQueue
                     ),
                     "webpush" => array(
                         "fcm_options" => array(
-                            "link" => "http://dev.learnovia.com",
+                            "link" => "https://dev.learnovia.com",
                             "analytics_label" => "Learnovia"
                         ),
                         "data" => $fordata
