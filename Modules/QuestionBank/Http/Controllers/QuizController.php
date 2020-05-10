@@ -654,6 +654,8 @@ class QuizController extends Controller
             return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
+        // if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
+        //     return HelperController::api_response_format(400, null, 'Time is out');
         $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where("user_id",Auth::id())->first();
         $quiz['start_date']=$quiz_lesson->start_date;
         $quiz['due_date']=$quiz_lesson->due_date;
