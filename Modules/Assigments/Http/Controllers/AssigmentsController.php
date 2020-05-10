@@ -582,14 +582,20 @@ class AssigmentsController extends Controller
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-            $studentassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
-            foreach($studentassigments as $studentassigment){
-                if(isset($studentassigment->user->attachment))
-                    $studentassigment->user->picture=$studentassigment->user->attachment->path;
-
-                if (isset($studentassigment->attachment_id)) {
-                    $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+            $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
+            foreach($userassigments as $userAssignment)
+            {
+                if ($userAssignment->user->can('site/course/student')) {
+                    $studentassigments[]=$userAssignment;
                 }
+            }
+            foreach($studentassigments as $studentassigment){
+                    if(isset($studentassigment->user->attachment))
+                        $studentassigment->user->picture=$studentassigment->user->attachment->path;
+
+                    if (isset($studentassigment->attachment_id)) {
+                        $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                    }
             }
             $assignment['user_submit'] = $studentassigments;
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
