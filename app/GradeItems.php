@@ -82,7 +82,7 @@ class GradeItems extends Model
     public function keepWeight()
     {
         $weight = [];
-        $grade_items = $this->GradeCategory->GradeItems;
+        $grade_items = $this->GradeCategory->GradeItems->where('weight',"!=" ,0);
         $allWeight = 0;
         foreach ($grade_items as $grade_item) {
             $allWeight += $grade_item->weight();
