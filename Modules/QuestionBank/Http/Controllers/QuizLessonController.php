@@ -278,23 +278,29 @@ class QuizLessonController extends Controller
         $request->validate([
         'users_id' => 'required|array',
         'users_id.*' => 'required|integer|exists:users,id',
-        'quiz_lesson_id' => 'required|integer|exists:quiz_lessons,id',
+        'quiz_id' => 'required|integer|exists:quizzes,id',
+        'lesson_id' => 'required|integer|exists:lessons,id',
         'start_date' => 'required|before:due_date',
         'due_date' => 'required|after:' . Carbon::now(),
     ]);
-    $quizLesson = QuizLesson::find($request->quiz_lesson_id);
+    
+    $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+    if(!isset($quizLesson)){
+        return HelperController::api_response_format(400,null, 'This quiz doesn\'t assign in this lesson');
+
+    }
+
     $usersOverride =array();
     foreach ($request->users_id as $user_id) {
         $usersOverride [] =  QuizOverride::firstOrCreate([
         'user_id'=> $user_id,
-        'quiz_lesson_id'=> $request->quiz_lesson_id ,
+        'quiz_lesson_id'=> $quizLesson->id,
         'start_date' => $request->start_date ,
         'due_date'=>$request->due_date ,
         'attemps' => $quizLesson->max_attemp
     ]);
 
         }
-        $quizLesson = QuizLesson::find($request->quiz_lesson_id);
         $lesson= Lesson::find( $quizLesson->lesson_id);
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
