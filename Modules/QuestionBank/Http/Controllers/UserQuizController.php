@@ -46,8 +46,8 @@ class UserQuizController extends Controller
         if (!isset($quiz_lesson)) {
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
         }
-        if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
-            return HelperController::api_response_format(400, null, 'Time is out');
+        // if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
+        //     return HelperController::api_response_format(400, null, 'Time is out');
 
         $max_attempt_index = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
             ->where('user_id', Auth::user()->id)
