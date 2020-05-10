@@ -42,9 +42,13 @@ class UserQuizController extends Controller
         $quiz =Quiz::find($request->quiz_id);
         $quiz_duration=$quiz->duration;
         
+        // return $quiz_lesson->due_date;
         if (!isset($quiz_lesson)) {
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
         }
+        if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
+            return HelperController::api_response_format(400, null, 'Time is out');
+
         $max_attempt_index = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
             ->where('user_id', Auth::user()->id)
             ->get()->max('attempt_index');
@@ -113,12 +117,12 @@ class UserQuizController extends Controller
                     {  
                         $attempt_index = ++$max_attempt_index;
 
-                        //case in last attempt in override
-                        if($override->attemps == 0)
-                            return HelperController::api_response_format(400, null, 'Max Attempt number reached and you can\'t answer again');
                         //case override
                         if($override_flag)
                         {
+                            //case in last attempt in override
+                            if($override->attemps == 0)
+                                return HelperController::api_response_format(400, null, 'Max Attempt number reached and you can\'t answer again');
                             $override->attemps--;
                             $override->save();
                         }
