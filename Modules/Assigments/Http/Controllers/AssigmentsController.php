@@ -520,8 +520,6 @@ class AssigmentsController extends Controller
         return HelperController::api_response_format(200, Assignment::all(), $message = 'Assignment deleted successfully');
     }
 
-
-
     public function GetAssignment(Request $request)
     {
         $request->validate([
@@ -543,7 +541,7 @@ class AssigmentsController extends Controller
         } else {
             $assignment['allow_edit'] = true;
         }
-        ///////////////student
+           /////////////student
         if ($user->can('site/assignment/getAssignment')) {
             $assignment_lesson = Lesson::where('id',$request->lesson_id)->with(['AssignmentLesson'=> function($query)use ($request){
                 $query->where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id);
@@ -562,18 +560,22 @@ class AssigmentsController extends Controller
                 }
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
-            // return $studentassigment->attachment_id;
+
             if(isset($studentassigment)){
-            $assignment['user_submit'] =$studentassigment;
-            if (isset($studentassigment->attachment_id)) {
-                $assignment['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-            }
+                $assignment['user_submit'] =$studentassigment;
+                $usr=User::find($studentassigment->user_id);
+                if(isset($usr->attachment))
+                    $usr->picture=$usr->attachment->path;
+                $assignment['user_submit']->User=$usr;
+                if (isset($studentassigment->attachment_id)) {
+                    $assignment['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                }
             }
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
-            }
+        }
             ////////teacher
-            if (!$user->can('site/assignment/getAssignment')) {
+        if (!$user->can('site/assignment/getAssignment')) {
             $assignment_lesson = Lesson::where('id',$request->lesson_id)->with(['AssignmentLesson'=> function($query)use ($request){
             $query->where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id);}])->first();
             $assignment['lesson'] =$assignment_lesson;
@@ -582,15 +584,17 @@ class AssigmentsController extends Controller
 
             $studentassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
             foreach($studentassigments as $studentassigment){
-            if (isset($studentassigment->attachment_id)) {
-                $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                if(isset($studentassigment->user->attachment))
+                    $studentassigment->user->picture=$studentassigment->user->attachment->path;
+
+                if (isset($studentassigment->attachment_id)) {
+                    $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                }
             }
-        }
             $assignment['user_submit'] = $studentassigments;
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
-
     }
 
     public function toggleAssignmentVisibity(Request $request)
