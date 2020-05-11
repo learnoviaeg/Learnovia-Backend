@@ -480,7 +480,8 @@ class CourseController extends Controller
                                     $Component->where('visible', '=', 1);
                                         // ->where('publish_date', '<=', Carbon::now());
                                 }
-                                if($com->model != 'quiz' && $com->model != 'assignment' ){ 
+                                //&& $com->model != 'assignment' 
+                                if($com->model != 'quiz'){ 
                                     if($role == 3){
                                         $Component->where('publish_date', '<=', Carbon::now()); 
                                     }
@@ -913,7 +914,8 @@ class CourseController extends Controller
                             $temp->where('visible', '=', 1);
                                 // ->where('publish_date', '<=', Carbon::now());
                         }
-                        if($component->model != 'quiz' && $component->model != 'assignment'){
+                        //&& $component->model != 'assignment'
+                        if($component->model != 'quiz'){
                             if($enroll['role_id'] == 3){
                                 $temp->where('publish_date', '<=', Carbon::now());
                             }
