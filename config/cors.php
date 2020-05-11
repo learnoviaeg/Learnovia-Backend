@@ -21,12 +21,12 @@ return [
 
         'allow_origins' => [
            'http://localhost:80/',
-           ' http://169.62.201.2/',
+           'http://169.62.201.2/',
            'http://qaitbay.learnovia.com/',
            'http://localhost:4200',
            'https://dev.learnovia.com',
-           'http://13.52.205.38/',
-           'http://staging.learnovia.com',
+           'https://13.52.205.38/',
+           'https://staging.learnovia.com',
         ],
 
         'allow_methods' => [
