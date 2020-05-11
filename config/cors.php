@@ -25,6 +25,8 @@ return [
            'http://qaitbay.learnovia.com/',
            'http://localhost:4200',
            'https://dev.learnovia.com',
+           'http://13.52.205.38/',
+           'http://staging.learnovia.com',
         ],
 
         'allow_methods' => [
