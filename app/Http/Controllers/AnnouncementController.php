@@ -67,13 +67,12 @@ class AnnouncementController extends Controller
             $date=Carbon::now();
             $publishdate = Carbon::parse($date)->format('Y-m-d H:i:s');
         }
-
+        $start_date = $request->start_date;
         if($request->start_date < Carbon::now())
         {
             $start_date = Carbon::now();
-        }else {
-            $start_date = $request->start_date;
         }
+
 
         $users = array();
         //Files uploading
@@ -101,6 +100,7 @@ class AnnouncementController extends Controller
             'publish_date' => $publishdate,
             'created_by' => Auth::id(),
         ]);
+        $ann->start_date = null ;
         if ($request->filled('start_date')) {
             $ann->start_date = $start_date;
             $ann->save();
@@ -120,8 +120,8 @@ class AnnouncementController extends Controller
                 'title' => $request->title,
                 'description' => $request->description,
                 'attached_file' => $file_id,
-                'start_date' => $start_date,
-                'due_date' => $request->due_date
+                'start_date' => $ann->start_date,
+                'due_date' => $ann->due_date
             ]);
         }else{
             $attached = attachment::where('id', $file_id)->first();
@@ -132,8 +132,8 @@ class AnnouncementController extends Controller
                 'title' => $request->title,
                 'description' => $request->description,
                 'attached_file' => $attached,
-                'start_date' => $start_date,
-                'due_date' => $request->due_date
+                'start_date' => $ann->start_date,
+                'due_date' => $ann->due_date
             ]);
 
         }
