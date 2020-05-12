@@ -681,7 +681,10 @@ class QuizController extends Controller
             //case-->user_answer in new attempt
             $answered=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
             if($answered < 1)
+            {
                 $user_answer=[];
+                $quiz->duration_time = $quiz->duration;
+            }
             else
                 $user_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->get();
 
