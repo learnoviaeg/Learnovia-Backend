@@ -287,7 +287,7 @@ class AssigmentsController extends Controller
                 'lesson_id' => $lessonId,
                 'type' => 'assignment',
                 'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
-                'publish_date' => $AssignmentLesson->start_date
+                'publish_date' => $AssignmentLesson->publish_date
             ]);
             // $all[] = Lesson::find($lesson_id)->module('Assigments', 'assignment')->get();
         $all = AssignmentLesson::all();
@@ -710,7 +710,7 @@ class AssigmentsController extends Controller
                 "course_segment" => $lesson->course_segment_id,
                 "assignment_lesson_id" => $assignment_lesson->id,
                 "submit_date" => Carbon::now(),
-                "publish_date" => $request->opening_date
+                "publish_date" => $request->publish_date
             );
             $this->assignAsstoUsers($data);
 
