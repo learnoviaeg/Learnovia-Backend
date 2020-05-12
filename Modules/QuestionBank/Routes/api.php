@@ -26,17 +26,17 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('get-all-categories', 'QuestionBankController@getAllCategories')->middleware('permission:quiz/get-all-categories');
     Route::get('get-quiz-lesson', 'QuizLessonController@getQuizInLesson')->middleware('permission:quiz/get-quiz-lesson');
     Route::get('get-grade-category', 'QuizLessonController@getGradeCategory')->middleware('permission:quiz/get-grade-category');
-    Route::post('override', 'QuizLessonController@overrideQuiz')->middleware('permission:quiz/override');
+    Route::post('override', 'QuizLessonController@overrideQuiz');//->middleware('permission:quiz/override');
 
     //User Quiz
-    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz')->middleware('permission:quiz/answer');
-    Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer')->middleware('permission:quiz/answer');
+    Route::post('store-user-quiz', 'UserQuizController@store_user_quiz');//->middleware('permission:quiz/answer');
+    Route::post('store-user-quiz-answer', 'UserQuizController@quiz_answer');//->middleware('permission:quiz/answer');
     Route::post('feedback', 'UserQuizController@feedback');
     Route::get('get-all-quizes', 'QuizController@getAllQuizes')->middleware('permission:quiz/get-all-quizes');
     Route::get('get-student-in-quiz', 'QuizController@getStudentinQuiz')->middleware('permission:quiz/get-student-in-quiz');
     Route::get('get-student-answer-quiz', 'QuizController@getStudentAnswerinQuiz')->middleware('permission:quiz/get-student-answer-quiz');
     Route::get('get-all-students-answer', 'QuizController@getAllStudentsAnswerinQuiz')->middleware('permission:quiz/get-all-students-answer');
-    Route::get('get-single-quiz', 'QuizController@getSingleQuiz')->middleware(['permission:quiz/answer|quiz/detailes', 'ParentCheck']);
+    Route::get('get-single-quiz', 'QuizController@getSingleQuiz');//->middleware(['permission:quiz/answer|quiz/detailes', 'ParentCheck']);
     Route::post('toggle', 'QuizController@toggleQuizVisibity')->middleware('permission:quiz/toggle');
     Route::post('correct-user-quiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
     Route::post('get-attempts', 'QuizController@get_user_quiz')->middleware('permission:quiz/get-attempts');
