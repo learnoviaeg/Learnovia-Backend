@@ -678,6 +678,7 @@ class QuizController extends Controller
             $check_time = ($duration_time) - ($now - $open_time);
             if($check_time < 0)
                 $check_time= 0;
+            //case-->user_answer in new attempt
             $answered=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
             if($answered < 1)
                 $user_answer=[];
