@@ -27,6 +27,8 @@ return [
            'https://dev.learnovia.com',
            'https://13.52.205.38/',
            'https://staging.learnovia.com',
+           'http://staging.learnovia.com',
+
         ],
 
         'allow_methods' => [
