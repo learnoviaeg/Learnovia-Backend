@@ -30,10 +30,7 @@ return [
         //    'http://staging.learnovia.com',
 
         // ],
-        'allow_origins' => [
-           '*'
-
-         ],
+        'allow_origins' => '*',
 
         'allow_methods' => [
             'POST',
