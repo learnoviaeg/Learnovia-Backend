@@ -159,6 +159,7 @@ class UserGradeController extends Controller
                 $user->picture=$user->attachment->path;
             foreach ($gradeCategories as $category) {
                 $grades[$i]['items'] = collect();
+                $grades[$i]['categories_child'] = $category->Child;
                 $grades[$i]['name'] = $category->name;
                 $grades[$i]['id'] = $category->id;
                 $grades[$i]['weight'] = $category->weight();
