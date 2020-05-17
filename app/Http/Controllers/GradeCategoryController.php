@@ -48,13 +48,14 @@ class GradeCategoryController extends Controller
         ///type 0 => scale
         $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (isset($course_segment_id)) {
+            $grade_cat=GradeCategory::where('course_segment_id',$course_segment_id->id)->whereNull('parent')->get()->first();
             $segclass=CourseSegment::find($course_segment_id->id)->segmentClasses;
             $classlevel=$segclass[0]->classLevel;
             $year_level= $classlevel[0]->yearLevels;
             $grade_category = GradeCategory::create([
                 'name' => $request->name,
                 'course_segment_id' => $course_segment_id->id,
-                'parent' => $request->parent,
+                'parent' => isset($request->parent) ? $request->parent : $grade_cat->id,
                 'aggregation' => $request->aggregation,
                 'locked' => $request->locked,
                 'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
@@ -63,33 +64,32 @@ class GradeCategoryController extends Controller
                 'grademin' => ($request->type==0) ? $request->grademin : null,
                 'type' => $request->type,
                 'exclude_flag' => $request->exclude_flag,
-                'id_number' => $year_level[0]->id
+                'id_number' => $year_level[0]->id,
+                'weight' => (isset($request->weight)) ? $request->weight : 0,
             ]);
-            if(isset($request->weight))
-            {
-                if(!isset($request->parent))
-                    $grade_category->weight=100;
-                else
-                {
-                    $grade_parent=GradeCategory::where('id',$request->parent)->with('child')->get();
 
-                    $allWeight = 0;
-                    foreach ($grade_parent[0]->child as $childs) {
-                        $allWeight += $childs->weight();
-                        $weight[] = $childs->weight();
+            if(!isset($request->parent))
+                $grade_category->weight=100;
+            else
+            {
+                $grade_parent=GradeCategory::where('id',$request->parent)->with('Child')->get();
+                $allWeight = 0;
+                $check=$grade_parent[0]->child->where('weight','!=', 0);
+                foreach ($check as $childs) {
+                    $allWeight += $childs->weight();
+                    $weight[] = $childs->weight();
+                }
+                if ($allWeight != 100) {
+                    // $message = "Your grades adjusted to get 100!";
+                    $gcd = GradeItemController::findGCD($weight, sizeof($weight));
+                    foreach ($weight as $w) {
+                        $devitions[] = $w / $gcd;
                     }
-                    if ($allWeight != 100) {
-                        $message = "Your grades adjusted to get 100!";
-                        $gcd = GradeItemController::findGCD($weight, sizeof($weight));
-                        foreach ($weight as $w) {
-                            $devitions[] = $w / $gcd;
-                        }
-                        $calculations = (100 / array_sum($devitions));
-                        $count = 0;
-                        foreach ($grade_parent[0]->child as $childs) {
-                            $childs->update(['weight' => round($devitions[$count] * $calculations, 3)]);
-                            $count++;
-                        }
+                    $calculations = (100 / array_sum($devitions));
+                    $count = 0;
+                    foreach ($check as $childs) {
+                        $childs->update(['weight' => round($devitions[$count] * $calculations, 3)]);
+                        $count++;
                     }
                 }
             }
