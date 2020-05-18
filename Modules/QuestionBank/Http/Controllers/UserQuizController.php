@@ -525,8 +525,8 @@ class UserQuizController extends Controller
         
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
 
-        $users=Enroll::where('course_segment',Lesson::find($request->lesson_id)->course_segment_id)->pluck('user_id')->toArray();
-        
+        $users=Enroll::where('course_segment',Lesson::find($request->lesson_id)->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
+
         $Submitted_users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->distinct('user_id')->pluck('user_id')->count();
 
         if (!isset($quiz_lesson))
@@ -540,17 +540,19 @@ class UserQuizController extends Controller
         }
         $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
         $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->count();
-
         foreach ($users as $user_id){
             $All_attemp=[];
-            $user = User::where('id',$user_id)->first();
+            $user = User::find($user_id);
             if($user == null)
             {
                 unset($user);
                 continue;
             }
+            // if (!$user->can('site/course/student')) {
+            //     continue;
+            // }
             if( !$user->can('site/quiz/store_user_quiz'))
-                continue;
+                    continue;
             
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
             foreach($attems as $attem)
@@ -579,7 +581,6 @@ class UserQuizController extends Controller
             $attemps['Attempts'] = $All_attemp;
             array_push($user_attempts, $attemps);
         }
-
         $all_users['essay']=$essay;
         $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
         $all_users['submitted_users'] = $Submitted_users ;
