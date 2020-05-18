@@ -585,8 +585,10 @@ class AssigmentsController extends Controller
             $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
             foreach($userassigments as $userAssignment)
             {
-                if ($userAssignment->user->can('site/course/student')) {
-                    $studentassigments[]=$userAssignment;
+                if(isset($userAssignment->user)){
+                    if ($userAssignment->user->can('site/course/student')) {
+                        $studentassigments[]=$userAssignment;
+                    }
                 }
             }
             foreach($studentassigments as $studentassigment){
