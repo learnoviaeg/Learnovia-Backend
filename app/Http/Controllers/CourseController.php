@@ -887,7 +887,9 @@ class CourseController extends Controller
             'components.*' => 'required|integer|exists:components,id',
             'timeline' => 'integer',
             'assort' => 'string|in:name,due_date,course',
-            'order' => 'string|in:asc,desc'
+            'order' => 'string|in:asc,desc',
+            'quick_action' => 'integer|in:1',
+            'by' => 'string|in:date'
         ]);
         // $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
         $components  = Component::where('active', 1)->whereIn('type', [3,1]);
@@ -968,6 +970,81 @@ class CourseController extends Controller
                 }
             }
         }
+        
+        //quick actions
+        if($request->quick_action == 1){
+        
+            if($request->by == 'date'){
+                if(isset($result["Media"])){
+                    $media = collect($result["Media"]);
+                    $i=0;
+                    foreach($media as $mm){
+                            $media_sort[$i]['id'] = $mm->id;
+                            $media_sort[$i]['date'] = $mm->pivot->publish_date; 
+                            $i++;
+                        }
+                        if($request->order == 'asc')
+                            $a = collect($media_sort)->sortBy('date')->values();
+                        else
+                            $a = collect($media_sort)->sortByDesc('date')->values();
+
+                        $j=0;
+                        foreach($a as $as)
+                        {
+                            $tryyyy [$j]= collect($result["Media"])->where('id', $as['id'])->values()[0];
+                            $j++;
+                        }
+                    $media = $tryyyy;
+                    $result['Media']   = $media;  
+                        
+                }
+                if(isset($result["File"])){
+                    $file = collect($result["File"]);
+                    $i=0;
+                    foreach($file as $mm){
+                            $file_sort[$i]['id'] = $mm->id;
+                            $file_sort[$i]['date'] = $mm->pivot->publish_date; 
+                            $i++;
+                        }
+                        if($request->order == 'asc')
+                            $a = collect($file_sort)->sortBy('date')->values();
+                        else
+                            $a = collect($file_sort)->sortByDesc('date')->values();
+
+                        $j=0;
+                        foreach($a as $as)
+                        {
+                            $tryy [$j]= collect($result["File"])->where('id', $as['id'])->values()[0];
+                            $j++;
+                        }
+                    $file = $tryy;
+                    $result['File'] = $file;  
+                }
+                if(isset($result["Page"])){
+                    $page = collect($result["Page"]);
+                    $i=0;
+                    foreach($page as $mm){
+                            $page_sort[$i]['id'] = $mm->id;
+                            $page_sort[$i]['date'] = $mm->pivot->publish_date; 
+                            $i++;
+                        }
+                        if($request->order == 'asc')
+                            $a = collect($page_sort)->sortBy('date')->values();
+                        else
+                            $a = collect($page_sort)->sortByDesc('date')->values();
+
+                        $j=0;
+                        foreach($a as $as)
+                        {
+                            $tryyy [$j]= collect($result["Page"])->where('id', $as['id'])->values()[0];
+                            $j++;
+                        }
+                    $page = $tryyy;
+                    $result['Page'] = $page;  
+                }
+            }
+            
+        }
         //sort assignments and quiz bt due_date
         if(isset($result["Assigments"])){
             $assignmet = collect($result["Assigments"])->sortByDesc('due_date');
@@ -986,6 +1063,8 @@ class CourseController extends Controller
                 }
                 $ass[] = $item;
             }
+            $ass = collect($ass)->sortByDesc('due_date');
+
             if(isset($request->assort)){
                 if($request->assort == 'course'){
                     $i=0;
