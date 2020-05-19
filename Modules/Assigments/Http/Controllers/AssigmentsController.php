@@ -552,7 +552,7 @@ class AssigmentsController extends Controller
                 $assignment_lesson->AssignmentLesson[0]->due_date = $override->due_date;
             }
                 $assignment['lesson'] =  $assignment_lesson;
-                
+                $start = $assignment_lesson->AssignmentLesson[0]->start_date;
                 if ($assignment_lesson->AssignmentLesson[0]->start_date > Carbon::now() || $assignment_lesson->AssignmentLesson[0]->due_date < Carbon::now()) {
                     if (isset($studentassigment->override) && $studentassigment->override == 0) {
                         return HelperController::api_response_format(400, $body = [], $message = 'you are not allowed to see the assignment at this moment');
@@ -572,12 +572,17 @@ class AssigmentsController extends Controller
                 }
             }
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
+            if($start > Carbon::now() &&  $request->user()->can('site/course/student'))
+                $assignment['started'] = false;
+            else
+                $assignment['started'] = true;
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
             ////////teacher
         if (!$user->can('site/assignment/getAssignment')) {
             $assignment_lesson = Lesson::where('id',$request->lesson_id)->with(['AssignmentLesson'=> function($query)use ($request){
             $query->where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id);}])->first();
+            $start = $assignment_lesson->AssignmentLesson[0]->start_date;
             $assignment['lesson'] =$assignment_lesson;
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
@@ -601,6 +606,10 @@ class AssigmentsController extends Controller
             }
             $assignment['user_submit'] = $studentassigments;
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
+            if($start > Carbon::now() &&  $request->user()->can('site/course/student'))
+                $assignment['started'] = false;
+            else
+                $assignment['started'] = true;
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
     }
