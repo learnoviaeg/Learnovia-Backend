@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\File;
 use App\Notifications\Announcment;
 use Illuminate\Http\Request;
 use App\Announcement;
+use App\userAnnouncement;
 use App\CourseSegment;
 use Carbon\Carbon;
 use App\Enroll;
