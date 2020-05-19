@@ -212,6 +212,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/getbyid', 'title' => 'get announcements by id']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/get-unread', 'title' => 'get unread announcements']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/mark-as-read', 'title' => 'mark announcements as read']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/my', 'title' => 'My announcements'  , 'dashboard' => 1]);
 
 
             //Calendar Permission
