@@ -218,7 +218,7 @@ class AnnouncementController extends Controller
             'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
-            'publish_date' => 'nullable|after:' . Carbon::now(),
+            'publish_date' => 'nullable|after:' . Carbon::now()->addMinutes(1),
         ]);
 
         if (isset($request->publish_date)) {
