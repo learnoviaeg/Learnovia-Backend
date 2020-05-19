@@ -889,7 +889,8 @@ class CourseController extends Controller
             'assort' => 'string|in:name,due_date,course',
             'order' => 'string|in:asc,desc',
             'quick_action' => 'integer|in:1',
-            'by' => 'string|in:date'
+            'by' => 'string|in:date,category',
+            'flag' => 'string|in:page,media,file'
         ]);
         // $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
         $components  = Component::where('active', 1)->whereIn('type', [3,1]);
@@ -963,6 +964,22 @@ class CourseController extends Controller
                                     else
                                     $item->Started = true;
                                 }
+                                // $quickaction =collect([]);
+                                if($item->pivot->media_id)
+                                {
+                                    $item['flag'] = 'media';
+                                    $quickaction[]=$item;
+                                }
+                                if($item->pivot->file_id)
+                                {
+                                    $item['flag'] = 'file';
+                                    $quickaction[]=$item;
+                                }
+                                if($item->pivot->page_id)
+                                {
+                                    $item['flag'] = 'page';
+                                    $quickaction[]=$item;
+                                }
                                     $result[$component->name][] = $item;
                             }
                         }
@@ -970,79 +987,50 @@ class CourseController extends Controller
                 }
             }
         }
-        
         //quick actions
         if($request->quick_action == 1){
-        
-            if($request->by == 'date'){
-                if(isset($result["Media"])){
-                    $media = collect($result["Media"]);
-                    $i=0;
-                    foreach($media as $mm){
-                            $media_sort[$i]['id'] = $mm->id;
-                            $media_sort[$i]['date'] = $mm->pivot->publish_date; 
-                            $i++;
-                        }
-                        if($request->order == 'asc')
-                            $a = collect($media_sort)->sortBy('date')->values();
-                        else
-                            $a = collect($media_sort)->sortByDesc('date')->values();
-
-                        $j=0;
-                        foreach($a as $as)
-                        {
-                            $tryyyy [$j]= collect($result["Media"])->where('id', $as['id'])->values()[0];
-                            $j++;
-                        }
-                    $media = $tryyyy;
-                    $result['Media']   = $media;  
-                        
+            //will be order in desc awl ma yft7 bl due date
+            $quick = collect($quickaction);
+            $i=0;
+            foreach($quick as $mm){
+                    $quick_sort[$i]['id'] = $mm->id;
+                    $quick_sort[$i]['date'] = $mm->pivot->publish_date; 
+                    $i++;
                 }
-                if(isset($result["File"])){
-                    $file = collect($result["File"]);
-                    $i=0;
-                    foreach($file as $mm){
-                            $file_sort[$i]['id'] = $mm->id;
-                            $file_sort[$i]['date'] = $mm->pivot->publish_date; 
-                            $i++;
-                        }
-                        if($request->order == 'asc')
-                            $a = collect($file_sort)->sortBy('date')->values();
-                        else
-                            $a = collect($file_sort)->sortByDesc('date')->values();
-
-                        $j=0;
-                        foreach($a as $as)
-                        {
-                            $tryy [$j]= collect($result["File"])->where('id', $as['id'])->values()[0];
-                            $j++;
-                        }
-                    $file = $tryy;
-                    $result['File'] = $file;  
+                $a = collect($quick_sort)->sortByDesc('date')->values();
+                $j=0;
+                foreach($a as $as)
+                {
+                    $tryyyy [$j]= collect($quickaction)->where('id', $as['id'])->values()[0];
+                    $j++;
                 }
-                if(isset($result["Page"])){
-                    $page = collect($result["Page"]);
-                    $i=0;
-                    foreach($page as $mm){
-                            $page_sort[$i]['id'] = $mm->id;
-                            $page_sort[$i]['date'] = $mm->pivot->publish_date; 
-                            $i++;
-                        }
-                        if($request->order == 'asc')
-                            $a = collect($page_sort)->sortBy('date')->values();
-                        else
-                            $a = collect($page_sort)->sortByDesc('date')->values();
-
-                        $j=0;
-                        foreach($a as $as)
-                        {
-                            $tryyy [$j]= collect($result["Page"])->where('id', $as['id'])->values()[0];
-                            $j++;
-                        }
-                    $page = $tryyy;
-                    $result['Page'] = $page;  
-                }
+            $quick = $tryyyy;
+            $quickaction   = $quick;
+            //in case date -> asc and desc
+            if($request->by == 'date' && $request->order == 'asc'){
+                $quickasc = collect($quickaction);
+                $l=0;
+                foreach($quickasc as $mm){
+                        $quickasc_sort[$l]['id'] = $mm->id;
+                        $quickasc_sort[$l]['date'] = $mm->pivot->publish_date; 
+                        $l++;
+                    }
+                    $a = collect($quickasc_sort)->sortBy('date')->values();
+                    $m=0;
+                    foreach($a as $as)
+                    {
+                        $tryyy [$m]= collect($quickaction)->where('id', $as['id'])->values()[0];
+                        $m++;
+                    }
+                $quickasc = $tryyy;
+                $quickaction   = $quickasc;
             }
+            //in case category -> file ,media and page
+            if($request->by == 'category')
+            {
+                $quickaction = collect($quickaction)->where('flag',$request->flag);
+            }
+            return HelperController::api_response_format(200,$quickaction);
             
         }
         //sort assignments and quiz bt due_date
