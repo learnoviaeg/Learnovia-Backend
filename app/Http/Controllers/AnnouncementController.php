@@ -650,4 +650,11 @@ class AnnouncementController extends Controller
         }
         return HelperController::api_response_format(400, $body = [], $message = 'You cannot seen this announcement');
     }
+
+    public function My_announc(Request $request)
+    {
+        $my = Announcement::where('created_by',Auth::id())->get();
+        return HelperController::api_response_format(200, $my);
+
+    }
 }
