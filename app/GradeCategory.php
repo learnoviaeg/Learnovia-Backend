@@ -27,7 +27,7 @@ class GradeCategory extends Model
     }
     public function Children()
     {
-        return $this->Child()->with(['Children', 'GradeItems']);
+        return $this->Child()->with(['Children', 'GradeItems.UserGrade']);
     }
     public function total()
     {
