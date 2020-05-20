@@ -1,7 +1,7 @@
 <?php
 
 namespace App;
-
+use Log;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 
