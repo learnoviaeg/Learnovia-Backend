@@ -142,7 +142,6 @@ class User extends Authenticatable
         }
         $job = ( new \App\Jobs\Sendnotify($request))->delay($seconds);
             dispatch($job);
-            Log::debug('after jobs');
          Notification::send( $touserid, new NewMessage($request));
         return 1;
     }
