@@ -36,7 +36,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['daily'],
+            'channels' => ['syslog', 'slack','single'],
             'ignore_exceptions' => false,
         ],
 
@@ -82,6 +82,7 @@ return [
 
         'syslog' => [
             'driver' => 'syslog',
+            'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
         ],
 
