@@ -74,7 +74,7 @@ class Sendnotify implements ShouldQueue
                         "publish_date" => $this->request['publish_date'],
                         "read_at" => null
                     );
-                    Log::debug('type is not announcement '+  $fordata );
+                    Log::debug('type is not announcement ');
             }else{
 
                 $this->request['message']='A new announcement is added';
