@@ -889,7 +889,6 @@ class CourseController extends Controller
             'assort' => 'string|in:name,due_date,course',
             'order' => 'string|in:asc,desc',
             'quick_action' => 'integer|in:1',
-            'by' => 'string|in:date,category',
             'flag' => 'string|in:page,media,file'
         ]);
         // $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
@@ -1007,7 +1006,7 @@ class CourseController extends Controller
             $quick = $tryyyy;
             $quickaction   = $quick;
             //in case date -> asc and desc
-            if($request->by == 'date' && $request->order == 'asc'){
+            if($request->order == 'asc'){
                 $quickasc = collect($quickaction);
                 $l=0;
                 foreach($quickasc as $mm){
@@ -1026,9 +1025,9 @@ class CourseController extends Controller
                 $quickaction   = $quickasc;
             }
             //in case category -> file ,media and page
-            if($request->by == 'category')
+            if(isset($request->flag))
             {
-                $quickaction = collect($quickaction)->where('flag',$request->flag);
+                $quickaction = collect($quickaction)->where('flag',$request->flag)->values();
             }
             return HelperController::api_response_format(200,$quickaction);
             
