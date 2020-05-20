@@ -9,6 +9,7 @@ use App\YearLevel;
 use Illuminate\Http\Request;
 use App\User;
 use App\Enroll;
+use App\Segment;
 use App\ClassLevel;
 use App\CourseSegment;
 use App\Course;
@@ -168,6 +169,7 @@ class EnrollUserToCourseController extends Controller
 
         $count = 0;
         foreach ($request->users as $user) {
+            $exist_user=$user;
             $x = HelperController::Get_segment_class($request);
             if ($x != null) {
                 $segments = collect([]);
@@ -192,20 +194,33 @@ class EnrollUserToCourseController extends Controller
                             'user_id' => $user,
                             'course_segment' => $segment,
                             'role_id' => 3,
+                            'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
+                            'type' => $request->type,
+                            'level' => $request->level,
+                            'class' => $request->class,
+                            'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
+                            'course' => CourseSegment::whereId($segment)->pluck('course_id')->first(),
                         ]);
                     }
-                } elseif (isset($request->course)) {
-                    $mand = Course::where('id', $request->course)->pluck('mandatory')->first();
-                    if ($mand == 1)
-                        return HelperController::api_response_format(400, [], 'This Course not Optional_Course');
-
-                    $courseSegment = GradeCategoryController::getCourseSegment($request);
-                    foreach($courseSegment as $one){
-                        Enroll::Create([
-                            'user_id' => $user,
-                            'course_segment' => $one,
-                            'role_id' => 3,
-                        ]);
+                    if (isset($request->course)) {
+                        $courseSegment = GradeCategoryController::getCourseSegment($request);
+                        foreach($courseSegment as $one){
+                            $check2 = Enroll::where('user_id', $user)->where('course_segment', $one)->pluck('id');
+                            if(count($check2) == 0)
+                            {
+                                Enroll::Create([
+                                    'user_id' => $user,
+                                    'course_segment' => $one,
+                                    'role_id' => 3,
+                                    'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
+                                    'type' => $request->type,
+                                    'level' => $request->level,
+                                    'class' => $request->class,
+                                    'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
+                                    'course' => CourseSegment::whereId($one)->pluck('course_id')->first(),
+                                ]);
+                            }
+                        }
                     }
                 } else {
                     $count++;
@@ -215,7 +230,7 @@ class EnrollUserToCourseController extends Controller
         }
         //($count);
         if ($count > 0) {
-            return HelperController::api_response_format(200, [], 'found user added before');
+            return HelperController::api_response_format(200, $exist_user, 'found user added before');
         }
         return HelperController::api_response_format(200, [], 'added successfully');
     }
@@ -434,6 +449,12 @@ class EnrollUserToCourseController extends Controller
                             'user_id' => $user,
                             'course_segment' => $course,
                             'role_id' => $request->role_id[$count],
+                            // 'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
+                            // 'type' => $request->type,
+                            // 'level' => $request->level,
+                            // 'class' => $request->class,
+                            // 'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
+                            // 'course' => $request->course,
                         ]);
                     } else
                         $EnrolledBefore[] = $user[$count];
