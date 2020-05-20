@@ -207,11 +207,12 @@ class SpatieController extends Controller
             //Announcements Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/delete', 'title' => 'delete announcements']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/send', 'title' => 'send announcements']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/get', 'title' => 'get announcements', 'dashboard' => 1]);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/get', 'title' => 'get announcements', 'dashboard' => 1 , 'icon'=> 'announcement']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/update', 'title' => 'update announcements']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/getbyid', 'title' => 'get announcements by id']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/get-unread', 'title' => 'get unread announcements']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/mark-as-read', 'title' => 'mark announcements as read']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/my', 'title' => 'My announcements'  , 'dashboard' => 1, 'icon'=> 'announcement']);
 
 
             //Calendar Permission

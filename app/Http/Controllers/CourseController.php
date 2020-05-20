@@ -887,7 +887,9 @@ class CourseController extends Controller
             'components.*' => 'required|integer|exists:components,id',
             'timeline' => 'integer',
             'assort' => 'string|in:name,due_date,course',
-            'order' => 'string|in:asc,desc'
+            'order' => 'string|in:asc,desc',
+            'quick_action' => 'integer|in:1',
+            'flag' => 'string|in:page,media,file'
         ]);
         // $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
         $components  = Component::where('active', 1)->whereIn('type', [3,1]);
@@ -961,12 +963,74 @@ class CourseController extends Controller
                                     else
                                     $item->Started = true;
                                 }
+                                // $quickaction =collect([]);
+                                if($item->pivot->media_id)
+                                {
+                                    $item['flag'] = 'media';
+                                    $quickaction[]=$item;
+                                }
+                                if($item->pivot->file_id)
+                                {
+                                    $item['flag'] = 'file';
+                                    $quickaction[]=$item;
+                                }
+                                if($item->pivot->page_id)
+                                {
+                                    $item['flag'] = 'page';
+                                    $quickaction[]=$item;
+                                }
                                     $result[$component->name][] = $item;
                             }
                         }
                     }
                 }
             }
+        }
+        //quick actions
+        if($request->quick_action == 1){
+            //will be order in desc awl ma yft7 bl due date
+            $quick = collect($quickaction);
+            $i=0;
+            foreach($quick as $mm){
+                    $quick_sort[$i]['id'] = $mm->id;
+                    $quick_sort[$i]['date'] = $mm->pivot->publish_date; 
+                    $i++;
+                }
+                $a = collect($quick_sort)->sortByDesc('date')->values();
+                $j=0;
+                foreach($a as $as)
+                {
+                    $tryyyy [$j]= collect($quickaction)->where('id', $as['id'])->values()[0];
+                    $j++;
+                }
+            $quick = $tryyyy;
+            $quickaction   = $quick;
+            //in case date -> asc and desc
+            if($request->order == 'asc'){
+                $quickasc = collect($quickaction);
+                $l=0;
+                foreach($quickasc as $mm){
+                        $quickasc_sort[$l]['id'] = $mm->id;
+                        $quickasc_sort[$l]['date'] = $mm->pivot->publish_date; 
+                        $l++;
+                    }
+                    $a = collect($quickasc_sort)->sortBy('date')->values();
+                    $m=0;
+                    foreach($a as $as)
+                    {
+                        $tryyy [$m]= collect($quickaction)->where('id', $as['id'])->values()[0];
+                        $m++;
+                    }
+                $quickasc = $tryyy;
+                $quickaction   = $quickasc;
+            }
+            //in case category -> file ,media and page
+            if(isset($request->flag))
+            {
+                $quickaction = collect($quickaction)->where('flag',$request->flag)->values();
+            }
+            return HelperController::api_response_format(200,$quickaction);
+            
         }
         //sort assignments and quiz bt due_date
         if(isset($result["Assigments"])){
@@ -986,6 +1050,8 @@ class CourseController extends Controller
                 }
                 $ass[] = $item;
             }
+            $ass = collect($ass)->sortByDesc('due_date');
+
             if(isset($request->assort)){
                 if($request->assort == 'course'){
                     $i=0;

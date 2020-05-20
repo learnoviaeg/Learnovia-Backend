@@ -74,6 +74,7 @@ Route::group(['middleware' => ['auth:api']], function () {
         Route::get('getbyid', 'AnnouncementController@getAnnounceByID')->name('getbyid')->middleware('permission:announcements/getbyid');
         Route::get('get-unread', 'AnnouncementController@unreadannouncements')->name('getunreadannouncements')->middleware('permission:announcements/get-unread');
         Route::post('mark-as-read', 'AnnouncementController@markasread')->name('readannouncements')->middleware('permission:announcements/mark-as-read');
+        Route::get('my', 'AnnouncementController@My_announc')->name('myannouncements')->middleware('permission:announcements/my');
     });
 
     //languages routes

@@ -130,19 +130,6 @@ class UserGradeController extends Controller
         return HelperController::api_response_format(200, $grade);
     }
 
-    //recursion fun.
-    public function gradeCat_items_parent($gradeCat)
-    {
-        $children=$gradeCat->Child;
-        $gradeCat->GradeItems;
-        $val=collect();
-        $val->push($children);
-        foreach($children as $child){
-            self::gradeCat_items_parent($child);
-        }
-        return $val;
-    }
-
     public function graderReport(Request $request)
     {
         $request->validate([
@@ -171,12 +158,11 @@ class UserGradeController extends Controller
             if(isset($user->attachment))
                 $user->picture=$user->attachment->path;
             foreach ($gradeCategories as $category) {
-                $grades[$i]['course_total']['items'] = collect();
-                $grades[$i]['course_total']['categories_child'] = self::gradeCat_items_parent($category);
-                $grades[$i]['course_total']['name'] = $category->name;
-                $grades[$i]['course_total']['id'] = $category->id;
-                $grades[$i]['course_total']['weight'] = $category->weight();
-                $grades[$i]['course_total']['max'] = $category->total();
+                $grades[$i]['items'] = collect();
+                $grades[$i]['name'] = $category->name;
+                $grades[$i]['id'] = $category->id;
+                $grades[$i]['weight'] = $category->weight();
+                $grades[$i]['max'] = $category->total();
                 $user->grades[$i] = collect();
                 $user->grades[$i]['total'] = 0;
                 $user->grades[$i]['name'] = $category->name;
@@ -198,7 +184,7 @@ class UserGradeController extends Controller
                     if ($temp != null)
                         $usergrade->final_grade = $temp->final_grade;
                     $user->grades[$i]['data']->push($usergrade);
-                    $grades[$i]['course_total']['items']->push(collect(['name' => $item->name, 'id' => $item->id, 'max' => $item->grademax, 'weight' => $item->weight()]));
+                    $grades[$i]['items']->push(collect(['name' => $item->name, 'id' => $item->id, 'max' => $item->grademax, 'weight' => $item->weight()]));
                 }
                 $first = true;
                 $i++;

@@ -140,9 +140,9 @@ class User extends Authenticatable
             $request['message']="A new announcement will be published";
             $request['title']=Announcement::whereId($request['id'])->first()->title;
         }
-        $job = ( new \App\Jobs\Sendnotify(
-            $request))->delay($seconds);
-            dispatch($job);
+         $job = ( new \App\Jobs\Sendnotify(
+              $request))->delay($seconds);
+             dispatch($job);
          Notification::send( $touserid, new NewMessage($request));
         return 1;
     }
