@@ -40,8 +40,8 @@ class GradeCategoryController extends Controller
             'grademin' => 'nullable|required_if:type,==,0|integer|min:0',
             'grademax' => 'nullable|required_if:type,==,0|integer|gt:grademin',
             'type' => 'boolean|required',
-            'exclude_flag' => 'boolean|required',
-            'locked' => 'required|boolean',
+            'exclude_flag' => 'boolean|nullable',
+            'locked' => 'nullable|boolean',
             'weight' => 'nullable|integer|required_if:exclude_flag,==,1'
         ]);
         ///type 1 => value
@@ -57,7 +57,7 @@ class GradeCategoryController extends Controller
                 'course_segment_id' => $course_segment_id->id,
                 'parent' => isset($request->parent) ? $request->parent : $grade_cat->id,
                 'aggregation' => $request->aggregation,
-                'locked' => $request->locked,
+                'locked' => (isset($request->locked)) ? $request->locked : null,
                 'aggregatedOnlyGraded' => $request->aggregatedOnlyGraded,
                 'hidden' => $request->hidden,
                 'grademax' => ($request->type==0) ? $request->grademax : null,
