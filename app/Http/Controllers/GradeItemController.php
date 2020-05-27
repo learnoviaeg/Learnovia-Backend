@@ -86,8 +86,7 @@ class GradeItemController extends Controller
         ];
 
         $grade = GradeItems::create($data);
-        event(new \App\Events\GradeItem($grade));
-
+        
         $grade_itms=GradeCategory::where('id',$request->grade_category)->with('GradeItems')->get();
         // return $grade_itms[0]->GradeItems;
 
