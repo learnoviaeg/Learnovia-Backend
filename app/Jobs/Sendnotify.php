@@ -75,6 +75,7 @@ class Sendnotify implements ShouldQueue
                         "read_at" => null
                     );
                     Log::debug('type is not announcement ');
+
             }else{
 
                 $this->request['message']='A new announcement is added';
