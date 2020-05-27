@@ -42,7 +42,7 @@ class GradeCategoryController extends Controller
             'type' => 'boolean|required',
             'exclude_flag' => 'boolean|nullable',
             'locked' => 'nullable|boolean',
-            'weight' => 'nullable|integer|required_if:exclude_flag,==,1'
+            'weight' => 'nullable|integer'
         ]);
         ///type 1 => value
         ///type 0 => scale
