@@ -389,9 +389,14 @@ class GradeItemController extends Controller
      * @return [objects] all grade items with Grade category and item type and scale
      */
     public function list()
-    {
-        $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale'])->get();
-        foreach($grade as $g)
+    {  $request->validate([
+        'id' => 'required|exists:grade_items,id',
+         ]);
+
+        $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale']);
+        if($request->filled('id'))
+            $grade->where('id', $request->id);
+        foreach($grade->get() as $g)
         {
             $g->weight = $g->weight();
             unset($g->GradeCategory);
