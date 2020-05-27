@@ -13,7 +13,7 @@ use GuzzleHttp\Exception\RequestException;
 use App\User;
 // use Illuminate\Support\Facades\Log;
 use Log;
-// use Exception;
+use Exception;
 
 
 
@@ -74,7 +74,7 @@ class Sendnotify implements ShouldQueue
                         "publish_date" => $this->request['publish_date'],
                         "read_at" => null
                     );
-                    Log::debug('type is not announcement '+  $fordata );
+                    Log::debug('type is not announcement ');
             }else{
 
                 $this->request['message']='A new announcement is added';
@@ -125,9 +125,9 @@ class Sendnotify implements ShouldQueue
                     'body' => $data
                 ]);              
                 Log::debug('request success');
-            } catch (RequestException $ex) {
-                
-                Log::debug('request fails');
+            } catch (\Exception $e) {
+
+               Log::debug( $e->getMessage());
             }
             
 
