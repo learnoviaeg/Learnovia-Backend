@@ -41,7 +41,7 @@ class GradeItemController extends Controller
             'item_type' => 'nullable|exists:item_types,id',
             'item_Entity' => 'nullable',
             'hidden' => 'required|boolean',
-            'locked' => 'required|boolean',
+            'locked' => 'nullable|boolean',
             'type' => 'required|in:0,1'
         ]);
 
@@ -76,7 +76,7 @@ class GradeItemController extends Controller
             'item_type' => (isset($request->item_type)) ? $request->item_type : null,
             'id_number' => $GradeCat->id_number,
             'item_Entity' => (isset($request->item_Entity)) ? $request->item_Entity : null,
-            'locked' => $request->locked,
+            'locked' => (isset($request->locked)) ? $request->locked : null,
             'hidden' => $request->hidden,
             'type' => $type,
             'multifactor' => (isset($request->multifactor)) ? $request->multifactor : 1,
