@@ -83,9 +83,22 @@ class AnnouncementController extends Controller
         } else {
             $file_id = null;
         }
-        $courseSegments = GradeCategoryController::getCourseSegment($request);
         // return $courseSegments;
-        $users = Enroll::whereIn('course_segment',$courseSegments)->where('user_id','!=' ,Auth::id())->pluck('user_id');
+        $userr = Enroll::where('user_id','!=' ,Auth::id());
+        if($request->filled('year'))
+            $userr->where('year',$request->year);
+        if($request->filled('type'))
+            $userr->where('type',$request->type);
+        if($request->filled('level'))
+            $userr->where('level',$request->level);
+        if($request->filled('segment'))
+            $userr->where('segment',$request->segment);
+        if($request->filled('course'))
+            $userr->where('course',$request->course);
+        if($request->filled('class'))
+            $userr->where('class',$request->class);
+            // $users->get();
+        $users =  $userr->pluck('user_id');
         //Creating announcement in DB
         $ann = Announcement::create([
             'title' => $request->title,
