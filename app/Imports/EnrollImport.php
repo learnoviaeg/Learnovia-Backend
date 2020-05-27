@@ -21,7 +21,6 @@ class EnrollImport implements ToModel,WithHeadingRow
     public function model(array $row)
     {
         $user_id = User::FindByName( $row['username'])->id;
-
         $request = new Request([
             'year' => $row['year'],
             'type' => $row['type'],
@@ -36,7 +35,13 @@ class EnrollImport implements ToModel,WithHeadingRow
         return new Enroll([
             'user_id'=>$user_id,
             'course_segment' => $courseSegment['value']['id'],
-            'role_id'=>$row['role_id']
+            'role_id'=>$row['role_id'],
+            'year' => $row['year'],
+            'type' => $row['type'],
+            'level' => $row['level'],
+            'class' => $row['class'],
+            'segment' => $row['segment'],
+            'course' => $row['course']
         ]);
     }
 }

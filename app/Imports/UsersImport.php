@@ -143,7 +143,13 @@ class UsersImport implements ToModel, WithHeadingRow
                         Enroll::firstOrCreate([
                             'course_segment' => $courseSeg->id,
                             'user_id' => $userId,
-                            'role_id'=> 3
+                            'role_id'=> 3,
+                            'year' => $year,
+                            'type' => $row['type'],
+                            'level' => $row['level'],
+                            'class' => $row['class_id'],
+                            'segment' => $segment,
+                            'course' => $course_id
                         ]);
 
                         $enrollcounter++;
@@ -163,7 +169,13 @@ class UsersImport implements ToModel, WithHeadingRow
                         Enroll::create([
                             'course_segment' => $course_seg,
                             'user_id' => $userId,
-                            'role_id'=> 4
+                            'role_id'=> 4,
+                            'year' => $year,
+                            'type' => $row['type'],
+                            'level' => $row['level'],
+                            'class' => $row['class_id'],
+                            'segment' => $segment,
+                            'course' => $course_id
                         ]);
 
                         $teachercounter++;
