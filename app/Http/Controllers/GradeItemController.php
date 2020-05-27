@@ -388,7 +388,7 @@ class GradeItemController extends Controller
      *
      * @return [objects] all grade items with Grade category and item type and scale
      */
-    public function list()
+    public function list(Request $request)
     {  $request->validate([
         'id' => 'required|exists:grade_items,id',
          ]);
