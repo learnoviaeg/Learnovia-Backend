@@ -27,19 +27,24 @@ class CoursesImport implements ToModel , WithHeadingRow
 
         Validator::make($row,[
             'name'=>'required',
-            'category'=>'required|exists:categories,id',
+            'category'=>'exists:categories,id',
             'year' => 'required|exists:academic_years,id',
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
             'segment' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
+            'mandatory' => 'nullable',
+            'typical' => 'nullable|boolean',
+            'start_date' => 'required_with:year|date',
+            'end_date' =>'required_with:year|date|after:start_date',
             'description' => 'string'
         ])->validate();
 
         $course = Course::firstOrCreate([
             'name' => $row['name'],
-            'category_id' => $row['category'],
+            'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,
+            // 'category_id' => $row['category'],
         ]);
 
         if (isset($row['description'])) {
@@ -54,7 +59,17 @@ class CoursesImport implements ToModel , WithHeadingRow
         $courseSegment = CourseSegment::firstOrCreate([
             'course_id' => $course->id,
             'segment_class_id' => $segmentClass->id,
-            'is_active' => 1
+            'is_active' => 1,
+            'typical' => isset($row['typical']) ? $row['typical'] : null,
+            'start_date' => $row['start_date'],
+            'end_date' => $row['end_date'],
+            'letter' => 1,
+            'letter_id' => 1
+        ]);
+        $gradeCat = GradeCategory::firstOrCreate([
+            'name' => 'Course Total',
+            'course_segment_id' => $courseSegment->id,
+            'id_number' => $yearlevel->id
         ]);
 
         if (isset($row['no_of_lessons'])) {
