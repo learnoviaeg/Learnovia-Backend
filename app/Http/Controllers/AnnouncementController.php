@@ -58,8 +58,7 @@ class AnnouncementController extends Controller
             'level' => 'nullable|exists:levels,id',
             'class' => 'nullable|exists:classes,id',
             'segment' => 'nullable|exists:segments,id',
-            'courses' => 'array',
-            'courses.*' => 'nullable|exists:courses,id',
+            'course' => 'nullable|exists:courses,id',
         ]);
 
         if (isset($request->publish_date)) {
