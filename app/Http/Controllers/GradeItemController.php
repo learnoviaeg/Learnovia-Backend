@@ -393,10 +393,11 @@ class GradeItemController extends Controller
         'id' => 'required|exists:grade_items,id',
          ]);
 
-        $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale']);
+        $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale'])->get();
         if($request->filled('id'))
-            $grade->where('id', $request->id);
-        foreach($grade->get() as $g)
+            $grade = GradeItems::where('id', $request->id)->with(['GradeCategory', 'ItemType', 'scale'])->get();
+
+        foreach($grade as $g)
         {
             $g->weight = $g->weight();
             unset($g->GradeCategory);
