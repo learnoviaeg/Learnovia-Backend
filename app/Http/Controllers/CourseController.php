@@ -35,7 +35,9 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use stdClass;
 use Modules\Assigments\Entities\assignmentOverride;
-
+use Modules\Page\Entities\pageLesson;
+use Modules\UploadFiles\Entities\FileLesson;
+use Modules\UploadFiles\Entities\MediaLesson;
 
 class CourseController extends Controller
 {
@@ -490,14 +492,26 @@ class CourseController extends Controller
                                 $lessonn[$com->name] = $Component->get();
                                 foreach($lessonn[$com->name] as $le){
                                     $le['course_id']=(int)$request->course_id;
+                                    if($le->pivot->media_id)
+                                    {
+                                        $le['item_lesson_id']=MediaLesson::where('media_id',$le->id)->where('lesson_id',$le->pivot->lesson_id)->pluck('id')->first();
+                                    }
+                                    if($le->pivot->file_id)
+                                    {
+                                        $le['item_lesson_id']=FileLesson::where('file_id',$le->id)->where('lesson_id',$le->pivot->lesson_id)->pluck('id')->first();
+                                    }
+                                    if($le->pivot->page_id)
+                                    {
+                                        $le['item_lesson_id']=pageLesson::where('page_id',$le->id)->where('lesson_id',$le->pivot->lesson_id)->pluck('id')->first();
+                                    }
                                 }
                                 if($com->name == 'Quiz'){
-                                 foreach ($lessonn['Quiz'] as $one){                                        
+                                 foreach ($lessonn['Quiz'] as $one){   
+                                    $one['item_lesson_id']=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('id')->first();
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
                                         else
                                         $one->Started = true;
-
                                  }
                                 }
                                 if($com->name == 'Assigments'){
@@ -519,7 +533,8 @@ class CourseController extends Controller
                                                 $one->Started = false;
                                             else
                                                 $one->Started = true;
-                                        }  
+                                        } 
+                                        $one['item_lesson_id']=AssignmentLesson::where('assignment_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('id')->first();
                                     }
                                 }
 
