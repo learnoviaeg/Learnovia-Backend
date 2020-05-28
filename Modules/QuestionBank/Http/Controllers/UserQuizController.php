@@ -524,7 +524,10 @@ class UserQuizController extends Controller
             $essay = 0;
         
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-
+        $quiz_duration_ended=false;
+        if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
+            $quiz_duration_ended=true;
+        }
         $users=Enroll::where('course_segment',Lesson::find($request->lesson_id)->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
 
         $Submitted_users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->distinct('user_id')->pluck('user_id')->count();
@@ -539,6 +542,7 @@ class UserQuizController extends Controller
                 return HelperController::api_response_format(200, 'This quiz is not assigned to this user');
         }
         $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
+        // return ($allUserQuizzes);
         $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->count();
         foreach ($users as $user_id){
             $All_attemp=[];
@@ -570,9 +574,13 @@ class UserQuizController extends Controller
                     $user_Attemp["grade"]= null;
                 else
                     $user_Attemp["grade"]= $attem->grade;
-                    
+                
+                $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
+                if( $useranswerSubmitted>0){
+                    if($quiz_duration_ended)
+                            continue;
+                }
                 array_push($All_attemp, $user_Attemp);
-                // return $All_attemp;
             }
 
             $attemps['id'] = $user->id;
