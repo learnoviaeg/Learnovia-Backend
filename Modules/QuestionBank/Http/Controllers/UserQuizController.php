@@ -348,7 +348,7 @@ class UserQuizController extends Controller
             'Questions' => 'required|array',
             'Questions.*.id' => 'required|integer|exists:questions,id',
             'Questions.*.mark' => 'required|numeric',
-            'Questions.*.feedback' => 'string',
+            'Questions.*.feedback' => 'nullable|string',
             'Questions.*.answer' => 'boolean',
         ]);
 
@@ -473,7 +473,7 @@ class UserQuizController extends Controller
         $request->validate([
             'user_quiz_id' =>'required|integer|exists:user_quizzes,id',
             'grade' => 'required|integer',
-            'feedback' => 'nullable|string'
+            'feedback' => 'string'
         ]);
         $userQuiz = userQuiz::find($request->user_quiz_id);
         $quiz_lesson = QuizLesson::find($userQuiz->quiz_lesson_id);
@@ -566,11 +566,14 @@ class UserQuizController extends Controller
                 $user_Attemp['id']= $attem->id;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswer = userQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
-                if($useranswer > 0) 
+                if($useranswer > 0) {
                     $user_Attemp["grade"]= null;
-                else
+                    $user_Attemp["feedback"] =null;
+                }
+                else{
                     $user_Attemp["grade"]= $attem->grade;
-                    
+                    $user_Attemp["feedback"] =$attem->feedback;
+                }
                 array_push($All_attemp, $user_Attemp);
                 // return $All_attemp;
             }
