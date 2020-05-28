@@ -348,7 +348,7 @@ class UserQuizController extends Controller
             'Questions' => 'required|array',
             'Questions.*.id' => 'required|integer|exists:questions,id',
             'Questions.*.mark' => 'required|numeric',
-            'Questions.*.feedback' => 'string',
+            'Questions.*.feedback' => 'nullable|string',
             'Questions.*.answer' => 'boolean',
         ]);
 
@@ -543,7 +543,7 @@ class UserQuizController extends Controller
         }
         $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
         // return ($allUserQuizzes);
-        $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->count();
+        $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
         foreach ($users as $user_id){
             $All_attemp=[];
             $user = User::find($user_id);
@@ -559,6 +559,9 @@ class UserQuizController extends Controller
                     continue;
             
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
+            // if(count($attems) > 0)
+            //     return $attems;
+
             foreach($attems as $attem)
             {
                 $req=new Request([
@@ -570,11 +573,14 @@ class UserQuizController extends Controller
                 $user_Attemp['id']= $attem->id;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswer = userQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
-                if($useranswer > 0) 
+                if($useranswer > 0){
                     $user_Attemp["grade"]= null;
-                else
+                    $user_Attemp["feedback"] =null;
+                } 
+                else{
                     $user_Attemp["grade"]= $attem->grade;
-                
+                    $user_Attemp["feedback"] =$attem->feedback;
+                }
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
                 if( $useranswerSubmitted>0){
                     if($quiz_duration_ended)
