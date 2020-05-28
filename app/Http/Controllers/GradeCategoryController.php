@@ -69,9 +69,11 @@ class GradeCategoryController extends Controller
             ]);
 
             if(!isset($request->parent))
-                $grade_category->weight=100;
+              { $grade_category->weight=100;
+                $grade_category->save();}
             else
             {
+                $weight = [];
                 $grade_parent=GradeCategory::where('id',$request->parent)->with('Child')->get();
                 $allWeight = 0;
                 $check=$grade_parent[0]->child->where('weight','!=', 0);
@@ -79,9 +81,13 @@ class GradeCategoryController extends Controller
                     $allWeight += $childs->weight();
                     $weight[] = $childs->weight();
                 }
-                if ($allWeight != 100) {
+                if($allWeight ==0){
+                    $grade_category->weight=100;
+                    $grade_category->save();
+                }
+                if ($allWeight != 100 && $allWeight !=0) {
                     // $message = "Your grades adjusted to get 100!";
-                    $gcd = GradeItemController::findGCD($weight, sizeof($weight));
+                    $gcd = GradeItems::findGCD($weight, sizeof($weight));
                     foreach ($weight as $w) {
                         $devitions[] = $w / $gcd;
                     }
