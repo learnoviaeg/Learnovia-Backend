@@ -517,6 +517,8 @@ class UserQuizController extends Controller
         $all_users = array();
         $user_attempts = array();
         $quiz_questions = quiz_questions::where('quiz_id',$request->quiz_id)->pluck('question_id');
+        $quiz_questions_total = Questions::whereIn('id',$quiz_questions)->pluck('mark');
+        $quiz_questions_sum= array_sum($quiz_questions_total->toArray());
         $essayQues = Questions::whereIn('id',$quiz_questions)->where('question_type_id',4)->pluck('id');
         if(count($essayQues) > 0)
             $essay = 1;
@@ -580,6 +582,11 @@ class UserQuizController extends Controller
                 else{
                     $user_Attemp["grade"]= $attem->grade;
                     $user_Attemp["feedback"] =$attem->feedback;
+                    $quiz_total = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->pluck('grade')->first();
+                    if($attem->grade == $quiz_questions_sum)
+                        $user_Attemp["grade"] = $quiz_total;
+                    else
+                        $user_Attemp["grade"] = round(($attem->grade*$quiz_total)/$quiz_questions_sum,2);
                 }
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
                 if( $useranswerSubmitted>0){
