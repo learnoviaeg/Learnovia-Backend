@@ -88,7 +88,6 @@ class GradeCategoryController extends Controller
                 if ($allWeight != 100 && $allWeight !=0) {
                     // $message = "Your grades adjusted to get 100!";
                     $gcd = GradeItems::findGCD($weight, sizeof($weight));
-                    dd($gcd);
                     foreach ($weight as $w) {
                         $devitions[] = $w / $gcd;
                     }
