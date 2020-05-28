@@ -14,7 +14,6 @@ class GradeItemObserver
      */
     public function created(GradeItems $gradeItems)
     {
-        if($gradeItems->weight != 0)
             $gradeItems->keepWeight();
     }
 
@@ -26,7 +25,6 @@ class GradeItemObserver
      */
     public function updated(GradeItems $gradeItems)
     {
-        if($gradeItems->weight != 0)
             $gradeItems->keepWeight();
     }
 
