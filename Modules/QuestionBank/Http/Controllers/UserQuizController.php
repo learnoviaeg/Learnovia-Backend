@@ -473,7 +473,7 @@ class UserQuizController extends Controller
         $request->validate([
             'user_quiz_id' =>'required|integer|exists:user_quizzes,id',
             'grade' => 'required|integer',
-            'feedback' => 'string'
+            'feedback' => 'nullable|string'
         ]);
         $userQuiz = userQuiz::find($request->user_quiz_id);
         $quiz_lesson = QuizLesson::find($userQuiz->quiz_lesson_id);
