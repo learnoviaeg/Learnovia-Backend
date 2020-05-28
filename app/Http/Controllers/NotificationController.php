@@ -11,6 +11,11 @@ use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
 use App\Announcement;
+use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\Page\Entities\pageLesson;
+use Modules\UploadFiles\Entities\FileLesson;
+use Modules\UploadFiles\Entities\MediaLesson;
 
 class NotificationController extends Controller
 {
@@ -79,6 +84,17 @@ class NotificationController extends Controller
                     if(isset($not->data['title']))
                         $data[$i]['title'] = $not->data['title'];
                     $data[$i]['title'] = null;
+
+                    if($not->data['type'] == 'quiz')
+                        $data[$i]['item_lesson_id'] = QuizLesson::where('quiz_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                    if($not->data['type'] == 'assignment')
+                        $data[$i]['item_lesson_id'] = AssignmentLesson::where('assignment_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                    if($not->data['type'] == 'file')
+                        $data[$i]['item_lesson_id'] = FileLesson::where('file_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                    if($not->data['type'] == 'media')
+                        $data[$i]['item_lesson_id'] = MediaLesson::where('media_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                    if($not->data['type'] == 'Page')
+                        $data[$i]['item_lesson_id'] = pageLesson::where('page_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
                 }
             }
             $i++;
