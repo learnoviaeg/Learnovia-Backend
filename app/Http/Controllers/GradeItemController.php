@@ -26,7 +26,7 @@ class GradeItemController extends Controller
     {
         $request->validate([
             'name' => 'nullable|string',
-            'weight' => 'nullable|integer',
+            'weight' => 'nullable',
             'grade_category' => 'required|exists:grade_categories,id',
             'grademin' => 'nullable',
             'grademax' => 'nullable',
@@ -87,28 +87,28 @@ class GradeItemController extends Controller
 
         $grade = GradeItems::create($data);
 
-        $grade_itms=GradeCategory::where('id',$request->grade_category)->with('GradeItems')->get();
+        // $grade_itms=GradeCategory::where('id',$request->grade_category)->with('GradeItems')->get();
         // return $grade_itms[0]->GradeItems;
 
-        $allWeight = 0;
-        foreach ($grade_itms[0]->GradeItems as $childs) {
-            $allWeight += $childs->weight();
-            $weight[] = $childs->weight();
-        }
+        // $allWeight = 0;
+        // foreach ($grade_itms[0]->GradeItems as $childs) {
+        //     $allWeight += $childs->weight();
+        //     $weight[] = $childs->weight();
+        // }
         // return $allWeight;
-        if ($allWeight != 100) {
-            // $message = "Your grades adjusted to get 100!";
-            $gcd = GradeItemController::findGCD($weight, sizeof($weight));
-            foreach ($weight as $w) {
-                $devitions[] = $w / $gcd;
-            }
-            $calculations = (100 / array_sum($devitions));
-            $count = 0;
-            foreach ($grade_itms[0]->GradeItems as $childs) {
-                $childs->update(['weight' => round($devitions[$count] * $calculations, 3)]);
-                $count++;
-            }
-        }
+        // if ($allWeight != 100) {
+        //     // $message = "Your grades adjusted to get 100!";
+        //     $gcd = GradeItemController::findGCD($weight, sizeof($weight));
+        //     foreach ($weight as $w) {
+        //         $devitions[] = $w / $gcd;
+        //     }
+        //     $calculations = (100 / array_sum($devitions));
+        //     $count = 0;
+        //     foreach ($grade_itms[0]->GradeItems as $childs) {
+        //         $childs->update(['weight' => round($devitions[$count] * $calculations, 3)]);
+        //         $count++;
+        //     }
+        // }
 
         $grade->weight=GradeItems::where('id',$grade->id)->pluck('weight')->first();
 
@@ -488,8 +488,8 @@ class GradeItemController extends Controller
     {
         if ($a == 0)
             return $b;
-        return self::gcd($b % $a, $a);
-    }
+        return self::gcd(fmod($b,$a), $a);   
+     }
 
     public static function findGCD($arr, $n)
     {

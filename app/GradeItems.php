@@ -106,8 +106,10 @@ class GradeItems extends Model
     {
         if ($a == 0)
             return $b;
-        return self::gcd($b % $a, $a);
-    }
+
+            return self::gcd(fmod($b,$a), $a);
+       
+        }
 
     public static function findGCD($arr, $n)
     {
