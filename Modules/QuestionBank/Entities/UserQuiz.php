@@ -4,6 +4,9 @@ namespace Modules\QuestionBank\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\quiz_questions;
 
 class userQuiz extends Model
 {
@@ -50,5 +53,18 @@ class userQuiz extends Model
                 break;
         }
         return $grade;
+    }
+
+    public function getUserGradeAttribute() {
+        $quiz_lesson = QuizLesson::where('id', $this->quiz_lesson_id)->first();
+        $quiz_questions = quiz_questions::where('quiz_id',$quiz_lesson->quiz_id)->pluck('question_id');
+        $quiz_questions_total = Questions::whereIn('id',$quiz_questions)->pluck('mark');
+        $quiz_questions_sum= array_sum($quiz_questions_total->toArray());
+        if($this->grade == $quiz_questions_sum)
+            $return = $quiz_lesson->grade;
+        else
+            $return = round(($this->grade*$quiz_lesson->grade)/$quiz_questions_sum,1);
+
+        return $return;
     }
 }
