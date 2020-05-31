@@ -1120,19 +1120,19 @@ class CourseController extends Controller
                 if($request->assort == 'course'){
                     $i=0;
                     foreach($quiz as $qu){
-                        $course_sort[$i]['id'] = $qu->id;
-                        $course_sort[$i]['name'] = $qu->course->name; 
+                        $course_quiz_sort[$i]['id'] = $qu->id;
+                        $course_quiz_sort[$i]['name'] = $qu->course->name; 
                         $i++;
                     }
                     if($request->order == 'asc')
-                        $a = collect($course_sort)->sortBy('name')->values();
+                        $quii = collect($course_quiz_sort)->sortBy('name')->values();
                     else
-                        $a = collect($course_sort)->sortByDesc('name')->values();
+                        $quii = collect($course_quiz_sort)->sortByDesc('name')->values();
 
                     $j=0;
-                    foreach($a as $as)
-                    {
-                        $try [$j]= collect($result["Quiz"])->where('id', $as['id'])->values()[0];
+                    foreach($quii as $qqq)
+                    {                          
+                        $try [$j]= collect($result["Quiz"])->where('id', $qqq['id'])->values()[0];
                         $j++;
                     }
                      $quiz = $try;
