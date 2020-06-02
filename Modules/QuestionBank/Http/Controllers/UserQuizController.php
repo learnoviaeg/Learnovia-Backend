@@ -224,7 +224,7 @@ class UserQuizController extends Controller
                 'user_quiz_id' => $request->user_quiz_id,
                 'question_id' => $question['id'],
                 'answered' => 1,
-                'force_submit' => 1,
+                // 'force_submit' => 1,
             ];
             array_push($Q_IDS, $question['id']);
             if (isset($question_type_id)) {
