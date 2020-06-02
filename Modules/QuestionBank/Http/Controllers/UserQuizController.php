@@ -85,7 +85,8 @@ class UserQuizController extends Controller
                 //When Time finish, he can't enter on same attempt
                 if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
                 {  
-                    $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get();
+                    // $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get();
+                    $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->get();
                     foreach($user_quiz_answer as $user_ans)
                     {
                         if(isset($user_ans)){
