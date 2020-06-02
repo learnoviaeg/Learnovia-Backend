@@ -91,6 +91,7 @@ class UserQuizController extends Controller
                         if(isset($user_ans)){
                             $user_ans->update([
                                 'answered' => 1,
+                                'force_submit' => 1,
                             ]);
                         }
                     }
