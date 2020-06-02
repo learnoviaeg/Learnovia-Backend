@@ -670,7 +670,7 @@ class QuestionBankController extends Controller
         }
         // $question = $this->updateQuestion($request,$parent);
 
-        return "success";
+        return "Question edited successfully";
     }
 
     public function updateMCQ($request,$parent,$Question_Type_id)
@@ -745,7 +745,7 @@ class QuestionBankController extends Controller
 
             }
         }
-        return "success";
+        return "Question edited successfully";
     }
 
     public function updateMatch($request,$parent,$Question_Type_id)
@@ -841,7 +841,7 @@ class QuestionBankController extends Controller
         }
 
 
-        return "updated sucess";
+        return "Question edited successfully";
 
     }
 
@@ -883,7 +883,7 @@ class QuestionBankController extends Controller
                     break;
             }
         }
-        return "updated sucess";
+        return "Question edited successfully";
     }
     public function update(Request $request)
     {
