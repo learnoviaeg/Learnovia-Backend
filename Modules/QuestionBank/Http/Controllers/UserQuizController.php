@@ -586,7 +586,8 @@ class UserQuizController extends Controller
                     if($quiz_duration_ended)
                             continue;
                 }
-                array_push($All_attemp, $user_Attemp);
+                else
+                    array_push($All_attemp, $user_Attemp);
             }
 
             $attemps['id'] = $user->id;
