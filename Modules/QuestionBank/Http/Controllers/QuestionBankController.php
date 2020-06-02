@@ -678,7 +678,7 @@ class QuestionBankController extends Controller
         $request->validate([
             'answers' => 'required|array|min:2|distinct',
             'answers.*' => 'required|string|min:1',
-            'Is_True' => 'required|integer|min:0|max:{$count(answers)-1}',
+            'Is_True' => 'required|integer|min:0|max:'.(count($request->answers)-1),
         ]);
         if ($parent==null){
             $question = $this->updateQuestion($request,$parent);
