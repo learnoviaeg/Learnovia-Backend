@@ -329,7 +329,8 @@ class UserQuizController extends Controller
 
         if($request->forced)
         {
-            $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->get();
+            // $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->get();
+            $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->get();
 
             foreach($answer2 as $ans)
             {
@@ -532,7 +533,7 @@ class UserQuizController extends Controller
         }
         $users=Enroll::where('course_segment',Lesson::find($request->lesson_id)->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
 
-        $Submitted_users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->distinct('user_id')->pluck('user_id')->count();
+        // $Submitted_users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->distinct('user_id')->pluck('id')->count();
 
         if (!isset($quiz_lesson))
             return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
@@ -546,7 +547,9 @@ class UserQuizController extends Controller
         $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
         // return ($allUserQuizzes);
         $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
+        $Submitted_users=0;
         foreach ($users as $user_id){
+            $i=0;
             $All_attemp=[];
             $user = User::find($user_id);
             if($user == null)
@@ -588,8 +591,10 @@ class UserQuizController extends Controller
                     if($quiz_duration_ended)
                             continue;
                 }
-                else
+                else{
                     array_push($All_attemp, $user_Attemp);
+                    $i++;
+                }
             }
 
             $attemps['id'] = $user->id;
@@ -597,6 +602,10 @@ class UserQuizController extends Controller
             $attemps['picture'] = $user->attachment;
             $attemps['Attempts'] = $All_attemp;
             array_push($user_attempts, $attemps);
+            if($i>0)
+            {
+                $Submitted_users++;
+            }
         }
         $all_users['essay']=$essay;
         $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
