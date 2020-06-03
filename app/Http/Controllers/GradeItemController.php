@@ -9,7 +9,7 @@ use App\GradeCategory;
 use App\YearLevel;
 use App\GradingMethod;
 use stdClass;
-
+use  App\Events\UserGradeEvent;
 
 class GradeItemController extends Controller
 {
@@ -86,6 +86,8 @@ class GradeItemController extends Controller
         ];
 
         $grade = GradeItems::create($data);
+        // return $grade;
+        // event(new UserGradeEvent($grade));
 
         // $grade_itms=GradeCategory::where('id',$request->grade_category)->with('GradeItems')->get();
         // return $grade_itms[0]->GradeItems;
