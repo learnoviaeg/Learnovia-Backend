@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\GradeItems;
+use App\Events\CreatedGradeItem;
 use App\CourseSegment;
 use App\GradeCategory;
 use App\YearLevel;
@@ -86,6 +87,7 @@ class GradeItemController extends Controller
         ];
 
         $grade = GradeItems::create($data);
+        dd(event(new CreatedGradeItem($grade)));
 
         // $grade_itms=GradeCategory::where('id',$request->grade_category)->with('GradeItems')->get();
         // return $grade_itms[0]->GradeItems;
