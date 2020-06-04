@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\User;
 use Spatie\Permission\Models\Permission;
+use Laravel\Passport\Passport;
 
 class AuthController extends Controller
 {
@@ -67,13 +68,20 @@ class AuthController extends Controller
             return HelperController::api_response_format(200, null, 'Your Account is Blocked!');
         }
 
+        if ($request->remember_me) {
+            Passport::personalAccessTokensExpireIn(now()->addWeeks(2));
+        } else {
+            Passport::personalAccessTokensExpireIn(now()->addHours(24));
+        }
         $user = $request->user();
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
-        if ($request->remember_me == 1)
+        if ($request->remember_me) {
             $token->expires_at = Carbon::now()->addWeeks(2);
-        else
-            $token->expires_at = Carbon::now()->addMinutes(5);
+        } else {
+            $token->expires_at = Carbon::now()->addHours(24);
+        }
+            
         $token->save();
         $user = Auth::user();
         $permissions = array();
