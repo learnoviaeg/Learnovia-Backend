@@ -292,6 +292,21 @@ class MediaController extends Controller
             $mediaLesson->update(['publish_date' => $publishdate]);
         }
         $tempReturn = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'media')->get();
+        $lesson = Lesson::find($request->lesson_id[0]);
+        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
+        User::notify([
+                    'id' => $media->id,
+                    'message' => $media->name.' media is updated',
+                    'from' => Auth::user()->id,
+                    'users' => $usersIDs,
+                    'course_id' => $courseID,
+                    'class_id' => $class_id,
+                    'lesson_id' => $mediaLesson->lesson_id,
+                    'type' => 'media',
+                    'publish_date' => $mediaLesson->publish_date,
+        ]);
 
         if($media->type != null)
         {

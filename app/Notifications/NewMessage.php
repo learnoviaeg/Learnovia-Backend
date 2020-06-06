@@ -52,7 +52,7 @@ class NewMessage extends Notification
             $returnobj = [
                 'id' => $this->mess['id'],
                 'type' => $this->mess['type'],
-                'message' => "A new announcement will be published",
+                'message' => $this->mess['message'],
                 'publish_date' => $this->mess['publish_date'],
             ];
             return $returnobj;
