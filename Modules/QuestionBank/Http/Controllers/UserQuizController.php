@@ -135,6 +135,10 @@ class UserQuizController extends Controller
                         return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
                 }
             } else {  
+                $answ=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
+                if($answ > 0){
+                    return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
+                }
                 return HelperController::api_response_format(400, null, 'Max Attempt number reached');
             }
         }
