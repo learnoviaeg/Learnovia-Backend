@@ -141,7 +141,8 @@ class AnnouncementController extends Controller
                 'description' => $request->description,
                 'attached_file' => $file_id,
                 'start_date' => $ann->start_date,
-                'due_date' => $ann->due_date
+                'due_date' => $ann->due_date,
+                'message' => $request->title.' announcement is added'
             ]);
         }else{
             $attached = attachment::where('id', $file_id)->first();
@@ -153,7 +154,8 @@ class AnnouncementController extends Controller
                 'description' => $request->description,
                 'attached_file' => $attached,
                 'start_date' => $ann->start_date,
-                'due_date' => $ann->due_date
+                'due_date' => $ann->due_date,
+                'message' => $request->title.' announcement is added'
             ]);
 
         }
@@ -277,6 +279,38 @@ class AnnouncementController extends Controller
         foreach ($myAnnouncements as $ann) {
             $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
         }
+        $usersIDs= userAnnouncement::where('announcement_id', $announce->id)->pluck('user_id');
+        if($announce->attached_file == null){
+            $requ = ([
+                'id' => $announce->id,
+                'type' => 'announcement',
+                'publish_date' => $publishdate,
+                'title' => $announce->title,
+                'description' => $announce->description,
+                'attached_file' => $announce->attached_file,
+                'start_date' => $announce->start_date,
+                'due_date' => $announce->due_date,
+                'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
+                'message' => $announce->title.' announcement is updated'
+            ]);
+
+        }else{
+            $attached = attachment::where('id', $announce->attached_file)->first();
+            $requ = ([
+                'id' => $announce->id,
+                'type' => 'announcement',
+                'publish_date' => $publishdate,
+                'title' => $announce->title,
+                'description' => $announce->description,
+                'attached_file' => $attached,
+                'start_date' => $announce->start_date,
+                'due_date' => $announce->due_date,
+                'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
+                'message' => $announce->title.' announcement is updated'
+            ]);
+        }
+        User::notify($requ);
+
         return HelperController::api_response_format(201,  ['notify' => $anounce , 'created'=>$myAnnouncements , 'assigned' => $anouncenew],'Announcement Updated Successfully');
 
     }

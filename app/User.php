@@ -137,7 +137,7 @@ class User extends Authenticatable
 
         $request['title']=null;
         if($request['type']=='announcement'){
-            $request['message']="A new announcement will be published";
+            // $request['message']="A new announcement will be published";
             $request['title']=Announcement::whereId($request['id'])->first()->title;
         }
          $job = ( new \App\Jobs\Sendnotify(

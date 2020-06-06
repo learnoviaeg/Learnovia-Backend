@@ -157,9 +157,24 @@ class PageController extends Controller
             'content' => $request->content
         ];
         $page->update($data);
+        $pagename = $page->title;
         if($request->filled('lesson_id')){
-            $page = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
+            $page = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();
         }
+        $lesson = Lesson::find($request->lesson_id[0]);
+        $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
+            User::notify([
+                'id' => $request->id,
+                'message' => $pagename.' is updated',
+                'from' => Auth::user()->id,
+                'users' => $usersIDs,
+                'course_id' => $lesson->courseSegment->courses[0]->id,
+                'class_id' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->classes[0]->id,
+                'lesson_id' => $request->lesson_id[0],
+                'type' => 'Page',
+                'link' => url(route('getPage')) . '?id=' . $request->id,
+                'publish_date' => $page->where('id',$request->id)->values()[0]->pivot->publish_date
+            ]);
         return HelperController::api_response_format(200, $page, 'Page edited successfully');
     }
 
