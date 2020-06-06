@@ -587,14 +587,13 @@ class QuestionBankController extends Controller
                 'text' => 'required|string|min:1',
             ]);
         }
-
         $question->update([
             'text' => ($request->text == null) ? "Match the correct Answer" : $request->text,
             'mark' => $request->mark,
             // 'category_id' => $request->category_id,
             'parent' => (isset($request->parent) && $request->Question_Type_id != 5) ? $request->parent : null,
             'question_category_id' => $request->question_category_id,
-            'And_why' => ($request->question_type_id == 1) ? $request->And_why : null,
+            'And_why' => ($question->question_type_id == 1) ? $request->And_why : null,
             'And_why_mark' => ($request->And_why == 1) ? $request->And_why_mark : null,
         ]);
 
