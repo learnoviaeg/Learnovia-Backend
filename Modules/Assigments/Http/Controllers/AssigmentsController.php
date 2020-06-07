@@ -578,6 +578,11 @@ class AssigmentsController extends Controller
             else
                 $assignment['started'] = true;
 
+            if($due > Carbon::now() && $request->user()->can('site/course/student'))
+                $assignment['ended'] = false;
+            else
+                $assignment['ended'] = true;
+
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
             ////////teacher
@@ -613,6 +618,11 @@ class AssigmentsController extends Controller
                 $assignment['started'] = false;
             else
                 $assignment['started'] = true;
+            
+            if($due > Carbon::now() && $request->user()->can('site/course/student'))
+                $assignment['ended'] = false;
+            else
+                $assignment['ended'] = true;
 
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
