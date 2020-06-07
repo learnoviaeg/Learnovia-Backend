@@ -573,7 +573,7 @@ class AssigmentsController extends Controller
                 }
             }
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
-            if(($start > Carbon::now() && $due > Carbon::now() && $request->user()->can('site/course/student')) || ($start <= Carbon::now() && $due < Carbon::now() && $request->user()->can('site/course/student')))
+            if($start > Carbon::now() && $request->user()->can('site/course/student'))
                 $assignment['started'] = false;
             else
                 $assignment['started'] = true;
@@ -609,7 +609,7 @@ class AssigmentsController extends Controller
             }
             $assignment['user_submit'] = $studentassigments;
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
-            if(($start > Carbon::now() && $due > Carbon::now() && $request->user()->can('site/course/student')) || ($start <= Carbon::now() && $due < Carbon::now() && $request->user()->can('site/course/student')))
+            if($start > Carbon::now() && $request->user()->can('site/course/student'))
                 $assignment['started'] = false;
             else
                 $assignment['started'] = true;
