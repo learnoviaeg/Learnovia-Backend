@@ -3,12 +3,18 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use  App\Events\UserGradeEvent;
 
 class GradeItems extends Model
 {
     protected $fillable = [
         'grade_category', 'grademin', 'grademax', 'calculation', 'item_no', 'grade_pass', 'multifactor',
         'plusfactor', 'aggregationcoef', 'aggregationcoef2', 'item_type', 'name', 'item_Entity', 'hidden','type', 'weight', 'id_number','scale_id'
+    ];
+
+    protected $dispatchesEvents = [
+        'created' => UserGradeEvent::class,
+        
     ];
 
     protected $appends = ['parent_aggregation'];

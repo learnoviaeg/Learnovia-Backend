@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        UserGrade::observe(UserGradeObserver::class);
+        // UserGrade::observe(UserGradeObserver::class);
         Enroll::observe(EnrollObserver::class);
         GradeItems::observe(GradeItemObserver::class);
     }
