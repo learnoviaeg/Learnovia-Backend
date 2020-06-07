@@ -731,6 +731,10 @@ class QuizController extends Controller
             $question->question_type;
             unset($question->pivot);
         }
+        if($quiz->start_date > Carbon::now())
+            $quiz['Started'] = false;
+        else
+            $quiz['Started'] = true;
         return HelperController::api_response_format(200,$quiz);
     }
     
