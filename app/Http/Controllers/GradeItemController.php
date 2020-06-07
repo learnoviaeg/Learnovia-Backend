@@ -87,15 +87,15 @@ class GradeItemController extends Controller
 
         $grade = GradeItems::create($data);
 
-        // $grade_itms=GradeCategory::where('id',$request->grade_category)->with('GradeItems')->get();
-        // return $grade_itms[0]->GradeItems;
-
-        // $allWeight = 0;
-        // foreach ($grade_itms[0]->GradeItems as $childs) {
-        //     $allWeight += $childs->weight();
-        //     $weight[] = $childs->weight();
-        // }
-        // return $allWeight;
+        $grade_itms=GradeCategory::where('id',$request->grade_category)->with('GradeItems')->first();
+        $allWeight = 0;
+        foreach ($grade_itms->GradeItems as $childs) {
+            $allWeight += $childs->weight();
+        }
+        if($allWeight ==0){
+            $grade->weight=100;
+            $grade->save();
+        }
         // if ($allWeight != 100) {
         //     // $message = "Your grades adjusted to get 100!";
         //     $gcd = GradeItemController::findGCD($weight, sizeof($weight));

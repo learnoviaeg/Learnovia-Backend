@@ -88,7 +88,7 @@ class GradeItems extends Model
             $allWeight += $grade_item->weight();
             $weight[] = $grade_item->weight();
         }
-        if ($allWeight != 100) {
+        if ($allWeight != 100 && $allWeight !=0) {
             $gcd = self::findGCD($weight, sizeof($weight));
             foreach ($weight as $w) {
                 $devitions[] = $w / $gcd;
