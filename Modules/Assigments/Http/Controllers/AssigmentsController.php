@@ -234,6 +234,7 @@ class AssigmentsController extends Controller
 
         return HelperController::api_response_format(200, $body = $assigment, $message = 'Assignment edited successfully');
     }
+    
     public function updateAssignmentLesson(Request $request)
     {
         $request->validate([
@@ -277,9 +278,10 @@ class AssigmentsController extends Controller
             $segmentClass = CourseSegment::where('id', $courseSegment)->pluck('segment_class_id')->first();
             $ClassLevel = SegmentClass::where('id', $segmentClass)->pluck('class_level_id')->first();
             $classId = ClassLevel::where('id', $ClassLevel)->pluck('class_id')->first();
+            $assignment=Assignment::find($request->assignment_id);
             user::notify([
                 'id' => $request->assignment_id,
-                'message' => 'Assignment is updated',
+                'message' => $assignment->name .' is updated',
                 'from' => Auth::user()->id,
                 'users' => $usersIDs,
                 'course_id' => $courseID,
