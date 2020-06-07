@@ -614,12 +614,12 @@ class AssigmentsController extends Controller
             }
             $assignment['user_submit'] = $studentassigments;
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
-            if($start > Carbon::now() && $request->user()->can('site/course/student'))
+            if($start > Carbon::now())
                 $assignment['started'] = false;
             else
                 $assignment['started'] = true;
             
-            if($due > Carbon::now() && $request->user()->can('site/course/student'))
+            if($due > Carbon::now())
                 $assignment['ended'] = false;
             else
                 $assignment['ended'] = true;
