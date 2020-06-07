@@ -692,7 +692,7 @@ class QuizController extends Controller
 
         }
 
-        $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('answered','1')->pluck('user_quiz_id')->unique()->count();
+        $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
         $quiz['taken_attempts'] = $count_answered;
         foreach($userquizzes as $userQuiz)
         {
