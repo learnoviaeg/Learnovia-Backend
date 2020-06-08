@@ -204,12 +204,16 @@ class QuizLessonController extends Controller
             'grade' => $request->grade,
             'grade_category_id' => ($request->filled('grade_category_id')) ? $request->grade_category_id : null,
         ]);
+        $quiz=Quiz::find($request->quiz_id);
+        $publish_date=$request->opening_time;
+        if(carbon::parse($publish_date)->isPast())
+            $publish_date=Carbon::now()->format('Y-m-d H:i:s');
         $requ = ([
-            'message' => 'the quiz is updated',
+            'message' => $quiz->name . ' quiz is updated',
             'id' => $request->quiz_id,
             'users' => $users,
             'type' =>'quiz',
-            'publish_date'=> $request->opening_time,
+            'publish_date'=> $publish_date,
             'course_id' => $course,
             'class_id'=> $class,
             'lesson_id'=> $request->lesson_id,
