@@ -262,6 +262,8 @@ class MediaController extends Controller
 
         $media = media::find($request->id);
         $mediaLesson = MediaLesson::whereIn('lesson_id' , $request->lesson_id)->where('media_id' , $request->id)->first();
+        if(!isset($mediaLesson))
+            return HelperController::api_response_format(400, null, 'This media is not in this lesson');
         if ($media->type != null && $request->hasFile('Imported_file')) {
             $extension = $request->Imported_file->getClientOriginalExtension();
             $fileName = $request->Imported_file->getClientOriginalName();
@@ -296,16 +298,20 @@ class MediaController extends Controller
         $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
         $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
+        
+        $publish_date=$mediaLesson->publish_date;
+        if(carbon::parse($publish_date)->isPast())
+            $publish_date=Carbon::now()->format('Y-m-d H:i:s');
         User::notify([
-                    'id' => $media->id,
-                    'message' => $media->name.' media is updated',
-                    'from' => Auth::user()->id,
-                    'users' => $usersIDs,
-                    'course_id' => $courseID,
-                    'class_id' => $class_id,
-                    'lesson_id' => $mediaLesson->lesson_id,
-                    'type' => 'media',
-                    'publish_date' => $mediaLesson->publish_date,
+            'id' => $media->id,
+            'message' => $media->name.' media is updated',
+            'from' => Auth::user()->id,
+            'users' => $usersIDs,
+            'course_id' => $courseID,
+            'class_id' => $class_id,
+            'lesson_id' => $mediaLesson->lesson_id,
+            'type' => 'media',
+            'publish_date' => carbon::parse($publish_date)->format('Y-m-d H:i:s'),
         ]);
 
         if($media->type != null)

@@ -279,6 +279,11 @@ class AssigmentsController extends Controller
             $ClassLevel = SegmentClass::where('id', $segmentClass)->pluck('class_level_id')->first();
             $classId = ClassLevel::where('id', $ClassLevel)->pluck('class_id')->first();
             $assignment=Assignment::find($request->assignment_id);
+
+            $publish_date=$AssignmentLesson->publish_date;
+            if(carbon::parse($publish_date)->isPast())
+                $publish_date=Carbon::now()->format('Y-m-d H:i:s');
+                
             user::notify([
                 'id' => $request->assignment_id,
                 'message' => $assignment->name .' is updated',
@@ -289,7 +294,7 @@ class AssigmentsController extends Controller
                 'lesson_id' => $lessonId,
                 'type' => 'assignment',
                 'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
-                'publish_date' => $AssignmentLesson->publish_date
+                'publish_date' => carbon::parse($publish_date)->format('Y-m-d H:i:s')
             ]);
             // $all[] = Lesson::find($lesson_id)->module('Assigments', 'assignment')->get();
         $all = AssignmentLesson::all();
