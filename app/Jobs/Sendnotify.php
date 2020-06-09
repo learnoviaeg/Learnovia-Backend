@@ -77,8 +77,6 @@ class Sendnotify implements ShouldQueue
                     Log::debug('type is not announcement ');
 
             }else{
-
-                $this->request['message']='A new announcement is added';
                 Log::debug('type is announcement and count is '. $count);
                 if($this->request['attached_file'] != null)
                     $att= (string) $this->request['attached_file'];
