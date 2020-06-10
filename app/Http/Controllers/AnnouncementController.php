@@ -97,7 +97,7 @@ class AnnouncementController extends Controller
         if($request->filled('class'))
             $userr->where('class',$request->class);
             // $users->get();
-        $users =  $userr->pluck('user_id')->unique()->toArray();
+        $users =  $userr->pluck('user_id')->unique('user_id')->toArray();
         //Creating announcement in DB
         $ann = Announcement::create([
             'title' => $request->title,
