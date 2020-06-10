@@ -113,7 +113,7 @@ class AnnouncementController extends Controller
             'publish_date' => $publishdate,
             'created_by' => Auth::id(),
         ]);
-        foreach ($users as $user){
+        foreach (array_unique($users) as $user){
             userAnnouncement::create([
                 'announcement_id' => $ann->id,
                 'user_id' => $user
