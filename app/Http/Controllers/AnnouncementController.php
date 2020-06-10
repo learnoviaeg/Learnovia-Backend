@@ -97,7 +97,7 @@ class AnnouncementController extends Controller
         if($request->filled('class'))
             $userr->where('class',$request->class);
             // $users->get();
-        $users =  $userr->pluck('user_id');
+        $users =  $userr->pluck('user_id')->unique('user_id');
         //Creating announcement in DB
         $ann = Announcement::create([
             'title' => $request->title,
@@ -113,7 +113,7 @@ class AnnouncementController extends Controller
             'publish_date' => $publishdate,
             'created_by' => Auth::id(),
         ]);
-        foreach (array_unique($users) as $user){
+        foreach ($users as $user){
             userAnnouncement::create([
                 'announcement_id' => $ann->id,
                 'user_id' => $user
