@@ -389,7 +389,7 @@ class AnnouncementController extends Controller
         $user_id = Auth::user()->id;
         $noti = DB::table('notifications')->where('notifiable_id', $user_id)
             ->orderBy('created_at')
-            ->get(['data' , 'read_at','id']);
+            ->get(['data' , 'read_at','id'])->unique('id');
         $notif = collect([]);
         $count = 0;
         foreach ($noti as $not) {
