@@ -212,6 +212,8 @@ class AnnouncementController extends Controller
 
         //get the announcement to be deleted
         $announce = Announcement::whereId($request->id)->first();
+        $old_name = $announce->title;
+
         $data = ([
             'id' => $request->id,
             'type' => 'announcement',
@@ -291,7 +293,7 @@ class AnnouncementController extends Controller
                 'start_date' => $announce->start_date,
                 'due_date' => $announce->due_date,
                 'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
-                'message' => $announce->title.' announcement is updated'
+                'message' => $old_name.' announcement is updated'
             ]);
 
         }else{
