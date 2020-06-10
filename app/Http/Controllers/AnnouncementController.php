@@ -281,7 +281,7 @@ class AnnouncementController extends Controller
         foreach ($myAnnouncements as $ann) {
             $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
         }
-        $usersIDs= userAnnouncement::where('announcement_id', $announce->id)->pluck('user_id');
+        $usersIDs= userAnnouncement::where('announcement_id', $announce->id)->pluck('user_id')->unique('user_id');
         if($announce->attached_file == null){
             $requ = ([
                 'id' => $announce->id,
