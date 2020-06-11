@@ -180,11 +180,12 @@ class AnnouncementController extends Controller
                     return HelperController::api_response_format(201,'No User');
             }
             else{
+
                 foreach($users as $use)
                 {
                     if($use != Auth::id())
                     {
-                         $requ['users'] = $user;
+                         $requ['users'] = $use;
                     }
                 }
             }
