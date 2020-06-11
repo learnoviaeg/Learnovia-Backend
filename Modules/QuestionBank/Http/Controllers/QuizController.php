@@ -802,6 +802,10 @@ class QuizController extends Controller
             return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
+        $quiz_duration_ended=false;
+        if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
+            $quiz_duration_ended=true;
+        }
         // return $quiz_lesson->due_date;
         if(!isset($quiz_lesson))
             return HelperController::api_response_format(200, 'there is quiz in this lesson');
