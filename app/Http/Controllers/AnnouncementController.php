@@ -185,10 +185,10 @@ class AnnouncementController extends Controller
                 {
                     if($use != Auth::id())
                     {
-                         $requ['users'] = $use;
                     }
                 }
             }
+            $requ['users'] = $users;
             $notificatin = User::notify($requ);
             // return $notificatin;
 
