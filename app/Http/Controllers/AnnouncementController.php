@@ -97,7 +97,9 @@ class AnnouncementController extends Controller
         if($request->filled('class'))
             $userr->where('class',$request->class);
              // $users->get();
-         $users =  $userr->pluck('user_id');
+        $users =  $userr->pluck('user_id')->toArray();
+        $users =  array_values(array_unique($users));
+        //  return $users;
         //Creating announcement in DB
         $ann = Announcement::create([
             'title' => $request->title,
@@ -159,10 +161,10 @@ class AnnouncementController extends Controller
             ]);
 
         }
-            $user = array_unique($users->toArray());
+            // $user = array_unique($users->toArray());
             if($request->filled('role'))
             {
-                foreach($user as $use)
+                foreach($users as $use)
                 {
                     if($use != Auth::id()){
 
@@ -178,7 +180,7 @@ class AnnouncementController extends Controller
                     return HelperController::api_response_format(201,'No User');
             }
             else{
-                foreach($user as $use)
+                foreach($users as $use)
                 {
                     if($use != Auth::id())
                     {
