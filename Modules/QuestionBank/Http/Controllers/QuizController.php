@@ -823,6 +823,7 @@ class QuizController extends Controller
             $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->pluck('answered')->first();
             if ($user_quiz_answer == 1)
                 $quiz['allow_edit'] = false;
+            
         }
 
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
@@ -847,6 +848,11 @@ class QuizController extends Controller
 
         foreach($user_quizzes as $user_Quiz)
         {
+            $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$user_Quiz->id)->where('force_submit',null)->count();
+            if( $useranswerSubmitted>0){
+                if($quiz_duration_ended)
+                        continue;
+            }
             $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz->id)->get();
             if(count($user_answer)>0)
                 $userAnswerss[]=$user_answer;
