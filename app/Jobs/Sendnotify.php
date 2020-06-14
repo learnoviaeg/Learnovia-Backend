@@ -72,7 +72,8 @@ class Sendnotify implements ShouldQueue
                         "class_id" => (string)$this->request['class_id'],
                         "lesson_id"=> (string)$this->request['lesson_id'],
                         "publish_date" => $this->request['publish_date'],
-                        "read_at" => null
+                        "read_at" => null,
+                        'deleted'=> "0"
                     );
                     // Log::debug('type is not announcement ');
 
@@ -95,6 +96,8 @@ class Sendnotify implements ShouldQueue
                         "start_date" => $this->request['start_date'],
                         "due_date" => $this->request['due_date'],
                         "attached_file" => $att,
+                        'deleted'=> '0'
+
                     );
             }
             $count++;
