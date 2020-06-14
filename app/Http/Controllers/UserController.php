@@ -299,7 +299,8 @@ class UserController extends Controller
         $users = User::with('roles');
 
         if ($request->filled('search'))
-            $users->where('username', 'LIKE', "%$request->search%");
+            // $users->where('username', 'LIKE', "%$request->search%");
+            $users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
         $users->get();
         $users = $users->paginate(HelperController::GetPaginate($request));
         if (Auth::user()->can('show/real-password')) {
