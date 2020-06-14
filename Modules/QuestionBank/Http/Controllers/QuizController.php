@@ -802,10 +802,6 @@ class QuizController extends Controller
             return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
-        $quiz_duration_ended=false;
-        if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
-            $quiz_duration_ended=true;
-        }
         // return $quiz_lesson->due_date;
         if(!isset($quiz_lesson))
             return HelperController::api_response_format(200, 'there is quiz in this lesson');
@@ -827,7 +823,6 @@ class QuizController extends Controller
             $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->pluck('answered')->first();
             if ($user_quiz_answer == 1)
                 $quiz['allow_edit'] = false;
-            
         }
 
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
@@ -852,11 +847,9 @@ class QuizController extends Controller
 
         foreach($user_quizzes as $user_Quiz)
         {
-            $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$user_Quiz->id)->where('force_submit',null)->count();
-            if( $useranswerSubmitted>0){
-                if($quiz_duration_ended)
-                        continue;
-            }
+            $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$user_Quiz->id)->where('force_submit',null)->count(); 
+            if($useranswerSubmitted > 0 )
+                continue;
             $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz->id)->get();
             if(count($user_answer)>0)
                 $userAnswerss[]=$user_answer;
