@@ -832,7 +832,6 @@ class QuizController extends Controller
         $quiz['due_date']=$quiz_lesson->due_date;
         $quiz['mark']=$quiz_lesson->grade;
         $quiz['grade_category']=$gradecat;
-        $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
         // return $quiz_lesson;
         $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where("user_id",$user_id)->first();
         // return $override_user;
@@ -844,16 +843,21 @@ class QuizController extends Controller
         $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->get();
         if($request->filled('attempt_index'))
             $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->get();
-
+        $attempts_index=[];
         foreach($user_quizzes as $user_Quiz)
         {
             $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$user_Quiz->id)->where('force_submit',null)->count(); 
             if($useranswerSubmitted > 0 )
                 continue;
             $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz->id)->get();
+            $attempts_index []= $user_Quiz->id;
             if(count($user_answer)>0)
                 $userAnswerss[]=$user_answer;
+            
         }
+
+        // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
+        $quiz['attempts_index'] = $attempts_index;
 
 
         // foreach($quest->question as $q){
