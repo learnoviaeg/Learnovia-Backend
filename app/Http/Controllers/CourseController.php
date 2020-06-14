@@ -1006,18 +1006,21 @@ class CourseController extends Controller
             //will be order in desc awl ma yft7 bl due date
             $quick = collect($quickaction);
             $i=0;
+            // return $quick;
             foreach($quick as $mm){
-                    $quick_sort[$i]['id'] = $mm->id;
-                    $quick_sort[$i]['date'] = $mm->pivot->publish_date; 
-                    $i++;
-                }
-                $a = collect($quick_sort)->sortByDesc('date')->values();
-                $j=0;
-                foreach($a as $as)
-                {
-                    $tryyyy [$j]= collect($quickaction)->where('id', $as['id'])->values()[0];
-                    $j++;
-                }
+                $quick_sort[$i]['id'] = $mm->id;
+                $quick_sort[$i]['date'] = $mm->pivot->publish_date;
+                $quick_sort[$i]['type'] = $mm->flag;
+                $i++;
+            }
+            $a = collect($quick_sort)->sortByDesc('date')->values();
+            $j=0;
+            // return $quickaction;
+            foreach($a as $as)
+            {
+                $tryyyy [$j]= collect($quickaction)->where('id', $as['id'])->where('flag',$as['type'])->values()[0];
+                $j++;
+            }
             $quick = $tryyyy;
             $quickaction   = $quick;
             //in case date -> asc and desc
