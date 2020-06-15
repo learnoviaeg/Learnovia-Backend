@@ -26,51 +26,13 @@ use Modules\UploadFiles\Entities\media;
 
 use Modules\UploadFiles\Entities\MediaLesson;
 
-
 class NotificationController extends Controller
-{
-    public function get_google_token()
-    {
-        $client = new \Google_Client();
-        $client->setAuthConfig(base_path('send-message-e290c-firebase-adminsdk-4oxh4-9afba5de5b.json'));
-        $client->setApplicationName("send-message-e290c");
-        $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
-
-       $client->useApplicationDefaultCredentials();
-       if ($client->isAccessTokenExpired()) {
-            $client->fetchAccessTokenWithAssertion();
-        }
-
-        $access_token = $client->getAccessToken()['access_token'];
-
-         $data = json_encode(array(
-            'message' => array(
-                "topic" => "mirna",
-                "notification" => array(
-                    "body" => "This is an FCM notification message!",
-                    "title" => "FCM Message .."
-                )
-            )
-          
-        ));
-        $clientt = new Client();
-        $res = $clientt->request('POST', 'https://fcm.googleapis.com/v1/projects/send-message-e290c/messages:send', [
-            'headers'   => [
-                'Authorization' => 'Bearer '. $access_token,
-                'Content-Type' => 'application/json'
-            ], 
-            'body' => $data
-        ]);
-        $result= $res->getBody();
-        return $result;
-    }
-    
+{    
    /**
     * @description: get all Notifications From database From Notifcation Table of this user.
     * @param no required parameters
     * @return all notifications.
     */
-
     public function getallnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data','read_at','id')->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();
@@ -231,7 +193,6 @@ class NotificationController extends Controller
             ->where('created_at', '<', $request->enddate)
             ->delete();
         return HelperController::api_response_format(200, $body = [], $message = 'notifications deleted');
-
     }
 
    /**
