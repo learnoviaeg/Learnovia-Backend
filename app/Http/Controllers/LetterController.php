@@ -124,7 +124,8 @@ class LetterController extends Controller
         if($courseSegment == null)
             return HelperController::api_response_format(200, 'This Course is not assigned to this class');
         $courseSegment->update([
-            'letter_id' => $request->letter
+            'letter_id' => $request->letter,
+            'letter' => 1
         ]);
         return HelperController::api_response_format(200, 'Letter Assigned Successfully');
     }
