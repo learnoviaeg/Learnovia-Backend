@@ -213,10 +213,14 @@ class CourseController extends Controller
             $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
             if ($request->filled('segment'))
                 $segment = $request->segment;
-            else
+            else{
+                $check =Segment::Get_current($request->type);
+                if(!isset($check))
+                    return HelperController::api_response_format(200,null , 'No specified segment and there is no defined current segment');
                 $segment = Segment::Get_current($request->type)->id;
-            $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
-            $courseSegment = $segment_class->courseSegment->pluck('course_id');
+            }
+                $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
+                $courseSegment = $segment_class->courseSegment->pluck('course_id');
             return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->whereIn('id', $courseSegment)->paginate(HelperController::GetPaginate($request)));
         }
         if (isset($request->id))
