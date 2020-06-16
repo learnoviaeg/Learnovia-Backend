@@ -36,11 +36,10 @@ class PaymentController extends Controller
     public function delete(Request $request)
     {
         $request->validate([
-            'payemnt_id' => 'required|integer|exists:payments,id'
+            'payment_id' => 'required|integer|exists:payments,id'
         ]);
-        Payment::find($request->payemnt_id)->delete();
+        Payment::find($request->payment_id)->delete();
         return HelperController::api_response_format(200, null, 'Deleted Successfully.');
-
     }
 
     public function postponedPayment(Request $request)
