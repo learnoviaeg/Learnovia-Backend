@@ -348,6 +348,9 @@ class AssigmentsController extends Controller
         ]);
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
+        if(!isset($assilesson))
+            return HelperController::api_response_format(200, null , $message = 'This assignment is not assigned to this lesson');
+        
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assilesson->id)->first();
         /*
             0===================>content
