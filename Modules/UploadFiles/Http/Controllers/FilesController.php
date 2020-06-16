@@ -527,7 +527,7 @@ class FilesController extends Controller
     public function GetFileByID(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer|exists:media,id',
+            'id' => 'required|integer|exists:files,id',
         ]);
         $File = file::find($request->id);
         return HelperController::api_response_format(200, $File);
