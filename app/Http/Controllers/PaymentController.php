@@ -46,7 +46,7 @@ class PaymentController extends Controller
     public function postponedPayment(Request $request)
     {
         $request->validate([
-            'payemnt_id' => 'required|integer|exists:payments,id',
+            'payment_id' => 'required|integer|exists:payments,id',
             'date' => 'required|date'
         ]);
         $old_payment = Payment::find($request->payemnt_id);
@@ -82,6 +82,7 @@ class PaymentController extends Controller
         $status_id_paid = status::where('name', "Paid")->first()->id;
         if ($request->amount == $payment->amount) {
             $payment->update(['status_id' => $status_id_paid]);
+            $payment->with('status');
             return HelperController::api_response_format(200, $payment, 'Paid Successfully.');
         } elseif ($request->amount < $payment->amount) {
             $request->validate([
