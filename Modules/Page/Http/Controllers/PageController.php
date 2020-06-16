@@ -210,7 +210,10 @@ class PageController extends Controller
         if ($page == null)
             return HelperController::api_response_format(200, null, 'This page is not visible');
         $lesson = $page->lesson->where('id', $request->lesson_id)->first();
-        $course_id= $lesson->courseSegment->course_id;
+        if(isset($lesson))
+            $course_id= $lesson->courseSegment->course_id;
+        else
+            return HelperController::api_response_format(200, null , 'This page is not assigned to the given lesson');
         $page->course_id=$course_id;
         unset($page->lesson);
         
