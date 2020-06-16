@@ -411,6 +411,7 @@ class CourseController extends Controller
                 $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
                 $course->teacher = $teacher;
+                $course->image = $course->attachment->path;
                 $all->push($course);
             }
         }
