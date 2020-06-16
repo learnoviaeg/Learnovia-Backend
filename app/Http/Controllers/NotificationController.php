@@ -83,7 +83,11 @@ class NotificationController extends Controller
                 if(Carbon::parse($not->data['publish_date']) < Carbon::now() && $not->data['type'] != 'announcement')
                 {
                     $course_segments_ids = Auth::user()->enroll->pluck('course_segment');
-                    $item_course_segment=Lesson::find($not->data['lesson_id'])->courseSegment->id;
+                    $item_course_segment=Lesson::find($not->data['lesson_id']);
+                    if(isset($item_course_segment))
+                    {
+                        $item_course_segment = $item_course_segment->courseSegment->id;
+                    }
                     switch($request->type){
                         case "assignment":
                              $object = Assignment::find( $not->data['id']);
