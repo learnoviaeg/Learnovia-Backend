@@ -303,7 +303,15 @@ class UserController extends Controller
             // $users->where('username', 'LIKE', "%$request->search%");
             $users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
         $users->get();
+
         $users = $users->paginate(HelperController::GetPaginate($request));
+        foreach($users->items() as $user)
+        {
+            if(isset($user->attachment)){
+                $user->picture = $user->attachment->path;
+            }
+        }
+
         if (Auth::user()->can('show/real-password')) {
             foreach ($users->items() as $value) {
                 $value->setHidden(['password']);
