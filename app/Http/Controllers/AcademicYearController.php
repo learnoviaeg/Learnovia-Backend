@@ -123,27 +123,44 @@ class AcademicYearController extends Controller
         return HelperController::api_response_format(200, $year, ' this year is  set to be current ');
     }
 
+    // public function GetMyYears(Request $request)
+    // {
+    //     $result=array();
+    //     $lev=array();
+    //     $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
+    //         //validate that course in my current course start < now && now < end
+    //         $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
+    //     },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
+    //         if ($request->filled('year'))
+    //             $query->where('academic_year_id', $request->year);            
+    //     }])->first();
+    //     foreach($users ->enroll as $enrolls)
+    //         foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+    //             foreach($segmetClas->classLevel as $clas)
+    //                     foreach($clas->yearLevels as $level)
+    //                         foreach($level->yearType as $typ)
+    //                             if(!in_array($typ->academic_year_id, $result))
+    //                             {
+    //                                 $result[]=$typ->academic_year_id;
+    //                                 $yearr[]=AcademicYear::find($typ->academic_year_id);
+    //                             }
+    //     if(isset($yearr) && count($yearr) > 0)
+    //         return HelperController::api_response_format(201,$yearr, 'Here are your years');
+        
+    //     return HelperController::api_response_format(201,null, 'You are not enrolled in any year');
+    // }
     public function GetMyYears(Request $request)
     {
         $result=array();
-        $lev=array();
-        $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
+        $CS=array();
+        $course_segments = Enroll::where('user_id',Auth::id())->with(['courseSegment' => function($query){
             //validate that course in my current course start < now && now < end
-            $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
-        },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
-            if ($request->filled('year'))
-                $query->where('academic_year_id', $request->year);            
-        }])->first();
-        foreach($users ->enroll as $enrolls)
-            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-                foreach($segmetClas->classLevel as $clas)
-                        foreach($clas->yearLevels as $level)
-                            foreach($level->yearType as $typ)
-                                if(!in_array($typ->academic_year_id, $result))
-                                {
-                                    $result[]=$typ->academic_year_id;
-                                    $yearr[]=AcademicYear::find($typ->academic_year_id);
-                                }
+            $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());}])->get();
+            foreach($course_segments as $course_segment){
+                array_push($CS , $course_segment->course_segment);
+            }
+        $years = Enroll::where('user_id',Auth::id())->whereIn('course_segment' ,$CS)->pluck('year');
+        $yearr = AcademicYear::whereIn('id', $years)->get();
         if(isset($yearr) && count($yearr) > 0)
             return HelperController::api_response_format(201,$yearr, 'Here are your years');
         
