@@ -68,10 +68,18 @@ class CategoryController extends Controller
     public function get(Request $request)
     {
         $request->validate([
-            'id' => 'exists:categories,id'
+            'id' => 'exists:categories,id',
+            'search' => 'nullable'
         ]);
         if (isset($request->id))
             return HelperController::api_response_format(200, Category::find($request->id));
-        return HelperController::api_response_format(200, Category::paginate(HelperController::GetPaginate($request)));
+
+        
+        $categories=Category::paginate(HelperController::GetPaginate($request));
+        if($request->filled('search'))
+        {
+            $categories=Category::where('name', 'LIKE' , "%$request->search%")->get()->paginate(HelperController::GetPaginate($request));
+        }
+        return HelperController::api_response_format(200, $categories);
     }
 }
