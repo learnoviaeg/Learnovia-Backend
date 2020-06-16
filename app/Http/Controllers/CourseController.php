@@ -216,7 +216,7 @@ class CourseController extends Controller
             else{
                 $check =Segment::Get_current($request->type);
                 if(!isset($check))
-                    return HelperController::api_response_format(200,null , 'No specified segment and there is no defined current segment');
+                    return HelperController::api_response_format(200,null , 'No choosen segment and there is no defined active segment in this year type');
                 $segment = Segment::Get_current($request->type)->id;
             }
                 $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
