@@ -49,13 +49,13 @@ class PaymentController extends Controller
             'payment_id' => 'required|integer|exists:payments,id',
             'date' => 'required|date'
         ]);
-        $old_payment = Payment::find($request->payemnt_id);
+        $old_payment = Payment::find($request->payment_id);
         $Payment = Payment::create([
-            'amount' => $old_payment->amount
-            , 'date' => $request->date
-            , 'note' => $old_payment->note
-            , 'contract_id' => $old_payment->contract_id
-            , 'status_id' => $old_payment->status_id
+            'amount' => $old_payment->amount,
+            'date' => $request->date, 
+            'note' => $old_payment->note,
+            'contract_id' => $old_payment->contract_id,
+            'status_id' => $old_payment->status_id
         ]);
         $old_payment->update([
             'child_id' => $Payment->id
@@ -82,7 +82,6 @@ class PaymentController extends Controller
         $status_id_paid = status::where('name', "Paid")->first()->id;
         if ($request->amount == $payment->amount) {
             $payment->update(['status_id' => $status_id_paid]);
-            $payment->with('status');
             return HelperController::api_response_format(200, $payment, 'Paid Successfully.');
         } elseif ($request->amount < $payment->amount) {
             $request->validate([
@@ -99,11 +98,11 @@ class PaymentController extends Controller
                         'date' => 'required|date'
                     ]);
                     $new_payment = Payment::create([
-                        'amount' => ($amount - $request->amount)
-                        , 'date' => $request->date
-                        , 'note' => $payment->note
-                        , 'contract_id' => $payment->contract_id
-                        , 'status_id' => $status_id_not_paid
+                        'amount' => ($amount - $request->amount),
+                        'date' => $request->date,
+                        'note' => $payment->note,
+                        'contract_id' => $payment->contract_id,
+                        'status_id' => $status_id_not_paid
                     ]);
                     return HelperController::api_response_format(200, $new_payment, 'One payment is paid Successfully and a new payment with the remainder added Successfully.');
                     break;
@@ -133,11 +132,11 @@ class PaymentController extends Controller
                 }else {
 
                     $new_payment = Payment::create([
-                        'amount' => ($payment->amount - $remainder)
-                        , 'date' => $payment->date
-                        , 'note' => $payment->note
-                        , 'contract_id' => $payment->contract_id
-                        , 'status_id' => $status_id_not_paid
+                        'amount' => ($payment->amount - $remainder),
+                        'date' => $payment->date,
+                        'note' => $payment->note,
+                        'contract_id' => $payment->contract_id,
+                        'status_id' => $status_id_not_paid
                     ]);
                     $payment->update([
                         'amount' => $remainder,
