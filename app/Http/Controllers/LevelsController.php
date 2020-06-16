@@ -114,7 +114,8 @@ class LevelsController extends Controller
             $levels = Level::find($request->id);
         } else {
             foreach ($yearType->yearLevel as $yearLevel) {
-                $levels[] = $yearLevel->levels[0];
+                if(count($yearLevel->levels) > 0)
+                    $levels[] = $yearLevel->levels[0];
             }
         }
         return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)));
