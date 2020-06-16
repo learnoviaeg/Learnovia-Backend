@@ -491,25 +491,28 @@ class CourseController extends Controller
                                         $Component->where('publish_date', '<=', Carbon::now()); 
                                     }
                                 }
-
                                 $lessonn[$com->name] = $Component->get();
                                 foreach($lessonn[$com->name] as $le){
                                     $le['course_id']=(int)$request->course_id;
                                     if($le->pivot->media_id)
                                     {
+                                        $le['visible'] = MediaLesson::where('media_id',$le->id)->where('lesson_id',$le->pivot->lesson_id)->pluck('visible')->first();
                                         $le['item_lesson_id']=MediaLesson::where('media_id',$le->id)->where('lesson_id',$le->pivot->lesson_id)->pluck('id')->first();
                                     }
                                     if($le->pivot->file_id)
                                     {
+                                        $le['visible'] = FileLesson::where('file_id',$le->id)->where('lesson_id',$le->pivot->lesson_id)->pluck('visible')->first();
                                         $le['item_lesson_id']=FileLesson::where('file_id',$le->id)->where('lesson_id',$le->pivot->lesson_id)->pluck('id')->first();
                                     }
                                     if($le->pivot->page_id)
                                     {
+                                        $le['visible'] = pageLesson::where('page_id',$le->id)->where('lesson_id',$le->pivot->lesson_id)->pluck('visible')->first();
                                         $le['item_lesson_id']=pageLesson::where('page_id',$le->id)->where('lesson_id',$le->pivot->lesson_id)->pluck('id')->first();
                                     }
                                 }
                                 if($com->name == 'Quiz'){
-                                 foreach ($lessonn['Quiz'] as $one){   
+                                 foreach ($lessonn['Quiz'] as $one){  
+                                    $one['visible'] = QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('visible')->first();
                                     $one['item_lesson_id']=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('id')->first();
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
@@ -537,6 +540,7 @@ class CourseController extends Controller
                                             else
                                                 $one->Started = true;
                                         } 
+                                        $one['visible'] = AssignmentLesson::where('assignment_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('visible')->first();
                                         $one['item_lesson_id']=AssignmentLesson::where('assignment_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('id')->first();
                                     }
                                 }
