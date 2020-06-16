@@ -215,7 +215,7 @@ class EventController extends Controller
                 'id_number' => $id_number,
             ]
         );
-        return HelperController::api_response_format(201, 'updated Successfully');
+        return HelperController::api_response_format(201, null,'updated Successfully');
     }
 
 
