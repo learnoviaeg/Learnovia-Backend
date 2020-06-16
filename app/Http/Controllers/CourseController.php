@@ -83,8 +83,8 @@ class CourseController extends Controller
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
             $course->save();
         }
-        if ($request->filled('category_id')) {
-            $course->category_id = $request->category_id;
+        if ($request->filled('category')) {
+            $course->category_id = $request->category;
             $course->save();
         }
 
@@ -161,7 +161,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'nullable',
-            'category_id' => 'nullable|exists:categories,id',
+            'category' => 'nullable|exists:categories,id',
             'id' => 'required|exists:courses,id',
             'image' => 'nullable',
             'description' => 'nullable',
@@ -170,8 +170,8 @@ class CourseController extends Controller
         $editable = ['name', 'category_id', 'description', 'mandatory'];
         $course = Course::find($request->id);
         $course->name = $request->name;
-        if($request->filled('category_id'))
-            $course->category_id = $request->category_id;
+        if($request->filled('category'))
+            $course->category_id = $request->category;
 
         // if course has an image
         if ($request->hasFile('image')) {
