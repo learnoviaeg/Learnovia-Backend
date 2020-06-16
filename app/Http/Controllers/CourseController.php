@@ -366,7 +366,7 @@ class CourseController extends Controller
             }
         }
         if (isset($all))
-            return HelperController::api_response_format(200, $all);
+            return HelperController::api_response_format(200, (new Collection($all))->paginate(HelperController::GetPaginate($request)));
 
         return HelperController::api_response_format(200, null, 'there is no courses');
     }
@@ -413,7 +413,7 @@ class CourseController extends Controller
             }
         }
         if (isset($all))
-            return HelperController::api_response_format(200, $all);
+            return HelperController::api_response_format(200, (new Collection($all))->paginate(HelperController::GetPaginate($request)));
 
         return HelperController::api_response_format(200, null, 'there is no courses');
     }
