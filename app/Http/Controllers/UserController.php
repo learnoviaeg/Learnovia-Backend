@@ -99,7 +99,8 @@ class UserController extends Controller
                 'lastname' => $request->lastname[$key],
                 'username' => User::generateUsername(),
                 'password' => bcrypt($request->password[$key]),
-                'real_password' => $request->password[$key]
+                'real_password' => $request->password[$key],
+                'suspend' => $request->suspend[$key]
             ]);
 
             foreach ($optionals as $optional){
