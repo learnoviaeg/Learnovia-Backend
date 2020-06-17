@@ -75,6 +75,7 @@ class MediaController extends Controller
             $allMedia = media::all();
 
             foreach ($allMedia as $media) {
+             if(isset($media->MediaLesson)){
                 $lesson_id = $media->MediaLesson->lesson_id;
                 if (!isset($media->link)) {
                     $media->path  = URL::asset('storage/media/' . $lesson_id . '/' . $media->id . '/' . $media->name);
@@ -92,6 +93,7 @@ class MediaController extends Controller
                 $media->owner = $user;
 
                 $MEDIA->push($media);
+             }
             }
         }
         return HelperController::api_response_format(200, $MEDIA);
