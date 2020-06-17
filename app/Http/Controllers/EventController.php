@@ -139,7 +139,7 @@ class EventController extends Controller
             $events->whereIn('user_id', $users_ids);
         }
         $events->delete();
-        return HelperController::api_response_format(201, 'deleted Successfully');
+        return HelperController::api_response_format(201,null, 'deleted Successfully');
     }
 
     public function update(Request $request)
