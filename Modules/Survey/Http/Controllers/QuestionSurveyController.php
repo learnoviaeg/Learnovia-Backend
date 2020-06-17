@@ -29,6 +29,8 @@ class QuestionSurveyController extends Controller
             $questions =$quest->store($request,3);
             foreach($questions as $question)
             {
+                if(!isset($question))
+                    continue;
                 $check=SurveyQuestion::firstOrCreate([
                     'question_id' => $question,
                     'survey_id' => $request['survey_id'],
