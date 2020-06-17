@@ -770,7 +770,9 @@ class AssigmentsController extends Controller
         ]);
 
         $assigmentlesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->pluck('id')->first();
-
+        if(!isset($assigmentlesson))
+            return HelperController::api_response_format(200, null , 'This assignment is not assigned to this lesson');
+            
         foreach($request->user_id as $user)
         {
             $assignmentOerride[] = assignmentOverride::firstOrCreate([
