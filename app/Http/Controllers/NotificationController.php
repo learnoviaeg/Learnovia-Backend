@@ -88,21 +88,6 @@ class NotificationController extends Controller
                     {
                         $item_course_segment = $item_course_segment->courseSegment->id;
                     }
-                    
-                    $data[$i]['id'] = $not->data['id'];
-                    $data[$i]['read_at'] = $not->read_at;
-                    $data[$i]['notification_id'] = $not->id;
-                    $data[$i]['message'] = $not->data['message'];
-                    $data[$i]['publish_date'] = $not->data['publish_date'];
-                    $data[$i]['type'] = $not->data['type'];
-                    $data[$i]['course_id'] = $not->data['course_id'];
-                    $data[$i]['class_id'] = $not->data['class_id'];
-                    $data[$i]['lesson_id'] = $not->data['lesson_id'];
-
-                    if(isset($not->data['title']))
-                        $data[$i]['title'] = $not->data['title'];
-                    $data[$i]['title'] = null;
-
                     switch($request->type){
                         case "assignment":
                              $object = Assignment::find( $not->data['id']);
@@ -137,10 +122,26 @@ class NotificationController extends Controller
                     }
                     $deleted = 0 ;
                     // if object doesnot deleted or this student not enrolled in this course
-                    if(!isset($data[$i]['item_lesson_id']) || !in_array($item_course_segment,$course_segments_ids->toArray())){
+                    if(!isset($object) || !in_array($item_course_segment,$course_segments_ids->toArray())){
                         $deleted = 1;
                     }
+                    
+                    $data[$i]['id'] = $not->data['id'];
+                    $data[$i]['read_at'] = $not->read_at;
+                    $data[$i]['notification_id'] = $not->id;
+                    $data[$i]['message'] = $not->data['message'];
+                    $data[$i]['publish_date'] = $not->data['publish_date'];
+                    $data[$i]['type'] = $not->data['type'];
+                    $data[$i]['course_id'] = $not->data['course_id'];
+                    $data[$i]['class_id'] = $not->data['class_id'];
+                    $data[$i]['lesson_id'] = $not->data['lesson_id'];
                     $data[$i]['deleted'] = $deleted;
+
+                    if(isset($not->data['title']))
+                        $data[$i]['title'] = $not->data['title'];
+                    $data[$i]['title'] = null;
+
+         
                 }
             }
             $i++;
