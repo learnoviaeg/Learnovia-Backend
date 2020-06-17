@@ -72,6 +72,7 @@ class UserController extends Controller
             'notes' => 'nullable|array','email' => 'nullable|array|unique:users', 'language' => 'nullable|array','timezone' => 'nullable|array',
             'religion' => 'nullable|array','second language' => 'nullable|array', 'username' => 'nullable|array', 'type' => 'nullable|array',
             'level' => 'nullable|array', 'real_password' => 'nullable|array',
+            'suspend.*' => 'boolean',
             'suspend'=>'array'
         ]);
 
@@ -184,6 +185,7 @@ class UserController extends Controller
             'username' => 'unique:users,username,'.$request->id,
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
+            'suspend' => 'boolean'
         ]);
 
         $users_is = collect([]);
