@@ -428,6 +428,9 @@ class AssigmentsController extends Controller
             'feedback' => 'string'
         ]);
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first(); 
+        if(!isset($assilesson))
+            return HelperController::api_response_format(200, null, $message = 'This assignment is not assigned to this lesson');
+            
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
         $assigment = assignment::where('id', $request->assignment_id)->first();
         // $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
