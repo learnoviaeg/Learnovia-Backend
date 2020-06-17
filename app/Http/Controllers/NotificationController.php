@@ -122,7 +122,7 @@ class NotificationController extends Controller
                     }
                     $deleted = 0 ;
                     // if object doesnot deleted or this student not enrolled in this course
-                    if(!isset($object) || !in_array($item_course_segment,$course_segments_ids->toArray())){
+                    if(!isset($data[$i]['item_lesson_id']) || !in_array($item_course_segment,$course_segments_ids->toArray())){
                         $deleted = 1;
                     }
                     
