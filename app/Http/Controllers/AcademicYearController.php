@@ -89,7 +89,7 @@ class AcademicYearController extends Controller
         $year = AcademicYear::whereId($request->id)->first();
         $year->update($request->all());
         $years=AcademicYear::get()->paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(200, $years);
+        return HelperController::api_response_format(200, $years , 'Year edited successfully');
     }
 
     /**

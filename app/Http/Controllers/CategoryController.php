@@ -40,7 +40,7 @@ class CategoryController extends Controller
         $cat->name = $request->name;
         $cat->save();
         $cats=Category::get()->paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(200, $cats, 'Category Updated Successfully');
+        return HelperController::api_response_format(200, $cats, 'Category edited successfully');
     }
      /**
      *

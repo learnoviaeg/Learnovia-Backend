@@ -245,7 +245,7 @@ class segment_class_Controller extends Controller
         $segment = Segment::find($request->id);
         $segment->name = $request->name;
         $segment->save();
-        return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)),'Segment edited successfully');
     }
      /**
      *

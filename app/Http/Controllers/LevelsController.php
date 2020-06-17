@@ -92,7 +92,7 @@ class LevelsController extends Controller
         $level->name = $request->name;
         $level->save();
         $levels=Level::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(200, $levels, 'Level Updated Successfully');
+        return HelperController::api_response_format(200, $levels, 'Level edited successfully');
     }
 
     /**
