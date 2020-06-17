@@ -394,9 +394,12 @@ class UserController extends Controller
             $all[$i]['level'] = level::find($level->level_id);
 
             $year_type = AcademicYearType::where('id', $level->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
-            $all[$i]['type'] = AcademicType::find($year_type->academic_year_id);
-
-            $all[$i]['year'] = AcademicYear::find($year_type->academic_type_id);
+            $all[$i]['type'] = "";
+            $all[$i]['year'] = "";
+            if(isset($year_type)){
+                $all[$i]['type'] = AcademicType::find($year_type->academic_year_id);
+                $all[$i]['year'] = AcademicYear::find($year_type->academic_type_id);    
+            }
             $i++;
         }
         if (isset($all))
