@@ -232,7 +232,7 @@ class QuizLessonController extends Controller
         ]);
         $couse_segment_id= CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id)->id;
         $course_segment = CourseSegment::find($couse_segment_id);
-        return $course_segment->GradeCategory;
+        return HelperController::api_response_format(200, $course_segment->GradeCategory,'These are grade category in this course');
     }
 
     /**
