@@ -88,44 +88,8 @@ class NotificationController extends Controller
                     {
                         $item_course_segment = $item_course_segment->courseSegment->id;
                     }
-                    $item_lesson_id = null;
-                    switch($request->type){
-                        case "assignment":
-                             $object = Assignment::find( $not->data['id']);
-                             $item_lesson_id = AssignmentLesson::where('assignment_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
-                        break;
-                        case "Attendance": 
-                            $object = Attendance::find( $not->data['id']);
-                        break;   
-                        case "meeting" :
-                            $object = BigbluebuttonModel::find( $not->data['id']);
-                        break;
-                        case "Page":
-                            $object = Page::find( $not->data['id']);
-                            $item_lesson_id = pageLesson::where('page_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
-
-                        break;    
-                        case "quiz": 
-                            $object = Quiz::find( $not->data['id']);
-                            $item_lesson_id = QuizLesson::where('quiz_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
-
-                        break;
-                        case "file": 
-                            $object = file::find( $not->data['id']);
-                            $item_lesson_id = FileLesson::where('file_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
-
-                        break; 
-                        case "media": 
-                            $object = media::find( $not->data['id']);
-                            $item_lesson_id = MediaLesson::where('media_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
-
-                        break;
-                    }
-                    $deleted = 0 ;
-                    // if object doesnot deleted or this student not enrolled in this course
-                    if(!isset($item_lesson_id) || !in_array($item_course_segment,$course_segments_ids->toArray())){
-                        $deleted = 1;
-                    }
+                  
+                    
                     
                     $data[$i]['id'] = $not->data['id'];
                     $data[$i]['read_at'] = $not->read_at;
@@ -136,13 +100,30 @@ class NotificationController extends Controller
                     $data[$i]['course_id'] = $not->data['course_id'];
                     $data[$i]['class_id'] = $not->data['class_id'];
                     $data[$i]['lesson_id'] = $not->data['lesson_id'];
-                    $data[$i]['deleted'] = $deleted;
-                    $data[$i]['item_lesson_id'] = $item_lesson_id;
+
                     if(isset($not->data['title']))
                         $data[$i]['title'] = $not->data['title'];
                     $data[$i]['title'] = null;
 
-         
+                    if($not->data['type'] == 'quiz')
+                        $data[$i]['item_lesson_id'] = QuizLesson::where('quiz_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                    if($not->data['type'] == 'assignment')
+                        $data[$i]['item_lesson_id'] = AssignmentLesson::where('assignment_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                    if($not->data['type'] == 'file')
+                        $data[$i]['item_lesson_id'] = FileLesson::where('file_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                    if($not->data['type'] == 'media')
+                        $data[$i]['item_lesson_id'] = MediaLesson::where('media_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                    if($not->data['type'] == 'Page')
+                        $data[$i]['item_lesson_id'] = pageLesson::where('page_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+
+                    
+                    $deleted = 0 ;
+                    // if object doesnot deleted or this student not enrolled in this course
+                    if(!isset($data[$i]['item_lesson_id']) || !in_array($item_course_segment,$course_segments_ids->toArray())){
+                        $deleted = 1;
+                    }
+
+                    $data[$i]['deleted'] = $deleted;
                 }
             }
             $i++;
