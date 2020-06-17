@@ -373,8 +373,10 @@ class FilesController extends Controller
 
         }
         $tempReturn = null;
+        $fileLesson = FileLesson::where('lesson_id', $request->lesson_id)->where('file_id', $request->id)->first();
+        if(!isset($fileLesson))
+            return HelperController::api_response_format(200, null , 'This file is not assigned to this file');
         if ($request->filled('publish_date')) {
-            $fileLesson = FileLesson::where('lesson_id', $request->lesson_id)->where('file_id', $request->id)->first();
             $publishdate = $request->publish_date;
             if (Carbon::parse($request->publish_date)->isPast()) {
                 $publishdate = Carbon::now();
