@@ -145,6 +145,7 @@ class FilesController extends Controller
             $allFiles = File::all();
 
             foreach ($allFiles as $file) {
+             if(isset($file->FileLesson)){
                 $lesson_id = $file->FileLesson->lesson_id;
                 $file->path  = URL::asset('storage/files/' . $lesson_id . '/' . $file->id . '/' . $file->name);
 
@@ -161,6 +162,7 @@ class FilesController extends Controller
                 $file->owner = $user;
 
                 $FILES->push($file);
+                }
             }
         }
         return HelperController::api_response_format(200, $FILES);
