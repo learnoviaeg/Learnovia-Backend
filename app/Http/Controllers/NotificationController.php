@@ -91,7 +91,7 @@ class NotificationController extends Controller
                     switch($request->type){
                         case "assignment":
                              $object = Assignment::find( $not->data['id']);
-                             $data[$i]['item_lesson_id'] = AssignmentLesson::where('assignment_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                             $item_lesson_id = AssignmentLesson::where('assignment_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
                         break;
                         case "Attendance": 
                             $object = Attendance::find( $not->data['id']);
@@ -101,28 +101,28 @@ class NotificationController extends Controller
                         break;
                         case "Page":
                             $object = Page::find( $not->data['id']);
-                            $data[$i]['item_lesson_id'] = pageLesson::where('page_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                            $item_lesson_id = pageLesson::where('page_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
 
                         break;    
                         case "quiz": 
                             $object = Quiz::find( $not->data['id']);
-                            $data[$i]['item_lesson_id'] = QuizLesson::where('quiz_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                            $item_lesson_id = QuizLesson::where('quiz_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
 
                         break;
                         case "file": 
                             $object = file::find( $not->data['id']);
-                            $data[$i]['item_lesson_id'] = FileLesson::where('file_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                            $item_lesson_id = FileLesson::where('file_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
 
                         break; 
                         case "media": 
                             $object = media::find( $not->data['id']);
-                            $data[$i]['item_lesson_id'] = MediaLesson::where('media_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                            $item_lesson_id = MediaLesson::where('media_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
 
                         break;
                     }
                     $deleted = 0 ;
                     // if object doesnot deleted or this student not enrolled in this course
-                    if(!isset($object) || !in_array($item_course_segment,$course_segments_ids->toArray())){
+                    if(!isset($item_lesson_id) || !in_array($item_course_segment,$course_segments_ids->toArray())){
                         $deleted = 1;
                     }
                     
@@ -136,7 +136,7 @@ class NotificationController extends Controller
                     $data[$i]['class_id'] = $not->data['class_id'];
                     $data[$i]['lesson_id'] = $not->data['lesson_id'];
                     $data[$i]['deleted'] = $deleted;
-
+                    $data[$i]['item_lesson_id'] = $item_lesson_id;
                     if(isset($not->data['title']))
                         $data[$i]['title'] = $not->data['title'];
                     $data[$i]['title'] = null;
