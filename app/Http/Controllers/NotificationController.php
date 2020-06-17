@@ -88,6 +88,7 @@ class NotificationController extends Controller
                     {
                         $item_course_segment = $item_course_segment->courseSegment->id;
                     }
+                    $item_lesson_id = null;
                     switch($request->type){
                         case "assignment":
                              $object = Assignment::find( $not->data['id']);
