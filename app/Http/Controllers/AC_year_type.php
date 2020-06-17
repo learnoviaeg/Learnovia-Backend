@@ -159,7 +159,7 @@ class AC_year_type extends Controller
         if ($AC) {
             $AC->AC_year;
             $output= AcademicType::paginate(HelperController::GetPaginate($req));
-            return HelperController::api_response_format(200, $output, 'Type Changed Successfully');
+            return HelperController::api_response_format(200, $output, 'Type edited successfully');
         }
         return HelperController::api_response_format(400, [], 'Something went wrong');
     }

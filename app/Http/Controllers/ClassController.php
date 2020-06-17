@@ -156,7 +156,7 @@ class ClassController extends Controller
             return HelperController::api_response_format(400 , $valid->errors() , 'Something went wrong');
         $class = Classes::find($request->id);
         $class->update($request->all());
-        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), 'Class edited successfully');
     }
 
     /**
