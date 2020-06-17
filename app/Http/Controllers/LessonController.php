@@ -199,7 +199,7 @@ class LessonController extends Controller
         $request->validate([
             'course' => 'required|exists:courses,id',
             'class' => 'required|exists:classes,id',
-            'count' => 'integer|min:1'
+            'count' => 'required|integer|min:1'
         ]);
 
         $courseSeg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
