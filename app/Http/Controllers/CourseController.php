@@ -992,7 +992,7 @@ class CourseController extends Controller
                                     else
                                     $item->Started = true;
                                 }
-                                $quickaction =collect([]);
+                                // $quickaction =collect([]);
                                 if($item->pivot->media_id)
                                 {
                                     $item['flag'] = 'media';
@@ -1017,6 +1017,8 @@ class CourseController extends Controller
         }
         //quick actions
         if($request->quick_action == 1){
+            if(count($quickaction) <= 0 )
+                return HelperController::api_response_format(200,$quickaction);
             //will be order in desc awl ma yft7 bl due date
             $quick = collect($quickaction);
             $i=0;
