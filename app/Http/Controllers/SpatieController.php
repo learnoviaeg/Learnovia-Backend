@@ -707,14 +707,12 @@ class SpatieController extends Controller
 
     public function Add_Role_With_Permissions(Request $request)
     {
-        $validater = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'required|string|min:1|unique:roles,name',
             "permissions" => "required|array|min:1",
             'permissions.*' => 'required|distinct|exists:permissions,name',
             'description' => 'string'
         ]);
-        if ($validater->fails())
-            return HelperController::api_response_format(400, $validater->errors());
 
         $role = Role::create(['name' => $request->name]);
         if ($request->filled('description')) {
