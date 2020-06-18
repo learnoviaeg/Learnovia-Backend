@@ -993,20 +993,24 @@ class CourseController extends Controller
                                     $item->Started = true;
                                 }
                                 // $quickaction =collect([]);
+                                $k=0;
                                 if($item->pivot->media_id)
                                 {
                                     $item['flag'] = 'media';
                                     $quickaction[]=$item;
+                                    $k++;
                                 }
                                 if($item->pivot->file_id)
                                 {
                                     $item['flag'] = 'file';
                                     $quickaction[]=$item;
+                                    $k++;
                                 }
                                 if($item->pivot->page_id)
                                 {
                                     $item['flag'] = 'page';
                                     $quickaction[]=$item;
+                                    $k++;
                                 }
                                     $result[$component->name][] = $item;
                             }
@@ -1017,8 +1021,10 @@ class CourseController extends Controller
         }
         //quick actions
         if($request->quick_action == 1){
-            if(count($quickaction) <= 0 )
+            if( $k == 0 ){  
+                $quickaction = [];
                 return HelperController::api_response_format(200,$quickaction);
+            }
             //will be order in desc awl ma yft7 bl due date
             $quick = collect($quickaction);
             $i=0;
