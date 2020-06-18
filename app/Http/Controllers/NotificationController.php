@@ -115,6 +115,10 @@ class NotificationController extends Controller
                         $data[$i]['item_lesson_id'] = MediaLesson::where('media_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
                     if($not->data['type'] == 'Page')
                         $data[$i]['item_lesson_id'] = pageLesson::where('page_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
+                    if($not->data['type'] == 'meeting')
+                        $data[$i]['item_lesson_id'] = BigbluebuttonModel::where('id', $not->data['id'])->pluck('id')->first();
+                    if($not->data['type'] == 'Attendance')
+                        $data[$i]['item_lesson_id'] = Attendance::where('id', $not->data['id'])->pluck('id')->first();
 
                     
                     $deleted = 0 ;
