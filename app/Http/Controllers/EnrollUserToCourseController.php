@@ -460,7 +460,7 @@ class EnrollUserToCourseController extends Controller
                     $level= $courseseg->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
                     $type = $courseseg->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id;
                     $active_segment =Segment::Get_current(isset($request->type) ? $request->type : $type);
-                    if(!$active_segment)
+                    if(!$active_segment && !isset($request->segment))
                         return HelperController::api_response_format(200, 'There is no active segment for '.$course.' course');
                         
                     $check = Enroll::IsExist($course, $user,$request->role_id[$count]);
