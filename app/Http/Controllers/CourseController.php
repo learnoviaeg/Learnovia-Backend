@@ -992,7 +992,7 @@ class CourseController extends Controller
                                     else
                                     $item->Started = true;
                                 }
-                                // $quickaction =collect([]);
+                                $quickaction =collect([]);
                                 if($item->pivot->media_id)
                                 {
                                     $item['flag'] = 'media';
