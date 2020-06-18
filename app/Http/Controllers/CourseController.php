@@ -934,7 +934,7 @@ class CourseController extends Controller
             if ($request->filled('course'))
                 $query->where('course_id', $request->course);
         }])->first();
-
+        $k=0;
         foreach ($user->enroll as $enroll) {
             if ($enroll->courseSegment != null) {
                 foreach ($enroll->courseSegment->lessons as $lesson) {
@@ -993,7 +993,6 @@ class CourseController extends Controller
                                     $item->Started = true;
                                 }
                                 // $quickaction =collect([]);
-                                $k=0;
                                 if($item->pivot->media_id)
                                 {
                                     $item['flag'] = 'media';
@@ -1021,7 +1020,7 @@ class CourseController extends Controller
         }
         //quick actions
         if($request->quick_action == 1){
-            if( $k == 0 ){  
+            if($k == 0){  
                 $quickaction = [];
                 return HelperController::api_response_format(200,$quickaction);
             }
