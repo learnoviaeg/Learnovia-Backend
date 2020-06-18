@@ -267,7 +267,7 @@ class QuizController extends Controller
             $questionsIDs = [];
         }
 
-        if ($questionsIDs == null) { // In case of delete all questions
+        if (!isset($questionsIDs)) { // In case of delete all questions
 
             $quiz->update([
                 'name' => $request->name,
