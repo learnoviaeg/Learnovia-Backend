@@ -484,7 +484,7 @@ class QuizController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'index' => 'required|integer'
         ]);
-        $quiz_index = Quiz::where('id', $request->quiz_id)->pluck('index')->first();
+        $quiz_index = QuizLesson::where('quiz_id', $request->quiz_id)->pluck('index')->first();
 
         if ($quiz_index > $request->index) {
             $quizes = $this->sortDown($request->quiz_id, $request->index);
