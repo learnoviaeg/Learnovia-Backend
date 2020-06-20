@@ -639,7 +639,7 @@ class QuizController extends Controller
             }
             $count += 1;
         }
-        return $students;
+        return HelperController::api_response_format(200,$students, 'All Students');
     }
 
     public function getSingleQuiz(Request $request){
