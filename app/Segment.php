@@ -3,9 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class Segment extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['name','current','academic_type_id'];
 
     public function Segment_class(){
