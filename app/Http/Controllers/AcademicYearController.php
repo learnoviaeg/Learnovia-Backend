@@ -117,12 +117,15 @@ class AcademicYearController extends Controller
         ]);
 
         $year = AcademicYear::find($request->id);
-        $year->update(['current' => 1]);
+        if($year->current == 1)
+            $year->update(['current' => 0]);
+        else
+            $year->update(['current' => 1]);
+        
         $all = AcademicYear::where('id', '!=', $request->id)
             ->update(['current' => 0]);
-            
-        $print=self::getall($request);
-        return $print;
+
+        return HelperController::api_response_format(200, $year , 'Year toggled successfully');
     }
 
     // public function GetMyYears(Request $request)
