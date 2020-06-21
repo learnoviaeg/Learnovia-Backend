@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AcademicType extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['name' , 'segment_no'];
     public function AC_year()
     {
