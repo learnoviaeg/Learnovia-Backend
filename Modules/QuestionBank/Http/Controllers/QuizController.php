@@ -578,7 +578,10 @@ class QuizController extends Controller
         $quiz = quiz::find($request->quiz_id);
         $quizLessons = $check->id;
         $courseSegment = $check->lesson->courseSegment; //$quiz->course->courseSegments->where('is_active',1)->first();
-        $roles_id=  Permission::where('name','site/quiz/getStudentinQuiz')->roles->pluck('id');
+        $per=  Permission::where('name','site/quiz/getStudentinQuiz')->first();
+        if(count($per->roles) <= 0)
+            return HelperController::api_response_format(200, null , 'There is no roles assigned to this permission');
+        $roles_id= $per->roles->pluck('id');
         $enroll = $courseSegment->Enroll->whereIn('role_id', $roles_id);
         foreach ($enroll as $enrollment) {
             $userData = collect([]);
