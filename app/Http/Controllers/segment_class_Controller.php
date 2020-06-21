@@ -68,9 +68,9 @@ class segment_class_Controller extends Controller
                 'year' => 'exists:academic_years,id',
                 'type' => 'exists:academic_types,id|required_with:year',
             ]);
-
-            $segments = Segment::paginate(HelperController::GetPaginate($request));
-
+            
+            $segments = Segment::with('academicType')->paginate(HelperController::GetPaginate($request));
+            
             if($request->filled('search'))
             {
                 $segments = Segment::where('name', 'LIKE' , "%$request->search%")->get()
@@ -250,24 +250,24 @@ class segment_class_Controller extends Controller
      /**
      *
      * @Description :set a segment to be current
-     * @param : segment_id and type_id are required parameters.
+     * @param : id and type_id are required parameters.
      * @return : string message which indicates if segment set to be current or not.
      */
     public function setCurrent_segmant(Request $request)
     {
         $request->validate([
-            'segment_id' => 'required|exists:segments,id',
+            'id' => 'required|exists:segments,id',
             'type_id' => 'required|exists:academic_types,id'
         ]);
 
-        $segment = Segment::where('id', $request->segment_id)->where('academic_type_id', $request->type_id)->first();
+        $segment = Segment::where('id', $request->id)->where('academic_type_id', $request->type_id)->first();
         if(isset($segment)) {
             if($segment->current == 1)
                 $segment->update(['current' => 0]);
             else
                 $segment->update(['current' => 1]);
 
-            Segment::where('id', '!=', $request->segment_id)->where('academic_type_id', $request->type_id)
+            Segment::where('id', '!=', $request->id)->where('academic_type_id', $request->type_id)
                 ->update(['current' => 0]);
             return HelperController::api_response_format(200, [], ' this Segment is  set to be current ');
         }
