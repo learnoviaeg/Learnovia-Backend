@@ -262,7 +262,10 @@ class segment_class_Controller extends Controller
 
         $segment = Segment::where('id', $request->segment_id)->where('academic_type_id', $request->type_id)->first();
         if(isset($segment)) {
-            $segment->update(['current' => 1]);
+            if($segment->current == 1)
+                $segment->update(['current' => 0]);
+            else
+                $segment->update(['current' => 1]);
 
             Segment::where('id', '!=', $request->segment_id)->where('academic_type_id', $request->type_id)
                 ->update(['current' => 0]);
