@@ -954,7 +954,7 @@ class QuestionBankController extends Controller
             'question_id' => $request->question_id
         ]);
 
-        return HelperController::api_response_format(200, $answer, 'Question Added Successfully');
+        return HelperController::api_response_format(200, $answer, 'Answer Added Successfully');
     }
 
     public function getAllTypes(Request $request){
