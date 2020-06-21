@@ -120,7 +120,9 @@ class AcademicYearController extends Controller
         $year->update(['current' => 1]);
         $all = AcademicYear::where('id', '!=', $request->id)
             ->update(['current' => 0]);
-        return HelperController::api_response_format(200, $year, ' this year is  set to be current ');
+            
+        $print=self::getall($request);
+        return $print;
     }
 
     // public function GetMyYears(Request $request)
