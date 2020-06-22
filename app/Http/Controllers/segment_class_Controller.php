@@ -88,6 +88,7 @@ class segment_class_Controller extends Controller
                 else
                     return HelperController::api_response_format(202, $arrayYear->paginate(HelperController::GetPaginate($request)));   
             }
+            
             if($request->returnmsg == 'delete')
                 return HelperController::api_response_format(200, $segments,'Segment deleted successfully');
             if($request->returnmsg == 'add')
@@ -145,6 +146,8 @@ class segment_class_Controller extends Controller
         ]);
 
         if ($segment) {
+            $req['id'] = null;
+            unset($req['year']);
             $req['returnmsg'] = 'add';
             $print = self::get($req);
             return $print;
@@ -259,6 +262,7 @@ class segment_class_Controller extends Controller
         $segment->name = $request->name;
         $segment->save();
 
+        $request['id'] = null;
         $request['returnmsg'] = 'update';
         $print = self::get($request);
         return $print;
