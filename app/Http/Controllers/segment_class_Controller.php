@@ -68,12 +68,12 @@ class segment_class_Controller extends Controller
                 'year' => 'exists:academic_years,id',
                 'type' => 'exists:academic_types,id|required_with:year',
             ]);
-            
-            $segments = Segment::with('academicType')->paginate(HelperController::GetPaginate($request));
-            
+
+            $segments = Segment::with('academicType.yearType.academicyear')->paginate(HelperController::GetPaginate($request));
+
             if($request->filled('search'))
             {
-                $segments = Segment::where('name', 'LIKE' , "%$request->search%")->get()
+                $segments = Segment::with('academicType.yearType.academicyear')->where('name', 'LIKE' , "%$request->search%")->get()
                 ->paginate(HelperController::GetPaginate($request));
                 return HelperController::api_response_format(202, $segments);   
             }
