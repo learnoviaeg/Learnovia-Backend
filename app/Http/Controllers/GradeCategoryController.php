@@ -577,7 +577,7 @@ class GradeCategoryController extends Controller
      * @param  [int] type
      * @param  [int] level
      * @param  [int] class
-     * @param  [int] course
+     * @param  [int] courses
      * @param  [int] segment
      * @return if there is no course segment [string] There is No Course segment available.
      * @return [objects] grade categories

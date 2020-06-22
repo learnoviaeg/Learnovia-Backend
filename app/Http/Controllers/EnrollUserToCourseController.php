@@ -8,6 +8,7 @@ use App\Http\Controllers\HelperController;
 use App\YearLevel;
 use Illuminate\Http\Request;
 use App\User;
+use Auth;
 use App\Enroll;
 use App\Segment;
 use App\ClassLevel;
@@ -388,6 +389,98 @@ class EnrollUserToCourseController extends Controller
                 $user->picture = $user->attachment->path;
 
         return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'students are ... ');
+    }
+
+    /**
+     * @param  [int] year
+     * @param  [int] type
+     * @param  [int] level
+     * @param  [int] class
+     * @param  [int] courses
+     * @param  [int] segment
+     */
+    public function UnEnrolledUsers(Request $request)
+    {
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:level',
+            'level' => 'exists:levels,id|required_with:class',
+            'class' => 'exists:classes,id',
+            'segment' => 'exists:segments,id',
+            'courses' => 'array|exists:courses,id',
+            'student' => 'required|in:1,0',
+            'search' => 'string'
+        ]);
+
+        $usersall=User::whereNotNull('id');
+        if($request->filled('country'))
+            $usersall->where('country','LIKE',"%$request->country%");
+        if($request->filled('nationality'))
+            $usersall->where('nationality','LIKE',"%$request->nationality%");
+        if($request->filled('religion'))
+            $usersall->where('religion','LIKE',"%$request->religion%");
+        if($request->filled('gender'))
+            $usersall->where('gender','LIKE',"%$request->gender%");
+
+        $users = Enroll::where('user_id','!=' ,Auth::id());
+        if($request->filled('year'))
+            $users->where('year',$request->year);
+        if($request->filled('type'))
+            $users->where('type',$request->type);
+        if($request->filled('level'))
+            $users->where('level',$request->level);
+        if($request->filled('segment'))
+            $users->where('segment',$request->segment);
+        if($request->filled('class'))
+            $users->where('class',$request->class);
+        if($request->filled('courses'))
+            $users->whereIn('course',$request->courses);
+            // return $usersall->pluck('id')->toArray();
+        $intersect = array_intersect($usersall->pluck('id')->toArray(),$users->pluck('user_id')->toArray());
+            // return array_values(array_unique($intersect));
+            
+        $users_student=[];
+        $users_staff=[];
+        $searched=collect();
+        foreach($intersect as $oneobj)
+        {
+            $users2=User::find($oneobj);
+            if($users2->roles[0]->id == 3)
+                $users_student[]=$users2;
+            else
+                $users_staff[]=$users2;
+        }
+
+        if($request->student == 1)
+        {
+            //search a student
+            if(isset($request->search))
+            {
+                foreach($users_student as $user)
+                {
+                    $test=strpos($user->fullname, $request->search);
+                    if($test > -1)
+                        $searched->push($user);
+                }
+                return HelperController::api_response_format(200, $searched,'students are ... ');
+            }
+            return HelperController::api_response_format(200, $users_student, 'students are ... ');
+        }
+        else
+        {
+            //search one of staff
+            if(isset($request->search))
+            {
+                foreach($users_staff as $user)
+                {
+                    $test=strpos($user->fullname, $request->search);
+                    if($test > -1)
+                        $searched->push($user);
+                }
+                return HelperController::api_response_format(200, $searched, 'STAFF are ... ');
+            }
+            return HelperController::api_response_format(200, $users_staff, 'STAFF are ... ');
+        }
     }
 
     /**
