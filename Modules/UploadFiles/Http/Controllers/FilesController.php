@@ -187,7 +187,7 @@ class FilesController extends Controller
                         wpd,rpm,z,ods,xlsm,pps,odp',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
-            'publish_date' => 'nullable',
+            'publish_date' => 'nullable|date',
         ]);
 
         if ($request->filled('publish_date')) {
@@ -356,7 +356,7 @@ class FilesController extends Controller
             'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,
             wpd,rpm,z,ods,xlsm,pps,odp',
             'lesson_id'        => 'required|exists:lessons,id',
-            'publish_date'  => 'nullable',
+            'publish_date'  => 'nullable|date',
         ]);
         $file = file::find($request->id);
 
