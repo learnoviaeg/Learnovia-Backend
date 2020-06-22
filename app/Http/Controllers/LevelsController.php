@@ -168,11 +168,11 @@ class LevelsController extends Controller
         ]);
         if($request->filled('search'))
         {
-            $levels = Level::where('name', 'LIKE' , "%$request->search%")->get()
-            ->paginate(HelperController::GetPaginate($request));
+            $levels = Level::where('name', 'LIKE' , "%$request->search%")
+            ->with(['yearlevel.yearType.academicyear','yearlevel.yearType.academictype'])->paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(202, $levels);   
         }
-        $levels = Level::paginate(HelperController::GetPaginate($request));
+        $levels = Level::with(['yearlevel.yearType.academicyear','yearlevel.yearType.academictype'])->paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(200, $levels);
     }
 
