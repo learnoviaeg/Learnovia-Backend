@@ -90,6 +90,10 @@ class segment_class_Controller extends Controller
             }
             if($request->returnmsg == 'delete')
                 return HelperController::api_response_format(200, $segments,'Segment deleted successfully');
+            if($request->returnmsg == 'add')
+                return HelperController::api_response_format(200, $segments,'Segment added successfully');
+            if($request->returnmsg == 'update')
+                return HelperController::api_response_format(200, $segments,'Segment updated successfully');
             else
                 return HelperController::api_response_format(200, $segments);
 
@@ -141,7 +145,10 @@ class segment_class_Controller extends Controller
         ]);
 
         if ($segment) {
-            return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), 'segment insertion sucess');
+            $req['returnmsg'] = 'add';
+            $print = self::get($req);
+            return $print;
+            // return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), 'segment insertion sucess');
         }
         return HelperController::NOTFOUND();
 
@@ -251,7 +258,11 @@ class segment_class_Controller extends Controller
         $segment = Segment::find($request->id);
         $segment->name = $request->name;
         $segment->save();
-        return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)),'Segment edited successfully');
+
+        $request['returnmsg'] = 'update';
+        $print = self::get($request);
+        return $print;
+        // return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)),'Segment edited successfully');
     }
      /**
      *
