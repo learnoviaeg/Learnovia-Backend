@@ -222,6 +222,7 @@ Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api']], function () {
     Route::post('add-and-enroll-bulk-of-new-users', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
     Route::get('enrolled-users', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');
     Route::get('get-unenroll-users', 'EnrollUserToCourseController@getUnEnroll')->name('getUnEnroll')->middleware('permission:enroll/get-unenroll-users');
+    Route::get('get-unenroll-users-role', 'EnrollUserToCourseController@UnEnrolledUsers')->name('UnEnrolledUsers');//->middleware('permission:enroll/get-unenroll-users-role');
     Route::get('get-unenrolled-users-Bulk', 'EnrollUserToCourseController@unEnrolledUsersBulk')->name('getUnEnrolleduser')->middleware('permission:enroll/get-unenrolled-users-Bulk');
     Route::post('users', 'EnrollUserToCourseController@enrollWithChain')->name('Enrollusers')->middleware('permission:enroll/users');
     Route::post('migrate-user', 'EnrollUserToCourseController@Migration')->name('migrateuser')->middleware('permission:enroll/migrate-user');
