@@ -19,7 +19,7 @@ class Classes extends Model
     ];
     public function classlevel()
     {
-        return $this->belongsTo('App\ClassLevel' , 'id' , 'class_id');
+        return $this->hasMany('App\ClassLevel' ,  'class_id', 'id');
     }
 
     public function Segment_class()
