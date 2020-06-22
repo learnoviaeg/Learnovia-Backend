@@ -160,6 +160,7 @@ class segment_class_Controller extends Controller
         $segment = Segment::find($req->id);
         if ($segment) {
             $segment->delete();
+            $req['id'] = null;
             $print = self::get($req);
             return $print;
         }
