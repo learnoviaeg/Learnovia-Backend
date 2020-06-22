@@ -53,8 +53,8 @@ class AC_year_type extends Controller
             $types = AcademicType::with('AC_year')->where('name', 'LIKE' , "%$request->search%")->get()->paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(202, $types);   
         }
-        $types = AcademicType::with('AC_year')->paginate(HelperController::GetPaginate($request));
-        
+        $types = AcademicType::with('yearType.academicyear')->paginate(HelperController::GetPaginate($request));
+
         if($request->returnmsg == 'delete')
             return HelperController::api_response_format(202, $types,'Type deleted successfully');
         if($request->returnmsg == 'add')
