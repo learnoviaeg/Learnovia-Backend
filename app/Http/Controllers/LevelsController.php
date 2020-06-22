@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\AcademicYearType;
+use App\AcademicType;
 use App\YearLevel;
 use Illuminate\Http\Request;
 use App\AcademicYear;
@@ -166,14 +167,27 @@ class LevelsController extends Controller
         $request->validate([
             'search' => 'nullable'
         ]);
+        $levels = Level::with('years');
+        $all_levels=collect([]);
         if($request->filled('search'))
         {
-            $levels = Level::where('name', 'LIKE' , "%$request->search%")
-            ->with(['yearlevel.yearType.academicyear','yearlevel.yearType.academictype'])->paginate(HelperController::GetPaginate($request));
-            return HelperController::api_response_format(202, $levels);   
+            $levels=$levels->where('name', 'LIKE' , "%$request->search%");
         }
-        $levels = Level::with(['yearlevel.yearType.academicyear','yearlevel.yearType.academictype'])->paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(200, $levels);
+         $levels= $levels->get();
+        foreach ($levels as $level)
+        {
+        $academic_type_id= $level->years->pluck('academic_type_id')->unique();
+        $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+        $academic_year_id= $level->years->pluck('academic_year_id')->unique();
+        $level['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+        unset($level->years);
+        $all_levels->push($level); 
+        
+}
+        // $levels=$levels::->paginate(HelperController::GetPaginate($request));
+        // return HelperController::api_response_format(200, $academic_type_id);
+        return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));   
+
     }
 
     public function GetMyLevels(Request $request)
