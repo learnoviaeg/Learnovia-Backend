@@ -18,7 +18,7 @@ class Level extends Model
 
     public function yearlevel()
     {
-        return $this->belongsTo('App\YearLevel', 'id', 'level_id');
+        return $this->hasMany('App\YearLevel');
     }
 
     public static function Validate($data){
