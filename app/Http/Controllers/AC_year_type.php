@@ -54,8 +54,13 @@ class AC_year_type extends Controller
             return HelperController::api_response_format(202, $types);   
         }
         $types = AcademicType::with('AC_year')->paginate(HelperController::GetPaginate($request));
+        
         if($request->returnmsg == 'delete')
             return HelperController::api_response_format(202, $types,'Type deleted successfully');
+        if($request->returnmsg == 'add')
+            return HelperController::api_response_format(202, $types,'Type added successfully');
+        if($request->returnmsg == 'update')
+            return HelperController::api_response_format(202, $types,'Type edited successfully');
         else
             return HelperController::api_response_format(202, $types);
     }
@@ -120,7 +125,10 @@ class AC_year_type extends Controller
         }
         if ($Ac) {
             $output= AcademicType::paginate(HelperController::GetPaginate($req));
-            return HelperController::api_response_format(200, $output, 'Type Added Successfully');
+            $req['returnmsg'] = 'add';
+            $print = self::get($req);
+            return $print;
+            // return HelperController::api_response_format(200, $output, 'Type Added Successfully');
         }
         return HelperController::api_response_format(404, [], 'Type insertion Fail');
     }
@@ -164,7 +172,10 @@ class AC_year_type extends Controller
         if ($AC) {
             $AC->AC_year;
             $output= AcademicType::paginate(HelperController::GetPaginate($req));
-            return HelperController::api_response_format(200, $output, 'Type edited successfully');
+            $req['returnmsg'] = 'update';
+            $print = self::get($req);
+            return $print;
+            // return HelperController::api_response_format(200, $output, 'Type edited successfully');
         }
         return HelperController::api_response_format(400, [], 'Something went wrong');
     }
