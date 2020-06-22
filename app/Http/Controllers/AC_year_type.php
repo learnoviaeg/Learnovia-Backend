@@ -50,7 +50,7 @@ class AC_year_type extends Controller
         ]);
         if($request->filled('search'))
         {
-            $types = AcademicType::with('AC_year')->where('name', 'LIKE' , "%$request->search%")->get()->paginate(HelperController::GetPaginate($request));
+            $types = AcademicType::with('yearType.academicyear')->where('name', 'LIKE' , "%$request->search%")->get()->paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(202, $types);   
         }
         $types = AcademicType::with('yearType.academicyear')->paginate(HelperController::GetPaginate($request));
