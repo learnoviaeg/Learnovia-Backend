@@ -73,7 +73,8 @@ class AC_year_type extends Controller
         if ($type) {
             $type->delete();
             $output= AcademicType::paginate(HelperController::GetPaginate($req));
-            return HelperController::api_response_format(200, $output, 'Type Deleted Successfully');
+            $print = self::get($req);
+            return $print;
         }
         return HelperController::api_response_format(400, [], 'Type Deleted Fail');
     }

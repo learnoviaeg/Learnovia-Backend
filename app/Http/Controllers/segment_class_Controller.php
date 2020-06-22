@@ -160,7 +160,8 @@ class segment_class_Controller extends Controller
         $segment = Segment::find($req->id);
         if ($segment) {
             $segment->delete();
-            return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), 'Segment Deleted Successfully');
+            $print = self::get($req);
+            return $print;
         }
         return HelperController::NOTFOUND();
     }
