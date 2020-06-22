@@ -88,8 +88,11 @@ class segment_class_Controller extends Controller
                 else
                     return HelperController::api_response_format(202, $arrayYear->paginate(HelperController::GetPaginate($request)));   
             }
+            if($request->returnmsg == 'delete')
+                return HelperController::api_response_format(200, $segments,'Segment deleted successfully');
+            else
+                return HelperController::api_response_format(200, $segments);
 
-            return HelperController::api_response_format(200, $segments);
         } else {
             $segment = Segment::find($request->id);
             return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)));
@@ -161,6 +164,7 @@ class segment_class_Controller extends Controller
         if ($segment) {
             $segment->delete();
             $req['id'] = null;
+            $req['returnmsg'] = 'delete';
             $print = self::get($req);
             return $print;
         }
