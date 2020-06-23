@@ -184,8 +184,6 @@ class LevelsController extends Controller
         $all_levels->push($level); 
         
 }
-        // $levels=$levels::->paginate(HelperController::GetPaginate($request));
-        // return HelperController::api_response_format(200, $academic_type_id);
         return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));   
 
     }

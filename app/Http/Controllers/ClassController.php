@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\AcademicYearType;
 use App\YearLevel;
+use App\Level;
+use App\AcademicType;
+
 use Illuminate\Http\Request;
 use App\Classes;
 use App\CourseSegment;
@@ -120,15 +123,27 @@ class ClassController extends Controller
             $request->validate([
                 'search' => 'nullable'
             ]);
-            if($request->filled('search'))
+
+            $Classes = Classes::with('classlevel.yearLevels.levels.years');
+            
+               if($request->filled('search'))
             {
-                $Classes = Classes::where('name', 'LIKE' , "%$request->search%")->with(['classlevel.yearLevels.yearType.academicyear','classlevel.yearLevels.yearType.academictype','classlevel.yearLevels.levels'])
-                ->paginate(HelperController::GetPaginate($request));
-                
-                return HelperController::api_response_format(202, $Classes);
+                $Classes = $Classes->where('name', 'LIKE' , "%$request->search%");
+
             }
-            $classes = Classes::with(['classlevel.yearLevels.yearType.academicyear','classlevel.yearLevels.yearType.academictype','classlevel.yearLevels.levels'])->paginate(HelperController::GetPaginate($request));
-            return HelperController::api_response_format(200,$classes);
+            $Classes = $Classes->get();
+            $all_classes=collect([]);
+            foreach ($Classes as $class)
+           { 
+                $levels_id= $class->classlevel->pluck('yearLevels.*.level_id')->collapse()->unique();
+                $class['levels']= Level::whereIn('id',$levels_id)->pluck('name');
+              $academic_year_id= $class->classlevel->pluck('yearLevels.*.levels.*.years.*.academic_year_id')->collapse()->unique();
+              $class['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+              $academic_type_id = array_values($class->classlevel->pluck('yearLevels.*.levels.*.years.*.academic_type_id')->collapse()->unique()->toArray());
+             $class['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+            unset($class->classlevel);
+             $all_classes->push($class);}
+            return HelperController::api_response_format(200,$all_classes->paginate(HelperController::GetPaginate($request)));
         }
         else
         {
