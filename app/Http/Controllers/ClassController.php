@@ -40,7 +40,8 @@ class ClassController extends Controller
             $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
             $class =collect([]);
             foreach ($yearlevel->classLevels as $classLevel){
-                $class[] = $classLevel->classes[0];
+                if(count($classLevel->classes) > 0)
+                    $class[] = $classLevel->classes[0];
             }
             return HelperController::api_response_format(200, $class->paginate(HelperController::GetPaginate($request)));
         }
