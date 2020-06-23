@@ -6,13 +6,15 @@ use App\AcademicYearType;
 use App\ClassLevel;
 use App\YearLevel;
 use Illuminate\Http\Request;
+use App\AcademicType;
+use App\AcademicYear;
 use Validator;
 use App\SegmentClass;
 use App\Segment;
 use App\Http\Resources\Segment_class_resource;
-use App\AcademicType;
-use App\AcademicYear;
 use App\User;
+use App\Level;
+use App\Classes;
 use Auth;
 use Carbon\Carbon;
 
@@ -69,14 +71,30 @@ class segment_class_Controller extends Controller
                 'type' => 'exists:academic_types,id|required_with:year',
             ]);
 
-            $segments = Segment::with(['academicType.yearType.academicyear'/*,'Segment_class.yearLevels.yearType.academicyear','Segment_class.yearLevels.yearType.academictype','Segment_class.classes','Segment_class.yearLevels.levels'*/])->paginate(HelperController::GetPaginate($request));
-
+            // $segments = Segment::with(['academicType.yearType.academicyear'/*,'Segment_class.yearLevels.yearType.academicyear','Segment_class.yearLevels.yearType.academictype','Segment_class.classes','Segment_class.yearLevels.levels'*/])->paginate(HelperController::GetPaginate($request));
+            $segments = Segment::with(['academicType.yearType.academicyear','Segment_class.yearLevels.yearType']);
+            $all_segments=collect([]);
             if($request->filled('search'))
             {
-                $segments = Segment::with(['academicType.yearType.academicyear'/*,'Segment_class.yearLevels.yearType.academicyear','Segment_class.yearLevels.yearType.academictype','Segment_class.classes','Segment_class.yearLevels.levels'*/])->where('name', 'LIKE' , "%$request->search%")->get()
-                ->paginate(HelperController::GetPaginate($request));
-                return HelperController::api_response_format(202, $segments);   
+                $segments = $segments->where('name', 'LIKE' , "%$request->search%");
             }
+            $segments =$segments->get();
+            foreach($segments as $segment){
+                $academic_year_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse();
+                $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name')[0];
+                $academic_type_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse();
+                $segment['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name')[0];
+                $class_id = $segment->segment_class[0]->class_id;
+                $segment['class']=Classes::where('id',$class_id)->pluck('name')[0];
+                $level_id = $segment->Segment_class->pluck('yearLevels.*.level_id')->collapse();
+                $segment['level'] = Level::where('id',$level_id[0])->pluck('name')[0];
+                unset($segment->Segment_class);
+                $all_segments->push($segment);
+            
+
+            }
+
+
             if(isset($request->year))
             {
                 $arrayYear=Segment::where('academic_type_id',$request->type)->with(['academicType.yearType' => function($query) use ($request){
@@ -90,13 +108,15 @@ class segment_class_Controller extends Controller
             }
             
             if($request->returnmsg == 'delete')
-                return HelperController::api_response_format(200, $segments,'Segment deleted successfully');
+                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),'Segment deleted successfully');
             if($request->returnmsg == 'add')
-                return HelperController::api_response_format(200, $segments,'Segment added successfully');
+                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),'Segment added successfully');
             if($request->returnmsg == 'update')
-                return HelperController::api_response_format(200, $segments,'Segment updated successfully');
+                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),'Segment updated successfully');
             else
-                return HelperController::api_response_format(200, $segments);
+                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)));
+
+
 
         } else {
             $segment = Segment::find($request->id);

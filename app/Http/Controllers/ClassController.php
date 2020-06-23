@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\AcademicYearType;
 use App\YearLevel;
 use App\Level;
-use App\AcademicType;
 
 use Illuminate\Http\Request;
 use App\Classes;
@@ -17,6 +16,8 @@ use Carbon\Carbon;
 use Auth;
 use App\Http\Resources\Classes as Classs;
 use Validator;
+use App\AcademicType;
+
 use App\AcademicYear;
 class ClassController extends Controller
 {
@@ -124,9 +125,7 @@ class ClassController extends Controller
             $request->validate([
                 'search' => 'nullable'
             ]);
-
             $Classes = Classes::with('classlevel.yearLevels.levels.years');
-            
                if($request->filled('search'))
             {
                 $Classes = $Classes->where('name', 'LIKE' , "%$request->search%");
