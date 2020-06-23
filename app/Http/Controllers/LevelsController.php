@@ -15,6 +15,8 @@ use App\CourseSegment;
 use Auth;
 use Illuminate\Support\Collection;
 use Validator;
+use App\Exports\LevelsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LevelsController extends Controller
 {
@@ -219,5 +221,9 @@ class LevelsController extends Controller
             return HelperController::api_response_format(201,$lev, 'There are your Levels');
         
         return HelperController::api_response_format(201, 'You haven\'t Levels');
+    }
+    public function export()
+    {
+        return Excel::download(new LevelsExport, 'levels.csv');
     }
 }

@@ -106,6 +106,8 @@ Route::group(['prefix' => 'year', 'middleware' => ['auth:api']], function () {
     Route::post('delete', 'AcademicYearController@destroy')->name('deleteyear')->middleware('permission:year/delete');
     Route::post('set-current', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/set-current');
     Route::get('get-my-years', 'AcademicYearController@GetMyYears')->name('getmyyear')->middleware('permission:year/get-my-years');
+    Route::get('export', 'AcademicYearController@export')->name('exportYears')->middleware('permission:year/export');
+
 });
 
 //Type Routes
@@ -117,6 +119,8 @@ Route::group(['prefix' => 'type', 'middleware' => ['auth:api']], function () {
     Route::get('get-all', 'AC_year_type@get')->name('gettypes')->middleware('permission:type/get-all');
     Route::post('update', 'AC_year_type@updateType')->name('updatetype')->middleware('permission:type/update');
     Route::post('assign', 'AC_year_type@Assign_to_anther_year')->name('assigntype')->middleware('permission:type/assign');
+    Route::get('export', 'AC_year_type@export')->name('exportTypes')->middleware('permission:type/export');
+
 });
 
 //Level Routes
@@ -129,6 +133,7 @@ Route::group(['prefix' => 'level', 'middleware' => ['auth:api']], function () {
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
     Route::post('assign', 'LevelsController@Assign_level_to')->name('assignlevel')->middleware('permission:level/assign');
+    Route::get('export', 'LevelsController@export')->name('exportLevels')->middleware('permission:level/export');
 });
 
 //Class Routes
@@ -142,6 +147,7 @@ Route::group(['prefix' => 'class', 'middleware' => ['auth:api']], function () {
     Route::post('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:class/delete');
     Route::post('assign', 'ClassController@Assign_class_to')->name('assignclass')->middleware('permission:class/assign');
     Route::get('get-lessons', 'ClassController@get_lessons_of_class')->middleware('permission:class/get-lessons');
+    Route::get('export', 'ClassController@export')->name('exportClasses')->middleware('permission:class/export');
 });
 
 //Segment Routes
@@ -154,6 +160,7 @@ Route::group(['prefix' => 'segment', 'middleware' => ['auth:api']], function () 
     Route::post('update', "segment_class_Controller@update")->name('updatesegment')->middleware('permission:segment/update');
     Route::post('set-current', 'segment_class_Controller@setCurrent_segmant')->name('SetCurrentSegment')->middleware('permission:segment/set-current');
     Route::get('get-my-segments', "segment_class_Controller@GetMySegments")->name('getsegments')->middleware('permission:segment/get-my-segments');
+    Route::get('export', 'segment_class_Controller@export')->name('export')->middleware('permission:segment/export');
 });
 
 //Category Routes

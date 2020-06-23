@@ -17,6 +17,8 @@ use App\Level;
 use App\Classes;
 use Auth;
 use Carbon\Carbon;
+use App\Exports\SegmentsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class segment_class_Controller extends Controller
 
@@ -354,5 +356,9 @@ class segment_class_Controller extends Controller
             return HelperController::api_response_format(201,$segmentt, 'Here are your segments');
         
         return HelperController::api_response_format(201,null, 'You are not enrolled in any segment');
+    }
+    public function export()
+    {
+        return Excel::download(new SegmentsExport, 'segments.csv');
     }
 }
