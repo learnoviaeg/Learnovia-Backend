@@ -445,10 +445,13 @@ class EnrollUserToCourseController extends Controller
         foreach($intersect as $oneobj)
         {
             $users2=User::find($oneobj);
-            if($users2->roles[0]->id == 3)
-                $users_student[]=$users2;
-            else
-                $users_staff[]=$users2;
+            if(count($users2->roles) > 0)
+            {
+                if($users2->roles[0]->id == 3)
+                    $users_student[]=$users2;
+                else
+                    $users_staff[]=$users2;
+            }
         }
 
         if($request->student == 1)
