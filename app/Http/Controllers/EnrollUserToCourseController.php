@@ -420,7 +420,7 @@ class EnrollUserToCourseController extends Controller
         if($request->filled('religion'))
             $usersall->where('religion','LIKE',"%$request->religion%");
         if($request->filled('gender'))
-            $usersall->where('gender','LIKE',"%$request->gender%");
+            $usersall->where('gender','LIKE',"$request->gender");
 
         $users = Enroll::where('user_id','!=' ,Auth::id());
         if($request->filled('year'))
