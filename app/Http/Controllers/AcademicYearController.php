@@ -11,6 +11,9 @@ use App\Segment;
 use App\User;
 use Auth;
 use Carbon\Carbon;
+use App\Exports\YearsExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 use App\Http\Resources\Academic_Year as Academic_YearResource;
 
 class AcademicYearController extends Controller
@@ -170,5 +173,10 @@ class AcademicYearController extends Controller
             return HelperController::api_response_format(201,$yearr, 'Here are your years');
         
         return HelperController::api_response_format(201,null, 'You are not enrolled in any year');
+    }
+
+    public function export()
+    {
+        return Excel::download(new YearsExport, 'years.csv');
     }
 }

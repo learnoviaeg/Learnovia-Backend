@@ -15,6 +15,9 @@ use Auth;
 use App\Http\Resources\Classes as Classs;
 use Validator;
 use App\AcademicYear;
+use App\Exports\ClassesExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class ClassController extends Controller
 {
   /*
@@ -265,5 +268,10 @@ class ClassController extends Controller
             return HelperController::api_response_format(201,$class, 'There are your Classes');
         
         return HelperController::api_response_format(201, 'You haven\'t Classes');
+    }
+
+    public function export()
+    {
+        return Excel::download(new ClassesExport, 'classes.csv');
     }
 }

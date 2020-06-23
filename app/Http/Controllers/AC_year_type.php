@@ -13,6 +13,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Resources\Year_type_resource;
 use Validator;
+use App\Exports\TypesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AC_year_type extends Controller
 {
@@ -232,5 +234,9 @@ class AC_year_type extends Controller
             return HelperController::api_response_format(201,$type, 'There are your types');
         
         return HelperController::api_response_format(201,null, 'You haven\'t types');
+    }
+    public function export()
+    {
+        return Excel::download(new TypesExport, 'types.csv');
     }
 }
