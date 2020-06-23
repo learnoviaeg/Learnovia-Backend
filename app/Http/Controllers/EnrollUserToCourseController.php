@@ -523,10 +523,10 @@ class EnrollUserToCourseController extends Controller
      * @param  [array] role_id
      * @param  [array] courses .. id
      * @param  [int..id] year
-     * @param  [int..id] type
-     * @param  [int..id] level
-     * @param  [int..id] class
-     * @param  [int..id] segment
+     * @param  [array] type
+     * @param  [array] levels
+     * @param  [array] classes
+     * @param  [array] segments
      * @return if these users enrolled before [string] those users already enrolled     *
      * @return if there is no courses [string] there is no course segment here
      * @return [objects] Enrolled successfilly
