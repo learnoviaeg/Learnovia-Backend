@@ -439,8 +439,8 @@ class EnrollUserToCourseController extends Controller
         $intersect = array_intersect($usersall->pluck('id')->toArray(),$users->pluck('user_id')->toArray());
             // return array_values(array_unique($intersect));
             
-        $users_student=[];
-        $users_staff=[];
+        $users_student=collect();
+        $users_staff=collect();
         $searched=collect();
         foreach($intersect as $oneobj)
         {
@@ -448,9 +448,9 @@ class EnrollUserToCourseController extends Controller
             if(count($users2->roles) > 0)
             {
                 if($users2->roles[0]->id == 3)
-                    $users_student[]=$users2;
+                    $users_student->push($users2);
                 else
-                    $users_staff[]=$users2;
+                    $users_staff->push($users2);
             }
         }
 
@@ -465,9 +465,9 @@ class EnrollUserToCourseController extends Controller
                     if($test > -1)
                         $searched->push($user);
                 }
-                return HelperController::api_response_format(200, $searched,'students are ... ');
+                return HelperController::api_response_format(200, $searched->paginate(HelperController::GetPaginate($request)),'students are ... ');
             }
-            return HelperController::api_response_format(200, $users_student, 'students are ... ');
+            return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)), 'students are ... ');
         }
         else
         {
@@ -480,9 +480,9 @@ class EnrollUserToCourseController extends Controller
                     if($test > -1)
                         $searched->push($user);
                 }
-                return HelperController::api_response_format(200, $searched, 'STAFF are ... ');
+                return HelperController::api_response_format(200, $searched->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
             }
-            return HelperController::api_response_format(200, $users_staff, 'STAFF are ... ');
+            return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
         }
     }
 
