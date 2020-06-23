@@ -18,9 +18,9 @@ class UsersExport implements FromCollection, WithHeadings
     public function collection()
     {
         $users =  User::get();
-        // if (request()->user()->can('show/real-password')) {
-        //     $this->fields[] = 'real_password';
-        // }
+        if (request()->user()->can('show/real-password')) {
+            $this->fields[] = 'real_password';
+        }
         foreach ($users as $value) {
             $value->setHidden([])->setVisible($this->fields);
         }
