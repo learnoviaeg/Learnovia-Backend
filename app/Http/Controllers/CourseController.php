@@ -223,10 +223,15 @@ class CourseController extends Controller
                 $courseSegment = $segment_class->courseSegment->pluck('course_id');
             return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->whereIn('id', $courseSegment)->paginate(HelperController::GetPaginate($request)));
         }
+        $courses =  Course::with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
+        
+        foreach($courses as $le){
+            $le['levels'] = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
+            unset($le->courseSegments);
+        }
         if (isset($request->id))
             return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->whereId($request->id)->first());
-        return HelperController::api_response_format(200, Course::with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get()
-            ->paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200, $courses->paginate(HelperController::GetPaginate($request)) );
     }
 
     /**
