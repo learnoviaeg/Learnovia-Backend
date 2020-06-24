@@ -287,6 +287,6 @@ class ClassController extends Controller
 
     public function export()
     {
-        return Excel::download(new ClassesExport, 'classes.csv');
+        return Excel::download(new ClassesExport, 'classes.xls');
     }
 }

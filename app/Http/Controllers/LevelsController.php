@@ -224,6 +224,6 @@ class LevelsController extends Controller
     }
     public function export()
     {
-        return Excel::download(new LevelsExport, 'levels.csv');
+        return Excel::download(new LevelsExport, 'levels.xls');
     }
 }

@@ -177,6 +177,6 @@ class AcademicYearController extends Controller
 
     public function export()
     {
-        return Excel::download(new YearsExport, 'years.csv');
+        return Excel::download(new YearsExport, 'years.xls');
     }
 }
