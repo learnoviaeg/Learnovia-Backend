@@ -87,7 +87,7 @@ class segment_class_Controller extends Controller
                 $class_id = $segment->segment_class[0]->class_id;
                 $segment['class']=Classes::where('id',$class_id)->pluck('name')[0];
                 $level_id = $segment->Segment_class->pluck('yearLevels.*.level_id')->collapse();
-                $segment['level'] = Level::where('id',$level_id[0])->pluck('name')[0];
+                $segment['level'] = Level::whereIn('id',$level_id)->pluck('name');
                 unset($segment->Segment_class);
                 $all_segments->push($segment);
             
