@@ -339,6 +339,6 @@ class segment_class_Controller extends Controller
     }
     public function export()
     {
-        return Excel::download(new SegmentsExport, 'segments.csv');
+        return Excel::download(new SegmentsExport, 'segments.xls');
     }
 }

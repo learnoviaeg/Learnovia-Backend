@@ -237,6 +237,6 @@ class AC_year_type extends Controller
     }
     public function export()
     {
-        return Excel::download(new TypesExport, 'types.csv');
+        return Excel::download(new TypesExport, 'types.xls');
     }
 }
