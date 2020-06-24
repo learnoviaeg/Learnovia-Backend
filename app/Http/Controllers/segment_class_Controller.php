@@ -86,8 +86,9 @@ class segment_class_Controller extends Controller
                 $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
                 $academic_type_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse();
                 $segment['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-                $class_id = $segment->segment_class[0]->class_id;
-                $segment['class']=Classes::where('id',$class_id)->pluck('name')[0];
+                if(isset($segment->segment_class[0]->class_id))
+               { $class_id = $segment->segment_class[0]->class_id;
+                $segment['class']=Classes::where('id',$class_id)->pluck('name')[0];}
                 $level_id = $segment->Segment_class->pluck('yearLevels.*.level_id')->collapse();
                 $segment['level'] = Level::whereIn('id',$level_id)->pluck('name');
                 unset($segment->Segment_class);
