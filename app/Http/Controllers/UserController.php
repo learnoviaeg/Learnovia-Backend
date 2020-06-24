@@ -297,14 +297,49 @@ class UserController extends Controller
     public function list(Request $request)
     {
         $request->validate([
-            'search' => 'nullable'
+            'search' => 'nullable|string',
+            'gender' => 'nullable|string|in:male,female',
+            'religion' => 'nullable|string',
+            'nationality' => 'nullable|string',
+            'country' => 'nullable|string   ',
+            'level' => 'nullable|integer|exists:enrolls,level',
+            'type' => 'nullable|integer|exists:enrolls,type',
+            'class' => 'nullable|integer|exists:enrolls,class',
+            'segment' => 'nullable|integer|exists:enrolls,segment',
+            'course' => 'nullable|integer|exists:enrolls,course',
+            'year' => 'nullable|integer|exists:enrolls,year',
+            'roles' => 'nullable|array',
+            'roles.*' => 'required|integer|exists:enrolls,role_id',
         ]);
         $users = User::with('roles');
+        if($request->filled('country'))
+            $users = $users->where('country','LIKE',"%$request->country%");
+        if($request->filled('nationality'))
+            $users = $users->where('nationality','LIKE',"%$request->nationality%");
+        if($request->filled('religion'))
+            $users = $users->where('religion','LIKE',"%$request->religion%");
+        if($request->filled('gender'))
+            $users = $users->where('gender','LIKE',"$request->gender");
+
+        $enrolled_users=Enroll::where('id','!=',-1);
+        if ($request->filled('level'))
+            $enrolled_users=$enrolled_users->where('level',$request->level);
+        if ($request->filled('type'))
+            $enrolled_users=$enrolled_users->where('type',$request->type);
+        if ($request->filled('segment'))
+            $enrolled_users=$enrolled_users->where('segment',$request->segment);
+        if ($request->filled('course'))
+            $enrolled_users=$enrolled_users->where('course',$request->course);
+        if ($request->filled('year'))
+            $enrolled_users=$enrolled_users->where('year',$request->year);
+        if ($request->filled('roles'))
+            $enrolled_users=$enrolled_users->whereIn('role_id',$request->roles);
 
         if ($request->filled('search'))
-            // $users->where('username', 'LIKE', "%$request->search%");
-            $users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
-        $users->get();
+            $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
+        
+        $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
+        $users=$users->whereIn('id',$intersect)->get();
 
         $users = $users->paginate(HelperController::GetPaginate($request));
         foreach($users->items() as $user)
