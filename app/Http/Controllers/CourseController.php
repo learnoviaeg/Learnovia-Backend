@@ -225,7 +225,7 @@ class CourseController extends Controller
         }
         if (isset($request->id))
             return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->whereId($request->id)->first());
-        return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->where('name', 'LIKE', "%$request->search%")->get()
+        return HelperController::api_response_format(200, Course::with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get()
             ->paginate(HelperController::GetPaginate($request)));
     }
 
