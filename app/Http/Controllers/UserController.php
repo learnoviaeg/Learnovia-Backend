@@ -8,6 +8,7 @@
  */
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Storage;
 
 use App\Level;
 use App\Classes;
