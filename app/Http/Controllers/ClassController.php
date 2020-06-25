@@ -53,7 +53,7 @@ class ClassController extends Controller
         {
             $class = Classes::find($request->id);
             if ($class)
-                return HelperController::api_response_format(200, new Classes($class->paginate(HelperController::GetPaginate($request))));
+                return HelperController::api_response_format(200, $class);
             return HelperController::NOTFOUND();
         }
 
