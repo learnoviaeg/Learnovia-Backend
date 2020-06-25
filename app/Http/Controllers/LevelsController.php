@@ -17,6 +17,8 @@ use Illuminate\Support\Collection;
 use Validator;
 use App\Exports\LevelsExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Response;
+
 
 class LevelsController extends Controller
 {
@@ -224,6 +226,14 @@ class LevelsController extends Controller
     }
     public function export()
     {
-        return Excel::download(new LevelsExport, 'levels.xls');
+        //  Excel::download(new LevelsExport, 'levels.csv');
+         $filename = uniqid();
+        //  Excel::store(new LevelsExport, $filename); 
+         Excel::store(new LevelsExport(2018), 'levels.xls');
+
+         $file = storage_path($filename);
+         return $file;
     }
+    
+    
 }

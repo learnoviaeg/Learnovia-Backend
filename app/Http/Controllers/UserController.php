@@ -662,6 +662,11 @@ class UserController extends Controller
 
     public function export()
     {
-        return Excel::download(new UsersExport, 'users.xls');
+        // return Excel::download(new UsersExport, 'users.xls');
+         $filename = uniqid();
+         Excel::store(new UsersExport, 'users.xls');
+
+         $file = storage_path($filename);
+         return $file;
     }
 }
