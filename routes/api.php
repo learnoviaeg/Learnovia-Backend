@@ -133,7 +133,7 @@ Route::group(['prefix' => 'level', 'middleware' => ['auth:api']], function () {
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
     Route::post('assign', 'LevelsController@Assign_level_to')->name('assignlevel')->middleware('permission:level/assign');
-    Route::get('export', 'LevelsController@export')->name('exportLevels')->middleware('permission:level/export');
+    Route::get('export', 'LevelsController@export')->name('exportLevels');//->middleware('permission:level/export');
 });
 
 //Class Routes
