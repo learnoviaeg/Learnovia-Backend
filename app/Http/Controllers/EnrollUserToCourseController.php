@@ -181,7 +181,7 @@ class EnrollUserToCourseController extends Controller
 
         $count = 0;
         foreach ($request->users as $user) {
-            $exist_user=[];
+            $exist_user=collect();
             $x = HelperController::Get_segment_class($request);
             if ($x != null) {
                 $segments = collect([]);
@@ -236,14 +236,14 @@ class EnrollUserToCourseController extends Controller
                     }
                 } else {
                     $count++;
-                    $exist_user[]=User::find($user);
+                    $exist_user->push(User::find($user));
                 }
             } else
                 return HelperController::api_response_format(400, [], 'No Current segment or year');
         }
         //($count);
         if ($count > 0) {
-            return HelperController::api_response_format(200, $exist_user, 'enrolled and found user added before');
+            return HelperController::api_response_format(200, $exist_user->paginate(HelperController::GetPaginate($request)), 'enrolled and found user added before');
         }
         return HelperController::api_response_format(200, [], 'added successfully');
     }
