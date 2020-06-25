@@ -341,8 +341,9 @@ class segment_class_Controller extends Controller
                 $query->where('academic_year_id', $request->year);          
         }])->first();
         // return $users;
-        foreach($users ->enroll as $enrolls)
-            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+        foreach($users ->enroll as $enrolls){
+            if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
+                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
                 foreach($segmetClas->classLevel as $clas)
                         foreach($clas->yearLevels as $level)
                             foreach($level->yearType as $typ)
@@ -353,6 +354,8 @@ class segment_class_Controller extends Controller
                                     $segmentt[]=Segment::find($segmetClas->segment_id);
                                 }
                             }
+            }
+        }     
         if(isset($segmentt) && count($segmentt) > 0)
             return HelperController::api_response_format(201,$segmentt, 'Here are your segments');
         
