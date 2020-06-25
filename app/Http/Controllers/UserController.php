@@ -627,9 +627,9 @@ class UserController extends Controller
 
     public function export()
     {
-         $filename = uniqid();
-         Excel::store(new UsersExport, 'users'.$filename.'.xls');
-         $file = storage_path('app/users'.$filename.'.xls');
+        $filename = uniqid();
+         $file = Excel::store(new UsersExport, 'users'.$filename.'.xls','public');
+         $file = url(Storage::url('users'.$filename.'.xls'));
          return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }

@@ -272,6 +272,10 @@ class ClassController extends Controller
 
     public function export()
     {
-        return Excel::download(new ClassesExport, 'classes.xls');
+        // return Excel::download(new ClassesExport, 'classes.xls');
+        $filename = uniqid();
+         $file = Excel::store(new ClassesExport, 'Class'.$filename.'.xls','public');
+         $file = url(Storage::url('Class'.$filename.'.xls'));
+         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }

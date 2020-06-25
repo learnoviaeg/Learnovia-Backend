@@ -339,6 +339,10 @@ class segment_class_Controller extends Controller
     }
     public function export()
     {
-        return Excel::download(new SegmentsExport, 'segments.xls');
+        // return Excel::download(new SegmentsExport, 'segments.xls');
+        $file = Excel::store(new SegmentsExport, 'Segment'.$filename.'.xls','public');
+        $file = url(Storage::url('Segment'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        
     }
 }
