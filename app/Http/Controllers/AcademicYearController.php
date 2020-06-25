@@ -177,6 +177,10 @@ class AcademicYearController extends Controller
 
     public function export()
     {
-        return Excel::download(new YearsExport, 'years.xls');
+        // return Excel::download(new YearsExport, 'years.xls');
+        $filename = uniqid();
+         $file = Excel::store(new YearsExport, 'Year'.$filename.'.xls','public');
+         $file = url(Storage::url('Year'.$filename.'.xls'));
+         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }
