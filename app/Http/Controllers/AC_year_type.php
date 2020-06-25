@@ -237,6 +237,10 @@ class AC_year_type extends Controller
     }
     public function export()
     {
-        return Excel::download(new TypesExport, 'types.xls');
+        // return Excel::download(new TypesExport, 'types.xls');
+        $filename = uniqid();
+        $file = Excel::store(new TypesExport, 'Type'.$filename.'.xls','public');
+        $file = url(Storage::url('Type'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }
