@@ -209,8 +209,9 @@ class LevelsController extends Controller
                 $query->whereIn('academic_type_id', $request->type);            
         }])->first();
 
-        foreach($users ->enroll as $enrolls)
-            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+        foreach($users ->enroll as $enrolls){
+            if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
+                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
                 foreach($segmetClas->classLevel as $clas)
                         foreach($clas->yearLevels as $level)
                             if(count($level->yearType) > 0)
@@ -219,7 +220,9 @@ class LevelsController extends Controller
                                     $result[]=$level->level_id;
                                     $lev[]=Level::find($level->level_id);
                                 }
-                                
+            }
+        }
+                             
         if(count($lev) > 0)
             return HelperController::api_response_format(201,$lev, 'There are your Levels');
         
