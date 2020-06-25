@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Course;
 use App\AcademicYearType;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\CourseSegment;
 use App\Http\Controllers\CourseController;
@@ -27,23 +28,29 @@ class CoursesImport implements ToModel , WithHeadingRow
 
         Validator::make($row,[
             'name'=>'required',
-            'category'=>'required|exists:categories,id',
+            'category'=>'exists:categories,id',
             'year' => 'required|exists:academic_years,id',
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
             'segment' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
-            'description' => 'string'
+            'start_date' => 'required_with:year',
+            'end_date' =>'required_with:year',
+            'mandatory' => 'in:0,1'
         ])->validate();
 
         $course = Course::firstOrCreate([
             'name' => $row['name'],
-            'category_id' => $row['category'],
+            'category_id' => isset($row['category']) ? $row['category'] : null,
         ]);
 
         if (isset($row['description'])) {
             $course->description = $row['description'];
+            $course->save();
+        }
+        if (isset($row['mandatory'])) {
+            $course->mandatory = $row['mandatory'];
             $course->save();
         }
 
@@ -54,7 +61,9 @@ class CoursesImport implements ToModel , WithHeadingRow
         $courseSegment = CourseSegment::firstOrCreate([
             'course_id' => $course->id,
             'segment_class_id' => $segmentClass->id,
-            'is_active' => 1
+            'is_active' => 1,
+            'start_date' =>  Date::excelToDateTimeObject($row['start_date']),
+            'end_date' =>  Date::excelToDateTimeObject($row['end_date']),
         ]);
 
         if (isset($row['no_of_lessons'])) {
