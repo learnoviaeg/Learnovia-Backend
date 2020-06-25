@@ -220,8 +220,9 @@ class AC_year_type extends Controller
                 $query->where('academic_year_id', $request->year);            
         }])->first();
 
-        foreach($users ->enroll as $enrolls)
-            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+        foreach($users ->enroll as $enrolls){
+            if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
+                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
                 foreach($segmetClas->classLevel as $clas)
                         foreach($clas->yearLevels as $level)
                             foreach($level->yearType as $typ)
@@ -230,6 +231,9 @@ class AC_year_type extends Controller
                                     $result[]=$typ->academic_type_id;
                                     $type[]=AcademicType::find($typ->academic_type_id);
                                 }
+            }
+        }
+            
         if(isset($type) && count($type) > 0)
             return HelperController::api_response_format(201,$type, 'There are your types');
         
