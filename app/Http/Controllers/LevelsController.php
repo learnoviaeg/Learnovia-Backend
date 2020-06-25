@@ -233,8 +233,8 @@ class LevelsController extends Controller
         //  Excel::download(new LevelsExport, 'levels.csv');
          $filename = uniqid();
         //  Excel::store(new LevelsExport, $filename); 
-         Excel::store(new LevelsExport, 'levels'.$filename.'.xls');
-         $file = storage_path('app/levels'.$filename.'.xls');
+         $file = Excel::store(new LevelsExport, 'levels'.$filename.'.xls','public');
+         $file = url(storage_path('levels'.$filename.'.xls'));
          return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
     
