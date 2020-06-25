@@ -7,6 +7,7 @@ use App\User;
 use App\Parents;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Spatie\Permission\Models\Role;
 
 class ParentsImport implements ToModel, WithHeadingRow
 {
@@ -18,7 +19,8 @@ class ParentsImport implements ToModel, WithHeadingRow
         Validator::make($row,[
             'firstname'=>'required',
             'lastname'=>'required',
-            'fullname'=>'required|exists:users,lastname'
+            'fullname'=>'required|exists:users,lastname', //it's not just father >> his/her mother or another member of his/her family
+            'role_id' => 'required|exists:roles,id'
         ])->validate();
 
         $password = mt_rand(100000, 999999);
@@ -30,6 +32,9 @@ class ParentsImport implements ToModel, WithHeadingRow
             'password' => bcrypt($password),
             'real_password' => $password
         ]);
+
+        $role = Role::find($row['role_id']);
+        $user->assignRole($role);
 
         $childs=User::where('lastname',$row['fullname'])->pluck('id');
 
