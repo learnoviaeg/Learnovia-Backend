@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Storage;
 
 use App\AcademicYearType;
 use App\AcademicType;
@@ -232,7 +233,7 @@ class LevelsController extends Controller
          Excel::store(new LevelsExport(2018), 'levels.xls');
 
          $file = storage_path($filename);
-         return $file;
+         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
     
     
