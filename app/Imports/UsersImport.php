@@ -166,7 +166,7 @@ class UsersImport implements ToModel, WithHeadingRow
 
                     foreach($courseSeg as $course_seg)
                     {
-                        Enroll::create([
+                        Enroll::firstOrCreate([
                             'course_segment' => $course_seg,
                             'user_id' => $userId,
                             'role_id'=> 4,
