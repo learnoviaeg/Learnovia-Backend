@@ -181,7 +181,7 @@ class EnrollUserToCourseController extends Controller
 
         $count = 0;
         foreach ($request->users as $user) {
-            $exist_user=$user;
+            $exist_user=[];
             $x = HelperController::Get_segment_class($request);
             if ($x != null) {
                 $segments = collect([]);
@@ -199,10 +199,10 @@ class EnrollUserToCourseController extends Controller
                 if ($segments == null)
                     break;
 
-                $check = Enroll::where('user_id', $user)->where('course_segment', $segments)->pluck('id');
+                $check = Enroll::where('user_id', $user)->whereIn('course_segment', $segments)->pluck('id');
                 if (count($check) == 0) {
                     foreach ($segments as $segment) {
-                        Enroll::Create([
+                        Enroll::firstOrCreate([
                             'user_id' => $user,
                             'course_segment' => $segment,
                             'role_id' => 3,
@@ -220,7 +220,7 @@ class EnrollUserToCourseController extends Controller
                             $check2 = Enroll::where('user_id', $user)->where('course_segment', $one)->pluck('id');
                             if(count($check2) == 0)
                             {
-                                Enroll::Create([
+                                Enroll::firstOrCreate([
                                     'user_id' => $user,
                                     'course_segment' => $one,
                                     'role_id' => 3,
@@ -236,13 +236,14 @@ class EnrollUserToCourseController extends Controller
                     }
                 } else {
                     $count++;
+                    $exist_user[]=User::find($user);
                 }
             } else
                 return HelperController::api_response_format(400, [], 'No Current segment or year');
         }
         //($count);
         if ($count > 0) {
-            return HelperController::api_response_format(200, $exist_user, 'found user added before');
+            return HelperController::api_response_format(200, $exist_user, 'enrolled and found user added before');
         }
         return HelperController::api_response_format(200, [], 'added successfully');
     }
