@@ -630,8 +630,7 @@ class UserController extends Controller
         // return Excel::download(new UsersExport, 'users.xls');
          $filename = uniqid();
          Excel::store(new UsersExport, 'users.xls');
-
          $file = storage_path($filename);
-         return $file;
+         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }
