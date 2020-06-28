@@ -45,9 +45,26 @@ class segment_class_Controller extends Controller
             $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
             $segments = collect([]);
             foreach ($classLevel->segmentClass as $segmentClass) {
-                $segments[] = $segmentClass->segments[0];
+                $segments[] = $segmentClass->segments[0]->id;
             }
-            return HelperController::api_response_format(200, $segments->paginate(HelperController::GetPaginate($request)));
+            $segments = Segment::with(['academicType.yearType.academicyear','Segment_class.yearLevels.yearType'])->whereIn('id',$segments);
+            $all_segments=collect([]);
+            $segments =$segments->get();
+            foreach($segments as $segment){
+                $academic_year_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse();
+                $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+                $academic_type_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse();
+                $segment['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+                if(isset($segment->segment_class[0]->class_id))
+               { $class_id = $segment->segment_class[0]->class_id;
+                $segment['class']=Classes::where('id',$class_id)->pluck('name')[0];}
+                $level_id = $segment->Segment_class->pluck('yearLevels.*.level_id')->collapse();
+                $segment['level'] = Level::whereIn('id',$level_id)->pluck('name');
+                unset($segment->Segment_class);
+                $all_segments->push($segment);
+            }
+
+            return HelperController::api_response_format(200, $all_segments->paginate(HelperController::GetPaginate($request)));
         } else {
             $request->validate([
                 'id' => 'exists:academic_years,id',
