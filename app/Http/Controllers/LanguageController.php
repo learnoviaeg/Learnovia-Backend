@@ -50,7 +50,7 @@ class LanguageController extends Controller
         if(isset($request->default) && $request->default == 0 && $lang->default == 1)
             return HelperController::api_response_format(200, [] , 'This is the default language and cannot be toggled unless you choose a default one instead');
 
-        if($request->default == 1 )
+        if($request->default == 1 && $lang->default != 1)
             Language::where('default' , '1')->update([
                 'default'=> 0, 
             ]);
