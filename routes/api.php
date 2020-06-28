@@ -79,11 +79,16 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     //languages routes
     Route::group(['prefix' => 'languages'], function () {
+        Route::get('dictionary', 'LanguageController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
+        Route::post('add', 'LanguageController@add_language')->name('addLang')->middleware('permission:language/add');
+        Route::post('update', 'LanguageController@update_language')->name('updateLang')->middleware('permission:languages/update');
+        Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:languages/get');
+        Route::post('delete', 'LanguageController@Delete_languages')->name('deleteLang')->middleware('permission:languages/delete');
         Route::get('get-active', 'SystemSettingsController@GetActiveLanguages')->name('getActiveLanguages');
         Route::get('get-default', 'SystemSettingsController@GetDefaultLanguage')->name('getDefaultLanguages');
         Route::post('activate', 'SystemSettingsController@ActivateLanguage')->name('activateLanguage')->middleware('permission:languages/activate');
         Route::post('deactivate', 'SystemSettingsController@DeActivateLanguage')->name('deactivateLanguage')->middleware('permission:languages/deactivate');
-        Route::post('add', 'SystemSettingsController@AddLanguage')->name('addLanguage')->middleware('permission:languages/add');
+        // Route::post('add', 'SystemSettingsController@AddLanguage')->name('addLanguage')->middleware('permission:languages/add');
         Route::post('set-default', 'SystemSettingsController@SetDefaultLanguage')->name('setDefaultLanguage')->middleware('permission:languages/set-default');
     });
 
@@ -365,12 +370,4 @@ Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'PaymentController@delete')->name('deletepayment')->middleware('permission:payment/delete');
     Route::post('postponed-payment', 'PaymentController@postponedPayment')->name('deletepayment')->middleware('permission:payment/postponed-payment');
     Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
-});
-
-Route::group(['prefix' => 'language', 'middleware' => ['auth:api']], function () {
-    Route::get('dictionary', 'LanguageController@Get_Dictionary')->name('getDictionary')->middleware('permission:language/dictionary');
-    Route::post('add', 'LanguageController@add_language')->name('addLang')->middleware('permission:language/add');
-    Route::post('update', 'LanguageController@update_language')->name('updateLang')->middleware('permission:language/update');
-    Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:language/get');
-    Route::post('delete', 'LanguageController@Delete_languages')->name('deleteLang')->middleware('permission:language/delete');
 });
