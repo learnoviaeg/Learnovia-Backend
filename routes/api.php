@@ -368,7 +368,7 @@ Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['prefix' => 'language', 'middleware' => ['auth:api']], function () {
-    Route::get('dictionary', 'LanguageController@Get_Dictionary');//->name('getDictionary')->middleware('permission:language/dictionary');
+    Route::get('dictionary', 'LanguageController@Get_Dictionary')->name('getDictionary')->middleware('permission:language/dictionary');
     Route::post('add', 'LanguageController@add_language')->name('addLang')->middleware('permission:language/add');
     Route::post('update', 'LanguageController@update_language')->name('updateLang')->middleware('permission:language/update');
     Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:language/get');
