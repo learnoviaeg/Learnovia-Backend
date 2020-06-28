@@ -45,9 +45,23 @@ class ClassController extends Controller
             $class =collect([]);
             foreach ($yearlevel->classLevels as $classLevel){
                 if(count($classLevel->classes) > 0)
-                    $class[] = $classLevel->classes[0];
+                    $class[] = $classLevel->classes[0]->id;
             }
-            return HelperController::api_response_format(200, $class->paginate(HelperController::GetPaginate($request)));
+            $Classes = Classes::with('classlevel.yearLevels.levels.years')->whereIn('id',$class);
+            $all_classes=collect([]);
+            $Classes = $Classes->get();
+            foreach ($Classes as $class)
+           { 
+            $levels_id= $class->classlevel->pluck('yearLevels.*.level_id')->collapse()->unique();
+            $class['levels']= Level::whereIn('id',$levels_id)->pluck('name');
+            $academic_year_id= array_values( $class->classlevel->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse()->unique()->toArray());
+            $class['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+            $academic_type_id = array_values($class->classlevel->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse()->unique()->toArray());
+            $class['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+            unset($class->classlevel);
+             $all_classes->push($class);
+            }
+            return HelperController::api_response_format(200, $all_classes->paginate(HelperController::GetPaginate($request)));
         }
         else
         {

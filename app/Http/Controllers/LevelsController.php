@@ -113,15 +113,31 @@ class LevelsController extends Controller
         ]);
         $yearType = AcademicYearType::checkRelation($request->year, $request->type);
         $levels = collect([]);
+        $all_levels = collect([]);
         if ($request->filled('id')) {
-            $levels = Level::find($request->id);
+            $all_levels = Level::find($request->id);
+
+            return HelperController::api_response_format(200, $all_levels);
         } else {
             foreach ($yearType->yearLevel as $yearLevel) {
                 if(count($yearLevel->levels) > 0)
-                    $levels[] = $yearLevel->levels[0];
+                    $levels[] = $yearLevel->levels[0]->id;
+            }
+
+            $levels = Level::with('years')->whereIn('id',$levels);
+            $levels= $levels->get();        
+            foreach ($levels as $level)
+            {
+            $academic_type_id= $level->years->pluck('academic_type_id')->unique();
+            $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+            $academic_year_id= $level->years->pluck('academic_year_id')->unique();
+            $level['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+            unset($level->years);
+            $all_levels->push($level); 
+            
             }
         }
-        return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));
     }
 
     /**
@@ -185,7 +201,7 @@ class LevelsController extends Controller
         unset($level->years);
         $all_levels->push($level); 
         
-}
+        }
         return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));   
 
     }
