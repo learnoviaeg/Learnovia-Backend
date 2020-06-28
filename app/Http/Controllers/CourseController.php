@@ -250,7 +250,7 @@ class CourseController extends Controller
     /**
      * get current enrolledCourses
      *
-     * @return [object] currenr course_name with teacher and category with all chain
+     * @return [object] current course_name with teacher and category with all chain
      */
     public function CurrentCourses(Request $request)
     {
@@ -264,11 +264,9 @@ class CourseController extends Controller
         ]);
         $all = collect();
         $testCourse=array();
-        if($request->filled('type') || $request->filled('levels') || $request->filled('classes') )
-            $CS = GradeCategoryController::getCourseSegmentWithArray($request);
+        $CS = GradeCategoryController::getCourseSegmentWithArray($request);
 
-            foreach ($request->user()->enroll as $enroll) {
-           
+        foreach ($request->user()->enroll as $enroll) {           
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                 if($request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
                     if(!in_array($enroll->CourseSegment->id, $CS->toArray()))
@@ -333,11 +331,24 @@ class CourseController extends Controller
      */
     public function PastCourses(Request $request)
     {
+        $request->validate([
+            'type' => 'array',
+            'type.*' => 'exists:academic_types,id',
+            'levels' => 'array',
+            'levels.*' => 'exists:levels,id',
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
+        ]);
         $all = collect();
         $testCourse=array();
-        $i = 0;
+        $CS = GradeCategoryController::getCourseSegmentWithArray($request);
+
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
+                if($request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
+                    if(!in_array($enroll->CourseSegment->id, $CS->toArray()))
+                        continue;
+                }
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
 
@@ -383,11 +394,24 @@ class CourseController extends Controller
      */
     public function FutureCourses(Request $request)
     {
+        $request->validate([
+            'type' => 'array',
+            'type.*' => 'exists:academic_types,id',
+            'levels' => 'array',
+            'levels.*' => 'exists:levels,id',
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
+        ]);
         $all = collect();
         $testCourse=array();
-        $i = 0;
+        $CS = GradeCategoryController::getCourseSegmentWithArray($request);
+
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
+                if($request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
+                    if(!in_array($enroll->CourseSegment->id, $CS->toArray()))
+                        continue;
+                }
                 $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
 
