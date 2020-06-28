@@ -201,36 +201,32 @@ class CourseController extends Controller
             'id' => 'exists:courses,id',
             'category_id' => 'nullable|exists:categories,id',
             'year' => 'nullable|exists:academic_years,id',
-            'type' => 'nullable|exists:academic_types,id|required_with:year',
-            'level' => 'nullable|exists:levels,id|required_with:year',
-            'class' => 'nullable|exists:classes,id|required_with:year',
+            'type' => 'nullable|exists:academic_types,id',
+            'level' => 'nullable|exists:levels,id',
+            'class' => 'nullable|exists:classes,id',
             'segment' => 'nullable|exists:segments,id',
             'search' => 'nullable'
         ]);
-        if ($request->filled('year')) {
-            $academic_year_type = AcademicYearType::checkRelation($request->year, $request->type);
-            $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level);
-            $class_level = ClassLevel::checkRelation($request->class, $year_level->id);
-            if ($request->filled('segment'))
-                $segment = $request->segment;
-            else{
-                $check =Segment::Get_current($request->type);
-                if(!isset($check))
-                    return HelperController::api_response_format(200,null , 'No choosen segment and there is no defined active segment in this year type');
-                $segment = Segment::Get_current($request->type)->id;
-            }
-                $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
-                $courseSegment = $segment_class->courseSegment->pluck('course_id');
-            return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->whereIn('id', $courseSegment)->paginate(HelperController::GetPaginate($request)));
+        if (isset($request->id))
+        {
+            $cor=Course::find($request->id);
+            $cor->levels=$cor->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
+            unset($cor->courseSegments);
+            $cor->category;
+            $cor->attachmnet;
+            return HelperController::api_response_format(200, $cor);
         }
-        $courses =  Course::with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
+        $couresegs = GradeCategoryController::getCourseSegment($request);
+        foreach($couresegs as $one){
+            $cc=CourseSegment::find($one);
+            $cs[]=$cc->course_id;
+        }
+        $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
         
         foreach($courses as $le){
             $le['levels'] = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
             unset($le->courseSegments);
         }
-        if (isset($request->id))
-            return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->whereId($request->id)->first());
         return HelperController::api_response_format(200, $courses->paginate(HelperController::GetPaginate($request)) );
     }
 
