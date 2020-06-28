@@ -232,10 +232,11 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'import', 'title' => 'import excel sheet']);
 
             //Language Permission
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/activate', 'title' => 'Activate Language']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/deactivate', 'title' => 'Deactivate Language']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/add', 'title' => 'Add Language']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/set-default', 'title' => 'Set default Language']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'language/get', 'title' => 'Get Languages']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'language/add', 'title' => 'Add Language']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'language/update', 'title' => 'Update Language']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'language/delete', 'title' => 'DeleteLanguage']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'language/dictionary', 'title' => 'Get dictionary']);
 
             //Lesson Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/add', 'title' => 'add lesson']);

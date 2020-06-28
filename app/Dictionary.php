@@ -4,8 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Language extends Model
+class Dictionary extends Model
 {
-    protected $fillable = ['name','default'];
+    protected $fillable = ['key','value','language'];
     protected $hidden = ['created_at', 'updated_at'];
 }
