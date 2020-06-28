@@ -255,12 +255,15 @@ class CourseController extends Controller
     public function CurrentCourses(Request $request)
     {
         $request->validate([
+            'year.*' => 'exists:academic_years,id',
             'type' => 'array',
             'type.*' => 'exists:academic_types,id',
             'levels' => 'array',
             'levels.*' => 'exists:levels,id',
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
+            'segments' => 'array',
+            'segments.*' => 'exists:segments,id',
         ]);
         $all = collect();
         $testCourse=array();
@@ -268,7 +271,7 @@ class CourseController extends Controller
 
         foreach ($request->user()->enroll as $enroll) {           
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                if($request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
+                if($request->filled('year') || $request->filled('segments') || $request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
                     if(!in_array($enroll->CourseSegment->id, $CS->toArray()))
                         continue;
                 }
@@ -332,12 +335,15 @@ class CourseController extends Controller
     public function PastCourses(Request $request)
     {
         $request->validate([
+            'year.*' => 'exists:academic_years,id',
             'type' => 'array',
             'type.*' => 'exists:academic_types,id',
             'levels' => 'array',
             'levels.*' => 'exists:levels,id',
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
+            'segments' => 'array',
+            'segments.*' => 'exists:segments,id',
         ]);
         $all = collect();
         $testCourse=array();
@@ -345,7 +351,7 @@ class CourseController extends Controller
 
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                if($request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
+                if($request->filled('year') || $request->filled('segments') || $request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
                     if(!in_array($enroll->CourseSegment->id, $CS->toArray()))
                         continue;
                 }
@@ -395,12 +401,15 @@ class CourseController extends Controller
     public function FutureCourses(Request $request)
     {
         $request->validate([
+            'year.*' => 'exists:academic_years,id',
             'type' => 'array',
             'type.*' => 'exists:academic_types,id',
             'levels' => 'array',
             'levels.*' => 'exists:levels,id',
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
+            'segments' => 'array',
+            'segments.*' => 'exists:segments,id',
         ]);
         $all = collect();
         $testCourse=array();
@@ -408,7 +417,7 @@ class CourseController extends Controller
 
         foreach ($request->user()->enroll as $enroll) {
             if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
-                if($request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
+                if($request->filled('year') || $request->filled('segments') || $request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
                     if(!in_array($enroll->CourseSegment->id, $CS->toArray()))
                         continue;
                 }
