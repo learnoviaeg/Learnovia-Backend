@@ -505,12 +505,12 @@ class UserController extends Controller
         foreach($user->childs as $c)
             $child[]=$c;
 
-        if($parent == null && $child != null)
+        if(count($child) > 0)
             return HelperController::api_response_format(201, ['Childs' => $child]);
-        else if($child == null && $parent != null)
+        if(count($parent) > 0)
             return HelperController::api_response_format(201, ['Parent'=>$parent]);
-        else
-            return HelperController::api_response_format(201,null,'There is no data for you.');
+
+        return HelperController::api_response_format(201,null,'There is no data for you.');
     }
 
     /**
