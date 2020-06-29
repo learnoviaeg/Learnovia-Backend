@@ -651,7 +651,7 @@ class UserController extends Controller
         ]);
         $parentID = Parents::where('child_id',$request->child_id)->first('parent_id');
         $parent =  User::find($parentID);
-        return $parent;
+        return HelperController::api_response_format(200,$parent ,'Your Parent is ...');
     }
 
     Public function get_my_users(Request $request){
