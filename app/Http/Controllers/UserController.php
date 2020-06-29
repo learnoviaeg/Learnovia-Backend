@@ -514,6 +514,27 @@ class UserController extends Controller
     }
 
     /**
+     * set paresnt's child
+     *
+     * @return Assigned Successfully
+    */
+    public function set_parent_child(Request $request)
+    {
+        $request->validate([
+            'parent_id' => 'required|exists:users,id',
+            'child_id' => 'required|array|exists:users,id'
+        ]);
+        foreach($request->child_id as $child)
+        {
+            $parent=Parents::firstOrCreate([
+                'child_id' => $child,
+                'parent_id' => $request->parent_id
+            ]);
+        }
+        return HelperController::api_response_format(201,null,'Assigned Successfully');
+    }
+
+    /**
      * get Users filtered by role
      *
      * @param  [int] role_id
