@@ -237,7 +237,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/update', 'title' => 'Update Language']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/delete', 'title' => 'DeleteLanguage']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/dictionary', 'title' => 'Get dictionary']);
-
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/language', 'title' => 'change my language']);
+            
             //Lesson Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/add', 'title' => 'add lesson']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/get', 'title' => 'get lesson']);

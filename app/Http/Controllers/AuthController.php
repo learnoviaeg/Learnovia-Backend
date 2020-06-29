@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use Spatie\Permission\Models\Role;
 use App\Parents;
+use App\Dictionary;
 use App\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\User;
+use App\Language;
 use Spatie\Permission\Models\Permission;
 use Laravel\Passport\Passport;
 
@@ -109,8 +111,36 @@ class AuthController extends Controller
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString(),
-            'language' => $result
+            'language' => Language::find($user->language),
+            'dictionary' => self::Get_Dictionary(1),
         ], 'User Login Successfully , Don`t share this token with any one they are hackers.');
+    }
+
+    public function Get_Dictionary($callOrNot = 0)
+    {
+        $result = array();
+        $user = User::find(Auth::id());
+        $lang = $user->language;
+        if(!isset($user->language))
+            $lang = Language::where('default', 1)->pluck('id');
+        $keywords = Dictionary::where('language',$lang)->get();
+        foreach($keywords as $keyword)
+            $result[$keyword->key] = $keyword->value;
+        if($callOrNot == 1)
+            return $result;
+        return HelperController::api_response_format(200, $result , 'Here are the keywords...');
+    }
+
+    public function changeUserLanguage(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:languages,id',
+        ]);  
+        $user = User::find(Auth::id());
+        $user->language = $request->id;
+        $user->save();
+        $dictionary = self::Get_Dictionary(1);
+        return HelperController::api_response_format(200, $dictionary , 'Language changed successfully...');  
     }
 
     /**
