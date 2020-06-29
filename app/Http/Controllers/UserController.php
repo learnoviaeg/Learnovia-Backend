@@ -9,7 +9,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
-
+use App\Language;
 use App\Level;
 use App\Classes;
 use App\Enroll;
@@ -120,6 +120,10 @@ class UserController extends Controller
             $i++;
 
             $user->save();
+            if(!isset($user->language)){
+                $user->language = Language::where('default', 1)->first()->id;
+                $user->save();
+            }
             $role = Role::find($request->role);
             $user->assignRole($role);
             $Auth_role = Role::find(8);

@@ -79,7 +79,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     //languages routes
     Route::group(['prefix' => 'languages'], function () {
-        Route::get('dictionary', 'LanguageController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
+        Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
         Route::post('add', 'LanguageController@add_language')->name('addLang')->middleware('permission:languages/add');
         Route::post('update', 'LanguageController@update_language')->name('updateLang')->middleware('permission:languages/update');
         Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:languages/get');
@@ -198,7 +198,6 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api']], function () {
     Route::get('lessons', 'CourseController@getLessonsFromCourseAndClass')->middleware('permission:course/lessons');
     Route::get('get-class', 'CourseController@get_class_from_course')->middleware('permission:course/get-classes-by-course');
     Route::post('get-courses-by-classes', 'CourseController@get_courses_with_classes')->middleware('permission:course/get-courses-by-classes');
-
 });
 
 //USER CRUD ROUTES
@@ -223,6 +222,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
     Route::post('current-child', 'UserController@SetCurrentChild')->name('currentchild')->middleware('permission:user/current-child');
     Route::post('get-my-users', 'UserController@get_my_users')->name('getmyusers')->middleware('permission:user/get-my-users');
     Route::get('export', 'UserController@export')->name('exportUsers')->middleware('permission:user/export');
+    Route::post('language', 'AuthController@changeUserLanguage')->name('changeLanguage')->middleware('permission:user/language');
 });
 
 //Enroll Routes

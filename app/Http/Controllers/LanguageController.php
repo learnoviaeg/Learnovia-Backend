@@ -11,18 +11,6 @@ use Illuminate\Support\Facades\Auth;
 class LanguageController extends Controller
 {
 
-    public function Get_Dictionary(Request $request)
-    {
-        $result = array();
-        $user = User::find(Auth::id());
-        $lang = $user->language;
-        if(!isset($user->language))
-            $lang = Language::where('default', 1)->pluck('id');
-        $keywords = Dictionary::where('language',$lang)->get();
-        foreach($keywords as $keyword)
-            $result[$keyword->key] = $keyword->value;
-        return HelperController::api_response_format(200, $result , 'Here are keywords...');
-    }
     public function add_language(Request $request)
     {
         $request->validate([
