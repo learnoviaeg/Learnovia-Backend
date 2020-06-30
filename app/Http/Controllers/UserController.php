@@ -99,7 +99,7 @@ class UserController extends Controller
             $user = User::create([
                 'firstname' => $firstname,
                 'lastname' => $request->lastname[$key],
-                'username' => $request->username,
+                'username' => $request->username[$key],
                 'password' => bcrypt($request->password[$key]),
                 'real_password' => $request->password[$key],
                 'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0
