@@ -314,7 +314,7 @@ class UserController extends Controller
             'course' => 'nullable|integer|exists:courses,id',
             'year' => 'nullable|integer|exists:academic_years,id',
             'roles' => 'nullable|array',
-            'roles.*' => 'required|integer|exists:enrolls,role_id',
+            'roles.*' => 'required|integer|exists:roles,id',
         ]);
         $users = User::with('roles');
         if($request->filled('country'))
@@ -325,6 +325,11 @@ class UserController extends Controller
             $users = $users->where('religion','LIKE',"%$request->religion%");
         if($request->filled('gender'))
             $users = $users->where('gender','LIKE',"$request->gender");
+        if ($request->filled('roles'))
+            $users=$users->whereHas("roles", function ($q) use ($request) {
+                $q->whereIn("id", $request->roles);
+            });
+
 
         $enrolled_users=Enroll::where('id','!=',-1);
         if ($request->filled('level'))
@@ -339,9 +344,7 @@ class UserController extends Controller
             $enrolled_users=$enrolled_users->where('course',$request->course);
         if ($request->filled('year'))
             $enrolled_users=$enrolled_users->where('year',$request->year);
-        if ($request->filled('roles'))
-            $enrolled_users=$enrolled_users->whereIn('role_id',$request->roles);
-
+       
         if ($request->filled('search'))
             $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
         
