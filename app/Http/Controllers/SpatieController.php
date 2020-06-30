@@ -204,6 +204,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-my-child', 'title' => 'get my child']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/search-all-users', 'title' => 'search all users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-my-users', 'title' => 'get all my users']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/generate-username-password', 'title' => 'generate username and password']);
 
             //Components Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/get', 'title' => 'get component']);
