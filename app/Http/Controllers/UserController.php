@@ -307,12 +307,12 @@ class UserController extends Controller
             'religion' => 'nullable|string',
             'nationality' => 'nullable|string',
             'country' => 'nullable|string   ',
-            'level' => 'nullable|integer|exists:enrolls,level',
-            'type' => 'nullable|integer|exists:enrolls,type',
-            'class' => 'nullable|integer|exists:enrolls,class',
-            'segment' => 'nullable|integer|exists:enrolls,segment',
-            'course' => 'nullable|integer|exists:enrolls,course',
-            'year' => 'nullable|integer|exists:enrolls,year',
+            'level' => 'nullable|integer|exists:levels,id',
+            'type' => 'nullable|integer|exists:academic_types,id',
+            'class' => 'nullable|integer|exists:classes,id',
+            'segment' => 'nullable|integer|exists:segments,id',
+            'course' => 'nullable|integer|exists:courses,id',
+            'year' => 'nullable|integer|exists:academic_years,id',
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:enrolls,role_id',
         ]);
@@ -331,6 +331,8 @@ class UserController extends Controller
             $enrolled_users=$enrolled_users->where('level',$request->level);
         if ($request->filled('type'))
             $enrolled_users=$enrolled_users->where('type',$request->type);
+        if ($request->filled('class'))
+            $enrolled_users=$enrolled_users->where('class',$request->class);
         if ($request->filled('segment'))
             $enrolled_users=$enrolled_users->where('segment',$request->segment);
         if ($request->filled('course'))
