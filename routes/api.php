@@ -223,6 +223,8 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
     Route::post('get-my-users', 'UserController@get_my_users')->name('getmyusers')->middleware('permission:user/get-my-users');
     Route::get('export', 'UserController@export')->name('exportUsers')->middleware('permission:user/export');
     Route::post('language', 'AuthController@changeUserLanguage')->name('changeLanguage')->middleware('permission:user/language');
+    Route::post('generate-username-password', 'UserController@generate_username_password')->name('generateusernamepassword')->middleware('permission:user/generate-username-password');
+
 });
 
 //Enroll Routes

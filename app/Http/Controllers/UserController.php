@@ -71,7 +71,7 @@ class UserController extends Controller
             'picture' => 'nullable|array','arabicname' => 'nullable|array', 'gender' => 'nullable|array', 'phone' => 'nullable|array',
             'address' => 'nullable|array','nationality' => 'nullable|array','country' => 'nullable|array', 'birthdate' => 'nullable|array',
             'notes' => 'nullable|array','email' => 'nullable|array|unique:users', 'language' => 'nullable|array','timezone' => 'nullable|array',
-            'religion' => 'nullable|array','second language' => 'nullable|array', 'username' => 'nullable|array', 'type' => 'nullable|array',
+            'religion' => 'nullable|array','second language' => 'nullable|array', 'username' => 'required|array', 'type' => 'nullable|array',
             'level' => 'nullable|array', 'real_password' => 'nullable|array',
             'suspend.*' => 'boolean',
             'suspend'=>'array'
@@ -99,7 +99,7 @@ class UserController extends Controller
             $user = User::create([
                 'firstname' => $firstname,
                 'lastname' => $request->lastname[$key],
-                'username' => User::generateUsername(),
+                'username' => $request->username,
                 'password' => bcrypt($request->password[$key]),
                 'real_password' => $request->password[$key],
                 'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0
@@ -694,5 +694,13 @@ class UserController extends Controller
          $file = Excel::store(new UsersExport, 'users'.$filename.'.xls','public');
          $file = url(Storage::url('users'.$filename.'.xls'));
          return HelperController::api_response_format(201,$file, 'Link to file ....');
+    }
+    public function generate_username_password(Request $request)
+    {
+        $auth = collect([]);
+        $auth['username'] = User::generateUsername();
+        $auth['password'] =  User::generatePassword()."";
+        return HelperController::api_response_format(200,$auth, 'your user name and password is ........');
+
     }
 }
