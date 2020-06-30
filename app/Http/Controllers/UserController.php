@@ -351,20 +351,18 @@ class UserController extends Controller
         $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
         $users=$users->whereIn('id',$intersect)->get();
 
-        $users = $users->paginate(HelperController::GetPaginate($request));
-        foreach($users->items() as $user)
+        foreach($users as $user)
         {
             if(isset($user->attachment)){
                 $user->picture = $user->attachment->path;
             }
         }
-
-        if (Auth::user()->can('show/real-password')) {
-            foreach ($users->items() as $value) {
-                $value->setHidden(['password']);
+        if (!Auth::user()->can('site/show/real-password')) {
+            foreach ($users as $value) {
+                $value->setHidden(['password','real_password']);
             }
         }
-        return HelperController::api_response_format(200 , $users);
+        return HelperController::api_response_format(200 , $users->paginate(HelperController::GetPaginate($request)));
     }
 
     /**
@@ -488,9 +486,9 @@ class UserController extends Controller
     */
     public function Show_and_hide_real_password_with_permission(){
         $user = User::all();
-        if (Auth::user()->can('show/real-password')) {
+        if (!Auth::user()->can('site/show/real-password')) {
             $user->each(function ($row) {
-                $row->setHidden(['password']);
+                $row->setHidden(['password','real_password']);
             });
         }
         return HelperController::api_response_format(200, $user);
