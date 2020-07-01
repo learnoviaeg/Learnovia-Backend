@@ -357,7 +357,7 @@ class UserController extends Controller
             $enrolled_users=$enrolled_users->where('year',$request->year);
        
         $enrolled_users=$enrolled_users->pluck('user_id');
-        $users = User:: whereIn('id',$enrolled_users);
+        $users = User:: whereIn('id',$enrolled_users)->with('roles');
         // $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
         // $users=$users->whereIn('id',$intersect);
 
