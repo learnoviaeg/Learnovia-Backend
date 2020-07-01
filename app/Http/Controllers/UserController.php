@@ -356,11 +356,12 @@ class UserController extends Controller
         if ($request->filled('year'))
             $enrolled_users=$enrolled_users->where('year',$request->year);
        
-        if ($request->filled('search'))
-            $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
         
         $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
-        $users=$users->whereIn('id',$intersect)->get();
+        $users=$users->whereIn('id',$intersect);
+
+        if ($request->filled('search'))
+            $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
 
         foreach($users as $user)
         {
