@@ -341,8 +341,8 @@ class UserController extends Controller
                 $q->whereIn("id", $request->roles);
             });
 
-
-        $enrolled_users=Enroll::where('id','!=',-1);
+        $users= $users->pluck('id');
+        $enrolled_users=Enroll::whereIn('user_id',$users);
         if ($request->filled('level'))
             $enrolled_users=$enrolled_users->where('level',$request->level);
         if ($request->filled('type'))
@@ -356,9 +356,10 @@ class UserController extends Controller
         if ($request->filled('year'))
             $enrolled_users=$enrolled_users->where('year',$request->year);
        
-        
-        $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
-        $users=$users->whereIn('id',$intersect);
+        $enrolled_users=$enrolled_users->pluck('user_id');
+        $users = User:: whereIn('id',$enrolled_users);
+        // $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
+        // $users=$users->whereIn('id',$intersect);
 
         if ($request->filled('search'))
             $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
