@@ -70,8 +70,14 @@ class UserController extends Controller
             'class_id.*' => 'exists:classes,id',
             'picture' => 'nullable|array','arabicname' => 'nullable|array', 'gender' => 'nullable|array', 'phone' => 'nullable|array',
             'address' => 'nullable|array','nationality' => 'nullable|array','country' => 'nullable|array', 'birthdate' => 'nullable|array',
-            'notes' => 'nullable|array','email' => 'nullable|array|unique:users', 'language' => 'nullable|array','timezone' => 'nullable|array',
-            'religion' => 'nullable|array','second language' => 'nullable|array', 'username' => 'required|array', 'type' => 'nullable|array',
+            'notes' => 'nullable|array','email' => 'nullable|array|unique:users',
+            'language' => 'nullable|array',
+            'language.*' => 'integer|exists:languages,id',
+            'timezone' => 'nullable|array',
+            'religion' => 'nullable|array',
+            'second language' => 'nullable|array',
+            'second language.*' => 'integer|exists:languages,id',
+             'username' => 'required|array', 'type' => 'nullable|array',
             'level' => 'nullable|array', 'real_password' => 'nullable|array',
             'suspend.*' => 'boolean',
             'suspend'=>'array'
@@ -85,7 +91,6 @@ class UserController extends Controller
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
         $i=0;
-
         $count=0;
         $max_allowed_users = Contract::whereNotNull('id')->pluck('numbers_of_users')->first();
         $users=Enroll::where('role_id',3)->get();
@@ -96,6 +101,10 @@ class UserController extends Controller
             return HelperController::api_response_format(404 ,$max_allowed_users, 'exceed MAX, U Can\'t add users any more');
 
         foreach ($request->firstname as $key => $firstname) {
+            $username=User::where('username',$request->username[$key])->pluck('username');
+            if(isset($username))
+                    return HelperController::api_response_format(404 ,$username, 'This username is already  used');
+
             $user = User::create([
                 'firstname' => $firstname,
                 'lastname' => $request->lastname[$key],
@@ -190,7 +199,9 @@ class UserController extends Controller
             'username' => 'unique:users,username,'.$request->id,
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
-            'suspend' => 'boolean'
+            'suspend' => 'boolean',
+            'language' => 'integer|exists:languages,id',
+            'second language' => 'integer|exists:languages,id',
         ]);
 
         $users_is = collect([]);
@@ -701,7 +712,7 @@ class UserController extends Controller
         $auth = collect([]);
         $auth['username'] = User::generateUsername();
         $auth['password'] =  User::generatePassword()."";
-        return HelperController::api_response_format(200,$auth, 'your user name and password is ........');
+        return HelperController::api_response_format(200,$auth, 'your username and password is ........');
 
     }
 }
