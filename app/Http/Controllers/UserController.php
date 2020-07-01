@@ -101,9 +101,9 @@ class UserController extends Controller
             return HelperController::api_response_format(404 ,$max_allowed_users, 'exceed MAX, U Can\'t add users any more');
 
         foreach ($request->firstname as $key => $firstname) {
-            $username=User::where('username',$request->username[$key])->pluck('username');
-            if(isset($username))
-                    return HelperController::api_response_format(404 ,$username, 'This username is already  used');
+            $username=User::where('username',$request->username[$key])->pluck('username')->count();
+            if($username>0)
+                return HelperController::api_response_format(404 ,$username, 'This username is already  used');
 
             $user = User::create([
                 'firstname' => $firstname,
