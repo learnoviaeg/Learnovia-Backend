@@ -207,6 +207,7 @@ class CourseController extends Controller
             'segment' => 'nullable|exists:segments,id',
             'search' => 'nullable'
         ]);
+        $cs=[];
         if (isset($request->id))
         {
             $cor=Course::find($request->id);
