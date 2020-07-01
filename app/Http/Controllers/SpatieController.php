@@ -405,8 +405,9 @@ class SpatieController extends Controller
             'name' => $request->name,
             'description' => $request->description
         ]);
-        return HelperController::api_response_format(201, $role, 'Role Added!');
+        return HelperController::api_response_format(201, $role, 'Role Added Successfully');
     }
+    
     /**
      *
      * @Description :get role by id
@@ -427,6 +428,7 @@ class SpatieController extends Controller
 
         return HelperController::api_response_format(201, $role);
     }
+
     /**
      *
      * @Description :update a role
@@ -467,7 +469,6 @@ class SpatieController extends Controller
      @output: 'if role exist' -> Role Deleted!
               'else' -> Error
    */
-
     public function Delete_Role(Request $request)
     {
         $request->validate([
@@ -476,7 +477,7 @@ class SpatieController extends Controller
         $find = Role::find($request->id);
         if ($find) {
             $find->delete();
-            return HelperController::api_response_format(200, $find, 'Role Deleted!');
+            return HelperController::api_response_format(200, $find, 'Role Deleted Successfully');
         }
         return HelperController::NOTFOUND();
     }
@@ -487,28 +488,19 @@ class SpatieController extends Controller
      @output: 'if role assigned' -> Role Assigned Successfully,
               'else' -> 'please try again,
    */
-
     public static function Assign_Role_to_user(Request $request)
     {
-        try {
-            $validater = Validator::make($request->all(), [
-                'users' => 'required|array',
-                'users.*' => 'required|integer|exists:users,id',
-                'role' => 'required|integer|exists:roles,id',
-            ]);
-            if ($validater->fails()) {
-                $errors = $validater->errors();
-                return HelperController::api_response_format(400, $errors);
-            }
-            $findrole = Role::find($request->role);
-            foreach ($request->users as $user) {
-                $finduser = User::find($user);
-                $finduser->assignRole($findrole->name);
-            }
-            return HelperController::api_response_format(201, [], 'Role Assigned Successfully');
-        } catch (Exception $ex) {
-            return HelperController::NOTFOUND();
+        $request->validate([
+            'users' => 'required|array',
+            'users.*' => 'required|integer|exists:users,id',
+            'role' => 'required|integer|exists:roles,id',
+        ]);
+        $findrole = Role::find($request->role);
+        foreach ($request->users as $user) {
+            $finduser = User::find($user);
+            $finduser->assignRole($findrole->name);
         }
+        return HelperController::api_response_format(201, [], 'Role assigned successfully');
     }
 
     /*
@@ -517,33 +509,22 @@ class SpatieController extends Controller
      @output: 'if permission assigned' -> Permission Assigned Successfully,
               'else' -> Please Try again
    */
-
     public function Assign_Permission_Role(Request $request)
     {
+        $request->validate([
+            'permissionid' => 'required|array',
+            'permissionid.*' => 'required|integer|exists:permissions,id',
+            'roleid' => 'required|integer|exists:roles,id'
+        ]);
 
-        try {
-            $validater = Validator::make($request->all(), [
-                'permissionid' => 'required|array',
-                'permissionid.*' => 'required|integer|exists:permissions,id',
-                'roleid' => 'required|integer|exists:roles,id'
+        $findrole = Role::find($request->roleid);
 
-            ]);
-            if ($validater->fails()) {
-                $errors = $validater->errors();
-                return response()->json($errors, 400);
-            }
-
-            $findrole = Role::find($request->roleid);
-
-            foreach ($request->permissionid as $per) {
-                $findPer = Permission::find($per);
-                $findrole->givePermissionTo($findPer);
-            }
-
-            return HelperController::api_response_format(201, [], 'Permission/s Assigned to Role Successfully');
-        } catch (Exception $ex) {
-            return HelperController::NOTFOUND();
+        foreach ($request->permissionid as $per) {
+            $findPer = Permission::find($per);
+            $findrole->givePermissionTo($findPer);
         }
+
+        return HelperController::api_response_format(201, [], 'Permission/s Assigned to Role Successfully');
     }
 
     /*
@@ -552,27 +533,17 @@ class SpatieController extends Controller
       @output: 'if role revoked' -> Role Revoked Successfully,
                'else' -> Please Try again
     */
-
     public function Revoke_Role_from_user(Request $request)
     {
-        try {
-            $validater = Validator::make($request->all(), [
-                'userid' => 'required|integer|exists:users,id',
-                'roleid' => 'required|integer|exists:roles,id'
+        $request->validate([
+            'userid' => 'required|integer|exists:users,id',
+            'roleid' => 'required|integer|exists:roles,id'
+        ]);
 
-            ]);
-            if ($validater->fails()) {
-                $errors = $validater->errors();
-                return response()->json($errors, 400);
-            }
-
-            $finduser = User::find($request->userid);
-            $findrole = Role::find($request->roleid);
-            $finduser->removeRole($findrole->name);
-            return HelperController::api_response_format(201, [], 'Role Revoked from user Successfully');
-        } catch (Exception $ex) {
-            return HelperController::NOTFOUND();
-        }
+        $finduser = User::find($request->userid);
+        $findrole = Role::find($request->roleid);
+        $finduser->removeRole($findrole->name);
+        return HelperController::api_response_format(201, [], 'Role Revoked from user Successfully');
     }
 
     /*
@@ -581,36 +552,24 @@ class SpatieController extends Controller
       @output: 'if permission assigned' -> Permission Revoked Successfully,
                'else' -> Please Try again
     */
-
     public function Revoke_Permission_from_Role(Request $request)
     {
-        try {
-            $validater = Validator::make($request->all(), [
-                'permissionid' => 'required|integer|exists:permissions,id',
-                'roleid' => 'required|integer|exists:roles,id'
+        $request->validate([
+            'permissionid' => 'required|integer|exists:permissions,id',
+            'roleid' => 'required|integer|exists:roles,id'
+        ]);
+        $findPer = Permission::find($request->permissionid);
+        $findrole = Role::find($request->roleid);
 
-            ]);
-            if ($validater->fails()) {
-                $errors = $validater->errors();
-                return response()->json($errors, 400);
-            }
+        $findrole->revokePermissionTo($findPer->name);
 
-            $findPer = Permission::find($request->permissionid);
-            $findrole = Role::find($request->roleid);
-
-            $findrole->revokePermissionTo($findPer->name);
-
-            return HelperController::api_response_format(201, [], 'Permission Revoked from Role Successfully');
-        } catch (Exception $ex) {
-            return HelperController::NOTFOUND();
-        }
+        return HelperController::api_response_format(201, [], 'Permission Revoked from Role Successfully');
     }
 
     /*
       This function is to List All Roles and Permissions
       @output: List of all Roles and permissions
     */
-
     public function List_Roles_Permissions()
     {
         $roles = Role::all();
@@ -618,6 +577,7 @@ class SpatieController extends Controller
         $pers = Permission::all();
         foreach ($pers as $permission) {
             $key =  explode("/", $permission->name)[0];
+            // $permissions[$key][] = $permission->title;
             $permissions[$key][] = $permission->name;
         }
         return HelperController::api_response_format(200, ['roles' => $roles, 'permissions' => $permissions]);
@@ -629,29 +589,17 @@ class SpatieController extends Controller
       @output: 'if permission assigned' -> Permission Assigned Successfully,
                'else' -> Please Try again
     */
-
     public function Assign_Permission_User(Request $request)
     {
+        $request->validate([
+            'permissionid' => 'required|integer|exists:permissions,id',
+            'roleid' => 'required|integer|exists:roles,id'
+        ]);
+        $findPer = Permission::find($request->permissionid);
+        $finduser = User::find($request->userid);
 
-        try {
-            $validater = Validator::make($request->all(), [
-                'permissionid' => 'required|integer|exists:permissions,id',
-                'userid' => 'required|integer|exists:users,id'
-
-            ]);
-            if ($validater->fails()) {
-                $errors = $validater->errors();
-                return response()->json($errors, 400);
-            }
-
-            $findPer = Permission::find($request->permissionid);
-            $finduser = User::find($request->userid);
-
-            $finduser->givePermissionTo($findPer->name);
-            return HelperController::api_response_format(200, [], 'Permission Assigned to User Successfully');
-        } catch (Exception $ex) {
-            return HelperController::NOTFOUND();
-        }
+        $finduser->givePermissionTo($findPer->name);
+        return HelperController::api_response_format(200, [], 'Permission Assigned to User Successfully');
     }
 
     /*
@@ -659,29 +607,24 @@ class SpatieController extends Controller
       @output: A list of all Roles with thier Permissions
 
     */
-
     public function List_Roles_With_Permission(Request $request)
     {
         $request->validate([
             'search' => 'nullable'
         ]);
 
-        try {
-            if ($request->filled('search')) {
-                $roles = Role::where('name', 'LIKE', "%$request->search%")->get()
-                    ->paginate(HelperController::GetPaginate($request));
-                return HelperController::api_response_format(202, $roles);
-            }
-            $roles = Role::all();
-            foreach ($roles as $role) {
-                $role->count = User::role($role)->count();
-                $role->permissions;
-            }
-            $roles->toArray();
-            return HelperController::api_response_format(200, $roles->paginate(HelperController::GetPaginate(\request())));
-        } catch (Exception $ex) {
-            return HelperController::NOTFOUND();
+        if ($request->filled('search')) {
+            $roles = Role::where('name', 'LIKE', "%$request->search%")->get()
+                ->paginate(HelperController::GetPaginate($request));
+            return HelperController::api_response_format(202, $roles);
         }
+        $roles = Role::all();
+        foreach ($roles as $role) {
+            $role->count = User::role($role)->count();
+            $role->permissions;
+        }
+        $roles->toArray();
+        return HelperController::api_response_format(200, $roles->paginate(HelperController::GetPaginate(\request())));
     }
 
     /*
@@ -690,24 +633,16 @@ class SpatieController extends Controller
       @output: 'if Role Exist' -> A list of all permissions to that role,
                'else' -> Role doesn't exist.
     */
-
     public function Get_Individual_Role(Request $request)
     {
 
-        try {
-            $validater = Validator::make($request->all(), [
-                'roleid' => 'required|integer|exists:roles,id',
-            ]);
-            if ($validater->fails()) {
-                return HelperController::api_response_format(200, $validater->errors());
-            }
+        $request->validate([
+            'roleid' => 'required|integer|exists:roles,id',
+        ]);
 
-            $findrole = Role::find($request->roleid);
-            $findrole->permissions;
-            return HelperController::api_response_format(200, $findrole);
-        } catch (Exception $ex) {
-            return HelperController::NOTFOUND();
-        }
+        $findrole = Role::find($request->roleid);
+        $findrole->permissions;
+        return HelperController::api_response_format(200, $findrole);
     }
 
     /*
@@ -716,7 +651,6 @@ class SpatieController extends Controller
       @output: 'if added' -> Done Successfully,
                'else' -> Error.
     */
-
     public function Add_Role_With_Permissions(Request $request)
     {
         $request->validate([
@@ -734,14 +668,13 @@ class SpatieController extends Controller
         foreach ($request->permissions as $per) {
             $role->givePermissionTo($per);
         }
-        return HelperController::api_response_format(200, $role);
+        return HelperController::api_response_format(200, $role,'Role added successfully');
     }
 
     /*
       This function is to Export all roles with it's permissions
       @output: A json file with all roles and thier permissions.
     */
-
     public function Export_Role_with_Permission()
     {
         $roles = Role::all();
@@ -768,41 +701,37 @@ class SpatieController extends Controller
       @output: 'if all conditions applied' -> Done Successfully,
                'else' -> Please Try again
     */
-
     public function Import_Role_with_Permission(Request $request)
     {
         $request->validate([
             'Imported_file' => 'required|file'
         ]);
-        try {
-            $extension = $request->Imported_file->getClientOriginalExtension();
-            if ($extension == 'json' || $extension == 'Json' || $extension == 'JSON') {
-                $content = json_decode(file_get_contents($request->Imported_file));
-                //  $data = json_decode($file, true);
-                foreach ($content as $con) {
-                    $role = Role::where('name', $con->roleName)->count();
-                    if ($role != 0) {
-                        return response()->json(['msg' => 'Role ' . $con->roleName . ' duplicated'], 400);
-                    }
-                    foreach ($con->permission as $pere) {
-                        $per = Permission::where('name', $pere)->count();
-                        if ($per == 0) {
-                            return response()->json(['msg' => 'Permission ' . $pere . ' is not exist'], 400);
-                        }
+        $extension = $request->Imported_file->getClientOriginalExtension();
+        if ($extension == 'json' || $extension == 'Json' || $extension == 'JSON') {
+            $content = json_decode(file_get_contents($request->Imported_file));
+            //  $data = json_decode($file, true);
+            foreach ($content as $con) {
+                $role = Role::where('name', $con->roleName)->count();
+                if ($role != 0) {
+                    return response()->json(['msg' => 'Role ' . $con->roleName . ' duplicated'], 400);
+                }
+                foreach ($con->permission as $pere) {
+                    $per = Permission::where('name', $pere)->count();
+                    if ($per == 0) {
+                        return response()->json(['msg' => 'Permission ' . $pere . ' is not exist'], 400);
                     }
                 }
-
-                foreach ($content as $con) {
-                    $role = Role::create(['name' => $con->roleName]);
-                    $role->syncPermissions($con->permission);
-                }
-                return HelperController::api_response_format(200, [], 'Added succes');
             }
-            return HelperController::NOTFOUND();
-        } catch (Exception $ex) {
-            return HelperController::NOTFOUND();
+
+            foreach ($content as $con) {
+                $role = Role::create(['name' => $con->roleName]);
+                $role->syncPermissions($con->permission);
+            }
+            return HelperController::api_response_format(200, [], 'Added succes');
         }
+        return HelperController::NOTFOUND();
     }
+
     /**
      *
      * @Description :check if user have certain permission.
@@ -814,6 +743,7 @@ class SpatieController extends Controller
         $request->validate(['permission' => 'required|exists:permissions,name']);
         return HelperController::api_response_format(200, $request->user()->hasPermissionTo($request->permission));
     }
+
     /**
      * @Description :get permissions of a user according to it's role.
      * @param : type is an optional parameter
@@ -823,7 +753,6 @@ class SpatieController extends Controller
      */
     public function Get_permission_of_user(Request $request)
     {
-
         $request->validate([
             'type' => 'nullable|in:course,quiz',
         ]);
@@ -870,6 +799,7 @@ class SpatieController extends Controller
 
         return HelperController::api_response_format(200, $user_per);
     }
+
     /**
      * @Description :check permissions of a user on a course.
      * @param : course, class, permissions are required parameters.
@@ -947,19 +877,16 @@ class SpatieController extends Controller
      */
     public function Toggle_dashboard(Request $request)
     {
+        $request->validate([
+            'permission_id' => 'required|exists:permissions,id',
+        ]);
 
-        try {
-            $request->validate([
-                'permission_id' => 'required|exists:permissions,id',
-            ]);
-            $permission = Permission::findById($request->permission_id);
-            $permission->dashboard = ($permission->dashboard == 1) ? 0 : 1;
-            $permission->save();
-            return HelperController::api_response_format(200, $permission, 'Toggle Successfully');
-        } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
-        }
+        $permission = Permission::findById($request->permission_id);
+        $permission->dashboard = ($permission->dashboard == 1) ? 0 : 1;
+        $permission->save();
+        return HelperController::api_response_format(200, $permission, 'Toggle Successfully');
     }
+
     /**
      * @Description :list dashboard permissions.
      * @param  : permission_id.
