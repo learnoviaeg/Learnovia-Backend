@@ -423,23 +423,32 @@ class EnrollUserToCourseController extends Controller
         if($request->filled('gender'))
             $usersall->where('gender','LIKE',"$request->gender");
 
+        $flg=false;
         $users = Enroll::where('user_id','!=' ,Auth::id());
-        if($request->filled('year'))
+        if($request->filled('year')){
             $users->where('year',$request->year);
-        if($request->filled('type'))
+            $flg=true;
+        }if($request->filled('type')){
             $users->where('type',$request->type);
-        if($request->filled('level'))
+            $flg=true;
+        }if($request->filled('level')){
             $users->where('level',$request->level);
-        if($request->filled('segment'))
+            $flg=true;
+        }if($request->filled('segment')){
             $users->where('segment',$request->segment);
-        if($request->filled('class'))
+            $flg=true;
+        }if($request->filled('class')){
             $users->where('class',$request->class);
-        if($request->filled('courses'))
+            $flg=true;
+        }if($request->filled('courses')){
             $users->whereIn('course',$request->courses);
-            // return $usersall->pluck('id')->toArray();
-        $intersect = array_intersect($usersall->pluck('id')->toArray(),$users->pluck('user_id')->toArray());
-            // return array_values(array_unique($intersect));
-            
+            $flg=true;
+        }
+        if($flg)
+            $intersect = array_intersect($usersall->pluck('id')->toArray(),$users->pluck('user_id')->toArray());
+        else
+            $intersect=$usersall->pluck('id')->toArray();
+
         $users_student=collect();
         $users_staff=collect();
         $searched=collect();
