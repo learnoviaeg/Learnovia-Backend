@@ -343,38 +343,25 @@ class UserController extends Controller
         
         $flag=false;
         $enrolled_users=Enroll::where('id','!=',0);
-        if ($request->filled('level'))
-            {
-                $enrolled_users=$enrolled_users->where('level',$request->level);
-                $flag=true;
-            }
-        if ($request->filled('type'))
-            {            
-                $enrolled_users=$enrolled_users->where('type',$request->type);
-                $flag=true;
-
-            }        
-        if ($request->filled('class'))
-            { 
-                $enrolled_users=$enrolled_users->where('class',$request->class);
-                $flag=true;
-            }        
-        if ($request->filled('segment'))
-            {            
-                $enrolled_users=$enrolled_users->where('segment',$request->segment);
-                $flag=true;
-
-            }        
-            if ($request->filled('course'))
-            {            
-                $enrolled_users=$enrolled_users->where('course',$request->course);
-                $flag=true;
-            }        
-            if ($request->filled('year'))
-            {            
-                $enrolled_users=$enrolled_users->where('year',$request->year);
-                $flag=true;
-            }       
+        if ($request->filled('level')){
+            $enrolled_users=$enrolled_users->where('level',$request->level);
+            $flag=true;
+        }if ($request->filled('type')){            
+            $enrolled_users=$enrolled_users->where('type',$request->type);
+            $flag=true;
+        }if ($request->filled('class')){ 
+            $enrolled_users=$enrolled_users->where('class',$request->class);
+            $flag=true;
+        }if ($request->filled('segment')){            
+            $enrolled_users=$enrolled_users->where('segment',$request->segment);
+            $flag=true;
+        }if ($request->filled('course')){            
+            $enrolled_users=$enrolled_users->where('course',$request->course);
+            $flag=true;
+        }if ($request->filled('year')){            
+            $enrolled_users=$enrolled_users->where('year',$request->year);
+            $flag=true;
+        }      
         // $enrolled_users=$enrolled_users->pluck('user_id');
         // $users = User:: whereIn('id',$enrolled_users)->with('roles');
         
@@ -383,7 +370,6 @@ class UserController extends Controller
             $users=$users->whereIn('id',$intersect);
         }
         
-
         if ($request->filled('search'))
             $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
         $users = $users->paginate(HelperController::GetPaginate($request));
