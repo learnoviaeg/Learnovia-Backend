@@ -327,7 +327,7 @@ class UserController extends Controller
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
         ]);
-        $users = User::with('roles');
+        $users = User::where('id','!=',0)->with('roles');
         if($request->filled('country'))
             $users = $users->where('country','LIKE',"%$request->country%");
         if($request->filled('nationality'))
@@ -342,6 +342,7 @@ class UserController extends Controller
             });
 
         $users= $users->pluck('id');
+
         $enrolled_users=Enroll::whereIn('user_id',$users);
         if ($request->filled('level'))
             $enrolled_users=$enrolled_users->where('level',$request->level);
@@ -363,7 +364,6 @@ class UserController extends Controller
 
         if ($request->filled('search'))
             $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
-
         $users = $users->paginate(HelperController::GetPaginate($request));
         foreach($users->items() as $user)
         {
