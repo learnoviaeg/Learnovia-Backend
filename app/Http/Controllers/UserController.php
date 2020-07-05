@@ -327,7 +327,7 @@ class UserController extends Controller
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
         ]);
-        $users = User::with('roles');
+        $users = User::where('id','!=',0)->with('roles');
         if($request->filled('country'))
             $users = $users->where('country','LIKE',"%$request->country%");
         if($request->filled('nationality'))
