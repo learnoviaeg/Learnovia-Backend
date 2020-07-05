@@ -337,45 +337,69 @@ class UserController extends Controller
         if($request->filled('gender'))
             $users = $users->where('gender','LIKE',"$request->gender");
         if ($request->filled('roles'))
-            $users=$users->whereHas("roles", function ($q) use ($request) {
-                $q->whereIn("id", $request->roles);
-            });
-
-        $users= $users->pluck('id');
-        $enrolled_users=Enroll::whereIn('user_id',$users);
+            $users= $users->whereHas("roles", function ($q) use ($request) {
+            $q->whereIn("id", $request->roles);
+        });
+        
+        $flag=false;
+        $enrolled_users=Enroll::where('id','!=',0);
         if ($request->filled('level'))
-            $enrolled_users=$enrolled_users->where('level',$request->level);
+            {
+                $enrolled_users=$enrolled_users->where('level',$request->level);
+                $flag=true;
+            }
         if ($request->filled('type'))
-            $enrolled_users=$enrolled_users->where('type',$request->type);
+            {            
+                $enrolled_users=$enrolled_users->where('type',$request->type);
+                $flag=true;
+
+            }        
         if ($request->filled('class'))
-            $enrolled_users=$enrolled_users->where('class',$request->class);
+            { 
+                $enrolled_users=$enrolled_users->where('class',$request->class);
+                $flag=true;
+            }        
         if ($request->filled('segment'))
-            $enrolled_users=$enrolled_users->where('segment',$request->segment);
-        if ($request->filled('course'))
-            $enrolled_users=$enrolled_users->where('course',$request->course);
-        if ($request->filled('year'))
-            $enrolled_users=$enrolled_users->where('year',$request->year);
-       
-        $enrolled_users=$enrolled_users->pluck('user_id');
-        $users = User:: whereIn('id',$enrolled_users)->with('roles');
-        // $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
-        // $users=$users->whereIn('id',$intersect);
+            {            
+                $enrolled_users=$enrolled_users->where('segment',$request->segment);
+                $flag=true;
+
+            }        
+            if ($request->filled('course'))
+            {            
+                $enrolled_users=$enrolled_users->where('course',$request->course);
+                $flag=true;
+            }        
+            if ($request->filled('year'))
+            {            
+                $enrolled_users=$enrolled_users->where('year',$request->year);
+                $flag=true;
+            }       
+        // $enrolled_users=$enrolled_users->pluck('user_id');
+        // $users = User:: whereIn('id',$enrolled_users)->with('roles');
+        
+        if($flag){
+            $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
+            $users=$users->whereIn('id',$intersect);
+        }
+        
 
         if ($request->filled('search'))
             $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
-
-        foreach($users as $user)
+        $users = $users->paginate(HelperController::GetPaginate($request));
+        foreach($users->items() as $user)
         {
             if(isset($user->attachment)){
                 $user->picture = $user->attachment->path;
             }
         }
-        if (!Auth::user()->can('site/show/real-password')) {
-            foreach ($users as $value) {
-                $value->setHidden(['password','real_password']);
+
+        if (Auth::user()->can('show/real-password')) {
+            foreach ($users->items() as $value) {
+                $value->setHidden(['password']);
             }
         }
-        return HelperController::api_response_format(200 , $users->paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200 , $users);
     }
 
     /**
@@ -499,9 +523,9 @@ class UserController extends Controller
     */
     public function Show_and_hide_real_password_with_permission(){
         $user = User::all();
-        if (!Auth::user()->can('site/show/real-password')) {
+        if (Auth::user()->can('show/real-password')) {
             $user->each(function ($row) {
-                $row->setHidden(['password','real_password']);
+                $row->setHidden(['password']);
             });
         }
         return HelperController::api_response_format(200, $user);
