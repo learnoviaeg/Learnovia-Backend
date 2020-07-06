@@ -15,7 +15,7 @@ class LevelsExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        $levels = Level::all();
+        $levels = Level::whereNull('deleted_at')->get();
         foreach ($levels as $level) {
             $level->setHidden([])->setVisible($this->fields);
         }

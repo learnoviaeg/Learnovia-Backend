@@ -15,7 +15,7 @@ class SegmentsExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        $segments =  Segment::get();
+        $segments =  Segment::whereNull('deleted_at')->get();
         foreach ($segments as $segment) {
             $segment->setHidden([])->setVisible($this->fields);
         }

@@ -15,7 +15,7 @@ class ClassesExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        $classes =  Classes::get();
+        $classes =  Classes::whereNull('deleted_at')->get();
         foreach ($classes as $class) {
             $class->setHidden([])->setVisible($this->fields);
         }

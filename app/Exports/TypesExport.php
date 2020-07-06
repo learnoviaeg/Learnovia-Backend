@@ -15,7 +15,7 @@ class TypesExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        $types = AcademicType::all();
+        $types = AcademicType::whereNull('deleted_at')->get();
         foreach ($types as $type) {
             $type->setHidden([])->setVisible($this->fields);
         }

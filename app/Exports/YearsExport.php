@@ -15,7 +15,7 @@ class YearsExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        $years = AcademicYear::all();
+        $years = AcademicYear::whereNull('deleted_at')->get();
         foreach ($years as $year) {
             $year->setHidden([])->setVisible($this->fields);
         }
