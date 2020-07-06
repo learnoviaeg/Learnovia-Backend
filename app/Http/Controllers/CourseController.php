@@ -227,8 +227,8 @@ class CourseController extends Controller
 
         if(!isset($request->segment))
         {
-            $segment_id = Segment::Get_current($request->type)->id;
-            if($segment_id)
+            $segment_id = Segment::Get_current($request->type);
+            if($segment_id->id)
                 return HelperController::api_response_format(200, null, ' No Active segment here');
         }
 
