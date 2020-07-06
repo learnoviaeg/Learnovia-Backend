@@ -475,7 +475,7 @@ class EnrollUserToCourseController extends Controller
             if(isset($request->search))
             {
                 $users_student= $users_student->pluck('id');
-                $users_student=User::whereIn('id',$users_student)->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
+                $users_student=User::whereIn('id',$users_student)->with('attachment')->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
                 return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)),'students are ... ');
             }
             return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)), 'students are ... ');
@@ -486,7 +486,7 @@ class EnrollUserToCourseController extends Controller
             if(isset($request->search))
             {
                 $users_staff= $users_staff->pluck('id');
-                $users_staff=User::whereIn('id',$users_staff)->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
+                $users_staff=User::whereIn('id',$users_staff)->with('attachment')->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
                 
                 return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
             }
