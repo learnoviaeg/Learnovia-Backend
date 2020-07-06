@@ -453,6 +453,8 @@ class EnrollUserToCourseController extends Controller
         else
             $intersect=$usersall->pluck('id')->toArray();
 
+
+
         $users_student=collect();
         $users_staff=collect();
         $searched=collect();
@@ -467,19 +469,14 @@ class EnrollUserToCourseController extends Controller
                     $users_staff->push($users2);
             }
         }
-
         if($request->student == 1)
         {
             //search a student
             if(isset($request->search))
             {
-                foreach($users_student as $user)
-                {
-                    $test=strpos($user->fullname, $request->search);
-                    if($test > -1)
-                        $searched->push($user);
-                }
-                return HelperController::api_response_format(200, $searched->paginate(HelperController::GetPaginate($request)),'students are ... ');
+                $users_student= $users_student->pluck('id');
+                $users_student=User::whereIn('id',$users_student)->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
+                return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)),'students are ... ');
             }
             return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)), 'students are ... ');
         }
@@ -488,13 +485,10 @@ class EnrollUserToCourseController extends Controller
             //search one of staff
             if(isset($request->search))
             {
-                foreach($users_staff as $user)
-                {
-                    $test=strpos($user->fullname, $request->search);
-                    if($test > -1)
-                        $searched->push($user);
-                }
-                return HelperController::api_response_format(200, $searched->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
+                $users_staff= $users_staff->pluck('id');
+                $users_staff=User::whereIn('id',$users_staff)->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
+                
+                return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
             }
             return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
         }
