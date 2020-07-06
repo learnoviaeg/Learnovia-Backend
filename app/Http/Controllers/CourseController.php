@@ -217,6 +217,21 @@ class CourseController extends Controller
             $cor->attachmnet;
             return HelperController::api_response_format(200, $cor);
         }
+
+        if(!isset($request->year))
+        {
+            $year = AcademicYear::Get_current();
+            if($year)
+                return HelperController::api_response_format(200, null, ' No Active year here');
+        }
+
+        if(!isset($request->segment))
+        {
+            $segment_id = Segment::Get_current($request->type)->id;
+            if($segment_id)
+                return HelperController::api_response_format(200, null, ' No Active segment here');
+        }
+
         $couresegs = GradeCategoryController::getCourseSegment($request);
         foreach($couresegs as $one){
             $cc=CourseSegment::find($one);
