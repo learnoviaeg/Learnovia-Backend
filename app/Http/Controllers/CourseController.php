@@ -226,12 +226,13 @@ class CourseController extends Controller
         }
 
         $couresegs = GradeCategoryController::getCourseSegment($request);
+        if(count($couresegs) == 0)
+            return HelperController::api_response_format(200, null, 'there is no courses' );
+
         foreach($couresegs as $one){
             $cc=CourseSegment::find($one);
             $cs[]=$cc->course_id;
         }
-        if(count($cs) == 0)
-            return HelperController::api_response_format(200, null, 'there is no course_segment' );
 
         $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
         

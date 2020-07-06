@@ -487,7 +487,6 @@ class EnrollUserToCourseController extends Controller
             {
                 $users_staff= $users_staff->pluck('id');
                 $users_staff=User::whereIn('id',$users_staff)->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
-                
                 return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
             }
             return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
