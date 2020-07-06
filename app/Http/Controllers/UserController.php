@@ -371,7 +371,7 @@ class UserController extends Controller
         }
         
         if ($request->filled('search'))
-            $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" );
+            $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
         $users = $users->paginate(HelperController::GetPaginate($request));
         foreach($users->items() as $user)
         {

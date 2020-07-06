@@ -288,9 +288,11 @@ class EnrollUserToCourseController extends Controller
             $users_id = Enroll::whereIn('course_segment', $course_seg_id)->where('role_id', 3)->pluck('user_id');
 
             if ($request->filled('search')) {
+
                 $users = User::whereIn('id', $users_id)->where(function ($query) use ($request) {
-                    $query->where('firstname', 'LIKE', "%$request->search%")
-                        ->orWhere('lastname', 'LIKE', "%$request->search%")->orWhere('username', 'LIKE', "%$request->search%");
+                    $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")
+                    ->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                    ->orWhere('username', 'LIKE', "%$request->search%");
                 })->get();
 
                 return HelperController::api_response_format(200, $users);
@@ -317,9 +319,11 @@ class EnrollUserToCourseController extends Controller
             $result = array_intersect($usersByClass->toArray(), $users_id->toArray());
 
             if ($request->filled('search')) {
+
                 $users = User::whereIn('id', $users_id)->where(function ($query) use ($request) {
-                    $query->where('firstname', 'LIKE', "%$request->search%")
-                        ->orWhere('lastname', 'LIKE', "%$request->search%")->orWhere('username', 'LIKE', "%$request->search%");
+                    $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")
+                    ->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                    ->orWhere('username', 'LIKE', "%$request->search%");
                 })->get();
 
                 return HelperController::api_response_format(200, $users);
