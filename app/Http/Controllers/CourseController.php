@@ -341,11 +341,9 @@ class CourseController extends Controller
                     }
                 }
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
-                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->get();
-                    
-                foreach($teacher as $one)
-                    if(isset($one->attachment))
-                        $one->picture=$one->attachment->path;
+                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                if(isset($teacher->attachment))
+                    $one->picture=$one->attachment->path;
 
                 $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
                 if(isset($en))
@@ -439,10 +437,9 @@ class CourseController extends Controller
                     }
                 }
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
-                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->get();
-                foreach($teacher as $one)
-                    if(isset($one->attachment))
-                        $one->picture=$one->attachment->path;
+                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                if(isset($teacher->attachment))
+                    $one->picture=$one->attachment->path;
 
                 $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
                 if(isset($en))
@@ -508,10 +505,9 @@ class CourseController extends Controller
                         $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
                     }
                 }
-                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->get();
-                foreach($teacher as $one)
-                    if(isset($one->attachment))
-                        $one->picture=$one->attachment->path;
+                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                if(isset($teacher->attachment))
+                    $one->picture=$one->attachment->path;
 
                 $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
