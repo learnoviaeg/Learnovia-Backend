@@ -443,7 +443,7 @@ class CourseController extends Controller
                 }
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
                 foreach($userr as $teach){
-                    $teacher = User::whereId($teach)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                    $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
                     if(isset($teacher->attachment))
                         $teacher->picture=$teacher->attachment->path;
                         array_push($teacherz, $teacher);
