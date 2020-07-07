@@ -341,7 +341,7 @@ class CourseController extends Controller
                     }
                 }
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
-                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->get();
                     
                 foreach($teacher as $one)
                     if(isset($one->attachment))
@@ -439,7 +439,11 @@ class CourseController extends Controller
                     }
                 }
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
-                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->get();
+                foreach($teacher as $one)
+                    if(isset($one->attachment))
+                        $one->picture=$one->attachment->path;
+
                 $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
                 if(isset($en))
                     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
@@ -504,7 +508,11 @@ class CourseController extends Controller
                         $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
                     }
                 }
-                $teacher = User::whereId(Enroll::where('role_id', '4')->where('course_segment', $enroll->CourseSegment->id)->pluck('user_id'))->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
+                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->get();
+                foreach($teacher as $one)
+                    if(isset($one->attachment))
+                        $one->picture=$one->attachment->path;
+
                 $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
                 $course->teacher = $teacher;
