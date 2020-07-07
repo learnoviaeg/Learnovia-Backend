@@ -232,11 +232,20 @@ class CourseController extends Controller
         foreach($couresegs as $one){
             $cc=CourseSegment::find($one);
             $cs[]=$cc->course_id;
+
         }
 
         $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
         foreach($courses as $le){
+
             $le['levels'] = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
+            
+            $teacher = User::whereIn('id',
+            Enroll::where('role_id', '4')
+                ->whereIn('course_segment',  $le->courseSegments->pluck('id'))
+                ->pluck('user_id')
+                )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
+                $le['teachers']  = $teacher ;
             unset($le->courseSegments);
         }
         return HelperController::api_response_format(200, $courses->paginate(HelperController::GetPaginate($request)) );
