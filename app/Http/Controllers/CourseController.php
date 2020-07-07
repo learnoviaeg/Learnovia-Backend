@@ -386,7 +386,7 @@ class CourseController extends Controller
         $couuures=array();
         $CS = GradeCategoryController::getCourseSegment($request);
 
-        if(!$request->user()->can('site/show-all-courses'))
+        if($request->user()->can('site/show-all-courses'))
         {
             foreach ($CS as $coco) {
                 $cocos=CourseSegment::find($coco);
