@@ -457,6 +457,7 @@ class CourseController extends Controller
                 $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
                 $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
                 $course->teachers = $teacherz;
+                $course->attachment;
                 $all->push($course);
             }
 
