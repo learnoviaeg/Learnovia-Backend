@@ -297,7 +297,7 @@ class CourseController extends Controller
         {
             foreach ($request->user()->enroll as $enroll) {           
                 if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                    if($request->filled('year') || $request->filled('segments') || $request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
+                    if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
                         if(in_array($enroll->CourseSegment->id, $CS->toArray()))
                             array_push($couuures,$enroll->CourseSegment->id);
                     }
@@ -380,7 +380,7 @@ class CourseController extends Controller
         $couuures=array();
         $CS = GradeCategoryController::getCourseSegment($request);
 
-        if($request->user()->can('site/show-all-courses'))
+        if(!$request->user()->can('site/show-all-courses'))
         {
             foreach ($CS as $coco) {
                 $cocos=CourseSegment::find($coco);
@@ -398,7 +398,7 @@ class CourseController extends Controller
         {
             foreach ($request->user()->enroll as $enroll) {           
                 if ($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                    if($request->filled('year') || $request->filled('segments') || $request->filled('type') || $request->filled('levels') || $request->filled('classes') ){
+                    if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
                         if(in_array($enroll->CourseSegment->id, $CS->toArray()))
                             array_push($couuures,$enroll->CourseSegment->id);
                     }
@@ -429,12 +429,15 @@ class CourseController extends Controller
                 $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
                 $flag->level = Level::find($level_id->level_id)->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
-                $flag->year = AcademicYear::find($AC_type->academic_type_id)->name;
-                $flag->type = AcademicYear::find($AC_type->academic_type_id)->name;
-                $teacher = User::whereId(Enroll::where('role_id', 4)
-                    ->where('course_segment', $enroll)
-                    ->pluck('user_id')
-                )->get(['id', 'username', 'firstname', 'lastname', 'picture'])[0];
+                $test = AcademicYear::find($AC_type->academic_type_id);
+                if($test)
+                    $flag->year=$test->name;
+                $ttype = AcademicYear::find($AC_type->academic_type_id);
+                if($ttype)
+                    $flag->type=$ttype->name;
+                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
+                if(isset($userr))
+                    $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
                 $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
                 if(isset($en))
                     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
