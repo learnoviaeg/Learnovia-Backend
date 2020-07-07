@@ -454,7 +454,7 @@ class CourseController extends Controller
                 }
                
                 $course->flag = $flag;
-                $course->teacher = $teacherz;
+                $course->teachers = $teacherz;
                 $all->push($course);
             }
 
