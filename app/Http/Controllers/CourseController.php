@@ -441,7 +441,7 @@ class CourseController extends Controller
                         $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
                     }
                 }
-                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->get();
+                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
                 foreach($userr as $teach){
                     $teacher = User::whereId($teach)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
                     if(isset($teacher->attachment))
