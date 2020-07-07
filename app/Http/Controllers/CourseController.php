@@ -426,7 +426,9 @@ class CourseController extends Controller
                 $flag = new stdClass();
                 $flag->segment = Segment::find($segment->segment_id)->name;
                 $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
-                $flag->class = Classes::find($class_id->class_id)->name;
+                $check_class = Classes::find($class_id->class_id);
+                if(isset($check_class))
+                    $flag->class = Classes::find($class_id->class_id)->name;
                 $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
                 $flag->level = Level::find($level_id->level_id)->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
