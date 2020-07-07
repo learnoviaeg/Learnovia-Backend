@@ -343,10 +343,10 @@ class CourseController extends Controller
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
                 $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
                 if(isset($teacher->attachment))
-                    $one->picture=$one->attachment->path;
+                    $teacher->picture=$teacher->attachment->path;
 
                 $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
-                if(isset($en))
+                if(isset($en->id))
                     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
                 $course->teacher = $teacher;
@@ -439,10 +439,10 @@ class CourseController extends Controller
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
                 $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
                 if(isset($teacher->attachment))
-                    $one->picture=$one->attachment->path;
+                    $teacher->picture=$teacher->attachment->path;
 
                 $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
-                if(isset($en))
+                if(isset($en->id))
                     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
                 $course->teacher = $teacher;
@@ -507,7 +507,7 @@ class CourseController extends Controller
                 }
                 $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
                 if(isset($teacher->attachment))
-                    $one->picture=$one->attachment->path;
+                    $teacher->picture=$teacher->attachment->path;
 
                 $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
