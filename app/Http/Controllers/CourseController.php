@@ -230,10 +230,7 @@ class CourseController extends Controller
             $cc=CourseSegment::find($one);
             $cs[]=$cc->course_id;
 
-         
- 
         }
-
         if(count($cs) == 0)
             return HelperController::api_response_format(200, null, 'there is no course_segment' );
 
