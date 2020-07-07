@@ -454,7 +454,7 @@ class CourseController extends Controller
                 }
                
                 $course->flag = $flag;
-                $coursa =  Course::where('course_segment', $enroll)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
+                $coursa =  Course::where('course_segment', $enroll)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
                 $course->levels = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
                 $course->teachers = $teacherz;
                 $all->push($course);
