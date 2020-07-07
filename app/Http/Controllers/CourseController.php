@@ -410,6 +410,7 @@ class CourseController extends Controller
         }
 
         foreach ($couuures as $enroll) {
+            $teacherz = array();
                 $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
 
@@ -440,16 +441,20 @@ class CourseController extends Controller
                         $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
                     }
                 }
-                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
-                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                if(isset($teacher->attachment))
-                    $teacher->picture=$teacher->attachment->path;
-
-                $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
-                if(isset($en->id))
-                    $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->get();
+                foreach($userr as $teach){
+                    $teacher = User::whereId($teach)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                    if(isset($teacher->attachment))
+                        $teacher->picture=$teacher->attachment->path;
+                        array_push($teacherz, $teacher);
+    
+                    // $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
+                    // if(isset($en->id))
+                    //     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+                }
+               
                 $course->flag = $flag;
-                $course->teacher = $teacher;
+                $course->teacher = $teacherz;
                 $all->push($course);
             }
 
