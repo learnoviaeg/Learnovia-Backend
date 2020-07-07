@@ -430,10 +430,10 @@ class CourseController extends Controller
                 $flag->level = Level::find($level_id->level_id)->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
                 $test = AcademicYear::find($AC_type->academic_type_id);
-                if($test)
+                if(isset($test))
                     $flag->year=$test->name;
                 $ttype = AcademicYear::find($AC_type->academic_type_id);
-                if($ttype)
+                if(isset($ttype))
                     $flag->type=$ttype->name;
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
                 if(isset($userr))
