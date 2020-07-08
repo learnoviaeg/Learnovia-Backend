@@ -494,15 +494,40 @@ class CourseController extends Controller
         ]);
         $all = collect();
         $testCourse=array();
+        $adminCourses=collect();
+        $couuures=array();
         $CS = GradeCategoryController::getCourseSegment($request);
 
-        foreach ($request->user()->enroll as $enroll) {
-            if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date > Carbon::now()) {
-                if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
-                    if(!in_array($enroll->CourseSegment->id, $CS->toArray()))
-                        continue;
+        if($request->user()->can('site/show-all-courses'))
+        {
+            foreach ($CS as $coco) {
+                $cocos=CourseSegment::find($coco);
+                if ($cocos->end_date < Carbon::now() && $cocos->start_date < Carbon::now()) {
+                    if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
+                        if(in_array($coco, $CS->toArray()))
+                            array_push($couuures,$coco);
+                    }
+                    else
+                        array_push($couuures,$coco);
                 }
-                $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
+            }
+        }
+        else
+        {
+            foreach ($request->user()->enroll as $enroll) {           
+                if ($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
+                    if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
+                        if(in_array($enroll->CourseSegment->id, $CS->toArray()))
+                            array_push($couuures,$enroll->CourseSegment->id);
+                    }
+                    else
+                        array_push($couuures,$enroll->CourseSegment->id);
+                }
+            }
+        }
+
+        foreach ($couuures as $enroll) {
+                $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
 
                 $request->validate([
@@ -528,18 +553,26 @@ class CourseController extends Controller
                         $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
                     }
                 }
-                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                if(isset($teacher->attachment))
-                    $teacher->picture=$teacher->attachment->path;
-
-                $teacher->class = $enroll->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
+                foreach($userr as $teach){
+                    $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                    if(isset($teacher->attachment))
+                        $teacher->picture=$teacher->attachment->path;
+                        array_push($teacherz, $teacher);
+    
+                    // $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
+                    // if(isset($en->id))
+                    //     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+                }
+               
                 $course->flag = $flag;
-                $course->teacher = $teacher;
-                if(isset($course->attachment))
-                    $course->image = $course->attachment->path;
+                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
+                $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
+                $course->teachers = $teacherz;
+                $course->attachment;
                 $all->push($course);
             }
-        }
+        // }
         if (isset($all))
             return HelperController::api_response_format(200, (new Collection($all))->paginate(HelperController::GetPaginate($request)));
 
