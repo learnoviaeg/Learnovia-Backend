@@ -502,7 +502,7 @@ class CourseController extends Controller
         {
             foreach ($CS as $coco) {
                 $cocos=CourseSegment::find($coco);
-                if ($cocos->end_date < Carbon::now() && $cocos->start_date < Carbon::now()) {
+                if ($cocos->end_date > Carbon::now() && $cocos->start_date > Carbon::now()) {
                     if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
                         if(in_array($coco, $CS->toArray()))
                             array_push($couuures,$coco);
