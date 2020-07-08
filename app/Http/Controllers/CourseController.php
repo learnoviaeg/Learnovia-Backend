@@ -340,16 +340,26 @@ class CourseController extends Controller
                         $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
                     }
                 }
-                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
-                $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                if(isset($teacher->attachment))
-                    $teacher->picture=$teacher->attachment->path;
+                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
 
+                // $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
+                // $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                // if(isset($teacher->attachment))
+                //     $teacher->picture=$teacher->attachment->path;
+                foreach($userr as $teach){
+                    $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                    if(isset($teacher->attachment))
+                        $teacher->picture=$teacher->attachment->path;
+                        array_push($teacherz, $teacher);
+
+                }
                 $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
                 if(isset($en->id)  && isset($teacher))
                     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
                 $course->flag = $flag;
-                $course->teacher = $teacher;
+                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
+                $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
+                $course->teachers = $teacherz;
                 if(!isset($course->attachment)){
                     $course->attachment = null;
                 }
