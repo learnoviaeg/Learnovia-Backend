@@ -527,6 +527,7 @@ class CourseController extends Controller
         }
 
         foreach ($couuures as $enroll) {
+            $teacherz = array();
                 $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
 
