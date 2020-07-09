@@ -310,7 +310,7 @@ class UserController extends Controller
      * @param  [atring] search
      * @return if search|id [object] user
     */
-    public function list(Request $request)
+    public function list(Request $request, $call = 0)
     {
         $request->validate([
             'search' => 'nullable|string',
@@ -372,6 +372,12 @@ class UserController extends Controller
         
         if ($request->filled('search'))
             $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
+
+            if($call == 1){
+                $students = $users->pluck('id');
+                return $students;
+            }
+    
         $users = $users->paginate(HelperController::GetPaginate($request));
         foreach($users->items() as $user)
         {
@@ -684,7 +690,7 @@ class UserController extends Controller
         return HelperController::api_response_format(200,$parent ,'Your Parent is ...');
     }
 
-    Public function get_my_users(Request $request,$call = 0){
+    Public function get_my_users(Request $request){
         $request->validate([
             'courses' => 'array',
             'courses.*' => 'exists:courses,id',
@@ -708,17 +714,13 @@ class UserController extends Controller
         foreach ($students as $student)
             if(isset($student->attachment))
                 $student->picture = $student->attachment->path;
-        if($call == 1){
-            $students = user::whereIn('id',$users->toArray())->where('id','!=',Auth::id())->pluck('id');
-            return $students;
-        }
 
         return HelperController::api_response_format(200,$students ,'Users are.......');
     }
 
     public function export(Request $request)
     {
-        $userIDs = self::get_my_users($request,1);
+        $userIDs = self::list($request,1);
         $filename = uniqid();
          $file = Excel::store(new UsersExport($userIDs), 'users'.$filename.'.xls','public');
          $file = url(Storage::url('users'.$filename.'.xls'));
