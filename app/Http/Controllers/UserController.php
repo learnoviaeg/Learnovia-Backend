@@ -684,7 +684,7 @@ class UserController extends Controller
         return HelperController::api_response_format(200,$parent ,'Your Parent is ...');
     }
 
-    Public function get_my_users(Request $request){
+    Public function get_my_users(Request $request,$call = 0){
         $request->validate([
             'courses' => 'array',
             'courses.*' => 'exists:courses,id',
@@ -708,14 +708,19 @@ class UserController extends Controller
         foreach ($students as $student)
             if(isset($student->attachment))
                 $student->picture = $student->attachment->path;
+        if($call == 1){
+            $students = user::whereIn('id',$users->toArray())->where('id','!=',Auth::id())->pluck('id');
+            return $students;
+        }
 
         return HelperController::api_response_format(200,$students ,'Users are.......');
     }
 
-    public function export()
+    public function export(Request $request)
     {
+        $userIDs = self::get_my_users($request,1);
         $filename = uniqid();
-         $file = Excel::store(new UsersExport, 'users'.$filename.'.xls','public');
+         $file = Excel::store(new UsersExport($userIDs), 'users'.$filename.'.xls','public');
          $file = url(Storage::url('users'.$filename.'.xls'));
          return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
