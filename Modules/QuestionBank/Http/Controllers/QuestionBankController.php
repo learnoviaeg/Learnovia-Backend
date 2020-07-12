@@ -190,7 +190,11 @@ class QuestionBankController extends Controller
             }
         }
         $Questions = $this->QuestionData($question);
-        return HelperController::api_response_format(200, $Questions);
+        $result=collect();
+            $result->push($Questions);
+        
+        // return HelperController::api_response_format(200, $Questions);
+        return HelperController::api_response_format(200, $result->paginate(HelperController::GetPaginate($request)));
     }
 
     public function QuestionData($questions, $type = 0)
