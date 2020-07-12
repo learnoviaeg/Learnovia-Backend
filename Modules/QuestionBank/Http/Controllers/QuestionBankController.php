@@ -195,9 +195,9 @@ class QuestionBankController extends Controller
 
     public function QuestionData($questions, $type = 0)
     {
-
         if ($type == 0) {
             foreach ($questions as $question) {
+                // dd($question;
                 $question->category;
                 $question->question_type;
                 $question->question_category;
@@ -208,7 +208,6 @@ class QuestionBankController extends Controller
                 foreach($question->childeren as $single){
                     $single->question_type;
                 }
-
             }
             $data = $questions;
         } else {
