@@ -37,7 +37,7 @@ class QuestionCategoryController extends Controller
         $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
         $course_seg_id=CourseSegment::whereIn('id',$myCourseSeg)->where('course_id',$request->course)->pluck('id');
         if(count($course_seg_id) == 0)
-            return HelperController::api_response_format(200, 'there is no course segment');
+            return HelperController::api_response_format(200,null,'there is no courses');
 
         foreach($course_seg_id as $CourseSeg)
         {
@@ -60,13 +60,12 @@ class QuestionCategoryController extends Controller
             'course' => 'integer|exists:courses,id',
         ]);
 
-        $ques_cat=QuestionsCategory::get();
+        $ques_cat=QuestionsCategory::get()->paginate(HelperController::GetPaginate($request));
         if($request->filled('course'))
         {
             $all_courses=CourseSegment::where('course_id',$request->course)->get();
-            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->get();
+            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->get()->paginate(HelperController::GetPaginate($request));
         }
-
         return HelperController::api_response_format(200, $ques_cat, 'Question category/ies');    
     }
 
