@@ -478,8 +478,26 @@ class EnrollUserToCourseController extends Controller
             //search a student
             if(isset($request->search))
             {
-                $users_student= $users_student->pluck('id');
-                $users_student=User::whereIn('id',$users_student)->with('attachment')->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
+                
+                $users_student =  User::whereHas("roles",function ( $q)
+                
+                 {
+
+                    $q->where('name',"Student");
+
+                })->where(function($q)
+                use($request){
+                    $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+                });
+                
+                // $users_student= $users_student->pluck('id');
+                // return $users_student;
+                // $users_student=User::whereIn('id',$users_student)
+                // ->with('attachment')->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")
+                // ->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                // ->orWhere('username', 'LIKE' ,"%$request->search%" );
                 return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)),'students are ... ');
             }
             return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)), 'students are ... ');
@@ -489,9 +507,21 @@ class EnrollUserToCourseController extends Controller
             //search one of staff
             if(isset($request->search))
             {
-                $users_staff= $users_staff->pluck('id');
-                $users_staff=User::whereIn('id',$users_staff)->with('attachment')->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
-                
+
+                $users_staff =  User::whereHas("roles",function ( $q)
+                {
+
+                   $q->where('name',"Teacher");
+
+               })->where(function($q)
+               use($request){
+                   $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                   ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                   ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+               });
+
+               
+
                 return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
             }
             return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
