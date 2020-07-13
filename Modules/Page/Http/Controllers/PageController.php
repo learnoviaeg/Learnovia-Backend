@@ -36,7 +36,7 @@ class PageController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/update', 'title' => 'update page']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/delete', 'title' => 'delete page']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/toggle', 'title' => 'toggle page']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/link-lesson', 'title' => 'link lesson page']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/link-lesson', 'title' => 'link page to lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/get', 'title' => 'get page']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
