@@ -371,8 +371,12 @@ class UserController extends Controller
         }
         
         if ($request->filled('search'))
-            $users=$users->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")->orWhere('arabicname', 'LIKE' ,"%$request->search%" )->orWhere('username', 'LIKE' ,"%$request->search%" );
-
+        
+            $users=$users->where(function($q) use($request){
+                $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+            });
             if($call == 1){
                 $students = $users->pluck('id');
                 return $students;
