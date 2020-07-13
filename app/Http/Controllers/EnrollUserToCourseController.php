@@ -490,7 +490,7 @@ class EnrollUserToCourseController extends Controller
                     $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                     ->orWhere('username', 'LIKE' ,"%$request->search%" )
                     ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-                });
+                })->with('attachment');
                 
                 // $users_student= $users_student->pluck('id');
                 // return $users_student;
@@ -509,6 +509,7 @@ class EnrollUserToCourseController extends Controller
             {
 
                 $users_staff =  User::whereHas("roles",function ( $q)
+
                 {
 
                    $q->where('name',"Teacher");
@@ -518,7 +519,7 @@ class EnrollUserToCourseController extends Controller
                    $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-               });
+               })->with('attachment');
 
                
 
