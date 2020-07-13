@@ -37,7 +37,7 @@ class QuestionCategoryController extends Controller
         $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
         $course_seg_id=CourseSegment::whereIn('id',$myCourseSeg)->where('course_id',$request->course)->pluck('id');
         if(count($course_seg_id) == 0)
-            return HelperController::api_response_format(200,null, 'there is no course segment');
+            return HelperController::api_response_format(200,null, 'there is no courses');
 
         foreach($course_seg_id as $CourseSeg)
         {
