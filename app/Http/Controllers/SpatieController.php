@@ -577,7 +577,7 @@ class SpatieController extends Controller
         $pers = Permission::all();
         foreach ($pers as $permission) {
             $key =  explode("/", $permission->name)[0];
-            $permissions[$key][] = $permission->title;
+            $permissions[$key][$permission->name] = $permission->title;
             // $permissions[$key][] = $permission->name;
         }
         return HelperController::api_response_format(200, ['roles' => $roles, 'permissions' => $permissions]);
