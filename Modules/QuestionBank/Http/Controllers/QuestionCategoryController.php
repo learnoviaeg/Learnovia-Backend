@@ -66,10 +66,10 @@ class QuestionCategoryController extends Controller
         if($request->filled('course'))
         {
             $all_courses=CourseSegment::where('course_id',$request->course)->get();
-            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->with('CourseSegmnet')->get()->paginate(HelperController::GetPaginate($request));
+            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
         }
         if($request->filled('name'))
-            $ques_cat=QuestionsCategory::where('name',$request->name)->with('CourseSegmnet')->get()->paginate(HelperController::GetPaginate($request));
+            $ques_cat=QuestionsCategory::where('name',$request->name)->with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
         
         return HelperController::api_response_format(200, $ques_cat, 'Question Categories');    
     }
