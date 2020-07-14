@@ -58,19 +58,22 @@ class QuestionCategoryController extends Controller
     public function show(Request $request)
     {
         $request->validate([
-            'course' => 'integer|exists:courses,id',
-            'name' => 'exists:questions_categories,name'
+            'course_id' => 'integer|exists:courses,id',
+            'text' => 'string'
         ]);
 
-        $ques_cat=QuestionsCategory::with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
-        if($request->filled('course'))
+        $ques_cat=QuestionsCategory::where(function($q) use($request){
+            if($request->filled('text'))
+                $q->orWhere('name', 'LIKE' ,"%$request->text%" );
+        })->with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
+        if($request->filled('course_id'))
         {
-            $all_courses=CourseSegment::where('course_id',$request->course)->get();
-            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
+            $all_courses=CourseSegment::where('course_id',$request->course_id)->get();
+            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
+                if($request->filled('text'))
+                    $q->orWhere('name', 'LIKE' ,"%$request->text%" );
+            })->with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
         }
-        if($request->filled('name'))
-            $ques_cat=QuestionsCategory::where('name',$request->name)->with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
-        
         return HelperController::api_response_format(200, $ques_cat, 'Question Categories');    
     }
 
