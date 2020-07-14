@@ -60,11 +60,12 @@ class QuestionCategoryController extends Controller
             'course' => 'integer|exists:courses,id',
         ]);
 
-        $ques_cat=QuestionsCategory::get()->paginate(HelperController::GetPaginate($request));
+        $ques_cat=QuestionsCategory::with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
         if($request->filled('course'))
         {
             $all_courses=CourseSegment::where('course_id',$request->course)->get();
-            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->get()->paginate(HelperController::GetPaginate($request));
+            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->with('CourseSegmnet')->get()->paginate(HelperController::GetPaginate($request));
+
         }
         return HelperController::api_response_format(200, $ques_cat, 'Question category/ies');    
     }

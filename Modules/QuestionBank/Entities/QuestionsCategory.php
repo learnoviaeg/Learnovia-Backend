@@ -15,4 +15,9 @@ class QuestionsCategory extends Model
     {
         return $this->hasMany('Modules\QuestionBank\Entities\Questions', 'question_category_id', 'id');
     }
+
+    public function CourseSegmnet()
+    {
+        return $this->belongsTo('App\CourseSegment', 'course_segment_id','id');
+    }
 }
