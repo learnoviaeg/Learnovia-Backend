@@ -58,6 +58,7 @@ class QuestionCategoryController extends Controller
     {
         $request->validate([
             'course' => 'integer|exists:courses,id',
+            'name' => 'exists:questions_categories,name'
         ]);
 
         $ques_cat=QuestionsCategory::with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
@@ -65,9 +66,11 @@ class QuestionCategoryController extends Controller
         {
             $all_courses=CourseSegment::where('course_id',$request->course)->get();
             $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->with('CourseSegmnet')->get()->paginate(HelperController::GetPaginate($request));
-
         }
-        return HelperController::api_response_format(200, $ques_cat, 'Question category/ies');    
+        if($request->filled('name'))
+            $ques_cat=QuestionsCategory::where('name',$request->name)->with('CourseSegmnet')->get()->paginate(HelperController::GetPaginate($request));
+        
+        return HelperController::api_response_format(200, $ques_cat, 'Question Categories');    
     }
 
     /**
