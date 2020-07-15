@@ -44,6 +44,10 @@ class QuestionCategoryController extends Controller
 
         foreach($course_seg_id as $CourseSeg)
         {
+            $duplicate=QuestionsCategory::where('name',$request->name)->where('course_segment_id',$CourseSeg)->get();
+            if(isset($duplicate))
+                return HelperController::api_response_format(400, $duplicate, 'This category added before');
+
             $quest_cat[]=QuestionsCategory::firstOrCreate([
                 'name' => $request->name,
                 'course_segment_id' => $CourseSeg
