@@ -899,7 +899,6 @@ class SpatieController extends Controller
         $allRole = $user->roles;
         foreach ($allRole as $role) {
             $pers = $role->getAllPermissions();
-            return $pers;
             foreach ($pers as $permission) {
                 if ($permission->dashboard) {
                     $key = explode("/", $permission->name)[0];
