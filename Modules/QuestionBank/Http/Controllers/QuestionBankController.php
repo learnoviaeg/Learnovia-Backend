@@ -14,7 +14,6 @@ use Illuminate\Routing\Controller;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuestionsAnswer;
 use Symfony\Component\Console\Question\Question;
-use Validator;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\QuestionsType;
@@ -152,7 +151,7 @@ class QuestionBankController extends Controller
      */
     public function index(Request $request)
     {
-        $valid = Validator::make($request->all(), [
+        $request->validate([
             'Question_Category_id' => 'array',
             'Question_Category_id.*' => 'integer|exists:questions_categories,id',
             'class' => 'integer|exists:classes,id',
@@ -161,9 +160,6 @@ class QuestionBankController extends Controller
             'question_type.*' => 'integer|exists:questions_types,id',
             'search' => 'nullable'
         ]);
-        if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors());
-        }
        
         $questions = Questions::where('survey',0)->with('question_answer');
         if($request->filled('search'))
@@ -257,7 +253,7 @@ class QuestionBankController extends Controller
      */
     public static function CreateOrFirstQuestion($Question,$parent = null)
     {
-        $valid = Validator::make($Question, [
+        $request->validate([
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
             'mark' => 'required|integer|min:0',
@@ -267,9 +263,6 @@ class QuestionBankController extends Controller
             'parent' => 'integer|exists:questions,id',
             'survey' => 'boolean',
         ]);
-        if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
-        }
      
         $arr = array();
         if (isset($Question['parent'])) {
@@ -298,7 +291,7 @@ class QuestionBankController extends Controller
 
     public static function CreateQuestion($Question,$parent=null)
     {
-        $valid = Validator::make($Question, [
+        $request->validate([
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
             'mark' => 'required|integer|min:0',
@@ -308,10 +301,6 @@ class QuestionBankController extends Controller
             'parent' => 'integer|exists:questions,id',
             'survey' => 'boolean'
         ]);
-
-        if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
-        }
 
         $Questions = collect([]);
         $arr = array();
@@ -340,7 +329,7 @@ class QuestionBankController extends Controller
 
     public function TrueFalse($Question,$parent)
     {
-        $validator = Validator::make($Question, [
+        $request->validate([
             'answers' => 'required|array|distinct|min:2|max:2',
             'text' => 'required|string',
             'answers.*' => 'required|boolean|distinct',
@@ -349,10 +338,6 @@ class QuestionBankController extends Controller
             'Is_True' => 'required|boolean',
             'survey' => 'boolean'
         ]);
-
-        if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
-        }
 
         $cat = $this::CreateOrFirstQuestion($Question,$parent);
         if (isset($cat->id)) {
@@ -381,21 +366,16 @@ class QuestionBankController extends Controller
 
     public function MCQ($Question,$parent)
     {
-
-        $validator = Validator::make($Question, [
+        $request->validate([
             'answers' => 'required|array|distinct|min:2',
             'answers.*' => 'required|string|distinct',
             'Is_True' => 'required|integer',
             'text' => 'required|string',
             'survey' => 'boolean'
         ]);
-
-        if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
-        }
-        if ($Question['Is_True'] > count($Question['answers']) - 1) {
+        if ($Question['Is_True'] > count($Question['answers']) - 1) 
             return HelperController::api_response_format(400, null, 'is True invalid');
-        }
+
         $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
         $ansA = QuestionsAnswer::where('question_id', $id)->pluck('content')->toArray();
         $result = array_diff($Question['answers'], $ansA);
@@ -431,18 +411,15 @@ class QuestionBankController extends Controller
 
     public function Match($Question,$parent)
     {
-        $validator = Validator::make($Question, [
+        $request->validate([
             'match_A' => 'required|array|min:2|distinct',
             'match_A.*' => 'required|distinct',
             'match_B' => 'required|array|distinct',
             'match_B.*' => 'required|distinct',
         ]);
-        if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
-        }
-        if (count($Question['match_A']) > count($Question['match_B'])) {
+        if (count($Question['match_A']) > count($Question['match_B'])) 
             return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
-        }
+            
         $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
         $ansA = QuestionsAnswer::where('question_id', $id)->pluck('match_A')->toArray();
         $resultA = array_diff($Question['match_A'], $ansA);
@@ -481,18 +458,15 @@ class QuestionBankController extends Controller
 
     public function paragraph($Question)
     {
-        $validator = Validator::make($Question, [
+        $request->validate([
             'subQuestions' => 'required|array|distinct'/*|min:2*/,
             'subQuestions.*' => 'required|distinct',
             'subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
             'survey' => 'boolean'
         ]);
-        if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors());
-        }
 
         $cat = $this->CreateOrFirstQuestion($Question);
-      //  dd($cat);
+        // dd($cat);
         $re = collect([]);
             foreach ($Question['subQuestions'] as $subQuestion) {
                 switch ($subQuestion['Question_Type_id']) {
@@ -601,15 +575,11 @@ class QuestionBankController extends Controller
 
     public function updatesubQuestion($squestion, $parent=null,$Question_Type_id=null)
     {
-        $validator = Validator::make($squestion->all(), [
+        $request->validate([
             'mark' => 'required|integer|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'required|integer|exists:questions_categories,id',
         ]);
-        if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors());
-        }
-
 
         $question_id = Questions::where('parent', $parent)->where('question_type_id', $Question_Type_id)->pluck('id')->first();
         $question = Questions::find($question_id);
