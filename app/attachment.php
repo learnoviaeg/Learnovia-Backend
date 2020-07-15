@@ -34,7 +34,7 @@ class attachment extends Model
         $attachment->description = $description;
         $attachment->type = $type;
         $attachment->extension = $extension;
-       $attachment->mime_type = $file->getClientMimeType();
+        $attachment->mime_type = $file->getClientMimeType();
         $attachment->save();
         Storage::disk('public')->putFileAs($type, $singlefile, $fileName);
 

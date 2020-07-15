@@ -224,7 +224,11 @@ class segment_class_Controller extends Controller
         foreach($req->levels as $level){
             $yearlevel = YearLevel::checkRelation($yeartype->id, $level);
             foreach($req->classes as $class){
-                $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
+                $classlevel = ClassLevel::whereClass_id($class)->whereYear_level_id($yearlevel)->first();
+                if(!isset($classlevel))
+                    continue;
+                $classLevel = $classlevel->id;
+                // $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
                 $count = SegmentClass::whereClass_level_id($classLevel->id)->count();
                 if ($count >= $type->segment_no) {
                     continue;
