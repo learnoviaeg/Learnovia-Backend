@@ -253,7 +253,7 @@ class QuestionBankController extends Controller
      */
     public static function CreateOrFirstQuestion($Question,$parent = null)
     {
-        $request->validate([
+        $request->validate($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
             'mark' => 'required|integer|min:0',
@@ -291,7 +291,7 @@ class QuestionBankController extends Controller
 
     public static function CreateQuestion($Question,$parent=null)
     {
-        $request->validate([
+        $request->validate($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
             'mark' => 'required|integer|min:0',
@@ -329,7 +329,7 @@ class QuestionBankController extends Controller
 
     public function TrueFalse($Question,$parent)
     {
-        $request->validate([
+        $request->validate($Question, [
             'answers' => 'required|array|distinct|min:2|max:2',
             'text' => 'required|string',
             'answers.*' => 'required|boolean|distinct',
@@ -366,13 +366,14 @@ class QuestionBankController extends Controller
 
     public function MCQ($Question,$parent)
     {
-        $request->validate([
+        $request->validate($Question, [
             'answers' => 'required|array|distinct|min:2',
             'answers.*' => 'required|string|distinct',
             'Is_True' => 'required|integer',
             'text' => 'required|string',
             'survey' => 'boolean'
         ]);
+
         if ($Question['Is_True'] > count($Question['answers']) - 1) 
             return HelperController::api_response_format(400, null, 'is True invalid');
 
@@ -411,7 +412,7 @@ class QuestionBankController extends Controller
 
     public function Match($Question,$parent)
     {
-        $request->validate([
+        $request->validate($Question, [
             'match_A' => 'required|array|min:2|distinct',
             'match_A.*' => 'required|distinct',
             'match_B' => 'required|array|distinct',
@@ -458,7 +459,7 @@ class QuestionBankController extends Controller
 
     public function paragraph($Question)
     {
-        $request->validate([
+        $request->validate($Question, [
             'subQuestions' => 'required|array|distinct'/*|min:2*/,
             'subQuestions.*' => 'required|distinct',
             'subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
@@ -575,7 +576,7 @@ class QuestionBankController extends Controller
 
     public function updatesubQuestion($squestion, $parent=null,$Question_Type_id=null)
     {
-        $request->validate([
+        $request->validate($squestion->all(), [
             'mark' => 'required|integer|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'required|integer|exists:questions_categories,id',
