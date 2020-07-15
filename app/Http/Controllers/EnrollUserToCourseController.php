@@ -495,7 +495,7 @@ class EnrollUserToCourseController extends Controller
             if(isset($request->search))
             {
                 $users_staff =  User::whereHas("roles",function ( $q){
-                   $q->where('name',"Teacher");
+                   $q->where('name',"!=","Student");
                })->where(function($q) use($request){
                    $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
