@@ -26,6 +26,12 @@ class QuestionCategoryController extends Controller
         ]);
         $quest_cat=[];
         $course_seg_id = [];
+
+        $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
+        if(count($myCourseSeg) < 1)
+            return HelperController::api_response_format(200,null,'you doesn\'t have any courses');        
+        $course_seg_id =CourseSegment::whereIn('id',$myCourseSeg)->where('course_id',$request->course)->pluck('id');
+
         if($request->filled('class'))
         {
             foreach($request->class as $class)
@@ -35,10 +41,6 @@ class QuestionCategoryController extends Controller
                     $course_seg_id[]=$course_seg->id;
             }
         }
-        $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
-        $course_seg_id []=CourseSegment::whereIn('id',$myCourseSeg)->where('course_id',$request->course)->pluck('id');
-        if(count($course_seg_id) < 1)
-            return HelperController::api_response_format(200,null,'there is no course segments');
 
         foreach($course_seg_id as $CourseSeg)
         {
@@ -47,7 +49,7 @@ class QuestionCategoryController extends Controller
                 'course_segment_id' => $CourseSeg
             ]);
         }
-        return HelperController::api_response_format(200, $quest_cat, 'Question categories added Successfully');
+        return HelperController::api_response_format(200, array_values(array_unique($quest_cat)), 'Question categories added Successfully');
     }
 
     /**
@@ -65,14 +67,14 @@ class QuestionCategoryController extends Controller
         $ques_cat=QuestionsCategory::where(function($q) use($request){
             if($request->filled('text'))
                 $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-        })->with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
+        })->with('CourseSegment.courses')->get()->paginate(HelperController::GetPaginate($request));
         if($request->filled('course_id'))
         {
             $all_courses=CourseSegment::where('course_id',$request->course_id)->get();
             $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
                 if($request->filled('text'))
                     $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-            })->with('CourseSegmnet.courses')->get()->paginate(HelperController::GetPaginate($request));
+            })->with('CourseSegment.courses')->get()->paginate(HelperController::GetPaginate($request));
         }
         return HelperController::api_response_format(200, $ques_cat, 'Question Categories');    
     }
