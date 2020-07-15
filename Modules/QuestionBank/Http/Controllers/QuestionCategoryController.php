@@ -67,16 +67,22 @@ class QuestionCategoryController extends Controller
         $ques_cat=QuestionsCategory::where(function($q) use($request){
             if($request->filled('text'))
                 $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-        })->with('CourseSegment.courses')->get()->paginate(HelperController::GetPaginate($request));
+        })->with('CourseSegment.courses')->get();
+
         if($request->filled('course_id'))
         {
-            $all_courses=CourseSegment::where('course_id',$request->course_id)->get();
+            $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
             $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
                 if($request->filled('text'))
                     $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-            })->with('CourseSegment.courses')->get()->paginate(HelperController::GetPaginate($request));
+            })->with('CourseSegment.courses')->get();
         }
-        return HelperController::api_response_format(200, $ques_cat, 'Question Categories');    
+        foreach($ques_cat as $cat)
+        {
+            $cat->course=isset($cat->CourseSegment) ? $cat->CourseSegment->courses[0] : null;
+            $cat->class=isset($cat->CourseSegment) ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
+        }
+        return HelperController::api_response_format(200, $ques_cat->paginate(HelperController::GetPaginate($request)), 'Question Categories');    
     }
 
     /**

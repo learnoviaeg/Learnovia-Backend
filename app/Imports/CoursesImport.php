@@ -76,7 +76,5 @@ class CoursesImport implements ToModel , WithHeadingRow
                 'index' => $i,
             ]);
         }
-        return $course;
     }
-
 }
