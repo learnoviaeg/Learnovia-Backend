@@ -500,7 +500,7 @@ class EnrollUserToCourseController extends Controller
                    $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-               })->with('attachment');
+               })->with('attachment')->with('roles');
                 return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
             }
             return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
