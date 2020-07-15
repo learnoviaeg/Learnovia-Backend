@@ -1113,13 +1113,12 @@ class CourseController extends Controller
                         $tempBulk = $temp->get();
 
                         foreach($tempBulk as $item){
+                            
                             if(isset($item->pivot))
                             {
                                 $item->course = Course::find(Lesson::find($item->pivot->lesson_id)->courseSegment->course_id);
                                 $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                 $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-                                $item->lesson = Lesson::find($item->pivot->lesson_id);
-
                                 if($item->pivot->quiz_id){
                                     $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id);
                                     if(isset($request->timeline) && $request->timeline == 1 ){
