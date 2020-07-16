@@ -642,7 +642,6 @@ class QuestionBankController extends Controller
         if ($parent==null){
             $question = $this->updateQuestion($request,$parent);
             $answers = QuestionsAnswer::where('question_id', $request->question_id)->get();
-
         }
         else {
             $question = $this->updatesubQuestion($request,$parent,$Question_Type_id);

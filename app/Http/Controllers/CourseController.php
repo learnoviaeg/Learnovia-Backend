@@ -145,7 +145,18 @@ class CourseController extends Controller
             }
         }
         $course->attachment;
-        return HelperController::api_response_format(201, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Created Successfully');
+        $courses =  Course::with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->get();
+        foreach($courses as $le){
+            $le['levels'] = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
+            $teacher = User::whereIn('id',
+                        Enroll::where('role_id', '4')
+                            ->whereIn('course_segment',  $le->courseSegments->pluck('id'))
+                            ->pluck('user_id')
+                            )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
+                            $le['teachers']  = $teacher ;
+            unset($le->courseSegments);
+        }
+        return HelperController::api_response_format(201, $courses->paginate(HelperController::GetPaginate($request)), 'Course Created Successfully');
     }
 
     /**
