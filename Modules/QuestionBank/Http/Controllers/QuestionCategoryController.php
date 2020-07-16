@@ -65,7 +65,8 @@ class QuestionCategoryController extends Controller
     {
         $request->validate([
             'course_id' => 'integer|exists:courses,id',
-            'text' => 'string'
+            'text' => 'string',
+            'lastpage' => 'bool'
         ]);
 
         $ques_cat=QuestionsCategory::where(function($q) use($request){
@@ -85,6 +86,9 @@ class QuestionCategoryController extends Controller
         {
             $cat->course=isset($cat->CourseSegment) ? $cat->CourseSegment->courses[0] : null;
             $cat->class=isset($cat->CourseSegment) ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
+        }
+        if(isset($request->lastpage) && $request->lastpage == true){
+            $request['page'] = $ques_cat->paginate(HelperController::GetPaginate($request))->lastPage();
         }
         return HelperController::api_response_format(200, $ques_cat->paginate(HelperController::GetPaginate($request)), 'Question Categories');    
     }
