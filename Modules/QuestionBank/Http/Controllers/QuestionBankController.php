@@ -152,7 +152,7 @@ class QuestionBankController extends Controller
      */
     public function index(Request $request)
     {
-        $valid = Validator::make($request->all(), [
+        $request->validate([
             'Question_Category_id' => 'array',
             'Question_Category_id.*' => 'integer|exists:questions_categories,id',
             'class' => 'integer|exists:classes,id',
@@ -161,9 +161,6 @@ class QuestionBankController extends Controller
             'question_type.*' => 'integer|exists:questions_types,id',
             'search' => 'nullable'
         ]);
-        if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors());
-        }
        
         $questions = Questions::where('survey',0)->with('question_answer');
         if($request->filled('search'))
