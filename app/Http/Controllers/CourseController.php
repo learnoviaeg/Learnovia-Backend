@@ -612,7 +612,10 @@ class CourseController extends Controller
             'course_id' => 'required|exists:course_segments,course_id'
         ]);
         $CourseSeg = Enroll::where('user_id', $request->user()->id)->pluck('course_segment');
-        
+
+        if($request->user()->can('site/show-all-courses')){
+            $CourseSeg = CourseSegment::where('course_id',$request->course_id)->pluck('id');
+        }
         $seggg = array();
         $userrole = array();
         foreach ($CourseSeg as $cour) {
@@ -623,7 +626,11 @@ class CourseController extends Controller
         }
         $CourseSeg = array();
         foreach ($seggg as $segggg) {
-            $userrole[$segggg] = Enroll::where('user_id', $request->user()->id)->where('course_segment', $segggg)->pluck('role_id')->first();
+            if($request->user()->can('site/show-all-courses'))
+                $userrole[$segggg] = 1;
+            else
+                $userrole[$segggg] = Enroll::where('user_id', $request->user()->id)->where('course_segment', $segggg)->pluck('role_id')->first();
+
             $CourseSeg[] = CourseSegment::where('id', $segggg)->get();
         }
         $clase = array();
