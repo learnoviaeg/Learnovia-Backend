@@ -159,7 +159,8 @@ class QuestionBankController extends Controller
             'course_id' => 'integer|exists:courses,id',
             'question_type' => 'array',
             'question_type.*' => 'integer|exists:questions_types,id',
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'lastpage' => 'bool'
         ]);
        
         $questions = Questions::where('survey',0)->with('question_answer');
@@ -187,6 +188,9 @@ class QuestionBankController extends Controller
             }
         }
         $Questions = $this->QuestionData($question);
+        if(isset($request->lastpage) && $request->lastpage == true){
+            $request['page'] = collect($Questions)->paginate(HelperController::GetPaginate($request))->lastPage();
+        }
         return HelperController::api_response_format(200, collect($Questions)->paginate(HelperController::GetPaginate($request)));
     }
 
