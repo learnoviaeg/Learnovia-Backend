@@ -565,7 +565,7 @@ class QuestionBankController extends Controller
             'question_id' => 'required|integer|exists:questions,id',
             'mark' => 'required|integer|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
-            'question_category_id' => 'required|integer|exists:questions_categories,id',
+            'question_category_id' => 'integer|exists:questions_categories,id',
             'parent' => 'integer|exists:questions,id',
         ]);
         $arr = array();
@@ -601,7 +601,7 @@ class QuestionBankController extends Controller
         $validator = Validator::make($squestion->all(), [
             'mark' => 'required|integer|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
-            'question_category_id' => 'required|integer|exists:questions_categories,id',
+            'question_category_id' => 'integer|exists:questions_categories,id',
         ]);
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors());
