@@ -27,10 +27,9 @@ class QuestionCategoryController extends Controller
         $quest_cat=[];
         $course_seg_id = [];
 
-        $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
-        if(count($myCourseSeg) < 1)
-            return HelperController::api_response_format(200,null,'you doesn\'t have any courses');        
-        $course_seg_id =CourseSegment::whereIn('id',$myCourseSeg)->where('course_id',$request->course)->pluck('id');
+        $course_seg_id =CourseSegment::where('course_id',$request->course)->pluck('id');
+        if(count($course_seg_id) < 1)
+            return HelperController::api_response_format(200,null,'you doesn\'t have any courses'); 
 
         if($request->filled('class'))
         {
@@ -44,7 +43,7 @@ class QuestionCategoryController extends Controller
 
         foreach($course_seg_id as $CourseSeg)
         {
-            $duplicate=QuestionsCategory::where('name',$request->name)->where('course_segment_id',$CourseSeg)->get();
+            $duplicate=QuestionsCategory::where('name',$request->name)->where('course_segment_id',$CourseSeg)->get()->first();
             if(isset($duplicate->course_segment_id) && isset($duplicate->name))
                 return HelperController::api_response_format(400, $duplicate, 'This category added before');
 
