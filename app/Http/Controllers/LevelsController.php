@@ -39,7 +39,7 @@ class LevelsController extends Controller
             'type' => 'array|required_with:year',
             'type.*' => 'exists:academic_types,id',
         ]);
-        $level = Level::firstOrCreate([
+        $level = Level::create([
             'name' => $request->name,
         ]);
         if ($request->filled('year') && $request->filled('type')) {
@@ -55,7 +55,7 @@ class LevelsController extends Controller
                 }
             }
         }
-        $levels = Level::paginate(HelperController::GetPaginate($request));
+        $levels = Level::all();//paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(201, $levels, 'Level Created Successfully');
     }
 
