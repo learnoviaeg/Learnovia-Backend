@@ -29,7 +29,8 @@ class AC_year_type extends Controller
     public function List_Years_with_types(Request $request)
     {
         $request->validate([
-            'year' => 'required|exists:academic_years,id'
+            'year' => 'required|exists:academic_years,id',
+            'dropdown' => 'boolean'
         ]);
 
         if($request->id != null)
@@ -42,8 +43,12 @@ class AC_year_type extends Controller
         }
         else {
             $cat = AcademicYear::whereId($request->year)->first()->AC_Type->pluck('id');
-            $types = AcademicType::with('yearType.academicyear')->whereIn('id',$cat);            
-            return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)));
+            $types = AcademicType::with('yearType.academicyear')->whereIn('id',$cat);     
+            if(isset($request->dropdown) && $request->dropdown == true)       
+                return HelperController::api_response_format(200, $types->get());
+            else
+                return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)));
+
         }
     }
 
