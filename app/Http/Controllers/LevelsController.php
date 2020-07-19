@@ -55,7 +55,7 @@ class LevelsController extends Controller
                 }
             }
         }
-        $levels = Level::all();//paginate(HelperController::GetPaginate($request));
+        $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(201, $levels, 'Level Created Successfully');
     }
 
