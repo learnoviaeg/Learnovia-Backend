@@ -66,7 +66,8 @@ class QuestionCategoryController extends Controller
         $request->validate([
             'course_id' => 'integer|exists:courses,id',
             'text' => 'string',
-            'lastpage' => 'bool'
+            'lastpage' => 'bool',
+            'dropdown' => 'boolean',
         ]);
 
         $ques_cat=QuestionsCategory::where(function($q) use($request){
@@ -90,7 +91,10 @@ class QuestionCategoryController extends Controller
         if(isset($request->lastpage) && $request->lastpage == true){
             $request['page'] = $ques_cat->paginate(HelperController::GetPaginate($request))->lastPage();
         }
-        return HelperController::api_response_format(200, $ques_cat->paginate(HelperController::GetPaginate($request)), 'Question Categories');    
+        if(isset($request->dropdown) && $request->dropdown == true)
+            return HelperController::api_response_format(200, $ques_cat, 'Question Categories');    
+        else
+            return HelperController::api_response_format(200, $ques_cat->paginate(HelperController::GetPaginate($request)), 'Question Categories');    
     }
 
     /**
