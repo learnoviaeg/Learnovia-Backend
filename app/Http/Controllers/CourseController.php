@@ -277,7 +277,11 @@ class CourseController extends Controller
         ]);
         $course = Course::find($request->id);
         $course->delete();
-        return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Deleted Successfully');
+        $request['returnmsg'] = 'Course Deleted Successfully';
+        $request = new Request($request->only(['returnmsg']));
+        $print=self::get($request);
+        return $print;
+        // return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Deleted Successfully');
     }
 
 
