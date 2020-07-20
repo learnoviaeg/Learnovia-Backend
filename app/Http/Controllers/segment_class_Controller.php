@@ -229,7 +229,7 @@ class segment_class_Controller extends Controller
                 if ($count >= $type->segment_no) {
                     continue;
                 }
-                SegmentClass::firstOrCreate([
+                SegmentClass::create([
                     'class_level_id' => $classLevel->id,
                     'segment_id' => $segment->id,
                 ]);
