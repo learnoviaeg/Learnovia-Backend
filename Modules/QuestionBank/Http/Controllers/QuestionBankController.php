@@ -155,15 +155,33 @@ class QuestionBankController extends Controller
         $request->validate([
             'Question_Category_id' => 'array',
             'Question_Category_id.*' => 'integer|exists:questions_categories,id',
+            'year' => 'nullable|exists:academic_years,id',
+            'type' => 'nullable|exists:academic_types,id',
+            'level' => 'nullable|exists:levels,id',
             'class' => 'integer|exists:classes,id',
+            'segment' => 'nullable|exists:segments,id',
             'course_id' => 'integer|exists:courses,id',
             'question_type' => 'array',
             'question_type.*' => 'integer|exists:questions_types,id',
             'search' => 'nullable',
             'lastpage' => 'bool'
         ]);
-       
-        $questions = Questions::where('survey',0)->with('question_answer');
+        if(isset($request->year)){
+            $cs = [];
+            $couresegs = GradeCategoryController::getCourseSegment($request);
+            if(count($couresegs) == 0)
+                return HelperController::api_response_format(200, null, 'No questions found' );
+
+            foreach($couresegs as $one){
+                $cc=CourseSegment::find($one);
+                $cs[]=$cc->course_id;
+            }
+            $cs= array_unique($cs);
+            $questions = Questions::whereIn('course_id',$cs)->where('survey',0)->with('question_answer');
+        }else{
+            $questions = Questions::where('survey',0)->with('question_answer');
+        }
+
         if($request->filled('search'))
         {
            $questions->where('text', 'LIKE' , "%$request->search%");
