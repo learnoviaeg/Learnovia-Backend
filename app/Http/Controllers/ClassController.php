@@ -107,7 +107,7 @@ class ClassController extends Controller
             'level.*'=> 'exists:levels,id',
         ]);
 
-        $class = Classes::firstOrCreate([
+        $class = Classes::create([
             'name' => $request->name,
         ]);
         if($request->filled('year')&&$request->filled('type')&&$request->filled('level')){
