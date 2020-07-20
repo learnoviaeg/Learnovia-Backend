@@ -154,7 +154,11 @@ class CourseController extends Controller
             $le['teachers']  = $teacher ;
             unset($le->courseSegments);
         }
-        return HelperController::api_response_format(201, $courses->paginate(HelperController::GetPaginate($request)), 'Course Created Successfully');
+        $request['returnmsg'] = 'Course Created Successfully';
+        $request = new Request($request->only(['name', 'category','returnmsg']));
+        $print=self::get($request);
+        return $print;
+        // return HelperController::api_response_format(201, $courses->paginate(HelperController::GetPaginate($request)), 'Course Created Successfully');
     }
 
     /**
@@ -204,7 +208,7 @@ class CourseController extends Controller
      * @return [object] course with attachment and category in paginate with search
      * @return [object] course with attachment and category in paginate if id
      */
-    public function get(Request $request)
+    public static function get(Request $request)
     {
         $request->validate([
             'id' => 'exists:courses,id',
@@ -254,7 +258,10 @@ class CourseController extends Controller
                             $le['teachers']  = $teacher ;
             unset($le->courseSegments);
         }
-        return HelperController::api_response_format(200, $courses->paginate(HelperController::GetPaginate($request)) );
+        if(isset($request->returnmsg))
+            return HelperController::api_response_format(200, $courses->paginate(HelperController::GetPaginate($request)),$request->returnmsg );
+        else
+            return HelperController::api_response_format(200, $courses->paginate(HelperController::GetPaginate($request)) );
     }
 
     /**
