@@ -395,25 +395,30 @@ class CourseController extends Controller
             'class' => 'exists:classes,id',
             'segment' => 'exists:segments,id',
         ]);
-        $all = collect();
+        $allCourses = collect();
         $testCourse=array();
         $adminCourses=collect();
         $couuures=array();
-        $CS = GradeCategoryController::getCourseSegment($request);
 
+        $course_Segmenttt=CourseSegment::where('start_date', '<',Carbon::now())->where('end_date', '<',Carbon::now());
+
+        if(!$request->user()->can('site/show-all-courses'))
+        {
+            $course_Segmenttt->whereHas('enroll',function($q)
+            {
+                $q->where('user_id',Auth::id());
+            });
+        }
+
+        return $course_Segmenttt->get();
         if($request->user()->can('site/show-all-courses'))
         {
-            foreach ($CS as $coco) {
-                $cocos=CourseSegment::find($coco);
-                if ($cocos->end_date < Carbon::now() && $cocos->start_date < Carbon::now()) {
-                    if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
-                        if(in_array($coco, $CS->toArray()))
-                            array_push($couuures,$coco);
-                    }
-                    else
-                        array_push($couuures,$coco);
-                }
-            }
+            $CS = GradeCategoryController::getCourseSegment($request);
+            if(!isset($CS))
+                return HelperController::api_response_format(200, null, 'there is no courses');
+
+                $couuures=CourseSegment::whereIn('id',$CS)->where('start_date', '<',Carbon::now())->where('end_date', '<',Carbon::now())->pluck('id');
+
         }
         else
         {
@@ -481,8 +486,8 @@ class CourseController extends Controller
                 $all->push($course);
             }
 
-        if (isset($all))
-            return HelperController::api_response_format(200, (new Collection($all))->paginate(HelperController::GetPaginate($request)));
+        if (isset($allCourses))
+            return HelperController::api_response_format(200, (new Collection($allCourses))->paginate(HelperController::GetPaginate($request)));
 
         return HelperController::api_response_format(200, null, 'there is no courses');
     }

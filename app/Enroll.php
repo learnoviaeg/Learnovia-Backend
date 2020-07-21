@@ -66,4 +66,15 @@ class Enroll extends Model
     {
         return $this->hasMany('App\User','id' , 'user_id');
     }
+   
+    public function scopeOfSegment($query)
+    {
+        return $query->where('segment', $segment);
+    }
+   
+    public function scopeOfYear($query)
+    {
+        $year = AcademicYear::Get_current();
+        return $query->where('year',  $year);
+    }
 }
