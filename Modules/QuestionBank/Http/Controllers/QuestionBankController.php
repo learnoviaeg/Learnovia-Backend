@@ -170,7 +170,7 @@ class QuestionBankController extends Controller
             $cs = [];
             $couresegs = GradeCategoryController::getCourseSegment($request);
             if(count($couresegs) == 0)
-                return HelperController::api_response_format(200, null, 'No questions found' );
+                return HelperController::api_response_format(200, collect($cs)->paginate(HelperController::GetPaginate($request)), 'No questions found' );
 
             foreach($couresegs as $one){
                 $cc=CourseSegment::find($one);
