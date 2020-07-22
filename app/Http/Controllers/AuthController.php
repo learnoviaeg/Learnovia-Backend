@@ -113,7 +113,7 @@ class AuthController extends Controller
             )->toDateTimeString(),
             'language' => Language::find($user->language),
             'dictionary' => self::Get_Dictionary(1),
-        ], 'User Login Successfully , Don`t share this token with any one they are hackers.');
+        ], 'Login successfully');
     }
 
     public function Get_Dictionary($callOrNot = 0)
