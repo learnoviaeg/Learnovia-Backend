@@ -155,7 +155,8 @@ class CourseController extends Controller
             unset($le->courseSegments);
         }
         $request['returnmsg'] = 'Course Created Successfully';
-        $request = new Request($request->only(['name', 'category','returnmsg']));
+        $request['year'] = $request->year[0];
+        $request = new Request($request->only(['name', 'category','returnmsg','year']));
         $print=self::get($request);
         return $print;
         // return HelperController::api_response_format(201, $courses->paginate(HelperController::GetPaginate($request)), 'Course Created Successfully');
