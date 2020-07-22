@@ -184,7 +184,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api']], function () {
     Route::get('get-all', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
     Route::get('my-courses', 'CourseController@CurrentCourses')->name('mycourses')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::get('all-courses', 'CourseController@EnrolledCourses')->name('enrolledcourses')->middleware(['permission:course/all-courses' , 'ParentCheck']);
-    Route::get('past-courses', 'CourseController@PastCourses')->name('pastcourses')->middleware(['permission:course/past-courses' , 'ParentCheck']);
+    Route::get('past-courses', 'CourseController@PastCourses');//->name('pastcourses')->middleware(['permission:course/past-courses' , 'ParentCheck']);
     Route::get('future-courses', 'CourseController@FutureCourses')->name('futurecourses')->middleware(['permission:course/future-courses' , 'ParentCheck']);
     Route::get('layout', 'CourseController@GetUserCourseLessons')->name('layout')->middleware(['permission:course/layout' , 'ParentCheck']);
     Route::get('optional', 'CourseController@getCoursesOptional')->name('optional')->middleware('permission:course/optional');

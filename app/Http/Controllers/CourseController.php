@@ -400,96 +400,57 @@ class CourseController extends Controller
         $adminCourses=collect();
         $couuures=array();
 
-        $course_Segmenttt=CourseSegment::where('start_date', '<',Carbon::now())->where('end_date', '<',Carbon::now());
+        $course_Segmenttt=CourseSegment::where('end_date', '<',Carbon::now());
+        $year=0;
+        $segment = Segment::where('current',1)->pluck('id');
+        try{
+            $year = AcademicYear::where('current',1)->first()->id;
+        }
+        catch( \Exception $e){
+            $year=null;
 
-        if(!$request->user()->can('site/show-all-courses'))
+        }
+        if ($request->has('year')) {
+            $year= $request->year;
+        }
+        if($year==null){
+            return HelperController::api_response_format(404, null, 'there is no years');
+
+        }
+        if ($request->has('segment')) {
+            $segment = $request->segment;
+        }
+        if($segment==null){
+            return HelperController::api_response_format(404, null, 'there is no segments');
+
+        }
+
+
+       $courses_ids= $course_Segmenttt->whereHas('enroll',function($q)use ($request,$year,$segment)
         {
-            $course_Segmenttt->whereHas('enroll',function($q)
+            if(!$request->user()->can('site/show-all-courses'))
             {
-                $q->where('user_id',Auth::id());
-            });
-        }
-
-        return $course_Segmenttt->get();
-        if($request->user()->can('site/show-all-courses'))
-        {
-            $CS = GradeCategoryController::getCourseSegment($request);
-            if(!isset($CS))
-                return HelperController::api_response_format(200, null, 'there is no courses');
-
-                $couuures=CourseSegment::whereIn('id',$CS)->where('start_date', '<',Carbon::now())->where('end_date', '<',Carbon::now())->pluck('id');
-
-        }
-        else
-        {
-            foreach ($request->user()->enroll as $enroll) {           
-                if ($enroll->CourseSegment->end_date < Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                    if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
-                        if(in_array($enroll->CourseSegment->id, $CS->toArray()))
-                            array_push($couuures,$enroll->CourseSegment->id);
-                    }
-                    else
-                        array_push($couuures,$enroll->CourseSegment->id);
-                }
+              
+            $q->where('user_id',Auth::id());
             }
-        }
-
-        foreach ($couuures as $enroll) {
-            $teacherz = array();
-                $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
-                $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
-
-                $request->validate([
-                    'course_id' => 'exists:courses,id'
-                ]);
-                if($request->filled('course_id'))
-                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
-
-                if(in_array($course->id,$testCourse))
-                    continue;
-                array_push($testCourse,$course->id);
-                $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
-                $flag = new stdClass();
-                $flag->segment = Segment::find($segment->segment_id)->name;
-                $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
-                $check_class = Classes::find($class_id->class_id);
-                if(isset($check_class))
-                    $flag->class = Classes::find($class_id->class_id)->name;
-                $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
-                $Check_level = Level::find($level_id->level_id);
-                if(isset($Check_level))
-                    $flag->level = Level::find($level_id->level_id)->name;
-                $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
-                if(isset($AC_type)){
-                    if(isset(AcademicYear::find($AC_type->academic_type_id)->name)){
-                        $flag->year = AcademicYear::find($AC_type->academic_year_id)->name;
-                        $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
-                    }
-                }
-                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
-                foreach($userr as $teach){
-                    $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                    if(isset($teacher->attachment))
-                        $teacher->picture=$teacher->attachment->path;
-                        array_push($teacherz, $teacher);
-    
-                    // $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
-                    // if(isset($en->id))
-                    //     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
-                }
-               
-                $course->flag = $flag;
-                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
-                $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
-                $course->teachers = $teacherz;
-                $course->attachment;
-                $all->push($course);
+            if ($request->has('level')) {
+                $q->where('level',$request->level);
             }
+            if ($request->has('type')) {
+                $q->where('type',$request->type);
+            } 
+           if ($request->has('class')) {
+                $q->where('class',$request->class);
+            }
+            $q->where('year',$year);
+            $q->whereIn('segment',$segment);
 
-        if (isset($allCourses))
-            return HelperController::api_response_format(200, (new Collection($allCourses))->paginate(HelperController::GetPaginate($request)));
+       
 
-        return HelperController::api_response_format(200, null, 'there is no courses');
+        })->pluck('course_id');
+        $courses = Course:: whereIn('id',$courses_ids)->get();       
+        return HelperController::api_response_format(200, (new Collection($courses))->paginate(HelperController::GetPaginate($request)));
+       
     }
 
     /**
