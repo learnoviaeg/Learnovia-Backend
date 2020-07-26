@@ -160,7 +160,7 @@ class CourseController extends Controller
             unset($le->courseSegments);
         }
         $request['returnmsg'] = 'Course Created Successfully';
-        $request['year'] = $request->year[0];
+        $request['year'] = $request->chains[0]['year'][0];
         $request = new Request($request->only(['name', 'category','returnmsg','year']));
         $print=self::get($request);
         return $print;
