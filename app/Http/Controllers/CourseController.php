@@ -942,7 +942,7 @@ class CourseController extends Controller
         } else {
             return HelperController::api_response_format(201, 'Please Enter Equal number of array');
         }
-        return HelperController::api_response_format(201, 'Course Assigned Successfully');
+        return HelperController::api_response_format(201, null ,'Course Assigned Successfully');
     }
 
     /**
