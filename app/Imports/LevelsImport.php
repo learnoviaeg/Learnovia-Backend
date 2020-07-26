@@ -20,7 +20,7 @@ class LevelsImport implements ToModel , WithHeadingRow
     public function model(array $row)
     {
         $messages = [
-            'exists' => 'Type assigned to level '.$row['name'].' is not assigned to a year.',
+            'exists' => 'Type with id '.$row['type_id'].' assigned to level '.$row['name'].' is not assigned to a year.',
         ];
         $validator = Validator::make($row,[
             'name' => 'required',
