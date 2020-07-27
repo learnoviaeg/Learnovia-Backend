@@ -63,6 +63,7 @@ class CoursesImport implements ToModel , WithHeadingRow
         if(count($classes_ids) > 0)
             $classLevel=$classes_ids;
         
+        //get current segment in case there is one segment active in all types of all system
         $segment = Segment::where('current',1)->pluck('id')->first();
         if(isset($row['segment_id']))
             $segment=$row['segment_id'];
