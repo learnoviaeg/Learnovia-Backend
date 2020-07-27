@@ -55,6 +55,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'required',
+            'short_name' => 'required|unique:courses',
             'category' => 'exists:categories,id',
             'chains.*.year' => 'array',
             'chains.*.year.*' => 'required|exists:academic_years,id',
@@ -77,6 +78,7 @@ class CourseController extends Controller
         $no_of_lessons = 4;
         $course = Course::create([
             'name' => $request->name,
+            'short_name' => $request->short_name,
         ]);
         // if course has an image
         if ($request->hasFile('image')) {
@@ -100,6 +102,7 @@ class CourseController extends Controller
             $course->save();
         }
         foreach ($request->chains as $chain){
+            // dd($chain);
         if(count($chain['year'])>0){
             foreach ($chain['year'] as $year) {
                 # code...
