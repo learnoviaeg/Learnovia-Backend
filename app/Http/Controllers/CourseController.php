@@ -889,6 +889,8 @@ class CourseController extends Controller
             'segment' => 'array',
             'segment.*' => 'exists:segments,id',
             'course' => 'required|exists:courses,id',
+            'start_date' => 'required|date',
+            'end_date' =>'required|date|after:start_date'
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
@@ -921,7 +923,10 @@ class CourseController extends Controller
                     $class_level = ClassLevel::checkRelation($class, $year_level->id);
                     $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
                     $course_Segment = CourseSegment::checkRelation($segment_class->id, $request->course);
-                    $courseSegment = CourseSegment::find($course_Segment->id);
+                    $courseSegment = CourseSegment::where('id',$course_Segment->id)->update([
+                        'start_date' => $request->start_date,
+                        'end_date' => $request->end_date,
+                    ]);
                     if ($request->filled('no_of_lessons')) {
                         $no_of_lessons = $request->no_of_lessons;
                     }
