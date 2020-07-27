@@ -137,7 +137,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/add', 'title' => 'Course Management' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/update', 'title' => 'update course']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/delete', 'title' => 'delete course']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-all', 'title' => 'Courses' , 'dashboard' => 1]);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-all', 'title' => 'All Courses' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/all-courses', 'title' => 'get all my courses']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/my-courses', 'title' => 'get current courses']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/past-courses', 'title' => 'get past courses']);

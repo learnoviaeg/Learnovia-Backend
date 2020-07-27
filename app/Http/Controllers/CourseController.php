@@ -56,16 +56,16 @@ class CourseController extends Controller
         $request->validate([
             'name' => 'required',
             'category' => 'exists:categories,id',
-            'year' => 'array',
-            'year.*' => 'required|exists:academic_years,id',
-            'type' => 'array|required_with:year',
-            'type.*' => 'exists:academic_types,id',
-            'level' => 'array|required_with:year',
-            'level.*' => 'required|exists:levels,id',
-            'class' => 'array|required_with:year',
-            'class.*' => 'required|exists:classes,id',
-            'segment' => 'array|required_with:year',
-            'segment.*' => 'required|exists:segments,id',
+            'chains.*.year' => 'array',
+            'chains.*.year.*' => 'required|exists:academic_years,id',
+            'chains.*.type' => 'array|required_with:chains.*.year',
+            'chains.*.type.*' => 'exists:academic_types,id',
+            'chains.*.level' => 'array|required_with:chains.*.year',
+            'chains.*.level.*' => 'required|exists:levels,id',
+            'chains.*.class' => 'array',
+            'chains.*.class.*' => 'exists:classes,id',
+            'chains.*.segment' => 'array|required_with:chains.*.year',
+            'chains.*.segment.*' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
             'description' => 'string',
@@ -99,19 +99,23 @@ class CourseController extends Controller
             $course->mandatory = $request->mandatory;
             $course->save();
         }
-        if($request->filled('year')){
-            foreach ($request->year as $year) {
+        foreach ($request->chains as $chain){
+        if(count($chain['year'])>0){
+            foreach ($chain['year'] as $year) {
                 # code...
-                foreach ($request->type as $type) {
+                foreach ($chain['type'] as $type) {
                     # code...
                     $yeartype = AcademicYearType::checkRelation($year, $type);
-                    foreach ($request->level as $level) {
+                    foreach ($chain['level'] as $level) {
                         # code...
                         $yearlevel = YearLevel::checkRelation($yeartype->id, $level);
-                        foreach ($request->class as $class) {
+                        if(!isset($chain['class'])){
+                            $chain['class'] =  ClassLevel::where('year_level_id',$yearlevel->id)->pluck('class_id');
+                        }
+                        foreach ($chain['class'] as $class) {
                             # code...
                             $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
-                            foreach ($request->segment as $segment) {
+                            foreach ($chain['segment'] as $segment) {
                                 # code...
                                 $segmentClass = SegmentClass::checkRelation($classLevel->id, $segment);
                                 $courseSegment = CourseSegment::firstOrCreate([
@@ -144,6 +148,7 @@ class CourseController extends Controller
                 }
             }
         }
+    }
         $course->attachment;
         $courses =  Course::with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->get();
         foreach($courses as $le){
@@ -155,7 +160,7 @@ class CourseController extends Controller
             unset($le->courseSegments);
         }
         $request['returnmsg'] = 'Course Created Successfully';
-        $request['year'] = $request->year[0];
+        $request['year'] = $request->chains[0]['year'][0];
         $request = new Request($request->only(['name', 'category','returnmsg','year']));
         $print=self::get($request);
         return $print;
@@ -884,8 +889,6 @@ class CourseController extends Controller
             'segment' => 'array',
             'segment.*' => 'exists:segments,id',
             'course' => 'required|exists:courses,id',
-            'start_date' => 'required|date',
-            'end_date' =>'required|date|after:start_date'
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
@@ -918,10 +921,7 @@ class CourseController extends Controller
                     $class_level = ClassLevel::checkRelation($class, $year_level->id);
                     $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
                     $course_Segment = CourseSegment::checkRelation($segment_class->id, $request->course);
-                    $courseSegment = CourseSegment::where('id',$course_Segment->id)->update([
-                        'start_date' => $request->start_date,
-                        'end_date' => $request->end_date,
-                    ]);
+                    $courseSegment = CourseSegment::find($course_Segment->id);
                     if ($request->filled('no_of_lessons')) {
                         $no_of_lessons = $request->no_of_lessons;
                     }
@@ -942,7 +942,7 @@ class CourseController extends Controller
         } else {
             return HelperController::api_response_format(201, 'Please Enter Equal number of array');
         }
-        return HelperController::api_response_format(201, 'Course Assigned Successfully');
+        return HelperController::api_response_format(201, null ,'Course Assigned Successfully');
     }
 
     /**

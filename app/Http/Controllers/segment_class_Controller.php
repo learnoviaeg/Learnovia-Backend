@@ -45,7 +45,8 @@ class segment_class_Controller extends Controller
             $classLevel = ClassLevel::checkRelation($request->class, $yearlevel->id);
             $segments = collect([]);
             foreach ($classLevel->segmentClass as $segmentClass) {
-                $segments[] = $segmentClass->segments[0]->id;
+                if(isset($segmentClass->segments[0]))
+                    $segments[] = $segmentClass->segments[0]->id;
             }
             $segments = Segment::with(['academicType.yearType.academicyear','Segment_class.yearLevels.yearType'])->whereIn('id',$segments);
             $all_segments=collect([]);
