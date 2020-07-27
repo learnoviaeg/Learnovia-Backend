@@ -15,7 +15,7 @@ use App\Http\Controllers\EnrollUserToCourseController;
 use App\ClassLevel;
 use App\SegmentClass;
 
-class EnrollStudentImport implements ToModel,WithHeadingRow
+class EnrollStudent implements ToModel,WithHeadingRow
 {
     /**
     * @param Collection $collection
