@@ -56,7 +56,10 @@ class LanguageController extends Controller
         $user = User::find(Auth::id());
         $langs = Language::all();
         foreach($langs as $lang){
-            if($lang->id != $user->language ){
+            if ($user->language ==  null && $lang->default == 1 ) {
+                $lang['current'] = 1 ;  
+            }
+            if($lang->id != $user->language && $user->language!=null ){
                $lang['current'] = 0 ;  
                continue;
             }
