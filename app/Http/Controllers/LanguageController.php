@@ -53,7 +53,18 @@ class LanguageController extends Controller
     }
     public function Get_languages()
     {
-        return HelperController::api_response_format(200, Language::all(), 'Languages are....');
+        $user = User::find(Auth::id());
+        $langs = Language::all();
+        foreach($langs as $lang){
+            if($lang->id != $user->language ){
+               $lang['current'] = 0 ;  
+               continue;
+            }
+            $lang['current'] = 1 ;  
+
+        }
+
+        return HelperController::api_response_format(200, $langs, 'Languages are....');
     }
     public function Delete_languages(Request $request)
     {
