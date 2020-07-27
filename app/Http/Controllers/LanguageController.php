@@ -56,15 +56,15 @@ class LanguageController extends Controller
         $user = User::find(Auth::id());
         $langs = Language::all();
         foreach($langs as $lang){
-            if ($user->language ==  null && $lang->default == 1 ) {
-                $lang['current'] = 1 ;  
-            }
-            if($lang->id != $user->language && $user->language!=null ){
-               $lang['current'] = 0 ;  
+            if($lang->id == $user->language && $user->language!=null ){
+               $lang['current'] = 1 ;  
                continue;
             }
-            $lang['current'] = 1 ;  
-
+             if ($user->language ==  null && $lang->default == 1 ) {
+                $lang['current'] = 1 ;  
+                continue;
+            }
+             $lang['current'] = 0;  
         }
 
         return HelperController::api_response_format(200, $langs, 'Languages are....');
