@@ -25,8 +25,10 @@ class LevelsExport implements FromCollection, WithHeadings
             $year_type = AcademicYearType::find($level->yearlevel->pluck('academic_year_type_id')->first());
 
             if(isset($year_type)){
-                $year_name= AcademicYear::find($year_type->academic_year_id)->name;
-                $type_name= AcademicType::find($year_type->academic_type_id)->name;
+                $year=AcademicYear::find($year_type->academic_year_id);
+                $type= AcademicType::find($year_type->academic_type_id);
+                $year_name= isset($year) ? $year->name : '';
+                $type_name = isset($type) ? $type->name : '';
             }
 
             $level['year'] = $year_name;
