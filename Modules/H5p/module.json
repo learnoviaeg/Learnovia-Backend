@@ -1,0 +1,13 @@
+{
+    "name": "H5p",
+    "alias": "h5p",
+    "description": "",
+    "keywords": [],
+    "order": 0,
+    "providers": [
+        "Modules\\H5p\\Providers\\H5pServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
