@@ -134,10 +134,11 @@ class AuthController extends Controller
     public function changeUserLanguage(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:languages,id',
+            'name' => 'required|exists:languages,name',
         ]);  
         $user = User::find(Auth::id());
-        $user->language = $request->id;
+        $lang = Language::where('name', $request->name)->first();
+        $user->language = $lang->id;
         $user->save();
         $dictionary = self::Get_Dictionary(1);
         return HelperController::api_response_format(200, $dictionary , 'Language changed successfully...');  
