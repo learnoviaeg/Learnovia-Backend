@@ -25,13 +25,14 @@ class UsersExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
         if (request()->user()->can('site/show/real-password')) {
             $this->fields[] = 'real_password';
         }
         if (request()->user()->can('site/show/username')) {
             $this->fields[] = 'username';
         }
+        $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
+
         foreach ($users as $value) {
             $role_id = DB::table('model_has_roles')->where('model_id',$value->id)->pluck('role_id')->first();
             $role_name='';
