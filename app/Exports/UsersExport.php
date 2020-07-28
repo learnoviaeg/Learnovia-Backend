@@ -25,10 +25,10 @@ class UsersExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        if (Auth::user()->can('site/show/real-password')) {
+        // if (Auth::user()->can('site/show/real-password')) {
             $this->fields[] = 'real_password';
-        }
-        if (request()->user()->can('site/show/username')) {
+        // }
+        if (Auth::user()->can('site/show/username')) {
             $this->fields[] = 'username';
         }
         $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
@@ -47,7 +47,7 @@ class UsersExport implements FromCollection, WithHeadings
     }
 
     public function headings(): array
-    {
+    {    dd($this->fields);
         return $this->fields;
     }
 }
