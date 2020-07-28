@@ -221,7 +221,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
     Route::get('get-my-children', 'UserController@getMyChildren')->name('getmychild')->middleware('permission:user/get-my-child');
     Route::post('current-child', 'UserController@SetCurrentChild')->name('currentchild')->middleware('permission:user/current-child');
     Route::post('get-my-users', 'UserController@get_my_users')->name('getmyusers')->middleware('permission:user/get-my-users');
-    Route::get('export', 'UserController@export');//->name('exportUsers')->middleware('permission:user/export');
+    Route::get('export', 'UserController@export')->name('exportUsers')->middleware('permission:user/export');
     Route::post('language', 'AuthController@changeUserLanguage')->name('changeLanguage')->middleware('permission:user/language');
     Route::post('generate-username-password', 'UserController@generate_username_password')->name('generateusernamepassword')->middleware('permission:user/generate-username-password');
     Route::get('GetAllCountries', 'UserController@GetAllCountries')->name('GetAllCountries')->middleware('permission:user/GetAllCountries');
