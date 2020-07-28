@@ -304,7 +304,7 @@ class ClassController extends Controller
         return HelperController::api_response_format(201, 'You haven\'t Classes');
     }
 
-    public function export()
+    public function export(Request $request)
     {
         $classesIDs = self::show($request,1);
         $filename = uniqid();
