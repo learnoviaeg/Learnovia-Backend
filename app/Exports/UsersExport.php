@@ -12,7 +12,7 @@ class UsersExport implements FromCollection, WithHeadings
 {
 
     protected $fields = ['id', 'firstname', 'lastname', 'arabicname', 'country', 'birthdate', 'gender',
-     'phone', 'address', 'nationality', 'notes','email','suspend', 'timezone', 'religion', 'second language', 'created_at',
+     'phone', 'address', 'nationality', 'notes','email','suspend', 'religion', 'second language', 'created_at',
      'class_id','level', 'type','role'];
 
 
@@ -25,16 +25,17 @@ class UsersExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
         if (request()->user()->can('site/show/real-password')) {
             $this->fields[] = 'real_password';
         }
         if (request()->user()->can('site/show/username')) {
             $this->fields[] = 'username';
         }
-        $role_name='';
+        $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
+
         foreach ($users as $value) {
             $role_id = DB::table('model_has_roles')->where('model_id',$value->id)->pluck('role_id')->first();
+            $role_name='';
             if(isset($role_id))
                 $role_name = DB::table('roles')->where('id',$role_id)->first()->name;
             $value['role'] = $role_name;
