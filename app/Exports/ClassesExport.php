@@ -18,9 +18,14 @@ class ClassesExport implements FromCollection, WithHeadings
     /**
     * @return \Illuminate\Support\Collection
     */
+
+    
+    function __construct($classesIDs) {
+        $this->ids = $classesIDs;
+    }
     public function collection()
     {
-        $classes =  Classes::whereNull('deleted_at')->get();
+        $classes =  Classes::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
         $year_name='';
         $type_name='';
         $level_name='';
