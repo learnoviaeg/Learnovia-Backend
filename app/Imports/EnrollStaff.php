@@ -8,6 +8,7 @@ use App\Enroll;
 use App\User;
 use App\Course;
 use App\CourseSegment;
+use Validator;
 
 class EnrollStaff implements ToModel, WithHeadingRow
 {
