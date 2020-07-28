@@ -83,7 +83,7 @@ class segment_class_Controller extends Controller
         }
     }
 
-    public function get(Request $request)
+    public function get(Request $request ,$call = 0)
     {
         if ($request->id == null) {
             $request->validate([
@@ -100,6 +100,10 @@ class segment_class_Controller extends Controller
                 $segments = $segments->where('name', 'LIKE' , "%$request->search%");
             }
             $segments =$segments->get();
+            if($call == 1){
+                $segmentIds = $segments->pluck('id');
+                return $segmentIds;
+            }
             foreach($segments as $segment){
                 $academic_year_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse();
                 $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
@@ -423,11 +427,11 @@ class segment_class_Controller extends Controller
         
         return HelperController::api_response_format(201,null, 'You are not enrolled in any segment');
     }
-    public function export()
+    public function export(Request $request)
     {
+        $segmentsIDs = self::get($request,1);
         $filename = uniqid();
-        // return Excel::download(new SegmentsExport, 'segments.xls');
-        $file = Excel::store(new SegmentsExport, 'Segment'.$filename.'.xls','public');
+        $file = Excel::store(new SegmentsExport($segmentsIDs), 'Segment'.$filename.'.xls','public');
         $file = url(Storage::url('Segment'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
         
