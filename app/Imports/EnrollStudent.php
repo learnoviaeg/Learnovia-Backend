@@ -34,7 +34,7 @@ class EnrollStudent implements ToModel,WithHeadingRow
         $optional='optional';
 
         $user_id = User::FindByName($row['username'])->id;
-        if(isset($row['class_id']))
+        if(!isset($row['class_id']))
             die('class_id is required');
         $classLevel=ClassLevel::where('class_id',$row['class_id'])->pluck('id')->first();
         $level=ClassLevel::find($classLevel)->yearLevels[0]->level_id;
