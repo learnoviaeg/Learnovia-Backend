@@ -13,12 +13,16 @@ class LevelsExport implements FromCollection, WithHeadings
 {
     protected $fields = ['id','name','year','type'];
 
+    function __construct($levelsIDs) {
+        $this->ids = $levelsIDs;
+    }
+
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection()
     {
-        $levels = Level::whereNull('deleted_at')->get();
+        $levels = Level::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
         $year_name='';
         $type_name='';
         foreach ($levels as $level) {
