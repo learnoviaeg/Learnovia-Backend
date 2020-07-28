@@ -38,6 +38,11 @@ use Modules\Assigments\Entities\assignmentOverride;
 use Modules\Page\Entities\pageLesson;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
+use App\Exports\CoursesExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+
+
 
 class CourseController extends Controller
 {
@@ -1448,5 +1453,42 @@ class CourseController extends Controller
 
         $courses=Course::get();
         return HelperController::api_response_format(200,$courses,'Here is all courses');
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'class' => 'exists:classes,id',
+            'segment' => 'array',
+            'segment.*' => 'exists:segments,id',    
+                ]);
+        $year=0;
+        $segment = Segment::where('current',1)->pluck('id');
+        try{
+            $year = AcademicYear::where('current',1)->first()->id;
+        }
+        catch( \Exception $e){
+            $year=null;
+        }
+        if ($request->has('year')) {
+            $year= $request->year;
+        }
+        if($year==null){
+            return HelperController::api_response_format(404, null, 'there is no years');
+        }
+        if ($request->has('segment')) {
+            $segment = $request->segment;
+        }
+        if($segment==null){
+            return HelperController::api_response_format(404, null, 'there is no segments');
+
+        }
+         $filename = uniqid();
+         $file = Excel::store(new CoursesExport( $request,$segment,$year), 'Courses'.$filename.'.xls','public');
+         $file = url(Storage::url('Courses'.$filename.'.xls'));
+         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }

@@ -28,6 +28,7 @@ class EnrollStudent implements ToModel,WithHeadingRow
         $validator = Validator::make($row,[
             'class_id' => 'required|exists:classes,id',
             'username' => 'required|exists:users,username',
+            'segment_id' => 'exists:segments,id'
         ],$messages)->validate();
         
         $optional='optional';
