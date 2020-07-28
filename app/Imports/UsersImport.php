@@ -160,6 +160,10 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$teacheroptional.$teachercounter])){
                     $course_id=Course::findById($row[$teacheroptional.$teachercounter]);
                     $courseSeg=CourseSegment::getidfromcourse($course_id);
+                    if(isset($row['class_id'])){
+                        $courseSegg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);
+                        $courseSeg=[$courseSegg->id];
+                    }
                     if($courseSeg == null)
                         break;
                     $userId =User::FindByName($user->username)->id;
