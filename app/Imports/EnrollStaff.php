@@ -16,6 +16,14 @@ class EnrollStaff implements ToModel, WithHeadingRow
     */
     public function model(array $row)
     {
+        $messages = [
+            'exists' => 'user with username '.$row['username'].' not found'
+        ];
+        $validator = Validator::make($row,[
+            'class_id' => 'exists:classes,id',
+            'username' => 'required|exists:users,username',
+        ],$messages)->validate();
+
         $optional='course';
         $count=1;
         while(isset($row[$optional.$count])){
