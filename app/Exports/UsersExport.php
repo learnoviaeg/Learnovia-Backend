@@ -25,9 +25,9 @@ class UsersExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        // if (Auth::user()->can('site/show/real-password')) {
+        if (Auth::user()->can('site/show/real-password')) {
             $this->fields[] = 'real_password';
-        // }
+        }
         if (Auth::user()->can('site/show/username')) {
             $this->fields[] = 'username';
         }
@@ -47,7 +47,8 @@ class UsersExport implements FromCollection, WithHeadings
     }
 
     public function headings(): array
-    {    dd($this->fields);
+    {   
+        //  dd($this->fields);
         return $this->fields;
     }
 }
