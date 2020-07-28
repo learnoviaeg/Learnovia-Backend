@@ -136,7 +136,7 @@ class ClassController extends Controller
      * @param : id of classes or search as an optional parameter.
      * @return : returns all classes or filtered ones or a class selected by id.
      */
-    public function show(Request $request)
+    public function show(Request $request ,$call = 0)
     {
         if($request->id == null)
         {
@@ -150,6 +150,10 @@ class ClassController extends Controller
 
             }
             $Classes = $Classes->get();
+            if($call == 1){
+                $classesIds = $Classes->pluck('id');
+                return $classesIds;
+            }
             $all_classes=collect([]);
             foreach ($Classes as $class)
            { 
@@ -302,10 +306,10 @@ class ClassController extends Controller
 
     public function export()
     {
-        // return Excel::download(new ClassesExport, 'classes.xls');
+        $classesIDs = self::show($request,1);
         $filename = uniqid();
-         $file = Excel::store(new ClassesExport, 'Class'.$filename.'.xls','public');
-         $file = url(Storage::url('Class'.$filename.'.xls'));
-         return HelperController::api_response_format(201,$file, 'Link to file ....');
+        $file = Excel::store(new ClassesExport, 'Class'.$filename.'.xls','public');
+        $file = url(Storage::url('Class'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }
