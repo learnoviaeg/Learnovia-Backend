@@ -431,7 +431,7 @@ class segment_class_Controller extends Controller
     {
         $segmentsIDs = self::get($request,1);
         $filename = uniqid();
-        $file = Excel::store(new SegmentsExport, 'Segment'.$filename.'.xls','public');
+        $file = Excel::store(new SegmentsExport($segmentsIDs), 'Segment'.$filename.'.xls','public');
         $file = url(Storage::url('Segment'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
         
