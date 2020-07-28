@@ -11,9 +11,9 @@ use DB;
 class UsersExport implements FromCollection, WithHeadings
 {
 
-    protected $fields = ['id', 'firstname', 'lastname', 'arabicname', 'created_at', 'level', 'type', 'class_id','email'
-    ,'suspend', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes',
-    'timezone', 'religion', 'second language','role'];
+    protected $fields = ['id', 'firstname', 'lastname', 'arabicname', 'country', 'birthdate', 'gender',
+     'phone', 'address', 'nationality', 'notes','email','suspend', 'timezone', 'religion', 'second language', 'created_at',
+     'class_id','level', 'type','role'];
 
 
     function __construct($userids) {
