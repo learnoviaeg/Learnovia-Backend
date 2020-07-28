@@ -15,9 +15,13 @@ class SegmentsExport implements FromCollection, WithHeadings
     /**
     * @return \Illuminate\Support\Collection
     */
+    
+    function __construct($segmentsIDs) {
+        $this->ids = $segmentsIDs;
+    }
     public function collection()
     {
-        $segments =  Segment::whereNull('deleted_at')->get();
+        $segments =  Segment::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
         foreach ($segments as $segment) {
             $type = AcademicType::find($segment->academic_type_id);
             $year = $type !== null && $type->Actypeyear !== null ? AcademicYear::find($type->Actypeyear->academic_year_id) : null;
