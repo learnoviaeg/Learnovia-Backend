@@ -156,6 +156,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/lessons', 'title' => 'get all course with lessons']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-classes-by-course', 'title' => 'get all classes by course']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/get-courses-by-classes', 'title' => 'get all courses by classes']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/export', 'title' => 'export courses']);
 
             //Enroll Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/user', 'title' => 'Staff Enrollment' , 'dashboard' => 1]);
