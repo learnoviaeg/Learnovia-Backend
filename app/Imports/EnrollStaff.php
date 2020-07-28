@@ -32,7 +32,8 @@ class EnrollStaff implements ToModel, WithHeadingRow
             $courseSeg=CourseSegment::getidfromcourse($course_id);
             if(isset($row['class_id'])){
                 $courseSegg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);
-                $courseSeg=[$courseSegg->id];
+                if(isset($courseSegg))
+                    $courseSeg=[$courseSegg->id];
             }
             if($courseSeg == null)
                 break;
