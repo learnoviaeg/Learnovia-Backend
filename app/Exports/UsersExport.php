@@ -22,13 +22,6 @@ class UsersExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $request->validate([
-            'year' => 'exists:academic_years,id',
-            'type' => 'exists:academic_types,id',
-            'level' => 'exists:levels,id',
-            'class' => 'exists:classes,id',
-            'segment' => 'exists:segments,id',
-        ]);
         $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
         if (request()->user()->can('site/show/real-password')) {
             $this->fields[] = 'real_password';
