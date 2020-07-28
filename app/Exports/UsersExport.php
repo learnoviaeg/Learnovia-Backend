@@ -41,6 +41,7 @@ class UsersExport implements FromCollection, WithHeadings
             
             $value->setHidden([])->setVisible($this->fields);
         }
+        
         return $users;
     }
 
