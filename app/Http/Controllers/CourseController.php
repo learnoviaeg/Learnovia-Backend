@@ -1463,7 +1463,8 @@ class CourseController extends Controller
             'level' => 'exists:levels,id',
             'class' => 'exists:classes,id',
             'segment' => 'array',
-            'segment.*' => 'exists:segments,id',        ]);
+            'segment.*' => 'exists:segments,id',    
+                ]);
         $year=0;
         $segment = Segment::where('current',1)->pluck('id');
         try{
