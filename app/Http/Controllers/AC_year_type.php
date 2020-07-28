@@ -52,17 +52,20 @@ class AC_year_type extends Controller
         }
     }
 
-    public function get(Request $request){
+    public function get(Request $request,$call=0){
 
         $request->validate([
             'search' => 'nullable'
         ]);
+        $types = AcademicType::whereNull('deleted_at');
         if($request->filled('search'))
         {
-            $types = AcademicType::with('yearType.academicyear')->where('name', 'LIKE' , "%$request->search%")->get()->paginate(HelperController::GetPaginate($request));
-            return HelperController::api_response_format(202, $types);   
+            $types = $types->with('yearType.academicyear')->where('name', 'LIKE' , "%$request->search%");
         }
-        $types = AcademicType::with('yearType.academicyear')->paginate(HelperController::GetPaginate($request));
+        if($call==1){
+            return $types->get();
+        }
+        $types = $types->with('yearType.academicyear')->paginate(HelperController::GetPaginate($request));
 
         if($request->returnmsg == 'delete')
             return HelperController::api_response_format(202, $types,'Type deleted successfully');
@@ -246,11 +249,12 @@ class AC_year_type extends Controller
         
         return HelperController::api_response_format(201,null, 'You haven\'t types');
     }
-    public function export()
+    public function export(Request $request)
     {
         // return Excel::download(new TypesExport, 'types.xls');
+        $types = self::get($request,1);
         $filename = uniqid();
-        $file = Excel::store(new TypesExport, 'Type'.$filename.'.xls','public');
+        $file = Excel::store(new TypesExport($types), 'Type'.$filename.'.xls','public');
         $file = url(Storage::url('Type'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
