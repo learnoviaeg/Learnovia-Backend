@@ -183,7 +183,7 @@ class LevelsController extends Controller
      * @param  [string] search
      * @return [string] Levels
     */
-    public function get(Request $request)
+    public function get(Request $request , $call = 0)
     {
         $request->validate([
             'search' => 'nullable'
@@ -195,6 +195,10 @@ class LevelsController extends Controller
             $levels=$levels->where('name', 'LIKE' , "%$request->search%");
         }
          $levels= $levels->get();
+         if($call == 1){
+            $levelsIds = $levels->pluck('id');
+            return $levelsIds;
+        }
         foreach ($levels as $level)
         {
         $academic_type_id= $level->years->pluck('academic_type_id')->unique();
@@ -244,12 +248,13 @@ class LevelsController extends Controller
         
         return HelperController::api_response_format(201, 'You haven\'t Levels');
     }
-    public function export()
+    public function export(Request $request)
     {
-         $filename = uniqid();
-         $file = Excel::store(new LevelsExport, 'levels'.$filename.'.xls','public');
-         $file = url(Storage::url('levels'.$filename.'.xls'));
-         return HelperController::api_response_format(201,$file, 'Link to file ....');
+        $levelsIDs = self::get($request,1);
+        $filename = uniqid();
+        $file = Excel::store(new LevelsExport($levelsIDs), 'levels'.$filename.'.xls','public');
+        $file = url(Storage::url('levels'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
     
     
