@@ -60,10 +60,10 @@ class AC_year_type extends Controller
         $types = AcademicType::whereNull('deleted_at');
         if($request->filled('search'))
         {
-            $types = $types->with('yearType.academicyear')->where('name', 'LIKE' , "%$request->search%");
+            $types = $types->where('name', 'LIKE' , "%$request->search%");
         }
         if($call==1){
-            return $types->get();
+            return $types;
         }
         $types = $types->with('yearType.academicyear')->paginate(HelperController::GetPaginate($request));
 
@@ -253,8 +253,13 @@ class AC_year_type extends Controller
     {
         // return Excel::download(new TypesExport, 'types.xls');
         $types = self::get($request,1);
+        if(isset($request->year)){
+        $cat = AcademicYear::whereId($request->year)->first()->AC_Type->pluck('id');
+        $types =$types->with('yearType.academicyear')->whereIn('id',$cat); 
+        }
+        
         $filename = uniqid();
-        $file = Excel::store(new TypesExport($types), 'Type'.$filename.'.xls','public');
+        $file = Excel::store(new TypesExport($types->get()), 'Type'.$filename.'.xls','public');
         $file = url(Storage::url('Type'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
