@@ -38,7 +38,12 @@ class UsersImport implements ToModel, WithHeadingRow
             'firstname'=>'required',
             'lastname'=>'required',
             'role_id'=>'required|exists:roles,id',
-            'class_id' => 'exists:classes,id'
+            'email' => 'unique:users',
+            'class_id' => 'exists:classes,id',
+            'level' => 'exists:levels,id',
+            'type' => 'exists:academic_types,id',
+            'language' => 'exists:languages,id',
+            'second language' => 'exists:languages,id'
         ])->validate();
 
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
