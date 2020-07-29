@@ -23,8 +23,9 @@ Route::get('library', "LibraryController@index")->name('h5p.library.index');
 // Route::group(, function () 
     // if (config('laravel-h5p.use_router') == 'EDITOR' || config('laravel-h5p.use_router') == 'ALL') {
         Route::prefix('h5p')->group(function() {
+            Route::get('hend', "H5pController@index");
 
-        Route::resource('h5p', "H5pController");
+        // Route::resource('h5p', "H5pController");
         // Route::group(['middleware' => ['auth']], function () {
 //            Route::get('h5p/export', 'Djoudi\LaravelH5p\Http\Controllers\H5pController@export')->name("h5p.export");
 

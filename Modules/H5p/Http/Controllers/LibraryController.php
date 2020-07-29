@@ -13,6 +13,7 @@ use Djoudi\LaravelH5p\Eloquents\H5pLibrary;
 use H5PCore;
 use Illuminate\Support\Facades\App;
 use Log;
+use Validator;
 
 class LibraryController extends Controller
 {
@@ -37,7 +38,6 @@ class LibraryController extends Controller
                 'upgradeLibrary' => trans('laravel-h5p.library.upgradeLibrary'),
             ],
         ]);
-        // dd( $settings);
 
         foreach ($entrys as $library) {
             $usage = $interface->getLibraryUsage($library->id, $not_cached ? true : false);
@@ -52,9 +52,9 @@ class LibraryController extends Controller
         }
 
         $last_update = config('laravel-h5p.h5p_content_type_cache_updated_at');
+        $required_files = $this->assets(['js/h5p-library-list.js']);
 
-        // $required_files = assets(['js/h5p-library-list.js']);
-        $required_files = '../../Resources/assets/js/h5p-library-list.js';
+        // $required_files = '../../Resources/assets/js/h5p-library-list.js';
 
         if ($not_cached) {
             $settings['libraryList']['notCached'] = $this->get_not_cached_settings($not_cached);
@@ -117,9 +117,13 @@ class LibraryController extends Controller
 
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'h5p_file' => 'required||max:50000',
-        ]);
+        $request->validate(
+            [
+                'h5p_file' => 'required||max:50000',
+
+            ]
+            );
+      
 
         if ($request->hasFile('h5p_file') && $request->file('h5p_file')->isValid()) {
             Log::info('Yes Good ');

@@ -276,7 +276,7 @@ class H5pController extends Controller
         event(new H5pEvent('content', null, $content['id'], $content['title'], $content['library']['name'], $content['library']['majorVersion'], $content['library']['minorVersion']));
 
         //     return view('h5p.content.edit', compact("settings", 'user', 'id', 'content', 'library', 'parameters', 'display_options'));
-        return view('h5p.content.show', compact('settings', 'user', 'embed_code', 'title'));
+    return view('h5p.content.show'/*, compact('settings', 'user', 'embed_code', 'title')*/);
     }
 
     public function destroy(Request $request, $id)
