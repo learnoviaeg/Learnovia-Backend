@@ -88,23 +88,48 @@ class segment_class_Controller extends Controller
         if ($request->id == null) {
             $request->validate([
                 'search' => 'nullable',
-                'year' => 'exists:academic_years,id',
-                'type' => 'exists:academic_types,id|required_with:year',
+                'years' => 'array',
+                'years.*' => 'exists:academic_years,id',
+                'types' => 'array',
+                'types.*' => 'exists:academic_types,id',
+                'levels' => 'array',
+                'levels.*' => 'exists:levels,id',
+                'classes' => 'array',
+                'classes.*' => 'exists:classes,id',
             ]);
+            if($request->filled('id')) {
+                $segment = Segment::find($request->id);
+                return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)));
+            }
 
-            // $segments = Segment::with(['academicType.yearType.academicyear'/*,'Segment_class.yearLevels.yearType.academicyear','Segment_class.yearLevels.yearType.academictype','Segment_class.classes','Segment_class.yearLevels.levels'*/])->paginate(HelperController::GetPaginate($request));
+            $segmentt = Segment::whereNull('deleted_at')
+            ->where('name', 'LIKE' , "%$request->search%")
+            ->whereHas('Segment_class.classes' , function($q)use ($request)
+            { 
+                    if ($request->has('classes'))
+                        $q->whereIn('id',$request->classes);
+                
+            })
+            ->whereHas('Segment_class.classes.classlevel.yearLevels', function($q)use ($request)
+            { 
+                    if ($request->has('levels')) 
+                        $q->whereIn('level_id',$request->levels);
+            })
+            ->whereHas('Segment_class.classes.classlevel.yearLevels.yearType' , function($q)use ($request)
+            { 
+                if ($request->has('years'))
+                    $q->whereIn('academic_year_id',$request->years);
+                if ($request->has('types'))
+                    $q->whereIn('academic_type_id',$request->types);
+            })->get();
             $segments = Segment::with(['academicType.yearType.academicyear','Segment_class.yearLevels.yearType']);
             $all_segments=collect([]);
-            if($request->filled('search'))
-            {
-                $segments = $segments->where('name', 'LIKE' , "%$request->search%");
-            }
-            $segments =$segments->get();
+           
             if($call == 1){
-                $segmentIds = $segments->pluck('id');
+                $segmentIds = $segmentt->pluck('id');
                 return $segmentIds;
             }
-            foreach($segments as $segment){
+            foreach($segmentt as $segment){
                 $academic_year_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse();
                 $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
                 $academic_type_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse();
@@ -120,19 +145,6 @@ class segment_class_Controller extends Controller
                 $all_segments->push($segment);
         
             }
-
-
-            if(isset($request->year))
-            {
-                $arrayYear=Segment::where('academic_type_id',$request->type)->with(['academicType.yearType' => function($query) use ($request){
-                    $query->where('academic_year_id', $request->year);         
-                }])->get();
-                foreach($arrayYear as $year)
-                    if(count($year->academicType->yearType) == 0)
-                        return HelperController::api_response_format(202, null);   
-                else
-                    return HelperController::api_response_format(202, $arrayYear->paginate(HelperController::GetPaginate($request)));   
-            }
             
             if($request->returnmsg == 'delete')
                 return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),'Segment deleted successfully');
@@ -145,9 +157,6 @@ class segment_class_Controller extends Controller
 
 
 
-        } else {
-            $segment = Segment::find($request->id);
-            return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)));
         }
     }
 
