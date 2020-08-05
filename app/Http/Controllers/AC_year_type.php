@@ -66,9 +66,8 @@ class AC_year_type extends Controller
         ->whereHas('yearType',function($q)use ($request)
         {
             if ($request->has('years')) {
-                $q->wherein('academic_year_id',$request->years);
+                $q->whereIn('academic_year_id',$request->years);
             }
-
         });
         $all_types = $types->get();
         if($call==1){
