@@ -38,7 +38,6 @@ class UsersImport implements ToModel, WithHeadingRow
             'firstname'=>'required',
             'lastname'=>'required',
             'role_id'=>'required|exists:roles,id',
-            'email' => 'unique:users',
             'class_id' => 'exists:classes,id',
             'level' => 'exists:levels,id',
             'type' => 'exists:academic_types,id',
@@ -46,6 +45,13 @@ class UsersImport implements ToModel, WithHeadingRow
             'second language' => 'exists:languages,id',
             'username' => 'unique:users'
         ])->validate();
+
+        if(isset($row['email']))
+        {
+            Validator::make($row,[
+                'email' => 'unique:users'
+            ])->validate();
+        }
 
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
                     'language', 'timezone', 'religion', 'second language', 'class_id', 'level', 'type', 'firstname',
