@@ -222,7 +222,7 @@ class CourseController extends Controller
      * @return [object] course with attachment and category in paginate with search
      * @return [object] course with attachment and category in paginate if id
      */
-    public static function get(Request $request)
+    public static function get(Request $request,$call=0)
     {
         $request->validate([
             'id' => 'exists:courses,id',
@@ -262,6 +262,9 @@ class CourseController extends Controller
         }
 
         $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
+        if($call == 1 ){
+            return $courses;
+        }
         foreach($courses as $le){
             $le['levels'] = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
             $teacher = User::whereIn('id',
@@ -1457,37 +1460,9 @@ class CourseController extends Controller
 
     public function export(Request $request)
     {
-        $request->validate([
-            'year' => 'exists:academic_years,id',
-            'type' => 'exists:academic_types,id',
-            'level' => 'exists:levels,id',
-            'class' => 'exists:classes,id',
-            'segment' => 'array',
-            'segment.*' => 'exists:segments,id',    
-                ]);
-        $year=0;
-        $segment = Segment::where('current',1)->pluck('id');
-        try{
-            $year = AcademicYear::where('current',1)->first()->id;
-        }
-        catch( \Exception $e){
-            $year=null;
-        }
-        if ($request->has('year')) {
-            $year= $request->year;
-        }
-        if($year==null){
-            return HelperController::api_response_format(404, null, 'there is no years');
-        }
-        if ($request->has('segment')) {
-            $segment = $request->segment;
-        }
-        if($segment==null){
-            return HelperController::api_response_format(404, null, 'there is no segments');
-
-        }
+        $courses=self::get($request,1);
          $filename = uniqid();
-         $file = Excel::store(new CoursesExport( $request,$segment,$year), 'Courses'.$filename.'.xls','public');
+         $file = Excel::store(new CoursesExport($courses), 'Courses'.$filename.'.xls','public');
          $file = url(Storage::url('Courses'.$filename.'.xls'));
          return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
