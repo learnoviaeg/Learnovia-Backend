@@ -729,12 +729,12 @@ class UserController extends Controller
         'class_id','level', 'type','role'];
 
         if (Auth::user()->can('site/show/real-password')) {
-            $fields[] = 'real_password';
+            $fields[14] = 'real_password';
         }
         if (Auth::user()->can('site/show/username')) {
-            $fields[] = 'username';
+            $fields[3] = 'username';
         }
-        
+
         $userIDs = self::list($request,1);
         $filename = uniqid();
         $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xls','public');
