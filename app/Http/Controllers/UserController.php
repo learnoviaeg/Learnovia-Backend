@@ -729,14 +729,16 @@ class UserController extends Controller
         if (Auth::user()->can('site/show/username')) {
             $fields[] = 'username';
         }
-        $fields [] =  ['arabicname', 'country', 'birthdate', 'gender',
-        'phone', 'address', 'nationality', 'notes','email'];
+
+        $fields = array_merge( $fields, ['arabicname', 'country', 'birthdate', 'gender',
+        'phone', 'address', 'nationality', 'notes','email'] );
 
         if (Auth::user()->can('site/show/real-password')) {
-            $fields[] = 'real_password';
+            array_push($fields,'real_password');
         }
-        $fields []= ['suspend', 'religion', 'second language', 'created_at',
-        'class_id','level', 'type','role'];
+
+        $fields = array_merge($fields, ['suspend', 'religion', 'second language', 'created_at',
+        'class_id','level', 'type','role'] );
 
         $userIDs = self::list($request,1);
         $filename = uniqid();
