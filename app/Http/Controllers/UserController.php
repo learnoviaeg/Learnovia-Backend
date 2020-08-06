@@ -724,16 +724,19 @@ class UserController extends Controller
 
     public function export(Request $request)
     {
-        $fields = ['id', 'firstname', 'lastname', 'arabicname', 'country', 'birthdate', 'gender',
-        'phone', 'address', 'nationality', 'notes','email','suspend', 'religion', 'second language', 'created_at',
-        'class_id','level', 'type','role'];
+        $fields = ['id', 'firstname', 'lastname'];
+
+        if (Auth::user()->can('site/show/username')) {
+            $fields[] = 'username';
+        }
+        $fields [] =  ['arabicname', 'country', 'birthdate', 'gender',
+        'phone', 'address', 'nationality', 'notes','email'];
 
         if (Auth::user()->can('site/show/real-password')) {
-            $fields[13] = 'real_password';
+            $fields[] = 'real_password';
         }
-        if (Auth::user()->can('site/show/username')) {
-            $fields[3] = 'username';
-        }
+        $fields []= ['suspend', 'religion', 'second language', 'created_at',
+        'class_id','level', 'type','role'];
 
         $userIDs = self::list($request,1);
         $filename = uniqid();

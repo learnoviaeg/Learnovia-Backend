@@ -11,11 +11,6 @@ use DB;
 class UsersExport implements FromCollection, WithHeadings
 {
 
-    // protected $fields = ['id', 'firstname', 'lastname', 'arabicname', 'country', 'birthdate', 'gender',
-    //  'phone', 'address', 'nationality', 'notes','email','suspend', 'religion', 'second language', 'created_at',
-    //  'class_id','level', 'type','role'];
-
-
     function __construct($userids,$fields) {
         $this->ids = $userids;
         $this->fields=$fields;
@@ -26,12 +21,6 @@ class UsersExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        // if (Auth::user()->can('site/show/real-password')) {
-        //     $this->fields[] = 'real_password';
-        // }
-        // if (Auth::user()->can('site/show/username')) {
-        //     $this->fields[] = 'username';
-        // }
         $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
 
         foreach ($users as $value) {
