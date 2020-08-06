@@ -737,8 +737,8 @@ class UserController extends Controller
             array_push($fields,'real_password');
         }
 
-        $fields = array_merge($fields, [ 'religion', 'second language', 'created_at',
-        'class_id','level', 'type','role'] );
+        $fields = array_merge($fields, [ 'religion', 'created_at',
+        'class_id','level', 'type','second language','role'] );
 
         $userIDs = self::list($request,1);
         $filename = uniqid();
