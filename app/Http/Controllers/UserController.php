@@ -731,13 +731,13 @@ class UserController extends Controller
         }
 
         $fields = array_merge( $fields, ['arabicname', 'country', 'birthdate', 'gender',
-        'phone', 'address', 'nationality', 'notes','email'] );
+        'phone', 'address', 'nationality', 'notes','email','suspend'] );
 
         if (Auth::user()->can('site/show/real-password')) {
             array_push($fields,'real_password');
         }
 
-        $fields = array_merge($fields, ['suspend', 'religion', 'second language', 'created_at',
+        $fields = array_merge($fields, [ 'religion', 'second language', 'created_at',
         'class_id','level', 'type','role'] );
 
         $userIDs = self::list($request,1);
