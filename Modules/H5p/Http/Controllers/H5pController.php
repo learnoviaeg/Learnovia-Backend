@@ -59,6 +59,8 @@ class H5pController extends Controller
 
     public function store(Request $request)
     {
+        Log::info('$request');
+
 
         $h5p = App::make('LaravelH5p');
         $core = $h5p::$core;

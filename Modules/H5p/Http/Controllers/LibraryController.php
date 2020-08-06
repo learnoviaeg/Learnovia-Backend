@@ -17,6 +17,30 @@ use Validator;
 
 class LibraryController extends Controller
 {
+    public function indexh5p(Request $request)
+    {
+        dd('dddddddddddd');
+        $where = H5pContent::orderBy('h5p_contents.id', 'desc');
+
+        if ($request->query('sf') && $request->query('s')) {
+            if ($request->query('sf') == 'title') {
+                $where->where('h5p_contents.title', $request->query('s'));
+            }
+            if ($request->query('sf') == 'creator') {
+                $where->leftJoin('users', 'users.id', 'h5p_contents.user_id')->where('users.name', 'like', '%'.$request->query('s').'%');
+            }
+        }
+
+        $search_fields = [
+            'title'   => trans('laravel-h5p.content.title'),
+            'creator' => trans('laravel-h5p.content.creator'),
+        ];
+        $entrys = $where->paginate(10);
+        $entrys->appends(['sf' => $request->query('sf'), 's' => $request->query('s')]);
+
+        return view('h5p.content.index', compact('entrys', 'request', 'search_fields'));
+    }
+
    
     public function index(Request $request)
     {
@@ -117,9 +141,10 @@ class LibraryController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate(
             [
-                'h5p_file' => 'required||max:50000',
+                'h5p_file' => 'required',
 
             ]
             );
