@@ -729,7 +729,7 @@ class UserController extends Controller
         'class_id','level', 'type','role'];
 
         if (Auth::user()->can('site/show/real-password')) {
-            $fields[14] = 'real_password';
+            $fields[13] = 'real_password';
         }
         if (Auth::user()->can('site/show/username')) {
             $fields[3] = 'username';
