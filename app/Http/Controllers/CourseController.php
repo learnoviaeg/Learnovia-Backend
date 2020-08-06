@@ -732,8 +732,11 @@ class CourseController extends Controller
                                 }
                                 if($com->name == 'Assigments'){
                                     foreach ($lessonn['Assigments'] as $one){
+
                                         $assignLesson = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
                                         ->pluck('id')->first();
+                                        $one['allow_attachment'] = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
+                                        ->pluck('allow_attachment')->first();
                                         $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignLesson)->pluck('start_date')->first();
                                         $one->start_date = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
                                         ->pluck('start_date')->first();
