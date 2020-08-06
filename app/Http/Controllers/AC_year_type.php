@@ -71,7 +71,7 @@ class AC_year_type extends Controller
         });
         $all_types = $types->get();
         if($call==1){
-            return $all_types->pluck('id');
+            return $all_types;
         }
 
         if($request->returnmsg == 'delete')
