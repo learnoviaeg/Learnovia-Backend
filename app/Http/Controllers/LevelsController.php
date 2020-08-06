@@ -110,10 +110,10 @@ class LevelsController extends Controller
     public function GetAllLevelsInYear(Request $request, $call = 0)
     {
         $request->validate([
-            'year' => 'array',
-            'year.*' => 'nullable|exists:academic_years,id',
-            'type' => 'array',
-            'type.*' => 'nullable|exists:academic_types,id',
+            'years' => 'array',
+            'years.*' => 'nullable|exists:academic_years,id',
+            'types' => 'array',
+            'types.*' => 'nullable|exists:academic_types,id',
             'id' => 'exists:levels,id',
             'search' => 'nullable'
         ]);
@@ -125,13 +125,13 @@ class LevelsController extends Controller
         
         $levels = new Level;
 
-        if($request->filled('year') || $request->filled('type')){
+        if($request->filled('years') || $request->filled('types')){
 
             $levels = Level::whereHas("years", function ($q) use ($request) {
-                if($request->filled('year'))
-                    $q->whereIn("academic_year_id", $request->year);
-                if($request->filled('type'))
-                    $q->whereIn("academic_type_id", $request->type);
+                if($request->filled('years'))
+                    $q->whereIn("academic_year_id", $request->years);
+                if($request->filled('types'))
+                    $q->whereIn("academic_type_id", $request->types);
             });
         }
         
@@ -204,30 +204,37 @@ class LevelsController extends Controller
     public function get(Request $request , $call = 0)
     {
         $request->validate([
-            'search' => 'nullable'
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'id' => 'exists:levels,id',
         ]);
-        $levels = Level::with('years');
-        $all_levels=collect([]);
-        if($request->filled('search'))
-        {
-            $levels=$levels->where('name', 'LIKE' , "%$request->search%");
+        $yearType = AcademicYearType::checkRelation($request->year, $request->type);
+        $levels = collect([]);
+        $all_levels = collect([]);
+        if ($request->filled('id')) {
+            $all_levels = Level::find($request->id);
+
+            return HelperController::api_response_format(200, $all_levels);
+        } else {
+            foreach ($yearType->yearLevel as $yearLevel) {
+                if(count($yearLevel->levels) > 0)
+                    $levels[] = $yearLevel->levels[0]->id;
+            }
+
+            $levels = Level::with('years')->whereIn('id',$levels);
+            $levels= $levels->get();        
+            foreach ($levels as $level)
+            {
+            $academic_type_id= $level->years->pluck('academic_type_id')->unique();
+            $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+            $academic_year_id= $level->years->pluck('academic_year_id')->unique();
+            $level['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+            unset($level->years);
+            $all_levels->push($level); 
+            
+            }
         }
-         $levels= $levels->get();
-         if($call == 1){
-            $levelsIds = $levels->pluck('id');
-            return $levelsIds;
-        }
-        foreach ($levels as $level)
-        {
-        $academic_type_id= $level->years->pluck('academic_type_id')->unique();
-        $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-        $academic_year_id= $level->years->pluck('academic_year_id')->unique();
-        $level['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
-        unset($level->years);
-        $all_levels->push($level); 
-        
-        }
-        return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));   
+        return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));  
 
     }
 
