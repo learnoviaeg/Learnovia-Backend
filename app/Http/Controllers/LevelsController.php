@@ -154,8 +154,8 @@ class LevelsController extends Controller
         }
 
         if($call == 1){
-           $levelsIds = $all_levels->pluck('id');
-           return $levelsIds;
+        //    $levelsIds = $all_levels->pluck('id');
+           return $all_levels;
         }
 
         return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));
