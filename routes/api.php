@@ -131,10 +131,10 @@ Route::group(['prefix' => 'type', 'middleware' => ['auth:api']], function () {
 //Level Routes
 Route::group(['prefix' => 'level', 'middleware' => ['auth:api']], function () {
     Route::post('add', 'LevelsController@AddLevelWithYear')->name('addlevel')->middleware('permission:level/add');
-    Route::get('get', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get');
+    Route::get('get', 'LevelsController@get')->name('getlevels')->middleware('permission:level/get');
     Route::get('get-my-levels', 'LevelsController@GetMyLevels')->name('getmylevels')->middleware('permission:level/get-my-levels');
     //without year or type request
-    Route::get('get-all', 'LevelsController@get')->name('getlevels')->middleware('permission:level/get-all');
+    Route::get('get-all', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get-all');
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
     Route::post('assign', 'LevelsController@Assign_level_to')->name('assignlevel')->middleware('permission:level/assign');
@@ -144,10 +144,10 @@ Route::group(['prefix' => 'level', 'middleware' => ['auth:api']], function () {
 //Class Routes
 Route::group(['prefix' => 'class', 'middleware' => ['auth:api']], function () {
     Route::post('add', 'ClassController@AddClassWithYear')->name('addclass')->middleware('permission:class/add');
-    Route::get('get', 'ClassController@index')->name('getallclasses')->middleware('permission:class/get');
+    Route::get('get', 'ClassController@show')->name('getallclasses')->middleware('permission:class/get');
     Route::get('get-my-classes', 'ClassController@GetMyclasses')->name('getmyclasses')->middleware('permission:class/get-my-classes');
     //without any parameters
-    Route::get('get-all', 'ClassController@show')->name('getallclass')->middleware('permission:class/get-all');
+    Route::get('get-all', 'ClassController@index')->name('getallclass')->middleware('permission:class/get-all');
     Route::post('update', 'ClassController@update')->name('updateclass')->middleware('permission:class/update');
     Route::post('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:class/delete');
     Route::post('assign', 'ClassController@Assign_class_to')->name('assignclass')->middleware('permission:class/assign');
