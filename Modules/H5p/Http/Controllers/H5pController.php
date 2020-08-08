@@ -14,6 +14,8 @@ class H5pController extends Controller
 {
     public function index(Request $request)
     {
+        Log::info('indexh5p');
+
         $where = H5pContent::orderBy('h5p_contents.id', 'desc');
 
         if ($request->query('sf') && $request->query('s')) {
@@ -37,12 +39,14 @@ class H5pController extends Controller
 
     public function create(Request $request)
     {
+        Log::info('createh5p');
+
         $h5p = App::make('LaravelH5p');
         $core = $h5p::$core;
 
         // Prepare form
         $library = 0;
-        $parameters = '{}';
+        $parameters = '{"chart"}';
 
         $display_options = $core->getDisplayOptionsForEdit(null);
 
@@ -59,7 +63,7 @@ class H5pController extends Controller
 
     public function store(Request $request)
     {
-        Log::info('$request');
+        Log::info('storeh5p');
 
 
         $h5p = App::make('LaravelH5p');

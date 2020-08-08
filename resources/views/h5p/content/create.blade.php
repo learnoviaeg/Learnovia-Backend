@@ -33,7 +33,6 @@
                     </div>
                 </div>
 
-
                 <div id="laravel-h5p-create" class="form-group {{ $errors->has('parameters') ? 'has-error' : '' }}">
                     <label for="inputParameters" class="control-label col-md-3">{{ trans('laravel-h5p.content.parameters') }}</label>
                     <div class="col-md-9">
