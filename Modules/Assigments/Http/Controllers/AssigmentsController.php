@@ -543,7 +543,6 @@ class AssigmentsController extends Controller
         $user = Auth::user();
         $lesson=Lesson::find($request->lesson_id);
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();        
@@ -569,6 +568,7 @@ class AssigmentsController extends Controller
             }
             $assignment['lesson'] =  $assignment_lesson;
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
+            $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
             $start = $assignment_lesson->AssignmentLesson[0]->start_date;
             $due = $assignment_lesson->AssignmentLesson[0]->due_date;
             if ($assignment_lesson->AssignmentLesson[0]->start_date > Carbon::now() || $assignment_lesson->AssignmentLesson[0]->due_date < Carbon::now()) {
@@ -578,7 +578,6 @@ class AssigmentsController extends Controller
             }
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
-
             if(isset($studentassigment)){
                 $assignment['user_submit'] =$studentassigment;
                 $usr=User::find($studentassigment->user_id);
@@ -610,8 +609,9 @@ class AssigmentsController extends Controller
             $due = $assignment_lesson->AssignmentLesson[0]->due_date;
             $assignment['lesson'] =$assignment_lesson;
             $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
-            $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
+            $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
+            $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
             foreach($userassigments as $userAssignment)
             {
