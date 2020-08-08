@@ -53,8 +53,7 @@ class LibraryController extends Controller
 
         $last_update = config('laravel-h5p.h5p_content_type_cache_updated_at');
 
-        // $required_files = assets(['js/h5p-library-list.js']);
-        $required_files = '../../Resources/assets/js/h5p-library-list.js';
+        $required_files = $this->assets(['js/h5p-library-list.js']);
 
         if ($not_cached) {
             $settings['libraryList']['notCached'] = $this->get_not_cached_settings($not_cached);

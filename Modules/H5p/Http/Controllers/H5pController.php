@@ -1,6 +1,9 @@
 <?php
 
+namespace App\Http\Controllers;
+
 namespace Djoudi\LaravelH5p\Http\Controllers;
+namespace Modules\H5p\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Djoudi\LaravelH5p\Eloquents\H5pContent;
@@ -14,6 +17,7 @@ class H5pController extends Controller
 {
     public function index(Request $request)
     {
+        Log::info('message');
         $where = H5pContent::orderBy('h5p_contents.id', 'desc');
 
         if ($request->query('sf') && $request->query('s')) {
@@ -276,7 +280,7 @@ class H5pController extends Controller
         event(new H5pEvent('content', null, $content['id'], $content['title'], $content['library']['name'], $content['library']['majorVersion'], $content['library']['minorVersion']));
 
         //     return view('h5p.content.edit', compact("settings", 'user', 'id', 'content', 'library', 'parameters', 'display_options'));
-        return view('h5p.content.show', compact('settings', 'user', 'embed_code', 'title'));
+        return view('h5p.content.show', compact('settings',/* 'user', */'embed_code', 'title'));
     }
 
     public function destroy(Request $request, $id)

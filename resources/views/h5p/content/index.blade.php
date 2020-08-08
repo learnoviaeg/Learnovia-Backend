@@ -47,7 +47,9 @@
                 <thead>
                     <tr class="active">
                         <th class="text-center">#</th>
-                        <th class="text-center">{{ trans('laravel-h5p.content.creator') }}</th>
+                        <th class="text-center">
+                            {{ trans('laravel-h5p.content.creator') }}
+                        </th>
                         <th class="text-left">{{ trans('laravel-h5p.content.title') }}</th>
                         <th class="text-center">{{ trans('laravel-h5p.content.created_at') }}</th>
                         <th class="text-center">{{ trans('laravel-h5p.content.action') }}</th>
@@ -68,7 +70,8 @@
                         </td>
 
                         <td class="">
-                            {{ $entry->get_user()->name }}
+                            hend
+                            {{-- {{ $entry->get_user()->name }} --}}
                         </td>
 
                         <td class="text-left">
