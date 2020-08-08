@@ -541,9 +541,13 @@ class AssigmentsController extends Controller
         ]);
 
         $user = Auth::user();
-        
+        $lesson=Lesson::find($request->lesson_id);
+        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
+
         $assignment = assignment::where('id', $request->assignment_id)->first();
-        $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
+        $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();        
         if(!isset($assigLessonID))
             return HelperController::api_response_format(200, null, 'this assigment doesn\'t belong to this lesson');
 
@@ -564,14 +568,14 @@ class AssigmentsController extends Controller
                 $assignment_lesson->AssignmentLesson[0]->start_date = $override->start_date;
                 $assignment_lesson->AssignmentLesson[0]->due_date = $override->due_date;
             }
-                $assignment['lesson'] =  $assignment_lesson;
-                $start = $assignment_lesson->AssignmentLesson[0]->start_date;
-                $due = $assignment_lesson->AssignmentLesson[0]->due_date;
-                if ($assignment_lesson->AssignmentLesson[0]->start_date > Carbon::now() || $assignment_lesson->AssignmentLesson[0]->due_date < Carbon::now()) {
-                    if (isset($studentassigment->override) && $studentassigment->override == 0) {
-                        return HelperController::api_response_format(400, $body = [], $message = 'you are not allowed to see the assignment at this moment');
-                    }
+            $assignment['lesson'] =  $assignment_lesson;
+            $start = $assignment_lesson->AssignmentLesson[0]->start_date;
+            $due = $assignment_lesson->AssignmentLesson[0]->due_date;
+            if ($assignment_lesson->AssignmentLesson[0]->start_date > Carbon::now() || $assignment_lesson->AssignmentLesson[0]->due_date < Carbon::now()) {
+                if (isset($studentassigment->override) && $studentassigment->override == 0) {
+                    return HelperController::api_response_format(400, $body = [], $message = 'you are not allowed to see the assignment at this moment');
                 }
+            }
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
 
@@ -585,7 +589,6 @@ class AssigmentsController extends Controller
                     $assignment['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
                 }
             }
-            $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
             if($start > Carbon::now() && $request->user()->can('site/course/student'))
                 $assignment['started'] = false;
             else
@@ -606,7 +609,6 @@ class AssigmentsController extends Controller
             $due = $assignment_lesson->AssignmentLesson[0]->due_date;
             $assignment['lesson'] =$assignment_lesson;
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
-            $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
             $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
             foreach($userassigments as $userAssignment)
@@ -618,15 +620,14 @@ class AssigmentsController extends Controller
                 }
             }
             foreach($studentassigments as $studentassigment){
-                    if(isset($studentassigment->user->attachment))
-                        $studentassigment->user->picture=$studentassigment->user->attachment->path;
+                if(isset($studentassigment->user->attachment))
+                    $studentassigment->user->picture=$studentassigment->user->attachment->path;
 
-                    if (isset($studentassigment->attachment_id)) {
-                        $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-                    }
+                if (isset($studentassigment->attachment_id)) {
+                    $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                }
             }
             $assignment['user_submit'] = $studentassigments;
-            $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
             if($start > Carbon::now())
                 $assignment['started'] = false;
             else
@@ -663,6 +664,7 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
+
     public function AssignAssignmentToLesson(Request $request)
     {
         $request->validate([
