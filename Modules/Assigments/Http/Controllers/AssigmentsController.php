@@ -541,8 +541,6 @@ class AssigmentsController extends Controller
         ]);
 
         $user = Auth::user();
-        $lesson=Lesson::find($request->lesson_id);
-        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();        
