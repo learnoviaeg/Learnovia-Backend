@@ -611,10 +611,17 @@ class CourseController extends Controller
                     $flag->level = Level::find($level_id->level_id)->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
                 if(isset($AC_type)){
-                    if(isset(AcademicYear::find($AC_type->academic_type_id)->name)){
-                        $flag->year = AcademicYear::find($AC_type->academic_year_id)->name;
-                        $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
-                    }
+
+                    $year_object = AcademicYear::find($AC_type->academic_year_id);
+                    $type_object = AcademicType::find($AC_type->academic_type_id);
+
+                    $flag->year = 'Not_Found';
+                    $flag->type = 'Not_Found';
+                    
+                    if(isset($year_object))
+                        $flag->year = $year_object->name;
+                    if(isset($type_object))
+                        $flag->type = $type_object->name;
                 }
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
                 foreach($userr as $teach){
