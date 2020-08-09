@@ -1096,6 +1096,7 @@ class CourseController extends Controller
 
         return HelperController::api_response_format(200, null, 'there is no courses');
     }
+
     public function Count_Components(Request $request)
     {
         $request->validate([
@@ -1154,22 +1155,37 @@ class CourseController extends Controller
         ]);
         // $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
         $components  = Component::where('active', 1)->whereIn('type', [3,1]);
-        if ($request->filled('components')) {
+        if ($request->filled('components')) 
             $components->whereIn('id', $request->components);
-        };
+            
         $components = $components->get();
         $result = [];
-        foreach ($components as $component) {
+        $CourseSegments=[];
+        foreach ($components as $component)
             $result[$component->name] = [];
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $cs=GradeCategoryController::getCourseSegment($request);
+            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
         }
-        $user = User::whereId($request->user()->id)->with(['enroll.courseSegment' => function ($query) use ($request) {
-            if ($request->filled('course'))
-                $query->where('course_id', $request->course);
-        }])->first();
+        else
+        {
+            foreach ($request->user()->enroll as $enroll) {
+                if ($enroll->courseSegment != null) {
+                    $CourseSegments[]=$enroll->courseSegment;
+                }
+            }
+        }
         $k=0;
-        foreach ($user->enroll as $enroll) {
-            if ($enroll->courseSegment != null) {
-                foreach ($enroll->courseSegment->lessons as $lesson) {
+        foreach ($CourseSegments as $oneCouSeg) {
+            if ($oneCouSeg != null) {
+                if(isset($request->course)){
+                    if($oneCouSeg->course_id != $request->course)
+                        continue;
+                }
+
+                foreach ($oneCouSeg->lessons as $lesson) {
                     foreach ($components as $component) {
                         $temp = $lesson->module($component->module, $component->model);
 
@@ -1179,7 +1195,7 @@ class CourseController extends Controller
                         }
                         //&& $component->model != 'assignment'
                         if($component->model != 'quiz'){
-                            if($enroll['role_id'] == 3){
+                            if($request->user()->can('site/course/student')){
                                 $temp->where('publish_date', '<=', Carbon::now());
                             }
                         }
@@ -1210,7 +1226,8 @@ class CourseController extends Controller
                                     $item->Started = true;
                                 }
                                 if($item->pivot->assignment_id)
-                                 {   $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id);
+                                {   
+                                    $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id);
                                     if(isset($request->timeline) && $request->timeline == 1 ){
                                         $item->due_date->where('due_date','>=',Carbon::now());
                                     }
@@ -1244,7 +1261,7 @@ class CourseController extends Controller
                                     $quickaction[]=$item;
                                     $k++;
                                 }
-                                    $result[$component->name][] = $item;
+                                $result[$component->name][] = $item;
                             }
                         }
                     }
@@ -1406,6 +1423,7 @@ class CourseController extends Controller
         }
         return HelperController::api_response_format(200,$result);
     }
+
     public function getLessonsFromCourseAndClass(Request $request){
         $validator =  Validator::make($request->all() , [
             'class'  => 'required|exists:classes,id',
