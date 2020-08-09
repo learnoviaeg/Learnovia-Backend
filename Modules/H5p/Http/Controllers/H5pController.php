@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 namespace Djoudi\LaravelH5p\Http\Controllers;
 namespace Modules\H5p\Http\Controllers;
-
+use Log;
 use App\Http\Controllers\Controller;
+use App\h5pLesson;
+use App\Lesson;
 use Djoudi\LaravelH5p\Eloquents\H5pContent;
 use Djoudi\LaravelH5p\Events\H5pEvent;
 use H5pCore;
+use Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +20,7 @@ class H5pController extends Controller
 {
     public function index(Request $request)
     {
-        Log::info('message');
+        Log::info('indexh5p');
         $where = H5pContent::orderBy('h5p_contents.id', 'desc');
 
         if ($request->query('sf') && $request->query('s')) {
@@ -49,6 +52,9 @@ class H5pController extends Controller
         $parameters = '{}';
 
         $display_options = $core->getDisplayOptionsForEdit(null);
+        $lessons = Lesson::pluck('name');
+        Log::info($lessons[0]);
+        // dd($lessons);
 
         // view Get the file and settings to print from
         $settings = $h5p::get_editor();
@@ -58,11 +64,19 @@ class H5pController extends Controller
 
         $user = Auth::user();
 
-        return view('h5p.content.create', compact('settings', 'user', 'library', 'parameters', 'display_options'));
+        return view('h5p.content.create', compact('settings', 'user', 'library', 'parameters', 'display_options','lessons'));
     }
 
     public function store(Request $request)
     {
+        Log::info('storeH5p');
+        // $request->validate([
+        //     'lesson_id' => 'required|integer|exists:lessons,id',
+        //     'start_date' => 'date |date_format:Y-m-d H:i:s|before:due_date',
+        //     'due_date' => 'date |date_format:Y-m-d H:i:s',
+        //     'visible' => 'boolean',
+        //     'publish_date' => 'date |date_format:Y-m-d H:i:s|before:due_date',
+        // ]);
 
         $h5p = App::make('LaravelH5p');
         $core = $h5p::$core;
@@ -88,8 +102,10 @@ class H5pController extends Controller
             'slug'       => config('laravel-h5p.slug'),
         ];
 
+
         $content['filtered'] = '';
 
+        
         try {
             if ($request->get('action') === 'create') {
                 $content['library'] = $core->libraryFromString($request->get('library'));
@@ -119,8 +135,18 @@ class H5pController extends Controller
                 // Save new content
                 $content['id'] = $core->saveContent($content);
 
+                $content_lesson = h5pLesson::firstOrCreate (['lesson_id' => 1 ,
+                                    'content_id' => $content['id'],
+                                    // 'visible'=>$request->visible,
+                                    'publish_date'=> "25-10-2020",//$request->publish_date ,
+                                    'start_date'=> "25-10-2020",//$request->start_date ,
+                                    'due_date'=>"25-10-2020",//$request->due_date ,
+                                ]);
+
+                                // $lessons = Lesson::pluck('name');
+                                // Log::info($lessons[0]);
                 // Move images and find all content dependencies
-                $editor->processParameters($content['id'], $content['library'], $params, $oldLibrary, $oldParams);
+            $editor->processParameters($content['id'], $content['library'], $params, $oldLibrary, $oldParams/*,$lessons*/);
 
                 event(new H5pEvent('content', $event_type, $content['id'], $content['title'], $content['library']['machineName'], $content['library']['majorVersion'], $content['library']['minorVersion']));
 

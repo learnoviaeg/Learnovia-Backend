@@ -13,6 +13,7 @@
             {!! Form::open(['route' => ['h5p.store'], 'class'=>'form-horizontal', 'enctype'=>"multipart/form-data", 'id'=>'laravel-h5p-form']) !!}
             <input type="hidden" name="library" id="laravel-h5p-library" value="{{ $library }}">
             <input type="hidden" name="parameters" id="laravel-h5p-parameters" value="{{ $parameters }}">
+            <input type="hidden" name="lessons" id="laravel-h5p-lessons" value="{{ $lessons }}">
             
             <fieldset>
 
@@ -40,6 +41,7 @@
                         <div>
                             <div id="laravel-h5p-editor">{{ trans('laravel-h5p.content.loading_content') }}</div>
                         </div>
+                     
 
                         @if ($errors->has('parameters'))                 
                         <span class="help-block">
@@ -49,6 +51,32 @@
 
                     </div>
                 </div>
+  
+               
+                    <div id="laravel-h5p-create" class="form-group {{ $errors->has('lessons') ? 'has-error' : '' }}">
+                    <label for="inputLessons" class="control-label col-md-3">Lessons</label>
+                    <div class="col-md-9">
+                        <div>
+                            <div id="laravel-h5p-editor">
+                                <select name="select">  
+                                    @foreach($lessons as $lesson)
+                                    <option value={{ $lesson }}>{{ $lesson }}</option> 
+                                @endforeach
+                                  </select>  
+                            </div>
+                        </div>
+                     
+
+                        @if ($errors->has('lessons'))                 
+                        <span class="help-block">
+                            {{ $errors->first('lessons') }}
+                        </span>
+                        @endif
+
+                    </div>
+                </div>
+
+                
 
 
 
