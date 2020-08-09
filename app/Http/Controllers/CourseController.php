@@ -1160,11 +1160,11 @@ class CourseController extends Controller
             
         $components = $components->get();
         $result = [];
-        $CourseSegments=collect();
+        $CourseSegments=[];
         foreach ($components as $component)
             $result[$component->name] = [];
 
-        if(!$request->user()->can('site/show-all-courses'))
+        if($request->user()->can('site/show-all-courses'))
         {
             $cs=GradeCategoryController::getCourseSegment($request);
             $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
