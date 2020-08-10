@@ -10,16 +10,19 @@ class YearsExport implements FromCollection, WithHeadings
 {
     protected $fields = ['id','name','current'];
 
+    function __construct($years) {
+        $this->years = $years;
+    }
+
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection()
     {
-        $years = AcademicYear::whereNull('deleted_at')->get();
-        foreach ($years as $year) {
+        foreach ($this->years as $year) {
             $year->setHidden([])->setVisible($this->fields);
         }
-        return $years;
+        return $this->years;
     }
 
     public function headings(): array

@@ -724,11 +724,27 @@ class UserController extends Controller
 
     public function export(Request $request)
     {
+        $fields = ['id', 'firstname', 'lastname'];
+
+        if (Auth::user()->can('site/show/username')) {
+            $fields[] = 'username';
+        }
+
+        $fields = array_merge( $fields, ['arabicname', 'country', 'birthdate', 'gender',
+        'phone', 'address', 'nationality', 'notes','email','suspend'] );
+
+        if (Auth::user()->can('site/show/real-password')) {
+            array_push($fields,'real_password');
+        }
+
+        $fields = array_merge($fields, [ 'religion', 'created_at',
+        'class_id','level', 'type','second language','role'] );
+
         $userIDs = self::list($request,1);
         $filename = uniqid();
-         $file = Excel::store(new UsersExport($userIDs), 'users'.$filename.'.xls','public');
-         $file = url(Storage::url('users'.$filename.'.xls'));
-         return HelperController::api_response_format(201,$file, 'Link to file ....');
+        $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xls','public');
+        $file = url(Storage::url('users'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 
     public function generate_username_password(Request $request)

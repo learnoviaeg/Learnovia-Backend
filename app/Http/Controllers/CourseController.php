@@ -38,6 +38,11 @@ use Modules\Assigments\Entities\assignmentOverride;
 use Modules\Page\Entities\pageLesson;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
+use App\Exports\CoursesExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+
+
 
 class CourseController extends Controller
 {
@@ -55,6 +60,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'required',
+            // 'short_name' => 'required|unique:courses',
             'category' => 'exists:categories,id',
             'chains.*.year' => 'array',
             'chains.*.year.*' => 'required|exists:academic_years,id',
@@ -77,6 +83,7 @@ class CourseController extends Controller
         $no_of_lessons = 4;
         $course = Course::create([
             'name' => $request->name,
+            // 'short_name' => $request->short_name,
         ]);
         // if course has an image
         if ($request->hasFile('image')) {
@@ -100,6 +107,7 @@ class CourseController extends Controller
             $course->save();
         }
         foreach ($request->chains as $chain){
+            // dd($chain);
         if(count($chain['year'])>0){
             foreach ($chain['year'] as $year) {
                 # code...
@@ -214,7 +222,7 @@ class CourseController extends Controller
      * @return [object] course with attachment and category in paginate with search
      * @return [object] course with attachment and category in paginate if id
      */
-    public static function get(Request $request)
+    public static function get(Request $request,$call=0)
     {
         $request->validate([
             'id' => 'exists:courses,id',
@@ -254,6 +262,9 @@ class CourseController extends Controller
         }
 
         $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
+        if($call == 1 ){
+            return $courses;
+        }
         foreach($courses as $le){
             $le['levels'] = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
             $teacher = User::whereIn('id',
@@ -357,15 +368,24 @@ class CourseController extends Controller
                 $flag = new stdClass();
                 $flag->segment = Segment::find($segment->segment_id)->name;
                 $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
-                $flag->class = Classes::find($class_id->class_id)->name;
+                $class_object = Classes::find($class_id->class_id);
+                $flag->class = 'Not_Found';
+                if(isset($class_object))
+                    $flag->class = $class_object->name;
                 $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
                 $flag->level = Level::find($level_id->level_id)->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
                 if(isset($AC_type)){
-                    if(isset(AcademicYear::find($AC_type->academic_type_id)->name)){
-                        $flag->year = AcademicYear::find($AC_type->academic_year_id)->name;
-                        $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
-                    }
+                    $year_object = AcademicYear::find($AC_type->academic_year_id);
+                    $type_object = AcademicType::find($AC_type->academic_type_id);
+
+                    $flag->year = 'Not_Found';
+                    $flag->type = 'Not_Found';
+                    
+                    if(isset($year_object))
+                        $flag->year = $year_object->name;
+                    if(isset($type_object))
+                        $flag->type = $type_object->name;
                 }
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
 
@@ -462,7 +482,11 @@ class CourseController extends Controller
                 array_push($testCourse,$course->id);
                 $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $flag = new stdClass();
-                $flag->segment = Segment::find($segment->segment_id)->name;
+
+                $segment_object = Segment::find($segment->segment_id);
+                $flag->segment = 'Not_Found';
+                if(isset($segment_object))
+                    $flag->segment = $segment_object->name;
                 $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
                 $check_class = Classes::find($class_id->class_id);
                 if(isset($check_class))
@@ -473,10 +497,18 @@ class CourseController extends Controller
                     $flag->level = Level::find($level_id->level_id)->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
                 if(isset($AC_type)){
-                    if(isset(AcademicYear::find($AC_type->academic_type_id)->name)){
-                        $flag->year = AcademicYear::find($AC_type->academic_year_id)->name;
-                        $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
-                    }
+
+                    $year_object = AcademicYear::find($AC_type->academic_year_id);
+                    $type_object = AcademicType::find($AC_type->academic_type_id);
+
+                    $flag->year = 'Not_Found';
+                    $flag->type = 'Not_Found';
+                    
+                    if(isset($year_object))
+                        $flag->year = $year_object->name;
+                    if(isset($type_object))
+                        $flag->type = $type_object->name;
+
                 }
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
                 foreach($userr as $teach){
@@ -579,10 +611,17 @@ class CourseController extends Controller
                     $flag->level = Level::find($level_id->level_id)->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
                 if(isset($AC_type)){
-                    if(isset(AcademicYear::find($AC_type->academic_type_id)->name)){
-                        $flag->year = AcademicYear::find($AC_type->academic_year_id)->name;
-                        $flag->type = AcademicType::find($AC_type->academic_type_id)->name;
-                    }
+
+                    $year_object = AcademicYear::find($AC_type->academic_year_id);
+                    $type_object = AcademicType::find($AC_type->academic_type_id);
+
+                    $flag->year = 'Not_Found';
+                    $flag->type = 'Not_Found';
+                    
+                    if(isset($year_object))
+                        $flag->year = $year_object->name;
+                    if(isset($type_object))
+                        $flag->type = $type_object->name;
                 }
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
                 foreach($userr as $teach){
@@ -711,8 +750,10 @@ class CourseController extends Controller
                                 }
                                 if($com->name == 'Quiz'){
                                  foreach ($lessonn['Quiz'] as $one){  
-                                    $one['visible'] = QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('visible')->first();
-                                    $one['item_lesson_id']=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('id')->first();
+                                    $quiz_lesson=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->get()->first();
+                                    $one['visible'] = $quiz_lesson->visible;
+                                    $one['item_lesson_id']=$quiz_lesson->id;
+                                    $one->quiz_lesson=$quiz_lesson;
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
                                         else
@@ -721,14 +762,14 @@ class CourseController extends Controller
                                 }
                                 if($com->name == 'Assigments'){
                                     foreach ($lessonn['Assigments'] as $one){
-                                        $assignLesson = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
-                                        ->pluck('id')->first();
-                                        $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignLesson)->pluck('start_date')->first();
-                                        $one->start_date = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
-                                        ->pluck('start_date')->first();
-                                       if($one->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
+                                        $assignment_lesson=AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)->get()->first();
+                                        $one->assignment_lesson=$assignment_lesson;
+                                        $one['allow_attachment'] = $assignment_lesson->allow_attachment;
+                                        $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignment_lesson->id)->pluck('start_date')->first();
+                                        $one->start_date = $assignment_lesson->start_date;
+                                        if($one->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                            $one->Started = false;
-                                           else
+                                        else
                                            $one->Started = true;
                                         
                                         if($override_satrtdate != null){
@@ -889,6 +930,8 @@ class CourseController extends Controller
             'segment' => 'array',
             'segment.*' => 'exists:segments,id',
             'course' => 'required|exists:courses,id',
+            'start_date' => 'required|date',
+            'end_date' =>'required|date|after:start_date'
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
@@ -921,7 +964,10 @@ class CourseController extends Controller
                     $class_level = ClassLevel::checkRelation($class, $year_level->id);
                     $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
                     $course_Segment = CourseSegment::checkRelation($segment_class->id, $request->course);
-                    $courseSegment = CourseSegment::find($course_Segment->id);
+                    $courseSegment = CourseSegment::where('id',$course_Segment->id)->update([
+                        'start_date' => $request->start_date,
+                        'end_date' => $request->end_date,
+                    ]);
                     if ($request->filled('no_of_lessons')) {
                         $no_of_lessons = $request->no_of_lessons;
                     }
@@ -1049,6 +1095,7 @@ class CourseController extends Controller
 
         return HelperController::api_response_format(200, null, 'there is no courses');
     }
+
     public function Count_Components(Request $request)
     {
         $request->validate([
@@ -1107,22 +1154,37 @@ class CourseController extends Controller
         ]);
         // $components  = Component::where('active', 1)->whereIn('type', [3,1])->where('name','not like', "%page%");
         $components  = Component::where('active', 1)->whereIn('type', [3,1]);
-        if ($request->filled('components')) {
+        if ($request->filled('components')) 
             $components->whereIn('id', $request->components);
-        };
+            
         $components = $components->get();
         $result = [];
-        foreach ($components as $component) {
+        $CourseSegments=[];
+        foreach ($components as $component)
             $result[$component->name] = [];
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $cs=GradeCategoryController::getCourseSegment($request);
+            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
         }
-        $user = User::whereId($request->user()->id)->with(['enroll.courseSegment' => function ($query) use ($request) {
-            if ($request->filled('course'))
-                $query->where('course_id', $request->course);
-        }])->first();
+        else
+        {
+            foreach ($request->user()->enroll as $enroll) {
+                if ($enroll->courseSegment != null) {
+                    $CourseSegments[]=$enroll->courseSegment;
+                }
+            }
+        }
         $k=0;
-        foreach ($user->enroll as $enroll) {
-            if ($enroll->courseSegment != null) {
-                foreach ($enroll->courseSegment->lessons as $lesson) {
+        foreach ($CourseSegments as $oneCouSeg) {
+            if ($oneCouSeg != null) {
+                if(isset($request->course)){
+                    if($oneCouSeg->course_id != $request->course)
+                        continue;
+                }
+
+                foreach ($oneCouSeg->lessons as $lesson) {
                     foreach ($components as $component) {
                         $temp = $lesson->module($component->module, $component->model);
 
@@ -1132,7 +1194,7 @@ class CourseController extends Controller
                         }
                         //&& $component->model != 'assignment'
                         if($component->model != 'quiz'){
-                            if($enroll['role_id'] == 3){
+                            if($request->user()->can('site/course/student')){
                                 $temp->where('publish_date', '<=', Carbon::now());
                             }
                         }
@@ -1163,7 +1225,8 @@ class CourseController extends Controller
                                     $item->Started = true;
                                 }
                                 if($item->pivot->assignment_id)
-                                 {   $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id);
+                                {   
+                                    $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id);
                                     if(isset($request->timeline) && $request->timeline == 1 ){
                                         $item->due_date->where('due_date','>=',Carbon::now());
                                     }
@@ -1197,7 +1260,7 @@ class CourseController extends Controller
                                     $quickaction[]=$item;
                                     $k++;
                                 }
-                                    $result[$component->name][] = $item;
+                                $result[$component->name][] = $item;
                             }
                         }
                     }
@@ -1359,6 +1422,7 @@ class CourseController extends Controller
         }
         return HelperController::api_response_format(200,$result);
     }
+
     public function getLessonsFromCourseAndClass(Request $request){
         $validator =  Validator::make($request->all() , [
             'class'  => 'required|exists:classes,id',
@@ -1440,5 +1504,14 @@ class CourseController extends Controller
 
         $courses=Course::get();
         return HelperController::api_response_format(200,$courses,'Here is all courses');
+    }
+
+    public function export(Request $request)
+    {
+        $courses=self::get($request,1);
+        $filename = uniqid();
+        $file = Excel::store(new CoursesExport($courses), 'Courses'.$filename.'.xls','public');
+        $file = url(Storage::url('Courses'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }
