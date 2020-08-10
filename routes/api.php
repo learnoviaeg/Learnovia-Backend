@@ -99,7 +99,9 @@ Route::group(['middleware' => ['auth:api']], function () {
     });
 
     //Import Excel Route
-    Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:import');
+    Route::group(['prefix' => 'import'] , function(){
+        Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:import/import');
+    });
 });
 
 //Year Routes
