@@ -22,6 +22,8 @@ use App\Segment;
 use App\AcademicYear;
 use App\GradeCategory;
 use Modules\QuestionBank\Entities\QuizOverride;
+use Modules\QuestionBank\Entities\UserQuiz;
+use Modules\QuestionBank\Entities\UserQuizAnswer;
 use App\AcademicType;
 use App\attachment;
 use App\LessonComponent;
@@ -750,13 +752,21 @@ class CourseController extends Controller
                                 }
                                 if($com->name == 'Quiz'){
                                  foreach ($lessonn['Quiz'] as $one){  
-                                    $quiz_lesson=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->get()->first();
+                                    $quiz_lesson=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)
+                                                                    ->with('grading_method')->get()->first();
+                                    $userquizze = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', Auth::id())->pluck('id');
+                                    // return u
+                                    $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
+                                    $one['attempts_left'] = ($quiz_lesson->max_attemp - $count_answered);
+                                    $one['taken_attempts'] = $count_answered;
+                                    $one['questions']=$quiz_lesson->quiz->Question;
+                                    unset($quiz_lesson->quiz);
                                     $one['visible'] = $quiz_lesson->visible;
                                     $one['item_lesson_id']=$quiz_lesson->id;
                                     $one->quiz_lesson=$quiz_lesson;
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
-                                        else
+                                    else
                                         $one->Started = true;
                                  }
                                 }
