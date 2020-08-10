@@ -85,7 +85,7 @@ class QuestionCategoryController extends Controller
         foreach($ques_cat as $cat)
         {
             $cat->course=isset($cat->CourseSegment) ? $cat->CourseSegment->courses[0] : null;
-            $cat->class= isset($cat->CourseSegment)  && isset($cat->CourseSegment->segmentClasses)  && isset($cat->CourseSegment->segmentClasses[0]->classLevel) && isset($cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes) ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
+            $cat->class= isset($cat->CourseSegment)  && count($cat->CourseSegment->segmentClasses) > 0  && count($cat->CourseSegment->segmentClasses[0]->classLevel) > 0 && count($cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes) > 0 ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
         }
         if(isset($request->lastpage) && $request->lastpage == true){
             $request['page'] = $ques_cat->paginate(HelperController::GetPaginate($request))->lastPage();
