@@ -750,8 +750,10 @@ class CourseController extends Controller
                                 }
                                 if($com->name == 'Quiz'){
                                  foreach ($lessonn['Quiz'] as $one){  
-                                    $one['visible'] = QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('visible')->first();
-                                    $one['item_lesson_id']=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('id')->first();
+                                    $quiz_lesson=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->get()->first();
+                                    $one['visible'] = $quiz_lesson->visible;
+                                    $one['item_lesson_id']=$quiz_lesson->id;
+                                    $one->quiz_lesson=$quiz_lesson;
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
                                         else
@@ -760,17 +762,14 @@ class CourseController extends Controller
                                 }
                                 if($com->name == 'Assigments'){
                                     foreach ($lessonn['Assigments'] as $one){
-
-                                        $assignLesson = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
-                                        ->pluck('id')->first();
-                                        $one['allow_attachment'] = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
-                                        ->pluck('allow_attachment')->first();
-                                        $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignLesson)->pluck('start_date')->first();
-                                        $one->start_date = AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)
-                                        ->pluck('start_date')->first();
-                                       if($one->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
+                                        $assignment_lesson=AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)->get()->first();
+                                        $one->assignment_lesson=$assignment_lesson;
+                                        $one['allow_attachment'] = $assignment_lesson->allow_attachment;
+                                        $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignment_lesson->id)->pluck('start_date')->first();
+                                        $one->start_date = $assignment_lesson->start_date;
+                                        if($one->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                            $one->Started = false;
-                                           else
+                                        else
                                            $one->Started = true;
                                         
                                         if($override_satrtdate != null){
@@ -1510,9 +1509,9 @@ class CourseController extends Controller
     public function export(Request $request)
     {
         $courses=self::get($request,1);
-         $filename = uniqid();
-         $file = Excel::store(new CoursesExport($courses), 'Courses'.$filename.'.xls','public');
-         $file = url(Storage::url('Courses'.$filename.'.xls'));
-         return HelperController::api_response_format(201,$file, 'Link to file ....');
+        $filename = uniqid();
+        $file = Excel::store(new CoursesExport($courses), 'Courses'.$filename.'.xls','public');
+        $file = url(Storage::url('Courses'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }
