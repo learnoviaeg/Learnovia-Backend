@@ -52,8 +52,8 @@ class H5pController extends Controller
         $parameters = '{}';
 
         $display_options = $core->getDisplayOptionsForEdit(null);
-        $lessons = Lesson::pluck('name');
-        Log::info($lessons[0]);
+        // $lessons = Lesson::pluck('name');
+        // Log::info($lessons[0]);
         // dd($lessons);
 
         // view Get the file and settings to print from
@@ -64,7 +64,7 @@ class H5pController extends Controller
 
         $user = Auth::user();
 
-        return view('h5p.content.create', compact('settings', 'user', 'library', 'parameters', 'display_options','lessons'));
+        return view('h5p.content.create', compact('settings', 'user', 'library', 'parameters', 'display_options'));
     }
 
     public function store(Request $request)

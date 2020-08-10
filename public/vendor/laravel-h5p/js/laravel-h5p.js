@@ -35,7 +35,6 @@
             var $create = $('#laravel-h5p-create').hide();
             var $type = $('.laravel-h5p-type');
             var $params = $('#laravel-h5p-parameters');
-            var $lessons =  $('#laravel-h5p-lessons');
             var $library = $('#laravel-h5p-library');
             var library = $library.val();
 
