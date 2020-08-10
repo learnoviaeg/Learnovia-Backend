@@ -31,6 +31,9 @@ class SpatieController extends Controller
             // restrict
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/restrict', 'title' => 'restrict middleware']);
 
+            //import
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'import/import', 'title' => 'import']);
+
             //Message Permissiosns
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/send', 'title' => 'send messages']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'messages/delete-for-all', 'title' => 'delete messages for all']);
