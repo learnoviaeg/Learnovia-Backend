@@ -14,7 +14,9 @@
 // Route::prefix('h5p')->group(function() {
 //     // Route::get('/', 'H5pController@index');
 // });
+
 Route::get('library', "LibraryController@index")->name('h5p.library.index');
+Route::post('content/create', "H5pController@h5p_lesson");
 
 
 
@@ -34,6 +36,7 @@ Route::get('library', "LibraryController@index")->name('h5p.library.index');
             Route::delete('library/destroy', "LibraryController@destroy")->name('h5p.library.destroy');
             Route::get('library/restrict', "LibraryController@restrict")->name('h5p.library.restrict');
             Route::post('library/clear', "LibraryController@clear")->name('h5p.library.clear');
+
         // });
 
         // ajax

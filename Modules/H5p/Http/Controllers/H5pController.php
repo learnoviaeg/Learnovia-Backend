@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 namespace Djoudi\LaravelH5p\Http\Controllers;
 namespace Modules\H5p\Http\Controllers;
 use Log;
+use App\Http\Controllers\HelperController;
 use App\Http\Controllers\Controller;
 use App\h5pLesson;
 use App\Lesson;
 use Djoudi\LaravelH5p\Eloquents\H5pContent;
+use Carbon\Carbon;
+
 use Djoudi\LaravelH5p\Events\H5pEvent;
 use H5pCore;
 use Validator;
@@ -70,13 +73,6 @@ class H5pController extends Controller
     public function store(Request $request)
     {
         Log::info('storeH5p');
-        // $request->validate([
-        //     'lesson_id' => 'required|integer|exists:lessons,id',
-        //     'start_date' => 'date |date_format:Y-m-d H:i:s|before:due_date',
-        //     'due_date' => 'date |date_format:Y-m-d H:i:s',
-        //     'visible' => 'boolean',
-        //     'publish_date' => 'date |date_format:Y-m-d H:i:s|before:due_date',
-        // ]);
 
         $h5p = App::make('LaravelH5p');
         $core = $h5p::$core;
@@ -135,14 +131,7 @@ class H5pController extends Controller
                 // Save new content
                 $content['id'] = $core->saveContent($content);
 
-                $content_lesson = h5pLesson::firstOrCreate (['lesson_id' => 1 ,
-                                    'content_id' => $content['id'],
-                                    // 'visible'=>$request->visible,
-                                    'publish_date'=> "25-10-2020",//$request->publish_date ,
-                                    'start_date'=> "25-10-2020",//$request->start_date ,
-                                    'due_date'=>"25-10-2020",//$request->due_date ,
-                                ]);
-
+                
                                 // $lessons = Lesson::pluck('name');
                                 // Log::info($lessons[0]);
                 // Move images and find all content dependencies
@@ -161,9 +150,10 @@ class H5pController extends Controller
             }
 
             if ($return_id) {
-                return redirect()
-                    ->route('h5p.edit', $return_id)
-                    ->with('success', trans('laravel-h5p.content.created'));
+                return HelperController::api_response_format(200,$return_id, 'success');
+                // return redirect()
+                //     ->route('h5p.edit', $return_id)
+                //     ->with('success', trans('laravel-h5p.content.created'));
             } else {
                 return redirect()
                     ->route('h5p.create')
@@ -345,6 +335,7 @@ class H5pController extends Controller
 
         // Move so core can validate the file extension.
         rename($_FILES['h5p_file']['tmp_name'], $interface->getUploadedH5pPath());
+        Log::info('handel');
 
         $skipContent = ($content === null);
 
@@ -366,7 +357,8 @@ class H5pController extends Controller
                 $interface->deleteLibraryUsage($content['id']);
             }
 
-            $storage->savePackage($content, null, $skipContent);
+            // $storage->savePackage($content, null, $skipContent);
+            $core->savePackage($content, null, $skipContent);
 
             // Clear cached value for dirsize.
             return $storage->contentId;
@@ -376,4 +368,28 @@ class H5pController extends Controller
 
         return false;
     }
+
+    public function h5p_lesson(Request $request){
+
+         $request->validate([
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'content_id' => 'required|integer|exists:h5p_contents,id',
+            'start_date' => 'required|date |date_format:Y-m-d H:i:s|before:due_date',
+            'due_date' => 'required|date |date_format:Y-m-d H:i:s',
+            'visible' => 'boolean',
+            'publish_date' => 'date |date_format:Y-m-d H:i:s|before:due_date',
+        ]);
+
+        $content_lesson = h5pLesson::firstOrCreate ([
+                                    'lesson_id' => $request->lesson_id ,
+                                    'content_id' => $request->content_id,
+                                    'visible'=>(isset($request->visible))?$request->visible:1,
+                                    'publish_date'=>(isset( $request->publish_date))?$request->publish_date :Carbon::now() ,
+                                    'start_date'=> $request->start_date ,
+                                    'due_date'=>$request->due_date ,
+           ]);
+
+           return HelperController::api_response_format(200,$content_lesson, 'H5P content created successfully');
+
+            }
 }
