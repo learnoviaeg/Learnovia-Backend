@@ -320,6 +320,10 @@ class CourseController extends Controller
         $testCourse=array();
         $adminCourses=collect();
         $couuures=array();
+        $active_year = AcademicYear::where('current',1)->get();
+        if(!isset($request->year) && !count($active_year)>0)
+            return HelperController::api_response_format(200, null, 'There is no active year,please send year');
+            
         $CS = GradeCategoryController::getCourseSegment($request);
 
         if($request->user()->can('site/show-all-courses'))
