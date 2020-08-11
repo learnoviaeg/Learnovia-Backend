@@ -420,4 +420,46 @@ class BigbluebuttonController extends Controller
 
         return HelperController::api_response_format(200 , $b , 'Toggled!');
     }
+
+    public function getmeetingInfo(Request $request)
+    {
+        $request->validate([
+            'id' => 'exists:bigbluebutton_models,id|required_without:class,course',
+            'class'=> 'exists:bigbluebutton_models,class_id|required_without:id',
+            'course'=> 'exists:bigbluebutton_models,course_id|required_without:id',
+        ]);
+
+        $user_id = Auth::user()->id;
+        $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
+        $permission_id = DB::table('permissions')->where('name','bigbluebutton/toggle')->pluck('id')->first();
+        $hasornot = DB::table('role_has_permissions')->where('role_id', $role_id)->where('permission_id', $permission_id)->get();
+
+
+        if($request->filled('id'))
+        {
+            $bbb = new BigBlueButton();
+            $meet = BigbluebuttonModel::whereId($request->id)->first();
+            $meet['join'] = false;
+
+            $req = new Request([
+                'duration' => $meet->duration,
+                'attendee' =>$meet->attendee,
+                'id' => $meet->id,
+                'name' => $meet->name,
+                'moderator_password' => $meet->moderator_password,
+                'is_recorded' => $meet->is_recorded
+            ]);
+            // dd($meet->start_date);
+            if(Carbon::parse($meet->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($meet->start_date)
+            ->addMinutes($meet->duration)->format('Y-m-d H:i:s'))
+            {
+                $check =self::start_meeting($req);
+                if($check)
+                    $meet['join'] = true;
+            }
+            $getMeetingInfoParams = new GetMeetingInfoParameters($request->id, '', $meet->moderator_password);
+            $response = $bbb->getMeetingInfoURL($getMeetingInfoParams);
+            return $response;
+        }
+    }
 }
