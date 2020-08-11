@@ -1,7 +1,8 @@
 @extends( config('laravel-h5p.layout') )
 
+<body style="background-color: white">
 @section( 'h5p' )
-<div class="container-fluid">
+<div class="container-fluid" >
 
 
 
@@ -13,29 +14,36 @@
 
             {!! Form::open(['route'=>"h5p.index", 'class'=>'form-inline', 'method'=>'GET']) !!}
             <fieldset>
-                <p class="form-control-static">
+                {{-- <p class="form-control-static">
                     {{ trans('laravel-h5p.content.search-result', ['count' => number_format($entrys->total())]) }}
-                </p>
+                </p> --}}
 
-                {!! Form::select('sf', $search_fields, [], ['class'=>'form-control']) !!}
+                {{-- {!! Form::select('sf', $search_fields, [], ['class'=>'form-control']) !!}
                 <input type="text" class="form-control" placeholder="{{ trans('laravel-h5p.content.keyword') }}" name='s' value='{{ $request->get('s') }}'>
-                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> {{ trans('laravel-h5p.content.search') }}</button>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> {{ trans('laravel-h5p.content.search') }}</button> --}}
             </fieldset>
 
             {!! Form::close() !!}
 
         </div>
 
-        <div class="col-md-3">
-            <a href="{{ route("h5p.create") }}" class="btn btn-primary pull-right">{{ trans('laravel-h5p.content.create') }}</a>
+        <div class="navbar-header" style="margin:1%">
+            <h1 style="color: #33516C;
+            font-family: Poppins;"><b>List Learnovia Interactive</b> 
+                <a href="{{ route("h5p.create") }}" class="btn btn-primary pull-right">{{ trans('laravel-h5p.content.create') }}</a>
+            </h1>
         </div>
     </div>
-
+    <div>
+    <p class="form-control-static" >
+        {{ trans('laravel-h5p.content.search-result', ['count' => number_format($entrys->total())]) }}
+    </p>
+    </div>
     <div class="row">
 
         <div class="col-md-12">
 
-            <table class="table text-middle text-center h5p-lists">
+            <table class="table text-middle text-center h5p-lists" id="showcontent">
                 <colgroup>
                     <col width="10%">
                     <col width="15%">
@@ -46,24 +54,24 @@
 
                 <thead>
                     <tr class="active">
-                        <th class="text-center">#</th>
-                        <th class="text-center">
+                        <th class="head">ID</th>
+                        <th class="head">
                             {{ trans('laravel-h5p.content.creator') }}
                         </th>
-                        <th class="text-left">{{ trans('laravel-h5p.content.title') }}</th>
-                        <th class="text-center">{{ trans('laravel-h5p.content.created_at') }}</th>
-                        <th class="text-center">{{ trans('laravel-h5p.content.action') }}</th>
+                        <th class="head">{{ trans('laravel-h5p.content.title') }}</th>
+                        <th class="head">{{ trans('laravel-h5p.content.created_at') }}</th>
+                        <th class="head">{{ trans('laravel-h5p.content.action') }}</th>
                     </tr>
                 </thead>
 
-                <tbody>
+                <tbody >
 
                     @unless(count($entrys) >0)
                     <tr><td colspan="5" class="h5p-noresult">{{ trans('laravel-h5p.common.no-result') }}</td></tr>
                     @endunless
 
                     @foreach($entrys as $n => $entry)
-                    <tr>
+                    <tr> 
 
                         <td class="">
                             {{ $entry->id }}
@@ -74,7 +82,7 @@
                             {{-- {{ $entry->get_user()->name }} --}}
                         </td>
 
-                        <td class="text-left">
+                        <td>
                             <a href="{{ route('h5p.show', $entry->id) }}">{{ $entry->title }}</a>
                         </td>
 
@@ -83,8 +91,7 @@
                         </td>
 
                         <td>
-                            <a href="{{ route('h5p.edit', $entry->id) }}" class="btn btn-default"  data-tooltip="{pos:'top'}" title="{{ trans('laravel-h5p.content.edit') }}">{{ trans('laravel-h5p.content.edit') }}</a>
-
+                            <a href="{{ route('h5p.edit', $entry->id) }}" class="btn btn-primary"  data-tooltip="{pos:'top'}" title="{{ trans('laravel-h5p.content.edit') }}">{{ trans('laravel-h5p.content.edit') }}</a>
                             <button class="btn btn-danger h5p-delete" data-delete="{{ route('h5p.destroy', $entry->id) }}" data-tooltip="{pos:'top'}" title="{{ trans('laravel-h5p.content.destroy') }}">{{ trans('laravel-h5p.content.destroy') }}</button>
                         </td>
                     </tr>

@@ -8,7 +8,7 @@
         <!-- CSRF Token -->
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>Learnovia Interacive</title>
 
         <script>
             window.Laravel = <?php echo json_encode([ 'csrfToken' => csrf_token()]); ?>
@@ -17,6 +17,7 @@
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Lato:300,300i,400,400i,700,700i,900,900i" rel="stylesheet">
         <link rel="stylesheet" href="{{ url('css/app.css') }}"/>
+        <link rel="stylesheet" href="{{ url('css/table.css') }}"/>
 
         @stack('h5p-header-script')
 
@@ -66,7 +67,7 @@
         </style>
     </head>
 
-    <body>
+    <body style="background-color: #f1f4f8">
 
         <div  id="app" 
               @if (Route::has('welcome'))
@@ -78,19 +79,6 @@
               <nav class="navbar navbar-default navbar-static-top">
                 <div class="container">
                     <div class="navbar-header">
-
-                        <!-- Collapsed Hamburger -->
-                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
-                            <span class="sr-only">Toggle Navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-
-                        <!-- Branding Image -->
-                        <a class="navbar-brand" href="{{ url('/') }}">
-                            {{ config('app.name', 'LARAVEL-H5P') }}
-                        </a>
                     </div>
 
                     <div class="collapse navbar-collapse" id="app-navbar-collapse">
