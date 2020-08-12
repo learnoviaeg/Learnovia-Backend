@@ -59,6 +59,7 @@
             }
 
             $('#laravel-h5p-form').submit(function () {
+                alert('hii from backend two');
                 if (h5peditor !== undefined) {
                     var params = h5peditor.getParams();
 
