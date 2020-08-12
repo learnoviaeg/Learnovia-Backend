@@ -19,6 +19,8 @@ use BigBlueButton\Parameters\GetMeetingInfoParameters;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\HelperController;
 use DB;
+use GuzzleHttp\Client;
+
 
 
 
@@ -425,8 +427,6 @@ class BigbluebuttonController extends Controller
     {
         $request->validate([
             'id' => 'exists:bigbluebutton_models,id|required_without:class,course',
-            'class'=> 'exists:bigbluebutton_models,class_id|required_without:id',
-            'course'=> 'exists:bigbluebutton_models,course_id|required_without:id',
         ]);
 
         $user_id = Auth::user()->id;
@@ -439,27 +439,21 @@ class BigbluebuttonController extends Controller
         {
             $bbb = new BigBlueButton();
             $meet = BigbluebuttonModel::whereId($request->id)->first();
-            $meet['join'] = false;
 
-            $req = new Request([
-                'duration' => $meet->duration,
-                'attendee' =>$meet->attendee,
-                'id' => $meet->id,
-                'name' => $meet->name,
-                'moderator_password' => $meet->moderator_password,
-                'is_recorded' => $meet->is_recorded
-            ]);
-            // dd($meet->start_date);
-            if(Carbon::parse($meet->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($meet->start_date)
-            ->addMinutes($meet->duration)->format('Y-m-d H:i:s'))
-            {
-                $check =self::start_meeting($req);
-                if($check)
-                    $meet['join'] = true;
+            $getMeetingInfoParams = new GetMeetingInfoParameters($request->id, $meet->moderator_password);
+            $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+            if ($response->getReturnCode() == 'FAILED') {
+                return 'failed';
+            } else {
+                $getMeetingInfoParams = new GetMeetingInfoParameters($request->id, $meet->moderator_password);
+                $response = $bbb->getMeetingInfoURL($getMeetingInfoParams);
+                $guzzleClient = new Client();
+                $response = $guzzleClient->get($response);
+                $body = $response->getBody();
+                $body->seek(0);
+                $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
+                return $response['attendees'];
             }
-            $getMeetingInfoParams = new GetMeetingInfoParameters($request->id, '', $meet->moderator_password);
-            $response = $bbb->getMeetingInfoURL($getMeetingInfoParams);
-            return $response;
         }
     }
 }
