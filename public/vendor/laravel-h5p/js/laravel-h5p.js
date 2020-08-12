@@ -59,6 +59,7 @@
             }
 
             $('#laravel-h5p-form').submit(function () {
+                document.getElementById('myIframe').contentWindow.postMessage("hii","https://dev.learnovia.com/");
                 if (h5peditor !== undefined) {
                     var params = h5peditor.getParams();
 
