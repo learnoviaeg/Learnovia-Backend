@@ -452,7 +452,12 @@ class BigbluebuttonController extends Controller
                 $body = $response->getBody();
                 $body->seek(0);
                 $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
-                return $response['attendees'];
+                $atendees=collect();
+                foreach($response['attendees'] as $attend){
+                    $atendees->push($attend['fullName']);
+                }
+                // return $response['attendees']['attendee'];
+                return $atendees;
             }
         }
     }
