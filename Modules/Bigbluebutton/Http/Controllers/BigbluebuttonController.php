@@ -457,8 +457,14 @@ class BigbluebuttonController extends Controller
                     
                     $atendees->push($attend);
                 }
+                $names=collect();
+
+                foreach($atendees[0] as $mm){
+                    
+                    $names->push($mm['fullName']);
+                }
                 // return $response['attendees']['attendee'];
-                return $atendees;
+                return $names;
             }
         }
     }
