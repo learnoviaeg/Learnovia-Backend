@@ -73,97 +73,99 @@ class H5pController extends Controller
     public function store(Request $request)
     {
         Log::info('storeH5p');
-
-        $h5p = App::make('LaravelH5p');
-        $core = $h5p::$core;
-        $editor = $h5p::$h5peditor;
-
-        $this->validate($request, [
-            'title'  => 'required|max:250',
-            'action' => 'required',
-        ], [], [
-            'title'  => trans('laravel-h5p.content.title'),
-            'action' => trans('laravel-h5p.content.action'),
-        ]);
-
-        $oldLibrary = null;
-        $oldParams = null;
-        $event_type = 'create';
-        $content = [
-            'disable'    => H5PCore::DISABLE_NONE,
-            'user_id'    => Auth::id(),
-            'title'      => $request->get('title'),
-            'embed_type' => 'div',
-            'filtered'   => '',
-            'slug'       => config('laravel-h5p.slug'),
-        ];
+      return HelperController::api_response_format(200,$request, 'success huda ');
 
 
-        $content['filtered'] = '';
+        // $h5p = App::make('LaravelH5p');
+        // $core = $h5p::$core;
+        // $editor = $h5p::$h5peditor;
+
+        // $this->validate($request, [
+        //     'title'  => 'required|max:250',
+        //     'action' => 'required',
+        // ], [], [
+        //     'title'  => trans('laravel-h5p.content.title'),
+        //     'action' => trans('laravel-h5p.content.action'),
+        // ]);
+
+        // $oldLibrary = null;
+        // $oldParams = null;
+        // $event_type = 'create';
+        // $content = [
+        //     'disable'    => H5PCore::DISABLE_NONE,
+        //     'user_id'    => Auth::id(),
+        //     'title'      => $request->get('title'),
+        //     'embed_type' => 'div',
+        //     'filtered'   => '',
+        //     'slug'       => config('laravel-h5p.slug'),
+        // ];
+
+
+        // $content['filtered'] = '';
 
         
-        try {
-            if ($request->get('action') === 'create') {
-                $content['library'] = $core->libraryFromString($request->get('library'));
-                if (!$content['library']) {
-                    throw new H5PException('Invalid library.');
-                }
+        // try {
+        //     if ($request->get('action') === 'create') {
+        //         $content['library'] = $core->libraryFromString($request->get('library'));
+        //         if (!$content['library']) {
+        //             throw new H5PException('Invalid library.');
+        //         }
 
-                // Check if library exists.
-                $content['library']['libraryId'] = $core->h5pF->getLibraryId($content['library']['machineName'], $content['library']['majorVersion'], $content['library']['minorVersion']);
-                if (!$content['library']['libraryId']) {
-                    throw new H5PException('No such library');
-                }
-                //old
-                // $content['params'] = $request->get('parameters');
-                // $params = json_decode($content['params']);
+        //         // Check if library exists.
+        //         $content['library']['libraryId'] = $core->h5pF->getLibraryId($content['library']['machineName'], $content['library']['majorVersion'], $content['library']['minorVersion']);
+        //         if (!$content['library']['libraryId']) {
+        //             throw new H5PException('No such library');
+        //         }
+        //         //old
+        //         // $content['params'] = $request->get('parameters');
+        //         // $params = json_decode($content['params']);
 
-                //new
-                $params = json_decode($request->get('parameters'));
-                $content['params'] = json_encode($params->params);
-                if ($params === null) {
-                    throw new H5PException('Invalid parameters');
-                }
+        //         //new
+        //         $params = json_decode($request->get('parameters'));
+        //         $content['params'] = json_encode($params->params);
+        //         if ($params === null) {
+        //             throw new H5PException('Invalid parameters');
+        //         }
 
-                // Set disabled features
-                $this->get_disabled_content_features($core, $content);
+        //         // Set disabled features
+        //         $this->get_disabled_content_features($core, $content);
 
-                // Save new content
-                $content['id'] = $core->saveContent($content);
+        //         // Save new content
+        //         $content['id'] = $core->saveContent($content);
 
                 
-                                // $lessons = Lesson::pluck('name');
-                                // Log::info($lessons[0]);
-                // Move images and find all content dependencies
-            $editor->processParameters($content['id'], $content['library'], $params, $oldLibrary, $oldParams/*,$lessons*/);
+        //                         // $lessons = Lesson::pluck('name');
+        //                         // Log::info($lessons[0]);
+        //         // Move images and find all content dependencies
+        //     $editor->processParameters($content['id'], $content['library'], $params, $oldLibrary, $oldParams/*,$lessons*/);
 
-                event(new H5pEvent('content', $event_type, $content['id'], $content['title'], $content['library']['machineName'], $content['library']['majorVersion'], $content['library']['minorVersion']));
+        //         event(new H5pEvent('content', $event_type, $content['id'], $content['title'], $content['library']['machineName'], $content['library']['majorVersion'], $content['library']['minorVersion']));
 
-                $return_id = $content['id'];
-            } elseif ($request->get('action') === 'upload') {
-                $content['uploaded'] = true;
+        //         $return_id = $content['id'];
+        //     } elseif ($request->get('action') === 'upload') {
+        //         $content['uploaded'] = true;
 
-                $this->get_disabled_content_features($core, $content);
+        //         $this->get_disabled_content_features($core, $content);
 
-                // Handle file upload
-                $return_id = $this->handle_upload($content);
-            }
+        //         // Handle file upload
+        //         $return_id = $this->handle_upload($content);
+        //     }
 
-            if ($return_id) {
-                return HelperController::api_response_format(200,$return_id, 'success');
-                // return redirect()
-                //     ->route('h5p.edit', $return_id)
-                //     ->with('success', trans('laravel-h5p.content.created'));
-            } else {
-                return redirect()
-                    ->route('h5p.create')
-                    ->with('fail', trans('laravel-h5p.content.can_not_created'));
-            }
-        } catch (H5PException $ex) {
-            return redirect()
-                ->route('h5p.create')
-                ->with('fail', trans('laravel-h5p.content.can_not_created'));
-        }
+        //     if ($return_id) {
+        //         return HelperController::api_response_format(200,$return_id, 'success');
+        //         // return redirect()
+        //         //     ->route('h5p.edit', $return_id)
+        //         //     ->with('success', trans('laravel-h5p.content.created'));
+        //     } else {
+        //         return redirect()
+        //             ->route('h5p.create')
+        //             ->with('fail', trans('laravel-h5p.content.can_not_created'));
+        //     }
+        // } catch (H5PException $ex) {
+        //     return redirect()
+        //         ->route('h5p.create')
+        //         ->with('fail', trans('laravel-h5p.content.can_not_created'));
+        // }
     }
 
     public function edit(Request $request, $id)
