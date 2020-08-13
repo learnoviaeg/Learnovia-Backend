@@ -183,6 +183,7 @@
                 "data-loading-text" => trans('laravel-h5p.content.saving')
                         ]) }}
 
+
                 </div>
 
             </div>
