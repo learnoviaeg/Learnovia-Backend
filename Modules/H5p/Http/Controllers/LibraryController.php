@@ -20,6 +20,7 @@ class LibraryController extends Controller
     public function index(Request $request)
     {
         $h5p = App::make('LaravelH5p');
+        Log::info('index');
         $core = $h5p::$core;
         $interface = $h5p::$interface;
         $not_cached = $interface->getNumNotFiltered();
@@ -37,7 +38,6 @@ class LibraryController extends Controller
                 'upgradeLibrary' => trans('laravel-h5p.library.upgradeLibrary'),
             ],
         ]);
-        // dd( $settings);
 
         foreach ($entrys as $library) {
             $usage = $interface->getLibraryUsage($library->id, $not_cached ? true : false);
@@ -117,7 +117,7 @@ class LibraryController extends Controller
     public function store(Request $request)
     {
         $request->validate( [
-            'h5p_file' => 'required',
+            'h5p_file' => 'required',   
         ]);
 
         if ($request->hasFile('h5p_file') && $request->file('h5p_file')->isValid()) {
@@ -139,11 +139,15 @@ class LibraryController extends Controller
                 Log::info('All is OK ');
             }
 
-//            if ($request->get('sync_hub')) {
-            //                $h5p::$core->updateContentTypeCache();
-            //            }
+           if ($request->get('sync_hub')) {
+                           $h5p::$core->updateContentTypeCache();
+                       }
             // The uploaded file was not a valid H5P package
+            Log::info('2bl unlink ');
+
             @unlink($interface->getUploadedH5pPath());
+            Log::info('b3d unlink ');
+
 
             return redirect()
                 ->route('h5p.library.index')
