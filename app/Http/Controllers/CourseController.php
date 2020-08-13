@@ -982,10 +982,12 @@ class CourseController extends Controller
                         'start_date' => $request->start_date,
                         'end_date' => $request->end_date,
                     ]);
+
                     if ($request->filled('no_of_lessons')) {
                         $no_of_lessons = $request->no_of_lessons;
                     }
                     for ($i = 1; $i <= $no_of_lessons; $i++) {
+                        $courseSegment = CourseSegment::find($course_Segment->id);
                         $courseSegment->lessons()->create([
                             'name' => 'Lesson ' . $i,
                             'index' => $i,
