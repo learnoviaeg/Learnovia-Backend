@@ -379,7 +379,10 @@ class CourseController extends Controller
                 if(isset($class_object))
                     $flag->class = $class_object->name;
                 $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
-                $flag->level = Level::find($level_id->level_id)->name;
+                $level_object = Level::find($level_id->level_id);
+                $flag->level = 'Not_Found';
+                if(isset($level_object))
+                    $flag->level = $level_object->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
                 if(isset($AC_type)){
                     $year_object = AcademicYear::find($AC_type->academic_year_id);
