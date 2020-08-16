@@ -77,74 +77,83 @@ class BigbluebuttonController extends Controller
             'moderator_password' => 'required|string',
             'duration' => 'nullable',
             'is_recorded' => 'required|bool',
-            'start_date' => 'required|date'
+            'start_date' => 'required|array',
         ]);
-
-        if(isset($request->attendee_password)){
-            $attendee= $request->attendee_password;
-        }
-        else{
-            $attendee= 'learnovia123';
-        }
-
-        if(isset($request->duration)){
-            $duration= $request->duration;
-        }
-        else{
-            $duration= '40';
-        }
-
-        //Creating the meeting in DB
-        $bigbb = new BigbluebuttonModel;
-        $bigbb->name=$request->name;
-        $bigbb->class_id=$request->class_id;
-        $bigbb->course_id=$request->course_id;
-        $bigbb->attendee_password=$attendee;
-        $bigbb->moderator_password=$request->moderator_password;
-        $bigbb->duration=$duration;
-        $bigbb->start_date=$request->start_date;
-        $bigbb->user_id = Auth::user()->id;
-        $bigbb->save();
-
-        $bigbb['join'] = false;
 
         $courseseg=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
         if(!isset($courseseg))
             return HelperController::api_response_format(200, null ,'Please check active course segments');
 
         $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
-
-        $req = new Request([
-            'duration' => $request->duration,
-            'attendee' =>$request->attendee,
-            'id' => $request->id,
-            'name' => $request->name,
-            'moderator_password' => $request->moderator_password,
-            'is_recorded' => $request->is_recorded,
-            'join' => $bigbb['join']
-        ]);
-        if(Carbon::parse($request->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($request->start_date)
-        ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
-        {
-            $check =self::start_meeting($req);
-            if($check)
-                $bigbb['join'] = true;
+        
+        $attendee= 'learnovia123';
+        if(isset($request->attendee_password)){
+            $attendee= $request->attendee_password;
         }
 
-        User::notify([
-            'id' => $bigbb->id,
-            'message' => $request->name.' meeting is created',
-            'from' => Auth::user()->id,
-            'users' => $usersIDs,
-            'course_id' => $request->course_id,
-            'class_id'=>$request->class_id,
-            'lesson_id'=> null,
-            'type' => 'meeting',
-            'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
-            'publish_date'=>Carbon::now()
-        ]);
+        $duration= '40';
+        if(isset($request->duration)){
+            $duration= $request->duration;
+        }
 
-        return HelperController::api_response_format(200, $bigbb ,'Meeting created Successfully');
+        $created_meetings=collect();
+        foreach($request->start_date as $start_date){
+            $last_date = $start_date;
+            if(isset($request->last_day)){
+                $last_date= $request->last_day;
+            }
+
+            $temp_start = Carbon::parse($start_date)->format('Y-m-d H:i:s');
+            while(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::parse($last_date)->format('Y-m-d H:i:s')){
+                $bigbb = new BigbluebuttonModel;
+                $bigbb->name=$request->name;
+                $bigbb->class_id=$request->class_id;
+                $bigbb->course_id=$request->course_id;
+                $bigbb->attendee_password=$attendee;
+                $bigbb->moderator_password=$request->moderator_password;
+                $bigbb->duration=$duration;
+                $bigbb->start_date=$temp_start;
+                $bigbb->user_id = Auth::user()->id;
+                $bigbb->save();
+                $bigbb['join'] = false;
+
+                $req = new Request([
+                    'duration' => $request->duration,
+                    'attendee' =>$request->attendee,
+                    'id' => $bigbb->id,
+                    'name' => $request->name,
+                    'moderator_password' => $request->moderator_password,
+                    'is_recorded' => $request->is_recorded,
+                    'join' => $bigbb['join']
+                ]);
+        
+                if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
+                ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
+                {
+                    $check =self::start_meeting($req);
+                    if($check)
+                        $bigbb['join'] = true;
+                }
+        
+                User::notify([
+                    'id' => $bigbb->id,
+                    'message' => $request->name.' meeting is created',
+                    'from' => Auth::user()->id,
+                    'users' => $usersIDs,
+                    'course_id' => $request->course_id,
+                    'class_id'=>$request->class_id,
+                    'lesson_id'=> null,
+                    'type' => 'meeting',
+                    'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
+                    'publish_date'=>Carbon::now()
+                ]);
+                
+                $created_meetings->push($bigbb);
+                $temp_start= Carbon::parse($temp_start)->addDays(7)->format('Y-m-d H:i:s');
+            }
+        }
+    
+        return HelperController::api_response_format(200, $created_meetings ,'Meeting created Successfully');
     }
 
     public function get_meetings()
