@@ -1,3 +1,11 @@
+<script>
+    window.addEventListener('message',function(message){
+    alert(message.data);
+    });
+
+    window.postMessage('test22222222','*');
+    </script>
+    LISTENER
 @extends( config('laravel-h5p.layout') )
 
 @if(!isset($errors))
@@ -18,7 +26,7 @@
             <input type="hidden" name="parameters" id="laravel-h5p-parameters" value="{{ $parameters }}">
             
             <fieldset>
-
+                    
                 <div class="navbar-header" style="">
                     <h1 style="color: #33516C;
                     font-family: Poppins;margin-bottom:2%"><b>Create Learnovia Interactive</b></h1>
@@ -202,6 +210,7 @@
 
 </div>
 </div>
+
 @endsection
 
 @push( 'h5p-header-script' )
