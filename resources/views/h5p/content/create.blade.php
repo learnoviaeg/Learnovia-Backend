@@ -4,7 +4,12 @@
 @php $errors = collect();@endphp
 @endif
 @section( 'h5p' )
-
+<script>
+    window.addEventListener('message',function(message){
+    alert(message.data);
+    });
+    </script>
+    LISTENER
 <div style="border-radius:20px;padding: 2%;margin-left: 5%;margin-right: 5%;margin-top: 3%;margin-bottom: 3%;background-color:white">
 
 <div class="container-fluid" >
@@ -202,6 +207,7 @@
 
 </div>
 </div>
+
 @endsection
 
 @push( 'h5p-header-script' )
