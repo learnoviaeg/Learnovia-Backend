@@ -781,7 +781,7 @@ class CourseController extends Controller
                                 if($com->name == 'Assigments'){
                                     foreach ($lessonn['Assigments'] as $one){
                                         $assignment_lesson=AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)->get()->first();
-                                        $one['user_submit']=[];
+                                        $one['user_submit']=null;
                                         $studentassigment = UserAssigment::where('assignment_lesson_id', $assignment_lesson->id)->where('user_id', Auth::id())->first();
                                         if(isset($studentassigment)){
                                             $one['user_submit'] =$studentassigment;
