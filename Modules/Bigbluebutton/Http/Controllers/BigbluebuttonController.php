@@ -463,7 +463,7 @@ class BigbluebuttonController extends Controller
                 $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
                 $atendees=collect();
                 $names=collect();
-                return count($response['attendees'];
+                return count($response['attendees']);
                 if(count($response['attendees']) >1){
                    foreach($response['attendees'] as $attend){
                     $atendees->push($attend);
