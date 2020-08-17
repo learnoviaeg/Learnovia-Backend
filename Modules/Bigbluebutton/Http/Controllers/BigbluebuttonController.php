@@ -21,6 +21,8 @@ use Illuminate\Support\Carbon;
 use App\Http\Controllers\HelperController;
 use DB;
 use GuzzleHttp\Client;
+use App\Exports\BigBlueButtonAttendance;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 
@@ -550,7 +552,7 @@ class BigbluebuttonController extends Controller
     }
 
 
-    public function viewAttendence(Request $request)
+    public function viewAttendence(Request $request,$call = 0)
     {
         $request->validate([
             'id' => 'required|exists:bigbluebutton_models,id',
@@ -563,7 +565,23 @@ class BigbluebuttonController extends Controller
         $attendance_log['Present']['precentage'] = ($attendance_log['Present']['count']/$all_logs->count())*100 ;
         $attendance_log['Absent']['precentage'] =  ($attendance_log['Absent']['count']/$all_logs->count())*100 ;
         $attendance_log['logs'] = $all_logs;
-        
+
+        if($call == 1)
+            return $attendance_log;
         return HelperController::api_response_format(200 , $attendance_log , 'Attendance records');
+    }
+
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:bigbluebutton_models,id',
+        ]); 
+
+        $bbb_object = self::viewAttendence($request,1);
+        $filename = uniqid();
+        $file = Excel::store(new BigBlueButtonAttendance($bbb_object['logs']), 'bbb'.$filename.'.xls','public');
+        $file = url(Storage::url('bbb'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }
