@@ -37,7 +37,7 @@
             var $params = $('#laravel-h5p-parameters');
             var $library = $('#laravel-h5p-library');
             var library = $library.val();
-
+            
             $type.change(function () {
                 if ($type.filter(':checked').val() === 'upload') {
                     $create.hide();
@@ -45,6 +45,7 @@
                 } else {
                     $upload.hide();
                     if (h5peditor === undefined) {
+                        console.log(library);
                         h5peditor = new ns.Editor(library, $params.val(), $editor[0]);
                     }
                     $create.show();
