@@ -6,6 +6,7 @@
     
     window.parent.postMessage('test22222222','*');
     </script>
+    LISTENER
 @extends( config('laravel-h5p.layout') )
 
 @if(!isset($errors))
@@ -22,8 +23,8 @@
         <div class="col-md-12">
 
             {!! Form::open(['route' => ['h5p.store'], 'class'=>'form-horizontal', 'target'=>'h5p-target', 'enctype'=>"multipart/form-data", 'id'=>'laravel-h5p-form']) !!}
-            <input type="text" name="library" id="laravel-h5p-library" value="{{ $library }}">
-            <input type="text" name="parameters" id="laravel-h5p-parameters" value="{{ $parameters }}">
+            <input type="hidden" name="library" id="laravel-h5p-library" value="{{ $library }}">
+            <input type="hidden" name="parameters" id="laravel-h5p-parameters" value="{{ $parameters }}">
             
             <fieldset>
                     
@@ -55,6 +56,7 @@
                         <div>
                             <div id="laravel-h5p-editor">{{ trans('laravel-h5p.content.loading_content') }}</div>
                         </div>
+                     
 
                         @if ($errors->has('parameters'))                 
                         <span class="help-block">
@@ -64,6 +66,9 @@
 
                     </div>
                 </div>
+                
+
+
 
                 <div class="form-group laravel-h5p-upload-container">
                     <label for="inputUpload" class="control-label col-md-3">{{ trans('laravel-h5p.content.upload') }}</label>

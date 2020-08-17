@@ -39,7 +39,6 @@
             var library = $library.val();
 
             $type.change(function () {
-
                 if ($type.filter(':checked').val() === 'upload') {
                     $create.hide();
                     $upload.show();
@@ -60,8 +59,8 @@
             }
 
             $('#laravel-h5p-form').submit(function () {
-                // alert('hii from backend one');
-                // document.getElementById('myIframe').contentWindow.postMessage("hii","https://dev.learnovia.com/");
+                alert('hii from backend one');
+                document.getElementById('myIframe').contentWindow.postMessage("hii","https://dev.learnovia.com/");
                 if (h5peditor !== undefined) {
                     var params = h5peditor.getParams();
                     if (params !== undefined) {
