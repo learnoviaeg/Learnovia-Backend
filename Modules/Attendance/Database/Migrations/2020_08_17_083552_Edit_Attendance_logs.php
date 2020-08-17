@@ -16,6 +16,7 @@ class EditAttendanceLogs extends Migration
         Schema::table('attendance_logs', function (Blueprint $table) {
             $table->dropForeign(['session_id']);            
             $table->dropcolumn('session_id');
+            $table->dropForeign(['status_id']);            
             $table->dropcolumn('status_id');
         });
         Schema::table('attendance_logs', function (Blueprint $table) {
