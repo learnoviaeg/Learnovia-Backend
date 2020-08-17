@@ -1,9 +1,10 @@
 <script>
-    window.addEventListener('message',function(message){
-    alert(message.data);
-    });
+    // window.addEventListener('message',function(message){
+    // alert(message.data);
+    // });
 
-    window.postMessage('test22222222','*');
+    
+    window.parent.postMessage('test22222222','*');
     </script>
     LISTENER
 @extends( config('laravel-h5p.layout') )
