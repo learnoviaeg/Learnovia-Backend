@@ -11,6 +11,7 @@ use App\User;
 use App\Enroll;
 use Auth;
 use App\CourseSegment;
+use Modules\Attendance\Entities\AttendanceLog;
 use BigBlueButton\Parameters\CreateMeetingParameters;
 use BigBlueButton\Parameters\JoinMeetingParameters;
 use BigBlueButton\Parameters\GetRecordingsParameters;
@@ -148,6 +149,20 @@ class BigbluebuttonController extends Controller
                     'publish_date'=>Carbon::now()
                 ]);
                 
+                foreach($usersIDs as $user)
+                {
+                    $userObj=User::find($user);
+                    if(!$userObj->roles->pluck('id')->first()==3)
+                        continue;
+                    $attendance=AttendanceLog::create([
+                        'ip_address' => \Request::ip(),
+                        'student_id' => $user,
+                        'taker_id' => $bigbb->user_id,
+                        'session_id' => $bigbb->id,
+                        'type' => 'online',
+                        'take_at' => Carbon::now()->format('Y-m-d H:i:s')
+                    ]);
+                }
                 $created_meetings->push($bigbb);
                 $temp_start= Carbon::parse($temp_start)->addDays(7)->format('Y-m-d H:i:s');
             }
@@ -183,9 +198,8 @@ class BigbluebuttonController extends Controller
         if ($response->getReturnCode() == 'FAILED') {
             return 'Can\'t create room! please contact our administrator.';
         } else {
-
-                // moderator join the meeting
-            $joinMeetingParams = new JoinMeetingParameters($request['id'], Auth::user()->firstname.' '.Auth::user()->lastname , $request->moderator_password);
+            // moderator join the meeting
+            $joinMeetingParams = new JoinMeetingParameters($request['id'], Auth::user()->username , $request->moderator_password);
             $joinMeetingParams->setRedirect(true);
             $joinMeetingParams->setJoinViaHtml5(true);
             $url = $bbb->getJoinMeetingURL($joinMeetingParams);
@@ -227,11 +241,15 @@ class BigbluebuttonController extends Controller
             'id'=>'required|exists:bigbluebutton_models,id',
         ]);
 
-        $user_name = Auth::user()->firstname.' '.Auth::user()->lastname;
+        $user_name = Auth::user()->username;
         $bigbb=BigbluebuttonModel::find($request->id);
         if($bigbb->user_id == Auth::user()->id){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
+            $attendance=AttendanceLog::where('student_id',Auth::id())->where('session_id',$bigbb->id)->update([
+                'ip_address' => \Request::ip(),
+                'take_at' => Carbon::now()->format('Y-m-d H:i:s')
+            ]);
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
         }
         $joinMeetingParams->setRedirect(true);
