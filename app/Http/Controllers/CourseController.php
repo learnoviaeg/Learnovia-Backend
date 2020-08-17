@@ -30,6 +30,7 @@ use App\LessonComponent;
 use App\User;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\Assigments\Entities\UserAssigment;
 use Carbon\Carbon;
 use App\Letter;
 use Illuminate\Support\Facades\Validator;
@@ -780,6 +781,19 @@ class CourseController extends Controller
                                 if($com->name == 'Assigments'){
                                     foreach ($lessonn['Assigments'] as $one){
                                         $assignment_lesson=AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)->get()->first();
+                                        $one['user_submit']=[];
+                                        $studentassigment = UserAssigment::where('assignment_lesson_id', $assignment_lesson->id)->where('user_id', Auth::id())->first();
+                                        if(isset($studentassigment)){
+                                            $one['user_submit'] =$studentassigment;
+                                            $usr=User::find($studentassigment->user_id);
+                                            if(isset($usr->attachment))
+                                                $usr->picture=$usr->attachment->path;
+                                            $one['user_submit']->User=$usr;
+                                            if (isset($studentassigment->attachment_id)) {
+                                                $one['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                                            }
+                                        }
+
                                         $one->assignment_lesson=$assignment_lesson;
                                         $one['allow_attachment'] = $assignment_lesson->allow_attachment;
                                         $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignment_lesson->id)->pluck('start_date')->first();

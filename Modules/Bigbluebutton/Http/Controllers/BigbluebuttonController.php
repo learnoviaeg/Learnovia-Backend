@@ -489,6 +489,7 @@ class BigbluebuttonController extends Controller
                 $atendees=collect();
                 $names=collect();
                 if(count($response['attendees']) >= 1){
+
                     foreach($response['attendees']['attendee'] as $attend){
                         $names->push($attend['fullName']);
                     }
@@ -496,7 +497,7 @@ class BigbluebuttonController extends Controller
                 }else{
                     foreach($response['attendees'] as $attend){
                     
-                        $names->push($attend['fullName']);
+                       $names->push($attend['fullName']);
                     }
                 }
                 
