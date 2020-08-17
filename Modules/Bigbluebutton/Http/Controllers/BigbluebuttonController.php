@@ -41,6 +41,7 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/delete','title' => 'Delete Record']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/toggle','title' => 'Toggle Record']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/attendance','title' => 'Bigbluebutton Attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-attendance','title' => 'Bigbluebutton get Attendance']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('bigbluebutton/create');
@@ -51,6 +52,8 @@ class BigbluebuttonController extends Controller
         $role->givePermissionTo('bigbluebutton/delete');
         $role->givePermissionTo('bigbluebutton/toggle');
         $role->givePermissionTo('bigbluebutton/attendance');
+        $role->givePermissionTo('bigbluebutton/get-attendance');
+
 
 
 
@@ -544,5 +547,23 @@ class BigbluebuttonController extends Controller
 
         return HelperController::api_response_format(200 , null , 'Attendance taken successfully!');
 
+    }
+
+
+    public function viewAttendence(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:bigbluebutton_models,id',
+        ]);
+
+        $all_logs=AttendanceLog::where('session_id',$request->id)->with('User')->get();
+        $attendance_log['Total_Logs'] = $all_logs->count();
+        $attendance_log['Present']['count']= $all_logs->where('status','Present')->count();
+        $attendance_log['Absent']['count']= $all_logs->where('status','Absent')->count();
+        $attendance_log['Present']['precentage'] = ($attendance_log['Present']['count']/$all_logs->count())*100 ;
+        $attendance_log['Absent']['precentage'] =  ($attendance_log['Absent']['count']/$all_logs->count())*100 ;
+        $attendance_log['logs'] = $all_logs;
+        
+        return HelperController::api_response_format(200 , $attendance_log , 'Attendance records');
     }
 }
