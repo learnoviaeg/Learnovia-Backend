@@ -11,6 +11,7 @@ use App\User;
 use App\Enroll;
 use Auth;
 use App\CourseSegment;
+use Modules\Attendance\Entities\AttendanceLog;
 use BigBlueButton\Parameters\CreateMeetingParameters;
 use BigBlueButton\Parameters\JoinMeetingParameters;
 use BigBlueButton\Parameters\GetRecordingsParameters;
@@ -39,7 +40,7 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/getRecord','title' => 'get Record']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/delete','title' => 'Delete Record']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/toggle','title' => 'Toggle Record']);
-
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/attendance','title' => 'Bigbluebutton Attendance']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('bigbluebutton/create');
@@ -49,6 +50,8 @@ class BigbluebuttonController extends Controller
         $role->givePermissionTo('bigbluebutton/getRecord');
         $role->givePermissionTo('bigbluebutton/delete');
         $role->givePermissionTo('bigbluebutton/toggle');
+        $role->givePermissionTo('bigbluebutton/attendance');
+
 
 
         Component::create([
@@ -148,6 +151,24 @@ class BigbluebuttonController extends Controller
                     'publish_date'=>Carbon::now()
                 ]);
                 
+                foreach($usersIDs as $user)
+                {
+                    $userObj=User::find($user);
+                    if(!isset($userObj))
+                        continue;
+
+                    if(!$userObj->roles->pluck('id')->first()==3)
+                        continue;
+
+                    $attendance=AttendanceLog::create([
+                        'ip_address' => \Request::ip(),
+                        'student_id' => $user,
+                        'taker_id' => $bigbb->user_id,
+                        'session_id' => $bigbb->id,
+                        'type' => 'online',
+                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s')
+                    ]);
+                }
                 $created_meetings->push($bigbb);
                 $temp_start= Carbon::parse($temp_start)->addDays(7)->format('Y-m-d H:i:s');
             }
@@ -183,9 +204,8 @@ class BigbluebuttonController extends Controller
         if ($response->getReturnCode() == 'FAILED') {
             return 'Can\'t create room! please contact our administrator.';
         } else {
-
-                // moderator join the meeting
-            $joinMeetingParams = new JoinMeetingParameters($request['id'], Auth::user()->firstname.' '.Auth::user()->lastname , $request->moderator_password);
+            // moderator join the meeting
+            $joinMeetingParams = new JoinMeetingParameters($request['id'], Auth::user()->username , $request->moderator_password);
             $joinMeetingParams->setRedirect(true);
             $joinMeetingParams->setJoinViaHtml5(true);
             $url = $bbb->getJoinMeetingURL($joinMeetingParams);
@@ -227,11 +247,16 @@ class BigbluebuttonController extends Controller
             'id'=>'required|exists:bigbluebutton_models,id',
         ]);
 
-        $user_name = Auth::user()->firstname.' '.Auth::user()->lastname;
+        $user_name = Auth::user()->username;
         $bigbb=BigbluebuttonModel::find($request->id);
         if($bigbb->user_id == Auth::user()->id){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
+            $attendance=AttendanceLog::where('student_id',Auth::id())->where('session_id',$bigbb->id)->update([
+                'ip_address' => \Request::ip(),
+                'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'entered_date' => Carbon::now()->format('Y-m-d H:i:s'),
+            ]);
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
         }
         $joinMeetingParams->setRedirect(true);
@@ -463,15 +488,11 @@ class BigbluebuttonController extends Controller
                 $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
                 $atendees=collect();
                 $names=collect();
-                if(count($response['attendees']) >1){
-                    foreach($response['attendees'] as $attend){
-                    
-                        $atendees->push($attend);
+                if(count($response['attendees']) >= 1){
+                    foreach($response['attendees']['attendee'] as $attend){
+                        $names->push($attend['fullName']);
                     }
-                    foreach($atendees[0] as $mm){
-                        
-                        $names->push($mm['fullName']);
-                    }
+
                 }else{
                     foreach($response['attendees'] as $attend){
                     
@@ -483,5 +504,44 @@ class BigbluebuttonController extends Controller
                 return $names;
             }
         }
+    }
+
+    public function takeattendance(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:bigbluebutton_models,id',
+        ]);
+
+        $bbb = new BigBlueButton();
+        $meet = BigbluebuttonModel::whereId($request->id)->first();
+        $getMeetingInfoParams = new GetMeetingInfoParameters($request->id, $meet->moderator_password);
+        $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+
+        if ($response->getReturnCode() == 'FAILED') {
+            return HelperController::api_response_format(200 , null , 'This meeting not found we cant find attendees!');
+        } 
+
+        $response = $bbb->getMeetingInfoURL($getMeetingInfoParams);
+        $guzzleClient = new Client();
+        $response = $guzzleClient->get($response);
+        $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
+
+        foreach($response['attendees']['attendee'] as $attend){
+            $user=User::where('username',$attend['fullName'])->first();
+            $attendance=AttendanceLog::where('student_id',$user->id)->where('session_id',$request->id)->update([
+                'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'taker_id' => Auth::id(),
+                'status' => 'Present'
+            ]);
+        }
+
+        $attendance_absent=AttendanceLog::where('status',null)->where('session_id',$request->id)->update([
+            'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'taker_id' => Auth::id(),
+            'status' => 'Absent'
+        ]);
+
+        return HelperController::api_response_format(200 , null , 'Attendance taken successfully!');
+
     }
 }
