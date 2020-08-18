@@ -176,7 +176,7 @@ class UserQuizController extends Controller
             'device_data' => $deviceData,
             'browser_data' => $browserData,
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
-            'submit_time'=> Carbon::now()->format('Y-m-d H:i:s'),
+            'submit_time'=> null,
         ]);
 
         foreach($quiz_lesson->quiz->Question as $question){
