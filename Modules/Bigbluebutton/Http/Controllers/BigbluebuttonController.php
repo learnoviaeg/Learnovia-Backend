@@ -21,8 +21,9 @@ use Illuminate\Support\Carbon;
 use App\Http\Controllers\HelperController;
 use DB;
 use GuzzleHttp\Client;
-
-
+use App\Exports\BigBlueButtonAttendance;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 
 class BigbluebuttonController extends Controller
@@ -42,6 +43,7 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/toggle','title' => 'Toggle Record']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/attendance','title' => 'Bigbluebutton Attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-attendance','title' => 'Bigbluebutton get Attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/export','title' => 'Bigbluebutton Export Attendance']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('bigbluebutton/create');
@@ -53,6 +55,7 @@ class BigbluebuttonController extends Controller
         $role->givePermissionTo('bigbluebutton/toggle');
         $role->givePermissionTo('bigbluebutton/attendance');
         $role->givePermissionTo('bigbluebutton/get-attendance');
+        $role->givePermissionTo('bigbluebutton/export');
 
 
 
@@ -255,7 +258,7 @@ class BigbluebuttonController extends Controller
         if($bigbb->user_id == Auth::user()->id){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
-            $attendance=AttendanceLog::where('student_id',Auth::id())->where('session_id',$bigbb->id)->update([
+            $attendance=AttendanceLog::where('student_id',Auth::id())->where('session_id',$bigbb->id)->where('type','online')->update([
                 'ip_address' => \Request::ip(),
                 'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'entered_date' => Carbon::now()->format('Y-m-d H:i:s'),
@@ -531,15 +534,19 @@ class BigbluebuttonController extends Controller
         $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
 
         foreach($response['attendees']['attendee'] as $attend){
+            if(!isset($attend['fullName'])){
+                return HelperController::api_response_format(200 , null , 'You may be the only person it this meeting!');
+            }
+
             $user=User::where('username',$attend['fullName'])->first();
-            $attendance=AttendanceLog::where('student_id',$user->id)->where('session_id',$request->id)->update([
+            $attendance=AttendanceLog::where('student_id',$user->id)->where('session_id',$request->id)->where('type','online')->update([
                 'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'taker_id' => Auth::id(),
                 'status' => 'Present'
             ]);
         }
 
-        $attendance_absent=AttendanceLog::where('status',null)->where('session_id',$request->id)->update([
+        $attendance_absent=AttendanceLog::where('status',null)->where('session_id',$request->id)->where('type','online')->update([
             'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'taker_id' => Auth::id(),
             'status' => 'Absent'
@@ -550,20 +557,36 @@ class BigbluebuttonController extends Controller
     }
 
 
-    public function viewAttendence(Request $request)
+    public function viewAttendence(Request $request,$call = 0)
     {
         $request->validate([
             'id' => 'required|exists:bigbluebutton_models,id',
         ]);
 
-        $all_logs=AttendanceLog::where('session_id',$request->id)->with('User')->get();
+        $all_logs=AttendanceLog::where('session_id',$request->id)->where('type','online')->with('User')->get();
         $attendance_log['Total_Logs'] = $all_logs->count();
         $attendance_log['Present']['count']= $all_logs->where('status','Present')->count();
         $attendance_log['Absent']['count']= $all_logs->where('status','Absent')->count();
         $attendance_log['Present']['precentage'] = ($attendance_log['Present']['count']/$all_logs->count())*100 ;
         $attendance_log['Absent']['precentage'] =  ($attendance_log['Absent']['count']/$all_logs->count())*100 ;
         $attendance_log['logs'] = $all_logs;
-        
+
+        if($call == 1)
+            return $attendance_log;
         return HelperController::api_response_format(200 , $attendance_log , 'Attendance records');
+    }
+
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:bigbluebutton_models,id',
+        ]); 
+
+        $bbb_object = self::viewAttendence($request,1);
+        $filename = uniqid();
+        $file = Excel::store(new BigBlueButtonAttendance($bbb_object['logs']), 'bbb'.$filename.'.xls','public');
+        $file = url(Storage::url('bbb'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }
