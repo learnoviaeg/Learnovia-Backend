@@ -200,7 +200,7 @@ class BigbluebuttonController extends Controller
         $createMeetingParams->setModeratorPassword($request['moderator_password']);
         $createMeetingParams->setDuration($request['duration']);
         // $createMeetingParams->setRedirect(false);
-        $createMeetingParams->setLogoutUrl('dev.learnovia.com/#/');
+        $createMeetingParams->setLogoutUrl('https://dev.learnovia.com');
         if($request['is_recorded'] == 1){
             $createMeetingParams->setRecord(true);
             $createMeetingParams->setAllowStartStopRecording(true);
@@ -533,11 +533,17 @@ class BigbluebuttonController extends Controller
         $response = $guzzleClient->get($response);
         $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
 
-        foreach($response['attendees']['attendee'] as $attend){
-            if(!isset($attend['fullName'])){
-                return HelperController::api_response_format(200 , null , 'You may be the only person in this meeting!');
-            }
+        if(!isset($response['attendees']['attendee'][0]['fullName'])){
+            return HelperController::api_response_format(200 , null , 'You may be the only person in this meeting!');
+        }
 
+        $attendance_status=AttendanceLog::where('session_id',$request->id)->where('type','online')->update([
+            'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'taker_id' => Auth::id(),
+            'status' => null
+        ]);
+
+        foreach($response['attendees']['attendee'] as $attend){
             $user=User::where('username',$attend['fullName'])->first();
             $attendance=AttendanceLog::where('student_id',$user->id)->where('session_id',$request->id)->where('type','online')->update([
                 'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
