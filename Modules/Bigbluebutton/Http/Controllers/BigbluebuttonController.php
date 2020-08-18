@@ -156,6 +156,7 @@ class BigbluebuttonController extends Controller
                     'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
                     'publish_date'=>Carbon::now()
                 ]);
+
                 
                 foreach($usersIDs as $user)
                 {
@@ -163,17 +164,16 @@ class BigbluebuttonController extends Controller
                     if(!isset($userObj))
                         continue;
 
-                    if(!$userObj->roles->pluck('id')->first()==3)
-                        continue;
-
-                    $attendance=AttendanceLog::create([
-                        'ip_address' => \Request::ip(),
-                        'student_id' => $user,
-                        'taker_id' => $bigbb->user_id,
-                        'session_id' => $bigbb->id,
-                        'type' => 'online',
-                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s')
-                    ]);
+                    if($userObj->roles->pluck('id')->first()==3){
+                        $attendance=AttendanceLog::create([
+                            'ip_address' => \Request::ip(),
+                            'student_id' => $user,
+                            'taker_id' => $bigbb->user_id,
+                            'session_id' => $bigbb->id,
+                            'type' => 'online',
+                            'taken_at' => Carbon::now()->format('Y-m-d H:i:s')
+                        ]);
+                    }
                 }
                 $created_meetings->push($bigbb);
                 $temp_start= Carbon::parse($temp_start)->addDays(7)->format('Y-m-d H:i:s');
@@ -535,7 +535,7 @@ class BigbluebuttonController extends Controller
 
         foreach($response['attendees']['attendee'] as $attend){
             if(!isset($attend['fullName'])){
-                return HelperController::api_response_format(200 , null , 'You may be the only person it this meeting!');
+                return HelperController::api_response_format(200 , null , 'You may be the only person in this meeting!');
             }
 
             $user=User::where('username',$attend['fullName'])->first();
