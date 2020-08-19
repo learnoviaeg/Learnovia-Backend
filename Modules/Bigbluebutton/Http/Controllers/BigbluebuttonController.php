@@ -44,6 +44,7 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/attendance','title' => 'Bigbluebutton Attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-attendance','title' => 'Bigbluebutton get Attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/export','title' => 'Bigbluebutton Export Attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-all','title' => 'Bigbluebutton Get All']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('bigbluebutton/create');
@@ -56,8 +57,7 @@ class BigbluebuttonController extends Controller
         $role->givePermissionTo('bigbluebutton/attendance');
         $role->givePermissionTo('bigbluebutton/get-attendance');
         $role->givePermissionTo('bigbluebutton/export');
-
-
+        $role->givePermissionTo('bigbluebutton/get-all');
 
 
         Component::create([
@@ -285,9 +285,9 @@ class BigbluebuttonController extends Controller
     public function get(Request $request)
     {
         $request->validate([
-            'id' => 'exists:bigbluebutton_models,id|required_without:class,course',
-            'class'=> 'exists:bigbluebutton_models,class_id|required_without:id',
-            'course'=> 'exists:bigbluebutton_models,course_id|required_without:id',
+            'id' => 'exists:bigbluebutton_models,id',
+            'class'=> 'exists:bigbluebutton_models,class_id',
+            'course'=> 'exists:bigbluebutton_models,course_id',
         ]);
 
         $user_id = Auth::user()->id;
@@ -329,6 +329,10 @@ class BigbluebuttonController extends Controller
                 $meet['student_view']=$meet['show'];
                 $meet['show']=1;
             }
+
+            if($meet == null)
+                return HelperController::api_response_format(200 , null , 'This Meeting is not found');
+            return HelperController::api_response_format(200 , $meet);
         }
         if($request->filled('course') && $request->filled('class'))
         {
@@ -365,7 +369,59 @@ class BigbluebuttonController extends Controller
                     $m['show']=1;
                 }
             }
+
+            if($meet == null)
+                return HelperController::api_response_format(200 , null , 'This Meeting is not found');
+            return HelperController::api_response_format(200 , $meet);
         }
+
+        $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+        $courses=collect();
+        foreach($CourseSeg as $cs){
+            $cs_object = CourseSegment::find($cs);
+            if($cs_object->end_date > Carbon::now() && $cs_object->start_date < Carbon::now()){
+                $courses_cs = $cs_object->courses;
+                foreach($courses_cs as $c){
+                    $courses->push($c->id);
+                }
+            }
+        }
+        
+        $meet = BigbluebuttonModel::whereIn('course_id',$courses)->get(); 
+        if($request->user()->can('bigbluebutton/get-all')){
+            $all_meetings = $bbb = new BigBlueButton();
+            $meet = BigbluebuttonModel::get();       
+        }
+
+        foreach($meet as $m)
+            {
+                $m['join'] = false;
+                if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
+                ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
+                {
+                    $req = new Request([
+                        'duration' => $m->duration,
+                        'attendee' =>$m->attendee,
+                        'id' => $m->id,
+                        'name' => $m->name,
+                        'moderator_password' => $m->moderator_password,
+                        'is_recorded' => $m->is_recorded
+                    ]);
+                    $check=self::start_meeting($req);
+                    if($check)
+                        $m['join'] = true;
+                }
+                $getMeetingInfoParams = new GetMeetingInfoParameters($m->id, '', $m->moderator_password);
+                $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+                if ($response->getReturnCode() == 'FAILED') {
+                    $m['join'] = false;
+                }
+                if(count($hasornot) > 0 )
+                {
+                    $m['student_view']=$m['show'];
+                    $m['show']=1;
+                }
+            }
 
         if($meet == null)
             return HelperController::api_response_format(200 , null , 'This Meeting is not found');
