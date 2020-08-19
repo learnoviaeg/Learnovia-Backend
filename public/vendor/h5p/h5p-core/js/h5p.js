@@ -973,6 +973,7 @@ H5P.newRunnable = function (library, contentId, $attachTo, skipResize, extras) {
  */
 H5P.error = function (err) {
   if (window.console !== undefined && console.error !== undefined) {
+    console.log("loaded");
     console.error(err.stack ? err.stack : err);
   }
 };
