@@ -286,8 +286,8 @@ class BigbluebuttonController extends Controller
     {
         $request->validate([
             'id' => 'exists:bigbluebutton_models,id',
-            'class'=> 'exists:bigbluebutton_models,class_id',
-            'course'=> 'exists:bigbluebutton_models,course_id',
+            'class'=> 'exists:bigbluebutton_models,class_id|required_with:course',
+            'course'=> 'exists:bigbluebutton_models,course_id|required_with:class',
         ]);
 
         $user_id = Auth::user()->id;
@@ -386,7 +386,7 @@ class BigbluebuttonController extends Controller
                 }
             }
         }
-        
+
         $meet = BigbluebuttonModel::whereIn('course_id',$courses)->get(); 
         if($request->user()->can('bigbluebutton/get-all')){
             $all_meetings = $bbb = new BigBlueButton();
