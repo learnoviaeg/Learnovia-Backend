@@ -313,6 +313,7 @@ class ClassController extends Controller
         else
             $CourseSegments[]=$users->enroll;
 
+            return $CourseSegments;
         foreach($CourseSegments as $enrolls)
             if(isset($enrolls->courseSegment->segmentClasses))
                 foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
@@ -328,7 +329,7 @@ class ClassController extends Controller
         if(count($class) > 0)
             return HelperController::api_response_format(201,$class, 'There are your Classes');
         
-        return HelperController::api_response_format(201, null,'You haven\'t Classes');
+        return HelperController::api_response_format(201, $class,'You haven\'t Classes');
     }
 
     public function export(Request $request)
