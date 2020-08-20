@@ -233,8 +233,8 @@ class BigbluebuttonController extends Controller
                     $attendance=AttendanceLog::create([
                         'ip_address' => \Request::ip(),
                         'student_id' => $user,
-                        'taker_id' => $bigbb->user_id,
-                        'session_id' => $bigbb->id,
+                        'taker_id' => $final_out->user_id,
+                        'session_id' => $final_out->id,
                         'type' => 'online',
                         'taken_at' => Carbon::now()->format('Y-m-d H:i:s')
                     ]);
