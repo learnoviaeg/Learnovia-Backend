@@ -159,25 +159,6 @@ class BigbluebuttonController extends Controller
                             'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
                             'publish_date'=>Carbon::now()
                         ]);
-        
-                        
-                        foreach($usersIDs as $user)
-                        {
-                            $userObj=User::find($user);
-                            if(!isset($userObj))
-                                continue;
-        
-                            if($userObj->roles->pluck('id')->first()==3){
-                                $attendance=AttendanceLog::create([
-                                    'ip_address' => \Request::ip(),
-                                    'student_id' => $user,
-                                    'taker_id' => $bigbb->user_id,
-                                    'session_id' => $bigbb->id,
-                                    'type' => 'online',
-                                    'taken_at' => Carbon::now()->format('Y-m-d H:i:s')
-                                ]);
-                            }
-                        }
                         $created_meetings->push($bigbb);
                         $temp_start= Carbon::parse($temp_start)->addDays(7)->format('Y-m-d H:i:s');
                     }
@@ -237,6 +218,28 @@ class BigbluebuttonController extends Controller
             );
 
             $final_out = BigbluebuttonModel::find($request['id']);
+            $courseseg=CourseSegment::GetWithClassAndCourse($final_out->class_id,$final_out->course_id);
+            if(!isset($courseseg))
+                return HelperController::api_response_format(200, null ,'Please check active course segments');
+    
+            $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
+            foreach($usersIDs as $user)
+            {
+                $userObj=User::find($user);
+                if(!isset($userObj))
+                    continue;
+
+                if($userObj->roles->pluck('id')->first()==3){
+                    $attendance=AttendanceLog::create([
+                        'ip_address' => \Request::ip(),
+                        'student_id' => $user,
+                        'taker_id' => $bigbb->user_id,
+                        'session_id' => $bigbb->id,
+                        'type' => 'online',
+                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s')
+                    ]);
+                }
+            }
             $getMeetingInfoParams = new GetMeetingInfoParameters($request['id'], '', $request['moderator_password']);
             $response = $bbb->getMeetingInfo($getMeetingInfoParams);
             if ($response->getReturnCode() == 'FAILED') {
