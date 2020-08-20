@@ -304,23 +304,31 @@ class ClassController extends Controller
             if ($request->filled('type'))
                 $query->whereIn('academic_type_id', $request->type);            
         }])->first();
-        foreach($users ->enroll as $enrolls)
-        if(isset($enrolls->courseSegment->segmentClasses)){
-            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-                foreach($segmetClas->classLevel as $clas)
-                    if(isset($clas->yearLevels))
-                        foreach($clas->yearLevels as $level)
-                            if(count($level->yearType) > 0)
-                                if(!in_array($clas->class_id, $result))
-                                {
-                                    $result[]=$clas->class_id;
-                                    $class[]=Classes::find($clas->class_id);
-                                }
-                            }
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $cs=GradeCategoryController::getCourseSegment($request);
+            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
+        }
+        else
+            $CourseSegments[]=$users->enroll;
+
+        foreach($CourseSegments as $enrolls)
+            if(isset($enrolls->courseSegment->segmentClasses))
+                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+                    foreach($segmetClas->classLevel as $clas)
+                        if(isset($clas->yearLevels))
+                            foreach($clas->yearLevels as $level)
+                                if(count($level->yearType) > 0)
+                                    if(!in_array($clas->class_id, $result))
+                                    {
+                                        $result[]=$clas->class_id;
+                                        $class[]=Classes::find($clas->class_id);
+                                    }
         if(count($class) > 0)
             return HelperController::api_response_format(201,$class, 'There are your Classes');
         
-        return HelperController::api_response_format(201, 'You haven\'t Classes');
+        return HelperController::api_response_format(201, null,'You haven\'t Classes');
     }
 
     public function export(Request $request)
