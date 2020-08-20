@@ -313,7 +313,6 @@ class ClassController extends Controller
         else
             $CourseSegments[]=$users->enroll;
 
-            return $CourseSegments;
         foreach($CourseSegments as $enrolls)
             if(isset($enrolls->courseSegment->segmentClasses))
                 foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
