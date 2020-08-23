@@ -600,7 +600,13 @@ class BigbluebuttonController extends Controller
         $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
 
         if(!isset($response['attendees']['attendee'][0]['fullName'])){
-            return HelperController::api_response_format(200 , null , 'You may be the only person in this meeting!');
+            $all_attendees = AttendanceLog::where('session_id',$request->id)->where('type','online')->update([
+                'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'taker_id' => Auth::id(),
+                'status' => 'Absent'
+            ]);
+
+            return HelperController::api_response_format(200 , null , 'Attendance taken successfully!');
         }
 
         $attendance_status=AttendanceLog::where('session_id',$request->id)->where('type','online')->update([
