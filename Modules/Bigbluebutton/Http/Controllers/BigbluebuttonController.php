@@ -131,7 +131,7 @@ class BigbluebuttonController extends Controller
         
                         $req = new Request([
                             'duration' => $request->duration,
-                            'attendee' =>$request->attendee,
+                            'attendee' =>$attendee,
                             'id' => $bigbb->id,
                             'name' => $request->name,
                             'moderator_password' => $request->moderator_password,
@@ -558,6 +558,7 @@ class BigbluebuttonController extends Controller
                 $body = $response->getBody();
                 $body->seek(0);
                 $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
+                return $response;
                 $atendees=collect();
                 $names=collect();
                 if(count($response['attendees']) >= 1){
