@@ -228,20 +228,20 @@ class BigbluebuttonController extends Controller
                 $userObj=User::find($user);
                 if(!isset($userObj))
                     continue;
-
                 if($userObj->roles->pluck('id')->first()==3){
-                    $founded=AttendanceLog::where('student_id',$user)->where('taker_id',$final_out->id)
-                            ->where('session_id',$final_out->id)->where('type','online')->get();
-                    if(isset($founded))
-                        continue;
-                    $attendance=AttendanceLog::create([
-                        'ip_address' => \Request::ip(),
-                        'student_id' => $user,
-                        'taker_id' => $final_out->user_id,
-                        'session_id' => $final_out->id,
-                        'type' => 'online',
-                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s')
-                    ]);
+                    $founded=AttendanceLog::where('student_id',$user)
+                            ->where('session_id',$final_out->id)->where('type','online')->first();
+
+                    if(!isset($founded)){
+                        $attendance=AttendanceLog::create([
+                            'ip_address' => \Request::ip(),
+                            'student_id' => $user,
+                            'taker_id' => $final_out->user_id,
+                            'session_id' => $final_out->id,
+                            'type' => 'online',
+                            'taken_at' => Carbon::now()->format('Y-m-d H:i:s')
+                        ]);
+                    }
                 }
             }
             $getMeetingInfoParams = new GetMeetingInfoParameters($request['id'], '', $request['moderator_password']);
