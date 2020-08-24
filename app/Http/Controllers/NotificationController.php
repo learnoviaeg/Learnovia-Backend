@@ -95,7 +95,7 @@ class NotificationController extends Controller
                     $data[$i]['read_at'] = $not->read_at;
                     $data[$i]['notification_id'] = $not->id;
                     $data[$i]['message'] = $not->data['message'];
-                    $data[$i]['publish_date'] = $not->data['publish_date'];
+                    $data[$i]['publish_date'] = Carbon::parse($not->data['publish_date'])->format('Y-m-d H:i:s');
                     $data[$i]['type'] = $not->data['type'];
                     $data[$i]['course_id'] = $not->data['course_id'];
                     $data[$i]['class_id'] = $not->data['class_id'];
