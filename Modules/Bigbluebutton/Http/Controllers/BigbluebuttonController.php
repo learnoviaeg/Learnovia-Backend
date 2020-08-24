@@ -671,7 +671,7 @@ class BigbluebuttonController extends Controller
 
         $bbb_object = self::viewAttendence($request,1);
         $filename = uniqid();
-        $file = Excel::store(new BigBlueButtonAttendance($bbb_object['logs']), 'bbb'.$filename.'.xls','public');
+        $file = Excel::store(new BigBlueButtonAttendance($bbb_object), 'bbb'.$filename.'.xls','public');
         $file = url(Storage::url('bbb'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
