@@ -36,6 +36,11 @@ class BigBlueButtonAttendance implements FromCollection, WithHeadings
                 $bbb['Absent'] = '✔';
             }
 
+            if($state == null){
+                $bbb['Present'] = '-';
+                $bbb['Absent'] = '-';
+            }
+
             $bbb->setHidden([])->setVisible($this->fields);
         }
         $bbb_logs[] = [
