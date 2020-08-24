@@ -153,7 +153,7 @@ class NotificationController extends Controller
             $not->data= json_decode($not->data, true);
             if($not->data['type'] != 'announcement')
             {
-                $parse=Carbon::parse($not->data['publish_date']);
+                $parse=Carbon::parse($not->data['publish_date'])->format('Y-m-d H:i:s');
 
                 if(!isset($parse)){
                     $data[] = $not->data;

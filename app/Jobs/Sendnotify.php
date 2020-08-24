@@ -133,10 +133,6 @@ class Sendnotify implements ShouldQueue
 
                Log::debug( $e->getMessage());
             }
-            
-
         }
-
-     
     }
 }
