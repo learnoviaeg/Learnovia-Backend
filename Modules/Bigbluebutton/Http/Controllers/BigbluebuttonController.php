@@ -83,7 +83,7 @@ class BigbluebuttonController extends Controller
             'object' => 'required|array',
             'object.*.class_id' => 'required|exists:classes,id',
             'object.*.course_id' => 'required|exists:courses,id',
-            'attendee_password' => 'nullable|string',
+            'attendee_password' => 'required|string|different:moderator_password',
             'moderator_password' => 'required|string',
             'duration' => 'nullable',
             'is_recorded' => 'required|bool',
