@@ -200,7 +200,7 @@ class MediaController extends Controller
                     'class_id' => $class_id,
                     'lesson_id' => $mediaLesson->lesson_id,
                     'type' => 'media',
-                    'publish_date' => $publishdate,
+                    'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
                 ]);
                 LessonComponent::create([
                     'lesson_id' => $mediaLesson->lesson_id,
