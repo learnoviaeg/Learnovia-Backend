@@ -2,7 +2,7 @@
   'app' => 
   array (
     'name' => 'Laravel',
-    'env' => 'local',
+    'env' => 'production',
     'debug' => true,
     'url' => 'http://localhost',
     'asset_url' => NULL,
@@ -10,7 +10,7 @@
     'locale' => 'en',
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
-    'key' => 'base64:kBClf83dLtR8J8UrXd1Wy7LMiHduT1DpYkz8OVC2E3A=',
+    'key' => 'base64:HUOhPc5Fpec+HFvKi0ZaHF3XeuT+Ek43ZeYO5Pj7FYo=',
     'cipher' => 'AES-256-CBC',
     'providers' => 
     array (
@@ -188,7 +188,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/storage/framework/cache/data',
+        'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -288,7 +288,7 @@
       array (
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'huda',
+        'database' => 'learnovia',
         'prefix' => '',
         'foreign_key_constraints' => true,
       ),
@@ -298,7 +298,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'huda',
+        'database' => 'learnovia',
         'username' => 'root',
         'password' => '',
         'unix_socket' => '',
@@ -318,7 +318,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'huda',
+        'database' => 'learnovia',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -333,7 +333,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'huda',
+        'database' => 'learnovia',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -428,13 +428,25 @@
     array (
       'default' => 'Maatwebsite\\Excel\\DefaultValueBinder',
     ),
+    'cache' => 
+    array (
+      'driver' => 'memory',
+      'batch' => 
+      array (
+        'memory_limit' => 60000,
+      ),
+      'illuminate' => 
+      array (
+        'store' => NULL,
+      ),
+    ),
     'transactions' => 
     array (
       'handler' => 'db',
     ),
     'temporary_files' => 
     array (
-      'local_path' => '/tmp',
+      'local_path' => 'C:\\Users\\lenovo\\AppData\\Local\\Temp',
       'remote_disk' => NULL,
     ),
   ),
@@ -447,17 +459,17 @@
       'components' => 
       array (
         'driver' => 'local',
-        'root' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/public/components/',
+        'root' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\public\\components/',
       ),
       'local' => 
       array (
         'driver' => 'local',
-        'root' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/storage/app',
+        'root' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\app',
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/storage/app/public',
+        'root' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
       ),
@@ -580,13 +592,13 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/storage/logs/laravel.log',
+        'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\logs/laravel.log',
         'level' => 'debug',
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/storage/logs/laravel.log',
+        'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
       ),
@@ -622,7 +634,7 @@
       'syslog' => 
       array (
         'driver' => 'syslog',
-        'path' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/storage/logs/laravel.log',
+        'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\logs/laravel.log',
         'level' => 'debug',
       ),
       'errorlog' => 
@@ -651,7 +663,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => '/home/huda/Downloads/Laravel/clone/learnovia-backend/resources/views/vendor/mail',
+        0 => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\resources\\views/vendor/mail',
       ),
     ),
     'log_channel' => NULL,
@@ -662,7 +674,7 @@
     'stubs' => 
     array (
       'enabled' => false,
-      'path' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/vendor/nwidart/laravel-modules/src/Commands/stubs',
+      'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend/vendor/nwidart/laravel-modules/src/Commands/stubs',
       'files' => 
       array (
         'routes/web' => 'Routes/web.php',
@@ -724,9 +736,9 @@
     ),
     'paths' => 
     array (
-      'modules' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/Modules',
-      'assets' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/public/modules',
-      'migration' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/database/migrations',
+      'modules' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\Modules',
+      'assets' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\public\\modules',
+      'migration' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\database/migrations',
       'generator' => 
       array (
         'config' => 
@@ -856,7 +868,7 @@
       'enabled' => false,
       'paths' => 
       array (
-        0 => '/home/huda/Downloads/Laravel/clone/learnovia-backend/vendor/*/*',
+        0 => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\vendor/*/*',
       ),
     ),
     'composer' => 
@@ -884,7 +896,7 @@
       'file' => 
       array (
         'class' => 'Nwidart\\Modules\\Activators\\FileActivator',
-        'statuses-file' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/modules_statuses.json',
+        'statuses-file' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\modules_statuses.json',
         'cache-key' => 'activator.installed',
         'cache-lifetime' => 604800,
       ),
@@ -1034,7 +1046,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/storage/framework/sessions',
+    'files' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -1087,9 +1099,9 @@
   array (
     'paths' => 
     array (
-      0 => '/home/huda/Downloads/Laravel/clone/learnovia-backend/resources/views',
+      0 => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\resources\\views',
     ),
-    'compiled' => '/home/huda/Downloads/Laravel/clone/learnovia-backend/storage/framework/views',
+    'compiled' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\framework\\views',
   ),
   'attendance' => 
   array (
