@@ -231,7 +231,7 @@ class BigbluebuttonController extends Controller
 
                 if($userObj->roles->pluck('id')->first()==3){
                     $founded=AttendanceLog::where('student_id',$user)->where('taker_id',$final_out->id)
-                            ->where('session-id',$final_out->id)->where('type','online')->get();
+                            ->where('session_id',$final_out->id)->where('type','online')->get();
                     if(isset($founded))
                         continue;
                     $attendance=AttendanceLog::create([
