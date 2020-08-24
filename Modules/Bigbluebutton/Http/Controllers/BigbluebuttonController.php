@@ -157,7 +157,7 @@ class BigbluebuttonController extends Controller
                             'lesson_id'=> null,
                             'type' => 'meeting',
                             'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
-                            'publish_date'=>$temp_start
+                            'publish_date'=>Carbon::parse($temp_start)->format('Y-m-d H:i:s')
                         ]);
                         $created_meetings->push($bigbb);
                         $temp_start= Carbon::parse($temp_start)->addDays(7)->format('Y-m-d H:i:s');

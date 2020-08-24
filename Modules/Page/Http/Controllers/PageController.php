@@ -108,7 +108,7 @@ class PageController extends Controller
                 'lesson_id' => $lesson,
                 'type' => 'Page',
                 'link' => url(route('getPage')) . '?id=' . $page->id,
-                'publish_date' => $publishdate
+                'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
             ]);
         }
         $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;

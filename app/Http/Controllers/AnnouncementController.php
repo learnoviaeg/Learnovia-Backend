@@ -112,7 +112,7 @@ class AnnouncementController extends Controller
             'year_id' => $request->year,
             'type_id' => $request->type,
             'segment_id' => $request->segment_id,
-            'publish_date' => $publishdate,
+            'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
             'created_by' => Auth::id(),
         ]);
         foreach ($users as $user){
@@ -138,7 +138,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $ann->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate)->format('Y-d-m H-i-s'),
                 'title' => $request->title,
                 'description' => $request->description,
                 'attached_file' => $file_id,
@@ -151,7 +151,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $ann->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
                 'title' => $request->title,
                 'description' => $request->description,
                 'attached_file' => $attached,
@@ -275,7 +275,7 @@ class AnnouncementController extends Controller
             'attached_file' => $file_id,
             'start_date'=>$start_date,
             'due_date'=> $due_date,
-            'publish_date' => $publishdate
+            'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
         ]);
 
         $anounce = AnnouncementController::get_announcement($request);
@@ -289,7 +289,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $announce->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
                 'title' => $announce->title,
                 'description' => $announce->description,
                 'attached_file' => $announce->attached_file,
@@ -304,7 +304,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $announce->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
                 'title' => $announce->title,
                 'description' => $announce->description,
                 'attached_file' => $attached,
@@ -510,7 +510,7 @@ class AnnouncementController extends Controller
             $not->data= json_decode($not->data, true);
             if($not->data['type'] == 'announcement')
             {
-                $parse=Carbon::parse($not->data['publish_date']);
+                $parse=Carbon::parse($not->data['publish_date'])->format('Y-m-d H:i:s');
 
                 if(!isset($parse)){
                     $data[] = $not->data;
