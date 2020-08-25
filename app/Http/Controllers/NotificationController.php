@@ -117,7 +117,6 @@ class NotificationController extends Controller
                     if($not->data['type'] == 'Attendance')
                         $data[$i]['item_lesson_id'] = Attendance::where('id', $not->data['id'])->pluck('id')->first();
 
-                    
                     $deleted = 0 ;
                     // if object doesnot deleted or this student not enrolled in this course
                     if(!isset($data[$i]['item_lesson_id']) || !in_array($item_course_segment,$course_segments_ids->toArray())){
@@ -130,12 +129,12 @@ class NotificationController extends Controller
             $i++;
         }
         return $data;
-        $final=array();
-        foreach($data as $object)
-        {
-            $final[]= $object;
-        }
-        return HelperController::api_response_format(200, $body = $final, $message = 'all users notifications');
+        // $final=array();
+        // foreach($data as $object)
+        // {
+        //     $final[]= $object;
+        // }
+        // return HelperController::api_response_format(200, $body = $final, $message = 'all users notifications');
     }
 
    /**
