@@ -115,7 +115,7 @@ class BigbluebuttonController extends Controller
                         $last_date= $request->last_day;
                     }
         
-                    $temp_start = $start_date;
+                    $temp_start = Carbon::parse($start_date);
                     while(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::parse($last_date)->format('Y-m-d H:i:s')){
                         $bigbb = new BigbluebuttonModel;
                         $bigbb->name=$request->name;
@@ -124,7 +124,7 @@ class BigbluebuttonController extends Controller
                         $bigbb->attendee_password=$attendee;
                         $bigbb->moderator_password=$request->moderator_password;
                         $bigbb->duration=$duration;
-                        $bigbb->start_date=$temp_start;
+                        $bigbb->start_date=$temp_start->format('Y-m-d H:i:s');
                         $bigbb->user_id = Auth::user()->id;
                         $bigbb->save();
                         $bigbb['join'] = false;
