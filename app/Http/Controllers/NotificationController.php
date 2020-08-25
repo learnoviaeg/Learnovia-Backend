@@ -88,9 +88,6 @@ class NotificationController extends Controller
                     {
                         $item_course_segment = $item_course_segment->courseSegment->id;
                     }
-                  
-                    
-                    
                     $data[$i]['id'] = $not->data['id'];
                     $data[$i]['read_at'] = $not->read_at;
                     $data[$i]['notification_id'] = $not->id;
@@ -132,6 +129,7 @@ class NotificationController extends Controller
             }
             $i++;
         }
+        return $data;
         $final=array();
         foreach($data as $object)
         {
