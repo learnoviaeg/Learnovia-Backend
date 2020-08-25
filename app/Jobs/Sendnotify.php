@@ -96,7 +96,6 @@ class Sendnotify implements ShouldQueue
                         "due_date" => $this->request['due_date'],
                         "attached_file" => $att,
                         'deleted'=> '0'
-
                     );
             }
             $count++;
