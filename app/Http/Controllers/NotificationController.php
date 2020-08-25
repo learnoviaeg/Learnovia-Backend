@@ -129,12 +129,12 @@ class NotificationController extends Controller
             $i++;
         }
         return $data;
-        // $final=array();
-        // foreach($data as $object)
-        // {
-        //     $final[]= $object;
-        // }
-        // return HelperController::api_response_format(200, $body = $final, $message = 'all users notifications');
+        $final=array();
+        foreach($data as $object)
+        {
+            $final[]= $object;
+        }
+        return HelperController::api_response_format(200, $body = $final, $message = 'all users notifications');
     }
 
    /**
