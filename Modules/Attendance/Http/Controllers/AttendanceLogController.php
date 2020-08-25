@@ -69,7 +69,7 @@ class AttendanceLogController extends Controller
                         'class_id' => (int)$classID[0],
                         'lesson_id' => null,
                         'type' => 'Attendance',
-                        'publish_date' =>Carbon::parse($date)->format('Y-m-d H:i:s'),
+                        'publish_date' => $date,
                     ]);
                 }
             }

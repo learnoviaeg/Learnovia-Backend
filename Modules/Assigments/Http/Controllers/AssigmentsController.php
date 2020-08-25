@@ -282,7 +282,7 @@ class AssigmentsController extends Controller
 
             $publish_date=$AssignmentLesson->publish_date;
             if(carbon::parse($publish_date)->isPast())
-                $publish_date=Carbon::now()->format('Y-m-d H:i:s');
+                $publish_date=Carbon::now();
                 
             user::notify([
                 'id' => $request->assignment_id,
@@ -294,7 +294,7 @@ class AssigmentsController extends Controller
                 'lesson_id' => $lessonId,
                 'type' => 'assignment',
                 'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
-                'publish_date' => carbon::parse($publish_date)->format('Y-m-d H:i:s')
+                'publish_date' => $publish_date
             ]);
             // $all[] = Lesson::find($lesson_id)->module('Assigments', 'assignment')->get();
         $all = AssignmentLesson::all();
@@ -333,7 +333,7 @@ class AssigmentsController extends Controller
             'lesson_id' => $lesson_id,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request["assignment_lesson_id"],
-            'publish_date' => Carbon::parse($request['publish_date'])->format('Y-m-d H:i:s'),
+            'publish_date' => $request['publish_date'],
         ]);
     }
 
@@ -802,7 +802,7 @@ class AssigmentsController extends Controller
             'lesson_id' => $assignment->lesson_id,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $assignment->assignment_id,
-            'publish_date' => Carbon::parse($request->start_date)->format('Y-m-d H:i:s'),
+            'publish_date' => $request->start_date,
         ]);
         return HelperController::api_response_format(200, $assignmentOerride, 'Assignment override successfully');
     }
