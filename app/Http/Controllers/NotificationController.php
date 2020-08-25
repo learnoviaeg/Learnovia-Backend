@@ -128,7 +128,6 @@ class NotificationController extends Controller
             }
             $i++;
         }
-        return $data;
         $final=array();
         foreach($data as $object)
         {
