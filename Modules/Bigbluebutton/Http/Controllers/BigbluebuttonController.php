@@ -45,6 +45,7 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-attendance','title' => 'Bigbluebutton get Attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/export','title' => 'Bigbluebutton Export Attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-all','title' => 'Bigbluebutton Get All']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/session-moderator','title' => 'Bigbluebutton session moderator']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('bigbluebutton/create');
@@ -58,7 +59,7 @@ class BigbluebuttonController extends Controller
         $role->givePermissionTo('bigbluebutton/get-attendance');
         $role->givePermissionTo('bigbluebutton/export');
         $role->givePermissionTo('bigbluebutton/get-all');
-
+        $role->givePermissionTo('bigbluebutton/session-moderator');
 
         Component::create([
             'name' => 'Bigbluebutton',
@@ -266,7 +267,7 @@ class BigbluebuttonController extends Controller
 
         $user_name = Auth::user()->username;
         $bigbb=BigbluebuttonModel::find($request->id);
-        if($bigbb->user_id == Auth::user()->id){
+        if($request->user()->can('bigbluebutton/session-moderator')){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
             $attendance=AttendanceLog::where('student_id',Auth::id())->where('session_id',$bigbb->id)->where('type','online')->update([
