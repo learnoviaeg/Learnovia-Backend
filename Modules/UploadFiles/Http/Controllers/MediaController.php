@@ -200,7 +200,7 @@ class MediaController extends Controller
                     'class_id' => $class_id,
                     'lesson_id' => $mediaLesson->lesson_id,
                     'type' => 'media',
-                    'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
+                    'publish_date' => $publishdate,
                 ]);
                 LessonComponent::create([
                     'lesson_id' => $mediaLesson->lesson_id,
@@ -303,7 +303,7 @@ class MediaController extends Controller
         
         $publish_date=$mediaLesson->publish_date;
         if(carbon::parse($publish_date)->isPast())
-            $publish_date=Carbon::now()->format('Y-m-d H:i:s');
+            $publish_date=Carbon::now();
         User::notify([
             'id' => $media->id,
             'message' => $media->name.' media is updated',
@@ -313,7 +313,7 @@ class MediaController extends Controller
             'class_id' => $class_id,
             'lesson_id' => $mediaLesson->lesson_id,
             'type' => 'media',
-            'publish_date' => carbon::parse($publish_date)->format('Y-m-d H:i:s'),
+            'publish_date' => $publish_date,
         ]);
 
         if($media->type != null)

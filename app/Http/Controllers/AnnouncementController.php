@@ -289,7 +289,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $announce->id,
                 'type' => 'announcement',
-                'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
+                'publish_date' => $publishdate,
                 'title' => $announce->title,
                 'description' => $announce->description,
                 'attached_file' => $announce->attached_file,
@@ -304,7 +304,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $announce->id,
                 'type' => 'announcement',
-                'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
+                'publish_date' => $publishdate,
                 'title' => $announce->title,
                 'description' => $announce->description,
                 'attached_file' => $attached,

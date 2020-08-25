@@ -398,7 +398,7 @@ class FilesController extends Controller
         
         $publish_date=$fileLesson->publish_date;
         if(carbon::parse($publish_date)->isPast())
-            $publish_date=Carbon::now()->format('Y-m-d H:i:s');
+            $publish_date=Carbon::now();
 
         User::notify([
                 'id' => $file->id,
@@ -410,7 +410,7 @@ class FilesController extends Controller
                 'lesson_id' => $request->lesson_id,
                 'type' => 'file',
                 'link' => $file->url,
-                'publish_date' => carbon::parse($publish_date)->format('Y-m-d H:i:s'),
+                'publish_date' => $publish_date,
         ]);
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, 'File edited successfully');

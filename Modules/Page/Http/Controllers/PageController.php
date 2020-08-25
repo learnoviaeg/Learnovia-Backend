@@ -108,7 +108,7 @@ class PageController extends Controller
                 'lesson_id' => $lesson,
                 'type' => 'Page',
                 'link' => url(route('getPage')) . '?id=' . $page->id,
-                'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
+                'publish_date' => $publishdate,
             ]);
         }
         $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
@@ -173,7 +173,7 @@ class PageController extends Controller
             'lesson_id' => $request->lesson_id[0],
             'type' => 'Page',
             'link' => url(route('getPage')) . '?id=' . $request->id,
-            'publish_date' => Carbon::now()->format('Y-m-d H:i:s')
+            'publish_date' => Carbon::now()
         ]);
         return HelperController::api_response_format(200, $page, 'Page edited successfully');
     }
