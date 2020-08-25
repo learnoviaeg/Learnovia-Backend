@@ -141,7 +141,7 @@ class BigbluebuttonController extends Controller
                 
                         if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
                         ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
-                        {
+                        {                            
                             $check =self::start_meeting($req);
                             if($check)
                                 $bigbb['join'] = true;
@@ -180,6 +180,8 @@ class BigbluebuttonController extends Controller
         $bbb = new BigBlueButton();
 
         $bbb->getJSessionId();
+
+     
         $createMeetingParams = new CreateMeetingParameters($request['id'], $request['name']);
         $createMeetingParams->setAttendeePassword($request['attendee']);
         $createMeetingParams->setModeratorPassword($request['moderator_password']);
@@ -672,5 +674,10 @@ class BigbluebuttonController extends Controller
         $file = Excel::store(new BigBlueButtonAttendance($bbb_object), 'bbb'.$filename.'.xls','public');
         $file = url(Storage::url('bbb'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
+    }
+
+    public function clear(){
+        \Artisan::call('cache:clear');
+        \Artisan::call('config:clear');
     }
 }

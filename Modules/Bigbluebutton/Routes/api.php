@@ -30,7 +30,6 @@ Route::group(['prefix' => 'bigbluebutton', 'middleware' => 'auth:api'], function
     Route::get('get-attendance', 'BigbluebuttonController@viewAttendence')->name('get-attendance')->middleware('permission:bigbluebutton/get-attendance');
     Route::get('export', 'BigbluebuttonController@export')->name('exportbbbattendence')->middleware('permission:bigbluebutton/export');
     Route::get('meetinginfo', 'BigbluebuttonController@getmeetingInfo')->name('getmeetingInfo');
-
-
+    Route::get('clear', 'BigbluebuttonController@clear')->name('clear');
 
 });
