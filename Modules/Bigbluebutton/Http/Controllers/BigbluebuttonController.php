@@ -115,7 +115,7 @@ class BigbluebuttonController extends Controller
                         $last_date= $request->last_day;
                     }
         
-                    $temp_start = Carbon::parse($start_date)->format('Y-m-d H:i:s');
+                    $temp_start = $start_date;
                     while(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::parse($last_date)->format('Y-m-d H:i:s')){
                         $bigbb = new BigbluebuttonModel;
                         $bigbb->name=$request->name;
@@ -160,13 +160,11 @@ class BigbluebuttonController extends Controller
                             'publish_date'=> $temp_start
                         ]);
                         $created_meetings->push($bigbb);
-                        $temp_start= Carbon::parse($temp_start)->addDays(7)->format('Y-m-d H:i:s');
+                        $temp_start= Carbon::parse($temp_start)->addDays(7);
                     }
                 }
             }
         }
-       
-    
         return HelperController::api_response_format(200, $created_meetings ,'Meeting created Successfully');
     }
 
