@@ -228,7 +228,7 @@ class FilesController extends Controller
                     'lesson_id' => $lesson,
                     'type' => 'file',
                     'link' => $file->url,
-                    'publish_date' => Carbon::parse($publishdate)->format('Y-m-d H:i:s'),
+                    'publish_date' => $publishdate,
                 ]);
                 if ($check) {
                     $fileLesson = new FileLesson;

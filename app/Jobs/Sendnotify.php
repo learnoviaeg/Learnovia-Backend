@@ -14,7 +14,7 @@ use App\User;
 // use Illuminate\Support\Facades\Log;
 use Log;
 use Exception;
-
+use Carbon\Carbon;
 
 
 class Sendnotify implements ShouldQueue
@@ -30,7 +30,6 @@ class Sendnotify implements ShouldQueue
     public function __construct( $request)
     {
         $this->request=$request;
-  
     }
 
     /**
@@ -71,7 +70,7 @@ class Sendnotify implements ShouldQueue
                         "course_id" => (string)$this->request['course_id'],
                         "class_id" => (string)$this->request['class_id'],
                         "lesson_id"=> (string)$this->request['lesson_id'],
-                        "publish_date" => $this->request['publish_date'],
+                        "publish_date" => Carbon::parse($this->request['publish_date'])->format('Y-m-d H:i:s'),
                         "read_at" => null,
                         'deleted'=> "0"
                     );
@@ -89,7 +88,7 @@ class Sendnotify implements ShouldQueue
                         "id" => (string)$this->request['id'],
                         "type" => $this->request['type'],
                         "message" => $this->request['message'],
-                        "publish_date" => $this->request['publish_date'],
+                        "publish_date" => Carbon::parse($this->request['publish_date'])->format('Y-m-d H:i:s'),
                         "read_at" => null,
                         "title" => $this->request['title'],
                         "description" => $this->request['description'],
