@@ -310,8 +310,11 @@ class ClassController extends Controller
             $cs=GradeCategoryController::getCourseSegment($request);
             $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
         }
-        else
-            $CourseSegments[]=$users->enroll;
+        else{
+            $enrll=$users->enroll;
+            foreach($enrll as $one)
+                $CourseSegments[]=$one->courseSegment;
+        }
 
         foreach($CourseSegments as $enrolls)
             if(isset($enrolls->segmentClasses))
