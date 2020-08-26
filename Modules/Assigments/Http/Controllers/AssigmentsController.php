@@ -93,6 +93,7 @@ class AssigmentsController extends Controller
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
 
+    // not used
     public function getAllAssigment(Request $request)
     {
         $request->validate([
