@@ -678,9 +678,8 @@ class BigbluebuttonController extends Controller
     }
 
     public function clear(){
-
+        \Artisan::call('config:cache');
         \Artisan::call('cache:clear');
         \Artisan::call('config:clear');
-        
     }
 }
