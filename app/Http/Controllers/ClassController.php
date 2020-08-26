@@ -314,8 +314,8 @@ class ClassController extends Controller
             $CourseSegments[]=$users->enroll;
 
         foreach($CourseSegments as $enrolls)
-            if(isset($enrolls->courseSegment->segmentClasses))
-                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+            if(isset($enrolls->segmentClasses))
+                foreach($enrolls->segmentClasses as $segmetClas)
                     foreach($segmetClas->classLevel as $clas)
                         if(isset($clas->yearLevels))
                             foreach($clas->yearLevels as $level)
