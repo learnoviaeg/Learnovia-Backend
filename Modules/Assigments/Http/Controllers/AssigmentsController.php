@@ -677,7 +677,7 @@ class AssigmentsController extends Controller
             'is_graded' => 'required|boolean',
             'mark' => 'required|integer',
             'allow_attachment' => 'required|integer|min:0|max:3',
-            'publish_date' => 'required|date|before:closing_date',
+            'publish_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date|date_format:Y-m-d H:i:s',
             'grade_category' => 'array|required_if:is_graded,==,1',
@@ -753,7 +753,7 @@ class AssigmentsController extends Controller
                 "course_segment" => $lesson->course_segment_id,
                 "assignment_lesson_id" => $assignment_lesson->id,
                 "submit_date" => Carbon::now(),
-                "publish_date" => $request->publish_date
+                "publish_date" => Carbon::parse($request->publish_date)
             );
             $this->assignAsstoUsers($data);
 
