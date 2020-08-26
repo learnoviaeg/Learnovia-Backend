@@ -753,7 +753,7 @@ class AssigmentsController extends Controller
                 "course_segment" => $lesson->course_segment_id,
                 "assignment_lesson_id" => $assignment_lesson->id,
                 "submit_date" => Carbon::now(),
-                "publish_date" => $request->publish_date
+                "publish_date" => Carbon::parse($request->publish_date)
             );
             $this->assignAsstoUsers($data);
 
