@@ -678,7 +678,7 @@ class BigbluebuttonController extends Controller
     }
 
     public function clear(){
-        //hello
+        \Artisan::call('config:cache', ['--env' => 'local']);
         \Artisan::call('cache:clear', ['--env' => 'local']);
         \Artisan::call('config:clear', ['--env' => 'local']);
     }
