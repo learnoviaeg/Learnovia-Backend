@@ -269,6 +269,10 @@ class BigbluebuttonController extends Controller
 
         $user_name = Auth::user()->username;
         $bigbb=BigbluebuttonModel::find($request->id);
+        $check=Carbon::parse($bigbb->start_date)->addMinutes($bigbb->duration);
+        if($check < Carbon::now())
+            return HelperController::api_response_format(200,null ,'you can\'t join this meeting any more');
+            
         if($request->user()->can('bigbluebutton/session-moderator')){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
