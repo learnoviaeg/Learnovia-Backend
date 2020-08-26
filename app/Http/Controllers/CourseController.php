@@ -1244,18 +1244,19 @@ class CourseController extends Controller
                                 $item->lesson = Lesson::find($item->pivot->lesson_id);
 
                                 if($item->pivot->quiz_id){
-                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id);
+                                    $item->quiz_lesson = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id);
                                     if(isset($request->timeline) && $request->timeline == 1 ){
-                                        $item->due_date->where('due_date','>=',Carbon::now());
+                                        $item->quiz_lesson->where('due_date','>=',Carbon::now());
                                     }
-                                    $item->due_date=  $item->due_date->pluck('due_date')->first();
+                                    $item->due_date=  $item->quiz_lesson->pluck('due_date')->first();
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
+                                    $item->quiz_lesson=$item->quiz_lesson->first();
                                     if($item->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
-                                    $item->Started = false;
+                                        $item->Started = false;
                                     else
-                                    $item->Started = true;
+                                        $item->Started = true;
                                 }
                                 if($item->pivot->assignment_id)
                                 {   
@@ -1267,12 +1268,13 @@ class CourseController extends Controller
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
-                                    $item->start_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)
-                                    ->pluck('start_date')->first();
+                                    $item->assignment_lesson = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)
+                                                ->where('lesson_id',$item->pivot->lesson_id)->first();
+                                    $item ->start_date=$item->assignment_lesson->start_date;
                                     if($item->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
-                                    $item->Started = false;
+                                        $item->Started = false;
                                     else
-                                    $item->Started = true;
+                                        $item->Started = true;
                                 }
                                 // $quickaction =collect([]);
                                 if($item->pivot->media_id)
