@@ -1252,7 +1252,10 @@ class CourseController extends Controller
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
-                                    $item->quiz_lesson=$item->quiz_lesson->first();
+                                    $item->quiz_lesson=$item->quiz_lesson->with('quiz.Question')->first();                                    
+                                    $userquizze = UserQuiz::where('quiz_lesson_id', $item->quiz_lesson->id)->where('user_id', Auth::id())->pluck('id');
+                                    $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
+                                    $item->attempts_left = ($item->quiz_lesson->max_attemp - $count_answered);
                                     if($item->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $item->Started = false;
                                     else
