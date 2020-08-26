@@ -45,7 +45,6 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-attendance','title' => 'Bigbluebutton get Attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/export','title' => 'Bigbluebutton Export Attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-all','title' => 'Bigbluebutton Get All']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/session-moderator','title' => 'Bigbluebutton session moderator']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('bigbluebutton/create');
@@ -59,7 +58,7 @@ class BigbluebuttonController extends Controller
         $role->givePermissionTo('bigbluebutton/get-attendance');
         $role->givePermissionTo('bigbluebutton/export');
         $role->givePermissionTo('bigbluebutton/get-all');
-        $role->givePermissionTo('bigbluebutton/session-moderator');
+
 
         Component::create([
             'name' => 'Bigbluebutton',
@@ -142,7 +141,7 @@ class BigbluebuttonController extends Controller
                 
                         if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
                         ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
-                        {                            
+                        {
                             $check =self::start_meeting($req);
                             if($check)
                                 $bigbb['join'] = true;
@@ -181,8 +180,6 @@ class BigbluebuttonController extends Controller
         $bbb = new BigBlueButton();
 
         $bbb->getJSessionId();
-
-     
         $createMeetingParams = new CreateMeetingParameters($request['id'], $request['name']);
         $createMeetingParams->setAttendeePassword($request['attendee']);
         $createMeetingParams->setModeratorPassword($request['moderator_password']);
@@ -269,7 +266,11 @@ class BigbluebuttonController extends Controller
 
         $user_name = Auth::user()->username;
         $bigbb=BigbluebuttonModel::find($request->id);
-        if($request->user()->can('bigbluebutton/session-moderator')){
+        $check=Carbon::parse($bigbb->start_date)->addMinutes($bigbb->duration);
+        if($check < Carbon::now())
+            return HelperController::api_response_format(200,null ,'you can\'t join this meeting any more');
+
+        if($bigbb->user_id == Auth::user()->id){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
             $attendance=AttendanceLog::where('student_id',Auth::id())->where('session_id',$bigbb->id)->where('type','online')->update([
@@ -675,11 +676,5 @@ class BigbluebuttonController extends Controller
         $file = Excel::store(new BigBlueButtonAttendance($bbb_object), 'bbb'.$filename.'.xls','public');
         $file = url(Storage::url('bbb'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
-    }
-
-    public function clear(){
-        // \Artisan::call('config:cache');
-        \Artisan::call('cache:clear');
-        \Artisan::call('config:clear');
     }
 }
