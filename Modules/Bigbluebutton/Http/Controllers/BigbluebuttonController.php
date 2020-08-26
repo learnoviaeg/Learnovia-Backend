@@ -678,7 +678,8 @@ class BigbluebuttonController extends Controller
     }
 
     public function clear(){
-        \Artisan::call('config:cache', ['--env' => 'local']);
+        //change peemission bootsttap directory l 775 if it didn't work on server
+        // \Artisan::call('config:cache', ['--env' => 'local']);
         \Artisan::call('cache:clear', ['--env' => 'local']);
         \Artisan::call('config:clear', ['--env' => 'local']);
     }
