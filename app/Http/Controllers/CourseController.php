@@ -1334,7 +1334,8 @@ class CourseController extends Controller
                                     if(isset($studentassigment)){
                                         if($studentassigment->grade == null)
                                             $item->status = 'submitted';
-                                        $item->status='graded';
+                                        else
+                                            $item->status='graded';
                                     }
                                 }
                                 // $quickaction =collect([]);
