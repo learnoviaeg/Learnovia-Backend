@@ -1273,10 +1273,9 @@ class CourseController extends Controller
                                     $item->status = 'new';
                                     if($count_answered != 0){
                                         foreach($user_quiz_answer->get() as $oneUserQuiz_answer)
-                                            foreach($oneUserQuiz_answer->Question as $oneQuest)
-                                                if((($oneQuest->question_type->id == 4 || $oneQuest->question_type->id == 5) && $oneUserQuiz_answer->user_grade == null) 
-                                                    || ($oneQuest->question_type->id == 1 && $oneQuest->And_why == 1 && $oneUserQuiz_answer->feedback != null))
-                                                    $item->status = 'submitted';
+                                            if((($oneUserQuiz_answer->Question->question_type->id == 4 || $oneUserQuiz_answer->Question->question_type->id == 5) && $oneUserQuiz_answer->user_grade == null) 
+                                                || ($oneUserQuiz_answer->Question->question_type->id == 1 && $oneUserQuiz_answer->Question->And_why == 1 && $oneUserQuiz_answer->feedback != null))
+                                                $item->status = 'submitted';
                                         $item->status='graded';
                                     }
                                 }
