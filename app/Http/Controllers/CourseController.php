@@ -1252,6 +1252,7 @@ class CourseController extends Controller
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
+                                    $item->quiz_lesson=$item->quiz_lesson->first();
                                     $userquizze = UserQuiz::where('quiz_lesson_id', $item->quiz_lesson->id)->where('user_id', Auth::id())->pluck('id');
                                     $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
                                     $item->attempts_left = ($item->quiz_lesson->max_attemp - $count_answered);
@@ -1260,7 +1261,6 @@ class CourseController extends Controller
                                     unset($item->quiz_lesson->quiz);
                                     $item->visible = $item->quiz_lesson->visible;
                                     $item->item_lesson_id=$item->quiz_lesson->id;
-                                    $item->quiz_lesson=$item->quiz_lesson;
                                     if($item->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $item->Started = false;
                                     else
@@ -1272,13 +1272,13 @@ class CourseController extends Controller
                                     if(isset($request->timeline) && $request->timeline == 1 ){
                                         $item->assignment_lesson->where('due_date','>=',Carbon::now());
                                     }
-                                    $item->due_date=  $item->assignment_lesson->due_date;
+                                    $item->due_date=  $item->assignment_lesson->pluck('due_date')->first();
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
                                     $item->assignment_lesson = $item->assignment_lesson->first();
                                     $item->user_submit=null;
-                                    $studentassigment = UserAssigment::where('assignment_lesson_id', $assignment_lesson->id)->where('user_id', Auth::id())->first();
+                                    $studentassigment = UserAssigment::where('assignment_lesson_id', $item->assignment_lesson->id)->where('user_id', Auth::id())->first();
                                     if(isset($studentassigment)){
                                         $item->user_submit =$studentassigment;
                                         $usr=User::find($studentassigment->user_id);
@@ -1289,9 +1289,9 @@ class CourseController extends Controller
                                             $item->user_submit->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
                                         }
                                     }
-                                    $item->allow_attachment = $assignment_lesson->allow_attachment;
-                                    $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignment_lesson->id)->pluck('start_date')->first();
-                                    $item ->start_date=$item->assignment_lesson->start_date;
+                                    $item->allow_attachment = $item->assignment_lesson->allow_attachment;
+                                    $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$item->assignment_lesson->id)->pluck('start_date')->first();
+                                    $item->start_date=$item->assignment_lesson->start_date;
                                     if($item->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $item->Started = false;
                                     else
