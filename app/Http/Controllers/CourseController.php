@@ -1285,7 +1285,8 @@ class CourseController extends Controller
                                             if((($oneUserQuiz_answer->Question->question_type->id == 4 || $oneUserQuiz_answer->Question->question_type->id == 5) && $oneUserQuiz_answer->user_grade == null) 
                                                 || ($oneUserQuiz_answer->Question->question_type->id == 1 && $oneUserQuiz_answer->Question->And_why == 1 && $oneUserQuiz_answer->feedback != null))
                                                 $item->status = 'submitted';
-                                            $item->status='graded';
+                                            else
+                                                $item->status='graded';
                                         }
                                     }
                                 }
