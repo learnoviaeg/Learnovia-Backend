@@ -778,6 +778,15 @@ class CourseController extends Controller
                                         $one->Started = false;
                                     else
                                         $one->Started = true;
+
+                                        // $item->status = 'new';
+                                        // if($count_answered != 0){
+                                        //     foreach($user_quiz_answer->get() as $oneUserQuiz_answer)
+                                        //         if((($oneUserQuiz_answer->Question->question_type->id == 4 || $oneUserQuiz_answer->Question->question_type->id == 5) && $oneUserQuiz_answer->user_grade == null) 
+                                        //             || ($oneUserQuiz_answer->Question->question_type->id == 1 && $oneUserQuiz_answer->Question->And_why == 1 && $oneUserQuiz_answer->feedback != null))
+                                        //             $item->status = 'submitted';
+                                        //     $item->status='graded';
+                                        // }
                                  }
                                 }
                                 if($com->name == 'Assigments'){
@@ -1272,11 +1281,13 @@ class CourseController extends Controller
 
                                     $item->status = 'new';
                                     if($count_answered != 0){
-                                        foreach($user_quiz_answer->get() as $oneUserQuiz_answer)
+                                        foreach($user_quiz_answer->get() as $oneUserQuiz_answer){
                                             if((($oneUserQuiz_answer->Question->question_type->id == 4 || $oneUserQuiz_answer->Question->question_type->id == 5) && $oneUserQuiz_answer->user_grade == null) 
                                                 || ($oneUserQuiz_answer->Question->question_type->id == 1 && $oneUserQuiz_answer->Question->And_why == 1 && $oneUserQuiz_answer->feedback != null))
                                                 $item->status = 'submitted';
-                                        $item->status='graded';
+                                            else
+                                                $item->status='graded';
+                                        }
                                     }
                                 }
                                 if($item->pivot->assignment_id)
