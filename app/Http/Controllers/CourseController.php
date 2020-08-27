@@ -1257,7 +1257,8 @@ class CourseController extends Controller
                                     }
                                     $item->quiz_lesson=$item->quiz_lesson->with('grading_method')->first();
                                     $userquizze = UserQuiz::where('quiz_lesson_id', $item->quiz_lesson->id)->where('user_id', Auth::id())->pluck('id');
-                                    $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
+                                    $user_quiz_answer=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('force_submit','1');
+                                    $count_answered=$user_quiz_answer->pluck('user_quiz_id')->unique()->count();
                                     $item->attempts_left = ($item->quiz_lesson->max_attemp - $count_answered);
                                     $item->taken_attempts = $count_answered;
                                     $item->questions=$item->quiz_lesson->quiz->Question;
@@ -1268,6 +1269,16 @@ class CourseController extends Controller
                                         $item->Started = false;
                                     else
                                         $item->Started = true;
+
+                                    $item->status = 'new';
+                                    if($count_answered != 0){
+                                        foreach($user_quiz_answer->get() as $oneUserQuiz_answer)
+                                            foreach($oneUserQuiz_answer->Question as $oneQuest)
+                                                if((($oneQuest->question_type->id == 4 || $oneQuest->question_type->id == 5) && $oneUserQuiz_answer->user_grade == null) 
+                                                    || ($oneQuest->question_type->id == 1 && $oneQuest->And_why == 1 && $oneUserQuiz_answer->feedback != null))
+                                                    $item->status = 'submitted';
+                                        $item->status='graded';
+                                    }
                                 }
                                 if($item->pivot->assignment_id)
                                 {   
@@ -1309,6 +1320,12 @@ class CourseController extends Controller
                                     } 
                                     $item->visible = $item->assignment_lesson->visible;
                                     $item->item_lesson_id=$item->assignment_lesson->id;
+                                    $item->status = 'new';
+                                    if(isset($studentassigment)){
+                                        if($studentassigment->grade == null)
+                                            $item->status = 'submitted';
+                                        $item->status='graded';
+                                    }
                                 }
                                 // $quickaction =collect([]);
                                 if($item->pivot->media_id)
