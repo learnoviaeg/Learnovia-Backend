@@ -407,6 +407,7 @@ class UserQuizController extends Controller
                                 ->where('question_id', $question['id'])->pluck('user_grade')->first();
 
                             $data['user_grade'] = (float)$user_grade + (float)$question['mark'];
+                            $data['feedback'] = isset($question['feedback']) ? $question['feedback'] : 'and_why question was corrected';
                         } else {
                             $data = null;
                         }
@@ -446,7 +447,7 @@ class UserQuizController extends Controller
 
             $userAnswer->user_grade = $data['user_grade'];
             if(isset($data['feedback']))
-            $userAnswer->feedback = $data['feedback'];
+                $userAnswer->feedback = $data['feedback'];
             $userAnswer->save();
         }
 
