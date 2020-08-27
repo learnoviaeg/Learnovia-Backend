@@ -1272,7 +1272,7 @@ class CourseController extends Controller
                                     if(isset($request->timeline) && $request->timeline == 1 ){
                                         $item->assignment_lesson->where('due_date','>=',Carbon::now());
                                     }
-                                    $item->due_date=  $item->assignment_lesson->due_date;
+                                    $item->due_date=  $item->assignment_lesson->pluck('due_date')->first();
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
