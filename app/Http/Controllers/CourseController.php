@@ -675,6 +675,8 @@ class CourseController extends Controller
         return HelperController::api_response_format(200, $teachers);
     }
 
+    // public function detailsQuizAssignment(Request $)
+
     /**
      * get UserCourseLessons
      *
@@ -1238,6 +1240,7 @@ class CourseController extends Controller
                         foreach($tempBulk as $item){
                             if(isset($item->pivot))
                             {
+                                // self::detailsQuizAssignment($lesson_id,$component_id);
                                 $item->course = Course::find(Lesson::find($item->pivot->lesson_id)->courseSegment->course_id);
                                 $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                 $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
@@ -1252,7 +1255,7 @@ class CourseController extends Controller
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
-                                    $item->quiz_lesson=$item->quiz_lesson->first();
+                                    $item->quiz_lesson=$item->quiz_lesson->with('grading_method')->first();
                                     $userquizze = UserQuiz::where('quiz_lesson_id', $item->quiz_lesson->id)->where('user_id', Auth::id())->pluck('id');
                                     $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
                                     $item->attempts_left = ($item->quiz_lesson->max_attemp - $count_answered);
