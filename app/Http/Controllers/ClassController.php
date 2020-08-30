@@ -313,7 +313,7 @@ class ClassController extends Controller
             if(!isset($currentYear) || !isset($currentSegment))
                 return HelperController::api_response_format(201, null ,'please Check active year and segment');
 
-            $cs=GradeCategoryController::getCourseSegment($request);
+            $cs=GradeCategoryController::getCourseSegmentWithArray($request);
             $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
         }
         else{
