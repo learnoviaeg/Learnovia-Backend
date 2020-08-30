@@ -10,6 +10,7 @@ use App\Level;
 use Illuminate\Http\Request;
 use App\Classes;
 use App\CourseSegment;
+use App\Segment;
 use App\User;
 use App\ClassLevel;
 use App\Enroll;
