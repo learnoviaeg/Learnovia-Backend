@@ -15,8 +15,8 @@ class H5PLessonController extends Controller
             'lesson_id' => 'required|exists:lessons,id'
         ]);
         
-        $founded = h5pLesson::where('content_id',$request->content_id)->where('lesson_id',$request->lesson_id)->first();
-        if(!isset($founded)){
+        $h5p_lesson = h5pLesson::where('content_id',$request->content_id)->where('lesson_id',$request->lesson_id)->first();
+        if(!isset($h5p_lesson)){
             $h5p_lesson = h5pLesson::firstOrCreate([
                 'content_id' => $request->content_id,
                 'lesson_id' => $request->lesson_id,
