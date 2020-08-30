@@ -264,7 +264,7 @@ class LevelsController extends Controller
             if(isset($year_levels))
                 $levels = Level::whereIn('id',$year_levels)->get();
 
-            if(!isset($levels))
+            if(count($levels) == 0)
                 return HelperController::api_response_format(201,null, 'You haven\'t levels');
 
             return HelperController::api_response_format(200,$levels, 'There are your levels');
