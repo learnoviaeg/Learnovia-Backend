@@ -419,7 +419,15 @@ class segment_class_Controller extends Controller
         }])->first();
 
         if($request->user()->can('site/show-all-courses'))
-            $CourseSegments=CourseSegment::all();
+        {
+            $currentYear=AcademicYear::where('current',1)->get();
+            $currentSegment=Segment::where('current',1)->get();
+            if(!isset($currentYear) || !isset($currentSegment))
+                return HelperController::api_response_format(201, null ,'please Check active year and segment');
+
+            $cs=GradeCategoryController::getCourseSegment($request);
+            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
+        }
         else{
             $enrll=$user->enroll;
             foreach($enrll as $one)
