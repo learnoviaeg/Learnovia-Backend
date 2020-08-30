@@ -22,6 +22,6 @@ class H5PLessonController extends Controller
             'start_date' => Carbon::now()
         ]);
 
-        return HelperController::api_response_format(200,$year->AC_Type, 'Interactive content added successfully');
+        return HelperController::api_response_format(200,$h5p_lesson, 'Interactive content added successfully');
     }
 }
