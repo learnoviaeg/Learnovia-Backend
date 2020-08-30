@@ -14,14 +14,17 @@ class H5PLessonController extends Controller
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|exists:lessons,id'
         ]);
-
-        $h5p_lesson = h5pLesson::firstOrCreate([
-            'content_id' => $request->content_id,
-            'lesson_id' => $request->lesson_id,
-            'publish_date' => Carbon::now(),
-            'start_date' => Carbon::now()
-        ]);
-
+        
+        $founded = h5pLesson::where('content_id',$request->content_id)->where('lesson_id',$request->lesson_id)->first();
+        if(!isset($founded)){
+            $h5p_lesson = h5pLesson::firstOrCreate([
+                'content_id' => $request->content_id,
+                'lesson_id' => $request->lesson_id,
+                'publish_date' => Carbon::now(),
+                'start_date' => Carbon::now()
+            ]);
+        }
+        
         return HelperController::api_response_format(200,$h5p_lesson, 'Interactive content added successfully');
     }
 }
