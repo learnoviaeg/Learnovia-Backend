@@ -379,3 +379,11 @@ Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
     Route::post('postponed-payment', 'PaymentController@postponedPayment')->name('deletepayment')->middleware('permission:payment/postponed-payment');
     Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
 });
+
+Route::group(['prefix' => 'h5p', 'middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
+
+        Route::get('create', 'H5PLessonController@create')->name('createh5plesson')->middleware('permission:h5p/lesson/create');
+
+    });
+});
