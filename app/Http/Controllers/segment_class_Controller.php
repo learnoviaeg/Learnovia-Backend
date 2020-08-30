@@ -11,6 +11,7 @@ use App\AcademicType;
 use App\AcademicYear;
 use Validator;
 use App\SegmentClass;
+use App\CourseSegment;
 use App\Segment;
 use App\Http\Resources\Segment_class_resource;
 use App\User;
@@ -401,7 +402,7 @@ class segment_class_Controller extends Controller
     {
         $result=array();
         $lev=array();
-        $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
+        $user = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
             //validate that course in my current course start < now && now < end
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
         },'enroll.courseSegment.segmentClasses.classLevel' => function($query) use ($request){
@@ -416,11 +417,24 @@ class segment_class_Controller extends Controller
             if ($request->filled('year'))
                 $query->where('academic_year_id', $request->year);          
         }])->first();
-        // return $users;
-        foreach($users ->enroll as $enrolls){
-            if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
-                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-                foreach($segmetClas->classLevel as $clas)
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $cs=GradeCategoryController::getCourseSegment($request);
+            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
+        }
+        else{
+            $enrll=$user->enroll;
+            foreach($enrll as $one)
+                $CourseSegments[]=$one->courseSegment;
+        }
+        // foreach($user->enroll as $enrolls){
+            // if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
+                // foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+        foreach($CourseSegments as $CourseSegment)
+            if(isset($CourseSegment)){
+                foreach($CourseSegment->segmentClasses as $segmetClas)
+                    foreach($segmetClas->classLevel as $clas)
                         foreach($clas->yearLevels as $level)
                             foreach($level->yearType as $typ)
                              if(isset($typ)){
@@ -431,7 +445,7 @@ class segment_class_Controller extends Controller
                                 }
                             }
             }
-        }     
+        // }     
         if(isset($segmentt) && count($segmentt) > 0)
             return HelperController::api_response_format(201,$segmentt, 'Here are your segments');
         
