@@ -419,33 +419,31 @@ class segment_class_Controller extends Controller
         }])->first();
 
         if($request->user()->can('site/show-all-courses'))
-        {
-            $cs=GradeCategoryController::getCourseSegment($request);
-            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
-        }
+            $CourseSegments=CourseSegment::all();
         else{
             $enrll=$user->enroll;
             foreach($enrll as $one)
                 $CourseSegments[]=$one->courseSegment;
         }
+        // return($CourseSegments);
         // foreach($user->enroll as $enrolls){
             // if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
                 // foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-        foreach($CourseSegments as $CourseSegment)
+        foreach($CourseSegments as $CourseSegment){
             if(isset($CourseSegment)){
                 foreach($CourseSegment->segmentClasses as $segmetClas)
                     foreach($segmetClas->classLevel as $clas)
                         foreach($clas->yearLevels as $level)
                             foreach($level->yearType as $typ)
-                             if(isset($typ)){
-                                if(!in_array($typ->academic_year_id, $result))
-                                {
-                                    $result[]=$segmetClas->segment_id;
-                                    $segmentt[]=Segment::find($segmetClas->segment_id);
+                                if(isset($typ)){
+                                    if(!in_array($segmetClas->segment_id, $result))
+                                    {
+                                        $result[]=$segmetClas->segment_id;
+                                        $segmentt[]=Segment::find($segmetClas->segment_id);
+                                    }
                                 }
-                            }
             }
-        // }     
+        } 
         if(isset($segmentt) && count($segmentt) > 0)
             return HelperController::api_response_format(201,$segmentt, 'Here are your segments');
         
