@@ -35,13 +35,13 @@ class H5PLessonController extends Controller
         $role->givePermissionTo('h5p/lesson/get-all');
         $role->givePermissionTo('h5p/lesson/delete');
 
-        Component::create([
-            'name' => 'H5P',
-            'module' => 'H5P',
-            'model' => 'h5pLesson',
-            'type' => 1,
-            'active' => 1
-        ]);
+        // Component::create([
+        //     'name' => 'H5P',
+        //     'module' => 'H5P',
+        //     'model' => 'h5pLesson',
+        //     'type' => 1,
+        //     'active' => 1
+        // ]);
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
