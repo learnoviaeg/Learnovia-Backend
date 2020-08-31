@@ -420,7 +420,10 @@ class segment_class_Controller extends Controller
 
         if($request->user()->can('site/show-all-courses'))
         {
-            // $year=AcademicYear::where('current',1)->get();
+            $year=AcademicYear::where('current',1)->get()->first();
+            if(!isset($year))
+                return HelperController::api_response_format(200, [], ' There is no active year ');
+
             $cs=GradeCategoryController::getCourseSegment($request);
             $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
         }

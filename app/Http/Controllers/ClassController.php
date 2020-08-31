@@ -308,6 +308,16 @@ class ClassController extends Controller
 
         if($request->user()->can('site/show-all-courses'))
         {
+            $year=AcademicYear::where('current',1)->get()->first();
+            if(!isset($year))
+                return HelperController::api_response_format(200, [], ' There is no active year ');
+
+            if ($request->filled('type'))
+            {
+                $segment=Segment::where('current',1)->get()->first();
+                if(!isset($segment))
+                    return HelperController::api_response_format(200, [], ' There is no active segment ');
+            }
             $cs=GradeCategoryController::getCourseSegmentWithArray($request);
             $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
         }
