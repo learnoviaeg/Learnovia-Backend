@@ -8,12 +8,45 @@ use App\Lesson;
 use App\User;
 use App\CourseSegment;
 use App\Enroll;
+use App\Component;
 use Auth;
 use Carbon\Carbon;
 use DB;
 
 class H5PLessonController extends Controller
 {
+
+    public function install()
+    {
+        if (\Spatie\Permission\Models\Permission::whereName('h5p/use')->first() != null) {
+            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        }
+
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/use', 'title' => 'H5P Usage']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/create', 'title' => 'H5P Create']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/toggle', 'title' => 'Toggle H5P visability']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/get-all', 'title' => 'Get all Learnovia interactive']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/delete', 'title' => 'Delete Learnovia interactive']);
+
+        $role = \Spatie\Permission\Models\Role::find(1);
+        $role->givePermissionTo('h5p/use');
+        $role->givePermissionTo('h5p/lesson/create');
+        $role->givePermissionTo('h5p/lesson/toggle');
+        $role->givePermissionTo('h5p/lesson/get-all');
+        $role->givePermissionTo('h5p/lesson/delete');
+
+        // Component::create([
+        //     'name' => 'H5P',
+        //     'module' => 'H5P',
+        //     'model' => 'h5pLesson',
+        //     'type' => 1,
+        //     'active' => 1
+        // ]);
+
+        return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
+    }
+
+
     public function create (Request $request)
     {
         $request->validate([
