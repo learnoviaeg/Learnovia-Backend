@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\h5pLesson;
 use App\Lesson;
+use App\User;
+use App\CourseSegment;
+use App\Enroll;
+use Auth;
 use Carbon\Carbon;
 use DB;
 
@@ -26,6 +30,25 @@ class H5PLessonController extends Controller
                 'start_date' => Carbon::now()
             ]);
         }
+
+        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+        $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
+        $Lesson = Lesson::find($request->lesson_id);
+        $courseID = CourseSegment::where('id', $Lesson->courseSegment->id)->pluck('course_id')->first();
+        $class_id=$Lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $Lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
+        User::notify([
+            'id' => $content->id,
+            'message' => $content->title.' interactive is added',
+            'from' => Auth::user()->id,
+            'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
+            'course_id' => $courseID,
+            'class_id' => $class_id,
+            'lesson_id' => $request->lesson_id,
+            'type' => 'h5p',
+            'link' => $url.'/api/h5p/'.$h5p_lesson->content_id,
+            'publish_date' => Carbon::now(),
+        ]);
         
         return HelperController::api_response_format(200,$h5p_lesson, 'Interactive content added successfully');
     }
