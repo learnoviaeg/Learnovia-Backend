@@ -348,7 +348,9 @@ class SpatieController extends Controller
 
             //h5p
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/create', 'title' => 'H5P Create']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/toggle', 'title' => 'Toggle H5P visability']);
 
+            
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
             $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->get());
             $Authenticated->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%bulk%')->where('name', 'like', '%messages%')->get());
