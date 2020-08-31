@@ -384,7 +384,8 @@ Route::group(['prefix' => 'h5p', 'middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
 
         Route::get('create', 'H5PLessonController@create')->name('createh5plesson')->middleware('permission:h5p/lesson/create');
-        Route::get('toggle', 'H5PLessonController@toggleVisibility')->name('toggleh5p');//->middleware('permission:h5p/lesson/toggle');
+        Route::get('toggle', 'H5PLessonController@toggleVisibility')->name('toggleh5p')->middleware('permission:h5p/lesson/toggle');
+        Route::get('get', 'H5PLessonController@get')->name('geth5p');//->middleware('permission:h5p/lesson/toggle');
 
     });
 });

@@ -30,7 +30,6 @@ class H5PLessonController extends Controller
 
     public function toggleVisibility(Request $request)
     {
-        return $request->url();
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
@@ -43,5 +42,10 @@ class H5PLessonController extends Controller
         $h5pLesson->visible = ($h5pLesson->visible == 1) ? 0 : 1;
         $h5pLesson->save();
         return HelperController::api_response_format(200, $h5pLesson, 'Content toggled successfully');
+    }
+
+    public function get (Request $request){
+        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+        return $url;
     }
 }
