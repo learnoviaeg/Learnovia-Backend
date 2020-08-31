@@ -831,6 +831,25 @@ class CourseController extends Controller
                                 // if (isset($com->name))
                                 //     $clase[$i][$com->name . $count] += count($lessonn[$com->name]);
                             }
+                            $h5p_content=collect();
+                            $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+                            $h5p_all= $lessonn->H5PLesson;
+                            if ($request->user()->can('site/course/student')) {
+                                $h5p_all= $lessonn->H5PLesson->where('visible', '=', 1)->where('publish_date', '<=', Carbon::now());
+                            }
+                            foreach($h5p_all as $h5p){                                
+                                $content = response()->json(DB::table('h5p_contents')->whereId($h5p->content_id)->first());
+                                $content->original->link =  $url.'/api/h5p/'.$h5p->content_id;
+                                $content->original->pivot = [
+                                    'lesson_id' =>  $h5p->lesson_id,
+                                    'content_id' =>  $h5p->content_id,
+                                    'publish_date' => $h5p->publish_date,
+                                    'created_at' =>  $h5p->created_at,
+                                ];
+                                $h5p_content->push($content->original);
+                            }
+                            $lessonn['interactive']= $h5p_content;
+                            unset($lessonn['H5PLesson']);
                         }
                         $i++;
                     }
