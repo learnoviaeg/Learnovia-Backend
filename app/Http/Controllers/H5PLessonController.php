@@ -47,7 +47,7 @@ class H5PLessonController extends Controller
     }
 
     public function get (Request $request){
-        
+
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5p_lesson =  h5pLesson::get();
         $h5p_content= collect();
@@ -57,5 +57,22 @@ class H5PLessonController extends Controller
             $h5p_content->push($content);
         }
         return HelperController::api_response_format(200, $h5p_content, 'List of Learnovia Interactive');
+    }
+
+    public function delete(Request $request)
+    {
+        $request->validate([
+            'content_id' => 'required|exists:h5p_contents,id',
+            'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
+        ]);
+
+        $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
+        if (!isset($h5pLesson)) {
+            return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+        }
+        $h5pLesson->delete();
+        $content = DB::table('h5p_contents')->whereId($request->content_id)->delete();
+
+        return HelperController::api_response_format(200, null, 'Content deleted successfully');
     }
 }
