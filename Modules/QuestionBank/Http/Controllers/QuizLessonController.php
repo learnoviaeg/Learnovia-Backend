@@ -213,7 +213,7 @@ class QuizLessonController extends Controller
             'id' => $request->quiz_id,
             'users' => $users,
             'type' =>'quiz',
-            'publish_date'=> $publish_date,
+            'publish_date'=> Carbon::parse($publish_date),
             'course_id' => $course,
             'class_id'=> $class,
             'lesson_id'=> $request->lesson_id,
