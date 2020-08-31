@@ -42,4 +42,9 @@ class Lesson extends Model
     {
         return $this->hasMany('Modules\Assigments\Entities\AssignmentLesson', 'lesson_id', 'id');
     }
+    
+    public function H5PLesson()
+    {
+        return $this->hasMany('App\h5pLesson', 'lesson_id', 'id');
+    }
 }

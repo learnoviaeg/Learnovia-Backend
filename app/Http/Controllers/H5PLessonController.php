@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\h5pLesson;
+use App\Lesson;
 use Carbon\Carbon;
+use DB;
 
 class H5PLessonController extends Controller
 {
@@ -45,7 +47,15 @@ class H5PLessonController extends Controller
     }
 
     public function get (Request $request){
+        
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
-        return $url;
+        $h5p_lesson =  h5pLesson::get();
+        $h5p_content= collect();
+        foreach($h5p_lesson as $h5p){
+            $content = response()->json(DB::table('h5p_contents')->whereId($h5p->content_id)->first());
+            $content->link =  $url.'/api/h5p/'.$h5p->content_id;
+            $h5p_content->push($content);
+        }
+        return HelperController::api_response_format(200, $h5p_content, 'List of Learnovia Interactive');
     }
 }
