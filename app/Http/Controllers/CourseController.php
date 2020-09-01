@@ -843,6 +843,9 @@ class CourseController extends Controller
                                 foreach($h5p_all as $h5p){                                
                                     $content = response()->json(DB::table('h5p_contents')->whereId($h5p->content_id)->first());
                                     $content->original->link =  $url.'api/h5p/'.$h5p->content_id;
+                                    $content->original->item_lesson_id = $h5p->id;
+                                    $content->original->visible = $h5p->visible;
+                                    $content->original->edit_link = $url.'api/h5p/'.$h5p->content_id.'/edit';
                                     $content->original->pivot = [
                                         'lesson_id' =>  $h5p->lesson_id,
                                         'content_id' =>  $h5p->content_id,
