@@ -131,4 +131,26 @@ class H5PLessonController extends Controller
 
         return HelperController::api_response_format(200, null, 'Content deleted successfully');
     }
+
+    public function edit (Request $request){
+
+        $request->validate([
+            'content_id' => 'required|exists:h5p_contents,id',
+            'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
+        ]);
+        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+        $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
+
+        $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
+        $content->link =  $url.'api/h5p/'.$h5pLesson->content_id.'/edit';
+        $content->pivot = [
+            'lesson_id' =>  $h5pLesson->lesson_id,
+            'content_id' =>  $h5pLesson->content_id,
+            'publish_date' => $h5pLesson->publish_date,
+            'created_at' =>  $h5pLesson->created_at,
+        ];
+
+        return HelperController::api_response_format(200, $content, 'Learnovia Interactive');
+    }
+    
 }

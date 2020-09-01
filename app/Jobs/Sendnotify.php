@@ -94,6 +94,7 @@ class Sendnotify implements ShouldQueue
                         "description" => $this->request['description'],
                         "start_date" => $this->request['start_date'],
                         "due_date" => $this->request['due_date'],
+                        "link" => $this->request['link'],
                         "attached_file" => $att,
                         'deleted'=> '0'
                     );
