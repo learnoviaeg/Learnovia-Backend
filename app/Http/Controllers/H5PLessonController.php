@@ -18,30 +18,30 @@ class H5PLessonController extends Controller
 
     public function install()
     {
-        if (\Spatie\Permission\Models\Permission::whereName('h5p/use')->first() != null) {
+        if (\Spatie\Permission\Models\Permission::whereName('h5p/lesson/create')->first() != null) {
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
 
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/use', 'title' => 'H5P Usage']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/create', 'title' => 'H5P Create']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/toggle', 'title' => 'Toggle H5P visability']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/create', 'title' => 'Create Learnovia interactive']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/toggle', 'title' => 'Toggle interactive visability']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/get-all', 'title' => 'Get all Learnovia interactive']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/delete', 'title' => 'Delete Learnovia interactive']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/update', 'title' => 'Update Learnovia interactive']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
-        $role->givePermissionTo('h5p/use');
         $role->givePermissionTo('h5p/lesson/create');
         $role->givePermissionTo('h5p/lesson/toggle');
         $role->givePermissionTo('h5p/lesson/get-all');
         $role->givePermissionTo('h5p/lesson/delete');
+        $role->givePermissionTo('h5p/lesson/update');
 
-        // Component::create([
-        //     'name' => 'H5P',
-        //     'module' => 'H5P',
-        //     'model' => 'h5pLesson',
-        //     'type' => 1,
-        //     'active' => 1
-        // ]);
+        Component::create([
+            'name' => 'H5P',
+            'module' => 'H5P',
+            'model' => 'h5pLesson',
+            'type' => 0,
+            'active' => 1
+        ]);
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
