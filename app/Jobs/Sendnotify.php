@@ -72,6 +72,7 @@ class Sendnotify implements ShouldQueue
                         "lesson_id"=> (string)$this->request['lesson_id'],
                         "publish_date" => Carbon::parse($this->request['publish_date'])->format('Y-m-d H:i:s'),
                         "read_at" => null,
+                        "link" => $this->request['link'],
                         'deleted'=> "0"
                     );
                     // Log::debug('type is not announcement ');
@@ -94,7 +95,6 @@ class Sendnotify implements ShouldQueue
                         "description" => $this->request['description'],
                         "start_date" => $this->request['start_date'],
                         "due_date" => $this->request['due_date'],
-                        "link" => $this->request['link'],
                         "attached_file" => $att,
                         'deleted'=> '0'
                     );
