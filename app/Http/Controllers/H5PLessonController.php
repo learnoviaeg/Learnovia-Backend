@@ -142,7 +142,7 @@ class H5PLessonController extends Controller
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
 
         $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
-        $content->link =  $url.'api/h5p/'.$h5pLesson->content_id.'/edit';
+        $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';
         $content->pivot = [
             'lesson_id' =>  $h5pLesson->lesson_id,
             'content_id' =>  $h5pLesson->content_id,
