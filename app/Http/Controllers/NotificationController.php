@@ -97,6 +97,7 @@ class NotificationController extends Controller
                     $data[$i]['course_id'] = $not->data['course_id'];
                     $data[$i]['class_id'] = $not->data['class_id'];
                     $data[$i]['lesson_id'] = $not->data['lesson_id'];
+                    $data[$i]['link'] = isset($not->data['link'])?$not->data['link']:null;
 
                     if(isset($not->data['title']))
                         $data[$i]['title'] = $not->data['title'];
