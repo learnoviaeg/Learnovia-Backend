@@ -26,12 +26,14 @@ class H5PLessonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/toggle', 'title' => 'Toggle interactive visability']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/get-all', 'title' => 'Get all Learnovia interactive']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/delete', 'title' => 'Delete Learnovia interactive']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/update', 'title' => 'Update Learnovia interactive']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('h5p/lesson/create');
         $role->givePermissionTo('h5p/lesson/toggle');
         $role->givePermissionTo('h5p/lesson/get-all');
         $role->givePermissionTo('h5p/lesson/delete');
+        $role->givePermissionTo('h5p/lesson/update');
 
         Component::create([
             'name' => 'H5P',
