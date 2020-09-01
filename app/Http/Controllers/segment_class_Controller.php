@@ -424,6 +424,13 @@ class segment_class_Controller extends Controller
             if(!isset($year))
                 return HelperController::api_response_format(200, [], ' There is no active year ');
 
+            if ($request->filled('type'))
+            {
+                $segment=Segment::where('current',1)->get()->first();
+                if(!isset($segment))
+                    return HelperController::api_response_format(200, [], ' There is no active segment ');
+            }
+
             $cs=GradeCategoryController::getCourseSegment($request);
             $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
         }
