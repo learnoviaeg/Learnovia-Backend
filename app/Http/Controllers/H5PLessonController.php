@@ -150,7 +150,7 @@ class H5PLessonController extends Controller
             'created_at' =>  $h5pLesson->created_at,
         ];
 
-        return HelperController::api_response_format(200, $content, 'Learnovia Interactive');
+        return HelperController::api_response_format(200, $content->original, 'Learnovia Interactive');
     }
     
 }
