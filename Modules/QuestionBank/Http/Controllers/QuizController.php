@@ -809,12 +809,12 @@ class QuizController extends Controller
         if(!isset($quiz_lesson))
             return HelperController::api_response_format(200, 'there is quiz in this lesson');
         if(User::find(Auth::id())->can('site/quiz/store_user_quiz')){
-            if($quiz->feedback == 1 )
-                $show_is_true=1;
-            elseif($quiz->feedback == 2 && Carbon::now() > $quiz_lesson->due_date )
-                $show_is_true=1;
-            else
-                $show_is_true=0;
+        if($quiz->feedback == 1 )
+            $show_is_true=1;
+        elseif($quiz->feedback == 2 && Carbon::now() > $quiz_lesson->due_date )
+            $show_is_true=1;
+        else
+            $show_is_true=0;
         }else
             $show_is_true=1;
 
@@ -837,13 +837,16 @@ class QuizController extends Controller
         $quiz['grade_category']=$gradecat;
         // return $quiz_lesson;
         $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where("user_id",$user_id)->first();
+        // return $override_user;
         if(isset($override_user)){
+            
             $quiz['start_date']=$override_user->start_date;
             $quiz['due_date']=$override_user->due_date;
         }
         $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->get();
         $all_attemps =  $user_quizzes ;
         $attempts_index=[];
+
         foreach($all_attemps as $user_Quiz)
         {
             $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$user_Quiz->id)->where('force_submit',null)->count(); 
@@ -851,62 +854,68 @@ class QuizController extends Controller
                 continue;
                 
             $attempts_index []= $user_Quiz->id;
-        }
 
+        }
         if($request->filled('attempt_index'))
             $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->get();
         foreach($user_quizzes as $user_Quiz)
         {
+            
             $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz->id)->get();
             if(count($user_answer)>0)
                 $userAnswerss[]=$user_answer;
+            
         }
 
         // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
         $quiz['attempts_index'] = $attempts_index;
 
-        $quiz['right']=0;
-        $quiz['wrong']=0;
-        $quiz['not_graded']=0;
-        $quiz['not_answered']=0;
+
+        // foreach($quest->question as $q){
+        //     $q->question_answer;
+        //     $Question_id =  $q->pivot->question_id;
+        //     $Ans_ID = userQuizAnswer::where('user_quiz_id',$user_quiz->id)->where('question_id',$Question_id)->first();
+        //     if(isset($Ans_ID->answer_id)){
+        //         $q->student_answer = QuestionsAnswer::find($Ans_ID->answer_id);
+        //         $q->user_grade =$Ans_ID->user_grade;
+        //         // if($show_is_true == 0){
+        //         //     unset($q->student_answer['is_true']);
+        //         // }
+        //     }
+        //     // if($show_is_true == 0)
+        //     //     foreach($q->question_answer as $ans){
+        //     //         unset( $q->question_answer);
+        //     //         unset($ans['is_true']);
+        //     //     }
+        //     if(!isset($q->student_answer))
+        //     $q->student_answer = Null;
+        // }
+
         foreach($quiz->Question as $question){
             if(count($question->childeren) > 0){
                 foreach($question->childeren as $single){
                     foreach($userAnswerss as $userAnswers)
-                        foreach($userAnswers as $userAnswer){
+                        foreach($userAnswers as $userAnswer)
                             if($userAnswer->question_id == $question->id)
                                 $question->User_Answer=$userAnswer;
-                            if($userAnswer->user_grade == $question->mark)
-                                $quiz['right']++;
-                            if($userAnswer->user_grade == 0)
-                                $quiz['wrong']++;
-                            if($userAnswer->user_grade == null && $userAnswer->content != null)
-                                $quiz['not_graded']++;
-                            if($userAnswer->user_grade == null && $userAnswer->content == null)
-                                $quiz['not_answered']++;
-                        }
-
-                        $single->question_type;
-                        if($show_is_true == 1)
-                            $single->question_answer;
-
-                        $question->question_category;
-                        unset($single->pivot);
+                    $single->question_type;
+                    if($show_is_true == 1)
+                        $single->question_answer;
+                    $question->question_category;
+                    unset($single->pivot);
                 }
             }
             else
                 unset($question->childeren);
-
             if(isset($userAnswerss))
-            { 
-                foreach($userAnswerss as $userAnswers)
-                    foreach($userAnswers as $userAnswer)
-                        if($userAnswer->question_id == $question->id)
-                            $question->User_Answer=$userAnswer;
+           { foreach($userAnswerss as $userAnswers)
+                foreach($userAnswers as $userAnswer)
+                    if($userAnswer->question_id == $question->id)
+                        $question->User_Answer=$userAnswer;
+                    
             }
             if($show_is_true == 1)
-                $question->question_answer;
-
+            $question->question_answer;
             $question->question_category;
             $question->question_type;
             unset($question->pivot);
