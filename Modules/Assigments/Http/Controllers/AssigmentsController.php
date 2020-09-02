@@ -93,6 +93,7 @@ class AssigmentsController extends Controller
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
 
+    // not used
     public function getAllAssigment(Request $request)
     {
         $request->validate([
@@ -282,7 +283,7 @@ class AssigmentsController extends Controller
 
             $publish_date=$AssignmentLesson->publish_date;
             if(carbon::parse($publish_date)->isPast())
-                $publish_date=Carbon::now()->format('Y-m-d H:i:s');
+                $publish_date=Carbon::now();
                 
             user::notify([
                 'id' => $request->assignment_id,
@@ -294,7 +295,7 @@ class AssigmentsController extends Controller
                 'lesson_id' => $lessonId,
                 'type' => 'assignment',
                 'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
-                'publish_date' => carbon::parse($publish_date)->format('Y-m-d H:i:s')
+                'publish_date' => $publish_date
             ]);
             // $all[] = Lesson::find($lesson_id)->module('Assigments', 'assignment')->get();
         $all = AssignmentLesson::all();
@@ -333,7 +334,7 @@ class AssigmentsController extends Controller
             'lesson_id' => $lesson_id,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request["assignment_lesson_id"],
-            'publish_date' => $request['publish_date']
+            'publish_date' => $request['publish_date'],
         ]);
     }
 
@@ -577,7 +578,7 @@ class AssigmentsController extends Controller
                 }
             }
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
-            $assignment['user_submit']=[];
+            $assignment['user_submit']=null;
             $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
             if(isset($studentassigment)){
                 $assignment['user_submit'] =$studentassigment;
@@ -753,7 +754,7 @@ class AssigmentsController extends Controller
                 "course_segment" => $lesson->course_segment_id,
                 "assignment_lesson_id" => $assignment_lesson->id,
                 "submit_date" => Carbon::now(),
-                "publish_date" => $request->publish_date
+                "publish_date" => Carbon::parse($request->publish_date)
             );
             $this->assignAsstoUsers($data);
 
@@ -802,7 +803,7 @@ class AssigmentsController extends Controller
             'lesson_id' => $assignment->lesson_id,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $assignment->assignment_id,
-            'publish_date' => $request->start_date
+            'publish_date' => $request->start_date,
         ]);
         return HelperController::api_response_format(200, $assignmentOerride, 'Assignment override successfully');
     }

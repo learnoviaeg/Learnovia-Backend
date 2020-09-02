@@ -230,6 +230,22 @@ class AC_year_type extends Controller
     {
         $result=array();
         $lev=array();
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $year = AcademicYear::where('current',1)->first();
+            if ($request->filled('year'))
+                $year = AcademicYear::whereId($request->year)->first();
+
+            if(!isset($year))
+                return HelperController::api_response_format(200,null, 'No active year available, please enter one.');
+
+            if(count($year->AC_Type) == 0)
+                return HelperController::api_response_format(201,null, 'You haven\'t types');
+
+            return HelperController::api_response_format(200,$year->AC_Type, 'There are your types');
+        }
+
         $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
             //validate that course in my current course start < now && now < end
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());

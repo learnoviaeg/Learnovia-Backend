@@ -69,7 +69,7 @@ class AttendanceLogController extends Controller
                         'class_id' => (int)$classID[0],
                         'lesson_id' => null,
                         'type' => 'Attendance',
-                        'publish_date' =>$date
+                        'publish_date' => $date,
                     ]);
                 }
             }

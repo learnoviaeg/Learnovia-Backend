@@ -379,3 +379,16 @@ Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
     Route::post('postponed-payment', 'PaymentController@postponedPayment')->name('deletepayment')->middleware('permission:payment/postponed-payment');
     Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
 });
+
+Route::group(['prefix' => 'h5p', 'middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
+
+        Route::get('install', 'H5PLessonController@install')->name('installh5p');
+        Route::get('create', 'H5PLessonController@create')->name('createh5plesson')->middleware('permission:h5p/lesson/create');
+        Route::get('toggle', 'H5PLessonController@toggleVisibility')->name('toggleh5p')->middleware('permission:h5p/lesson/toggle');
+        Route::get('get', 'H5PLessonController@get')->name('geth5p')->middleware('permission:h5p/lesson/get-all');
+        Route::get('delete', 'H5PLessonController@delete')->name('deleteh5p')->middleware('permission:h5p/lesson/delete');
+        Route::get('update', 'H5PLessonController@edit')->name('edith5p')->middleware('permission:h5p/lesson/update');
+
+    });
+});

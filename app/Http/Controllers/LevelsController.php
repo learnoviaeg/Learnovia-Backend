@@ -246,6 +246,30 @@ class LevelsController extends Controller
         ]);
         $result=array();
         $lev=array();
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $year_type = AcademicYear::where('current',1)->first();
+            if(isset($year_type))
+                $year_type = $year_type->YearType->pluck('id');
+          
+            if ($request->filled('type'))
+                $year_type = AcademicYearType::whereIn('academic_type_id',$request->type)->pluck('id');
+
+            if(!isset($year_type))
+                return HelperController::api_response_format(200,null, 'No active year available, please enter types you want.');
+
+            $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('level_id');
+            $levels;
+            if(isset($year_levels))
+                $levels = Level::whereIn('id',$year_levels)->get();
+
+            if(count($levels) == 0)
+                return HelperController::api_response_format(201,null, 'You haven\'t levels');
+
+            return HelperController::api_response_format(200,$levels, 'There are your levels');
+        }
+
         $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
             //validate that course in my current course start < now && now < end
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());

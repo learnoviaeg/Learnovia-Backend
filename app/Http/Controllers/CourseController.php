@@ -22,12 +22,15 @@ use App\Segment;
 use App\AcademicYear;
 use App\GradeCategory;
 use Modules\QuestionBank\Entities\QuizOverride;
+use Modules\QuestionBank\Entities\UserQuiz;
+use Modules\QuestionBank\Entities\UserQuizAnswer;
 use App\AcademicType;
 use App\attachment;
 use App\LessonComponent;
 use App\User;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\Assigments\Entities\UserAssigment;
 use Carbon\Carbon;
 use App\Letter;
 use Illuminate\Support\Facades\Validator;
@@ -377,7 +380,10 @@ class CourseController extends Controller
                 if(isset($class_object))
                     $flag->class = $class_object->name;
                 $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
-                $flag->level = Level::find($level_id->level_id)->name;
+                $level_object = Level::find($level_id->level_id);
+                $flag->level = 'Not_Found';
+                if(isset($level_object))
+                    $flag->level = $level_object->name;
                 $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
                 if(isset($AC_type)){
                     $year_object = AcademicYear::find($AC_type->academic_year_id);
@@ -669,6 +675,8 @@ class CourseController extends Controller
         return HelperController::api_response_format(200, $teachers);
     }
 
+    // public function detailsQuizAssignment(Request $)
+
     /**
      * get UserCourseLessons
      *
@@ -754,19 +762,49 @@ class CourseController extends Controller
                                 }
                                 if($com->name == 'Quiz'){
                                  foreach ($lessonn['Quiz'] as $one){  
-                                    $quiz_lesson=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->get()->first();
+                                    $quiz_lesson=QuizLesson::where('quiz_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)
+                                                                    ->with('grading_method')->get()->first();
+                                    $userquizze = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', Auth::id())->pluck('id');
+                                    // return u
+                                    $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
+                                    $one['attempts_left'] = ($quiz_lesson->max_attemp - $count_answered);
+                                    $one['taken_attempts'] = $count_answered;
+                                    $one['questions']=$quiz_lesson->quiz->Question;
+                                    unset($quiz_lesson->quiz);
                                     $one['visible'] = $quiz_lesson->visible;
                                     $one['item_lesson_id']=$quiz_lesson->id;
                                     $one->quiz_lesson=$quiz_lesson;
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
-                                        else
+                                    else
                                         $one->Started = true;
+
+                                        // $item->status = 'new';
+                                        // if($count_answered != 0){
+                                        //     foreach($user_quiz_answer->get() as $oneUserQuiz_answer)
+                                        //         if((($oneUserQuiz_answer->Question->question_type->id == 4 || $oneUserQuiz_answer->Question->question_type->id == 5) && $oneUserQuiz_answer->user_grade == null) 
+                                        //             || ($oneUserQuiz_answer->Question->question_type->id == 1 && $oneUserQuiz_answer->Question->And_why == 1 && $oneUserQuiz_answer->feedback != null))
+                                        //             $item->status = 'submitted';
+                                        //     $item->status='graded';
+                                        // }
                                  }
                                 }
                                 if($com->name == 'Assigments'){
                                     foreach ($lessonn['Assigments'] as $one){
                                         $assignment_lesson=AssignmentLesson::where('assignment_id',$one->pivot->assignment_id)->where('lesson_id',$one->pivot->lesson_id)->get()->first();
+                                        $one['user_submit']=null;
+                                        $studentassigment = UserAssigment::where('assignment_lesson_id', $assignment_lesson->id)->where('user_id', Auth::id())->first();
+                                        if(isset($studentassigment)){
+                                            $one['user_submit'] =$studentassigment;
+                                            $usr=User::find($studentassigment->user_id);
+                                            if(isset($usr->attachment))
+                                                $usr->picture=$usr->attachment->path;
+                                            $one['user_submit']->User=$usr;
+                                            if (isset($studentassigment->attachment_id)) {
+                                                $one['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                                            }
+                                        }
+
                                         $one->assignment_lesson=$assignment_lesson;
                                         $one['allow_attachment'] = $assignment_lesson->allow_attachment;
                                         $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignment_lesson->id)->pluck('start_date')->first();
@@ -784,14 +822,40 @@ class CourseController extends Controller
                                             else
                                                 $one->Started = true;
                                         } 
-                                        $one['visible'] = AssignmentLesson::where('assignment_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('visible')->first();
-                                        $one['item_lesson_id']=AssignmentLesson::where('assignment_id',$one->id)->where('lesson_id',$one->pivot->lesson_id)->pluck('id')->first();
+                                        $one['visible'] = $assignment_lesson->visible;
+                                        $one['item_lesson_id']=$assignment_lesson->id;
                                     }
                                 }
 
                                 // $lessonn[$com->name][$com->name . $count] =  count($lessonn[$com->name]);
                                 // if (isset($com->name))
                                 //     $clase[$i][$com->name . $count] += count($lessonn[$com->name]);
+                            }
+
+                            $h5p_comp = Component::where('model', 'h5pLesson')->first();
+                            if(isset($h5p_comp)){
+                                $h5p_content=collect();
+                                $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+                                $h5p_all= $lessonn->H5PLesson;
+                                if ($request->user()->can('site/course/student')) {
+                                    $h5p_all= $lessonn->H5PLesson->where('visible', '=', 1)->where('publish_date', '<=', Carbon::now());
+                                }
+                                foreach($h5p_all as $h5p){                                
+                                    $content = response()->json(DB::table('h5p_contents')->whereId($h5p->content_id)->first());
+                                    $content->original->link =  $url.'/api/h5p/'.$h5p->content_id;
+                                    $content->original->item_lesson_id = $h5p->id;
+                                    $content->original->visible = $h5p->visible;
+                                    $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit';
+                                    $content->original->pivot = [
+                                        'lesson_id' =>  $h5p->lesson_id,
+                                        'content_id' =>  $h5p->content_id,
+                                        'publish_date' => $h5p->publish_date,
+                                        'created_at' =>  $h5p->created_at,
+                                    ];
+                                    $h5p_content->push($content->original);
+                                }
+                                $lessonn['interactive']= $h5p_content;
+                                unset($lessonn['H5PLesson']);
                             }
                         }
                         $i++;
@@ -972,10 +1036,12 @@ class CourseController extends Controller
                         'start_date' => $request->start_date,
                         'end_date' => $request->end_date,
                     ]);
+
                     if ($request->filled('no_of_lessons')) {
                         $no_of_lessons = $request->no_of_lessons;
                     }
                     for ($i = 1; $i <= $no_of_lessons; $i++) {
+                        $courseSegment = CourseSegment::find($course_Segment->id);
                         $courseSegment->lessons()->create([
                             'name' => 'Lesson ' . $i,
                             'index' => $i,
@@ -1209,41 +1275,94 @@ class CourseController extends Controller
                         foreach($tempBulk as $item){
                             if(isset($item->pivot))
                             {
+                                // self::detailsQuizAssignment($lesson_id,$component_id);
                                 $item->course = Course::find(Lesson::find($item->pivot->lesson_id)->courseSegment->course_id);
                                 $item->class= Classes::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                 $item->level = Level::find(Lesson::find($item->pivot->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
                                 $item->lesson = Lesson::find($item->pivot->lesson_id);
 
                                 if($item->pivot->quiz_id){
-                                    $item->due_date = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id);
+                                    $item->quiz_lesson = QuizLesson::where('quiz_id',$item->pivot->quiz_id)->where('lesson_id',$item->pivot->lesson_id);
                                     if(isset($request->timeline) && $request->timeline == 1 ){
-                                        $item->due_date->where('due_date','>=',Carbon::now());
+                                        $item->quiz_lesson->where('due_date','>=',Carbon::now());
                                     }
-                                    $item->due_date=  $item->due_date->pluck('due_date')->first();
+                                    $item->due_date=  $item->quiz_lesson->pluck('due_date')->first();
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
+                                    $item->quiz_lesson=$item->quiz_lesson->with('grading_method')->first();
+                                    $userquizze = UserQuiz::where('quiz_lesson_id', $item->quiz_lesson->id)->where('user_id', Auth::id())->pluck('id');
+                                    $user_quiz_answer=UserQuizAnswer::whereIn('user_quiz_id',$userquizze)->where('force_submit','1');
+                                    $count_answered=$user_quiz_answer->pluck('user_quiz_id')->unique()->count();
+                                    $item->attempts_left = ($item->quiz_lesson->max_attemp - $count_answered);
+                                    $item->taken_attempts = $count_answered;
+                                    $item->questions=$item->quiz_lesson->quiz->Question;
+                                    unset($item->quiz_lesson->quiz);
+                                    $item->visible = $item->quiz_lesson->visible;
+                                    $item->item_lesson_id=$item->quiz_lesson->id;
                                     if($item->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
-                                    $item->Started = false;
+                                        $item->Started = false;
                                     else
-                                    $item->Started = true;
+                                        $item->Started = true;
+
+                                    $item->status = 'new';
+                                    if($count_answered != 0){
+                                        foreach($user_quiz_answer->get() as $oneUserQuiz_answer){
+                                            if((($oneUserQuiz_answer->Question->question_type->id == 4 || $oneUserQuiz_answer->Question->question_type->id == 5) && $oneUserQuiz_answer->user_grade == null) 
+                                                || ($oneUserQuiz_answer->Question->question_type->id == 1 && $oneUserQuiz_answer->Question->And_why == 1 && $oneUserQuiz_answer->feedback != null))
+                                                $item->status = 'submitted';
+                                            else
+                                                $item->status='graded';
+                                        }
+                                    }
                                 }
                                 if($item->pivot->assignment_id)
                                 {   
-                                    $item->due_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id);
+                                    $item->assignment_lesson = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id);
                                     if(isset($request->timeline) && $request->timeline == 1 ){
-                                        $item->due_date->where('due_date','>=',Carbon::now());
+                                        $item->assignment_lesson->where('due_date','>=',Carbon::now());
                                     }
-                                    $item->due_date=  $item->due_date->pluck('due_date')->first();
+                                    $item->due_date=  $item->assignment_lesson->pluck('due_date')->first();
                                     if(!isset ($item->due_date)){
                                         continue;
                                     }
-                                    $item->start_date = AssignmentLesson::where('assignment_id',$item->pivot->assignment_id)->where('lesson_id',$item->pivot->lesson_id)
-                                    ->pluck('start_date')->first();
+                                    $item->assignment_lesson = $item->assignment_lesson->first();
+                                    $item->user_submit=null;
+                                    $studentassigment = UserAssigment::where('assignment_lesson_id', $item->assignment_lesson->id)->where('user_id', Auth::id())->first();
+                                    if(isset($studentassigment)){
+                                        $item->user_submit =$studentassigment;
+                                        $usr=User::find($studentassigment->user_id);
+                                        if(isset($usr->attachment))
+                                            $usr->picture=$usr->attachment->path;
+                                        $item->user_submit->User=$usr;
+                                        if (isset($studentassigment->attachment_id)) {
+                                            $item->user_submit->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                                        }
+                                    }
+                                    $item->allow_attachment = $item->assignment_lesson->allow_attachment;
+                                    $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$item->assignment_lesson->id)->pluck('start_date')->first();
+                                    $item->start_date=$item->assignment_lesson->start_date;
                                     if($item->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
-                                    $item->Started = false;
+                                        $item->Started = false;
                                     else
-                                    $item->Started = true;
+                                        $item->Started = true;
+                                    if($override_satrtdate != null){
+                                        $item->start_date = $override_satrtdate;
+                                        // $one->pivot->publish_date = $override_satrtdate;
+                                        if($one->start_date > Carbon::now() &&  $request->user()->can('site/course/student'))
+                                            $item->Started = false;
+                                        else
+                                            $item->Started = true;
+                                    } 
+                                    $item->visible = $item->assignment_lesson->visible;
+                                    $item->item_lesson_id=$item->assignment_lesson->id;
+                                    $item->status = 'new';
+                                    if(isset($studentassigment)){
+                                        if($studentassigment->grade == null)
+                                            $item->status = 'submitted';
+                                        else
+                                            $item->status='graded';
+                                    }
                                 }
                                 // $quickaction =collect([]);
                                 if($item->pivot->media_id)

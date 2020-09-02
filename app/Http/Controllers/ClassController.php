@@ -10,6 +10,7 @@ use App\Level;
 use Illuminate\Http\Request;
 use App\Classes;
 use App\CourseSegment;
+use App\Segment;
 use App\User;
 use App\ClassLevel;
 use App\Enroll;
@@ -304,23 +305,44 @@ class ClassController extends Controller
             if ($request->filled('type'))
                 $query->whereIn('academic_type_id', $request->type);            
         }])->first();
-        foreach($users ->enroll as $enrolls)
-        if(isset($enrolls->courseSegment->segmentClasses)){
-            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-                foreach($segmetClas->classLevel as $clas)
-                    if(isset($clas->yearLevels))
-                        foreach($clas->yearLevels as $level)
-                            if(count($level->yearType) > 0)
-                                if(!in_array($clas->class_id, $result))
-                                {
-                                    $result[]=$clas->class_id;
-                                    $class[]=Classes::find($clas->class_id);
-                                }
-                            }
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $year=AcademicYear::where('current',1)->get()->first();
+            if(!isset($year))
+                return HelperController::api_response_format(200, [], ' There is no active year ');
+
+            if ($request->filled('type'))
+            {
+                $segment=Segment::where('current',1)->get()->first();
+                if(!isset($segment))
+                    return HelperController::api_response_format(200, [], ' There is no active segment ');
+            }
+            $cs=GradeCategoryController::getCourseSegmentWithArray($request);
+            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
+        }
+        else{
+            $enrll=$users->enroll;
+            foreach($enrll as $one)
+                $CourseSegments[]=$one->courseSegment;
+        }
+
+        foreach($CourseSegments as $enrolls)
+            if(isset($enrolls->segmentClasses))
+                foreach($enrolls->segmentClasses as $segmetClas)
+                    foreach($segmetClas->classLevel as $clas)
+                        if(isset($clas->yearLevels))
+                            foreach($clas->yearLevels as $level)
+                                if(count($level->yearType) > 0)
+                                    if(!in_array($clas->class_id, $result))
+                                    {
+                                        $result[]=$clas->class_id;
+                                        $class[]=Classes::find($clas->class_id);
+                                    }
         if(count($class) > 0)
             return HelperController::api_response_format(201,$class, 'There are your Classes');
         
-        return HelperController::api_response_format(201, 'You haven\'t Classes');
+        return HelperController::api_response_format(201, $class,'You haven\'t Classes');
     }
 
     public function export(Request $request)

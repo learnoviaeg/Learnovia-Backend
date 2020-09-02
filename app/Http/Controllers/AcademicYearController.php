@@ -165,6 +165,16 @@ class AcademicYearController extends Controller
     {
         $result=array();
         $CS=array();
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $year = AcademicYear::get();
+            if(count($year) == 0)
+                return HelperController::api_response_format(201,null, 'No available years in the system');
+
+            return HelperController::api_response_format(201,$year, 'Here are your years');
+        }
+
         $course_segments = Enroll::where('user_id',Auth::id())->with(['courseSegment' => function($query){
             //validate that course in my current course start < now && now < end
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());}])->get();
