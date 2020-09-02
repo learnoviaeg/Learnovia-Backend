@@ -1230,9 +1230,13 @@ class CourseController extends Controller
         $components = $components->get();
         $result = [];
         $CourseSegments=[];
+        $h5p_comp = Component::where('model', 'h5pLesson')->first();
         foreach ($components as $component)
             $result[$component->name] = [];
 
+        if(isset($h5p_comp))
+            $result['interactive'] = [];
+            
         if($request->user()->can('site/show-all-courses'))
         {
             $cs=GradeCategoryController::getCourseSegment($request);
@@ -1387,6 +1391,34 @@ class CourseController extends Controller
                             }
                         }
                     }
+                        $h5p_comp = Component::where('model', 'h5pLesson')->first();
+                            if(isset($h5p_comp)){
+                                $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+                                $h5p_all= $lesson->H5PLesson;
+                                if ($request->user()->can('site/course/student')) {
+                                    $h5p_all= $lesson->H5PLesson->where('visible', '=', 1)->where('publish_date', '<=', Carbon::now());
+                                }
+                                foreach($h5p_all as $h5p){                                
+                                    $content = response()->json(DB::table('h5p_contents')->whereId($h5p->content_id)->first());
+                                    $content->original->link =  $url.'/api/h5p/'.$h5p->content_id;
+                                    $content->original->item_lesson_id = $h5p->id;
+                                    $content->original->visible = $h5p->visible;
+                                    $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit';
+                                    $content->original->course = Course::find(Lesson::find($h5p->lesson_id)->courseSegment->course_id);
+                                    $content->original->class= Classes::find(Lesson::find($h5p->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+                                    $content->original->level = Level::find(Lesson::find($h5p->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+                                    $content->original->lesson = Lesson::find($h5p->lesson_id);
+                                    $content->original->pivot = [
+                                        'lesson_id' =>  $h5p->lesson_id,
+                                        'content_id' =>  $h5p->content_id,
+                                        'publish_date' => $h5p->publish_date,
+                                        'created_at' =>  $h5p->created_at,
+                                    ];
+                                    unset($content->original->parameters);
+                                    unset($content->original->filtered);
+                                    $result['interactive'][]=$content->original;
+                                }
+                            }
                 }
             }
         }
