@@ -79,6 +79,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     //languages routes
     Route::group(['prefix' => 'languages'], function () {
+        //without middleware
         Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary');//->middleware('permission:languages/dictionary');
         Route::post('add', 'LanguageController@add_language')->name('addLang')->middleware('permission:languages/add');
         Route::post('update', 'LanguageController@update_language')->name('updateLang')->middleware('permission:languages/update');
