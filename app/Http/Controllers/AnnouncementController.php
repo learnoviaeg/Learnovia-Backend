@@ -111,7 +111,7 @@ class AnnouncementController extends Controller
             'level_id' => $request->level,
             'year_id' => $request->year,
             'type_id' => $request->type,
-            'segment_id' => $request->segment_id,
+            'segment_id' => $request->segment,
             'publish_date' => Carbon::parse($publishdate),
             'created_by' => Auth::id(),
         ]);
