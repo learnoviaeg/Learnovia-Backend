@@ -7,7 +7,16 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
+use Illuminate\Http\Request;
+Route::get('h5p_protect', function(Request $request)
+{   
+    $data = explode('/',request()->data);
+     $video_name = $data[count($data) - 1];
+     $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
+     $stream =  new \App\VideoStream($filePath);
+     $stream->start();
 
+})->name('h5p_protect');
 Route::group(['middleware' => ['auth:api']], function () {
     //user main routes without permissions
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
