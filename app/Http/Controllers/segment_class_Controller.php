@@ -420,32 +420,40 @@ class segment_class_Controller extends Controller
 
         if($request->user()->can('site/show-all-courses'))
         {
-            $year=AcademicYear::where('current',1)->get()->first();
-            if(!isset($year))
-                return HelperController::api_response_format(200, [], ' There is no active year ');
+            $year = AcademicYear::where('current',1)->first();
+            if($request->filled('year'))
+                $year = AcademicYear::where('id',$request->year)->first();
 
-            if ($request->filled('type'))
-            {
-                $segment=Segment::where('current',1)->get()->first();
-                if(!isset($segment))
-                    return HelperController::api_response_format(200, [], ' There is no active segment ');
+            if(isset($year))
+                $year_type = $year->YearType->pluck('id');
+
+            if ($request->filled('type')){
+                $year_type = AcademicYearType::where('academic_type_id',$request->type)->pluck('id');
+                $segments = Segment::where('academic_type_id',$request->type)->pluck('id');
             }
+            // return $year_type;   
+            if(!isset($year_type))
+                return HelperController::api_response_format(200,null, 'No active year available, please enter types you want.');
+                
+            $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('id');
+            // return
+            if(isset($year_levels))
+                $classes = ClassLevel::whereIn('year_level_id',$year_levels)->pluck('id');
+            
+            if(!isset($segments))
+                $segments=SegmentClass::whereIn('class_level_id',$classes)->pluck('segment_id');
 
-            $cs=GradeCategoryController::getCourseSegment($request);
-            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
+            if(isset($segments))
+                $segments = segment::whereIn('id',$segments)->get();
+            if(count($segments) == 0)
+                return HelperController::api_response_format(201,null, 'You haven\'t segments');
+
+            return HelperController::api_response_format(200,$segments, 'There are your segments');
         }
-        else{
-            $enrll=$user->enroll;
-            foreach($enrll as $one)
-                $CourseSegments[]=$one->courseSegment;
-        }
-        // return($CourseSegments);
-        // foreach($user->enroll as $enrolls){
-            // if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
-                // foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-        foreach($CourseSegments as $CourseSegment){
-            if(isset($CourseSegment)){
-                foreach($CourseSegment->segmentClasses as $segmetClas)
+
+        foreach($user->enroll as $enrolls){
+            if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
+                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
                     foreach($segmetClas->classLevel as $clas)
                         foreach($clas->yearLevels as $level)
                             foreach($level->yearType as $typ)
