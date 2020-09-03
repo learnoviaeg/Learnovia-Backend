@@ -171,7 +171,6 @@
                     
                     <div class="form-group">
                     <div class="col-md-9 col-md-offset-3">
-                        <a href="{{ route('h5p.index') }}" class="btn btn-default"><i class="fa fa-reply"></i> {{ trans('laravel-h5p.content.cancel') }}</a>
     
                         {{ Form::submit(trans('laravel-h5p.content.save'), [
                     "class"=>"btn btn-primary",
