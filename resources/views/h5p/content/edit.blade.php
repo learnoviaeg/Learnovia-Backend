@@ -11,9 +11,7 @@
         <div class="row">
     
             <div class="col-md-12">
-                <script>
-                    window.parent.postMessage({{ $id }},'*');
-                    </script>
+               
                 {!! Form::model($content, ['method' => 'PATCH','route' => ['h5p.update', $id], 'class'=>'form-horizontal', 'id'=>'laravel-h5p-form', 'enctype'=>"multipart/form-data"]) !!}
                 <input type="hidden" name="library" id="laravel-h5p-library" value="{{ $library }}">
                 <input type="hidden" name="parameters" id="laravel-h5p-parameters" value="{{ $parameters }}">
@@ -172,7 +170,7 @@
     
                 <div class="form-group">
                     <div class="col-md-9 col-md-offset-3">
-                        <a href="{{ route('h5p.index') }}" class="btn btn-default"><i class="fa fa-reply"></i> {{ trans('laravel-h5p.content.cancel') }}</a>
+                        <a href="{{ route('h5p.index') }}"  onclick="postData()" class="btn btn-default"><i class="fa fa-reply"></i> {{ trans('laravel-h5p.content.cancel') }}</a>
     
                         {{ Form::submit(trans('laravel-h5p.content.save'), [
                     "class"=>"btn btn-primary",
@@ -184,6 +182,12 @@
                 </div>
     
                 {!! Form::close() !!}
+
+                <script>
+                    function pastData(){
+                        window.parent.postMessage({{ $id }},'*');
+                    }
+                    </script>
     
             </div>
     
