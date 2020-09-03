@@ -64,13 +64,11 @@ class H5PLessonController extends Controller
                 'content_id' => $request->content_id,
                 'lesson_id' => $request->lesson_id,
                 'publish_date' => Carbon::now(),
-                'start_date' => Carbon::now()
+                'start_date' => Carbon::now(),
+                'user_id' => Auth::id()
             ]);
         }
 
-        $content = DB::table('h5p_contents')->whereId($request->content_id)->update([
-            'user_id' => Auth::id()
-        ]);
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
         $Lesson = Lesson::find($request->lesson_id);
@@ -130,12 +128,11 @@ class H5PLessonController extends Controller
         ]);
 
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
-        $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
         if (!isset($h5pLesson)) {
             return HelperController::api_response_format(400, null, 'Try again , Data invalid');
         }
 
-        if(!$request->user()->can('h5p/lesson/allow-delete') && $content->user_id != Auth::id() ){
+        if(!$request->user()->can('h5p/lesson/allow-delete') && $h5pLesson->user_id != Auth::id() ){
             return HelperController::api_response_format(400, null, 'You dont have permission to delete this content.');
         }
 
