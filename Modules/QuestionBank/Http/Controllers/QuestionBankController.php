@@ -91,7 +91,7 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/add');
         $role->givePermissionTo('quiz/update');
         $role->givePermissionTo('quiz/sort');
-        $role->givePermissionTo('quiz/sortup');
+        // $role->givePermissionTo('quiz/sortup');
         $role->givePermissionTo('quiz/delete');
         $role->givePermissionTo('quiz/add-quiz-lesson');
         $role->givePermissionTo('quiz/update-quiz-lesson');

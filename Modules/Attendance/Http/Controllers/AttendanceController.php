@@ -61,7 +61,7 @@ class AttendanceController extends Controller
         $role->givePermissionTo('attendance/add-log');
         $role->givePermissionTo('attendance/get-users-in-attendance');
         $role->givePermissionTo('attendance/get-users-in-session');
-        $role->givePermissionTo('attendance/get-all-taken-users-in-session');
+        // $role->givePermissionTo('attendance/get-all-taken-users-in-session');
         $role->givePermissionTo('attendance/add-session');
         $role->givePermissionTo('site/attendance/bulk/attendance');
         $role->givePermissionTo('attendance/status/add');
