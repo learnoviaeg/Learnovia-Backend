@@ -79,10 +79,10 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     //languages routes
     Route::group(['prefix' => 'languages'], function () {
-        Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
+        Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary');//->middleware('permission:languages/dictionary');
         Route::post('add', 'LanguageController@add_language')->name('addLang')->middleware('permission:languages/add');
         Route::post('update', 'LanguageController@update_language')->name('updateLang')->middleware('permission:languages/update');
-        Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:languages/get');
+        Route::get('get', 'LanguageController@Get_languages')->name('getLang');//->middleware('permission:languages/get');
         Route::post('delete', 'LanguageController@Delete_languages')->name('deleteLang')->middleware('permission:languages/delete');
         Route::get('get-active', 'SystemSettingsController@GetActiveLanguages')->name('getActiveLanguages');
         Route::get('get-default', 'SystemSettingsController@GetDefaultLanguage')->name('getDefaultLanguages');
