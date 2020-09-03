@@ -4,7 +4,7 @@
 @php $errors = collect();@endphp
 @endif
 @section( 'h5p' )
-<div style="border-radius:20px;padding: 2%;margin-left: 5%;margin-right: 5%;margin-top: 3%;margin-bottom: 3%;background-color:white">
+<div >
 
     <div class="container-fluid" >
     
