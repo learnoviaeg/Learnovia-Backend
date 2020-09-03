@@ -196,6 +196,7 @@ class AnnouncementController extends Controller
         $myAnnouncements = Announcement::where('created_by',Auth::id())->get();
         foreach ($myAnnouncements as $ann) {
             $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
+            // $ann->attachment;
         }
         return HelperController::api_response_format(201, ['notify' => $anounce , 'created'=>$myAnnouncements ],'Announcement Sent Successfully');
     }
