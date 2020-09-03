@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
+use Nwidart\Modules\Collection;
 
 use App\AcademicType;
 use App\AcademicYear;
@@ -52,26 +53,36 @@ class AC_year_type extends Controller
         }
     }
 
-    public function get(Request $request){
+    public function get(Request $request,$call=0){
 
         $request->validate([
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'years' => 'array',
+            'years.*' => 'exists:academic_years,id',
         ]);
-        if($request->filled('search'))
+    
+        $types = AcademicType::whereNull('deleted_at')
+        ->where('name', 'LIKE' , "%$request->search%")
+        ->whereHas('yearType',function($q)use ($request)
         {
-            $types = AcademicType::with('yearType.academicyear')->where('name', 'LIKE' , "%$request->search%")->get()->paginate(HelperController::GetPaginate($request));
-            return HelperController::api_response_format(202, $types);   
+            if ($request->has('years')) {
+                $q->whereIn('academic_year_id',$request->years);
+            }
+        });
+        $all_types = $types->get();
+        if($call==1){
+            return $all_types;
         }
-        $types = AcademicType::with('yearType.academicyear')->paginate(HelperController::GetPaginate($request));
 
         if($request->returnmsg == 'delete')
-            return HelperController::api_response_format(202, $types,'Type deleted successfully');
+            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),'Type deleted successfully');
         if($request->returnmsg == 'add')
-            return HelperController::api_response_format(202, $types,'Type added successfully');
+            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),'Type added successfully');
         if($request->returnmsg == 'update')
-            return HelperController::api_response_format(202, $types,'Type edited successfully');
+            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),'Type edited successfully');
+
         else
-            return HelperController::api_response_format(202, $types);
+            return HelperController::api_response_format(200, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)));
     }
 
     /**
@@ -219,6 +230,22 @@ class AC_year_type extends Controller
     {
         $result=array();
         $lev=array();
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $year = AcademicYear::where('current',1)->first();
+            if ($request->filled('year'))
+                $year = AcademicYear::whereId($request->year)->first();
+
+            if(!isset($year))
+                return HelperController::api_response_format(200,null, 'No active year available, please enter one.');
+
+            if(count($year->AC_Type) == 0)
+                return HelperController::api_response_format(201,null, 'You haven\'t types');
+
+            return HelperController::api_response_format(200,$year->AC_Type, 'There are your types');
+        }
+
         $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
             //validate that course in my current course start < now && now < end
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
@@ -246,11 +273,13 @@ class AC_year_type extends Controller
         
         return HelperController::api_response_format(201,null, 'You haven\'t types');
     }
-    public function export()
+    public function export(Request $request)
     {
         // return Excel::download(new TypesExport, 'types.xls');
+        $typeIDs = self::get($request,1);
+        
         $filename = uniqid();
-        $file = Excel::store(new TypesExport, 'Type'.$filename.'.xls','public');
+        $file = Excel::store(new TypesExport($typeIDs), 'Type'.$filename.'.xls','public');
         $file = url(Storage::url('Type'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }

@@ -65,7 +65,7 @@ class AnnouncementController extends Controller
             $publishdate = $request->publish_date;
         }else {
             $date=Carbon::now();
-            $publishdate = Carbon::parse($date)->format('Y-m-d H:i:s');
+            $publishdate = Carbon::parse($date);
         }
         $start_date = $request->start_date;
         if($request->start_date < Carbon::now())
@@ -112,7 +112,7 @@ class AnnouncementController extends Controller
             'year_id' => $request->year,
             'type_id' => $request->type,
             'segment_id' => $request->segment_id,
-            'publish_date' => $publishdate,
+            'publish_date' => Carbon::parse($publishdate),
             'created_by' => Auth::id(),
         ]);
         foreach ($users as $user){
@@ -138,7 +138,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $ann->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate),
                 'title' => $request->title,
                 'description' => $request->description,
                 'attached_file' => $file_id,
@@ -151,7 +151,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $ann->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate),
                 'title' => $request->title,
                 'description' => $request->description,
                 'attached_file' => $attached,
@@ -275,7 +275,7 @@ class AnnouncementController extends Controller
             'attached_file' => $file_id,
             'start_date'=>$start_date,
             'due_date'=> $due_date,
-            'publish_date' => $publishdate
+            'publish_date' => Carbon::parse($publishdate),
         ]);
 
         $anounce = AnnouncementController::get_announcement($request);

@@ -7,7 +7,16 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
+use Illuminate\Http\Request;
+Route::get('h5p_protect', function(Request $request)
+{   
+    $data = explode('/',request()->data);
+     $video_name = $data[count($data) - 1];
+     $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
+     $stream =  new \App\VideoStream($filePath);
+     $stream->start();
 
+})->name('h5p_protect');
 Route::group(['middleware' => ['auth:api']], function () {
     //user main routes without permissions
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
@@ -79,10 +88,11 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     //languages routes
     Route::group(['prefix' => 'languages'], function () {
-        Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
+        //without middleware
+        // Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary');//->middleware('permission:languages/dictionary');
         Route::post('add', 'LanguageController@add_language')->name('addLang')->middleware('permission:languages/add');
         Route::post('update', 'LanguageController@update_language')->name('updateLang')->middleware('permission:languages/update');
-        Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:languages/get');
+        // Route::get('get', 'LanguageController@Get_languages')->name('getLang');//->middleware('permission:languages/get');
         Route::post('delete', 'LanguageController@Delete_languages')->name('deleteLang')->middleware('permission:languages/delete');
         Route::get('get-active', 'SystemSettingsController@GetActiveLanguages')->name('getActiveLanguages');
         Route::get('get-default', 'SystemSettingsController@GetDefaultLanguage')->name('getDefaultLanguages');
@@ -99,7 +109,13 @@ Route::group(['middleware' => ['auth:api']], function () {
     });
 
     //Import Excel Route
-    Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:import');
+    Route::group(['prefix' => 'import'] , function(){
+        Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:import/import');
+    });
+});
+Route::group(['prefix' => 'languages'], function () {
+    Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
+    Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:languages/get');
 });
 
 //Year Routes
@@ -131,10 +147,10 @@ Route::group(['prefix' => 'type', 'middleware' => ['auth:api']], function () {
 //Level Routes
 Route::group(['prefix' => 'level', 'middleware' => ['auth:api']], function () {
     Route::post('add', 'LevelsController@AddLevelWithYear')->name('addlevel')->middleware('permission:level/add');
-    Route::get('get', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get');
+    Route::get('get', 'LevelsController@get')->name('getlevels')->middleware('permission:level/get');
     Route::get('get-my-levels', 'LevelsController@GetMyLevels')->name('getmylevels')->middleware('permission:level/get-my-levels');
     //without year or type request
-    Route::get('get-all', 'LevelsController@get')->name('getlevels')->middleware('permission:level/get-all');
+    Route::get('get-all', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get-all');
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
     Route::post('assign', 'LevelsController@Assign_level_to')->name('assignlevel')->middleware('permission:level/assign');
@@ -144,10 +160,10 @@ Route::group(['prefix' => 'level', 'middleware' => ['auth:api']], function () {
 //Class Routes
 Route::group(['prefix' => 'class', 'middleware' => ['auth:api']], function () {
     Route::post('add', 'ClassController@AddClassWithYear')->name('addclass')->middleware('permission:class/add');
-    Route::get('get', 'ClassController@index')->name('getallclasses')->middleware('permission:class/get');
+    Route::get('get', 'ClassController@show')->name('getallclasses')->middleware('permission:class/get');
     Route::get('get-my-classes', 'ClassController@GetMyclasses')->name('getmyclasses')->middleware('permission:class/get-my-classes');
     //without any parameters
-    Route::get('get-all', 'ClassController@show')->name('getallclass')->middleware('permission:class/get-all');
+    Route::get('get-all', 'ClassController@index')->name('getallclass')->middleware('permission:class/get-all');
     Route::post('update', 'ClassController@update')->name('updateclass')->middleware('permission:class/update');
     Route::post('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:class/delete');
     Route::post('assign', 'ClassController@Assign_class_to')->name('assignclass')->middleware('permission:class/assign');
@@ -198,6 +214,8 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api']], function () {
     Route::get('lessons', 'CourseController@getLessonsFromCourseAndClass')->middleware('permission:course/lessons');
     Route::get('get-class', 'CourseController@get_class_from_course')->middleware('permission:course/get-classes-by-course');
     Route::post('get-courses-by-classes', 'CourseController@get_courses_with_classes')->middleware('permission:course/get-courses-by-classes');
+    Route::get('export', 'CourseController@export')->name('exportCourses')->middleware('permission:course/export');
+
 });
 
 //USER CRUD ROUTES
@@ -374,4 +392,17 @@ Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
     Route::post('delete', 'PaymentController@delete')->name('deletepayment')->middleware('permission:payment/delete');
     Route::post('postponed-payment', 'PaymentController@postponedPayment')->name('deletepayment')->middleware('permission:payment/postponed-payment');
     Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
+});
+
+Route::group(['prefix' => 'h5p', 'middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
+
+        Route::get('install', 'H5PLessonController@install')->name('installh5p');
+        Route::get('create', 'H5PLessonController@create')->name('createh5plesson')->middleware('permission:h5p/lesson/create');
+        Route::get('toggle', 'H5PLessonController@toggleVisibility')->name('toggleh5p')->middleware('permission:h5p/lesson/toggle');
+        Route::get('get', 'H5PLessonController@get')->name('geth5p')->middleware('permission:h5p/lesson/get-all');
+        Route::get('delete', 'H5PLessonController@delete')->name('deleteh5p')->middleware('permission:h5p/lesson/delete');
+        Route::get('update', 'H5PLessonController@edit')->name('edith5p')->middleware('permission:h5p/lesson/update');
+
+    });
 });

@@ -10,6 +10,7 @@ use App\Level;
 use Illuminate\Http\Request;
 use App\Classes;
 use App\CourseSegment;
+use App\Segment;
 use App\User;
 use App\ClassLevel;
 use App\Enroll;
@@ -31,28 +32,50 @@ class ClassController extends Controller
               id of class as an optional parameter.
     * @return : returns all classes or a selected class.
     */
-    public function index(Request $request)
+    public function index(Request $request ,$call = 0)
     {
         $request->validate([
-            'year'  => 'required|exists:academic_years,id',
-            'type'  => 'required|exists:academic_types,id',
-            'level' => 'required|exists:levels,id',
-            'id' => 'exists:classes,id'
+            'years'  => 'array',
+            'years.*'  => 'nullable|exists:academic_years,id',
+            'types'  => 'array',
+            'types.*'  => 'nullable|exists:academic_types,id',
+            'levels' => 'array',
+            'levels.*' => 'nullable|exists:levels,id',
+            'id' => 'exists:classes,id',
+            'search' => 'nullable'
         ]);
-        if($request->id == null)
+        
+        if($request->filled('id')){
+            $class = Classes::find($request->id);
+            if ($class)
+                return HelperController::api_response_format(200, $class);
+            return HelperController::NOTFOUND();
+        }
+
+        $classes = new Classes;
+
+        $classes = Classes::WhereHas('classlevel.yearLevels.yearType', function ($q) use ($request) {
+            if($request->filled('years'))
+                $q->whereIn("academic_year_id", $request->years);
+            if($request->filled('types'))
+                $q->whereIn("academic_type_id", $request->types);
+        });
+
+        $classes = $classes->WhereHas('classlevel.yearLevels', function ($q) use ($request) {
+            if($request->filled('levels'))
+                $q->whereIn("level_id", $request->levels);
+        });
+
+        if($request->filled('search'))
         {
-            $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
-            $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
-            $class =collect([]);
-            foreach ($yearlevel->classLevels as $classLevel){
-                if(count($classLevel->classes) > 0)
-                    $class[] = $classLevel->classes[0]->id;
-            }
-            $Classes = Classes::with('classlevel.yearLevels.levels.years')->whereIn('id',$class);
-            $all_classes=collect([]);
-            $Classes = $Classes->get();
-            foreach ($Classes as $class)
-           { 
+            $classes = $classes->where('name', 'LIKE' , "%$request->search%");
+        }
+
+        $classes = $classes->get();
+        $all_classes=collect([]);
+
+        foreach ($classes as $class)
+        { 
             $levels_id= $class->classlevel->pluck('yearLevels.*.level_id')->collapse()->unique();
             $class['levels']= Level::whereIn('id',$levels_id)->pluck('name');
             $academic_year_id= array_values( $class->classlevel->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse()->unique()->toArray());
@@ -60,17 +83,14 @@ class ClassController extends Controller
             $academic_type_id = array_values($class->classlevel->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse()->unique()->toArray());
             $class['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
             unset($class->classlevel);
-             $all_classes->push($class);
-            }
-            return HelperController::api_response_format(200, $all_classes->paginate(HelperController::GetPaginate($request)));
+            $all_classes->push($class);
         }
-        else
-        {
-            $class = Classes::find($request->id);
-            if ($class)
-                return HelperController::api_response_format(200, $class);
-            return HelperController::NOTFOUND();
+
+        if($call == 1){
+            $classesIds = $all_classes->pluck('id');
+            return $classesIds;
         }
+        return HelperController::api_response_format(200, $all_classes->paginate(HelperController::GetPaginate($request)));
 
     }
 
@@ -136,41 +156,45 @@ class ClassController extends Controller
      * @param : id of classes or search as an optional parameter.
      * @return : returns all classes or filtered ones or a class selected by id.
      */
-    public function show(Request $request)
+    public function show(Request $request ,$call = 0)
     {
+        $request->validate([
+            'year'  => 'required|exists:academic_years,id',
+            'type'  => 'required|exists:academic_types,id',
+            'level' => 'required|exists:levels,id',
+            'id' => 'exists:classes,id'
+        ]);
         if($request->id == null)
         {
-            $request->validate([
-                'search' => 'nullable'
-            ]);
-            $Classes = Classes::with('classlevel.yearLevels.levels.years');
-               if($request->filled('search'))
-            {
-                $Classes = $Classes->where('name', 'LIKE' , "%$request->search%");
-
+            $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
+            $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
+            $class =collect([]);
+            foreach ($yearlevel->classLevels as $classLevel){
+                if(count($classLevel->classes) > 0)
+                    $class[] = $classLevel->classes[0]->id;
             }
-            $Classes = $Classes->get();
+            $Classes = Classes::with('classlevel.yearLevels.levels.years')->whereIn('id',$class);
             $all_classes=collect([]);
+            $Classes = $Classes->get();
             foreach ($Classes as $class)
            { 
-                $levels_id= $class->classlevel->pluck('yearLevels.*.level_id')->collapse()->unique();
-                $class['levels']= Level::whereIn('id',$levels_id)->pluck('name');
-              $academic_year_id= array_values( $class->classlevel->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse()->unique()->toArray());
-              $class['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
-              $academic_type_id = array_values($class->classlevel->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse()->unique()->toArray());
-             $class['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+            $levels_id= $class->classlevel->pluck('yearLevels.*.level_id')->collapse()->unique();
+            $class['levels']= Level::whereIn('id',$levels_id)->pluck('name');
+            $academic_year_id= array_values( $class->classlevel->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse()->unique()->toArray());
+            $class['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+            $academic_type_id = array_values($class->classlevel->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse()->unique()->toArray());
+            $class['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
             unset($class->classlevel);
-             $all_classes->push($class);}
-            return HelperController::api_response_format(200,$all_classes->paginate(HelperController::GetPaginate($request)));
+             $all_classes->push($class);
+            }
+            return HelperController::api_response_format(200, $all_classes->paginate(HelperController::GetPaginate($request)));
         }
         else
         {
-            $request->validate([
-                'id' => 'exists:classes,id',
-            ]);
             $class = Classes::find($request->id);
-            return HelperController::api_response_format(200,$class);
-
+            if ($class)
+                return HelperController::api_response_format(200, $class);
+            return HelperController::NOTFOUND();
         }
     }
 
@@ -281,31 +305,52 @@ class ClassController extends Controller
             if ($request->filled('type'))
                 $query->whereIn('academic_type_id', $request->type);            
         }])->first();
-        foreach($users ->enroll as $enrolls)
-        if(isset($enrolls->courseSegment->segmentClasses)){
-            foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-                foreach($segmetClas->classLevel as $clas)
-                    if(isset($clas->yearLevels))
-                        foreach($clas->yearLevels as $level)
-                            if(count($level->yearType) > 0)
-                                if(!in_array($clas->class_id, $result))
-                                {
-                                    $result[]=$clas->class_id;
-                                    $class[]=Classes::find($clas->class_id);
-                                }
-                            }
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $year=AcademicYear::where('current',1)->get()->first();
+            if(!isset($year))
+                return HelperController::api_response_format(200, [], ' There is no active year ');
+
+            if ($request->filled('type'))
+            {
+                $segment=Segment::Get_current($request->type);
+                if(!isset($segment->id))
+                    return HelperController::api_response_format(200, [], ' There is no active segment ');
+            }
+            $cs=GradeCategoryController::getCourseSegmentWithArray($request);
+            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
+        }
+        else{
+            $enrll=$users->enroll;
+            foreach($enrll as $one)
+                $CourseSegments[]=$one->courseSegment;
+        }
+
+        foreach($CourseSegments as $enrolls)
+            if(isset($enrolls->segmentClasses))
+                foreach($enrolls->segmentClasses as $segmetClas)
+                    foreach($segmetClas->classLevel as $clas)
+                        if(isset($clas->yearLevels))
+                            foreach($clas->yearLevels as $level)
+                                if(count($level->yearType) > 0)
+                                    if(!in_array($clas->class_id, $result))
+                                    {
+                                        $result[]=$clas->class_id;
+                                        $class[]=Classes::find($clas->class_id);
+                                    }
         if(count($class) > 0)
             return HelperController::api_response_format(201,$class, 'There are your Classes');
         
-        return HelperController::api_response_format(201, 'You haven\'t Classes');
+        return HelperController::api_response_format(201, $class,'You haven\'t Classes');
     }
 
-    public function export()
+    public function export(Request $request)
     {
-        // return Excel::download(new ClassesExport, 'classes.xls');
+        $classesIDs = self::index($request,1);
         $filename = uniqid();
-         $file = Excel::store(new ClassesExport, 'Class'.$filename.'.xls','public');
-         $file = url(Storage::url('Class'.$filename.'.xls'));
-         return HelperController::api_response_format(201,$file, 'Link to file ....');
+        $file = Excel::store(new ClassesExport($classesIDs), 'Class'.$filename.'.xls','public');
+        $file = url(Storage::url('Class'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }

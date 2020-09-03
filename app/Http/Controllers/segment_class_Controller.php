@@ -11,6 +11,7 @@ use App\AcademicType;
 use App\AcademicYear;
 use Validator;
 use App\SegmentClass;
+use App\CourseSegment;
 use App\Segment;
 use App\Http\Resources\Segment_class_resource;
 use App\User;
@@ -56,9 +57,10 @@ class segment_class_Controller extends Controller
                 $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
                 $academic_type_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse();
                 $segment['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-                if(isset($segment->segment_class[0]->class_id))
-               { $class_id = $segment->segment_class[0]->class_id;
-                $segment['class']=Classes::where('id',$class_id)->pluck('name')[0];}
+                if(isset($segment->segment_class[0]->class_id)){
+                    $class_id = $segment->segment_class[0]->class_id;
+                    $segment['class']=Classes::where('id',$class_id)->pluck('name')->first();
+                }
                 $level_id = $segment->Segment_class->pluck('yearLevels.*.level_id')->collapse();
                 $segment['level'] = Level::whereIn('id',$level_id)->pluck('name');
                 unset($segment->Segment_class);
@@ -83,24 +85,53 @@ class segment_class_Controller extends Controller
         }
     }
 
-    public function get(Request $request)
+    public function get(Request $request ,$call = 0)
     {
         if ($request->id == null) {
             $request->validate([
                 'search' => 'nullable',
-                'year' => 'exists:academic_years,id',
-                'type' => 'exists:academic_types,id|required_with:year',
+                'years' => 'array',
+                'years.*' => 'exists:academic_years,id',
+                'types' => 'array',
+                'types.*' => 'exists:academic_types,id',
+                'levels' => 'array',
+                'levels.*' => 'exists:levels,id',
+                'classes' => 'array',
+                'classes.*' => 'exists:classes,id',
             ]);
+            if($request->filled('id')) {
+                $segment = Segment::find($request->id);
+                return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)));
+            }
 
-            // $segments = Segment::with(['academicType.yearType.academicyear'/*,'Segment_class.yearLevels.yearType.academicyear','Segment_class.yearLevels.yearType.academictype','Segment_class.classes','Segment_class.yearLevels.levels'*/])->paginate(HelperController::GetPaginate($request));
+            $segmentt = Segment::whereNull('deleted_at')
+            ->where('name', 'LIKE' , "%$request->search%")
+            ->whereHas('Segment_class.classes' , function($q)use ($request)
+            { 
+                    if ($request->has('classes'))
+                        $q->whereIn('id',$request->classes);
+                
+            })
+            ->whereHas('Segment_class.classes.classlevel.yearLevels', function($q)use ($request)
+            { 
+                    if ($request->has('levels')) 
+                        $q->whereIn('level_id',$request->levels);
+            })
+            ->whereHas('Segment_class.classes.classlevel.yearLevels.yearType' , function($q)use ($request)
+            { 
+                if ($request->has('years'))
+                    $q->whereIn('academic_year_id',$request->years);
+                if ($request->has('types'))
+                    $q->whereIn('academic_type_id',$request->types);
+            })->get();
             $segments = Segment::with(['academicType.yearType.academicyear','Segment_class.yearLevels.yearType']);
             $all_segments=collect([]);
-            if($request->filled('search'))
-            {
-                $segments = $segments->where('name', 'LIKE' , "%$request->search%");
+           
+            if($call == 1){
+                $segmentIds = $segmentt->pluck('id');
+                return $segmentIds;
             }
-            $segments =$segments->get();
-            foreach($segments as $segment){
+            foreach($segmentt as $segment){
                 $academic_year_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse();
                 $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
                 $academic_type_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse();
@@ -116,19 +147,6 @@ class segment_class_Controller extends Controller
                 $all_segments->push($segment);
         
             }
-
-
-            if(isset($request->year))
-            {
-                $arrayYear=Segment::where('academic_type_id',$request->type)->with(['academicType.yearType' => function($query) use ($request){
-                    $query->where('academic_year_id', $request->year);         
-                }])->get();
-                foreach($arrayYear as $year)
-                    if(count($year->academicType->yearType) == 0)
-                        return HelperController::api_response_format(202, null);   
-                else
-                    return HelperController::api_response_format(202, $arrayYear->paginate(HelperController::GetPaginate($request)));   
-            }
             
             if($request->returnmsg == 'delete')
                 return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),'Segment deleted successfully');
@@ -141,9 +159,6 @@ class segment_class_Controller extends Controller
 
 
 
-        } else {
-            $segment = Segment::find($request->id);
-            return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)));
         }
     }
 
@@ -387,7 +402,7 @@ class segment_class_Controller extends Controller
     {
         $result=array();
         $lev=array();
-        $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
+        $user = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
             //validate that course in my current course start < now && now < end
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
         },'enroll.courseSegment.segmentClasses.classLevel' => function($query) use ($request){
@@ -402,32 +417,57 @@ class segment_class_Controller extends Controller
             if ($request->filled('year'))
                 $query->where('academic_year_id', $request->year);          
         }])->first();
-        // return $users;
-        foreach($users ->enroll as $enrolls){
-            if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
-                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-                foreach($segmetClas->classLevel as $clas)
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $year=AcademicYear::where('current',1)->get()->first();
+            if(!isset($year))
+                return HelperController::api_response_format(200, [], ' There is no active year ');
+
+            if ($request->filled('type'))
+            {
+                $segment=Segment::where('current',1)->get()->first();
+                if(!isset($segment))
+                    return HelperController::api_response_format(200, [], ' There is no active segment ');
+            }
+
+            $cs=GradeCategoryController::getCourseSegment($request);
+            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
+        }
+        else{
+            $enrll=$user->enroll;
+            foreach($enrll as $one)
+                $CourseSegments[]=$one->courseSegment;
+        }
+        // return($CourseSegments);
+        // foreach($user->enroll as $enrolls){
+            // if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
+                // foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+        foreach($CourseSegments as $CourseSegment){
+            if(isset($CourseSegment)){
+                foreach($CourseSegment->segmentClasses as $segmetClas)
+                    foreach($segmetClas->classLevel as $clas)
                         foreach($clas->yearLevels as $level)
                             foreach($level->yearType as $typ)
-                             if(isset($typ)){
-                                if(!in_array($typ->academic_year_id, $result))
-                                {
-                                    $result[]=$segmetClas->segment_id;
-                                    $segmentt[]=Segment::find($segmetClas->segment_id);
+                                if(isset($typ)){
+                                    if(!in_array($segmetClas->segment_id, $result))
+                                    {
+                                        $result[]=$segmetClas->segment_id;
+                                        $segmentt[]=Segment::find($segmetClas->segment_id);
+                                    }
                                 }
-                            }
             }
-        }     
+        } 
         if(isset($segmentt) && count($segmentt) > 0)
             return HelperController::api_response_format(201,$segmentt, 'Here are your segments');
         
         return HelperController::api_response_format(201,null, 'You are not enrolled in any segment');
     }
-    public function export()
+    public function export(Request $request)
     {
+        $segmentsIDs = self::get($request,1);
         $filename = uniqid();
-        // return Excel::download(new SegmentsExport, 'segments.xls');
-        $file = Excel::store(new SegmentsExport, 'Segment'.$filename.'.xls','public');
+        $file = Excel::store(new SegmentsExport($segmentsIDs), 'Segment'.$filename.'.xls','public');
         $file = url(Storage::url('Segment'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
         

@@ -44,18 +44,21 @@ class AcademicYearController extends Controller
      *          else: returns all years in database.
      *
      */
-    public function getall(Request $request)
+    public function getall(Request $request,$call =0 )
     {
         $request->validate([
             'search' => 'nullable'
         ]);
+        
+        $years=AcademicYear::whereNull('deleted_at');
         if($request->filled('search'))
         {
-            $years = AcademicYear::where('name', 'LIKE' , "%$request->search%")->get()
-            ->paginate(HelperController::GetPaginate($request));
-            return HelperController::api_response_format(202, $years);   
+            $years = AcademicYear::where('name', 'LIKE' , "%$request->search%"); 
         }
-        $years = AcademicYear::paginate(HelperController::GetPaginate($request));
+        if($call == 1 ){
+            return $years->get();
+        }
+        $years =$years->paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(202, $years);
     }
 
@@ -162,6 +165,16 @@ class AcademicYearController extends Controller
     {
         $result=array();
         $CS=array();
+
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $year = AcademicYear::get();
+            if(count($year) == 0)
+                return HelperController::api_response_format(201,null, 'No available years in the system');
+
+            return HelperController::api_response_format(201,$year, 'Here are your years');
+        }
+
         $course_segments = Enroll::where('user_id',Auth::id())->with(['courseSegment' => function($query){
             //validate that course in my current course start < now && now < end
             $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());}])->get();
@@ -176,11 +189,11 @@ class AcademicYearController extends Controller
         return HelperController::api_response_format(201,null, 'You are not enrolled in any year');
     }
 
-    public function export()
+    public function export(Request $request)
     {
-        // return Excel::download(new YearsExport, 'years.xls');
+         $years = self::getall($request,1);
         $filename = uniqid();
-         $file = Excel::store(new YearsExport, 'Year'.$filename.'.xls','public');
+         $file = Excel::store(new YearsExport($years), 'Year'.$filename.'.xls','public');
          $file = url(Storage::url('Year'.$filename.'.xls'));
          return HelperController::api_response_format(201,$file, 'Link to file ....');
     }

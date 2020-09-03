@@ -8,7 +8,7 @@
         <!-- CSRF Token -->
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Learnovia Interacive</title>
+        <title>{{ config('app.name', 'Laravel') }}</title>
 
         <script>
             window.Laravel = <?php echo json_encode([ 'csrfToken' => csrf_token()]); ?>
@@ -17,7 +17,6 @@
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Lato:300,300i,400,400i,700,700i,900,900i" rel="stylesheet">
         <link rel="stylesheet" href="{{ url('css/app.css') }}"/>
-        <link rel="stylesheet" href="{{ url('css/table.css') }}"/>
 
         @stack('h5p-header-script')
 
@@ -67,7 +66,7 @@
         </style>
     </head>
 
-    <body style="background-color: #f1f4f8">
+    <body>
 
         <div  id="app" 
               @if (Route::has('welcome'))
@@ -76,24 +75,32 @@
               >
 
 
-              <nav class="navbar navbar-default navbar-static-top">
+               <!-- <nav class="navbar navbar-default navbar-static-top">
                 <div class="container">
                     <div class="navbar-header">
+
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+                            <span class="sr-only">Toggle Navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+
+                        <a class="navbar-brand" href="{{ url('/') }}">
+                            {{ config('app.name', 'LARAVEL-H5P') }}
+                        </a>
                     </div>
 
                     <div class="collapse navbar-collapse" id="app-navbar-collapse">
-                        <!-- Left Side Of Navbar -->
                         <ul class="nav navbar-nav">
                             &nbsp;
                         </ul>
 
-                        <!-- Right Side Of Navbar -->
                         <ul class="nav navbar-nav navbar-right">
 
                             <li><a href="/h5p" class="">H5P</a></li>
                             <li><a href="/library" class="">H5P Library</a></li>
 
-                            <!-- Authentication Links -->
                             @if (Auth::guest())
                             <li><a href="/login">Login</a></li>
                             <li><a href="/register">Register</a></li>
@@ -121,7 +128,7 @@
                         </ul>
                     </div>
                 </div>
-            </nav>
+            </nav> -->
 
             @yield('h5p')
 
