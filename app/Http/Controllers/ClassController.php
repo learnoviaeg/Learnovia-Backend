@@ -308,19 +308,46 @@ class ClassController extends Controller
 
         if($request->user()->can('site/show-all-courses'))
         {
-            $year=AcademicYear::where('current',1)->get()->first();
-            if(!isset($year))
-                return HelperController::api_response_format(200, [], ' There is no active year ');
+            $year = AcademicYear::where('current',1)->first();
+            if($request->filled('year'))
+                $year = AcademicYear::where('id',$request->year)->first();
+
+            if(isset($year))
+                $year_type = $year->YearType->pluck('id');
 
             if ($request->filled('type'))
-            {
-                $segment=Segment::Get_current($request->type);
-                if(!isset($segment->id))
-                    return HelperController::api_response_format(200, [], ' There is no active segment ');
-            }
-            $cs=GradeCategoryController::getCourseSegmentWithArray($request);
-            $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
+                $year_type = AcademicYearType::whereIn('academic_type_id',$request->type)->pluck('id');
+
+            if(!isset($year_type))
+                return HelperController::api_response_format(200,null, 'No active year available, please enter types you want.');
+                
+            $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('id');
+            
+            if(isset($year_levels))
+                $classes = ClassLevel::whereIn('year_level_id',$year_levels)->pluck('class_id');
+
+            if(isset($classes))
+                $classes = Classes::whereIn('id',$classes)->get();
+            if(count($classes) == 0)
+                return HelperController::api_response_format(201,null, 'You haven\'t classes');
+
+            return HelperController::api_response_format(200,$classes, 'There are your classes');
         }
+        // if($request->user()->can('site/show-all-courses'))
+        // {
+        //     $year=AcademicYear::where('current',1)->get()->first();
+        //     if(!isset($year))
+        //         return HelperController::api_response_format(200, [], ' There is no active year ');
+
+        //     if ($request->filled('type'))
+        //     {
+        //         $segment=Segment::Get_current($request->type);
+        //         if(!isset($segment->id))
+        //             return HelperController::api_response_format(200, [], ' There is no active segment ');
+        //     }
+        //     $cs=GradeCategoryController::getCourseSegmentWithArray($request);
+        //     $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
+        // }
         else{
             $enrll=$users->enroll;
             foreach($enrll as $one)
