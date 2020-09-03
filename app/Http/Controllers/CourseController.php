@@ -846,7 +846,7 @@ class CourseController extends Controller
                                     $content->original->item_lesson_id = $h5p->id;
                                     $content->original->visible = $h5p->visible;
                                     $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit';
-                                    if(!$request->user()->can('h5p/lesson/allow-edit') && $content->original->user_id != Auth::id() ){
+                                    if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id() ){
                                         $content->original->edit_link = null;
                                     }
                                     $content->original->pivot = [
@@ -1407,7 +1407,7 @@ class CourseController extends Controller
                                     $content->original->item_lesson_id = $h5p->id;
                                     $content->original->visible = $h5p->visible;
                                     $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit';
-                                    if(!$request->user()->can('h5p/lesson/allow-edit') && $content->original->user_id != Auth::id() ){
+                                    if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id() ){
                                         $content->original->edit_link = null;
                                     }
                                     $content->original->course = Course::find(Lesson::find($h5p->lesson_id)->courseSegment->course_id);
