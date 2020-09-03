@@ -184,7 +184,7 @@
                 {!! Form::close() !!}
 
                 <script>
-                    function pastData(){
+                    function postData(){
                         window.parent.postMessage({{ $id }},'*');
                     }
                     </script>
