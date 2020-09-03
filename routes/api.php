@@ -114,8 +114,8 @@ Route::group(['middleware' => ['auth:api']], function () {
     });
 });
 Route::group(['prefix' => 'languages'], function () {
-    Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
-    Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:languages/get');
+    Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary');//->middleware('permission:languages/dictionary');
+    Route::get('get', 'LanguageController@Get_languages')->name('getLang');//->middleware('permission:languages/get');
 });
 
 //Year Routes
