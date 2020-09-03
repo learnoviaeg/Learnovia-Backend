@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background-color: white">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -68,7 +68,7 @@
 
     <body>
 
-        <div  id="app" 
+        <div  id="app"  style="background-color: white"
               @if (Route::has('welcome'))
               class="flex-center position-ref full-height"
               @endif
