@@ -51,20 +51,25 @@ class LanguageController extends Controller
         return HelperController::api_response_format(200, Language::all(), 'Language is updated....');
 
     }
-    public function Get_languages()
+    public function Get_languages(Request $request)
     {
-        $user = User::find(Auth::id());
+        $request->validate([
+            'name' => 'required|exists:languages,name',
+        ]);
+        // $user = User::find(Auth::id());
+        $id=Language::where('name',$request->name)->pluck('id')->first();
         $langs = Language::all();
         foreach($langs as $lang){
-            if($lang->id == $user->language && $user->language!=null ){
+            // if($lang->id == $user->language && $user->language!=null ){
+            if($lang->id == $id){
                $lang['current'] = 1 ;  
                continue;
             }
-             if ($user->language ==  null && $lang->default == 1 ) {
-                $lang['current'] = 1 ;  
-                continue;
-            }
-             $lang['current'] = 0;  
+            //  if ($user->language ==  null && $lang->default == 1 ) {
+            //     $lang['current'] = 1 ;  
+            //     continue;
+            // }
+            $lang['current'] = 0;  
         }
 
         return HelperController::api_response_format(200, $langs, 'Languages are....');
