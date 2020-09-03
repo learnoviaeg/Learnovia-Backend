@@ -107,7 +107,7 @@ class AnnouncementController extends Controller
             'attached_file' => $file_id,
             'assign' => $request->assign,
             'class_id' => $request->class,
-            'course_id' => $request->courses[0],
+            'course_id' => $request->course,
             'level_id' => $request->level,
             'year_id' => $request->year,
             'type_id' => $request->type,
