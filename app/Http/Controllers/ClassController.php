@@ -333,30 +333,10 @@ class ClassController extends Controller
 
             return HelperController::api_response_format(200,$classes, 'There are your classes');
         }
-        // if($request->user()->can('site/show-all-courses'))
-        // {
-        //     $year=AcademicYear::where('current',1)->get()->first();
-        //     if(!isset($year))
-        //         return HelperController::api_response_format(200, [], ' There is no active year ');
 
-        //     if ($request->filled('type'))
-        //     {
-        //         $segment=Segment::Get_current($request->type);
-        //         if(!isset($segment->id))
-        //             return HelperController::api_response_format(200, [], ' There is no active segment ');
-        //     }
-        //     $cs=GradeCategoryController::getCourseSegmentWithArray($request);
-        //     $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
-        // }
-        else{
-            $enrll=$users->enroll;
-            foreach($enrll as $one)
-                $CourseSegments[]=$one->courseSegment;
-        }
-
-        foreach($CourseSegments as $enrolls)
-            if(isset($enrolls->segmentClasses))
-                foreach($enrolls->segmentClasses as $segmetClas)
+        foreach($users->enroll as $enrolls){
+            if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
+                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
                     foreach($segmetClas->classLevel as $clas)
                         if(isset($clas->yearLevels))
                             foreach($clas->yearLevels as $level)
@@ -366,6 +346,8 @@ class ClassController extends Controller
                                         $result[]=$clas->class_id;
                                         $class[]=Classes::find($clas->class_id);
                                     }
+            }
+        }
         if(count($class) > 0)
             return HelperController::api_response_format(201,$class, 'There are your Classes');
         
