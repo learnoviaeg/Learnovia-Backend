@@ -7,6 +7,12 @@
 <div >
 
     <div class="container-fluid">
+        <script>
+            function postData(){
+                window.parent.postMessage({{ $id }},'*');
+            }
+            window.parent.postMessage({{ $id }},'*');
+            </script>
     
         <div class="row">
     
@@ -170,12 +176,13 @@
     
                 <div class="form-group">
                     <div class="col-md-9 col-md-offset-3">
-                        <a href="{{ route('h5p.index') }}"  onclick="postData()" class="btn btn-default"><i class="fa fa-reply"></i> {{ trans('laravel-h5p.content.cancel') }}</a>
     
+                       <span onclick="postData()">
                         {{ Form::submit(trans('laravel-h5p.content.save'), [
-                    "class"=>"btn btn-primary",
-                    "data-loading-text" => trans('laravel-h5p.content.saving')
-                            ]) }}
+                            "class"=>"btn btn-primary",
+                            "data-loading-text" => trans('laravel-h5p.content.saving')
+                                    ]) }}
+                       </span>
     
                     </div>
     
@@ -183,11 +190,7 @@
     
                 {!! Form::close() !!}
 
-                <script>
-                    function postData(){
-                        window.parent.postMessage({{ $id }},'*');
-                    }
-                    </script>
+
     
             </div>
     
