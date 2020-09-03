@@ -112,7 +112,7 @@ class AuthController extends Controller
                 $tokenResult->token->expires_at
             )->toDateTimeString(),
             'language' => Language::find($user->language),
-            'dictionary' => self::Get_Dictionary(1),
+            // 'dictionary' => self::Get_Dictionary(1,$request),
         ], 'Login successfully');
     }
 
