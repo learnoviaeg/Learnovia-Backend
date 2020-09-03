@@ -97,6 +97,7 @@
 
 
     ns.getAjaxUrl = function (action, parameters) {
+        console.log('fn 2');
         var url = H5PIntegration.editor.ajaxPath + action + '/?';
         var request_params = [];
 

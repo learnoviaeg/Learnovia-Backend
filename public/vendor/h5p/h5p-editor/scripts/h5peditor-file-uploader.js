@@ -24,9 +24,11 @@ H5PEditor.FileUploader = (function ($, EventDispatcher) {
       formData.append('file', file, filename);
       formData.append('field', JSON.stringify(field));
       formData.append('contentId', H5PEditor.contentId || 0);
+      
 
       // Submit the form
       var request = new XMLHttpRequest();
+      
       request.upload.onprogress = function (e) {
         if (e.lengthComputable) {
           self.trigger('uploadProgress', (e.loaded / e.total));
@@ -43,9 +45,12 @@ H5PEditor.FileUploader = (function ($, EventDispatcher) {
           result = JSON.parse(request.responseText);
         }
         catch (err) {
+          console.log("catch");
+
           H5P.error(err);
           // Add error data to event object
           uploadComplete.error = H5PEditor.t('core', 'fileToLarge');
+          console.log(uploadComplete.error);
         }
 
         if (result !== undefined) {
@@ -65,8 +70,10 @@ H5PEditor.FileUploader = (function ($, EventDispatcher) {
         // Allow the widget to process the result
         self.trigger('uploadComplete', uploadComplete);
       };
-
-      request.open('POST', H5PEditor.getAjaxUrl('files'), true);
+      console.log(H5PEditor.getAjaxUrl('files'),"this is link");
+       request.open('POST', H5PEditor.getAjaxUrl('files'), true);
+      // request.open('POST', 'https://devapi.learnovia.com/api/ajax/files?', true);
+      
       request.send(formData);
       self.trigger('upload');
     };
