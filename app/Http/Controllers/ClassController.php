@@ -314,8 +314,8 @@ class ClassController extends Controller
 
             if ($request->filled('type'))
             {
-                $segment=Segment::where('current',1)->get()->first();
-                if(!isset($segment))
+                $segment=Segment::Get_current($request->type);
+                if(!isset($segment->id))
                     return HelperController::api_response_format(200, [], ' There is no active segment ');
             }
             $cs=GradeCategoryController::getCourseSegmentWithArray($request);

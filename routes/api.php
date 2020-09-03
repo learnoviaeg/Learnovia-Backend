@@ -7,7 +7,16 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
+use Illuminate\Http\Request;
+Route::get('h5p_protect', function(Request $request)
+{   
+    $data = explode('/',request()->data);
+     $video_name = $data[count($data) - 1];
+     $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
+     $stream =  new \App\VideoStream($filePath);
+     $stream->start();
 
+})->name('h5p_protect');
 Route::group(['middleware' => ['auth:api']], function () {
     //user main routes without permissions
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
@@ -79,10 +88,11 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     //languages routes
     Route::group(['prefix' => 'languages'], function () {
-        Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
+        //without middleware
+        // Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary');//->middleware('permission:languages/dictionary');
         Route::post('add', 'LanguageController@add_language')->name('addLang')->middleware('permission:languages/add');
         Route::post('update', 'LanguageController@update_language')->name('updateLang')->middleware('permission:languages/update');
-        Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:languages/get');
+        // Route::get('get', 'LanguageController@Get_languages')->name('getLang');//->middleware('permission:languages/get');
         Route::post('delete', 'LanguageController@Delete_languages')->name('deleteLang')->middleware('permission:languages/delete');
         Route::get('get-active', 'SystemSettingsController@GetActiveLanguages')->name('getActiveLanguages');
         Route::get('get-default', 'SystemSettingsController@GetDefaultLanguage')->name('getDefaultLanguages');
@@ -102,6 +112,10 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::group(['prefix' => 'import'] , function(){
         Route::post('import', 'ExcelController@import')->name('import')->middleware('permission:import/import');
     });
+});
+Route::group(['prefix' => 'languages'], function () {
+    Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
+    Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:languages/get');
 });
 
 //Year Routes

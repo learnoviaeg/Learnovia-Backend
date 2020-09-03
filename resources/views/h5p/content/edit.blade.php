@@ -4,23 +4,19 @@
 @php $errors = collect();@endphp
 @endif
 @section( 'h5p' )
-<div style="border-radius:20px;padding: 2%;margin-left: 5%;margin-right: 5%;margin-top: 3%;margin-bottom: 3%;background-color:white">
-
 <div class="container-fluid">
 
     <div class="row">
-
         <div class="col-md-12">
-
+            <script>
+                window.parent.postMessage({{ $id }},'*');
+                </script>
             {!! Form::model($content, ['method' => 'PATCH','route' => ['h5p.update', $id], 'class'=>'form-horizontal', 'id'=>'laravel-h5p-form', 'enctype'=>"multipart/form-data"]) !!}
             <input type="hidden" name="library" id="laravel-h5p-library" value="{{ $library }}">
             <input type="hidden" name="parameters" id="laravel-h5p-parameters" value="{{ $parameters }}">
 
             <fieldset>
-                <div class="navbar-header" style="">
-                    <h1 style="color: #33516C;
-                    font-family: Poppins;margin-bottom:2%"><b>Edit Learnovia Interactive</b></h1>
-                </div>
+
                 <div class="form-group {{ $errors->has('title') ? 'has-error' : '' }}">
                     <label for="inputTitle" class="control-label col-md-3">{{ trans('laravel-h5p.content.title') }}</label>
                     <div class="col-md-9">
@@ -191,7 +187,6 @@
 
     </div>
 
-</div>
 </div>
 
 @endsection

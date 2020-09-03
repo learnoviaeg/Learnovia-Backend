@@ -112,18 +112,23 @@ class AuthController extends Controller
                 $tokenResult->token->expires_at
             )->toDateTimeString(),
             'language' => Language::find($user->language),
-            'dictionary' => self::Get_Dictionary(1),
+            // 'dictionary' => self::Get_Dictionary(1,$request),
         ], 'Login successfully');
     }
 
-    public function Get_Dictionary($callOrNot = 0)
+    public function Get_Dictionary($callOrNot = 0,Request $request)
     {
+        $request->validate([
+            'name' => 'required|exists:languages,name',
+        ]);
         $result = array();
-        $user = User::find(Auth::id());
-        $lang = $user->language;
-        if(!isset($user->language))
-            $lang = Language::where('default', 1)->pluck('id');
-        $keywords = Dictionary::where('language',$lang)->get();
+        // $user = User::find(Auth::id());
+        // $lang = $user->language;
+        // if(!isset($user->language))
+        //     $lang = Language::where('default', 1)->pluck('id');
+        $id=Language::where('name',$request->name)->pluck('id')->first();
+        // if(!isset($request->id))
+        $keywords = Dictionary::where('language',$id)->get();
         foreach($keywords as $keyword)
             $result[$keyword->key] = $keyword->value;
         if($callOrNot == 1)

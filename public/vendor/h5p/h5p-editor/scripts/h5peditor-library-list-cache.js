@@ -9,6 +9,7 @@ var llc = H5PEditor.LibraryListCache = {
   librariesMissing: {},
   que: []
 };
+console.log("start");
 
 /**
  * Get data for a list of libraries
@@ -42,6 +43,7 @@ llc.getLibraries = function (libraries, handler, thisArg) {
       llc.librariesComingIn[libraries[i]] = true;
     }
   }
+  console.log(H5PEditor.getAjaxUrl('libraries'));
   switch (status) {
     case 'hasAll':
       handler.call(thisArg, cachedLibraries);
@@ -50,6 +52,7 @@ llc.getLibraries = function (libraries, handler, thisArg) {
       llc.que.push({libraries: libraries, handler: handler, thisArg: thisArg});
       break;
     case 'requestThem':
+      console.log(H5PEditor.getAjaxUrl('libraries'));
       var ajaxParams = {
         type: "POST",
         url: H5PEditor.getAjaxUrl('libraries'),
