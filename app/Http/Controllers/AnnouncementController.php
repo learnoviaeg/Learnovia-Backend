@@ -111,7 +111,7 @@ class AnnouncementController extends Controller
             'level_id' => $request->level,
             'year_id' => $request->year,
             'type_id' => $request->type,
-            'segment_id' => $request->segment_id,
+            'segment_id' => $request->segment,
             'publish_date' => Carbon::parse($publishdate),
             'created_by' => Auth::id(),
         ]);
@@ -371,14 +371,15 @@ class AnnouncementController extends Controller
         ]);
        $announcements_ids =  userAnnouncement::where('user_id', Auth::id())->pluck('announcement_id');
        $announcements = Announcement::whereIn('id',$announcements_ids)->where('title', 'LIKE' , "%$request->search%")
-                   ->where('publish_date', '<=', Carbon::now());
+                                        ->where('publish_date', '<=', Carbon::now());
 
-                   if($request->filled('search')){
-                    $announcements->where(function ($query) use ($request) {
-                        $query->where('title', 'LIKE' , "%$request->search%");
-                    });
-                }
-        return $announcements->get();
+        if($request->filled('search')){
+            $announcements->where(function ($query) use ($request) {$query->where('title', 'LIKE' , "%$request->search%");});
+        }
+        $all= $announcements->get();
+        foreach($all as $one)
+            $one->attached_file=attachment::where('id', $one->attached_file)->first();
+        return $all;
     }
     
     /**
