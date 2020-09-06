@@ -405,7 +405,7 @@ class BigbluebuttonController extends Controller
         
         $bbb = new BigBlueButton();
         $meet = BigbluebuttonModel::whereIn('course_id',$courses)->get(); 
-        if($request->user()->can('bigbluebutton/get-all')){
+        if($request->user()->can('site/show-all-courses')){
             $all_meetings = $bbb = new BigBlueButton();
             $meet = BigbluebuttonModel::get();       
         }
