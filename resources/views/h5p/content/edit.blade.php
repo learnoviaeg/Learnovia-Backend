@@ -11,8 +11,7 @@
             function postData(){
                 window.parent.postMessage({{ $id }},'*');
             }
-            window.onload =  postData();
-            
+            window.parent.postMessage({{ $id }},'*');            
             </script>
     
         <div class="row">
