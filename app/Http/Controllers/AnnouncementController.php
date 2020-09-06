@@ -570,7 +570,6 @@ class AnnouncementController extends Controller
             }
             $print=self::get($request);
             return $print;
-
         }
         return HelperController::api_response_format(400, $body = [], $message = 'You cannot seen this announcement');
     }
@@ -583,7 +582,8 @@ class AnnouncementController extends Controller
                 $query->where('title', 'LIKE' , "%$request->search%");
             });
         }
-        return HelperController::api_response_format(200, $my->get());
-
+        foreach($my->get() as $one)
+            $one->attached_file = attachment::where('id', $one->attached_file)->first();
+        return HelperController::api_response_format(200, $my);
     }
 }
