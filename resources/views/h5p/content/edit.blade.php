@@ -9,10 +9,10 @@
     <div class="container-fluid">
         <script>
             function postData(){
-            let msg = JSON.stringify( {'data': {{ $id }}, 'type': 'edit' );
+            let msg = JSON.stringify( {'data': {{ $id }}, 'type': 'edit' });
                 window.parent.postMessage( msg ,'*');
             }
-            let msg2 = JSON.stringify( {'data': {{ $id }}, 'type': 'create' );
+            let msg2 = JSON.stringify( {'data': {{ $id }}, 'type': 'create' });
             window.parent.postMessage(msg2 ,'*');            
             </script>
     
