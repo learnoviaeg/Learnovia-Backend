@@ -865,10 +865,6 @@ class QuizController extends Controller
         // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
         $quiz['attempts_index'] = $attempts_index;
 
-        $quiz['right']=0;
-        $quiz['wrong']=0;
-        $quiz['not_graded']=0;
-        $quiz['not_answered']=0;
         foreach($quiz->Question as $question){
             if(count($question->childeren) > 0){
                 foreach($question->childeren as $single){
@@ -893,6 +889,10 @@ class QuizController extends Controller
             { 
                 foreach($userAnswerss as $userAnswers)
                     foreach($userAnswers as $userAnswer){
+                        $quiz['right']=0;
+                        $quiz['wrong']=0;
+                        $quiz['not_graded']=0;
+                        $quiz['not_answered']=0;
                         if($userAnswer->question_id == $question->id)
                             $question->User_Answer=$userAnswer;
                         if($userAnswer->user_grade == $question->mark)
