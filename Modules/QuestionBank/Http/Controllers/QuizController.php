@@ -859,16 +859,16 @@ class QuizController extends Controller
         {
             $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz->id)->get();
             if(count($user_answer)>0)
-                $userAnswerss[]=$user_answer;
+                $userAnswers=$user_answer;
         }
-
+        // return $userAnswers;
         // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
         $quiz['attempts_index'] = $attempts_index;
 
         foreach($quiz->Question as $question){
             if(count($question->childeren) > 0){
                 foreach($question->childeren as $single){
-                    foreach($userAnswerss as $userAnswers)
+                    // foreach($userAnswerss as $userAnswers)
                         foreach($userAnswers as $userAnswer){
                             if($userAnswer->question_id == $question->id)
                                 $question->User_Answer=$userAnswer;
@@ -885,14 +885,16 @@ class QuizController extends Controller
             else
                 unset($question->childeren);
 
-            if(isset($userAnswerss))
-            { 
-                foreach($userAnswerss as $userAnswers)
+            if(isset($userAnswers))
+            {
+                $quiz['right']=0;
+                $quiz['wrong']=0;
+                $quiz['not_graded']=0;
+                $quiz['not_answered']=0;
+                $quiz['user_mark']=0;
+                // return $userAnswers[0]->user_grade;
+                // foreach($userAnswerss as $userAnswers)
                     foreach($userAnswers as $userAnswer){
-                        $quiz['right']=0;
-                        $quiz['wrong']=0;
-                        $quiz['not_graded']=0;
-                        $quiz['not_answered']=0;
                         if($userAnswer->question_id == $question->id)
                             $question->User_Answer=$userAnswer;
                         if($userAnswer->user_grade == $question->mark)
@@ -905,16 +907,13 @@ class QuizController extends Controller
                             $quiz['not_answered']=+1;
                         $quiz['user_mark']+=$userAnswer->user_grade;
                     }
-
-                $quiz['mark_precentage']=($userAnswer->user_grade*100)/$quiz_lesson->grade;
-                
+                    $quiz['mark_precentage']=($quiz['user_mark']*100)/$quiz_lesson->grade;
             }
             if($show_is_true == 1)
                 $question->question_answer;
 
             $question->question_category;
             $question->question_type;
-            // dd(count($question));
             unset($question->pivot);
         }
 
