@@ -124,8 +124,18 @@ class AcademicYearController extends Controller
         ]);
 
         $year = AcademicYear::find($request->id);
-        if($year->current == 1)
+        if($year->current == 1){
             $year->update(['current' => 0]);
+            $types = $year->AC_Type;
+            foreach($types as $type){
+                $active_segment = Segment::where('academic_type_id',$type->id)
+                                    ->where('current',1)
+                                    ->first();
+                if(isset($active_segment))
+                    $active_segment->update(['current' => 0]);
+            }
+            unset($year->AC_Type);
+        }
         else
             $year->update(['current' => 1]);
         
