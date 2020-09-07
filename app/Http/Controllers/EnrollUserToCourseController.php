@@ -199,6 +199,23 @@ class EnrollUserToCourseController extends Controller
                 if ($segments == null)
                     break;
 
+                if (isset($request->course)) {
+                    $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+                    if(isset($courseSegment)){
+                        Enroll::firstOrCreate([
+                            'user_id' => $user,
+                            'course_segment' => $courseSegment->id,
+                            'role_id' => 3,
+                            'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
+                            'type' => $request->type,
+                            'level' => $request->level,
+                            'class' => $request->class,
+                            'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
+                            'course' => $courseSegment->course_id,
+                        ]);
+                    }
+                }
+
                 $check = Enroll::where('user_id', $user)->whereIn('course_segment', $segments)->pluck('id');
                 if (count($check) == 0) {
                     foreach ($segments as $segment) {
@@ -213,26 +230,6 @@ class EnrollUserToCourseController extends Controller
                             'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
                             'course' => CourseSegment::whereId($segment)->pluck('course_id')->first(),
                         ]);
-                    }
-                    if (isset($request->course)) {
-                        $courseSegment = GradeCategoryController::getCourseSegment($request);
-                        foreach($courseSegment as $one){
-                            $check2 = Enroll::where('user_id', $user)->where('course_segment', $one)->pluck('id');
-                            if(count($check2) == 0)
-                            {
-                                Enroll::firstOrCreate([
-                                    'user_id' => $user,
-                                    'course_segment' => $one,
-                                    'role_id' => 3,
-                                    'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
-                                    'type' => $request->type,
-                                    'level' => $request->level,
-                                    'class' => $request->class,
-                                    'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
-                                    'course' => CourseSegment::whereId($one)->pluck('course_id')->first(),
-                                ]);
-                            }
-                        }
                     }
                 } else {
                     $count++;
