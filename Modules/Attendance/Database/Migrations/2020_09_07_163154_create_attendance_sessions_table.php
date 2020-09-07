@@ -15,15 +15,21 @@ class CreateAttendanceSessionsTable extends Migration
     {
         Schema::create('attendance_sessions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('attendance_id');
-            $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('taker_id');
             $table->foreign('taker_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->unsignedBigInteger('course_segment_id')->nullable();
-            $table->foreign('course_segment_id')->references('id')->on('course_segments')->onDelete('cascade')->onUpdate('cascade');
-            $table->dateTime('date');
-            $table->dateTime('last_time_taken')->nullable();
-            $table->dateTime('duration')->nullable();
+            $table->string('name')->nullable();
+            $table->unsignedBigInteger('class_id');
+            $table->foreign('class_id')->references('id')->on('classes')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('course_id');
+            $table->foreign('grade_item_id')->references('id')->on('courses')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('grade_item_id');
+            $table->foreign('course_id')->references('id')->on('grade_items')->onDelete('cascade')->onUpdate('cascade');
+            $table->time('from');
+            $table->time('to')->nullable();
+            $table->boolean('graded');
+            $table->dateTime('start_date');
+            $table->enum('type',['daliy','per_session']);
+
             $table->timestamps();
         });
     }
