@@ -885,15 +885,16 @@ class QuizController extends Controller
             else
                 unset($question->childeren);
 
+            $quiz['right']=0;
+            $quiz['wrong']=0;
+            $quiz['not_graded']=0;
+            $quiz['not_answered']=0;
+            $quiz['partially']=0;
+            $quiz['user_mark']=0;
+            $quiz['mark_precentage']=0;
+
             if(isset($userAnswers))
             {
-                $quiz['right']=0;
-                $quiz['wrong']=0;
-                $quiz['not_graded']=0;
-                $quiz['not_answered']=0;
-                $quiz['partially']=0;
-                $quiz['user_mark']=0;
-                $quiz['mark_precentage']=0;
                 foreach($userAnswers as $userAnswer){
                     if($userAnswer->question_id == $question->id)
                         $question->User_Answer=$userAnswer;
