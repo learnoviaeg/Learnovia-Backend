@@ -369,8 +369,10 @@ class AnnouncementController extends Controller
         $request->validate([
             'search' => 'nullable',
         ]);
-       $announcements_ids =  userAnnouncement::where('user_id', Auth::id())->pluck('announcement_id');
-       $announcements = Announcement::whereIn('id',$announcements_ids)->where('title', 'LIKE' , "%$request->search%")
+        $announcements_ids =  userAnnouncement::where('user_id', Auth::id())->pluck('announcement_id');
+        if($request->user()->can('site/show-all-courses'))
+            $announcements_ids = Announcement::where('created_by',Auth::id())->pluck('id');
+        $announcements = Announcement::whereIn('id',$announcements_ids)->where('title', 'LIKE' , "%$request->search%")
                                         ->where('publish_date', '<=', Carbon::now());
 
         if($request->filled('search')){
