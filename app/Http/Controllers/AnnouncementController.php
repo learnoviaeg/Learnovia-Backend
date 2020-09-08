@@ -582,8 +582,11 @@ class AnnouncementController extends Controller
                 $query->where('title', 'LIKE' , "%$request->search%");
             });
         }
-        foreach($my->get() as $one)
-            $one->attached_file = attachment::where('id', $one->attached_file)->first();
-        return HelperController::api_response_format(200, $my);
+        $announcements=$my->get();
+        foreach($announcements as $one)
+            if(isset($one->attached_file))
+                $one->attached_file = attachment::where('id', $one->attached_file)->first();
+        
+        return HelperController::api_response_format(200, $announcements,'my announcement');
     }
 }
