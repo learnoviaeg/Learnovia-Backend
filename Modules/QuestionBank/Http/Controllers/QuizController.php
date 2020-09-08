@@ -900,7 +900,7 @@ class QuizController extends Controller
                         $question->User_Answer=$userAnswer;
                     if($userAnswer->user_grade == $question->mark)
                         $quiz['right']=+1;
-                    if($userAnswer->user_grade == 0 && $userAnswer->user_grade != null && $userAnswer->correct != null)
+                    if($userAnswer->user_grade == 0 && $userAnswer->user_grade != null)
                         $quiz['wrong']=+1;
                     if($userAnswer->user_grade != 0 && $userAnswer->user_grade != null && $userAnswer->user_grade < $question->mark)
                         $quiz['partially']=+1;
