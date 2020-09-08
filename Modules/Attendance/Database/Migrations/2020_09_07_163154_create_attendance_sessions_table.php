@@ -21,14 +21,14 @@ class CreateAttendanceSessionsTable extends Migration
             $table->unsignedBigInteger('class_id');
             $table->foreign('class_id')->references('id')->on('classes')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('course_id');
-            $table->foreign('grade_item_id')->references('id')->on('courses')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('grade_item_id')->nullable();
-            $table->foreign('course_id')->references('id')->on('grade_items')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('grade_item_id')->references('id')->on('grade_items')->onDelete('cascade')->onUpdate('cascade');
             $table->time('from');
             $table->time('to')->nullable();
             $table->boolean('graded');
             $table->dateTime('start_date');
-            $table->enum('type',['daliy','per_session']);
+            $table->enum('type',['daily','per_session']);
 
             $table->timestamps();
         });

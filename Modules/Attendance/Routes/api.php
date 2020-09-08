@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 Route::group(['prefix' => 'attendance', 'middleware' => 'auth:api'], function () {
     Route::get('install','AttendanceController@install');
-    Route::post('add-session', 'AttendanceSessionController@createSession')->name('addsession')->middleware('permission:attendance/add-session');
+    Route::post('add-session', 'AttendanceSessionController@createSession')->name('addsession');//->middleware('permission:attendance/add-session');
     Route::get('get-sessions', 'AttendanceController@GetAllSessionDay')->name('getsession')->middleware('permission:attendance/get-sessions');
     Route::get('attend-report', 'AttendanceController@Attendance_Report')->name('attendancereport')->middleware('permission:attendance/attend-report');
     Route::post('update-session', 'AttendanceController@update_session')->name('updatesession')->middleware('permission:attendance/update-session');

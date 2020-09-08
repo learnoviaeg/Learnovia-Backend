@@ -67,18 +67,36 @@ class AttendanceSessionController extends Controller
             'object.*.class_id' => 'required|exists:classes,id',
             'object.*.course_id' => 'required|exists:courses,id',
             'graded' => 'required|in:0,1',
-            'grade_item_id' => 'required_if:graded,==,1|exists:grade_items,id',
-            'object.*.from' => 'date_format:H:i|required',
-            'object.*.to' => 'required_if:type,==,per_session|date_format:H:i|after:object.*.from',
+            'object.*.grade_category_id' => 'required_if:graded,==,1|exists:grade_categories,id',
+            'object.*.grade_max'=>'required_if:graded,==,1|integer|min:1',
+            'object.*.from' => 'required|array',
+            'object.*.to' => 'array|required',
+            'object.*.from.*' => 'required_with:object.*.to.*|date_format:H:i',
+            'object.*.to.*' => 'required_with:object.*.from.*|date_format:H:i|after:object.*.from.*',
             'object.*.start_date' => 'required',
-            'object.*.end_date' => 'required',
-            'type' => 'in:daily,per_session'
+            'object.*.end_date' => 'required|after:object.*.start_datefrom',
+            'type' => 'in:daily,per_session',
+            'day' => 'array|required_if:type,==,per_session',
+            'day.*'=>'required|string|in:sunday,monday,tuesday,wednesday,thursday'
         ]);
-
-        if(count($request->object) > 0){
-            foreach($request->object as $object){       
-                    $temp_start = Carbon::parse($object['start_date']);
+        if($request->type=="daily"){
+            $request->day = ['sunday','monday','tuesday','wednesday','thursday'];
+        }
+                foreach($request->object as $object){  
+                    $grade_item = ($request->graded == 1)? 
+                      GradeCategory::find( $object['grade_category_id'])
+                      ->GradeItems()->create(['name' => 'Attendance','grademin' => '0', 'grademax' => $object['grade_max'] , 'weight' => 0])->id:null;
+                      $day_before = date( 'Y-m-d H:i:s', strtotime( $object['start_date'] . ' -1 day' ) );
+                    foreach($request->day as $day)
+                    {
+                    $temp_start = date('Y-m-d H:i:s', strtotime("next ".$day, strtotime($day_before))); 
                     while(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::parse($object['end_date'])->format('Y-m-d H:i:s')){
+                        if (count($object['from']) != count($object['to'])) {
+                            return HelperController::api_response_format(400, null, 'invalid size of from , to ');
+                        }
+                        foreach($object['from']  as $key => $from)
+                        {
+                            
                         $sessions=AttendanceSession::firstOrCreate([
                             'taker_id' => Auth::id(),
                             'name' => $request->name,
@@ -86,15 +104,19 @@ class AttendanceSessionController extends Controller
                             'course_id'=>$object['course_id'],
                             'class_id' => $object['class_id'],
                             'start_date' => Carbon::parse($temp_start)->format('Y-m-d H:i:s'),
-                            'from' => $object['from'],
-                            'to' => isset($object['to']) ? $object['to'] : Carbon::parse($object['from'])->addHour(1),
+                            'from' => $object['from'][$key],
+                            'to' => $object['to'][$key],
                             'graded' => $request->graded,
-                            'grade_item_id' => ($request->graded == 1) ? $request->grade_item_id : null
+                            'grade_item_id' => $grade_item
                         ]);
+                    }
                         $temp_start= Carbon::parse($temp_start)->addDays(7);
                     }
+                }
             }
-            return HelperController::api_response_format(200, 'Attendance Created Successfully');
-        }
+            return HelperController::api_response_format(200,null ,'Sessions Created Successfully');
+
+
+    
     }
 }
