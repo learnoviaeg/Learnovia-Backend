@@ -9,13 +9,12 @@
     <div class="container-fluid">
         <script>
             function postData(){
-            let msg = JSON.stringify( {'data': {{ $id }}, 'type': 'edit' });
+            let msg = JSON.stringify( {'data': {{ $id }}, 'type': 'edit' ,'editting_done':$editting_done});
                 window.parent.postMessage( msg ,'*');
             }
-            let msg2 = JSON.stringify( {'data': {{ $id }}, 'type': 'create' });
+            let msg2 = JSON.stringify( {'data': {{ $id }}, 'type': 'create' ,'editting_done':$editting_done});
             window.parent.postMessage(msg2 ,'*');            
             </script>
-    
         <div class="row">
     
             <div class="col-md-12">
