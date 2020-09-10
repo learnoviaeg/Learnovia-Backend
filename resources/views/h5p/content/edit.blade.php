@@ -16,7 +16,6 @@
             window.parent.postMessage(msg2 ,'*');            
             </script>
         <div class="row">
-    <h1>{{ $editting_done }}</h1>
             <div class="col-md-12">
                
                 {!! Form::model($content, ['method' => 'PATCH','route' => ['h5p.update', $id,$editting_done], 'class'=>'form-horizontal', 'id'=>'laravel-h5p-form', 'enctype'=>"multipart/form-data"]) !!}
