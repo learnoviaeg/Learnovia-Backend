@@ -36,9 +36,7 @@ class QuestionCategoryController extends Controller
             foreach($request->class as $class)
             {
                 $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course);
-                {
-                    $course_seg[]=$course_seg->id;
-                }
+                $course_seg[]=$course_seg->id;
             }
             $course_seg_id=$course_seg;
         }
