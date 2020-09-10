@@ -55,8 +55,7 @@ class H5pController extends Controller
         event(new H5pEvent('content', 'new'));
 
         $user = Auth::user();
-
-        return view('h5p.content.create', compact('settings', 'user', 'library', 'parameters', 'display_options'));
+    return view('h5p.content.create', compact('settings', 'user', 'library', 'parameters', 'display_options'));
     }
 
     public function store(Request $request)
@@ -148,10 +147,10 @@ class H5pController extends Controller
         }*/
 
         $return_id = LaravelH5p::controllerStore($request, $this);
-
+        $editting_done='done';
         if ($return_id) {
             return redirect()
-                ->route('h5p.edit', $return_id)
+                ->route('h5p.edit',[ $return_id ,$editting_done] )
                 ->with('success', trans('laravel-h5p.content.created'));
         } else {
             return redirect()
@@ -188,10 +187,10 @@ class H5pController extends Controller
         event(new H5pEvent('content', 'edit', $content['id'], $content['title'], $content['library']['name'], $content['library']['majorVersion'].'.'.$content['library']['minorVersion']));
 
         $user = Auth::user();
-        $editting_done='done';
+        $editting_done='';
 
         
-        return view('h5p.content.edit', compact('settings', 'user', 'id', 'content', 'library', 'parameters', 'display_options','editting_done'));
+    return view('h5p.content.edit', compact('settings', 'user', 'id', 'content', 'library', 'parameters', 'display_options','editting_done'));
     }
 
     public function update(Request $request, $id)
@@ -280,11 +279,12 @@ class H5pController extends Controller
                 ->with('fail', trans('laravel-h5p.content.can_not_updated'));
         }*/
 
+        
         $return_id = LaravelH5p::controllerUpdate($request, $this, $id);
-
+        $editting_done='done';
         if ($return_id) {
             return redirect()
-                ->route('h5p.edit', $return_id)
+                ->route('h5p.edit', [$return_id,$editting_done])
                 ->with('success', trans('laravel-h5p.content.updated'));
         } else {
             return redirect()

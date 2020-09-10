@@ -11,7 +11,6 @@
         <div class="row">
     
             <div class="col-md-12">
-    
                 {!! Form::open(['route' => ['h5p.store'], 'class'=>'form-horizontal', 'target'=>'_self', 'enctype'=>"multipart/form-data", 'id'=>'laravel-h5p-form']) !!}
                 <input type="hidden" name="library" id="laravel-h5p-library" value="{{ $library }}">
                 <input type="hidden" name="parameters" id="laravel-h5p-parameters" value="{{ $parameters }}">
