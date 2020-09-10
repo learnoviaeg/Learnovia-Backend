@@ -48,7 +48,17 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required',
             'description' => 'required',
-            'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,mp4,ogg,mpga,jpg,jpeg,png',
+            //all mimetypes in this link
+            // https://github.com/symfony/symfony/blob/d94d837e9ea75d76eeb0a43e0535a5e7a7a01542/src/Symfony/Component/HttpFoundation/File/MimeType/MimeTypeExtensionGuesser.php
+            'attached_file' => 'nullable|file|mimetypes:application/pdf,
+                                                        application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                                        application/msword,
+                                                        application/vnd.ms-excel,
+                                                        application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                                                        application/vnd.ms-powerpoint,
+                                                        application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                                                        application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,
+                                                        video/ogg,jpg,image/jpeg,image/png',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|after:' . Carbon::now(),
