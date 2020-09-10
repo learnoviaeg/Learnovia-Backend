@@ -17,7 +17,6 @@
             </script>
         <div class="row">
             <div class="col-md-12">
-               
                 {!! Form::model($content, ['method' => 'PATCH','route' => ['h5p.update', $id,$editting_done], 'class'=>'form-horizontal', 'id'=>'laravel-h5p-form', 'enctype'=>"multipart/form-data"]) !!}
                 <input type="hidden" name="library" id="laravel-h5p-library" value="{{ $library }}">
                 <input type="hidden" name="parameters" id="laravel-h5p-parameters" value="{{ $parameters }}">
