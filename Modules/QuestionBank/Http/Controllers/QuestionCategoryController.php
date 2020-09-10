@@ -36,11 +36,11 @@ class QuestionCategoryController extends Controller
             foreach($request->class as $class)
             {
                 $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course);
-                if(isset($course_seg))
-                    if(in_array($course_seg->id,$course_seg_id->toArray()))
-                        continue;
-                    $course_seg_id[]=$course_seg->id;
+                {
+                    $course_seg[]=$course_seg->id;
+                }
             }
+            $course_seg_id=$course_seg;
         }
 
         // return $course_seg_id;
@@ -70,7 +70,7 @@ class QuestionCategoryController extends Controller
             'text' => 'string',
             'lastpage' => 'bool',
             'dropdown' => 'boolean',
-            'class' => 'integer|exists:classes,id'
+            'class' => 'array|exists:classes,id'
         ]);
 
         $ques_cat=QuestionsCategory::where(function($q) use($request){
@@ -82,7 +82,14 @@ class QuestionCategoryController extends Controller
         {
             $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
             if($request->filled('class'))
-                $all_courses=[CourseSegment::GetWithClassAndCourse($request->class,$request->course_id)->id];
+            {
+                foreach($request->class as $class)
+                {
+                    $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course_id);
+                    $courses[]=$course_seg->id;
+                }
+                $all_courses=$courses;
+            }
             $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
                 if($request->filled('text'))
                     $q->orWhere('name', 'LIKE' ,"%$request->text%" );
