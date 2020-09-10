@@ -33,12 +33,14 @@ class QuestionCategoryController extends Controller
 
         if($request->filled('class'))
         {
+            $courses=[];
             foreach($request->class as $class)
             {
                 $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course);
-                $course_seg[]=$course_seg->id;
+                if(isset($course_seg))
+                    $courses[]=$course_seg->id;
             }
-            $course_seg_id=$course_seg;
+            $course_seg_id=$courses;
         }
 
         // return $course_seg_id;
@@ -81,6 +83,7 @@ class QuestionCategoryController extends Controller
             $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
             if($request->filled('class'))
             {
+                $courses=[];
                 foreach($request->class as $class)
                 {
                     $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course_id);
