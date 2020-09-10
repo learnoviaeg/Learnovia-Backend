@@ -84,7 +84,8 @@ class QuestionCategoryController extends Controller
                 foreach($request->class as $class)
                 {
                     $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course_id);
-                    $courses[]=$course_seg->id;
+                    if(isset($course_seg));
+                        $courses[]=$course_seg->id;
                 }
                 $all_courses=$courses;
             }
