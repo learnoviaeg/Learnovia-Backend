@@ -36,11 +36,12 @@ class QuestionCategoryController extends Controller
             foreach($request->class as $class)
             {
                 $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course);
-                if(isset($course_seg))
-                    $course_seg_id[]=$course_seg->id;
+                $course_seg[]=$course_seg->id;
             }
+            $course_seg_id=$course_seg;
         }
 
+        // return $course_seg_id;
         foreach($course_seg_id as $CourseSeg)
         {
             $duplicate=QuestionsCategory::where('name',$request->name)->where('course_segment_id',$CourseSeg)->get()->first();
@@ -67,6 +68,7 @@ class QuestionCategoryController extends Controller
             'text' => 'string',
             'lastpage' => 'bool',
             'dropdown' => 'boolean',
+            'class' => 'array|exists:classes,id'
         ]);
 
         $ques_cat=QuestionsCategory::where(function($q) use($request){
@@ -77,6 +79,16 @@ class QuestionCategoryController extends Controller
         if($request->filled('course_id'))
         {
             $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
+            if($request->filled('class'))
+            {
+                foreach($request->class as $class)
+                {
+                    $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course_id);
+                    if(isset($course_seg));
+                        $courses[]=$course_seg->id;
+                }
+                $all_courses=$courses;
+            }
             $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
                 if($request->filled('text'))
                     $q->orWhere('name', 'LIKE' ,"%$request->text%" );
@@ -85,7 +97,7 @@ class QuestionCategoryController extends Controller
         foreach($ques_cat as $cat)
         {
             $cat->course=isset($cat->CourseSegment) ? $cat->CourseSegment->courses[0] : null;
-            $cat->class=isset($cat->CourseSegment) ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
+            $cat->class= isset($cat->CourseSegment)  && count($cat->CourseSegment->segmentClasses) > 0  && count($cat->CourseSegment->segmentClasses[0]->classLevel) > 0 && count($cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes) > 0 ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
         }
         if(isset($request->lastpage) && $request->lastpage == true){
             $request['page'] = $ques_cat->paginate(HelperController::GetPaginate($request))->lastPage();

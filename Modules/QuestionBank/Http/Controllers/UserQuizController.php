@@ -176,7 +176,7 @@ class UserQuizController extends Controller
             'device_data' => $deviceData,
             'browser_data' => $browserData,
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
-            'submit_time'=> Carbon::now()->format('Y-m-d H:i:s'),
+            'submit_time'=> null,
         ]);
 
         foreach($quiz_lesson->quiz->Question as $question){
@@ -407,6 +407,7 @@ class UserQuizController extends Controller
                                 ->where('question_id', $question['id'])->pluck('user_grade')->first();
 
                             $data['user_grade'] = (float)$user_grade + (float)$question['mark'];
+                            $data['feedback'] = isset($question['feedback']) ? $question['feedback'] : 'and_why question was corrected';
                         } else {
                             $data = null;
                         }
@@ -446,34 +447,12 @@ class UserQuizController extends Controller
 
             $userAnswer->user_grade = $data['user_grade'];
             if(isset($data['feedback']))
-            $userAnswer->feedback = $data['feedback'];
+                $userAnswer->feedback = $data['feedback'];
             $userAnswer->save();
         }
 
         return HelperController::api_response_format(200, $allData, 'Grade submitted successfully');
     }
-
-    // public function get_user_quiz(Request $request)
-    // {
-    //     $user_id = Auth::User()->id;
-
-    //     $request->validate([
-    //         'quiz_id' => 'required|integer|exists:quizzes,id',
-    //         'lesson_id' => 'required|integer|exists:lessons,id',
-    //         'user_id' => 'integer|exists:users,id',
-    //     ]);
-    //     if (isset($request->user_id))
-    //         $user_id = $request->user_id;
-
-    //     $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)
-    //         ->where('lesson_id', $request->lesson_id)->first();
-
-    //     if (!isset($quiz_lesson)) {
-    //         return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
-    //     }
-    //     $attemps = userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->get();
-    //     return HelperController::api_response_format(200, $attemps, 'your attempts are ...');
-    // }
 
     public function gradeUserQuiz(Request $request)
     {

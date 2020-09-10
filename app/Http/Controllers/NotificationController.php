@@ -88,18 +88,16 @@ class NotificationController extends Controller
                     {
                         $item_course_segment = $item_course_segment->courseSegment->id;
                     }
-                  
-                    
-                    
                     $data[$i]['id'] = $not->data['id'];
                     $data[$i]['read_at'] = $not->read_at;
                     $data[$i]['notification_id'] = $not->id;
                     $data[$i]['message'] = $not->data['message'];
-                    $data[$i]['publish_date'] = $not->data['publish_date'];
+                    $data[$i]['publish_date'] = Carbon::parse($not->data['publish_date'])->format('Y-m-d H:i:s');
                     $data[$i]['type'] = $not->data['type'];
                     $data[$i]['course_id'] = $not->data['course_id'];
                     $data[$i]['class_id'] = $not->data['class_id'];
                     $data[$i]['lesson_id'] = $not->data['lesson_id'];
+                    $data[$i]['link'] = isset($not->data['link'])?$not->data['link']:null;
 
                     if(isset($not->data['title']))
                         $data[$i]['title'] = $not->data['title'];
@@ -120,7 +118,6 @@ class NotificationController extends Controller
                     if($not->data['type'] == 'Attendance')
                         $data[$i]['item_lesson_id'] = Attendance::where('id', $not->data['id'])->pluck('id')->first();
 
-                    
                     $deleted = 0 ;
                     // if object doesnot deleted or this student not enrolled in this course
                     if(!isset($data[$i]['item_lesson_id']) || !in_array($item_course_segment,$course_segments_ids->toArray())){
@@ -134,9 +131,8 @@ class NotificationController extends Controller
         }
         $final=array();
         foreach($data as $object)
-        {
             $final[]= $object;
-        }
+            
         return HelperController::api_response_format(200, $body = $final, $message = 'all users notifications');
     }
 
@@ -153,7 +149,7 @@ class NotificationController extends Controller
             $not->data= json_decode($not->data, true);
             if($not->data['type'] != 'announcement')
             {
-                $parse=Carbon::parse($not->data['publish_date']);
+                $parse=Carbon::parse($not->data['publish_date'])->format('Y-m-d H:i:s');
 
                 if(!isset($parse)){
                     $data[] = $not->data;

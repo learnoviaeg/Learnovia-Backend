@@ -100,7 +100,6 @@ class User extends Authenticatable
 
     public static function notify($request)
     {
-   
         $validater = Validator::make($request, [
             'users'=>'required|array',
             'users.*' => 'required|integer|exists:users,id',
@@ -133,11 +132,12 @@ class User extends Authenticatable
             if($temp != null)
                 $touserid[] = $temp;
         }
-        $date=Carbon::parse($request['publish_date']);
+        $date=$request['publish_date'];
         $seconds = $date->diffInSeconds(Carbon::now());
         if($seconds < 0) {
             $seconds = 0 ;
         }
+        $date=Carbon::parse($request['publish_date'])->format('Y-m-d H:i:s');
 
         $request['title']=null;
         if($request['type']=='announcement'){

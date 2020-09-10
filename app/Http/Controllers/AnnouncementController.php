@@ -48,7 +48,17 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required',
             'description' => 'required',
-            'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,mp4,ogg,mpga,jpg,jpeg,png',
+            //all mimetypes in this link
+            // https://github.com/symfony/symfony/blob/d94d837e9ea75d76eeb0a43e0535a5e7a7a01542/src/Symfony/Component/HttpFoundation/File/MimeType/MimeTypeExtensionGuesser.php
+            'attached_file' => 'nullable|file|mimetypes:application/pdf,
+                                                        application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                                        application/msword,
+                                                        application/vnd.ms-excel,
+                                                        application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                                                        application/vnd.ms-powerpoint,
+                                                        application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                                                        application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,
+                                                        video/ogg,jpg,image/jpeg,image/png',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|after:' . Carbon::now(),
@@ -65,7 +75,7 @@ class AnnouncementController extends Controller
             $publishdate = $request->publish_date;
         }else {
             $date=Carbon::now();
-            $publishdate = Carbon::parse($date)->format('Y-m-d H:i:s');
+            $publishdate = Carbon::parse($date);
         }
         $start_date = $request->start_date;
         if($request->start_date < Carbon::now())
@@ -107,12 +117,12 @@ class AnnouncementController extends Controller
             'attached_file' => $file_id,
             'assign' => $request->assign,
             'class_id' => $request->class,
-            'course_id' => $request->courses[0],
+            'course_id' => $request->course,
             'level_id' => $request->level,
             'year_id' => $request->year,
             'type_id' => $request->type,
-            'segment_id' => $request->segment_id,
-            'publish_date' => $publishdate,
+            'segment_id' => $request->segment,
+            'publish_date' => Carbon::parse($publishdate),
             'created_by' => Auth::id(),
         ]);
         foreach ($users as $user){
@@ -138,7 +148,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $ann->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate),
                 'title' => $request->title,
                 'description' => $request->description,
                 'attached_file' => $file_id,
@@ -151,7 +161,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $ann->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate),
                 'title' => $request->title,
                 'description' => $request->description,
                 'attached_file' => $attached,
@@ -196,6 +206,7 @@ class AnnouncementController extends Controller
         $myAnnouncements = Announcement::where('created_by',Auth::id())->get();
         foreach ($myAnnouncements as $ann) {
             $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
+            // $ann->attachment;
         }
         return HelperController::api_response_format(201, ['notify' => $anounce , 'created'=>$myAnnouncements ],'Announcement Sent Successfully');
     }
@@ -275,7 +286,7 @@ class AnnouncementController extends Controller
             'attached_file' => $file_id,
             'start_date'=>$start_date,
             'due_date'=> $due_date,
-            'publish_date' => $publishdate
+            'publish_date' => Carbon::parse($publishdate),
         ]);
 
         $anounce = AnnouncementController::get_announcement($request);
@@ -368,16 +379,19 @@ class AnnouncementController extends Controller
         $request->validate([
             'search' => 'nullable',
         ]);
-       $announcements_ids =  userAnnouncement::where('user_id', Auth::id())->pluck('announcement_id');
-       $announcements = Announcement::whereIn('id',$announcements_ids)->where('title', 'LIKE' , "%$request->search%")
-                   ->where('publish_date', '<=', Carbon::now());
+        $announcements_ids =  userAnnouncement::where('user_id', Auth::id())->pluck('announcement_id');
+        if($request->user()->can('site/show-all-courses'))
+            $announcements_ids = Announcement::where('created_by',Auth::id())->pluck('id');
+        $announcements = Announcement::whereIn('id',$announcements_ids)->where('title', 'LIKE' , "%$request->search%")
+                                        ->where('publish_date', '<=', Carbon::now());
 
-                   if($request->filled('search')){
-                    $announcements->where(function ($query) use ($request) {
-                        $query->where('title', 'LIKE' , "%$request->search%");
-                    });
-                }
-        return $announcements->get();
+        if($request->filled('search')){
+            $announcements->where(function ($query) use ($request) {$query->where('title', 'LIKE' , "%$request->search%");});
+        }
+        $all= $announcements->get();
+        foreach($all as $one)
+            $one->attached_file=attachment::where('id', $one->attached_file)->first();
+        return $all;
     }
     
     /**
@@ -568,7 +582,6 @@ class AnnouncementController extends Controller
             }
             $print=self::get($request);
             return $print;
-
         }
         return HelperController::api_response_format(400, $body = [], $message = 'You cannot seen this announcement');
     }
@@ -581,7 +594,11 @@ class AnnouncementController extends Controller
                 $query->where('title', 'LIKE' , "%$request->search%");
             });
         }
-        return HelperController::api_response_format(200, $my->get());
-
+        $announcements=$my->get();
+        foreach($announcements as $one)
+            if(isset($one->attached_file))
+                $one->attached_file = attachment::where('id', $one->attached_file)->first();
+        
+        return HelperController::api_response_format(200, $announcements,'my announcement');
     }
 }

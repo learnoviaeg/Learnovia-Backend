@@ -91,7 +91,7 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/add');
         $role->givePermissionTo('quiz/update');
         $role->givePermissionTo('quiz/sort');
-        $role->givePermissionTo('quiz/sortup');
+        // $role->givePermissionTo('quiz/sortup');
         $role->givePermissionTo('quiz/delete');
         $role->givePermissionTo('quiz/add-quiz-lesson');
         $role->givePermissionTo('quiz/update-quiz-lesson');
@@ -853,12 +853,8 @@ class QuestionBankController extends Controller
                     $count += 1;
                 }
             }
-
         }
-
-
         return "updated sucess";
-
     }
 
     public function updateEssay($request,$parent,$Question_Type_id)
@@ -869,7 +865,6 @@ class QuestionBankController extends Controller
             $question = $this->updatesubQuestion($request,$parent,$Question_Type_id);
             // dd($question);
         }
-
         return "updated sucess";
     }
 
