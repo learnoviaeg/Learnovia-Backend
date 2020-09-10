@@ -23,6 +23,10 @@ use Modules\Attendance\Entities\AttendanceStatus;
 use Modules\Attendance\Jobs\AttendanceGradeItems;
 use Modules\Attendance\Jobs\AttendanceSessionsJob;
 use stdClass;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use App\Exports\AttendnaceExport;
+
 
 class AttendanceSessionController extends Controller
 {
@@ -38,8 +42,9 @@ class AttendanceSessionController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-attendance', 'title' => 'delete attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/edit-attendance', 'title' => 'edit attendance']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'get all users in session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/export', 'title' => 'Export attendnace']);
 
-
+        
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('attendance/add-session');
         $role->givePermissionTo('attendance/add-log');
@@ -47,6 +52,8 @@ class AttendanceSessionController extends Controller
         $role->givePermissionTo('attendance/delete-attendance');
         $role->givePermissionTo('attendance/edit-attendance');
         $role->givePermissionTo('attendance/get-attendance');
+        $role->givePermissionTo('attendance/export');
+
 
 
         Component::create([
@@ -70,19 +77,38 @@ class AttendanceSessionController extends Controller
             'graded' => 'required|in:0,1',
             'object.*.grade_category_id' => 'required_if:graded,==,1|exists:grade_categories,id',
             'object.*.grade_max'=>'required_if:graded,==,1|integer|min:1',
-            'object.*.from' => 'required|array',
-            'object.*.to' => 'array|required',
-            'object.*.from.*' => 'required_with:object.*.to.*|date_format:H:i',
-            'object.*.to.*' => 'required_with:object.*.from.*|date_format:H:i|after:object.*.from.*',
             'object.*.start_date' => 'required',
             'object.*.end_date' => 'required|after:object.*.start_datefrom',
             'type' => 'in:daily,per_session',
             'day' => 'array|required_if:type,==,per_session',
-            'day.*'=>'required|string|in:sunday,monday,tuesday,wednesday,thursday'
+            'day.*.name'=>'required|string|in:sunday,monday,tuesday,wednesday,thursday',
+            'day.*.from'=>'required|array',
+            'day.*.to'=>'required|array',
+            'day.*.from.*' => 'required_with:day.*.to.*|date_format:H:i',
+            'day.*.to.*' => 'required_with:day.*.from.*|date_format:H:i|after:day.*.from.*',
+            'time' => 'array|required_if:type,==,daily',
+            'time.*.from'=>'required|array',
+            'time.*.to'=>'required|array',
+            'time.*.from.*' => 'required_with:time.*.to.*|date_format:H:i',
+            'time.*.to.*' => 'required_with:time.*.from.*|date_format:H:i|after:time.*.from.*',
+
         ]);
         if($request->type=="daily"){
-            $request->day = ['sunday','monday','tuesday','wednesday','thursday'];
+            $days = ['sunday','monday','tuesday','wednesday','thursday'];
+            $times_collect=collect();
+                foreach($request->time as $times){
+                    foreach($days as $day){
+                        $req = [
+                            'name' => $day,
+                            'from' => $times['from'],
+                            'to' => $times['to'],
+                        ];
+                        $times_collect->push($req);
+                    }
+                }
+                $request->day=$times_collect;
         }
+       
                 foreach($request->object as $object){  
                     $grade_item = ($request->graded == 1)? 
                       GradeCategory::find( $object['grade_category_id'])
@@ -90,12 +116,12 @@ class AttendanceSessionController extends Controller
                       $day_before = date( 'Y-m-d H:i:s', strtotime( $object['start_date'] . ' -1 day' ) );
                     foreach($request->day as $day)
                     {
-                    $temp_start = date('Y-m-d H:i:s', strtotime("next ".$day, strtotime($day_before))); 
+                    $temp_start = date('Y-m-d H:i:s', strtotime("next ".$day['name'], strtotime($day_before))); 
                     while(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::parse($object['end_date'])->format('Y-m-d H:i:s')){
-                        if (count($object['from']) != count($object['to'])) {
+                        if (count($day['from']) != count($day['to'])) {
                             return HelperController::api_response_format(400, null, 'invalid size of from , to ');
                         }
-                        foreach($object['from']  as $key => $from)
+                        foreach($day['from']  as $key => $from)
                         {
                             
                         $sessions=AttendanceSession::firstOrCreate([
@@ -105,8 +131,8 @@ class AttendanceSessionController extends Controller
                             'course_id'=>$object['course_id'],
                             'class_id' => $object['class_id'],
                             'start_date' => Carbon::parse($temp_start)->format('Y-m-d H:i:s'),
-                            'from' => $object['from'][$key],
-                            'to' => $object['to'][$key],
+                            'from' => $day['from'][$key],
+                            'to' => $day['to'][$key],
                             'graded' => $request->graded,
                             'grade_item_id' => $grade_item
                         ]);
@@ -118,7 +144,7 @@ class AttendanceSessionController extends Controller
             return HelperController::api_response_format(200,null ,'Sessions Created Successfully');
     }
 
-    public function get_users_in_sessions (Request $request)
+    public function get_users_in_sessions (Request $request,$call =0)
     {
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
@@ -131,7 +157,7 @@ class AttendanceSessionController extends Controller
 
         $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
 
-        $attendees_object = [];
+        // $attendees_object = [];
 
         $all_logs=AttendanceLog::where('session_id',$request->session_id)->where('type','offline')->with('User')->get();
         $attendees_object['Total_Logs'] = $all_logs->count();
@@ -147,6 +173,7 @@ class AttendanceSessionController extends Controller
             $attendees_object['Excuse']['precentage'] =  ($attendees_object['Excuse']['count']/$all_logs->count())*100 ;
         }
 
+        $h=collect();
         foreach($usersIDs as $user)
         {
             $userObj=User::find($user);
@@ -159,9 +186,13 @@ class AttendanceSessionController extends Controller
                                                 ->pluck('status')
                                                 ->first();
                 unset($userObj->roles);
-                $attendees_object['logs'][]=$userObj;
+                $h->push($userObj);
             }
         }
+        $attendees_object['logs']=$h;
+
+        if($call == 1)
+            return $attendees_object;
 
         return HelperController::api_response_format(200,$attendees_object ,'List of users in this session.');
     }
@@ -175,13 +206,24 @@ class AttendanceSessionController extends Controller
             'object.*.status' => 'required|in:Absent,Late,Present,Excuse',
         ]);
 
+        $session = AttendanceSession::where('id',$request->session_id)->first();
         $courseseg=CourseSegment::GetWithClassAndCourse($session->class_id,$session->course_id);
         if(!isset($courseseg))
             return HelperController::api_response_format(200, null ,'Please check active course segments');
 
         $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
-
-        if(count($request->object) != count($usersIDs))
+        $i=0;
+        foreach($usersIDs as $user)
+        {
+            $userObj=User::find($user);
+            if(!isset($userObj))
+                continue;
+            if($userObj->roles->pluck('id')->first() == 3){
+                $i++;
+            }
+        }
+        
+        if(count($request->object) != $i)
             return HelperController::api_response_format(200, null ,'Some students statuses are missing!');
 
         foreach($request->object as $object){
@@ -284,4 +326,16 @@ class AttendanceSessionController extends Controller
         return HelperController::api_response_format(200,null ,'Session edited successfully.');
 
     } 
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|exists:attendance_sessions,id',
+        ]);
+        $attendnace_object = self::get_users_in_sessions($request,1);
+        $filename = uniqid();
+        $file = Excel::store(new AttendnaceExport($attendnace_object), 'attendance'.$filename.'.xls','public');
+        $file = url(Storage::url('attendance'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
+    }
 }
