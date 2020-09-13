@@ -188,14 +188,14 @@ class H5pController extends Controller
         event(new H5pEvent('content', 'edit', $content['id'], $content['title'], $content['library']['name'], $content['library']['majorVersion'].'.'.$content['library']['minorVersion']));
 
         $user = Auth::user();
-        $editting_done = "not_done";
+        $editting_done ='false';
 
 
         
         return view('h5p.content.edit', compact('settings', 'user', 'id', 'content', 'library', 'parameters', 'display_options','editting_done'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id,$editting_done='true')
     {
         /*$h5p = App::make('LaravelH5p');
         $core = $h5p::$core;
@@ -282,10 +282,10 @@ class H5pController extends Controller
         }*/
 
         $return_id = LaravelH5p::controllerUpdate($request, $this, $id);
-        $editting_done = "done";
+        $editting_done = 'true';
         if ($return_id) {
             return redirect()
-                ->route('h5p.edit', $return_id,$editting_done)
+                ->route('h5p.edit',[ $return_id,$editting_done])
                 ->with('success', trans('laravel-h5p.content.updated'));
         } else {
             return redirect()
