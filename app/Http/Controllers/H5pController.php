@@ -148,10 +148,10 @@ class H5pController extends Controller
         }*/
 
         $return_id = LaravelH5p::controllerStore($request, $this);
-
+        $editting_done ='false';
         if ($return_id) {
             return redirect()
-                ->route('h5p.edit', $return_id)
+                ->route('h5p.edit',[ $return_id,'editting_done' => 'false'])
                 ->with('success', trans('laravel-h5p.content.created'));
         } else {
             return redirect()
@@ -162,6 +162,8 @@ class H5pController extends Controller
 
     public function edit(Request $request, $id)
     {
+        // \Log::info('in start edit '.$request);
+
         $h5p = App::make('LaravelH5p');
         $core = $h5p::$core;
         $editor = $h5p::$h5peditor;
@@ -186,12 +188,12 @@ class H5pController extends Controller
 
         // create event dispatch
         event(new H5pEvent('content', 'edit', $content['id'], $content['title'], $content['library']['name'], $content['library']['majorVersion'].'.'.$content['library']['minorVersion']));
-
         $user = Auth::user();
-        $editting_done ='false';
-
+         $editting_done =$_GET['editting_done'];
 
         
+        \Log::info('in edit '.$editting_done);
+
         return view('h5p.content.edit', compact('settings', 'user', 'id', 'content', 'library', 'parameters', 'display_options','editting_done'));
     }
 
@@ -282,10 +284,12 @@ class H5pController extends Controller
         }*/
 
         $return_id = LaravelH5p::controllerUpdate($request, $this, $id);
+        \Log::info('in update '.$editting_done);
         $editting_done = 'true';
         if ($return_id) {
+            \Log::info('in if condi '.$editting_done);
             return redirect()
-                ->route('h5p.edit',[ $return_id,$editting_done])
+                ->route('h5p.edit',[ $return_id,'editting_done' => 'true'])
                 ->with('success', trans('laravel-h5p.content.updated'));
         } else {
             return redirect()
