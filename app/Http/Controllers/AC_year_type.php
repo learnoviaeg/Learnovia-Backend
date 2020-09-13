@@ -73,7 +73,15 @@ class AC_year_type extends Controller
         if($call==1){
             return $all_types;
         }
+        foreach($all_types as $type){
+            $array = array();
+            foreach($type->AC_year as $year_name){
+                array_push($array , $year_name->name);
+            }
+            unset($type->AC_year);
+            $type->year_type = $array;
 
+        }
         if($request->returnmsg == 'delete')
             return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),'Type deleted successfully');
         if($request->returnmsg == 'add')
