@@ -2,15 +2,15 @@
   'app' => 
   array (
     'name' => 'Laravel',
-    'env' => 'production',
+    'env' => 'local',
     'debug' => true,
-    'url' => 'http://localhost',
+    'url' => 'https://dev.learnovia.com/',
     'asset_url' => NULL,
     'timezone' => 'Africa/Cairo',
     'locale' => 'en',
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
-    'key' => 'base64:HUOhPc5Fpec+HFvKi0ZaHF3XeuT+Ek43ZeYO5Pj7FYo=',
+    'key' => 'base64:32utReOqxxJM8eu+PNFimZ2Tn0VjA/CeyEG/cZuGdHo=',
     'cipher' => 'AES-256-CBC',
     'providers' => 
     array (
@@ -189,7 +189,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\framework/cache/data',
+        'path' => '/home/mariam/development/storage/framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -301,7 +301,7 @@
         'port' => '3306',
         'database' => 'learnovia',
         'username' => 'root',
-        'password' => '',
+        'password' => '12345',
         'unix_socket' => '',
         'charset' => 'utf8',
         'collation' => 'utf8_unicode_ci',
@@ -321,7 +321,7 @@
         'port' => '3306',
         'database' => 'learnovia',
         'username' => 'root',
-        'password' => '',
+        'password' => '12345',
         'charset' => 'utf8',
         'prefix' => '',
         'prefix_indexes' => true,
@@ -336,7 +336,7 @@
         'port' => '3306',
         'database' => 'learnovia',
         'username' => 'root',
-        'password' => '',
+        'password' => '12345',
         'charset' => 'utf8',
         'prefix' => '',
         'prefix_indexes' => true,
@@ -429,25 +429,13 @@
     array (
       'default' => 'Maatwebsite\\Excel\\DefaultValueBinder',
     ),
-    'cache' => 
-    array (
-      'driver' => 'memory',
-      'batch' => 
-      array (
-        'memory_limit' => 60000,
-      ),
-      'illuminate' => 
-      array (
-        'store' => NULL,
-      ),
-    ),
     'transactions' => 
     array (
       'handler' => 'db',
     ),
     'temporary_files' => 
     array (
-      'local_path' => 'C:\\Users\\lenovo\\AppData\\Local\\Temp',
+      'local_path' => '/tmp',
       'remote_disk' => NULL,
     ),
   ),
@@ -460,18 +448,18 @@
       'components' => 
       array (
         'driver' => 'local',
-        'root' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\public\\components/',
+        'root' => '/home/mariam/development/public/components/',
       ),
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\app',
+        'root' => '/home/mariam/development/storage/app',
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\app/public',
-        'url' => 'http://localhost/storage',
+        'root' => '/home/mariam/development/storage/app/public',
+        'url' => 'https://dev.learnovia.com//storage',
         'visibility' => 'public',
       ),
       's3' => 
@@ -548,7 +536,7 @@
   array (
     'H5P_DEV' => false,
     'language' => 'en',
-    'domain' => 'http://localhost',
+    'domain' => 'https://dev.learnovia.com/',
     'h5p_public_path' => '/vendor',
     'slug' => 'laravel-h5p',
     'views' => 'h5p',
@@ -593,13 +581,13 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\logs/laravel.log',
+        'path' => '/home/mariam/development/storage/logs/laravel.log',
         'level' => 'debug',
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\logs/laravel.log',
+        'path' => '/home/mariam/development/storage/logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
       ),
@@ -635,7 +623,7 @@
       'syslog' => 
       array (
         'driver' => 'syslog',
-        'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\logs/laravel.log',
+        'path' => '/home/mariam/development/storage/logs/laravel.log',
         'level' => 'debug',
       ),
       'errorlog' => 
@@ -664,7 +652,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\resources\\views/vendor/mail',
+        0 => '/home/mariam/development/resources/views/vendor/mail',
       ),
     ),
     'log_channel' => NULL,
@@ -675,7 +663,7 @@
     'stubs' => 
     array (
       'enabled' => false,
-      'path' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend/vendor/nwidart/laravel-modules/src/Commands/stubs',
+      'path' => '/home/mariam/development/vendor/nwidart/laravel-modules/src/Commands/stubs',
       'files' => 
       array (
         'routes/web' => 'Routes/web.php',
@@ -737,9 +725,9 @@
     ),
     'paths' => 
     array (
-      'modules' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\Modules',
-      'assets' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\public\\modules',
-      'migration' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\database/migrations',
+      'modules' => '/home/mariam/development/Modules',
+      'assets' => '/home/mariam/development/public/modules',
+      'migration' => '/home/mariam/development/database/migrations',
       'generator' => 
       array (
         'config' => 
@@ -869,7 +857,7 @@
       'enabled' => false,
       'paths' => 
       array (
-        0 => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\vendor/*/*',
+        0 => '/home/mariam/development/vendor/*/*',
       ),
     ),
     'composer' => 
@@ -897,7 +885,7 @@
       'file' => 
       array (
         'class' => 'Nwidart\\Modules\\Activators\\FileActivator',
-        'statuses-file' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\modules_statuses.json',
+        'statuses-file' => '/home/mariam/development/modules_statuses.json',
         'cache-key' => 'activator.installed',
         'cache-lifetime' => 604800,
       ),
@@ -1047,7 +1035,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\framework/sessions',
+    'files' => '/home/mariam/development/storage/framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -1100,9 +1088,9 @@
   array (
     'paths' => 
     array (
-      0 => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\resources\\views',
+      0 => '/home/mariam/development/resources/views',
     ),
-    'compiled' => 'D:\\Learnovia\\Learnovia Tasks\\learnovia-backend\\storage\\framework\\views',
+    'compiled' => '/home/mariam/development/storage/framework/views',
   ),
   'attendance' => 
   array (
