@@ -12,7 +12,7 @@
             let msg = JSON.stringify( {'data': {{ $id }}, 'type': 'edit' ,'editting_done':{{ $editting_done }} });
                 window.parent.postMessage( msg ,'*');
             }
-            let msg2 = JSON.stringify( {'data': {{ $id }}, 'type': 'create' ,'editting_done':{{  $editting_done}} });
+            let msg2 = JSON.stringify( {'data': {{ $id }}, 'type': 'create' ,'editting_done':'not_done' });
             window.parent.postMessage(msg2 ,'*');            
             </script>
     
