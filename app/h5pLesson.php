@@ -11,7 +11,9 @@ class h5pLesson extends Model
       'visible',
       'publish_date' ,
        'start_date' ,
-        'due_date'];
+        'due_date',
+        'user_id'
+    ];
 
     //   public function contents()
     //   {

@@ -859,9 +859,9 @@ class QuizController extends Controller
         {
             $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz->id)->get();
             if(count($user_answer)>0)
-                $userAnswerss[]=$user_answer;
+                $userAnswers=$user_answer;
         }
-
+        // return $userAnswers;
         // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
         $quiz['attempts_index'] = $attempts_index;
 
@@ -869,10 +869,13 @@ class QuizController extends Controller
         $quiz['wrong']=0;
         $quiz['not_graded']=0;
         $quiz['not_answered']=0;
+        $quiz['partially']=0;
+        $quiz['user_mark']=0;
+        $quiz['mark_precentage']=0;
         foreach($quiz->Question as $question){
             if(count($question->childeren) > 0){
                 foreach($question->childeren as $single){
-                    foreach($userAnswerss as $userAnswers)
+                    // foreach($userAnswerss as $userAnswers)
                         foreach($userAnswers as $userAnswer){
                             if($userAnswer->question_id == $question->id)
                                 $question->User_Answer=$userAnswer;
@@ -889,32 +892,32 @@ class QuizController extends Controller
             else
                 unset($question->childeren);
 
-            if(isset($userAnswerss))
-            { 
-                foreach($userAnswerss as $userAnswers)
-                    foreach($userAnswers as $userAnswer){
-                        if($userAnswer->question_id == $question->id)
-                            $question->User_Answer=$userAnswer;
+            if(isset($userAnswers))
+            {
+                foreach($userAnswers as $userAnswer){
+                    if($userAnswer->question_id == $question->id){
+                        $question->User_Answer=$userAnswer;
                         if($userAnswer->user_grade == $question->mark)
-                            $quiz['right']=+1;
-                        if($userAnswer->user_grade == 0 && $userAnswer->user_grade != null && $userAnswer->correct != null)
-                            $quiz['wrong']=+1;
-                        if($userAnswer->user_grade == null && $userAnswer->content != null)
-                            $quiz['not_graded']=+1;
-                        if($userAnswer->user_grade == null && $userAnswer->content == null)
-                            $quiz['not_answered']=+1;
+                            $quiz['right']+=1;
+                        if($userAnswer->user_grade == 0 && gettype($userAnswer->user_grade) != null)
+                            $quiz['wrong']+=1;
+                            // return $userAnswer->user_grade;
+                        if($userAnswer->user_grade != 0 && gettype($userAnswer->user_grade) != null && $userAnswer->user_grade < $question->mark)
+                            $quiz['partially']+=1;
+                        if(gettype($userAnswer->user_grade) == null && $userAnswer->content != null)
+                            $quiz['not_graded']+=1;
+                        if(gettype($userAnswer->user_grade) == null && $userAnswer->content == null)
+                            $quiz['not_answered']+=1;
                         $quiz['user_mark']+=$userAnswer->user_grade;
                     }
-
-                $quiz['mark_precentage']=($userAnswer->user_grade*100)/$quiz_lesson->grade;
-                
+                }
+                $quiz['mark_precentage']=($quiz['user_mark']*100)/$quiz_lesson->grade;
             }
             if($show_is_true == 1)
                 $question->question_answer;
 
             $question->question_category;
             $question->question_type;
-            // dd(count($question));
             unset($question->pivot);
         }
 

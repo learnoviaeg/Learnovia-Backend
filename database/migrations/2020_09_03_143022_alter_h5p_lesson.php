@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterSessions extends Migration
+class AlterH5pLesson extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,10 @@ class AlterSessions extends Migration
      */
     public function up()
     {
-        Schema::table('attendance_sessions', function (Blueprint $table) {
-            $table->time('from');
-            $table->time('to')->nullable();
-
+        Schema::table('h5p_lessons', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->nullable();
         });
-
-        }
+    }
 
     /**
      * Reverse the migrations.

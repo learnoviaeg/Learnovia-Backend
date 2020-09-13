@@ -37,7 +37,6 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/create','title' => 'create meeting']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/join','title' => 'join meeting']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get','title' => 'get meeting']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-all','title' => 'get meetings']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/getRecord','title' => 'get Record']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/delete','title' => 'Delete Record']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/toggle','title' => 'Toggle Record']);
@@ -58,7 +57,6 @@ class BigbluebuttonController extends Controller
         $role->givePermissionTo('bigbluebutton/attendance');
         $role->givePermissionTo('bigbluebutton/get-attendance');
         $role->givePermissionTo('bigbluebutton/export');
-        $role->givePermissionTo('bigbluebutton/get-all');
         $role->givePermissionTo('bigbluebutton/session-moderator');
 
         Component::create([
@@ -407,7 +405,7 @@ class BigbluebuttonController extends Controller
         
         $bbb = new BigBlueButton();
         $meet = BigbluebuttonModel::whereIn('course_id',$courses)->get(); 
-        if($request->user()->can('bigbluebutton/get-all')){
+        if($request->user()->can('site/show-all-courses')){
             $all_meetings = $bbb = new BigBlueButton();
             $meet = BigbluebuttonModel::get();       
         }

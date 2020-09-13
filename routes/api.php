@@ -17,6 +17,7 @@ Route::get('h5p_protect', function(Request $request)
      $stream->start();
 
 })->name('h5p_protect');
+Route::resource('h5p', "H5pController");
 Route::group(['middleware' => ['auth:api']], function () {
     //user main routes without permissions
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
@@ -114,8 +115,8 @@ Route::group(['middleware' => ['auth:api']], function () {
     });
 });
 Route::group(['prefix' => 'languages'], function () {
-    Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary')->middleware('permission:languages/dictionary');
-    Route::get('get', 'LanguageController@Get_languages')->name('getLang')->middleware('permission:languages/get');
+    Route::get('dictionary', 'AuthController@Get_Dictionary')->name('getDictionary');//->middleware('permission:languages/dictionary');
+    Route::get('get', 'LanguageController@Get_languages')->name('getLang');//->middleware('permission:languages/get');
 });
 
 //Year Routes

@@ -13,19 +13,5 @@ class AttendanceLog extends Model
     {
         return $this->belongsTo('App\User', 'student_id' , 'id' );
     }
-    public function session()
-    {
-        return $this->belongsTo('Modules\Attendance\Entities\AttendanceSession', 'session_id' , 'id' );
-    }
-    public function status()
-    {
-        return $this->hasOne('Modules\Attendance\Entities\AttendanceStatus', 'id' , 'status_id' );
-    }
-    
-    public function getPrecentageStatus($count)
-    {
-        $status= $this->status;
-        $status->precentage=100/$count;
-        return $status;
-    }
+
 }

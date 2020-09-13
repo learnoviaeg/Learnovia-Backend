@@ -845,7 +845,10 @@ class CourseController extends Controller
                                     $content->original->link =  $url.'/api/h5p/'.$h5p->content_id;
                                     $content->original->item_lesson_id = $h5p->id;
                                     $content->original->visible = $h5p->visible;
-                                    $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit';
+                                    $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit'.'?editting_done=false';
+                                    if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id() ){
+                                        $content->original->edit_link = null;
+                                    }
                                     $content->original->pivot = [
                                         'lesson_id' =>  $h5p->lesson_id,
                                         'content_id' =>  $h5p->content_id,
@@ -1404,6 +1407,9 @@ class CourseController extends Controller
                                     $content->original->item_lesson_id = $h5p->id;
                                     $content->original->visible = $h5p->visible;
                                     $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit';
+                                    if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id() ){
+                                        $content->original->edit_link = null;
+                                    }
                                     $content->original->course = Course::find(Lesson::find($h5p->lesson_id)->courseSegment->course_id);
                                     $content->original->class= Classes::find(Lesson::find($h5p->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
                                     $content->original->level = Level::find(Lesson::find($h5p->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);

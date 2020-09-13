@@ -27,6 +27,8 @@ class H5PLessonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/get-all', 'title' => 'Get all Learnovia interactive']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/delete', 'title' => 'Delete Learnovia interactive']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/update', 'title' => 'Update Learnovia interactive']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/allow-edit', 'title' => 'Allow to edit interactive content']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/allow-delete', 'title' => 'Allow to delete interactive content']);
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('h5p/lesson/create');
@@ -34,6 +36,8 @@ class H5PLessonController extends Controller
         $role->givePermissionTo('h5p/lesson/get-all');
         $role->givePermissionTo('h5p/lesson/delete');
         $role->givePermissionTo('h5p/lesson/update');
+        $role->givePermissionTo('h5p/lesson/allow-edit');
+        $role->givePermissionTo('h5p/lesson/allow-delete');
 
         Component::create([
             'name' => 'H5P',
@@ -60,7 +64,8 @@ class H5PLessonController extends Controller
                 'content_id' => $request->content_id,
                 'lesson_id' => $request->lesson_id,
                 'publish_date' => Carbon::now(),
-                'start_date' => Carbon::now()
+                'start_date' => Carbon::now(),
+                'user_id' => Auth::id()
             ]);
         }
 
@@ -126,8 +131,13 @@ class H5PLessonController extends Controller
         if (!isset($h5pLesson)) {
             return HelperController::api_response_format(400, null, 'Try again , Data invalid');
         }
+
+        if(!$request->user()->can('h5p/lesson/allow-delete') && $h5pLesson->user_id != Auth::id() ){
+            return HelperController::api_response_format(400, null, 'You dont have permission to delete this content.');
+        }
+
         $h5pLesson->delete();
-        $content = DB::table('h5p_contents')->whereId($request->content_id)->delete();
+        DB::table('h5p_contents')->whereId($request->content_id)->delete();
 
         return HelperController::api_response_format(200, null, 'Content deleted successfully');
     }
