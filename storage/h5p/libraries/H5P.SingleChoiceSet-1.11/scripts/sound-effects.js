@@ -38,7 +38,7 @@ H5P.SingleChoiceSet.SoundEffects = (function () {
    * @param  {number} delay Delay in milliseconds
    */
   SoundEffects.play = function (type, delay) {
-    H5P.SoundJS.play(type, H5P.SoundJS.INTERRUPT_NONE, (delay || 0));
+    //  H5P.SoundJS.play(type, H5P.SoundJS.INTERRUPT_NONE, (delay || 0));
   };
 
   return SoundEffects;

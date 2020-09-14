@@ -526,7 +526,7 @@ H5P.SingleChoiceSet = (function ($, UI, Question, SingleChoice, SolutionView, Re
 
     if (self.options.behaviour.soundEffectsEnabled) {
       self.$muteButton = $('<div>', {
-        'class': 'h5p-sc-sound-control',
+        // 'class': 'h5p-sc-sound-control',
         'tabindex': 0,
         'role': 'button',
         'aria-label': self.l10n.muteButtonLabel,
