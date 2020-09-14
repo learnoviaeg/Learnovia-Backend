@@ -78,7 +78,7 @@ class AttendanceSessionController extends Controller
             'object.*.grade_category_id' => 'required_if:graded,==,1|exists:grade_categories,id',
             'object.*.grade_max'=>'required_if:graded,==,1|integer|min:1',
             'object.*.start_date' => 'required',
-            'object.*.end_date' => 'required|after:object.*.start_datefrom',
+            'object.*.end_date' => 'required|after:object.*.start_date',
             'type' => 'in:daily,per_session',
             'day' => 'array|required_if:type,==,per_session',
             'day.*.name'=>'required|string|in:sunday,monday,tuesday,wednesday,thursday',
@@ -265,9 +265,9 @@ class AttendanceSessionController extends Controller
             }
         }
 
-        $sessions = AttendanceSession::whereIn('course_id',$courses); 
+        $sessions = AttendanceSession::whereIn('course_id',$courses)->with(['class','course']); 
         if($request->user()->can('site/show-all-courses')){
-            $sessions = new AttendanceSession;     
+            $sessions = AttendanceSession::with(['class','course']);     
         }
 
         if($request->has('class_id'))
