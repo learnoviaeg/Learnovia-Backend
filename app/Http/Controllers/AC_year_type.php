@@ -69,17 +69,14 @@ class AC_year_type extends Controller
                 $q->whereIn('academic_year_id',$request->years);
             }
         });
-        $all_types = $types->get();
+        $all_types = $types;
         if($call==1){
-            return $all_types;
+            return $all_types->get();
         }
+        $all_types= $all_types->with('yearType.academicyear')->get();//;->pluck(['yearType.*.academicyear.*.name'])->collapse();
         foreach($all_types as $type){
-            $array = array();
-            foreach($type->AC_year as $year_name){
-                array_push($array , $year_name->name);
-            }
-            unset($type->AC_year);
-            $type->year_type = $array;
+            $type->year_type = $type->yearType->pluck('academicyear.*.name')->collapse();
+            unset($type->yearType);
 
         }
         if($request->returnmsg == 'delete')
