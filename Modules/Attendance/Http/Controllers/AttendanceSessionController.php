@@ -78,7 +78,7 @@ class AttendanceSessionController extends Controller
             'object.*.grade_category_id' => 'required_if:graded,==,1|exists:grade_categories,id',
             'object.*.grade_max'=>'required_if:graded,==,1|integer|min:1',
             'object.*.start_date' => 'required',
-            'object.*.end_date' => 'required|after:object.*.start_datefrom',
+            'object.*.end_date' => 'required|after:object.*.start_date',
             'type' => 'in:daily,per_session',
             'day' => 'array|required_if:type,==,per_session',
             'day.*.name'=>'required|string|in:sunday,monday,tuesday,wednesday,thursday',
@@ -250,7 +250,9 @@ class AttendanceSessionController extends Controller
             'course_id' => 'array',
             'course_id.*' => 'exists:courses,id',
             'start_date' => 'date',
-            'end_date' => 'date|required_with:start_date'
+            'end_date' => 'date|required_with:start_date',
+            'type' => 'in:daily,per_session',
+            'search' => 'nullable',
         ]);
 
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
@@ -265,9 +267,9 @@ class AttendanceSessionController extends Controller
             }
         }
 
-        $sessions = AttendanceSession::whereIn('course_id',$courses); 
+        $sessions = AttendanceSession::whereIn('course_id',$courses)->with(['class','course'])->orderBy('start_date'); 
         if($request->user()->can('site/show-all-courses')){
-            $sessions = new AttendanceSession;     
+            $sessions = AttendanceSession::with(['class','course'])->orderBy('start_date');     
         }
 
         if($request->has('class_id'))
@@ -275,10 +277,17 @@ class AttendanceSessionController extends Controller
 
         if($request->has('course_id'))
             $sessions = $sessions->whereIn('course_id',$request->course_id);
+
+        if($request->has('type'))
+            $sessions = $sessions->where('type',$request->type);
         
         if($request->has('start_date') && $request->has('end_date'))
             $sessions = $sessions->where('start_date','>=',$request->start_date)->where('start_date','<=',$request->end_date);
 
+        if($request->has('search'))
+            $sessions = $sessions->where('name', 'LIKE' , "%$request->search%");
+
+            
         return HelperController::api_response_format(200,$sessions->get() ,'List of all sessions.');
 
     }
