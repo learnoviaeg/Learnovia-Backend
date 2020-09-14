@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Attendance\Entities\AttendanceSession;
+
 
 class Course extends Model
 {
@@ -41,5 +43,10 @@ class Course extends Model
     public function attachment()
     {
         return $this->hasOne('App\attachment', 'id', 'image');
+    }
+    
+    public function sessions()
+    {
+        return $this->hasMany('Modules\Attendance\Entities\AttendanceSession','course_id','id');
     }
 }
