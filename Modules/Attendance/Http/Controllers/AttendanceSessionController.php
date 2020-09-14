@@ -26,6 +26,7 @@ use stdClass;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\AttendnaceExport;
+use Illuminate\Support\Str;
 
 
 class AttendanceSessionController extends Controller
@@ -148,6 +149,7 @@ class AttendanceSessionController extends Controller
     {
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
+            'search' => 'nullable',
         ]);
 
         $session = AttendanceSession::where('id',$request->session_id)->first();
@@ -157,23 +159,8 @@ class AttendanceSessionController extends Controller
 
         $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
 
-        // $attendees_object = [];
-
-        $all_logs=AttendanceLog::where('session_id',$request->session_id)->where('type','offline')->with('User')->get();
-        $attendees_object['Total_Logs'] = $all_logs->count();
-        $attendees_object['Present']['count']= $all_logs->where('status','Present')->count();
-        $attendees_object['Absent']['count']= $all_logs->where('status','Absent')->count();
-        $attendees_object['Late']['count']= $all_logs->where('status','Late')->count();
-        $attendees_object['Excuse']['count']= $all_logs->where('status','Excuse')->count();
-        if($all_logs->count() != 0)
-        {
-            $attendees_object['Present']['precentage'] = ($attendees_object['Present']['count']/$all_logs->count())*100 ;
-            $attendees_object['Absent']['precentage'] =  ($attendees_object['Absent']['count']/$all_logs->count())*100 ;
-            $attendees_object['Late']['precentage'] =  ($attendees_object['Late']['count']/$all_logs->count())*100 ;
-            $attendees_object['Excuse']['precentage'] =  ($attendees_object['Excuse']['count']/$all_logs->count())*100 ;
-        }
-
         $h=collect();
+        $i=0;
         foreach($usersIDs as $user)
         {
             $userObj=User::find($user);
@@ -186,9 +173,34 @@ class AttendanceSessionController extends Controller
                                                 ->pluck('status')
                                                 ->first();
                 unset($userObj->roles);
+                $i++;
+                if($request->has('search'))
+                    if(!(Str::contains($userObj->username, [$request->search]) || Str::contains($userObj->firstname, [$request->search]) || Str::contains($userObj->lastname, [$request->search]) || Str::contains($userObj->arabicname, [$request->search])))
+                        continue;
+
                 $h->push($userObj);
             }
         }
+
+        $all_logs=AttendanceLog::where('session_id',$request->session_id)->where('type','offline')->with('User')->get();
+        $attendees_object['name'] = $session->name;
+        $attendees_object['Total_Logs'] = $i;
+        $attendees_object['Present']['count']= $all_logs->where('status','Present')->count();
+        $attendees_object['Absent']['count']= $all_logs->where('status','Absent')->count();
+        $attendees_object['Late']['count']= $all_logs->where('status','Late')->count();
+        $attendees_object['Excuse']['count']= $all_logs->where('status','Excuse')->count();
+        $attendees_object['Present']['precentage'] = 0 ;
+        $attendees_object['Absent']['precentage'] =  0 ;
+        $attendees_object['Late']['precentage'] =  0 ;
+        $attendees_object['Excuse']['precentage'] =  0 ;
+        if($i != 0)
+        {
+            $attendees_object['Present']['precentage'] = ($attendees_object['Present']['count']/$i)*100 ;
+            $attendees_object['Absent']['precentage'] =  ($attendees_object['Absent']['count']/$i)*100 ;
+            $attendees_object['Late']['precentage'] =  ($attendees_object['Late']['count']/$i)*100 ;
+            $attendees_object['Excuse']['precentage'] =  ($attendees_object['Excuse']['count']/$i)*100 ;
+        }
+
         $attendees_object['logs']=$h;
 
         if($call == 1)
