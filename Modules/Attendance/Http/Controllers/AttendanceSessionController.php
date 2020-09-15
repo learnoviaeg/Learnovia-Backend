@@ -73,8 +73,9 @@ class AttendanceSessionController extends Controller
         $request->validate([
             'name' => 'required|string',
             'object' => 'required|array',
-            'object.*.class_id' => 'required|exists:classes,id',
-            'object.*.course_id' => 'required|exists:courses,id',
+            'main' => 'required|array',
+            'main.*.class_id' => 'required|exists:classes,id',
+            'main.*.course_id' => 'required|exists:courses,id',
             'graded' => 'required|in:0,1',
             'object.*.grade_category_id' => 'required_if:graded,==,1|exists:grade_categories,id',
             'object.*.grade_max'=>'required_if:graded,==,1|integer|min:1',
@@ -125,18 +126,22 @@ class AttendanceSessionController extends Controller
                         foreach($day['from']  as $key => $from)
                         {
                             
-                        $sessions=AttendanceSession::firstOrCreate([
-                            'taker_id' => Auth::id(),
-                            'name' => $request->name,
-                            'type' => $request->type,
-                            'course_id'=>$object['course_id'],
-                            'class_id' => $object['class_id'],
-                            'start_date' => Carbon::parse($temp_start)->format('Y-m-d H:i:s'),
-                            'from' => $day['from'][$key],
-                            'to' => $day['to'][$key],
-                            'graded' => $request->graded,
-                            'grade_item_id' => $grade_item
-                        ]);
+                            foreach($request->main  as $main)
+                            {
+                                
+                                $sessions=AttendanceSession::firstOrCreate([
+                                    'taker_id' => Auth::id(),
+                                    'name' => $request->name,
+                                    'type' => $request->type,
+                                    'course_id'=>$main['course_id'],
+                                    'class_id' => $main['class_id'],
+                                    'start_date' => Carbon::parse($temp_start)->format('Y-m-d H:i:s'),
+                                    'from' => $day['from'][$key],
+                                    'to' => $day['to'][$key],
+                                    'graded' => $request->graded,
+                                    'grade_item_id' => $grade_item
+                                ]);
+                        }
                     }
                         $temp_start= Carbon::parse($temp_start)->addDays(7);
                     }
