@@ -206,6 +206,9 @@ class AttendanceSessionController extends Controller
         if($call == 1)
             return $attendees_object;
 
+        if(isset($request->return_mess))
+            return HelperController::api_response_format(200,$attendees_object ,$request->return_mess);
+
         return HelperController::api_response_format(200,$attendees_object ,'List of users in this session.');
     }
 
@@ -250,7 +253,11 @@ class AttendanceSessionController extends Controller
                     'status' => $object['status']
                 ]);
         }
-        return HelperController::api_response_format(200,null ,'Attendnace taken successfully.');
+
+        $request['return_mess'] = 'Attendnace taken successfully.';
+        $print=self::get_users_in_sessions($request);
+        return $print;
+        // return HelperController::api_response_format(200,null ,'Attendnace taken successfully.');
     }
 
     public function get_sessions (Request $request)
