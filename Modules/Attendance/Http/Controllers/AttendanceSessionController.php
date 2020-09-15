@@ -219,24 +219,24 @@ class AttendanceSessionController extends Controller
         ]);
 
         $session = AttendanceSession::where('id',$request->session_id)->first();
-        $courseseg=CourseSegment::GetWithClassAndCourse($session->class_id,$session->course_id);
-        if(!isset($courseseg))
-            return HelperController::api_response_format(200, null ,'Please check active course segments');
+        // $courseseg=CourseSegment::GetWithClassAndCourse($session->class_id,$session->course_id);
+        // if(!isset($courseseg))
+        //     return HelperController::api_response_format(200, null ,'Please check active course segments');
 
-        $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
-        $i=0;
-        foreach($usersIDs as $user)
-        {
-            $userObj=User::find($user);
-            if(!isset($userObj))
-                continue;
-            if($userObj->roles->pluck('id')->first() == 3){
-                $i++;
-            }
-        }
+        // $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
+        // $i=0;
+        // foreach($usersIDs as $user)
+        // {
+        //     $userObj=User::find($user);
+        //     if(!isset($userObj))
+        //         continue;
+        //     if($userObj->roles->pluck('id')->first() == 3){
+        //         $i++;
+        //     }
+        // }
         
-        if(count($request->object) != $i)
-            return HelperController::api_response_format(200, null ,'Some students statuses are missing!');
+        // if(count($request->object) != $i)
+        //     return HelperController::api_response_format(200, null ,'Some students statuses are missing!');
 
         foreach($request->object as $object){
             $attendance=AttendanceLog::updateOrCreate(['student_id' => $object['user_id'],'session_id'=>$request->session_id,'type'=>'offline'],
