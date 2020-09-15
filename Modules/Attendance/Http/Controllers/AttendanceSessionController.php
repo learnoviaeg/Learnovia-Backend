@@ -195,10 +195,10 @@ class AttendanceSessionController extends Controller
         $attendees_object['Excuse']['precentage'] =  0 ;
         if($i != 0)
         {
-            $attendees_object['Present']['precentage'] = ($attendees_object['Present']['count']/$i)*100 ;
-            $attendees_object['Absent']['precentage'] =  ($attendees_object['Absent']['count']/$i)*100 ;
-            $attendees_object['Late']['precentage'] =  ($attendees_object['Late']['count']/$i)*100 ;
-            $attendees_object['Excuse']['precentage'] =  ($attendees_object['Excuse']['count']/$i)*100 ;
+            $attendees_object['Present']['precentage'] = round(($attendees_object['Present']['count']/$i)*100,2) ;
+            $attendees_object['Absent']['precentage'] =  round(($attendees_object['Absent']['count']/$i)*100,2) ;
+            $attendees_object['Late']['precentage'] =  round(($attendees_object['Late']['count']/$i)*100,2) ;
+            $attendees_object['Excuse']['precentage'] =  round(($attendees_object['Excuse']['count']/$i)*100,2) ;
         }
 
         $attendees_object['logs']=$h;
@@ -218,7 +218,7 @@ class AttendanceSessionController extends Controller
             'session_id' => 'required|exists:attendance_sessions,id',
             'object' => 'required|array',
             'object.*.user_id' => 'required|exists:users,id',
-            'object.*.status' => 'required|in:absent,late,present,excuse',
+            'object.*.status' => 'required|in:Absent,Late,Present,Excuse',
         ]);
 
         $session = AttendanceSession::where('id',$request->session_id)->first();
