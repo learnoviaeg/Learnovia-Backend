@@ -206,9 +206,6 @@ class AttendanceSessionController extends Controller
         if($call == 1)
             return $attendees_object;
 
-        if(isset($request->return_mess))
-            return HelperController::api_response_format(200,$attendees_object ,$request->return_mess);
-
         return HelperController::api_response_format(200,$attendees_object ,'List of users in this session.');
     }
 
@@ -244,8 +241,10 @@ class AttendanceSessionController extends Controller
         foreach($request->object as $object){
             if($object['status'] == null)
                 $object['status'] = 'Absent';
-               
-            $attendance=AttendanceLog::updateOrCreate(['student_id' => $object['user_id'],'session_id'=>$request->session_id,'type'=>'offline'],
+            
+            if($object['status'] == 'Absent' || $object['status'] == 'Late' || $object['status'] == 'Present' || $object['status'] == 'Excuse')
+            {
+                $attendance=AttendanceLog::updateOrCreate(['student_id' => $object['user_id'],'session_id'=>$request->session_id,'type'=>'offline'],
                 [
                     'ip_address' => \Request::ip(),
                     'student_id' => $object['user_id'],
@@ -255,12 +254,11 @@ class AttendanceSessionController extends Controller
                     'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
                     'status' => $object['status']
                 ]);
+            }
+            
         }
 
-        $request['return_mess'] = 'Attendnace taken successfully.';
-        $print=self::get_users_in_sessions($request);
-        return $print;
-        // return HelperController::api_response_format(200,null ,'Attendnace taken successfully.');
+        return HelperController::api_response_format(200,null ,'Attendnace taken successfully.');
     }
 
     public function get_sessions (Request $request)
