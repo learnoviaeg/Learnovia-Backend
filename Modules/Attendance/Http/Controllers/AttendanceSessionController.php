@@ -218,7 +218,7 @@ class AttendanceSessionController extends Controller
             'session_id' => 'required|exists:attendance_sessions,id',
             'object' => 'required|array',
             'object.*.user_id' => 'required|exists:users,id',
-            'object.*.status' => 'nullable|in:Absent,Late,Present,Excuse',
+            'object.*.status' => 'nullable',
         ]);
 
         $session = AttendanceSession::where('id',$request->session_id)->first();
