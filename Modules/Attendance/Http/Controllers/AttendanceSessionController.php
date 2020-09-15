@@ -243,7 +243,8 @@ class AttendanceSessionController extends Controller
 
         foreach($request->object as $object){
             if($object['status'] == null)
-                    continue;            
+                $object['status'] = 'Absent';
+               
             $attendance=AttendanceLog::updateOrCreate(['student_id' => $object['user_id'],'session_id'=>$request->session_id,'type'=>'offline'],
                 [
                     'ip_address' => \Request::ip(),
