@@ -13,7 +13,9 @@ use App\GradeCategory;
 use App\Classes;
 use Spatie\Permission\Models\Permission;
 use URL;
-
+use Spatie\PdfToImage\Pdf;
+use Org_Heigl\Ghostscript\Ghostscript;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -629,6 +631,16 @@ class AssigmentsController extends Controller
 
                 if (isset($studentassigment->attachment_id)) {
                     $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                    $inputFile=storage_path('app/public/') . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
+                    $outputFile=storage_path('app/public') . '/assignment/'. uniqid()."%d";
+                    // $name=uniqid();
+                    // $inputFile=$assignment['user_submit']->attachment_id->path;
+                    // $outputFile=url(Storage::url('assignment\\')).$name;
+                    // return $inputFile;
+                    Ghostscript::setGsPath("/usr/bin/gs");
+                    $pdf = new Pdf($inputFile);
+                    $pdf->setOutputFormat('png')->saveImage($outputFile);
+
                 }
             }
             $assignment['user_submit'] = $studentassigments;
