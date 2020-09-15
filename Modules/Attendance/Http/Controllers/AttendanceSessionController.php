@@ -183,7 +183,7 @@ class AttendanceSessionController extends Controller
         }
 
         $all_logs=AttendanceLog::where('session_id',$request->session_id)->where('type','offline')->with('User')->get();
-        $attendees_object['name'] = $session->name;
+        $attendees_object['session'] = $session;
         $attendees_object['Total_Logs'] = $i;
         $attendees_object['Present']['count']= $all_logs->where('status','Present')->count();
         $attendees_object['Absent']['count']= $all_logs->where('status','Absent')->count();
