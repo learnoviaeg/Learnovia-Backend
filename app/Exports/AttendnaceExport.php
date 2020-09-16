@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class AttendnaceExport implements FromCollection, WithHeadings
 {
-    protected $fields = ['User Name','Full Name','Present','Absent','Late','Excuse'];
+    protected $fields = ['User Name','Full Name','Present','Late','Excuse','Absent'];
 
     function __construct($attendnace_object) {
         $this->log = $attendnace_object['logs'];
@@ -30,38 +30,37 @@ class AttendnaceExport implements FromCollection, WithHeadings
 
             if($state == 'Present'){
                 $att['Present'] = '✔';
-                $att['Absent'] = '-';
                 $att['Late'] = '-';
                 $att['Excuse'] = '-';
-
+                $att['Absent'] = '-';
             }
 
             if($state == 'Absent'){
                 $att['Present'] = '-';
-                $att['Absent'] = '✔';
                 $att['Late'] = '-';
                 $att['Excuse'] = '-';
+                $att['Absent'] = '✔';
             }
 
             if($state == 'Late'){
                 $att['Present'] = '-';
-                $att['Absent'] = '-';
                 $att['Late'] = '✔';
                 $att['Excuse'] = '-';
+                $att['Absent'] = '-';
             }
 
             if($state == 'Excuse'){
                 $att['Present'] = '-';
-                $att['Absent'] = '-';
                 $att['Late'] = '-';
                 $att['Excuse'] = '✔';
+                $att['Absent'] = '-';
             }
 
             if($state == null){
                 $att['Present'] = '-';
-                $att['Absent'] = '-';
                 $att['Late'] = '-';
                 $att['Excuse'] = '-';
+                $att['Absent'] = '-';
             }
 
             $att->setHidden([])->setVisible($this->fields);
@@ -70,18 +69,18 @@ class AttendnaceExport implements FromCollection, WithHeadings
             'User Name' => '',
             'Full Name' => '',
             'Present' => $this->present['count'].' / '.$this->total,
-            'Absent' => $this->absent['count'].' / '.$this->total,
             'Late' => $this->late['count'].' / '.$this->total,
             'Excuse' => $this->excuse['count'].' / '.$this->total,
+            'Absent' => $this->absent['count'].' / '.$this->total,
 
         ];
         $logs[] = [
             'User Name' => '',
             'Full Name' => '',
             'Present' => isset($this->present['precentage'])?$this->present['precentage'].' % ': '0 %',
-            'Absent' => isset($this->absent['precentage'])?$this->absent['precentage'].' % ' : '0 %',
             'Late' => isset($this->late['precentage'])?  $this->late['precentage'].' % ' : '0 %',
             'Excuse' => isset($this->excuse['precentage'])?  $this->excuse['precentage'].' % ' : '0 %',
+            'Absent' => isset($this->absent['precentage'])?$this->absent['precentage'].' % ' : '0 %',
         ];
 
         return $logs;
