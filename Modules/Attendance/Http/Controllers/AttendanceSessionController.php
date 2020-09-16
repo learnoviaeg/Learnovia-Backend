@@ -246,17 +246,33 @@ class AttendanceSessionController extends Controller
             
             if($object['status'] == 'Absent' || $object['status'] == 'Late' || $object['status'] == 'Present' || $object['status'] == 'Excuse')
             {
-                $attendance=AttendanceLog::updateOrCreate(['student_id' => $object['user_id'],'session_id'=>$request->session_id,'type'=>'offline'],
-                [
-                    'ip_address' => \Request::ip(),
-                    'student_id' => $object['user_id'],
-                    'taker_id' => Auth::id(),
-                    'session_id' => $request->session_id,
-                    'type' => 'offline',
-                    'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'status' => $object['status'],
-                    'attendnace_type' => isset($request->session_id) ? 'per_session':'daily'
-                ]);
+                if(isset($request->session_id)){
+                    $attendance=AttendanceLog::updateOrCreate(['student_id' => $object['user_id'],'session_id'=>$request->session_id,'type'=>'offline'],
+                    [
+                        'ip_address' => \Request::ip(),
+                        'student_id' => $object['user_id'],
+                        'taker_id' => Auth::id(),
+                        'session_id' => $request->session_id,
+                        'type' => 'offline',
+                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'status' => $object['status'],
+                        'attendnace_type' => 'per_session'
+                    ]);
+                }
+
+                if(!isset($request->session_id)){
+                    $attendance=AttendanceLog::create([
+                        'ip_address' => \Request::ip(),
+                        'student_id' => $object['user_id'],
+                        'taker_id' => Auth::id(),
+                        'session_id' => $request->session_id,
+                        'type' => 'offline',
+                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'status' => $object['status'],
+                        'attendnace_type' => 'daily',
+                    ]);
+                }
+               
             }
             
         }
