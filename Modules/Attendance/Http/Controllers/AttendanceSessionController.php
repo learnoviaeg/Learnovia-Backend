@@ -244,7 +244,7 @@ class AttendanceSessionController extends Controller
         //     return HelperController::api_response_format(200, null ,'Some students statuses are missing!');
 
         foreach($request->object as $object){
-            if($object['status'] == null)
+            if( !isset($object['status']) || $object['status'] == null)
                 $object['status'] = 'Absent';
             
             if($object['status'] == 'Absent' || $object['status'] == 'Late' || $object['status'] == 'Present' || $object['status'] == 'Excuse')
