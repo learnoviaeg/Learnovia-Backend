@@ -227,7 +227,10 @@ class AttendanceSessionController extends Controller
 
         if($call == 1)
             return $attendees_object;
-
+        
+        if(!isset($attendees_object))
+                $attendees_object=[];
+                
         return HelperController::api_response_format(200,$attendees_object ,'List of users in this session.');
     }
 
