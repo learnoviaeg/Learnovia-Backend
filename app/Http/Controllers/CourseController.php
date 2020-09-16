@@ -1600,7 +1600,13 @@ class CourseController extends Controller
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id'
         ]);
+        
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $cs=GradeCategoryController::getCourseSegment($request);
+            $CourseSeg=CourseSegment::whereIn('id',$cs)->get();
+        }
         $seggg = array();
         foreach ($CourseSeg as $cour) {
             $check = CourseSegment::where('course_id', $request->course_id)->where('id', $cour)->pluck('id')->first();
