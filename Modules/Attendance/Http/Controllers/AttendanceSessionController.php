@@ -173,7 +173,7 @@ class AttendanceSessionController extends Controller
 
         $courseseg=CourseSegment::GetWithClassAndCourse($class_id,$course_id);
         if(!isset($courseseg))
-            return HelperController::api_response_format(200, null ,'Please check active course segments');
+            return HelperController::api_response_format(200, [] ,'Please check active course segments');
 
         $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
 
@@ -227,10 +227,7 @@ class AttendanceSessionController extends Controller
 
         if($call == 1)
             return $attendees_object;
-        
-        if(!isset($attendees_object))
-                $attendees_object=[];
-                
+
         return HelperController::api_response_format(200,$attendees_object ,'List of users in this session.');
     }
 
