@@ -200,19 +200,21 @@ class EnrollUserToCourseController extends Controller
                     break;
 
                 if (count($request->course) > 0) {
-                    $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$request->course[0]);
-                    if(isset($courseSegment)){
-                        Enroll::firstOrCreate([
-                            'user_id' => $user,
-                            'course_segment' => $courseSegment->id,
-                            'role_id' => 3,
-                            'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
-                            'type' => $request->type,
-                            'level' => $request->level,
-                            'class' => $request->class,
-                            'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
-                            'course' => $courseSegment->course_id,
-                        ]);
+                    foreach($request->course as $course){
+                        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$course);
+                        if(isset($courseSegment)){
+                            Enroll::firstOrCreate([
+                                'user_id' => $user,
+                                'course_segment' => $courseSegment->id,
+                                'role_id' => 3,
+                                'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
+                                'type' => $request->type,
+                                'level' => $request->level,
+                                'class' => $request->class,
+                                'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
+                                'course' => $courseSegment->course_id,
+                            ]);
+                        }
                     }
                 }
 
