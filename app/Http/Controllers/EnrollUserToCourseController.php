@@ -178,7 +178,7 @@ class EnrollUserToCourseController extends Controller
             'segment' => 'exists:segments,id',
             'course' => 'array|exists:courses,id'
         ]);
-$
+
         $count = 0;
         foreach ($request->users as $user) {
             $exist_user=collect();
