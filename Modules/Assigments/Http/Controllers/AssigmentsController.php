@@ -625,18 +625,21 @@ class AssigmentsController extends Controller
                     }
                 }
             }
+            $images_path=collect([]);
             foreach($studentassigments as $studentassigment){
                 if(isset($studentassigment->user->attachment))
                     $studentassigment->user->picture=$studentassigment->user->attachment->path;
 
                 if (isset($studentassigment->attachment_id)) {
+                     
                     $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
                     $inputFile=$studentassigment->attachment_id->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
-                    $outputFile=storage_path('app/public') . '/assignment//'. uniqid()."%d";
                     Ghostscript::setGsPath("/usr/bin/gs");
                     $pdf = new Pdf("storage/".$inputFile);
                     foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
-                        $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'. uniqid().'%d');
+                        $name= uniqid();
+                        $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+                        $images_path->push( url(Storage::url('assignment/'.$name)));
                         }
                 }
             }
@@ -650,7 +653,7 @@ class AssigmentsController extends Controller
                 $assignment['ended'] = false;
             else
                 $assignment['ended'] = true;
-
+            // return  $images_path;
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
     }
