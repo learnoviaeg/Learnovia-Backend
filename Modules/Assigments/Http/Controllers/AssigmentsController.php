@@ -634,7 +634,7 @@ class AssigmentsController extends Controller
                      
                     $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
                     $inputFile=$studentassigment->attachment_id->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
-                    Ghostscript::setGsPath("/usr/bin/gs");
+                    // Ghostscript::setGsPath("/usr/bin/gs");
                     $pdf = new Pdf("storage/".$inputFile);
                     foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
                         $name= uniqid();
