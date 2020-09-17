@@ -631,16 +631,13 @@ class AssigmentsController extends Controller
 
                 if (isset($studentassigment->attachment_id)) {
                     $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-                    $inputFile=$studentassigment->attachment_id->path;//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
+                    $inputFile=$studentassigment->attachment_id->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
                     $outputFile=storage_path('app/public') . '/assignment//'. uniqid()."%d";
-                    // $name=uniqid();
-                    // $inputFile=$assignment['user_submit']->attachment_id->path;
-                    // $outputFile=url(Storage::url('assignment\\')).$name;
-                    // return $inputFile;
                     Ghostscript::setGsPath("/usr/bin/gs");
-                    $pdf = new Pdf('storage/assignment/5f61ddf22e090جه يا مريم؟.pdf');
-                    $pdf->setOutputFormat('png')->saveImage('storage/assignment/'. uniqid()."%d");
-
+                    $pdf = new Pdf("storage/".$inputFile);
+                    foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
+                        $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'. uniqid().'%d');
+                        }
                 }
             }
             $assignment['user_submit'] = $studentassigments;
