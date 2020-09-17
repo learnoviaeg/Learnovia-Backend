@@ -178,7 +178,7 @@ class EnrollUserToCourseController extends Controller
             'segment' => 'exists:segments,id',
             'course' => 'array|exists:courses,id'
         ]);
-
+$
         $count = 0;
         foreach ($request->users as $user) {
             $exist_user=collect();
@@ -199,8 +199,8 @@ class EnrollUserToCourseController extends Controller
                 if ($segments == null)
                     break;
 
-                if (isset($request->course)) {
-                    $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+                if (count($request->course) > 0) {
+                    $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$request->course[0]);
                     if(isset($courseSegment)){
                         Enroll::firstOrCreate([
                             'user_id' => $user,
