@@ -261,7 +261,8 @@ class CourseController extends Controller
 
         foreach($couresegs as $one){
             $cc=CourseSegment::find($one);
-            $cs[]=$cc->course_id;
+            if($cc->start_date <= Carbon::now() && $cc->end_date >= Carbon::now())
+                $cs[]=$cc->course_id;
         }
 
         $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
