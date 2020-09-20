@@ -235,7 +235,8 @@ class CourseController extends Controller
             'level' => 'nullable|exists:levels,id',
             'class' => 'nullable|exists:classes,id',
             'segment' => 'nullable|exists:segments,id',
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'for' => 'in:enroll'
         ]);
         $cs=[];
         if (isset($request->id))
@@ -261,6 +262,10 @@ class CourseController extends Controller
 
         foreach($couresegs as $one){
             $cc=CourseSegment::find($one);
+            if($request->for == 'enroll')
+                if(!($cc->start_date <= Carbon::now() && $cc->end_date >= Carbon::now()))
+                    continue;
+
             $cs[]=$cc->course_id;
         }
 
@@ -345,15 +350,17 @@ class CourseController extends Controller
         }
         else
         {
-            foreach ($request->user()->enroll as $enroll) {           
-                if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                    if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
-                        if(in_array($enroll->CourseSegment->id, $CS->toArray()))
+            foreach ($request->user()->enroll as $enroll) {  
+                if(in_array($enroll->CourseSegment->id, $CS->toArray())){
+                    if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
+                        if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
+                            if(in_array($enroll->CourseSegment->id, $CS->toArray()))
+                                array_push($couuures,$enroll->CourseSegment->id);
+                        }
+                        else
                             array_push($couuures,$enroll->CourseSegment->id);
                     }
-                    else
-                        array_push($couuures,$enroll->CourseSegment->id);
-                }
+                }         
             }
         }
 
