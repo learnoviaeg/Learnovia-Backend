@@ -821,6 +821,9 @@ class AssigmentsController extends Controller
     }
     public function AnnotatePDF(Request $request)
     {
+        $request->validate([
+            'attachment_id' => 'integer|required|exists:user_assigments,attachment_id',
+            ]);
         $images_path=collect([]);
         $attachmnet=attachment::find($request->attachment_id);
         $inputFile=$attachmnet->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
