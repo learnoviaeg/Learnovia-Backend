@@ -24,7 +24,7 @@ use GuzzleHttp\Client;
 use App\Exports\BigBlueButtonAttendance;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-
+use App\Http\Controllers\GradeCategoryController;
 
 class BigbluebuttonController extends Controller
 {
@@ -311,7 +311,7 @@ class BigbluebuttonController extends Controller
         $permission_id = DB::table('permissions')->where('name','bigbluebutton/toggle')->pluck('id')->first();
         $hasornot = DB::table('role_has_permissions')->where('role_id', $role_id)->where('permission_id', $permission_id)->get();
 
-
+        
         if($request->filled('id'))
         {
             $bbb = new BigBlueButton();
@@ -391,14 +391,17 @@ class BigbluebuttonController extends Controller
             return HelperController::api_response_format(200 , $meet);
         }
 
+        $CS_ids=GradeCategoryController::getCourseSegment($request);
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
         $courses=collect();
         foreach($CourseSeg as $cs){
-            $cs_object = CourseSegment::find($cs);
-            if($cs_object->end_date > Carbon::now() && $cs_object->start_date < Carbon::now()){
-                $courses_cs = $cs_object->courses;
-                foreach($courses_cs as $c){
-                    $courses->push($c->id);
+            if(in_array($cs, $CS_ids->toArray())){
+                $cs_object = CourseSegment::find($cs);
+                if($cs_object->end_date > Carbon::now() && $cs_object->start_date < Carbon::now()){
+                    $courses_cs = $cs_object->courses;
+                    foreach($courses_cs as $c){
+                        $courses->push($c->id);
+                    }
                 }
             }
         }
@@ -406,8 +409,14 @@ class BigbluebuttonController extends Controller
         $bbb = new BigBlueButton();
         $meet = BigbluebuttonModel::whereIn('course_id',$courses)->get(); 
         if($request->user()->can('site/show-all-courses')){
+            $courses_id=collect();
+            foreach ($CS_ids as $coco) {
+                $cocos=CourseSegment::find($coco);
+                if($cocos->end_date >= Carbon::now() && $cocos->start_date <= Carbon::now())
+                    $courses_id->push($cocos->course_id);
+            }
             $all_meetings = $bbb = new BigBlueButton();
-            $meet = BigbluebuttonModel::get();       
+            $meet = BigbluebuttonModel::whereIn('course_id',$courses_id)->get();       
         }
 
         foreach($meet as $m)
@@ -442,7 +451,7 @@ class BigbluebuttonController extends Controller
 
         if($meet == null)
             return HelperController::api_response_format(200 , null , 'This Meeting is not found');
-        return HelperController::api_response_format(200 , $meet);
+        return HelperController::api_response_format(200 , $meet,'Meetings list');
     }
 
     /**
