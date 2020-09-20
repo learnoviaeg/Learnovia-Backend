@@ -819,4 +819,19 @@ class AssigmentsController extends Controller
         ]);
         return HelperController::api_response_format(200, $assignmentOerride, 'Assignment override successfully');
     }
+    public function AnnotatePDF(Request $request)
+    {
+        $images_path=collect([]);
+        $attachmnet=attachment::find($request->attachment_id);
+        $inputFile=$attachmnet->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
+        // Ghostscript::setGsPath("/usr/bin/gs");
+        $pdf = new Pdf("storage/".$inputFile);
+        // return $pdf;
+        foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
+            $name= uniqid();
+            $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+            $images_path->push( url(Storage::url('assignment/'.$name)));
+        }
+        return HelperController::api_response_format(200, $images_path, 'Here pdf\'s images');
+    }
 }
