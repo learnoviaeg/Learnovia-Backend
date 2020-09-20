@@ -429,6 +429,18 @@
     array (
       'default' => 'Maatwebsite\\Excel\\DefaultValueBinder',
     ),
+    'cache' => 
+    array (
+      'driver' => 'memory',
+      'batch' => 
+      array (
+        'memory_limit' => 60000,
+      ),
+      'illuminate' => 
+      array (
+        'store' => NULL,
+      ),
+    ),
     'transactions' => 
     array (
       'handler' => 'db',
