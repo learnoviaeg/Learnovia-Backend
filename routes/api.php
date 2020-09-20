@@ -150,7 +150,6 @@ Route::group(['prefix' => 'level', 'middleware' => ['auth:api']], function () {
     Route::get('get', 'LevelsController@get')->name('getlevels')->middleware('permission:level/get');
     Route::get('get-my-levels', 'LevelsController@GetMyLevels')->name('getmylevels')->middleware('permission:level/get-my-levels');
     //without year or type request
-    
     Route::get('get-all', 'LevelsController@GetAllLevelsInYear')->name('getlevels')->middleware('permission:level/get-all');
     Route::post('delete', 'LevelsController@Delete')->name('deletelevel')->middleware('permission:level/delete');
     Route::post('update', 'LevelsController@UpdateLevel')->name('updatelevel')->middleware('permission:level/update');
