@@ -13,7 +13,9 @@ use App\GradeCategory;
 use App\Classes;
 use Spatie\Permission\Models\Permission;
 use URL;
-
+use Spatie\PdfToImage\Pdf;
+use Org_Heigl\Ghostscript\Ghostscript;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -625,12 +627,22 @@ class AssigmentsController extends Controller
             }
             if(!isset($studentassigments))
                 $studentassigments=[];
+            $images_path=collect([]);
             foreach($studentassigments as $studentassigment){
                 if(isset($studentassigment->user->attachment))
                     $studentassigment->user->picture=$studentassigment->user->attachment->path;
 
                 if (isset($studentassigment->attachment_id)) {
+                     
                     $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
+                    $inputFile=$studentassigment->attachment_id->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
+                    // Ghostscript::setGsPath("/usr/bin/gs");
+                    $pdf = new Pdf("storage/".$inputFile);
+                    foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
+                        $name= uniqid();
+                        $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+                        $images_path->push( url(Storage::url('assignment/'.$name)));
+                        }
                 }
             }
             $assignment['user_submit'] = $studentassigments;
@@ -643,7 +655,7 @@ class AssigmentsController extends Controller
                 $assignment['ended'] = false;
             else
                 $assignment['ended'] = true;
-
+            // return  $images_path;
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
     }
@@ -808,5 +820,23 @@ class AssigmentsController extends Controller
             'publish_date' => $request->start_date,
         ]);
         return HelperController::api_response_format(200, $assignmentOerride, 'Assignment override successfully');
+    }
+    public function AnnotatePDF(Request $request)
+    {
+        $request->validate([
+            'attachment_id' => 'integer|required|exists:user_assigments,attachment_id',
+            ]);
+        $images_path=collect([]);
+        $attachmnet=attachment::find($request->attachment_id);
+        $inputFile=$attachmnet->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
+        // Ghostscript::setGsPath("/usr/bin/gs");
+        $pdf = new Pdf("storage/".$inputFile);
+        // return $pdf;
+        foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
+            $name= uniqid();
+            $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+            $images_path->push( url(Storage::url('assignment/'.$name)));
+        }
+        return HelperController::api_response_format(200, $images_path, 'Here pdf\'s images');
     }
 }

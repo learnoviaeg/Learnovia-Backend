@@ -166,16 +166,21 @@ class ClassController extends Controller
         ]);
         if($request->id == null)
         {
-            $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
-            $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
-            $class =collect([]);
-            foreach ($yearlevel->classLevels as $classLevel){
-                if(count($classLevel->classes) > 0)
-                    $class[] = $classLevel->classes[0]->id;
-            }
-            $Classes = Classes::with('classlevel.yearLevels.levels.years')->whereIn('id',$class);
+            $Classes = Classes::whereNull('deleted_at')
+            ->whereHas('classlevel.yearLevels', function($q)use ($request)
+            { 
+                    if ($request->has('level')) 
+                        $q->where('level_id',$request->level);
+            })
+            ->whereHas('classlevel.yearLevels.yearType' , function($q)use ($request)
+            { 
+                if ($request->has('year'))
+                    $q->where('academic_year_id',$request->year);
+                if ($request->has('type'))
+                    $q->where('academic_type_id',$request->type);
+            })->get();
+
             $all_classes=collect([]);
-            $Classes = $Classes->get();
             foreach ($Classes as $class)
            { 
             $levels_id= $class->classlevel->pluck('yearLevels.*.level_id')->collapse()->unique();

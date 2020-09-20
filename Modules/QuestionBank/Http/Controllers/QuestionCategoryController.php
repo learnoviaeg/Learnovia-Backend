@@ -33,14 +33,17 @@ class QuestionCategoryController extends Controller
 
         if($request->filled('class'))
         {
+            $courses=[];
             foreach($request->class as $class)
             {
                 $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course);
                 if(isset($course_seg))
-                    $course_seg_id[]=$course_seg->id;
+                    $courses[]=$course_seg->id;
             }
+            $course_seg_id=$courses;
         }
 
+        // return $course_seg_id;
         foreach($course_seg_id as $CourseSeg)
         {
             $duplicate=QuestionsCategory::where('name',$request->name)->where('course_segment_id',$CourseSeg)->get()->first();
@@ -67,6 +70,7 @@ class QuestionCategoryController extends Controller
             'text' => 'string',
             'lastpage' => 'bool',
             'dropdown' => 'boolean',
+            'class' => 'array|exists:classes,id'
         ]);
 
         $ques_cat=QuestionsCategory::where(function($q) use($request){
@@ -77,6 +81,18 @@ class QuestionCategoryController extends Controller
         if($request->filled('course_id'))
         {
             $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
+            if($request->filled('class'))
+            {
+                $courses=[];
+                foreach($request->class as $class)
+                {
+                    $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course_id);
+                    // return $course_seg;
+                    if(isset($course_seg))
+                        $courses[]=$course_seg->id;
+                }
+                $all_courses=$courses;
+            }
             $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
                 if($request->filled('text'))
                     $q->orWhere('name', 'LIKE' ,"%$request->text%" );
