@@ -1247,16 +1247,18 @@ class CourseController extends Controller
         if(isset($h5p_comp))
             $result['interactive'] = [];
             
+        $cs=GradeCategoryController::getCourseSegment($request);
         if($request->user()->can('site/show-all-courses'))
         {
-            $cs=GradeCategoryController::getCourseSegment($request);
             $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
         }
         else
         {
             foreach ($request->user()->enroll as $enroll) {
                 if ($enroll->courseSegment != null) {
-                    $CourseSegments[]=$enroll->courseSegment;
+                    if(in_array($enroll->courseSegment->id, $cs->toArray())){
+                        $CourseSegments[]=$enroll->courseSegment;
+                    }
                 }
             }
         }
