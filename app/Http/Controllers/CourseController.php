@@ -235,7 +235,8 @@ class CourseController extends Controller
             'level' => 'nullable|exists:levels,id',
             'class' => 'nullable|exists:classes,id',
             'segment' => 'nullable|exists:segments,id',
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'for' => 'in:enroll'
         ]);
         $cs=[];
         if (isset($request->id))
@@ -261,8 +262,11 @@ class CourseController extends Controller
 
         foreach($couresegs as $one){
             $cc=CourseSegment::find($one);
-            if($cc->start_date <= Carbon::now() && $cc->end_date >= Carbon::now())
-                $cs[]=$cc->course_id;
+            if($request->for == 'enroll')
+                if(!($cc->start_date <= Carbon::now() && $cc->end_date >= Carbon::now()))
+                    continue;
+
+            $cs[]=$cc->course_id;
         }
 
         $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
