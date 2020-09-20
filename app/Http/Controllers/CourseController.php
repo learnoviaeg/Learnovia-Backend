@@ -350,15 +350,17 @@ class CourseController extends Controller
         }
         else
         {
-            foreach ($request->user()->enroll as $enroll) {           
-                if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                    if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
-                        if(in_array($enroll->CourseSegment->id, $CS->toArray()))
+            foreach ($request->user()->enroll as $enroll) {  
+                if(in_array($enroll->CourseSegment->id, $CS->toArray())){
+                    if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
+                        if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
+                            if(in_array($enroll->CourseSegment->id, $CS->toArray()))
+                                array_push($couuures,$enroll->CourseSegment->id);
+                        }
+                        else
                             array_push($couuures,$enroll->CourseSegment->id);
                     }
-                    else
-                        array_push($couuures,$enroll->CourseSegment->id);
-                }
+                }         
             }
         }
 
