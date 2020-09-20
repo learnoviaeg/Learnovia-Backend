@@ -625,6 +625,8 @@ class AssigmentsController extends Controller
                     }
                 }
             }
+            if(!isset($studentassigments))
+                $studentassigments=[];
             $images_path=collect([]);
             foreach($studentassigments as $studentassigment){
                 if(isset($studentassigment->user->attachment))
