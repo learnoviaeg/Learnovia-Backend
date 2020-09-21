@@ -41,6 +41,7 @@ class AnnouncementController extends Controller
      *                               year => announcement for all users in a specific year.
      *          attached_file and publish_date as optional parameters.
      * @return : return all announcement of this user.
+     * 
      */
     public function announcement(Request $request)
     {
