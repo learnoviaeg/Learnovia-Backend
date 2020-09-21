@@ -294,22 +294,26 @@ class AttendanceSessionController extends Controller
             'search' => 'nullable',
         ]);
 
+        $CS_ids=GradeCategoryController::getCourseSegment($request);
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+        $CourseSeg = array_intersect($CS_ids->toArray(),$CourseSeg->toArray());
+        if($request->user()->can('site/show-all-courses')){
+            $CourseSeg = $CS_ids;
+        }
         $courses=collect();
         foreach($CourseSeg as $cs){
-            $cs_object = CourseSegment::find($cs);
-            if($cs_object->end_date > Carbon::now() && $cs_object->start_date < Carbon::now()){
-                $courses_cs = $cs_object->courses;
-                foreach($courses_cs as $c){
-                    $courses->push($c->id);
+            if(in_array($cs, $CS_ids->toArray())){
+                $cs_object = CourseSegment::find($cs);
+                if($cs_object->end_date > Carbon::now() && $cs_object->start_date < Carbon::now()){
+                    $courses_cs = $cs_object->courses;
+                    foreach($courses_cs as $c){
+                        $courses->push($c->id);
+                    }
                 }
             }
         }
 
         $sessions = AttendanceSession::whereIn('course_id',$courses)->with(['class','course'])->orderBy('start_date'); 
-        if($request->user()->can('site/show-all-courses')){
-            $sessions = AttendanceSession::with(['class','course'])->orderBy('start_date');     
-        }
 
         if($request->has('class_id'))
             $sessions = $sessions->whereIn('class_id',$request->class_id);
