@@ -451,6 +451,8 @@ class AnnouncementController extends Controller
         return $notif;
     }
 
+
+    
     /**
      *
      * @Description :get all announcements for logged in user.

@@ -232,6 +232,10 @@ class segment_class_Controller extends Controller
             return HelperController::api_response_format(400, $valid->errors());
         }
         $type = AcademicType::find($req->type);
+        $current_segment_created = Segment::where('academic_type_id',$req->type)->count();
+        if($current_segment_created >= $type->segment_no){
+            return HelperController::api_response_format(200, null,"This type invalid ,It has enough number of segments");
+        }
         $segment = Segment::firstOrCreate([
             'name' => $req->name,
             'academic_type_id'=>$req->type
