@@ -223,9 +223,9 @@ class segment_class_Controller extends Controller
             'year'      => 'required|exists:academic_years,id',
             'type'      => 'required|exists:academic_types,id',
             'levels'    => 'required|array',
-            'levels.*'  => 'required|exists:levels,id',
-            'classes'   => 'required|array',
-            'classes.*'   => 'required|exists:classes,id',
+            'levels.*.id'  => 'required|exists:levels,id',
+            'levels.*.classes'   => 'required|array',
+            'levels.*.classes.*'   => 'required|exists:classes,id',
         ]);
 
         if ($valid->fails()) {
@@ -242,8 +242,8 @@ class segment_class_Controller extends Controller
         ]);
         $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
         foreach($req->levels as $level){
-            $yearlevel = YearLevel::checkRelation($yeartype->id, $level);
-            foreach($req->classes as $class){
+            $yearlevel = YearLevel::checkRelation($yeartype->id, $level['id']);
+            foreach($level['classes'] as $class){
                 $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
                 $count = SegmentClass::whereClass_level_id($classLevel->id)->count();
                 if ($count >= $type->segment_no) {
