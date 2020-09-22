@@ -31,5 +31,8 @@ Route::group(['prefix' => 'bigbluebutton', 'middleware' => 'auth:api'], function
     Route::get('export', 'BigbluebuttonController@export')->name('exportbbbattendence')->middleware('permission:bigbluebutton/export');
     Route::get('meetinginfo', 'BigbluebuttonController@getmeetingInfo')->name('getmeetingInfo');
     Route::get('clear', 'BigbluebuttonController@clear')->name('clear');
+    Route::get('callme', 'BigbluebuttonController@bbb_will_call');
+    Route::get('mimi', 'BigbluebuttonController@mimi');
+
 
 });

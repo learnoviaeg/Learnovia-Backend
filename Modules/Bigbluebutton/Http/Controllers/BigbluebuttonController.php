@@ -10,11 +10,13 @@ use App\Component;
 use App\User;
 use App\Enroll;
 use Auth;
+use Log;
 use App\CourseSegment;
 use Modules\Attendance\Entities\AttendanceLog;
 use BigBlueButton\Parameters\CreateMeetingParameters;
 use BigBlueButton\Parameters\JoinMeetingParameters;
 use BigBlueButton\Parameters\GetRecordingsParameters;
+use BigBlueButton\Parameters\HooksCreateParameters;
 use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
 use BigBlueButton\Parameters\GetMeetingInfoParameters;
 use Illuminate\Support\Carbon;
@@ -270,7 +272,7 @@ class BigbluebuttonController extends Controller
         $check=Carbon::parse($bigbb->start_date)->addMinutes($bigbb->duration);
         if($check < Carbon::now())
             return HelperController::api_response_format(200,null ,'you can\'t join this meeting any more');
-            
+        
         if($request->user()->can('bigbluebutton/session-moderator')){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
@@ -693,5 +695,53 @@ class BigbluebuttonController extends Controller
         // \Artisan::call('config:cache', ['--env' => 'local']);
         \Artisan::call('cache:clear', ['--env' => 'local']);
         \Artisan::call('config:clear', ['--env' => 'local']);
+    }
+
+    public function create_hooks(){
+        $bbb = new BigBlueButton();
+        $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
+        $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
+        // $req=$bbb->getHooksListUrl();
+        return $req;
+    }
+
+    public function bbb_will_call(){
+        
+        
+        Log::debug('mirna');
+        
+        // $bbb = new BigBlueButton();
+        // $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
+        // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
+        // $req=$bbb->getHooksListUrl();
+        // return $req;
+    }
+
+    public function mimi( Request $request){
+        // $checksum= substr($url,strripos($url, "=")+1);
+        // return $checksum;
+        // $client = new \Google_Client();
+        // $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
+        // $client->setApplicationName("learnovia-notifications");
+        // $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
+        // $client->useApplicationDefaultCredentials();
+        // if ($client->isAccessTokenExpired()) {
+        //     $client->fetchAccessTokenWithAssertion();
+        // }
+        // $access_token = $client->getAccessToken()['access_token'];
+
+        // $clientt = new Client();
+        // $res = $clientt->request('GET', 'https://sbbb.learnovia.com/bigbluebutton/api/hooks/create?callbackURL=http://127.0.0.1:80/api/bigbluebutton/callme&checksum=' . $request->checksum . '&meetingID=' . $request->id, [
+        //     'headers'   => [
+        //         'Authorization' => 'Bearer '. $access_token,
+        //         'Content-Type' => 'application/json'
+        //     ], 
+        // ]);
+        $bbb = new BigBlueButton();
+        $getMeetingInfoParams = new HooksCreateParameters($request->callback);
+        $getMeetingInfoParams->setMeetingId($request->id);
+        $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
+        // $req=$bbb->getHooksListUrl();
+        return $req;
     }
 }
