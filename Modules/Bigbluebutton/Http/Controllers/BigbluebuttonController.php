@@ -700,6 +700,8 @@ class BigbluebuttonController extends Controller
 
     public function post_fun(Request $request){
 
+        $request->header('Content-Type', 'multipart/form-data;boundary=<calculated when request is sent>');
+  
         Log::info("mirna and hend" .$request);
 
         $bigbb = new BigbluebuttonModel;
@@ -769,6 +771,9 @@ class BigbluebuttonController extends Controller
 
     public function mimi( Request $request){
         $bbb = new BigBlueButton();
+        // $hookdestroypar = new HooksDestroyParameters(15);
+        // $req = $bbb->hooksDestroy($hookdestroypar);
+        // return 'done';
         // $hookParameter = new HooksCreateParameters("https://webhook.site/3fb81c64-5b58-4513-9fa3-622a9f7b17ea");
         $hookParameter = new HooksCreateParameters("https://devapi.learnovia.com/api/bigbluebutton/callagain2");
         $hookRes = $bbb->hooksCreate($hookParameter);
