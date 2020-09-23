@@ -358,11 +358,10 @@ class AssigmentsController extends Controller
         /*
             0===================>content
             1===================>attached_file
-            2===================>both
-            3===================>can submit content or file
+            2===================>can submit content or file 
         */
 
-        if ((($assilesson->allow_attachment == 3)) && ((!isset($request->content)) && (!isset($request->file)))) {
+        if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) && (!isset($request->file)))) {
             return HelperController::api_response_format(400, $body = [], $message = 'you must enter the content or the file');
         }
         if ((($assilesson->allow_attachment == 0)) && ((!isset($request->content)) || (isset($request->file)))) {
@@ -372,9 +371,9 @@ class AssigmentsController extends Controller
         if ((($assilesson->allow_attachment == 1)) && ((isset($request->content)) || (!isset($request->file)))) {
             return HelperController::api_response_format(400, $body = [], $message = 'you must enter only the file');
         }
-        if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) || (!isset($request->file)))) {
-            return HelperController::api_response_format(400, $body = [], $message = 'you must enter both the content and the file');
-        }
+        // if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) || (!isset($request->file)))) {
+        //     return HelperController::api_response_format(400, $body = [], $message = 'you must enter both the content and the file');
+        // }
         $userassigment = UserAssigment::where('user_id', Auth::user()->id)->where('assignment_lesson_id', $assilesson->id)->first();
 
         if(!isset($userassigment))
