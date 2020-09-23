@@ -788,7 +788,7 @@ class BigbluebuttonController extends Controller
         // ]);
         $bbb = new BigBlueButton();
         $getMeetingInfoParams = new HooksCreateParameters('https://devapi.learnovia.com/api/bigbluebutton/callagain1');
-        $getMeetingInfoParams->setMeetingId($request->id);
+        // $getMeetingInfoParams->setMeetingId($request->id);
         $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
         // $req=$bbb->getHooksListUrl();
         return $req;
