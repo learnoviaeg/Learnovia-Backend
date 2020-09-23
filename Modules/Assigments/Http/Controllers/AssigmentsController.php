@@ -636,12 +636,12 @@ class AssigmentsController extends Controller
                         $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
                         $inputFile=$studentassigment->attachment_id->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
                         // Ghostscript::setGsPath("/usr/bin/gs");
-                        $pdf = new Pdf("storage/".$inputFile);
-                        foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
-                            $name= uniqid();
-                            $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
-                            $images_path->push( url(Storage::url('assignment/'.$name)));
-                            }
+                        // $pdf = new Pdf("storage/".$inputFile);
+                        // foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
+                        //     $name= uniqid();
+                        //     $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+                        //     $images_path->push( url(Storage::url('assignment/'.$name)));
+                        //     }
                     }
                 }
                 $assignment['user_submit'] = $studentassigments;
