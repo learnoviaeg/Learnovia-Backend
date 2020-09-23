@@ -223,23 +223,27 @@ class segment_class_Controller extends Controller
             'year'      => 'required|exists:academic_years,id',
             'type'      => 'required|exists:academic_types,id',
             'levels'    => 'required|array',
-            'levels.*'  => 'required|exists:levels,id',
-            'classes'   => 'required|array',
-            'classes.*'   => 'required|exists:classes,id',
+            'levels.*.id'  => 'required|exists:levels,id',
+            'levels.*.classes'   => 'required|array',
+            'levels.*.classes.*'   => 'required|exists:classes,id',
         ]);
 
         if ($valid->fails()) {
             return HelperController::api_response_format(400, $valid->errors());
         }
         $type = AcademicType::find($req->type);
+        $current_segment_created = Segment::where('academic_type_id',$req->type)->count();
+        if($current_segment_created >= $type->segment_no){
+            return HelperController::api_response_format(200, null,"This type invalid ,It has enough number of segments");
+        }
         $segment = Segment::firstOrCreate([
             'name' => $req->name,
             'academic_type_id'=>$req->type
         ]);
         $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
         foreach($req->levels as $level){
-            $yearlevel = YearLevel::checkRelation($yeartype->id, $level);
-            foreach($req->classes as $class){
+            $yearlevel = YearLevel::checkRelation($yeartype->id, $level['id']);
+            foreach($level['classes'] as $class){
                 $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
                 $count = SegmentClass::whereClass_level_id($classLevel->id)->count();
                 if ($count >= $type->segment_no) {

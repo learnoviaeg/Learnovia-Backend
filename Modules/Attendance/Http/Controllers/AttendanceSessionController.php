@@ -26,6 +26,7 @@ use stdClass;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\AttendnaceExport;
+use Illuminate\Support\Str;
 
 
 class AttendanceSessionController extends Controller
@@ -35,13 +36,14 @@ class AttendanceSessionController extends Controller
         if (\Spatie\Permission\Models\Permission::whereName('attendance/add-session')->first() != null) {
             return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
         }
-
+        
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'Add Sessions']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'Take attendnace']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attendance', 'title' => 'Get Sessions','dashboard' => 1]);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-attendance', 'title' => 'delete attendance']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/edit-attendance', 'title' => 'edit attendance']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'get all users in session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attendance', 'title' => 'All Sessions','dashboard' => 1,'icon'=> 'Attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-daily', 'title' => 'Daily','dashboard' => 1,'icon'=> 'Attendance']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-attendance', 'title' => 'Delete Session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/edit-attendance', 'title' => 'Edit Session']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'Get students in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/export', 'title' => 'Export attendnace']);
 
         
@@ -53,6 +55,7 @@ class AttendanceSessionController extends Controller
         $role->givePermissionTo('attendance/edit-attendance');
         $role->givePermissionTo('attendance/get-attendance');
         $role->givePermissionTo('attendance/export');
+        $role->givePermissionTo('attendance/get-daily');
 
 
 
@@ -72,8 +75,9 @@ class AttendanceSessionController extends Controller
         $request->validate([
             'name' => 'required|string',
             'object' => 'required|array',
-            'object.*.class_id' => 'required|exists:classes,id',
-            'object.*.course_id' => 'required|exists:courses,id',
+            'main' => 'required|array',
+            'main.*.class_id' => 'required|exists:classes,id',
+            'main.*.course_id' => 'required|exists:courses,id',
             'graded' => 'required|in:0,1',
             'object.*.grade_category_id' => 'required_if:graded,==,1|exists:grade_categories,id',
             'object.*.grade_max'=>'required_if:graded,==,1|integer|min:1',
@@ -124,18 +128,22 @@ class AttendanceSessionController extends Controller
                         foreach($day['from']  as $key => $from)
                         {
                             
-                        $sessions=AttendanceSession::firstOrCreate([
-                            'taker_id' => Auth::id(),
-                            'name' => $request->name,
-                            'type' => $request->type,
-                            'course_id'=>$object['course_id'],
-                            'class_id' => $object['class_id'],
-                            'start_date' => Carbon::parse($temp_start)->format('Y-m-d H:i:s'),
-                            'from' => $day['from'][$key],
-                            'to' => $day['to'][$key],
-                            'graded' => $request->graded,
-                            'grade_item_id' => $grade_item
-                        ]);
+                            foreach($request->main  as $main)
+                            {
+                                
+                                $sessions=AttendanceSession::firstOrCreate([
+                                    'taker_id' => Auth::id(),
+                                    'name' => $request->name,
+                                    'type' => $request->type,
+                                    'course_id'=>$main['course_id'],
+                                    'class_id' => $main['class_id'],
+                                    'start_date' => Carbon::parse($temp_start)->format('Y-m-d H:i:s'),
+                                    'from' => $day['from'][$key],
+                                    'to' => $day['to'][$key],
+                                    'graded' => $request->graded,
+                                    'grade_item_id' => $grade_item
+                                ]);
+                        }
                     }
                         $temp_start= Carbon::parse($temp_start)->addDays(7);
                     }
@@ -147,48 +155,74 @@ class AttendanceSessionController extends Controller
     public function get_users_in_sessions (Request $request,$call =0)
     {
         $request->validate([
-            'session_id' => 'required|exists:attendance_sessions,id',
+            'session_id' => 'exists:attendance_sessions,id|required_without:class_id|required_without:course_id',
+            'search' => 'nullable',
+            'class_id' => 'nullable|exists:classes,id|required_with:course_id|required_without:session_id',
+            'course_id' => 'nullable|exists:courses,id|required_with:class_id|required_without:session_id',
         ]);
 
-        $session = AttendanceSession::where('id',$request->session_id)->first();
-        $courseseg=CourseSegment::GetWithClassAndCourse($session->class_id,$session->course_id);
+        $class_id= $request->class_id;
+        $course_id= $request->course_id;
+        $session = null;
+
+        if(isset($request->session_id)){
+            $session = AttendanceSession::where('id',$request->session_id)->first();
+            $class_id=$session->class_id;
+            $course_id = $session->course_id;
+        }
+
+        $courseseg=CourseSegment::GetWithClassAndCourse($class_id,$course_id);
         if(!isset($courseseg))
-            return HelperController::api_response_format(200, null ,'Please check active course segments');
+            return HelperController::api_response_format(400, [] ,'Please check active course segments');
 
         $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
 
-        // $attendees_object = [];
-
-        $all_logs=AttendanceLog::where('session_id',$request->session_id)->where('type','offline')->with('User')->get();
-        $attendees_object['Total_Logs'] = $all_logs->count();
-        $attendees_object['Present']['count']= $all_logs->where('status','Present')->count();
-        $attendees_object['Absent']['count']= $all_logs->where('status','Absent')->count();
-        $attendees_object['Late']['count']= $all_logs->where('status','Late')->count();
-        $attendees_object['Excuse']['count']= $all_logs->where('status','Excuse')->count();
-        if($all_logs->count() != 0)
-        {
-            $attendees_object['Present']['precentage'] = ($attendees_object['Present']['count']/$all_logs->count())*100 ;
-            $attendees_object['Absent']['precentage'] =  ($attendees_object['Absent']['count']/$all_logs->count())*100 ;
-            $attendees_object['Late']['precentage'] =  ($attendees_object['Late']['count']/$all_logs->count())*100 ;
-            $attendees_object['Excuse']['precentage'] =  ($attendees_object['Excuse']['count']/$all_logs->count())*100 ;
-        }
-
         $h=collect();
+        $i=0;
         foreach($usersIDs as $user)
         {
             $userObj=User::find($user);
             if(!isset($userObj))
                 continue;
             if($userObj->roles->pluck('id')->first() == 3){
-                $userObj['status']=AttendanceLog::where('student_id',$user)
+                $userObj['status'] = null;
+                if(isset($request->session_id)){
+                    $userObj['status']=AttendanceLog::where('student_id',$user)
                                                 ->where('session_id',$request->session_id)
                                                 ->where('type','offline')
                                                 ->pluck('status')
                                                 ->first();
+                }
+
                 unset($userObj->roles);
+                $i++;
+                if($request->has('search'))
+                    if(!(Str::contains($userObj->username, [$request->search]) || Str::contains($userObj->firstname, [$request->search]) || Str::contains($userObj->lastname, [$request->search]) || Str::contains($userObj->arabicname, [$request->search])))
+                        continue;
+
                 $h->push($userObj);
             }
         }
+
+        $all_logs=AttendanceLog::where('session_id',$request->session_id)->where('type','offline')->with('User')->get();
+        $attendees_object['session'] = isset($session)? $session->name : $session['name'] = 'Daily Attendnace';
+        $attendees_object['Total_Logs'] = $i;
+        $attendees_object['Present']['count']= $all_logs->where('status','Present')->count();
+        $attendees_object['Absent']['count']= $all_logs->where('status','Absent')->count();
+        $attendees_object['Late']['count']= $all_logs->where('status','Late')->count();
+        $attendees_object['Excuse']['count']= $all_logs->where('status','Excuse')->count();
+        $attendees_object['Present']['precentage'] = 0 ;
+        $attendees_object['Absent']['precentage'] =  0 ;
+        $attendees_object['Late']['precentage'] =  0 ;
+        $attendees_object['Excuse']['precentage'] =  0 ;
+        if($i != 0)
+        {
+            $attendees_object['Present']['precentage'] = round((($attendees_object['Present']['count']/$i)*100),2) ;
+            $attendees_object['Absent']['precentage'] =  round((($attendees_object['Absent']['count']/$i)*100),2) ;
+            $attendees_object['Late']['precentage'] =  round((($attendees_object['Late']['count']/$i)*100),2) ;
+            $attendees_object['Excuse']['precentage'] =  round((($attendees_object['Excuse']['count']/$i)*100),2) ;
+        }
+
         $attendees_object['logs']=$h;
 
         if($call == 1)
@@ -200,44 +234,49 @@ class AttendanceSessionController extends Controller
     public function take_attendnace (Request $request)
     {
         $request->validate([
-            'session_id' => 'required|exists:attendance_sessions,id',
+            'session_id' => 'nullable|exists:attendance_sessions,id',
             'object' => 'required|array',
             'object.*.user_id' => 'required|exists:users,id',
-            'object.*.status' => 'required|in:Absent,Late,Present,Excuse',
+            'object.*.status' => 'nullable',
         ]);
 
-        $session = AttendanceSession::where('id',$request->session_id)->first();
-        $courseseg=CourseSegment::GetWithClassAndCourse($session->class_id,$session->course_id);
-        if(!isset($courseseg))
-            return HelperController::api_response_format(200, null ,'Please check active course segments');
-
-        $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
-        $i=0;
-        foreach($usersIDs as $user)
-        {
-            $userObj=User::find($user);
-            if(!isset($userObj))
-                continue;
-            if($userObj->roles->pluck('id')->first() == 3){
-                $i++;
-            }
-        }
-        
-        if(count($request->object) != $i)
-            return HelperController::api_response_format(200, null ,'Some students statuses are missing!');
-
         foreach($request->object as $object){
-            $attendance=AttendanceLog::updateOrCreate(['student_id' => $object['user_id'],'session_id'=>$request->session_id,'type'=>'offline'],
-                [
-                    'ip_address' => \Request::ip(),
-                    'student_id' => $object['user_id'],
-                    'taker_id' => Auth::id(),
-                    'session_id' => $request->session_id,
-                    'type' => 'offline',
-                    'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'status' => $object['status']
-                ]);
+            if( !isset($object['status']) || $object['status'] == null)
+                $object['status'] = 'Absent';
+            
+            if($object['status'] == 'Absent' || $object['status'] == 'Late' || $object['status'] == 'Present' || $object['status'] == 'Excuse')
+            {
+                if(isset($request->session_id)){
+                    $attendance=AttendanceLog::updateOrCreate(['student_id' => $object['user_id'],'session_id'=>$request->session_id,'type'=>'offline'],
+                    [
+                        'ip_address' => \Request::ip(),
+                        'student_id' => $object['user_id'],
+                        'taker_id' => Auth::id(),
+                        'session_id' => $request->session_id,
+                        'type' => 'offline',
+                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'status' => $object['status'],
+                        'attendnace_type' => 'per_session'
+                    ]);
+                }
+
+                if(!isset($request->session_id)){
+                    $attendance=AttendanceLog::create([
+                        'ip_address' => \Request::ip(),
+                        'student_id' => $object['user_id'],
+                        'taker_id' => Auth::id(),
+                        'session_id' => $request->session_id,
+                        'type' => 'offline',
+                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'status' => $object['status'],
+                        'attendnace_type' => 'daily',
+                    ]);
+                }
+               
+            }
+            
         }
+
         return HelperController::api_response_format(200,null ,'Attendnace taken successfully.');
     }
 
@@ -255,22 +294,26 @@ class AttendanceSessionController extends Controller
             'search' => 'nullable',
         ]);
 
+        $CS_ids=GradeCategoryController::getCourseSegment($request);
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+        $CourseSeg = array_intersect($CS_ids->toArray(),$CourseSeg->toArray());
+        if($request->user()->can('site/show-all-courses')){
+            $CourseSeg = $CS_ids;
+        }
         $courses=collect();
         foreach($CourseSeg as $cs){
-            $cs_object = CourseSegment::find($cs);
-            if($cs_object->end_date > Carbon::now() && $cs_object->start_date < Carbon::now()){
-                $courses_cs = $cs_object->courses;
-                foreach($courses_cs as $c){
-                    $courses->push($c->id);
+            if(in_array($cs, $CS_ids->toArray())){
+                $cs_object = CourseSegment::find($cs);
+                if($cs_object->end_date > Carbon::now() && $cs_object->start_date < Carbon::now()){
+                    $courses_cs = $cs_object->courses;
+                    foreach($courses_cs as $c){
+                        $courses->push($c->id);
+                    }
                 }
             }
         }
 
         $sessions = AttendanceSession::whereIn('course_id',$courses)->with(['class','course'])->orderBy('start_date'); 
-        if($request->user()->can('site/show-all-courses')){
-            $sessions = AttendanceSession::with(['class','course'])->orderBy('start_date');     
-        }
 
         if($request->has('class_id'))
             $sessions = $sessions->whereIn('class_id',$request->class_id);
@@ -302,7 +345,7 @@ class AttendanceSessionController extends Controller
                                                 ->where('type','offline')
                                                 ->first();
         if(isset($log))
-            return HelperController::api_response_format(200,null ,'You can\'t delete this session, it\'s attendnace taken already!');
+            return HelperController::api_response_format(200,'fail' ,'You can\'t delete this session, it\'s attendnace taken already!');
             
         $session = AttendanceSession::where('id',$request->session_id)->delete();
         return HelperController::api_response_format(200,null ,'Session deleted successfully.');

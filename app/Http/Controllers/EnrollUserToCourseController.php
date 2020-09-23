@@ -199,20 +199,22 @@ class EnrollUserToCourseController extends Controller
                 if ($segments == null)
                     break;
 
-                if (isset($request->course)) {
-                    $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$request->course);
-                    if(isset($courseSegment)){
-                        Enroll::firstOrCreate([
-                            'user_id' => $user,
-                            'course_segment' => $courseSegment->id,
-                            'role_id' => 3,
-                            'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
-                            'type' => $request->type,
-                            'level' => $request->level,
-                            'class' => $request->class,
-                            'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
-                            'course' => $courseSegment->course_id,
-                        ]);
+                if (count($request->course) > 0) {
+                    foreach($request->course as $course){
+                        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$course);
+                        if(isset($courseSegment)){
+                            Enroll::firstOrCreate([
+                                'user_id' => $user,
+                                'course_segment' => $courseSegment->id,
+                                'role_id' => 3,
+                                'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
+                                'type' => $request->type,
+                                'level' => $request->level,
+                                'class' => $request->class,
+                                'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
+                                'course' => $courseSegment->course_id,
+                            ]);
+                        }
                     }
                 }
 

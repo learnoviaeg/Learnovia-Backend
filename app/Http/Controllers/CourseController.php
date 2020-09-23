@@ -235,7 +235,8 @@ class CourseController extends Controller
             'level' => 'nullable|exists:levels,id',
             'class' => 'nullable|exists:classes,id',
             'segment' => 'nullable|exists:segments,id',
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'for' => 'in:enroll'
         ]);
         $cs=[];
         if (isset($request->id))
@@ -261,6 +262,10 @@ class CourseController extends Controller
 
         foreach($couresegs as $one){
             $cc=CourseSegment::find($one);
+            if($request->for == 'enroll')
+                if(!($cc->start_date <= Carbon::now() && $cc->end_date >= Carbon::now()))
+                    continue;
+
             $cs[]=$cc->course_id;
         }
 
@@ -345,15 +350,17 @@ class CourseController extends Controller
         }
         else
         {
-            foreach ($request->user()->enroll as $enroll) {           
-                if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
-                    if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
-                        if(in_array($enroll->CourseSegment->id, $CS->toArray()))
+            foreach ($request->user()->enroll as $enroll) {  
+                if(in_array($enroll->CourseSegment->id, $CS->toArray())){
+                    if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
+                        if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){
+                            if(in_array($enroll->CourseSegment->id, $CS->toArray()))
+                                array_push($couuures,$enroll->CourseSegment->id);
+                        }
+                        else
                             array_push($couuures,$enroll->CourseSegment->id);
                     }
-                    else
-                        array_push($couuures,$enroll->CourseSegment->id);
-                }
+                }         
             }
         }
 
@@ -1240,16 +1247,18 @@ class CourseController extends Controller
         if(isset($h5p_comp))
             $result['interactive'] = [];
             
+        $cs=GradeCategoryController::getCourseSegment($request);
         if($request->user()->can('site/show-all-courses'))
         {
-            $cs=GradeCategoryController::getCourseSegment($request);
             $CourseSegments=CourseSegment::whereIn('id',$cs)->get();
         }
         else
         {
             foreach ($request->user()->enroll as $enroll) {
                 if ($enroll->courseSegment != null) {
-                    $CourseSegments[]=$enroll->courseSegment;
+                    if(in_array($enroll->courseSegment->id, $cs->toArray())){
+                        $CourseSegments[]=$enroll->courseSegment;
+                    }
                 }
             }
         }
@@ -1600,7 +1609,12 @@ class CourseController extends Controller
         $request->validate([
             'course_id' => 'required|exists:course_segments,course_id'
         ]);
+
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+        if($request->user()->can('site/show-all-courses'))
+        {
+            $CourseSeg=GradeCategoryController::getCourseSegment($request);
+        }
         $seggg = array();
         foreach ($CourseSeg as $cour) {
             $check = CourseSegment::where('course_id', $request->course_id)->where('id', $cour)->pluck('id')->first();

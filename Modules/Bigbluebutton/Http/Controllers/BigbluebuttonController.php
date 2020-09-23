@@ -10,13 +10,16 @@ use App\Component;
 use App\User;
 use App\Enroll;
 use Auth;
+use Log;
 use App\CourseSegment;
 use Modules\Attendance\Entities\AttendanceLog;
 use BigBlueButton\Parameters\CreateMeetingParameters;
 use BigBlueButton\Parameters\JoinMeetingParameters;
 use BigBlueButton\Parameters\GetRecordingsParameters;
+use BigBlueButton\Parameters\HooksCreateParameters;
 use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
 use BigBlueButton\Parameters\GetMeetingInfoParameters;
+use BigBlueButton\Parameters\HooksDestroyParameters;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\HelperController;
 use DB;
@@ -24,7 +27,7 @@ use GuzzleHttp\Client;
 use App\Exports\BigBlueButtonAttendance;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-
+use App\Http\Controllers\GradeCategoryController;
 
 class BigbluebuttonController extends Controller
 {
@@ -270,7 +273,7 @@ class BigbluebuttonController extends Controller
         $check=Carbon::parse($bigbb->start_date)->addMinutes($bigbb->duration);
         if($check < Carbon::now())
             return HelperController::api_response_format(200,null ,'you can\'t join this meeting any more');
-            
+        
         if($request->user()->can('bigbluebutton/session-moderator')){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
@@ -311,7 +314,7 @@ class BigbluebuttonController extends Controller
         $permission_id = DB::table('permissions')->where('name','bigbluebutton/toggle')->pluck('id')->first();
         $hasornot = DB::table('role_has_permissions')->where('role_id', $role_id)->where('permission_id', $permission_id)->get();
 
-
+        
         if($request->filled('id'))
         {
             $bbb = new BigBlueButton();
@@ -391,14 +394,17 @@ class BigbluebuttonController extends Controller
             return HelperController::api_response_format(200 , $meet);
         }
 
+        $CS_ids=GradeCategoryController::getCourseSegment($request);
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
         $courses=collect();
         foreach($CourseSeg as $cs){
-            $cs_object = CourseSegment::find($cs);
-            if($cs_object->end_date > Carbon::now() && $cs_object->start_date < Carbon::now()){
-                $courses_cs = $cs_object->courses;
-                foreach($courses_cs as $c){
-                    $courses->push($c->id);
+            if(in_array($cs, $CS_ids->toArray())){
+                $cs_object = CourseSegment::find($cs);
+                if($cs_object->end_date > Carbon::now() && $cs_object->start_date < Carbon::now()){
+                    $courses_cs = $cs_object->courses;
+                    foreach($courses_cs as $c){
+                        $courses->push($c->id);
+                    }
                 }
             }
         }
@@ -406,8 +412,14 @@ class BigbluebuttonController extends Controller
         $bbb = new BigBlueButton();
         $meet = BigbluebuttonModel::whereIn('course_id',$courses)->get(); 
         if($request->user()->can('site/show-all-courses')){
+            $courses_id=collect();
+            foreach ($CS_ids as $coco) {
+                $cocos=CourseSegment::find($coco);
+                if($cocos->end_date >= Carbon::now() && $cocos->start_date <= Carbon::now())
+                    $courses_id->push($cocos->course_id);
+            }
             $all_meetings = $bbb = new BigBlueButton();
-            $meet = BigbluebuttonModel::get();       
+            $meet = BigbluebuttonModel::whereIn('course_id',$courses_id)->get();       
         }
 
         foreach($meet as $m)
@@ -442,7 +454,7 @@ class BigbluebuttonController extends Controller
 
         if($meet == null)
             return HelperController::api_response_format(200 , null , 'This Meeting is not found');
-        return HelperController::api_response_format(200 , $meet);
+        return HelperController::api_response_format(200 , $meet,'Meetings list');
     }
 
     /**
@@ -684,5 +696,90 @@ class BigbluebuttonController extends Controller
         // \Artisan::call('config:cache', ['--env' => 'local']);
         \Artisan::call('cache:clear', ['--env' => 'local']);
         \Artisan::call('config:clear', ['--env' => 'local']);
+    }
+
+    public function post_fun(Request $request){
+
+        $request->header('Content-Type', 'multipart/form-data;boundary=<calculated when request is sent>');
+  
+        Log::info("mirna and hend" .$request);
+
+        $bigbb = new BigbluebuttonModel;
+        $bigbb->name='el log ehstghl';
+        $bigbb->class_id=1;
+        $bigbb->course_id=36;
+        $bigbb->attendee_password='1234567';
+        $bigbb->moderator_password='mimi';
+        $bigbb->duration='50';
+        $bigbb->start_date=Carbon::now();
+        $bigbb->user_id = Auth::user()->id;
+        $bigbb->save();
+        // $bbb = new BigBlueButton();
+        // $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
+        // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
+        // $req=$bbb->getHooksListUrl();
+        // return $req;
+
+    }
+
+    public function bbb_will_call(Request $request){
+        
+        $meeting_info = self::getmeetingInfo($request);
+        $client = new \Google_Client();
+        $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
+        $client->setApplicationName("learnovia-notifications");
+        $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
+        $client->useApplicationDefaultCredentials();
+        if ($client->isAccessTokenExpired()) {
+            $client->fetchAccessTokenWithAssertion();
+        }
+        $access_token = $client->getAccessToken()['access_token'];
+
+        $clientt = new Client();
+        $res = $clientt->request('POST', 'http://127.0.0.1:80/api/bigbluebutton/callagain', [
+            'headers'   => [
+                'Authorization' => 'Bearer '. $access_token,
+                'Content-Type' => 'application/x-www-form-urlencoded'
+            ], 
+            'body' => json_encode(array(
+                'event' => array(
+                    "data" => array(
+                        "type" => "event",
+                        "id" => "meeting-ended",
+                        "attributes" => array(
+                            "meeting" => array(
+                                "internal-meeting-id" => $meeting_info['internalMeetingID'],
+                                "external-meeting-id" => $request->id
+                            ),
+                        ),
+                        "event" => array(
+                            "ts" => "1532718316938",
+                        ),
+                    ),
+                ),
+            ))
+        ]);  
+        
+        // Log::debug('mirna');
+        
+        // $bbb = new BigBlueButton();
+        // $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
+        // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
+        // $req=$bbb->getHooksListUrl();
+        // return $req;
+    }
+
+    public function mimi( Request $request){
+        $bbb = new BigBlueButton();
+        // $hookdestroypar = new HooksDestroyParameters(15);
+        // $req = $bbb->hooksDestroy($hookdestroypar);
+        // return 'done';
+        // $hookParameter = new HooksCreateParameters("https://webhook.site/3fb81c64-5b58-4513-9fa3-622a9f7b17ea");
+        $hookParameter = new HooksCreateParameters("https://devapi.learnovia.com/api/bigbluebutton/callagain2");
+        $hookRes = $bbb->hooksCreate($hookParameter);
+        return $hookRes->getHookId();
+        // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
+        // $req=$bbb->getHooksListUrl();
+        return $req;
     }
 }
