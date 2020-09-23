@@ -19,6 +19,7 @@ use BigBlueButton\Parameters\GetRecordingsParameters;
 use BigBlueButton\Parameters\HooksCreateParameters;
 use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
 use BigBlueButton\Parameters\GetMeetingInfoParameters;
+use BigBlueButton\Parameters\HooksDestroyParameters;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\HelperController;
 use DB;
@@ -767,30 +768,14 @@ class BigbluebuttonController extends Controller
     }
 
     public function mimi( Request $request){
-        // $checksum= substr($url,strripos($url, "=")+1);
-        // return $checksum;
-        // $client = new \Google_Client();
-        // $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
-        // $client->setApplicationName("learnovia-notifications");
-        // $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
-        // $client->useApplicationDefaultCredentials();
-        // if ($client->isAccessTokenExpired()) {
-        //     $client->fetchAccessTokenWithAssertion();
-        // }
-        // $access_token = $client->getAccessToken()['access_token'];
-
-        // $clientt = new Client();
-        // $res = $clientt->request('GET', 'https://sbbb.learnovia.com/bigbluebutton/api/hooks/create?callbackURL=http://127.0.0.1:80/api/bigbluebutton/callme&checksum=' . $request->checksum . '&meetingID=' . $request->id, [
-        //     'headers'   => [
-        //         'Authorization' => 'Bearer '. $access_token,
-        //         'Content-Type' => 'application/json'
-        //     ], 
-        // ]);
         $bbb = new BigBlueButton();
-        $getMeetingInfoParams = new HooksCreateParameters('https://devapi.learnovia.com/api/bigbluebutton/callagain1');
-        // $getMeetingInfoParams->setMeetingId($request->id);
-        $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
+        // $hookdestroypar = new HooksDestroyParameters(10);
+        // $req = $bbb->hooksDestroy($hookdestroypar);
+        $hookParameter = new HooksCreateParameters("https://devapi.learnovia.com/api/bigbluebutton/callagain2");
+        $hookRes = $bbb->hooksCreate($hookParameter);
+        return $hookRes->getHookId();
+        // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
         // $req=$bbb->getHooksListUrl();
-        return $req;
+        // return $req;
     }
 }
