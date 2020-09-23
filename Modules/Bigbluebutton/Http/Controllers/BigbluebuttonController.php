@@ -697,18 +697,67 @@ class BigbluebuttonController extends Controller
         \Artisan::call('config:clear', ['--env' => 'local']);
     }
 
-    public function create_hooks(){
-        $bbb = new BigBlueButton();
-        $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
-        $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
+    public function post_fun(Request $request){
+
+        Log::debug('mirna and hend'.$request);
+
+        $bigbb = new BigbluebuttonModel;
+        $bigbb->name='el log ehstghl';
+        $bigbb->class_id=1;
+        $bigbb->course_id=36;
+        $bigbb->attendee_password='1234567';
+        $bigbb->moderator_password='mimi';
+        $bigbb->duration='50';
+        $bigbb->start_date=Carbon::now();
+        $bigbb->user_id = Auth::user()->id;
+        $bigbb->save();
+        // $bbb = new BigBlueButton();
+        // $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
+        // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
         // $req=$bbb->getHooksListUrl();
-        return $req;
+        // return $req;
+
     }
 
-    public function bbb_will_call(){
+    public function bbb_will_call(Request $request){
         
+        $meeting_info = self::getmeetingInfo($request);
+        $client = new \Google_Client();
+        $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
+        $client->setApplicationName("learnovia-notifications");
+        $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
+        $client->useApplicationDefaultCredentials();
+        if ($client->isAccessTokenExpired()) {
+            $client->fetchAccessTokenWithAssertion();
+        }
+        $access_token = $client->getAccessToken()['access_token'];
+
+        $clientt = new Client();
+        $res = $clientt->request('POST', 'http://127.0.0.1:80/api/bigbluebutton/callagain', [
+            'headers'   => [
+                'Authorization' => 'Bearer '. $access_token,
+                'Content-Type' => 'application/x-www-form-urlencoded'
+            ], 
+            'body' => json_encode(array(
+                'event' => array(
+                    "data" => array(
+                        "type" => "event",
+                        "id" => "meeting-ended",
+                        "attributes" => array(
+                            "meeting" => array(
+                                "internal-meeting-id" => $meeting_info['internalMeetingID'],
+                                "external-meeting-id" => $request->id
+                            ),
+                        ),
+                        "event" => array(
+                            "ts" => "1532718316938",
+                        ),
+                    ),
+                ),
+            ))
+        ]);  
         
-        Log::debug('mirna');
+        // Log::debug('mirna');
         
         // $bbb = new BigBlueButton();
         // $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
@@ -738,7 +787,7 @@ class BigbluebuttonController extends Controller
         //     ], 
         // ]);
         $bbb = new BigBlueButton();
-        $getMeetingInfoParams = new HooksCreateParameters($request->callback);
+        $getMeetingInfoParams = new HooksCreateParameters('https://devapi.learnovia.com/api/bigbluebutton/callagain1');
         $getMeetingInfoParams->setMeetingId($request->id);
         $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
         // $req=$bbb->getHooksListUrl();

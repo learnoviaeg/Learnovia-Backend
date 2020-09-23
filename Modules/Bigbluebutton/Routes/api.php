@@ -32,6 +32,7 @@ Route::group(['prefix' => 'bigbluebutton', 'middleware' => 'auth:api'], function
     Route::get('meetinginfo', 'BigbluebuttonController@getmeetingInfo')->name('getmeetingInfo');
     Route::get('clear', 'BigbluebuttonController@clear')->name('clear');
     Route::get('callme', 'BigbluebuttonController@bbb_will_call');
+    Route::post('callagain1', 'BigbluebuttonController@post_fun');
     Route::get('mimi', 'BigbluebuttonController@mimi');
 
 
