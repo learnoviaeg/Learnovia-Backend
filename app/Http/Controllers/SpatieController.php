@@ -11,6 +11,7 @@ use App\CourseSegment;
 use Validator;
 use Auth;
 use App\Enroll;
+use App\Language;
 use App\Contract;
 use Carbon\Carbon;
 use DB;
@@ -360,6 +361,16 @@ class SpatieController extends Controller
             ]);
             $user->save();
             $user->assignRole($super);
+
+            $lan1=Language::create([
+                'name' => 'English',
+                'default' => 1,
+            ]);
+
+            $lan2=Language::create([
+                'name' => 'Arabic',
+                'default' => 0,
+            ]);
             return "System Installed Your User is $user->email and Password is LeaRnovia_H_M_A";
 
             $formateScale = [
@@ -392,6 +403,7 @@ class SpatieController extends Controller
                'name' => 'Default Letter',
                'formate' => serialize($formateLetter),
             ]);
+
         }
     }
 
