@@ -50,7 +50,7 @@ class AnnouncementController extends Controller
             'description' => 'required',
             //all mimetypes in this link
             // https://github.com/symfony/symfony/blob/d94d837e9ea75d76eeb0a43e0535a5e7a7a01542/src/Symfony/Component/HttpFoundation/File/MimeType/MimeTypeExtensionGuesser.php
-            'attached_file' => 'nullable|file|mimetypes:application/pdf,
+            'attached_file' => 'nullable|file|mimetypes:mp3,application/pdf,
                                                         application/vnd.openxmlformats-officedocument.wordprocessingml.document,
                                                         application/msword,
                                                         application/vnd.ms-excel,
@@ -246,7 +246,7 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required',
             'description' => 'required',
-            'attached_file' => 'nullable|file|mimetypes:application/pdf,
+            'attached_file' => 'nullable|file|mimetypes:mp3,application/pdf,
                                 application/vnd.openxmlformats-officedocument.wordprocessingml.document,
                                 application/msword,
                                 application/vnd.ms-excel,
