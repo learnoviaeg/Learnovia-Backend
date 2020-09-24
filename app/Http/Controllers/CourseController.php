@@ -213,7 +213,10 @@ class CourseController extends Controller
             }
         }
         $course->save();
-        return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
+        $req = new Request();
+
+          return HelperController::api_response_format(200, $this->get($req,2)->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
+          // return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
     }
 
     /**
@@ -282,6 +285,9 @@ class CourseController extends Controller
                             )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
                             $le['teachers']  = $teacher ;
             unset($le->courseSegments);
+        }
+        if($call == 2 ){ //$call by function update 
+            return $courses;
         }
         if(isset($request->returnmsg))
             return HelperController::api_response_format(200, $courses->paginate(HelperController::GetPaginate($request)),$request->returnmsg );
