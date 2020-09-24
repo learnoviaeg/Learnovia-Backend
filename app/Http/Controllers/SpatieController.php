@@ -29,7 +29,7 @@ class SpatieController extends Controller
             return "This Site is Installed before go and ask admin";
         } else {
             // initial Contract
-            Contract::create(['attachment_id' => null, 'start_date' => Carbon::now(), 'end_date' => null, 'numbers_of_users' => null, 'total' => null, 'allowance_period' => null]);
+            Contract::create(['attachment_id' => null, 'start_date' => Carbon::now(), 'end_date' => null, 'numbers_of_users' => 500000000, 'total' => null, 'allowance_period' => null]);
 
             // restrict
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/restrict', 'title' => 'restrict middleware']);
@@ -176,6 +176,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-unenrolled-users-Bulk', 'title' => 'get bulk of unenrolled users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/users', 'title' => 'enroll users with chain']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/migrate-user', 'title' => 'migrate user to another class']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-unenroll-users-role', 'title' => 'Get unenrolled users']);
+
 
             //Events
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'event/add', 'title' => 'Add event to users']);
@@ -214,6 +216,9 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/generate-username-password', 'title' => 'generate username and password']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/GetAllCountries', 'title' => 'Get all countries']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/GetAllNationalities', 'title' => 'Get all nationalities']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Set parents and childs']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/export', 'title' => 'Export Users']);
+
 
             //Components Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/get', 'title' => 'get component']);
@@ -248,6 +253,12 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/delete', 'title' => 'Delete Language']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/dictionary', 'title' => 'Get Dictionary']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/language', 'title' => 'change my language']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/activate', 'title' => 'Activate language']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/deactivate', 'title' => 'Dea-ctivate language']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'languages/set-default', 'title' => 'Set default language']);
+
+
+
             
             //Lesson Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'lesson/add', 'title' => 'add lesson']);
@@ -273,6 +284,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/bulk-all-get', 'title' => 'get bulk grade category with chain']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/chain-categories', 'title' => 'get all chain grade category']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/grades', 'title' => 'Grades', 'icon' => 'grade']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/category/get-gradecategories', 'title' => 'Get Grade Categories']);
+
 
             //Grade Item
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/item/add', 'title' => 'add grade item']);
