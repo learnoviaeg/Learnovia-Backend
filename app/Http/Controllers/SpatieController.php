@@ -343,11 +343,12 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/show/real-password', 'title' => 'Show Real Password']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/course/teacher', 'title' => 'detect course\'s teacher']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/course/student', 'title' => 'detect course\'s student']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/show-all-courses', 'title' => 'admin permission']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/update-password', 'title' => 'update password']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/update-username', 'title' => 'update username']);
 
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
-            $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->get());
+            $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->where('name','not like','%site/course/student%')->get());
             $Authenticated->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%bulk%')->where('name', 'like', '%messages%')->get());
             $user = new User([
                 'firstname' => 'Learnovia',
