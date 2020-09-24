@@ -364,6 +364,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/show-all-courses', 'title' => 'admin permission']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/update-password', 'title' => 'update password']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/update-username', 'title' => 'update username']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/show/username', 'title' => 'show username']);
 
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
             $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->where('name','not like','%site/course/student%')->get());
