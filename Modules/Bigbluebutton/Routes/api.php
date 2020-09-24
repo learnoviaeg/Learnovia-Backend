@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::post('callback_function', 'BigbluebuttonController@callback_function');
 
 Route::group(['prefix' => 'bigbluebutton', 'middleware' => 'auth:api'], function () {
 
@@ -31,9 +32,8 @@ Route::group(['prefix' => 'bigbluebutton', 'middleware' => 'auth:api'], function
     Route::get('export', 'BigbluebuttonController@export')->name('exportbbbattendence')->middleware('permission:bigbluebutton/export');
     Route::get('meetinginfo', 'BigbluebuttonController@getmeetingInfo')->name('getmeetingInfo');
     Route::get('clear', 'BigbluebuttonController@clear')->name('clear');
-    Route::get('callme', 'BigbluebuttonController@bbb_will_call');
-    Route::post('callagain2', 'BigbluebuttonController@post_fun');
-    Route::get('mimi', 'BigbluebuttonController@mimi');
-
+    Route::get('create_hook', 'BigbluebuttonController@create_hook');
+    Route::get('destroy_hook', 'BigbluebuttonController@destroy_hook');
+    Route::get('list_hook', 'BigbluebuttonController@list_hook');
 
 });
