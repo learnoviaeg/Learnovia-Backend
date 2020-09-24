@@ -712,7 +712,7 @@ class BigbluebuttonController extends Controller
         $bigbb->moderator_password='mimi';
         $bigbb->duration='50';
         $bigbb->start_date=Carbon::now();
-        $bigbb->user_id = Auth::user()->id;
+        $bigbb->user_id = 5090;
         $bigbb->save();
         // $bbb = new BigBlueButton();
         // $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
@@ -775,7 +775,7 @@ class BigbluebuttonController extends Controller
         // $req = $bbb->hooksDestroy($hookdestroypar);
         // return 'done';
         // $hookParameter = new HooksCreateParameters("https://webhook.site/3fb81c64-5b58-4513-9fa3-622a9f7b17ea");
-        $hookParameter = new HooksCreateParameters("https://devapi.learnovia.com/api/bigbluebutton/callagain2");
+        $hookParameter = new HooksCreateParameters("https://devapi.learnovia.com/api/callagain2");
         $hookRes = $bbb->hooksCreate($hookParameter);
         return $hookRes->getHookId();
         // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
