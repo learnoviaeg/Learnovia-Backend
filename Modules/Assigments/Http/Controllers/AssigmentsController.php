@@ -427,7 +427,8 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'grade' => 'required|integer',
-            'feedback' => 'string'
+            'feedback' => 'string',
+            'corrected_file' => 'file|distinct|mimes:pdf',
         ]);
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first(); 
         if(!isset($assilesson))
@@ -442,11 +443,15 @@ class AssigmentsController extends Controller
         if (isset($request->feedback)) {
             $userassigment->feedback = $request->feedback;
         }
+        if (isset($request->corrected_file)) {
+            $userassigment->corrected_file = attachment::upload_attachment($request->corrected_file, 'assignment', null)->id;
+        }
         $userassigment->grade = $request->grade;
         $userassigment->status_id = 1;
         $userassigment->save();
         return HelperController::api_response_format(200, $body = $userassigment, $message = 'Grade submitted successfully');
     }
+
     public function editGradeAssignment(Request $request)
     {
         $request->validate([
@@ -454,7 +459,8 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'grade' => 'required|integer',
-            'feedback' => 'string'
+            'feedback' => 'string',
+            'annotate_file' => 'file|distinct|mimes:pdf',
         ]);
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first(); 
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
@@ -463,6 +469,9 @@ class AssigmentsController extends Controller
         }
         if (isset($request->feedback)) {
             $userassigment->feedback = $request->feedback;
+        }
+        if (isset($request->annotate_file)) {
+            $userassigment->corrected_file = attachment::upload_attachment($request->corrected_file, 'assignment', null)->id;
         }
         $userassigment->grade = $request->grade;
         $userassigment->save();
@@ -590,6 +599,9 @@ class AssigmentsController extends Controller
                 if (isset($studentassigment->attachment_id)) {
                     $assignment['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
                 }
+                if (isset($studentassigment->corrected_file)) {
+                    $assignment['corrected_file'] = attachment::where('id', $studentassigment->corrected_file)->first();
+                }
             }
             if($start > Carbon::now() && $request->user()->can('site/course/student'))
                 $assignment['started'] = false;
@@ -632,16 +644,10 @@ class AssigmentsController extends Controller
                         $studentassigment->user->picture=$studentassigment->user->attachment->path;
     
                     if (isset($studentassigment->attachment_id)) {
-                         
                         $studentassigment->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-                        $inputFile=$studentassigment->attachment_id->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
-                        // Ghostscript::setGsPath("/usr/bin/gs");
-                        // $pdf = new Pdf("storage/".$inputFile);
-                        // foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
-                        //     $name= uniqid();
-                        //     $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
-                        //     $images_path->push( url(Storage::url('assignment/'.$name)));
-                        //     }
+                    }
+                    if (isset($studentassigment->corrected_file)) {
+                        $studentassigment->corrected_file = attachment::where('id', $studentassigment->corrected_file)->first();
                     }
                 }
                 $assignment['user_submit'] = $studentassigments;
