@@ -460,7 +460,7 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'grade' => 'required|integer',
             'feedback' => 'string',
-            'annotate_file' => 'file|distinct|mimes:pdf',
+            'corrected_file' => 'file|distinct|mimes:pdf',
         ]);
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first(); 
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
@@ -470,7 +470,7 @@ class AssigmentsController extends Controller
         if (isset($request->feedback)) {
             $userassigment->feedback = $request->feedback;
         }
-        if (isset($request->annotate_file)) {
+        if (isset($request->corrected_file)) {
             $userassigment->corrected_file = attachment::upload_attachment($request->corrected_file, 'assignment', null)->id;
         }
         $userassigment->grade = $request->grade;
