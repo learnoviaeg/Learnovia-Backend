@@ -698,7 +698,7 @@ class BigbluebuttonController extends Controller
         \Artisan::call('config:clear', ['--env' => 'local']);
     }
 
-    public function post_fun(Request $request){
+    public function callback_function(Request $request){
 
         $request->header('Content-Type', 'multipart/form-data;boundary=<calculated when request is sent>');
   
@@ -714,72 +714,27 @@ class BigbluebuttonController extends Controller
         $bigbb->start_date=Carbon::now();
         $bigbb->user_id = 5090;
         $bigbb->save();
-        // $bbb = new BigBlueButton();
-        // $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
-        // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
-        // $req=$bbb->getHooksListUrl();
-        // return $req;
-
     }
 
-    public function bbb_will_call(Request $request){
+    public function create_hook( Request $request){
         
-        $meeting_info = self::getmeetingInfo($request);
-        $client = new \Google_Client();
-        $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
-        $client->setApplicationName("learnovia-notifications");
-        $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
-        $client->useApplicationDefaultCredentials();
-        if ($client->isAccessTokenExpired()) {
-            $client->fetchAccessTokenWithAssertion();
-        }
-        $access_token = $client->getAccessToken()['access_token'];
-
-        $clientt = new Client();
-        $res = $clientt->request('POST', 'http://127.0.0.1:80/api/bigbluebutton/callagain', [
-            'headers'   => [
-                'Authorization' => 'Bearer '. $access_token,
-                'Content-Type' => 'application/x-www-form-urlencoded'
-            ], 
-            'body' => json_encode(array(
-                'event' => array(
-                    "data" => array(
-                        "type" => "event",
-                        "id" => "meeting-ended",
-                        "attributes" => array(
-                            "meeting" => array(
-                                "internal-meeting-id" => $meeting_info['internalMeetingID'],
-                                "external-meeting-id" => $request->id
-                            ),
-                        ),
-                        "event" => array(
-                            "ts" => "1532718316938",
-                        ),
-                    ),
-                ),
-            ))
-        ]);  
-        
-        // Log::debug('mirna');
-        
-        // $bbb = new BigBlueButton();
-        // $getMeetingInfoParams = new HooksCreateParameters('https://sbbb.learnovia.com');
-        // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
-        // $req=$bbb->getHooksListUrl();
-        // return $req;
-    }
-
-    public function mimi( Request $request){
-        $bbb = new BigBlueButton();
-        // $hookdestroypar = new HooksDestroyParameters(15);
-        // $req = $bbb->hooksDestroy($hookdestroypar);
-        // return 'done';
         // $hookParameter = new HooksCreateParameters("https://webhook.site/3fb81c64-5b58-4513-9fa3-622a9f7b17ea");
-        $hookParameter = new HooksCreateParameters("https://devapi.learnovia.com/api/callagain2");
+        $bbb = new BigBlueButton();
+        $hookParameter = new HooksCreateParameters("https://devapi.learnovia.com/api/callback_function");
         $hookRes = $bbb->hooksCreate($hookParameter);
         return $hookRes->getHookId();
-        // $req=$bbb->getHooksCreateUrl($getMeetingInfoParams);
-        // $req=$bbb->getHooksListUrl();
+    }
+
+    public function destroy_hook(Request $request){
+        $bbb = new BigBlueButton();
+        $hookdestroypar = new HooksDestroyParameters($request->id);
+        $req = $bbb->hooksDestroy($hookdestroypar);
+        return 'Destroyed';
+    }
+
+    public function list_hook(Request $request){
+        $bbb = new BigBlueButton();
+        $req=$bbb->getHooksListUrl();
         return $req;
     }
 }
