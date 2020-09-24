@@ -11,12 +11,14 @@ use App\CourseSegment;
 use Validator;
 use Auth;
 use App\Enroll;
+use App\Letter;
 use App\Language;
 use App\Contract;
 use Carbon\Carbon;
 use DB;
 use Modules\QuestionBank\Entities\Quiz;
-
+use App\Http\Controllers\ExcelController;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SpatieController extends Controller
 {
@@ -57,7 +59,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/seen', 'title' => 'seen notifications']);
 
             //Spatie Permissions
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/add', 'title' => 'add role' , 'dashboard' => 1, 'icon' => 'User']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/add', 'title' => 'Add Role' , 'dashboard' => 1, 'icon' => 'User']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/delete', 'title' => 'delete role']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/get', 'title' => 'Roles Management', 'dashboard' => 1,  'icon' => 'User']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/update', 'title' => 'update role']);
@@ -210,6 +212,8 @@ class SpatieController extends Controller
             // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/search-all-users', 'title' => 'search all users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-my-users', 'title' => 'get all my users']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/generate-username-password', 'title' => 'generate username and password']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/GetAllCountries', 'title' => 'Get all countries']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/GetAllNationalities', 'title' => 'Get all nationalities']);
 
             //Components Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'component/get', 'title' => 'get component']);
@@ -371,18 +375,6 @@ class SpatieController extends Controller
                 'name' => 'Arabic',
                 'default' => 0,
             ]);
-            return "System Installed Your User is $user->email and Password is LeaRnovia_H_M_A";
-
-            $formateScale = [
-                ['name' => 'Fair','grade' => 0 ],
-                ['name' => 'Good','grade' => 1],
-                ['name' => 'Very Good','grade' => 2],
-                ['name' => 'Excellent','grade' => 3]
-            ];
-            $scale=Scale::create([
-               'name' => 'Default Scale',
-               'formate' => serialize($formateScale),
-            ]);
 
             $formateLetter = [
                 ['name' => 'A+','boundary' => 96],
@@ -403,6 +395,12 @@ class SpatieController extends Controller
                'name' => 'Default Letter',
                'formate' => serialize($formateLetter),
             ]);
+
+            eval('$importer = new App\Imports\\LanguageImport();');
+            $check = Excel::import($importer, public_path('translation/EngTranslate.xlsx'));
+            $check1 = Excel::import($importer, public_path('translation/ArabTranslate.xlsx'));
+            
+            return "System Installed Your User is $user->email and Password is LeaRnovia_H_M_A";
 
         }
     }
