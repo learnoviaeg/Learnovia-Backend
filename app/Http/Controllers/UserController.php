@@ -135,8 +135,8 @@ class UserController extends Controller
             }
             $role = Role::find($request->role);
             $user->assignRole($role);
-            $Auth_role = Role::find(8);
-            $user->assignRole($Auth_role);
+            // $Auth_role = Role::find(8);
+            // $user->assignRole($Auth_role);
             if ($request->role_id == 3) {
                 $option = new Request([
                     'users' => [$user->id],
