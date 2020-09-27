@@ -42,7 +42,6 @@ class AssigmentsController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/add', 'title' => 'add assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/update', 'title' => 'update assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/update-assignemnt-lesson', 'title' => 'update assignemnt lesson']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/delete-assign-lesson', 'title' => 'delete assignemnt lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/submit', 'title' => 'submit assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/grade', 'title' => 'grade assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/override', 'title' => 'override assignment']);
@@ -50,12 +49,22 @@ class AssigmentsController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/get', 'title' => 'get assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/toggle', 'title' => 'toggle assignment']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/get-all', 'title' => 'get all assignments']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/assign', 'title' => 'Assign assignment to lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/editgrade', 'title' => 'edit assignment\'s grades']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/assignment/assigned-users', 'title' => 'assign assignment to users']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/assignment/getAssignment', 'title' => 'get assignment for student']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'delete-assign-lesson', 'title' => 'Delete assign']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/delete-assign-lesson', 'title' => 'Delete assigned lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'assignment/assignment-override', 'title' => 'assignment override']);
 
+        $teacher_permissions=['assignment/add','assignment/update','assignment/update-assignemnt-lesson','assignment/delete-assign-lesson',
+        'assignment/grade','assignment/override','assignment/delete','assignment/get','assignment/toggle','assignment/editgrade','site/assignment/assigned-users',
+        'assignment/assignment-override','assignment/assign'];
+        $tecaher = \Spatie\Permission\Models\Role::find(4);
+        $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
+
+        $student_permissions=['assignment/submit','assignment/get','site/assignment/getAssignment'];
+        $student = \Spatie\Permission\Models\Role::find(3);
+        $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
         
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('assignment/add');
@@ -68,10 +77,11 @@ class AssigmentsController extends Controller
         $role->givePermissionTo('assignment/get');
         $role->givePermissionTo('assignment/toggle');
         $role->givePermissionTo('assignment/get-all');
+        $role->givePermissionTo('assignment/assign');
         $role->givePermissionTo('assignment/editgrade');
         $role->givePermissionTo('site/assignment/assigned-users');
         $role->givePermissionTo('site/assignment/getAssignment');
-        $role->givePermissionTo('delete-assign-lesson');
+        $role->givePermissionTo('assignment/delete-assign-lesson');
         $role->givePermissionTo('assignment/assignment-override');
 
         Component::create([
