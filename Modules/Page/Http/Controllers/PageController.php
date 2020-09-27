@@ -39,6 +39,14 @@ class PageController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/link-lesson', 'title' => 'link page to lesson']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'page/get', 'title' => 'get page']);
 
+        $teacher_permissions=['page/add','page/update','page/delete','page/toggle','page/link-lesson','page/get'];
+        $tecaher = \Spatie\Permission\Models\Role::find(4);
+        $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
+
+        $student_permissions=['page/get'];
+        $student = \Spatie\Permission\Models\Role::find(3);
+        $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('page/add');
         $role->givePermissionTo('page/update');

@@ -72,7 +72,19 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
 
-        
+        $teacher_permissions=['question/category/add','question/category/delete','question/category/update','question/category/get','question/add','question/update',
+        'question/get','question/delete','question/random','question/add-answer','question/delete-answer','quiz/add','quiz/update','quiz/delete','quiz/get',
+        'quiz/add-quiz-lesson','quiz/grading-method','quiz/update-quiz-lesson','quiz/destroy-quiz-lesson','quiz/get-all-types','quiz/get-all-categories',
+        'quiz/sort','quiz/get-quiz-lesson','quiz/get-all-quizes','quiz/get-student-in-quiz','quiz/get-student-answer-quiz','quiz/get-all-students-answer',
+        'quiz/detailes','quiz/correct-user-quiz','quiz/get-grade-category','quiz/toggle','quiz/get-attempts','site/quiz/getStudentinQuiz','quiz/grade-user-quiz',
+        'quiz/override'];
+        $tecaher = \Spatie\Permission\Models\Role::find(4);
+        $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
+
+        $student_permissions=['quiz/get','quiz/answer','quiz/correct-user-quiz','quiz/get-attempts','site/quiz/store_user_quiz'];
+        $student = \Spatie\Permission\Models\Role::find(3);
+        $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('site/quiz/getStudentinQuiz');
         $role->givePermissionTo('site/quiz/store_user_quiz');

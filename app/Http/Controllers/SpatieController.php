@@ -19,6 +19,13 @@ use DB;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Http\Controllers\ExcelController;
 use Maatwebsite\Excel\Facades\Excel;
+use Modules\QuestionBank\Http\Controllers\QuestionBankController;
+use Modules\UploadFiles\Http\Controllers\FilesController;
+use Modules\Page\Http\Controllers\PageController;
+use Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController;
+use Modules\Attendance\Http\Controllers\AttendanceSessionController;
+use App\Http\Controllers\H5PLessonController;
+use Modules\Assigments\Http\Controllers\AssigmentsController;
 
 class SpatieController extends Controller
 {
@@ -347,14 +354,14 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'payment/pay-payment', 'title' => 'pay payment']);
 
             //Add Roles
-            $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin']);
-            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'System Admin']);
-            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Student']);
-            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Teacher']);
-            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Manager']);
-            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Supervisor']);
-            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Parent']);
-            $Authenticated = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Authenticated']);
+            $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin' , 'description' => 'System manager that can monitor everything.']);
+            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'System Admin', 'description' => 'System admin.']);
+            $student = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Student', 'description' => 'System student.']);
+            $tecaher = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Teacher', 'description' => 'System teacher.']);
+            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Manager', 'description' => 'System Manager.']);
+            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Supervisor', 'description' => 'System Supervisor.']);
+            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Parent', 'description' => 'Systen students Parent.']);
+            $Authenticated = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Authenticated', 'description' => 'Allow user to only login untill has another permissions.']);
 
             //site internal permessions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/user/search-all-users', 'title' => 'Search all users assigned to my course segments and search all site wide for users give permission to search site wide']);
@@ -367,15 +374,39 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/show/username', 'title' => 'show username']);
 
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
+            $teacher_permissions = [
+                'site/restrict','notifications/get-all','notifications/get-unread','notifications/mark-as-read','notifications/seen','year/get','year/get-all',
+                'year/get-my-years','type/get-all','type/get','type/get-my-types','level/get-all','level/get','level/get-my-levels','class/get-all','class/get-my-classes',
+                'class/get','segment/get-all','segment/get','segment/get-my-segments','category/get-all','course/my-courses','course/layout','course/optional','course/course-with-teacher',
+                'course/sorted-componenets','course/toggle/letter','course/count-components','course/chain','course/components','course/lessons','course/get-classes-by-course',
+                'course/get-courses-by-classes','enroll/get-enrolled-courses','event/add','event/delete','event/update','event/my-events','contact/add','contact/get','contact/search',
+                'user/get-my-users','component/get','announcements/delete','announcements/send','announcements/get','announcements/update','announcements/getbyid','announcements/get-unread',
+                'announcements/mark-as-read','announcements/my','calendar/get','calendar/weekly','languages/get','languages/add','languages/update','languages/delete','languages/dictionary',
+                'user/language','languages/activate','languages/deactivate','languages/set-default','lesson/add','lesson/get','lesson/delete','lesson/update','lesson/sort',
+                'grade/category/add','grade/category/get','grade/category/delete','grade/category/update','grade/category/tree','grade/category/chain-categories','grade/grades',
+                'grade/category/get-gradecategories','grade/item/add','grade/item/get','grade/item/delete','grade/item/update','grade/user/add','grade/user/get','grade/user/update',
+                'grade/user/delete','grade/report/grader','grade/report/user','grade/report/over-all','scale/add','scale/update','scale/delete','scale/get','scale/get-with-course',
+                'letter/add','letter/update','letter/delete','letter/get','letter/assign','site/user/search-all-users','site/course/teacher',
+            ];
+            $student_permissions=['notifications/get-all','notifications/get-unread','notifications/mark-as-read','notifications/seen','year/get-all','year/get-my-years',
+            'type/get-all','type/get-my-types','level/get-my-levels','class/get-all','class/get-my-classes','class/get','class/get-lessons','segment/get-all','segment/get',
+            'segment/get-my-segments','course/my-courses','course/layout','course/components','contact/add','contact/get','user/get-by-id','user/get-my-users',
+            'component/get','announcements/get','announcements/getbyid','announcements/get-unread','announcements/mark-as-read','calendar/get','calendar/weekly',
+            'languages/get','languages/update','languages/delete','languages/dictionary','user/language','languages/activate','languages/deactivate','languages/set-default',
+            'grade/user/course-grade','grade/report/user','site/course/student'];
+
             $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->where('name','not like','%site/course/student%')->get());
             $Authenticated->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%bulk%')->where('name', 'like', '%messages%')->get());
+            $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
+            $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+
             $user = new User([
                 'firstname' => 'Learnovia',
                 'lastname' => 'Company',
                 'username' => 'Admin',
                 'email' => 'admin@learnovia.com',
-                'password' => bcrypt('LeaRnovia_H_M_A'),
-                'real_password' => 'LeaRnovia_H_M_A'
+                'password' => bcrypt('Learnovia123'),
+                'real_password' => 'Learnovia123'
             ]);
             $user->save();
             $user->assignRole($super);
@@ -414,7 +445,16 @@ class SpatieController extends Controller
             $check = Excel::import($importer, public_path('translation/EngTranslate.xlsx'));
             $check1 = Excel::import($importer, public_path('translation/ArabTranslate.xlsx'));
             
-            return "System Installed Your User is $user->email and Password is LeaRnovia_H_M_A";
+            //install components
+            (new FilesController)->install_file();
+            (new QuestionBankController)->install_question_bank();
+            (new AttendanceSessionController)->install();
+            (new AssigmentsController)->install_Assignment();
+            (new PageController)->install();
+            (new BigbluebuttonController)->install();
+            (new H5PLessonController)->install();
+
+            return "System Installed Your User is $user->email and Password is Learnovia123.";
 
         }
     }

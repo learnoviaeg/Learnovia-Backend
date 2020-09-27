@@ -30,6 +30,16 @@ class H5PLessonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/allow-edit', 'title' => 'Allow to edit interactive content']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/allow-delete', 'title' => 'Allow to delete interactive content']);
 
+        $teacher_permissions=['h5p/lesson/create','h5p/lesson/toggle','h5p/lesson/get-all','h5p/lesson/delete','h5p/lesson/update','h5p/lesson/allow-edit',
+        'h5p/lesson/allow-delete'];
+        $tecaher = \Spatie\Permission\Models\Role::find(4);
+        $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
+        
+        $student_permissions=['h5p/lesson/get-all'];
+        $student = \Spatie\Permission\Models\Role::find(3);
+        $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+
+
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('h5p/lesson/create');
         $role->givePermissionTo('h5p/lesson/toggle');

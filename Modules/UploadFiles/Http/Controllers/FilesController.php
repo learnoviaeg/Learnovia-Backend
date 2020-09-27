@@ -52,6 +52,13 @@ class FilesController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/media/edit', 'title' => 'update media']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/assign', 'title' => 'assign media']);
 
+        $teacher_permissions=['file/add','file/assign','file/update','file/delete','file/toggle','media/add','media/update','media/delete',
+        'media/toggle','file/media/get','link/add','link/update','file/sort','media/sort','media/get','file/get','site/file/edit','site/media/edit',
+        'media/assign'];
+
+        $tecaher = \Spatie\Permission\Models\Role::find(4);
+        $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
+
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('file/add');
         $role->givePermissionTo('file/update');

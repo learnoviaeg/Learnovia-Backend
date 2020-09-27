@@ -46,6 +46,9 @@ class AttendanceSessionController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'Get students in session']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/export', 'title' => 'Export attendnace']);
 
+        $teacher_permissions=['attendance/add-log','attendance/get-attendance','attendance/get-daily','attendance/get-users-in-session','attendance/export'];
+        $tecaher = \Spatie\Permission\Models\Role::find(4);
+        $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
         
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('attendance/add-session');
