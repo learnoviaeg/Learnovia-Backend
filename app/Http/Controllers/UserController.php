@@ -708,6 +708,8 @@ class UserController extends Controller
 
         $Given_courseSegments = GradeCategoryController::getCourseSegmentWithArray($request);
         $course_segments = Enroll::where('user_id',Auth::id())->pluck('course_segment')->unique();
+        if($request->user()->can('site/show-all-courses'))
+            $course_segments=$Given_courseSegments;
         $CS =  array_intersect($course_segments->toArray(),$Given_courseSegments->toArray());
         $users = Enroll::whereIn('course_segment',$CS)->pluck('user_id')->unique();
 
