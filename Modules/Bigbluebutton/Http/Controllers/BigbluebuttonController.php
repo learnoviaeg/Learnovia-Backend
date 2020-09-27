@@ -49,6 +49,16 @@ class BigbluebuttonController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/get-all','title' => 'Bigbluebutton Get All']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'bigbluebutton/session-moderator','title' => 'Bigbluebutton session moderator']);
 
+        $teacher_permissions=['bigbluebutton/create','bigbluebutton/join','bigbluebutton/get','bigbluebutton/getRecord','bigbluebutton/delete','bigbluebutton/toggle',
+        'bigbluebutton/attendance','bigbluebutton/get-attendance','bigbluebutton/export','bigbluebutton/session-moderator'];
+        $tecaher = \Spatie\Permission\Models\Role::find(4);
+        $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
+
+        $student_permissions=['bigbluebutton/join','bigbluebutton/get','bigbluebutton/getRecord'];
+        $student = \Spatie\Permission\Models\Role::find(3);
+        $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+
+
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('bigbluebutton/create');
         $role->givePermissionTo('bigbluebutton/join');
