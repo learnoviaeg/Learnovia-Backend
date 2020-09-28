@@ -21,6 +21,7 @@ use Auth;
 use Carbon\Carbon;
 use App\Exports\SegmentsExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Enroll;
 
 class segment_class_Controller extends Controller
 
@@ -274,15 +275,21 @@ class segment_class_Controller extends Controller
         $req->validate([
             'id' => 'required|exists:segments,id'
         ]);
-        $segment = Segment::find($req->id);
-        if ($segment) {
-            $segment->delete();
-            $req['id'] = null;
-            $req['returnmsg'] = 'delete';
-            $print = self::get($req);
-            return $print;
-        }
-        return HelperController::NOTFOUND();
+
+        $course_segments = CourseSegment::whereIn('segment_class_id',SegmentClass::where('segment_id',$req->id)->pluck('id'))->get();
+        if (count($course_segments) > 0) 
+             return HelperController::api_response_format(404, [] , 'This Segment assigned to course/s, cannot be deleted.');
+        
+        Segment::whereId($req->id)->delete();
+        SegmentClass::where('segment_id',$req->id)->delete();
+        Enroll::where('segment',$req->id)->update([
+            'segment' => null
+        ]);
+
+        $req['id'] = null;
+        $req['returnmsg'] = 'delete';
+        $print = self::get($req);
+        return $print;
     }
 
     /**

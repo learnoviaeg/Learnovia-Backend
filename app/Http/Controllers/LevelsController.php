@@ -19,7 +19,7 @@ use Validator;
 use App\Exports\LevelsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Response;
-
+use App\ClassLevel;
 
 class LevelsController extends Controller
 {
@@ -70,11 +70,21 @@ class LevelsController extends Controller
         $request->validate([
             'id' => 'required|exists:levels,id',
         ]);
+        
+        $year_levels_id= YearLevel::where('level_id',$request->id)->pluck('id');
+        $class_level = ClassLevel::whereIn('year_level_id',$year_levels_id)->get();
+        if (count($class_level) > 0)
+            return HelperController::api_response_format(404, [] , 'This level assigned to classe/s, cannot be deleted.');
 
-        $level = Level::find($request->id);
-        if ($level)
-            $level->delete();
-            $levels = Level::paginate(HelperController::GetPaginate($request));
+        Level::whereId($request->id)->delete();
+        YearLevel::where('level_id',$request->id)->delete();
+        User::where('level',$request->id)->update([
+            'level' => null
+        ]);
+        Enroll::where('level',$request->id)->update([
+            'level' => null
+        ]);
+        $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(203, $levels, 'Level Deleted Successfully');
     }
 
