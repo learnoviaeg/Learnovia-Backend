@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use App\AcademicYearType;
 use App\YearLevel;
 use App\Level;
-
+use App\SegmentClass;
 use Illuminate\Http\Request;
 use App\Classes;
 use App\CourseSegment;
@@ -231,6 +231,14 @@ class ClassController extends Controller
     {
         $request->validate(['id' => 'required|exists:classes,id']);
         $class = Classes::find($request->id);
+        $Segment_class = SegmentClass::whereIn("class_level_id",ClassLevel::where('class_id',$request->id)->pluck('id'))->get();
+        
+        if(count($Segment_class)>0){
+            return HelperController::api_response_format(400, [], 'This class assigned to segments, cannot be deleted');
+        }
+        ClassLevel::where('class_id',$request->id)->delete();
+        Enroll::where('class',$request->id)->update(["class"=>null]);
+        User::where('class_id',$request->id)->update(["class_id"=>null]);
         $class->delete();
         return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), 'Class Deleted Successfully');
     }
