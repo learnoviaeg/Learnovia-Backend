@@ -199,7 +199,7 @@ class BigbluebuttonController extends Controller
         $createMeetingParams->setModeratorPassword($request['moderator_password']);
         $createMeetingParams->setDuration($request['duration']);
         // $createMeetingParams->setRedirect(false);
-        $createMeetingParams->setLogoutUrl('https://dev.learnovia.com');
+        $createMeetingParams->setLogoutUrl('https://learnovia.com/');
         if($request['is_recorded'] == 1){
             $createMeetingParams->setRecord(true);
             $createMeetingParams->setAllowStartStopRecording(true);
