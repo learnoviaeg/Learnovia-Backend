@@ -307,6 +307,12 @@ class CourseController extends Controller
             'id' => 'required|exists:courses,id'
         ]);
         $course = Course::find($request->id);
+        $enrolls = Enroll::where('course_segment',CourseSegment::where('course_id',$request->id)->pluck('id'))->get();
+        if(count($enrolls)>0){
+            return HelperController::api_response_format(400, [], 'This course assigned to users, cannot be deleted');
+
+        }
+        CourseSegment::where('course_id',$request->id)->delete();
         $course->delete();
         $request['returnmsg'] = 'Course Deleted Successfully';
         $request = new Request($request->only(['returnmsg']));
