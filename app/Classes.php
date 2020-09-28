@@ -24,7 +24,7 @@ class Classes extends Model
 
     public function Segment_class()
     {
-        return $this->hasMany('App\SegmentClass', 'ClassLevel', 'class_id','id');
+        return $this->hasMany('App\SegmentClass', 'class_level_id','id');
     }
 
     public function sessions()

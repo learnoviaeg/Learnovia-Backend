@@ -112,6 +112,10 @@ class AcademicYearController extends Controller
         ]);
 
         $year = AcademicYear::whereId($request->id)->first();
+        if(count( $year->YearType)>0){
+            return HelperController::api_response_format(400, [], 'This year assigned to types, cannot be deleted');
+        }
+        Enroll::where('year',$request->id)->update(["year"=>null]);
         if ($year->delete()) {
             return HelperController::api_response_format(200, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), 'Year Deleted Successfully');            
         }
