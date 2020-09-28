@@ -387,44 +387,46 @@ class GradeCategoryController extends Controller
         $year = AcademicYear::Get_current();
         if ($request->filled('year'))
             $year = AcademicYear::find($request->year);
-        $YearTypes = $year->where('id', $year->id)->with(['YearType' => function ($query) use ($request) {
-            if ($request->filled('type'))
-                $query->where('academic_type_id', $request->type);
-        }, 'YearType.yearLevel' => function ($query) use ($request) {
-            if ($request->filled('level'))
-                $query->where('level_id', $request->level);
-        }, 'YearType.yearLevel.classLevels' => function ($query) use ($request) {
-            if ($request->filled('class'))
-                $query->where('class_id', $request->class);
-        }, 'YearType.yearLevel.classLevels.segmentClass' => function ($query) use ($request) {
-            if ($request->filled('type')) {
-                $segment_id = Segment::Get_current($request->type)->id;
-                if ($request->filled('segment'))
-                    $segment_id = $request->segment;
-                $query->where('segment_id', $segment_id);
-            }
-        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function ($query)  use ($request) {
-            if ($request->filled('courses'))
-                $query->whereIn('course_id', $request->courses);
-            if ($request->filled('typical'))
-                $query->where('typical', $request->typical);
-        }])->get()->pluck('YearType')[0];
-        $array = collect();
-        if (count($YearTypes) > 0) {
-            $YearTypes = $YearTypes->pluck('yearLevel');
+        if(isset($year)){
+            $YearTypes = $year->where('id', $year->id)->with(['YearType' => function ($query) use ($request) {
+                if ($request->filled('type'))
+                    $query->where('academic_type_id', $request->type);
+            }, 'YearType.yearLevel' => function ($query) use ($request) {
+                if ($request->filled('level'))
+                    $query->where('level_id', $request->level);
+            }, 'YearType.yearLevel.classLevels' => function ($query) use ($request) {
+                if ($request->filled('class'))
+                    $query->where('class_id', $request->class);
+            }, 'YearType.yearLevel.classLevels.segmentClass' => function ($query) use ($request) {
+                if ($request->filled('type')) {
+                    $segment_id = Segment::Get_current($request->type)->id;
+                    if ($request->filled('segment'))
+                        $segment_id = $request->segment;
+                    $query->where('segment_id', $segment_id);
+                }
+            }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function ($query)  use ($request) {
+                if ($request->filled('courses'))
+                    $query->whereIn('course_id', $request->courses);
+                if ($request->filled('typical'))
+                    $query->where('typical', $request->typical);
+            }])->get()->pluck('YearType')[0];
+            $array = collect();
             if (count($YearTypes) > 0) {
-                for ($i = 0; $i < count($YearTypes); $i++) {
-                    $classes = $YearTypes[$i]->pluck('classLevels');
-                    if (count($classes) > 0) {
-                        for ($j = 0; $j < count($classes); $j++) {
-                            $segments = $classes[$j]->pluck('segmentClass');
-                            if (count($segments) > 0) {
-                                for ($k = 0; $k < count($segments); $k++) {
-                                    $courseSegments = $segments[$k]->pluck('courseSegment');
-
-                                    foreach ($courseSegments as $courseSegment) {
-                                        foreach ($courseSegment as $value) {
-                                            $array->push($value->id);
+                $YearTypes = $YearTypes->pluck('yearLevel');
+                if (count($YearTypes) > 0) {
+                    for ($i = 0; $i < count($YearTypes); $i++) {
+                        $classes = $YearTypes[$i]->pluck('classLevels');
+                        if (count($classes) > 0) {
+                            for ($j = 0; $j < count($classes); $j++) {
+                                $segments = $classes[$j]->pluck('segmentClass');
+                                if (count($segments) > 0) {
+                                    for ($k = 0; $k < count($segments); $k++) {
+                                        $courseSegments = $segments[$k]->pluck('courseSegment');
+    
+                                        foreach ($courseSegments as $courseSegment) {
+                                            foreach ($courseSegment as $value) {
+                                                $array->push($value->id);
+                                            }
                                         }
                                     }
                                 }
@@ -433,8 +435,9 @@ class GradeCategoryController extends Controller
                     }
                 }
             }
+            return $array;
         }
-        return $array;
+        return [];
     }
 
     public  static function getCourseSegmentWithArray(Request $request)
