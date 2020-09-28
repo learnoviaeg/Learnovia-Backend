@@ -17,6 +17,7 @@ use App\Http\Resources\Year_type_resource;
 use Validator;
 use App\Exports\TypesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\YearLevel;
 
 class AC_year_type extends Controller
 {
@@ -102,15 +103,23 @@ class AC_year_type extends Controller
         $req->validate([
             'id' => 'required|exists:academic_types,id'
         ]);
-        $type = AcademicType::find($req->id);
-        if ($type) {
-            $type->delete();
-            $output= AcademicType::paginate(HelperController::GetPaginate($req));
-            $req['returnmsg'] = 'delete';
-            $print = self::get($req);
-            return $print;
+
+        $segment= Segment::where('academic_type_id',$req->id)->get();
+        $level= YearLevel::whereIn('academic_year_type_id',AcademicYearType::where('academic_type_id',$req->id)->pluck('id'))->get();
+        if(!(count($segment) == 0 && count($level) == 0)){
+            return HelperController::api_response_format(404, [], 'This type assigned to level or segment, cannot be deleted.');
         }
-        return HelperController::api_response_format(400, [], 'Type Deleted Fail');
+        $types = AcademicType::whereId($req->id)->delete();
+        AcademicYearType::where('academic_type_id',$req->id)->delete();
+        User::where('type',$req->id)->update([
+            'type' => null
+        ]);
+        Enroll::where('type',$req->id)->update([
+            'type' => null
+        ]);
+        $req['returnmsg'] = 'delete';
+        $print = self::get($req);
+        return $print;
     }
 
     /**

@@ -712,18 +712,18 @@ class BigbluebuttonController extends Controller
 
         $request->header('Content-Type', 'multipart/form-data;boundary=<calculated when request is sent>');
   
-        Log::info("mirna and hend" .$request);
+        // Log::info("mirna and hend" .$request);
 
-        $bigbb = new BigbluebuttonModel;
-        $bigbb->name='el log ehstghl';
-        $bigbb->class_id=1;
-        $bigbb->course_id=36;
-        $bigbb->attendee_password='1234567';
-        $bigbb->moderator_password='mimi';
-        $bigbb->duration='50';
-        $bigbb->start_date=Carbon::now();
-        $bigbb->user_id = 5090;
-        $bigbb->save();
+        // $bigbb = new BigbluebuttonModel;
+        // $bigbb->name='el log ehstghl';
+        // $bigbb->class_id=1;
+        // $bigbb->course_id=36;
+        // $bigbb->attendee_password='1234567';
+        // $bigbb->moderator_password='mimi';
+        // $bigbb->duration='50';
+        // $bigbb->start_date=Carbon::now();
+        // $bigbb->user_id = 5090;
+        // $bigbb->save();
     }
 
     public function create_hook( Request $request){
