@@ -146,14 +146,14 @@ class QuestionBankController extends Controller
         );
         QuestionsType::insert($QuesTypes);
 
-        $QuesCateg=array(
-            array('name' => 'Lesson One'),
-            array('name' => 'Lesson Two'),
-            array('name' => 'Lesson Three'),
-            array('name' => 'Lesson Four'),
-            array('name' => 'Lesson Five'),
-        );
-        QuestionsCategory::insert($QuesCateg);
+        // $QuesCateg=array(
+        //     array('name' => 'Lesson One'),
+        //     array('name' => 'Lesson Two'),
+        //     array('name' => 'Lesson Three'),
+        //     array('name' => 'Lesson Four'),
+        //     array('name' => 'Lesson Five'),
+        // );
+        // QuestionsCategory::insert($QuesCateg);
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
