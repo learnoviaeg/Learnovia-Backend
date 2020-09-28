@@ -367,7 +367,7 @@ class BigbluebuttonController extends Controller
         {
             $bbb = new BigBlueButton();
             // $meet = BigbluebuttonModel::whereId($request->id)->first();
-            $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)->get();
+            $meet = BigbluebuttonModel::where('class_id',$request->class)->where('course_id',$request->course)->orderBy('start_date')->get();
 
             foreach($meet as $m)
             {
@@ -420,7 +420,7 @@ class BigbluebuttonController extends Controller
         }
         
         $bbb = new BigBlueButton();
-        $meet = BigbluebuttonModel::whereIn('course_id',$courses)->get(); 
+        $meet = BigbluebuttonModel::whereIn('course_id',$courses)->orderBy('start_date')->get(); 
         if($request->user()->can('site/show-all-courses')){
             $courses_id=collect();
             foreach ($CS_ids as $coco) {
@@ -429,7 +429,7 @@ class BigbluebuttonController extends Controller
                     $courses_id->push($cocos->course_id);
             }
             $all_meetings = $bbb = new BigBlueButton();
-            $meet = BigbluebuttonModel::whereIn('course_id',$courses_id)->get();       
+            $meet = BigbluebuttonModel::whereIn('course_id',$courses_id)->orderBy('start_date')->get();       
         }
 
         foreach($meet as $m)
