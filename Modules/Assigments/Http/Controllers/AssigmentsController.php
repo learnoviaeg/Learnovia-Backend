@@ -10,7 +10,9 @@ use App\Lesson;
 use App\SegmentClass;
 use App\ClassLevel;
 use App\GradeCategory;
+use App\GradeItems;
 use App\Classes;
+use App\UserGrade;
 use Spatie\Permission\Models\Permission;
 use URL;
 use Spatie\PdfToImage\Pdf;
@@ -445,7 +447,6 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200, null, $message = 'This assignment is not assigned to this lesson');
             
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
-        $assigment = assignment::where('id', $request->assignment_id)->first();
         // $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if ($assilesson->mark < $request->grade) {
             return HelperController::api_response_format(400, $body = [], $message = 'please put grade less than ' . $assilesson->mark);
@@ -457,6 +458,13 @@ class AssigmentsController extends Controller
             $userassigment->corrected_file = attachment::upload_attachment($request->corrected_file, 'assignment', null)->id;
         }
         $userassigment->grade = $request->grade;
+
+        $assigment = assignment::where('id', $request->assignment_id)->first();
+        $grade_item=GradeItems::where('name',$assigment->name)->pluck('id')->first();
+        $usergrade=UserGrade::where('user_id',$request->user_id)
+                                ->where('grade_item_id',GradeItems::where('name',$assigment->name)->pluck('id')->first())
+                                ->update(['final_grade' => $request->grade]);
+
         $userassigment->status_id = 1;
         $userassigment->save();
         return HelperController::api_response_format(200, $body = $userassigment, $message = 'Grade submitted successfully');
