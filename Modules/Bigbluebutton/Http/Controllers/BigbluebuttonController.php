@@ -287,15 +287,20 @@ class BigbluebuttonController extends Controller
         if($request->user()->can('bigbluebutton/session-moderator')){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
-            $attendance=AttendanceLog::where('student_id',Auth::id())->where('session_id',$bigbb->id)->where('type','online')->update([
+            $attendance = AttendanceLog::updateOrCreate(['student_id' => Auth::id(),'session_id'=>$bigbb->id,'type'=>'online','entered_date'=> null],
+            [
                 'ip_address' => \Request::ip(),
+                'student_id' => Auth::id(),
+                'session_id' => $bigbb->id,
                 'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'type' => 'online',
                 'entered_date' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
         }
         $joinMeetingParams->setRedirect(true);
         $joinMeetingParams->setJoinViaHtml5(true);
+        $joinMeetingParams->setUserId($user_name);
         $url = $bbb->getJoinMeetingURL($joinMeetingParams);
 
         $output = array(
@@ -647,14 +652,14 @@ class BigbluebuttonController extends Controller
 
         foreach($response['attendees']['attendee'] as $attend){
             $user=User::where('username',$attend['fullName'])->first();
-            $attendance=AttendanceLog::where('student_id',$user->id)->where('session_id',$request->id)->where('type','online')->update([
+            $attendance=AttendanceLog::where('student_id',$user->id)->where('session_id',$request->id)->where('type','online')->first()->update([
                 'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'taker_id' => Auth::id(),
                 'status' => 'Present'
             ]);
         }
 
-        $attendance_absent=AttendanceLog::where('status',null)->where('session_id',$request->id)->where('type','online')->update([
+        $attendance_absent=AttendanceLog::where('status',null)->where('session_id',$request->id)->where('type','online')->distinct()->update([
             'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'taker_id' => Auth::id(),
             'status' => 'Absent'
@@ -709,21 +714,20 @@ class BigbluebuttonController extends Controller
     }
 
     public function callback_function(Request $request){
+        $arr=[];
+        $arr=json_decode($request['event'],true);
+        if($arr[0]['data']['id'] == 'user-left'){
+            // Log::debug($arr[0]['data']['id']);
+            // Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
+            // Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
 
-        // $request->header('Content-Type', 'multipart/form-data;boundary=<calculated when request is sent>');
-
-        Log::info("Webhooks bbb test" .$request);
-        
-        // $bigbb = new BigbluebuttonModel;
-        // $bigbb->name='el log ehstghl';
-        // $bigbb->class_id=1;
-        // $bigbb->course_id=36;
-        // $bigbb->attendee_password='1234567';
-        // $bigbb->moderator_password='mimi';
-        // $bigbb->duration='50';
-        // $bigbb->start_date=Carbon::now();
-        // $bigbb->user_id = 5090;
-        // $bigbb->save();
+            $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
+            $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
+                                ->where('type','online')
+                                ->where('student_id',$user_id)->last()->update([
+                                    'left_date' => Carbon::now()
+                                ]);
+        }
     }
 
     public function create_hook(Request $request){
