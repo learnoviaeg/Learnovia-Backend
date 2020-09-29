@@ -492,6 +492,13 @@ class AssigmentsController extends Controller
             $userassigment->corrected_file = attachment::upload_attachment($request->corrected_file, 'assignment', null)->id;
         }
         $userassigment->grade = $request->grade;
+
+        $assigment = assignment::where('id', $request->assignment_id)->first();
+        $grade_item=GradeItems::where('name',$assigment->name)->pluck('id')->first();
+        $usergrade=UserGrade::where('user_id',$request->user_id)
+                                ->where('grade_item_id',GradeItems::where('name',$assigment->name)->pluck('id')->first())
+                                ->update(['final_grade' => $request->grade]);
+                                
         $userassigment->save();
         return HelperController::api_response_format(200, $body = $userassigment, $message = 'Grade edited successfully');
     }
