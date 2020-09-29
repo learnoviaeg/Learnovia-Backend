@@ -295,6 +295,7 @@ class BigbluebuttonController extends Controller
                 'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'type' => 'online',
                 'entered_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                'taker_id' => $bigbb->user_id
             ]);
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
         }
@@ -717,15 +718,15 @@ class BigbluebuttonController extends Controller
         $arr=[];
         $arr=json_decode($request['event'],true);
         if($arr[0]['data']['id'] == 'user-left'){
-            // Log::debug($arr[0]['data']['id']);
-            // Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
-            // Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
+            Log::debug($arr[0]['data']['id']);
+            Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
+            Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
 
             $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
             $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
                                 ->where('type','online')
                                 ->where('student_id',$user_id)->last()->update([
-                                    'left_date' => Carbon::now()
+                                    'left_date' => Carbon::now()->format('Y-m-d H:i:s')
                                 ]);
         }
     }
