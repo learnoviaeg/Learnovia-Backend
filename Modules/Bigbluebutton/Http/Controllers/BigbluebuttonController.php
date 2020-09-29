@@ -651,8 +651,10 @@ class BigbluebuttonController extends Controller
             'status' => null
         ]);
 
+        $students_id=collcet();
         foreach($response['attendees']['attendee'] as $attend){
             $user=User::where('username',$attend['fullName'])->first();
+            $students_id->push($user->id);
             $attendance=AttendanceLog::where('student_id',$user->id)->where('session_id',$request->id)->where('type','online')->first();
             if(isset($attendance)){
                 $attendance->update([
@@ -663,7 +665,7 @@ class BigbluebuttonController extends Controller
             }
         }
 
-        $attendance_absent=AttendanceLog::where('status',null)->where('session_id',$request->id)->where('type','online')->distinct()->update([
+        $attendance_absent=AttendanceLog::where('status',null)->where('session_id',$request->id)->where('type','online')->whereNotIn('student_id',$students_id)->distinct()->update([
             'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'taker_id' => Auth::id(),
             'status' => 'Absent'
@@ -680,7 +682,7 @@ class BigbluebuttonController extends Controller
             'id' => 'required|exists:bigbluebutton_models,id',
         ]);
 
-        $all_logs=AttendanceLog::where('session_id',$request->id)->where('type','online')->with('User')->get();
+        $all_logs=AttendanceLog::where('session_id',$request->id)->where('type','online')->distinct()->with('User')->get();
         $attendance_log['Total_Logs'] = $all_logs->count();
         $attendance_log['Present']['count']= $all_logs->where('status','Present')->count();
         $attendance_log['Absent']['count']= $all_logs->where('status','Absent')->count();
