@@ -653,11 +653,14 @@ class BigbluebuttonController extends Controller
 
         foreach($response['attendees']['attendee'] as $attend){
             $user=User::where('username',$attend['fullName'])->first();
-            $attendance=AttendanceLog::where('student_id',$user->id)->where('session_id',$request->id)->where('type','online')->first()->update([
-                'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'taker_id' => Auth::id(),
-                'status' => 'Present'
-            ]);
+            $attendance=AttendanceLog::where('student_id',$user->id)->where('session_id',$request->id)->where('type','online')->first();
+            if(isset($attendance)){
+                $attendance->update([
+                    'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                    'taker_id' => Auth::id(),
+                    'status' => 'Present'
+                ]);
+            }
         }
 
         $attendance_absent=AttendanceLog::where('status',null)->where('session_id',$request->id)->where('type','online')->distinct()->update([
@@ -725,7 +728,7 @@ class BigbluebuttonController extends Controller
             $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
             $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
                                 ->where('type','online')
-                                ->where('student_id',$user_id)->last()->update([
+                                ->where('student_id',$user_id)->latest()->first()->update([
                                     'left_date' => Carbon::now()->format('Y-m-d H:i:s')
                                 ]);
         }
