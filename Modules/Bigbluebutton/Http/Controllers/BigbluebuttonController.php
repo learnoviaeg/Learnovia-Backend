@@ -700,27 +700,28 @@ class BigbluebuttonController extends Controller
 
     public function callback_function(Request $request){
 
-        $request->header('Content-Type', 'multipart/form-data;boundary=<calculated when request is sent>');
-  
-        Log::info("mirna and hend" .$request);
+        // $request->header('Content-Type', 'multipart/form-data;boundary=<calculated when request is sent>');
 
-        $bigbb = new BigbluebuttonModel;
-        $bigbb->name='el log ehstghl';
-        $bigbb->class_id=1;
-        $bigbb->course_id=36;
-        $bigbb->attendee_password='1234567';
-        $bigbb->moderator_password='mimi';
-        $bigbb->duration='50';
-        $bigbb->start_date=Carbon::now();
-        $bigbb->user_id = 5090;
-        $bigbb->save();
+        Log::info("Webhooks bbb test" .$request);
+
+        // $bigbb = new BigbluebuttonModel;
+        // $bigbb->name='el log ehstghl';
+        // $bigbb->class_id=1;
+        // $bigbb->course_id=36;
+        // $bigbb->attendee_password='1234567';
+        // $bigbb->moderator_password='mimi';
+        // $bigbb->duration='50';
+        // $bigbb->start_date=Carbon::now();
+        // $bigbb->user_id = 5090;
+        // $bigbb->save();
     }
 
-    public function create_hook( Request $request){
+    public function create_hook(Request $request){
         
         // $hookParameter = new HooksCreateParameters("https://webhook.site/3fb81c64-5b58-4513-9fa3-622a9f7b17ea");
         $bbb = new BigBlueButton();
-        $hookParameter = new HooksCreateParameters("https://devapi.learnovia.com/api/callback_function");
+        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+        $hookParameter = new HooksCreateParameters($url."/api/callback_function");
         $hookRes = $bbb->hooksCreate($hookParameter);
         return $hookRes->getHookId();
     }
