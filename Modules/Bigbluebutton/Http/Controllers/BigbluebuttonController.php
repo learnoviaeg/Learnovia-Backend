@@ -102,7 +102,6 @@ class BigbluebuttonController extends Controller
             'start_date' => 'required|array',
         ]);
 
-        self::create_hook($request);
         $attendee= 'learnovia123';
         if(isset($request->attendee_password)){
             $attendee= $request->attendee_password;
@@ -154,7 +153,8 @@ class BigbluebuttonController extends Controller
                 
                         if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
                         ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
-                        {                            
+                        {
+                            self::create_hook($request);                            
                             $check =self::start_meeting($req);
                             if($check)
                                 $bigbb['join'] = true;
