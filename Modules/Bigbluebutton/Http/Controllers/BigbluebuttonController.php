@@ -153,7 +153,8 @@ class BigbluebuttonController extends Controller
                 
                         if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
                         ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
-                        {                            
+                        {
+                            self::create_hook($request);                            
                             $check =self::start_meeting($req);
                             if($check)
                                 $bigbb['join'] = true;
@@ -188,7 +189,6 @@ class BigbluebuttonController extends Controller
 
     public function start_meeting($request)
     {
-        self::create_hook($request);
         //Creating the meeting
         $bbb = new BigBlueButton();
 
