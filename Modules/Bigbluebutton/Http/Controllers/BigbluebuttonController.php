@@ -188,6 +188,7 @@ class BigbluebuttonController extends Controller
 
     public function start_meeting($request)
     {
+        self::create_hook($request);
         //Creating the meeting
         $bbb = new BigBlueButton();
 
@@ -271,6 +272,7 @@ class BigbluebuttonController extends Controller
     //Join the meeting
     public function join(Request $request)
     {
+        self::create_hook($request);
         $bbb = new BigBlueButton();
 
         //Validating the Input
@@ -567,7 +569,7 @@ class BigbluebuttonController extends Controller
     public function getmeetingInfo(Request $request)
     {
         $request->validate([
-            'id' => 'exists:bigbluebutton_models,id|required_without:class,course',
+            'id' => 'exists:bigbluebutton_models,id',
         ]);
 
         $user_id = Auth::user()->id;
@@ -594,23 +596,6 @@ class BigbluebuttonController extends Controller
                 $body->seek(0);
                 $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
                 return $response;
-                $atendees=collect();
-                $names=collect();
-                if(count($response['attendees']) >= 1){
-
-                    foreach($response['attendees']['attendee'] as $attend){
-                        $names->push($attend['fullName']);
-                    }
-
-                }else{
-                    foreach($response['attendees'] as $attend){
-                    
-                       $names->push($attend['fullName']);
-                    }
-                }
-                
-                // return $response['attendees']['attendee'];
-                return $names;
             }
         }
     }
@@ -724,29 +709,35 @@ class BigbluebuttonController extends Controller
     public function callback_function(Request $request){
         $arr=[];
         $arr=json_decode($request['event'],true);
-        
-        Log::debug($arr[0]['data']);
 
-        if($arr[0]['data']['id'] == 'user-left'){
-            Log::debug($arr[0]['data']['id']);
-            Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
-            Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
+        $req = new Request([
+            'id' => $arr[0]['data']['attributes']['meeting']['external-meeting-id'] ,
+        ]);
 
-            $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
-            $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
-                                ->where('type','online')
-                                ->where('student_id',$user_id)->where('left_date',null)->first()->update([
-                                    'left_date' => Carbon::now()->format('Y-m-d H:i:s')
-                                ]);
-        }
+        $information = self::getmeetingInfo($req);
+        if($information != 'failed' && $information['internalMeetingID'] == $arr[0]['data']['attributes']['meeting']['internal-meeting-id']){
 
-        if($arr[0]['data']['id'] == 'meeting-ended'){
-            $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
-                                ->where('type','online')
-                                ->where('entered_date','!=',null)
-                                ->where('left_date',null)->update([
-                                    'left_date' => Carbon::now()->format('Y-m-d H:i:s')
-                                ]);
+            if($arr[0]['data']['id'] == 'user-left'){
+                Log::debug($arr[0]['data']['id']);
+                Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
+                Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
+
+                $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
+                $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
+                                    ->where('type','online')
+                                    ->where('student_id',$user_id)->where('left_date',null)->first()->update([
+                                        'left_date' => Carbon::now()->format('Y-m-d H:i:s')
+                                    ]);
+            }
+
+            if($arr[0]['data']['id'] == 'meeting-ended'){
+                $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
+                                    ->where('type','online')
+                                    ->where('entered_date','!=',null)
+                                    ->where('left_date',null)->update([
+                                        'left_date' => Carbon::now()->format('Y-m-d H:i:s')
+                                    ]);
+            }
         }
     }
 
