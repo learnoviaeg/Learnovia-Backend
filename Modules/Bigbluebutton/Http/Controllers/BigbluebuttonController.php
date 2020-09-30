@@ -740,7 +740,8 @@ class BigbluebuttonController extends Controller
         if($arr[0]['data']['id'] == 'meeting-ended'){
             $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
                                 ->where('type','online')
-                                ->where('left_date',null)->first()->update([
+                                ->where('entered_date','not like',null)
+                                ->where('left_date',null)->update([
                                     'left_date' => Carbon::now()->format('Y-m-d H:i:s')
                                 ]);
         }
