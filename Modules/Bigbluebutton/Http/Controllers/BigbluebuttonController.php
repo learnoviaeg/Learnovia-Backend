@@ -730,7 +730,7 @@ class BigbluebuttonController extends Controller
             $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
             $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
                                 ->where('type','online')
-                                ->where('student_id',$user_id)->latest()->first()->update([
+                                ->where('student_id',$user_id)->where('left_date',null)->first()->update([
                                     'left_date' => Carbon::now()->format('Y-m-d H:i:s')
                                 ]);
         }
