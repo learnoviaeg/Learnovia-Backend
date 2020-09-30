@@ -726,6 +726,7 @@ class BigbluebuttonController extends Controller
         }
 
         if($arr[0]['data']['id'] == 'meeting-ended'){
+            Log::debug($arr[0]['data']);
             Log::debug($arr[0]['data']['id']);
             $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
                                 ->where('type','online')
