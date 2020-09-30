@@ -571,13 +571,7 @@ class BigbluebuttonController extends Controller
         $request->validate([
             'id' => 'exists:bigbluebutton_models,id',
         ]);
-
-        $user_id = Auth::user()->id;
-        $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
-        $permission_id = DB::table('permissions')->where('name','bigbluebutton/toggle')->pluck('id')->first();
-        $hasornot = DB::table('role_has_permissions')->where('role_id', $role_id)->where('permission_id', $permission_id)->get();
-
-
+        
         if($request->filled('id'))
         {
             $bbb = new BigBlueButton();
