@@ -723,8 +723,10 @@ class BigbluebuttonController extends Controller
 
     public function callback_function(Request $request){
         $arr=[];
-        Log::debug($arr[0]['data']);
         $arr=json_decode($request['event'],true);
+        
+        Log::debug($arr[0]['data']);
+
         if($arr[0]['data']['id'] == 'user-left'){
             Log::debug($arr[0]['data']['id']);
             Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
