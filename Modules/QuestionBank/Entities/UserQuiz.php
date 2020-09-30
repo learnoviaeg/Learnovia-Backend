@@ -67,4 +67,40 @@ class userQuiz extends Model
 
         return $return;
     }
+
+    public static function gradeMethod($quiz_lesson,$user)
+    {
+        // dd($user);
+        $grading_method_id=  QuizLesson::where('id',$quiz_lesson->id)->pluck('grading_method_id');
+        $attemps= userQuiz::where('user_id',$user->id)->where('quiz_lesson_id',$quiz_lesson->id);
+        // return($attemps->get());
+        $grade=0;
+        $i=0;
+        foreach($attemps->get() as $attemp)
+        {
+            $gradeAttemp[$i]=0;
+            $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$attemp->id)->where('force_submit',1)->get();
+            foreach($user_quiz_answers as $user_quiz_answer)
+                $gradeAttemp[$i]+= $user_quiz_answer->user_grade;
+            $i++;
+        }
+        switch ($grading_method_id[0]){
+            case 1: //first
+                $grade=$gradeAttemp[0];
+                break;
+            case 2 : //last
+                $grade=last($gradeAttemp);
+                break;
+            case 3 : // average
+                $grade=array_sum($gradeAttemp)/count($gradeAttemp);
+                break;
+            case 4 : // highest
+                $grade= max($gradeAttemp);
+                break;
+            case 5 :  //lowest
+                $grade= min($gradeAttemp);
+                break;
+        }
+        return $grade;
+    }  
 }

@@ -1,6 +1,8 @@
 <?php
 
 namespace App;
+use Modules\QuestionBank\Entities\userQuizAnswer;
+use Modules\QuestionBank\Entities\userQuiz;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -59,6 +61,25 @@ class UserGrade extends Model
             default:
                 return null;
                 break;
+        }
+    }
+
+    public static function quizUserGrade($user)
+    {
+        $grade_items_userGrade=UserGrade::where('user_id',$user->id)->pluck('grade_item_id');
+        $user_quizzes=UserQuiz::where('user_id',$user->id)->pluck('id');
+        // return $grade_items_userGrade;
+        foreach($user_quizzes as $user_quiz)
+        {
+            $quiz_lesson=UserQuiz::find($user_quiz)->quiz_lesson;
+            $grade_item=GradeItems::where('name',$quiz_lesson->quiz->name)->pluck('id')->first();
+            if(in_array($grade_item,$grade_items_userGrade->toArray()))
+            {
+                $grade= UserQuiz::gradeMethod($quiz_lesson,$user);
+                $usergrade=UserGrade::where('user_id',$user->id)->where('grade_item_id',$grade_item)->first();
+                $usergrade->final_grade=$grade;
+                $usergrade->save();
+            }
         }
     }
 }
