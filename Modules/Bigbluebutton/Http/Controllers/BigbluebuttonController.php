@@ -651,7 +651,7 @@ class BigbluebuttonController extends Controller
             'status' => null
         ]);
 
-        $students_id=collcet();
+        $students_id=collect();
         foreach($response['attendees']['attendee'] as $attend){
             $user=User::where('username',$attend['fullName'])->first();
             $students_id->push($user->id);
