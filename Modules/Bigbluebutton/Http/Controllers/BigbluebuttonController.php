@@ -102,6 +102,7 @@ class BigbluebuttonController extends Controller
             'start_date' => 'required|array',
         ]);
 
+        self::create_hook($request);
         $attendee= 'learnovia123';
         if(isset($request->attendee_password)){
             $attendee= $request->attendee_password;
@@ -188,7 +189,6 @@ class BigbluebuttonController extends Controller
 
     public function start_meeting($request)
     {
-        self::create_hook($request);
         //Creating the meeting
         $bbb = new BigBlueButton();
 
