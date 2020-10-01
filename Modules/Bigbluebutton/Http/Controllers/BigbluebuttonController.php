@@ -782,11 +782,14 @@ class BigbluebuttonController extends Controller
         }
     }
 
-    public function create_hook(Request $request){
+    public function create_hook(Request $request,$call=0){
         
         // $hookParameter = new HooksCreateParameters("https://webhook.site/3fb81c64-5b58-4513-9fa3-622a9f7b17ea");
         $bbb = new BigBlueButton();
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+        if($call == 1)
+            $hookParameter = new HooksCreateParameters($url."api/callback_function");
+
         $hookParameter = new HooksCreateParameters($url."/api/callback_function");
         $hookRes = $bbb->hooksCreate($hookParameter);
         return $hookRes->getHookId();
