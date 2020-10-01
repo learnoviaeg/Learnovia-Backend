@@ -72,13 +72,19 @@ class UserGrade extends Model
         foreach($user_quizzes as $user_quiz)
         {
             $quiz_lesson=UserQuiz::find($user_quiz)->quiz_lesson;
-            $grade_item=GradeItems::where('name',$quiz_lesson->quiz->name)->pluck('id')->first();
-            if(in_array($grade_item,$grade_items_userGrade->toArray()))
+            $courseSegmentQuiz=$quiz_lesson->lesson->courseSegment->id;
+            // return $courseSegmentQuiz;
+            $grade_items=GradeItems::where('name',$quiz_lesson->quiz->name)->get();
+            foreach($grade_items as $grade_item)
             {
-                $grade= UserQuiz::gradeMethod($quiz_lesson,$user);
-                $usergrade=UserGrade::where('user_id',$user->id)->where('grade_item_id',$grade_item)->first();
-                $usergrade->final_grade=$grade;
-                $usergrade->save();
+                $CoSeGgrdItmSameName=$grade_item->GradeCategory->CourseSegment->id;
+                if($CoSeGgrdItmSameName == $courseSegmentQuiz)
+                {
+                    $grade= UserQuiz::gradeMethod($quiz_lesson,$user);
+                    $usergrade=UserGrade::where('user_id',$user->id)->where('grade_item_id',$grade_item->id)->first();
+                    $usergrade->final_grade=$grade;
+                    $usergrade->save();
+                }            
             }
         }
     }
