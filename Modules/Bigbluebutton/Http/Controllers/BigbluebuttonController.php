@@ -703,13 +703,6 @@ class BigbluebuttonController extends Controller
     }
 
     public function callback_function(Request $request){
-
-        $headers = apache_request_headers();
-        $url = substr($request->url(), 0, strpos($request->url(), "/api"));
-        // if(Str::contains($url,$headers['Host']))
-        Log::debug($headers['Host']);
-        Log::debug($url);
-        
         $arr=[];
         $arr=json_decode($request['event'],true);
 
