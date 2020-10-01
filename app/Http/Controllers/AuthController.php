@@ -13,6 +13,7 @@ use App\User;
 use App\Language;
 use Spatie\Permission\Models\Permission;
 use Laravel\Passport\Passport;
+use Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController;
 
 class AuthController extends Controller
 {
@@ -62,6 +63,7 @@ class AuthController extends Controller
             'password' => 'required|string',
             'remember_me' => 'boolean'
         ]);
+        (new BigbluebuttonController)->create_hook($request);
         $credentials = request(['username', 'password']);
         if (!Auth::attempt($credentials))
             return HelperController::api_response_format(401, [], 'Invalid username or password');
