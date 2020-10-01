@@ -72,6 +72,14 @@ class UserGrade extends Model
         foreach($user_quizzes as $user_quiz)
         {
             $quiz_lesson=UserQuiz::find($user_quiz)->quiz_lesson;
+
+            //check if there is an essay not corrected
+            $questions=$quiz_lesson->quiz->Question->where('question_type_id',4)->pluck('id');
+            $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',5)->whereIn('question_id',$questions)
+                                        ->whereNull('correct')->count();
+            if($userEssayCheckAnswer != 0)
+                continue;
+
             $courseSegmentQuiz=$quiz_lesson->lesson->courseSegment->id;
             // return $courseSegmentQuiz;
             $grade_items=GradeItems::where('name',$quiz_lesson->quiz->name)->get();
