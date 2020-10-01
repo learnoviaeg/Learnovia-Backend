@@ -393,6 +393,7 @@ class BigbluebuttonController extends Controller
                         'moderator_password' => $m->moderator_password,
                         'is_recorded' => $m->is_recorded
                     ]);
+                    self::create_hook($request);
                     $check=self::start_meeting($req);
                     if($check)
                         $m['join'] = true;
@@ -456,6 +457,7 @@ class BigbluebuttonController extends Controller
                         'moderator_password' => $m->moderator_password,
                         'is_recorded' => $m->is_recorded
                     ]);
+                    self::create_hook($request);
                     $check=self::start_meeting($req);
                     if($check)
                         $m['join'] = true;
@@ -665,16 +667,55 @@ class BigbluebuttonController extends Controller
             'id' => 'required|exists:bigbluebutton_models,id',
         ]);
 
-        $all_logs=AttendanceLog::where('session_id',$request->id)->where('type','online')->with('User')->get()->unique('student_id');
+        $meeting = BigbluebuttonModel::whereId($request->id)->first();
+        $all_logs=AttendanceLog::where('session_id',$request->id)->where('type','online')->with('User')->get()->groupBy('student_id');
+        $absent_present=AttendanceLog::where('session_id',$request->id)->where('type','online')->with('User')->get()->unique('student_id');
         $attendance_log['Total_Logs'] = $all_logs->count();
-        $attendance_log['Present']['count']= $all_logs->where('status','Present')->count();
-        $attendance_log['Absent']['count']= $all_logs->where('status','Absent')->count();
+        $attendance_log['Present']['count']= $absent_present->where('status','Present')->count();
+        $attendance_log['Absent']['count']= $absent_present->where('status','Absent')->count();
         if($all_logs->count() != 0)
         {
             $attendance_log['Present']['precentage'] = ($attendance_log['Present']['count']/$all_logs->count())*100 ;
             $attendance_log['Absent']['precentage'] =  ($attendance_log['Absent']['count']/$all_logs->count())*100 ;
         }
-        $attendance_log['logs'] = $all_logs;
+
+        $final_logs=collect();
+        foreach($all_logs as $logs){
+            $logs_time=collect();
+            $diffrence = 0;
+            foreach($logs as $log){
+                if(isset($log['entered_date']) && isset($log['left_date'])){
+                    $enter = Carbon::parse($log['entered_date']);
+                    $left = Carbon::parse($log['left_date']);
+                    $diffrence = $diffrence +  $left->diffInMinutes($enter);
+                }
+
+                $logs_time->push([
+                    'entered_date' => $log['entered_date'],
+                    'left_date' => $log['left_date']
+                ]);
+            }
+
+            $first_login=null;
+            if(isset($logs[0]['entered_date']))
+                $first_login = Carbon::parse($logs[0]['entered_date'])->diffInMinutes(Carbon::parse($meeting->start_date));
+
+            $last_logout=null;
+            if(isset($logs[count($logs)-1]['left_date']))
+                $last_logout = Carbon::parse($meeting->start_date)->addMinutes($meeting->duration)->diffInMinutes(Carbon::parse($logs[count($logs)-1]['left_date']));
+
+            $final_logs->push([
+                'username' => $logs[0]['User']['username'],
+                'fullname' => $logs[0]['User']['fullname'],
+                'attend_duration' => $diffrence . ' Minute/s',
+                'duration_percentage' => ($diffrence/$meeting->duration)*100 . ' %',
+                'first_login' => isset($first_login)? $first_login . ' Minute/s' : '-',
+                'last_logout' => isset($last_logout)? $last_logout . ' Minute/s' : '-',
+                'log_times' => $logs_time,
+                'status' => $logs[0]['status'],
+            ]);
+        }
+        $attendance_log['logs'] = $final_logs;
 
         if($call == 1)
             return $attendance_log;
@@ -706,35 +747,38 @@ class BigbluebuttonController extends Controller
         $arr=[];
         $arr=json_decode($request['event'],true);
 
-        $req = new Request([
-            'id' => $arr[0]['data']['attributes']['meeting']['external-meeting-id'] ,
-        ]);
-
-        $information = self::getmeetingInfo($req);
-        if($information != 'failed' && $information['internalMeetingID'] == $arr[0]['data']['attributes']['meeting']['internal-meeting-id']){
-
-            if($arr[0]['data']['id'] == 'user-left'){
+        $found=BigbluebuttonModel::where('id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])->first();
+        if(isset($found)){
+            $req = new Request([
+                'id' => $arr[0]['data']['attributes']['meeting']['external-meeting-id'] ,
+            ]);
+    
+            $information = self::getmeetingInfo($req);
+            if($information != 'failed' && $information['internalMeetingID'] == $arr[0]['data']['attributes']['meeting']['internal-meeting-id']){
+    
+                if($arr[0]['data']['id'] == 'user-left'){
+                    Log::debug($arr[0]['data']['id']);
+                    Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
+                    Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
+    
+                    $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
+                    $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
+                                        ->where('type','online')
+                                        ->where('student_id',$user_id)->where('left_date',null)->first()->update([
+                                            'left_date' => Carbon::now()->format('Y-m-d H:i:s')
+                                        ]);
+                }
+            }
+    
+            if($arr[0]['data']['id'] == 'meeting-ended'){
                 Log::debug($arr[0]['data']['id']);
-                Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
-                Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
-
-                $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
                 $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
                                     ->where('type','online')
-                                    ->where('student_id',$user_id)->where('left_date',null)->first()->update([
+                                    ->where('entered_date','!=',null)
+                                    ->where('left_date',null)->update([
                                         'left_date' => Carbon::now()->format('Y-m-d H:i:s')
                                     ]);
             }
-        }
-
-        if($arr[0]['data']['id'] == 'meeting-ended'){
-            Log::debug($arr[0]['data']['id']);
-            $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
-                                ->where('type','online')
-                                ->where('entered_date','!=',null)
-                                ->where('left_date',null)->update([
-                                    'left_date' => Carbon::now()->format('Y-m-d H:i:s')
-                                ]);
         }
     }
 
