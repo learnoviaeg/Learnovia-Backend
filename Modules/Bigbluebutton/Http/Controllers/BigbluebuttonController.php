@@ -28,6 +28,7 @@ use App\Exports\BigBlueButtonAttendance;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\GradeCategoryController;
+use Illuminate\Support\Str;
 
 class BigbluebuttonController extends Controller
 {
@@ -351,6 +352,7 @@ class BigbluebuttonController extends Controller
             if(Carbon::parse($meet->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($meet->start_date)
             ->addMinutes($meet->duration)->format('Y-m-d H:i:s'))
             {
+                self::create_hook($request);
                 $check =self::start_meeting($req);
                 if($check)
                     $meet['join'] = true;
@@ -701,6 +703,13 @@ class BigbluebuttonController extends Controller
     }
 
     public function callback_function(Request $request){
+
+        $headers = apache_request_headers();
+        $url = substr($request->url(), 0, strpos($request->url(), "/api"));
+        // if(Str::contains($url,$headers['Host']))
+        Log::debug($headers['Host']);
+        Log::debug($url);
+        
         $arr=[];
         $arr=json_decode($request['event'],true);
 
