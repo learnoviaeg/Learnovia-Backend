@@ -63,7 +63,7 @@ class AuthController extends Controller
             'password' => 'required|string',
             'remember_me' => 'boolean'
         ]);
-        (new BigbluebuttonController)->create_hook($request);
+        (new BigbluebuttonController)->create_hook($request,1);
         $credentials = request(['username', 'password']);
         if (!Auth::attempt($credentials))
             return HelperController::api_response_format(401, [], 'Invalid username or password');
