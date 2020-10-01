@@ -80,7 +80,6 @@ class UserGrade extends Model
             if($userEssayCheckAnswer != 0)
                 continue;
 
-
             $courseSegmentQuiz=$quiz_lesson->lesson->courseSegment->id;
             // return $courseSegmentQuiz;
             $grade_items=GradeItems::where('name',$quiz_lesson->quiz->name)->get();
