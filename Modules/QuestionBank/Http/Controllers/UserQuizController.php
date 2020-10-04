@@ -529,6 +529,12 @@ class UserQuizController extends Controller
         }
         $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
         // return ($allUserQuizzes);
+
+        //count attempts NotGraded
+        // $questions=$quiz_lesson->quiz->Question->where('question_type_id',4)->pluck('id');
+        // $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',$user_quiz)->whereIn('question_id',$questions)
+        //                             ->whereNull('correct')->count();
+
         $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
         $Submitted_users=0;
         foreach ($users as $user_id){
