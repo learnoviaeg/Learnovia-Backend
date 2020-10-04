@@ -29,10 +29,10 @@ class BigBlueButtonAttendance implements FromCollection, WithHeadings
                 'full name' => $bbb['fullname'],
                 'attend duration' => $bbb['attend_duration'],
                 'duration percentage' => $bbb['duration_percentage'],
-                'first login' => $bbb['first_login'] == '-'? $bbb['first_login'] : 'After '.$bbb['first_login'],
-                'last logout' => $bbb['last_logout'] == '-'? $bbb['last_logout'] : 'Before '.$bbb['last_logout'],
-                'enter date' => $bbb['log_times'][0]['entered_date'],
-                'left date' => $bbb['log_times'][0]['left_date'],
+                'first login' => $bbb['first_login'] == null? '-' : 'After '.$bbb['first_login'],
+                'last logout' => $bbb['last_logout'] == null ? '-' : 'Before '.$bbb['last_logout'],
+                'enter date' => count($bbb['log_times']) > 0 ? $bbb['log_times'][0]['entered_date'] : '-',
+                'left date' => count($bbb['log_times']) > 0 ? $bbb['log_times'][0]['left_date'] : '-',
                 'Present' => $bbb['status'] == 'Present'? '✔' : '-',
                 'Absent' => $bbb['status'] == 'Absent'? '✔' : '-'
             ]);
