@@ -155,6 +155,7 @@ class BigbluebuttonController extends Controller
                         if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
                         ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
                         {
+                            self::clear();
                             self::create_hook($request);                            
                             $check =self::start_meeting($req);
                             if($check)
@@ -328,6 +329,7 @@ class BigbluebuttonController extends Controller
             'course'=> 'exists:bigbluebutton_models,course_id|required_with:class',
         ]);
 
+        self::clear();
         $user_id = Auth::user()->id;
         $role_id = DB::table('model_has_roles')->where('model_id',$user_id)->pluck('role_id')->first();
         $permission_id = DB::table('permissions')->where('name','bigbluebutton/toggle')->pluck('id')->first();
@@ -604,6 +606,7 @@ class BigbluebuttonController extends Controller
             'id' => 'required|exists:bigbluebutton_models,id',
         ]);
 
+        self::clear();
         $bbb = new BigBlueButton();
         $meet = BigbluebuttonModel::whereId($request->id)->first();
         $getMeetingInfoParams = new GetMeetingInfoParameters($request->id, $meet->moderator_password);
