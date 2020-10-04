@@ -708,8 +708,8 @@ class BigbluebuttonController extends Controller
                 'fullname' => $logs[0]['User']['fullname'],
                 'attend_duration' => $diffrence . ' Minute/s',
                 'duration_percentage' => round(($diffrence/$meeting->duration)*100,2) . ' %',
-                'first_login' => isset($first_login)? $first_login . ' Minute/s' : '-',
-                'last_logout' => isset($last_logout)? $last_logout . ' Minute/s' : '-',
+                'first_login' => isset($first_login)? $first_login . ' Minute/s' : null,
+                'last_logout' => isset($last_logout)? $last_logout . ' Minute/s' : null,
                 'log_times' => $logs_time,
                 'status' => $logs[0]['status'],
             ]);
