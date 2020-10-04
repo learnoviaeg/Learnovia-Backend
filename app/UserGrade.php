@@ -75,7 +75,7 @@ class UserGrade extends Model
 
             //check if there is an essay not corrected
             $questions=$quiz_lesson->quiz->Question->where('question_type_id',4)->pluck('id');
-            $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',5)->whereIn('question_id',$questions)
+            $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',$user_quiz)->whereIn('question_id',$questions)
                                         ->whereNull('correct')->count();
             if($userEssayCheckAnswer != 0)
                 continue;
