@@ -688,12 +688,11 @@ class BigbluebuttonController extends Controller
                     $enter = Carbon::parse($log['entered_date']);
                     $left = Carbon::parse($log['left_date']);
                     $diffrence = $diffrence +  $left->diffInMinutes($enter);
+                    $logs_time->push([
+                        'entered_date' => $log['entered_date'],
+                        'left_date' => $log['left_date']
+                    ]);
                 }
-
-                $logs_time->push([
-                    'entered_date' => $log['entered_date'],
-                    'left_date' => $log['left_date']
-                ]);
             }
 
             $first_login=null;
@@ -708,7 +707,7 @@ class BigbluebuttonController extends Controller
                 'username' => $logs[0]['User']['username'],
                 'fullname' => $logs[0]['User']['fullname'],
                 'attend_duration' => $diffrence . ' Minute/s',
-                'duration_percentage' => ($diffrence/$meeting->duration)*100 . ' %',
+                'duration_percentage' => round(($diffrence/$meeting->duration)*100,2) . ' %',
                 'first_login' => isset($first_login)? $first_login . ' Minute/s' : '-',
                 'last_logout' => isset($last_logout)? $last_logout . ' Minute/s' : '-',
                 'log_times' => $logs_time,
