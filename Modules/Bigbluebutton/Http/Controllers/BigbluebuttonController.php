@@ -748,7 +748,7 @@ class BigbluebuttonController extends Controller
         $arr=json_decode($request['event'],true);
 
         $found=BigbluebuttonModel::where('id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])->first();
-        if(isset($found)){
+        if(isset($found) && Carbon::parse($found->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
             $req = new Request([
                 'id' => $arr[0]['data']['attributes']['meeting']['external-meeting-id'] ,
             ]);
@@ -778,18 +778,22 @@ class BigbluebuttonController extends Controller
                                     ->where('left_date',null)->update([
                                         'left_date' => Carbon::now()->format('Y-m-d H:i:s')
                                     ]);
+
+                $start = Carbon::parse($found->start_date);
+                $end = Carbon::now();
+                $duration= $end->diffInMinutes($start);
+                BigbluebuttonModel::where('id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])->update([
+                    'duration' => $duration
+                ]);
             }
         }
     }
 
-    public function create_hook(Request $request,$call=0){
+    public function create_hook(Request $request){
         
         // $hookParameter = new HooksCreateParameters("https://webhook.site/3fb81c64-5b58-4513-9fa3-622a9f7b17ea");
         $bbb = new BigBlueButton();
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
-        if($call == 1)
-            $hookParameter = new HooksCreateParameters($url."api/callback_function");
-
         $hookParameter = new HooksCreateParameters($url."/api/callback_function");
         $hookRes = $bbb->hooksCreate($hookParameter);
         return $hookRes->getHookId();
