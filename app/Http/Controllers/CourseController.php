@@ -382,7 +382,7 @@ class CourseController extends Controller
             $couuures= CourseSegment::where('course_id', $request->course_id)->pluck('id');
  
         foreach ($couuures as $enroll) {
-            $teacherz = array();
+                $teacherz = array();
                 $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
                     
@@ -423,10 +423,11 @@ class CourseController extends Controller
                 //     $teacher->picture=$teacher->attachment->path;
                 foreach($userr as $teach){
                     $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                    if(isset($teacher->attachment))
+                    if(isset($teacher)){
+                        if(isset($teacher->attachment))
                         $teacher->picture=$teacher->attachment->path;
                         array_push($teacherz, $teacher);
-
+                    }
                 }
                 $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
                 if(isset($en->id)  && isset($teacher))
