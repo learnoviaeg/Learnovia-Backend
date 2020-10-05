@@ -291,16 +291,6 @@ class BigbluebuttonController extends Controller
         if($request->user()->can('bigbluebutton/session-moderator')){
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->moderator_password);
         }else{
-            $attendance = AttendanceLog::updateOrCreate(['student_id' => Auth::id(),'session_id'=>$bigbb->id,'type'=>'online','entered_date'=> null],
-            [
-                'ip_address' => \Request::ip(),
-                'student_id' => Auth::id(),
-                'session_id' => $bigbb->id,
-                'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'type' => 'online',
-                'entered_date' => Carbon::now()->format('Y-m-d H:i:s'),
-                'taker_id' => $bigbb->user_id
-            ]);
             $joinMeetingParams = new JoinMeetingParameters($request->id, $user_name, $bigbb->attendee_password);
         }
         $joinMeetingParams->setRedirect(true);
@@ -757,7 +747,30 @@ class BigbluebuttonController extends Controller
     
             $information = self::getmeetingInfo($req);
             if($information != 'failed' && $information['internalMeetingID'] == $arr[0]['data']['attributes']['meeting']['internal-meeting-id']){
+                
+                if($arr[0]['data']['id'] == 'user-joined'){
+                    Log::debug($arr[0]['data']['id']);
+                    Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
+                    Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
     
+                    $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
+                    $log = AttendanceLog::where('session_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])
+                                        ->where('type','online')
+                                        ->where('student_id',$user_id)->first();
+                    if(isset($log)){
+                        $attendance = AttendanceLog::updateOrCreate(['student_id' => $user_id,'session_id'=> $found->id,'type'=>'online','entered_date'=> null],
+                        [
+                            'ip_address' => \Request::ip(),
+                            'student_id' => $user_id,
+                            'session_id' => $found->id,
+                            'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                            'type' => 'online',
+                            'entered_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                            'taker_id' => $found->user_id
+                        ]);
+                    }
+                }
+                
                 if($arr[0]['data']['id'] == 'user-left'){
                     Log::debug($arr[0]['data']['id']);
                     Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
