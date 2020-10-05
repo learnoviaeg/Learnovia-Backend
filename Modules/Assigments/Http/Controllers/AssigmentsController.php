@@ -865,7 +865,8 @@ class AssigmentsController extends Controller
         foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
             $name= uniqid();
             $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
-            $images_path->push( url(Storage::url('assignment/'.$name)));
+            $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
+            $images_path->push('data:image/png;base64,'.$b64image);
         }
         return HelperController::api_response_format(200, $images_path, 'Here pdf\'s images');
     }
