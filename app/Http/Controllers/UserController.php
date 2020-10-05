@@ -13,6 +13,8 @@ use App\Language;
 use App\Level;
 use App\Classes;
 use App\Enroll;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use stdClass;
 use App\GradeCategory;
 use App\Segment;
@@ -105,13 +107,37 @@ class UserController extends Controller
             if($username>0)
                 return HelperController::api_response_format(404 ,$username, 'This username is already  used');
 
+            $client = new \Google_Client();
+            $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
+            $client->setApplicationName("learnovia-notifications");
+            $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
+            $client->useApplicationDefaultCredentials();
+            if ($client->isAccessTokenExpired()) {
+                $client->fetchAccessTokenWithAssertion();
+            }
+            $access_token = $client->getAccessToken()['access_token']; 
+            $clientt = new Client();
+            $data = json_encode(array(
+                'name' => $firstname. " " .$request->lastname[$key] 
+            ));
+            $res = $clientt->request('POST', 'https://us-central1-akwadchattest.cloudfunctions.net/createUser', [
+                'headers'   => [
+                    'Authorization' => 'Bearer '. $access_token,
+                    'Content-Type' => 'application/json'
+                ], 
+                'body' => $data
+            ]);
+            
             $user = User::create([
                 'firstname' => $firstname,
                 'lastname' => $request->lastname[$key],
                 'username' => $request->username[$key],
                 'password' => bcrypt($request->password[$key]),
                 'real_password' => $request->password[$key],
-                'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0
+                'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0,
+                'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+                'chat_token' => json_decode($res->getBody(),true)['token'],
+
             ]);
 
             foreach ($optionals as $optional){
