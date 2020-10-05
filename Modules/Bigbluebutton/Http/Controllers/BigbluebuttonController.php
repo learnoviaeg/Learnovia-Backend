@@ -668,8 +668,8 @@ class BigbluebuttonController extends Controller
         $attendance_log['Absent']['count']= $absent_present->where('status','Absent')->count();
         if($all_logs->count() != 0)
         {
-            $attendance_log['Present']['precentage'] = ($attendance_log['Present']['count']/$all_logs->count())*100 ;
-            $attendance_log['Absent']['precentage'] =  ($attendance_log['Absent']['count']/$all_logs->count())*100 ;
+            $attendance_log['Present']['precentage'] = round(($attendance_log['Present']['count']/$all_logs->count())*100,2) ;
+            $attendance_log['Absent']['precentage'] =  round(($attendance_log['Absent']['count']/$all_logs->count())*100,2) ;
         }
 
         $final_logs=collect();
