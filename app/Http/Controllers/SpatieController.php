@@ -31,6 +31,8 @@ class SpatieController extends Controller
 {
     public function install()
     {
+
+        (new BigbluebuttonController)->clear();
         $user = User::whereEmail('admin@learnovia.com')->first();
         if ($user) {
             return "This Site is Installed before go and ask admin";
@@ -453,6 +455,10 @@ class SpatieController extends Controller
             (new PageController)->install();
             (new BigbluebuttonController)->install();
             (new H5PLessonController)->install();
+
+            //create webhook 
+            (new BigbluebuttonController)->create_hook();
+
 
             return "System Installed Your User is $user->email and Password is Learnovia123.";
 
