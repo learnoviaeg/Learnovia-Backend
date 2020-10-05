@@ -399,7 +399,9 @@ class GradeCategoryController extends Controller
                     $query->where('class_id', $request->class);
             }, 'YearType.yearLevel.classLevels.segmentClass' => function ($query) use ($request) {
                 if ($request->filled('type')) {
-                    $segment_id = Segment::Get_current($request->type)->id;
+                    $segment_id = Segment::Get_current($request->type);
+                    if(isset($segment_id))
+                        $segment_id = Segment::Get_current($request->type)->id;
                     if ($request->filled('segment'))
                         $segment_id = $request->segment;
                     $query->where('segment_id', $segment_id);

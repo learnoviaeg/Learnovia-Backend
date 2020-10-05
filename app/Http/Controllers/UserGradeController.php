@@ -153,6 +153,7 @@ class UserGradeController extends Controller
         $grades = [];
         $ids = [];
         foreach ($users as $user) {
+            UserGrade::quizUserGrade($user);
             $user->grades = collect();
             $i = 0;
             if(isset($user->attachment))

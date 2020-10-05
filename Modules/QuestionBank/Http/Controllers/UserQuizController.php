@@ -529,7 +529,13 @@ class UserQuizController extends Controller
         }
         $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
         // return ($allUserQuizzes);
-        $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
+
+        //count attempts NotGraded
+        $userEssayCheckAnswer=UserQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)
+                                                ->whereNull('correct')->pluck('user_quiz_id');
+        // $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
+        $countOfNotGraded = count($userEssayCheckAnswer);
+        
         $Submitted_users=0;
         foreach ($users as $user_id){
             $i=0;
@@ -566,7 +572,15 @@ class UserQuizController extends Controller
                     $user_Attemp["feedback"] =null;
                 } 
                 else{
-                    $user_Attemp["grade"]= $attem->user_grade;
+                    // $user_Attemp["grade"]= $attem->user_grade; //user_grade is an accesor on UserQuiz
+
+                    //withput wieght
+                    $gradeNotWeight=0;
+                    $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',1)->get();
+                    foreach($user_quiz_answers as $user_quiz_answer)
+                        $gradeNotWeight+= $user_quiz_answer->user_grade;
+                        
+                    $user_Attemp["grade"]=$gradeNotWeight;
                     $user_Attemp["feedback"] =$attem->feedback;
                 }
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();

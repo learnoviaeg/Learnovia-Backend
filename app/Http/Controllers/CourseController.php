@@ -375,21 +375,19 @@ class CourseController extends Controller
                 }         
             }
         }
-
+        $request->validate([
+            'course_id' => 'exists:courses,id'
+        ]);
+        if($request->filled('course_id'))
+            $couuures= CourseSegment::where('course_id', $request->course_id)->pluck('id');
         foreach ($couuures as $enroll) {
-            $teacherz = array();
+                $teacherz = array();
                 $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
-
-                $request->validate([
-                    'course_id' => 'exists:courses,id'
-                ]);
-                if($request->filled('course_id'))
-                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
-                    
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
+                
                 $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $flag = new stdClass();
                 $flag->segment = Segment::find($segment->segment_id)->name;
@@ -424,10 +422,11 @@ class CourseController extends Controller
                 //     $teacher->picture=$teacher->attachment->path;
                 foreach($userr as $teach){
                     $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                    if(isset($teacher->attachment))
+                    if(isset($teacher)){
+                        if(isset($teacher->attachment))
                         $teacher->picture=$teacher->attachment->path;
                         array_push($teacherz, $teacher);
-
+                    }
                 }
                 $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
                 if(isset($en->id)  && isset($teacher))
@@ -465,6 +464,9 @@ class CourseController extends Controller
         $testCourse=array();
         $adminCourses=collect();
         $couuures=array();
+                $active_year = AcademicYear::where('current',1)->get();
+        if(!isset($request->year) && !count($active_year)>0)
+            return HelperController::api_response_format(200, null, 'There is no active year,please send year');
         $CS = GradeCategoryController::getCourseSegment($request);
 
         if($request->user()->can('site/show-all-courses'))
@@ -495,23 +497,21 @@ class CourseController extends Controller
             }
         }
 
+        $request->validate([
+            'course_id' => 'exists:courses,id'
+        ]);
+        if($request->filled('course_id'))
+            $couuures= CourseSegment::where('course_id', $request->course_id)->pluck('id');
         foreach ($couuures as $enroll) {
-            $teacherz = array();
+                $teacherz = array();
                 $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
-
-                $request->validate([
-                    'course_id' => 'exists:courses,id'
-                ]);
-                if($request->filled('course_id'))
-                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
-
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
-                $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
-                $flag = new stdClass();
 
+                $flag = new stdClass();
+                $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $segment_object = Segment::find($segment->segment_id);
                 $flag->segment = 'Not_Found';
                 if(isset($segment_object))
@@ -542,10 +542,11 @@ class CourseController extends Controller
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
                 foreach($userr as $teach){
                     $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                    if(isset($teacher->attachment))
+                    if(isset($teacher)){
+                        if(isset($teacher->attachment))
                         $teacher->picture=$teacher->attachment->path;
                         array_push($teacherz, $teacher);
-    
+                    }
                     // $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
                     // if(isset($en->id))
                     //     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
@@ -583,6 +584,9 @@ class CourseController extends Controller
         $testCourse=array();
         $adminCourses=collect();
         $couuures=array();
+        $active_year = AcademicYear::where('current',1)->get();
+        if(!isset($request->year) && !count($active_year)>0)
+            return HelperController::api_response_format(200, null, 'There is no active year,please send year');
         $CS = GradeCategoryController::getCourseSegment($request);
 
         if($request->user()->can('site/show-all-courses'))
@@ -613,22 +617,21 @@ class CourseController extends Controller
             }
         }
 
+        $request->validate([
+            'course_id' => 'exists:courses,id'
+        ]);
+        if($request->filled('course_id'))
+            $couuures= CourseSegment::where('course_id', $request->course_id)->pluck('id');
         foreach ($couuures as $enroll) {
-            $teacherz = array();
+                $teacherz = array();
                 $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
                 $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
-
-                $request->validate([
-                    'course_id' => 'exists:courses,id'
-                ]);
-                if($request->filled('course_id'))
-                    $course = Course::where('id', $request->course_id)->with(['category', 'attachment'])->first();
-
                 if(in_array($course->id,$testCourse))
                     continue;
                 array_push($testCourse,$course->id);
-                $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
+
                 $flag = new stdClass();
+                $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
                 $flag->segment = Segment::find($segment->segment_id)->name;
                 $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
                 $check_class = Classes::find($class_id->class_id);
@@ -655,10 +658,11 @@ class CourseController extends Controller
                 $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
                 foreach($userr as $teach){
                     $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                    if(isset($teacher->attachment))
+                    if(isset($teacher)){
+                        if(isset($teacher->attachment))
                         $teacher->picture=$teacher->attachment->path;
                         array_push($teacherz, $teacher);
-    
+                    }
                     // $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
                     // if(isset($en->id))
                     //     $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
