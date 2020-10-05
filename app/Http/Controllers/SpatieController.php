@@ -29,7 +29,7 @@ use Modules\Assigments\Http\Controllers\AssigmentsController;
 
 class SpatieController extends Controller
 {
-    public function install()
+    public function install(Request $request)
     {
 
         (new BigbluebuttonController)->clear();
@@ -457,7 +457,7 @@ class SpatieController extends Controller
             (new H5PLessonController)->install();
 
             //create webhook 
-            (new BigbluebuttonController)->create_hook();
+            (new BigbluebuttonController)->create_hook($request);
 
 
             return "System Installed Your User is $user->email and Password is Learnovia123.";
