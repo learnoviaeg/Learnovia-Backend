@@ -82,7 +82,6 @@ class AssigmentsController extends Controller
         $role->givePermissionTo('assignment/assign');
         $role->givePermissionTo('assignment/editgrade');
         $role->givePermissionTo('site/assignment/assigned-users');
-        $role->givePermissionTo('site/assignment/getAssignment');
         $role->givePermissionTo('assignment/delete-assign-lesson');
         $role->givePermissionTo('assignment/assignment-override');
 
