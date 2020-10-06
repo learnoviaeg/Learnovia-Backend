@@ -100,6 +100,13 @@ class Sendnotify implements ShouldQueue
                     );
             }
             $count++;
+            
+            $url= config('app.url');
+            $url = substr($url, 0, strpos($url, "api"));
+            $opne_link = 'learnovia.com';
+            if(isset($url)){
+                $opne_link = $url.'.learnovia.com/';
+            }
             $data = json_encode(array(
                 'message' => array(
                     "token" => $token,
@@ -110,7 +117,7 @@ class Sendnotify implements ShouldQueue
                     ),
                     "webpush" => array(
                         "fcm_options" => array(
-                            "link" => "https://dev.learnovia.com",
+                            "link" => $opne_link,
                             "analytics_label" => "Learnovia"
                         ),
                         "data" => $fordata
