@@ -14,6 +14,7 @@ use App\Enroll;
 use App\Letter;
 use App\Language;
 use App\Contract;
+use App\scale;
 use Carbon\Carbon;
 use DB;
 use Modules\QuestionBank\Entities\Quiz;
@@ -441,6 +442,17 @@ class SpatieController extends Controller
             $letter=Letter::create([
                'name' => 'Default Letter',
                'formate' => serialize($formateLetter),
+            ]);
+
+            $formateScale = [
+                ['name' => 'Fair','grade' => 0 ],
+                ['name' => 'Good','grade' => 1],
+                ['name' => 'Very Good','grade' => 2],
+                ['name' => 'Excellent','grade' => 3]
+            ];
+            $scale=scale::create([
+               'name' => 'Default Scale',
+               'formate' => serialize($formateScale),
             ]);
 
             eval('$importer = new App\Imports\\LanguageImport();');
