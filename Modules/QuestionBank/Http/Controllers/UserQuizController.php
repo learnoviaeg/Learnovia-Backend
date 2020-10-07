@@ -448,6 +448,8 @@ class UserQuizController extends Controller
             $userAnswer->user_grade = $data['user_grade'];
             if(isset($data['feedback']))
                 $userAnswer->feedback = $data['feedback'];
+            if(isset($data['correct']))
+                $userAnswer->correct = $data['correct'];
             $userAnswer->save();
         }
 
