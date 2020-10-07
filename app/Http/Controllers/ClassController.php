@@ -333,9 +333,13 @@ class ClassController extends Controller
 
             if(!isset($year_type))
                 return HelperController::api_response_format(200,null, 'No active year available, please enter types you want.');
-                
-            $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->whereIn('level_id',$request->level)->pluck('id');
             
+            $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('id');
+
+            if($request->has('level') && count($request->level)>0)    
+                $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->whereIn('level_id',$request->level)->pluck('id');
+            
+
             if(isset($year_levels))
                 $classes = ClassLevel::whereIn('year_level_id',$year_levels)->pluck('class_id');
 
