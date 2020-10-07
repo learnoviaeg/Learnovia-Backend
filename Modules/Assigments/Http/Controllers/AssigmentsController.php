@@ -853,7 +853,8 @@ class AssigmentsController extends Controller
     public function AnnotatePDF(Request $request)
     {
         $request->validate([
-            'attachment_id' => 'integer|required|exists:user_assigments,attachment_id',
+            'attachment_id' => 'integer|required|exists:attachments,id', //because this file may not be assigned to user "corrected_file" 
+            // 'attachment_id' => 'integer|required|exists:user_assigments,attachment_id',
             ]);
         $images_path=collect([]);
         $attachmnet=attachment::find($request->attachment_id);
