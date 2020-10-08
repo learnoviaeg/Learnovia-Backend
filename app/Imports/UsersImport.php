@@ -24,7 +24,8 @@ use App\ClassLevel;
 use App\Contract;
 use App\SegmentClass;
 use Carbon\Carbon;
-
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 class UsersImport implements ToModel, WithHeadingRow
 {
     /**
@@ -64,13 +65,24 @@ class UsersImport implements ToModel, WithHeadingRow
         // dd((count($users)));
         if(((count($users) + count($row)-1)) > $max_allowed_users)
             die('U Can\'t add users any more');
-
+        $clientt = new Client();
+        $data = json_encode(array(
+            'name' => $row['firstname']. " " .$row['lastname'] 
+        ));
+        $res = $clientt->request('POST', 'https://us-central1-akwadchattest.cloudfunctions.net/createUser', [
+            'headers'   => [
+                'Content-Type' => 'application/json'
+            ], 
+            'body' => $data
+        ]);
         $user = new User([
             'firstname' => $row['firstname'],
             'lastname' => $row['lastname'],
             'username' => User::generateUsername(),
             'password' => bcrypt($password),
-            'real_password' => $password
+            'real_password' => $password,
+            'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+            'chat_token' => json_decode($res->getBody(),true)['token'],
         ]);
 
         foreach ($optionals as $optional) {
