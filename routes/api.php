@@ -407,3 +407,6 @@ Route::group(['prefix' => 'h5p', 'middleware' => 'auth:api'], function () {
 
     });
 });
+Route::group(['prefix' => 'chat', 'middleware' => ['auth:api']], function () {
+    Route::post('add-room', 'ChatController@chat_room')->name('addroom')->middleware('permission:chat/add-room');
+});
