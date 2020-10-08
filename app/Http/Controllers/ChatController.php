@@ -39,6 +39,11 @@ class ChatController extends Controller
             'body' => $data
         ]);
         
-        return json_decode($res->getBody(),true);
+        $body = json_decode($res->getBody(),true);
+        if(isset($body['room_id']))
+            return HelperController::api_response_format(200, $body, 'Chat room created successfully');
+
+        return HelperController::api_response_format(400, null, 'Error while generating chat room.');
+        
     }
 }
