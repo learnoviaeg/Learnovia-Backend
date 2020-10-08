@@ -199,7 +199,7 @@ class EnrollUserToCourseController extends Controller
                 if ($segments == null)
                     break;
 
-                if (count($request->course) > 0) {
+                if ($request->has('course') && count($request->course) > 0) {
                     foreach($request->course as $course){
                         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$course);
                         if(isset($courseSegment)){
