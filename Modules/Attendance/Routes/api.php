@@ -21,5 +21,6 @@ Route::group(['prefix' => 'attendance', 'middleware' => 'auth:api'], function ()
     Route::post('delete', 'AttendanceSessionController@delete_session')->name('deletesessions')->middleware('permission:attendance/delete-attendance');
     Route::post('update', 'AttendanceSessionController@update_session')->name('editsessions')->middleware('permission:attendance/edit-attendance');
     Route::get('export', 'AttendanceSessionController@export')->name('exportsessions')->middleware('permission:attendance/export');
-
+    Route::post('report', 'AttendnaceReportController@attendance_report');//->name('attendancereport')->middleware('permission:attendance/report');
+    
 });
