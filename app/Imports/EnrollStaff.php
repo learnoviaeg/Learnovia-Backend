@@ -31,6 +31,8 @@ class EnrollStaff implements ToModel, WithHeadingRow
         $count=1;
         while(isset($row[$optional.$count])){
             $course_id=Course::where('short_name',$row[$optional.$count])->pluck('id')->first();
+            if(!isset($course_id))
+                break;
             $courseSeg=CourseSegment::getidfromcourse($course_id);
             if(isset($row['class_id'])){
                 $courseSegg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);
