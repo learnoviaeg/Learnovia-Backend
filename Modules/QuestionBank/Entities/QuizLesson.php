@@ -3,7 +3,11 @@
 namespace Modules\QuestionBank\Entities;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Classes;
+use App\Lesson;
+use App\Course;
+use App\Level;
+use Carbon\Carbon;
 class QuizLesson extends Model
 {
     protected $fillable = [
@@ -19,6 +23,25 @@ class QuizLesson extends Model
         'visible','index'
     ];
     protected $table = 'quiz_lessons';
+    protected $appends = ['type','class','level','course','started'];
+    public function getTypeAttribute(){
+        return 'quiz';
+    }
+    public function getClassAttribute(){
+        return Classes::find(Lesson::find($this->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id)->name;   
+    }
+    public function getCourseAttribute(){
+        return  Course::find(Lesson::find($this->lesson_id)->courseSegment->course_id)->name;
+    }    
+    public function getLevelAttribute(){
+        return Level::find(Lesson::find($this->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id)->name;
+    }  
+    public function getStartedAttribute(){
+        if($this->publish_date > Carbon::now() &&  Auth::user()->can('site/course/student'))
+            return false;
+        else
+            return true;  
+      } 
 
     public function quiz()
     {
@@ -32,4 +55,5 @@ class QuizLesson extends Model
     {
         return $this->belongsTo('App\GradingMethod', 'grading_method_id', 'id');
     }
+  
 }

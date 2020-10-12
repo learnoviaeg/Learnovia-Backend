@@ -1233,7 +1233,45 @@ class CourseController extends Controller
         }
         return HelperController::api_response_format(400, $courses);
     }
+    public function timeline(Request $request)
+    {   
+        $components  = Component::where('active', 1)->whereIn('id',[3,5])->whereIn('type', [3,1])->get();
+        $cs=GradeCategoryController::getCourseSegment($request);
+        $CourseSegments= collect([]);
+        if(count($cs)<=0)
+                return HelperController::api_response_format(400,null,'no course segments available');
 
+        foreach ($request->user()->enroll as $enroll) {
+            if ($enroll->courseSegment != null) {
+                if(in_array($enroll->courseSegment->id, $cs->toArray()))
+                {
+                    $enroll->courseSegment['lessons'] = $enroll->courseSegment->lessons;
+                    $CourseSegments[]=$enroll->courseSegment;   
+                } 
+            }
+        }
+        if($request->user()->can('site/show-all-courses'))
+            $CourseSegments=CourseSegment::whereIn('id',$cs)->with('lessons')->get();
+        $lessons_ides =  $CourseSegments->pluck('lessons.*.id')->collapse()->unique();
+        
+        $assignmentlesssons = AssignmentLesson::whereIn('lesson_id',$lessons_ides)->with('Assignment')
+                                                ->where('publish_date','<=',Carbon::now())
+                                                ->where('due_date','>',Carbon::now());
+        $quizlesssons = QuizLesson::whereIn('lesson_id',$lessons_ides)->with('quiz')
+                                                ->where('publish_date','<=',Carbon::now())
+                                                ->where('due_date','>',Carbon::now());
+            
+        if ($request->user()->can('site/course/student')) {
+            $quizlesssons->where('visible', '=', 1);
+            $assignmentlesssons->where('visible', '=', 1);
+        }
+        $allcomponentsLessons=$quizlesssons->get()->merge($assignmentlesssons->get());
+
+
+        return $allcomponentsLessons->sortByDesc('due_date')->values();  
+       
+        
+    }
     public function getAllMyComponenets(Request $request)
     {
         $request->validate([
@@ -1705,4 +1743,5 @@ class CourseController extends Controller
         $file = url(Storage::url('Courses'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
+
 }
