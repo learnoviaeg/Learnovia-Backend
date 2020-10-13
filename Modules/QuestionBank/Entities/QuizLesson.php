@@ -28,13 +28,16 @@ class QuizLesson extends Model
         return 'quiz';
     }
     public function getClassAttribute(){
-        return Classes::find(Lesson::find($this->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id)->name;   
+        $class = Classes::find(Lesson::find($this->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+        return isset($class)?$class->name:null ;   
     }
     public function getCourseAttribute(){
-        return  Course::find(Lesson::find($this->lesson_id)->courseSegment->course_id)->name;
+        $course = Course::find(Lesson::find($this->lesson_id)->courseSegment->course_id);
+        return  isset($course)?$course->name:null;
     }    
     public function getLevelAttribute(){
-        return Level::find(Lesson::find($this->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id)->name;
+        $level = Level::find(Lesson::find($this->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+        return isset($level)?$level->name:null;
     }  
     public function getStartedAttribute(){
         if($this->publish_date > Carbon::now() &&  Auth::user()->can('site/course/student'))
@@ -42,7 +45,7 @@ class QuizLesson extends Model
         else
             return true;  
       } 
-
+      
     public function quiz()
     {
         return $this->belongsTo('Modules\QuestionBank\Entities\quiz', 'quiz_id', 'id');

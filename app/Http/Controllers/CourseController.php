@@ -1266,9 +1266,11 @@ class CourseController extends Controller
             $assignmentlesssons->where('visible', '=', 1);
         }
         $allcomponentsLessons=$quizlesssons->get()->merge($assignmentlesssons->get());
+        $allcomponentsLessons = $allcomponentsLessons->sortByDesc('due_date')->values();
+        $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->whereIn('assignment_lesson_id',$assignmentlesssons->pluck('id'))->pluck(['start_date','due_date']);
+        
+        return $override_satrtdate;
 
-
-        return $allcomponentsLessons->sortByDesc('due_date')->values();  
        
         
     }
