@@ -1705,4 +1705,17 @@ class CourseController extends Controller
         $file = url(Storage::url('Courses'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
+
+    public function Upload(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav',
+            'id' => 'exists:attachments,id',
+        ]);
+
+        $attachment = attachment::upload_attachment($request->file, 'For-Editor');
+        if(isset($request->id))
+            $attachment=attachment::where('id',$request->id)->first();
+        return HelperController::api_response_format(201,$attachment, 'file');
+    }
 }
