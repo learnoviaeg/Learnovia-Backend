@@ -30,6 +30,9 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('dashboard', 'SpatieController@dashboard')->name('dashboard');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('comparepermissions', 'SpatieController@comparepermissions');
+    
+    //for editor
+    Route::post('upload-editor', 'CourseController@Upload')->name('uploadForEditor');
 
     //dashboard routes
     Route::post('dashboard/toggle', 'SpatieController@Toggle_dashboard')->name('toggleDashboard')->middleware('permission:dashboard/toggle');
@@ -216,7 +219,6 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api']], function () {
     Route::get('get-class', 'CourseController@get_class_from_course')->middleware('permission:course/get-classes-by-course');
     Route::post('get-courses-by-classes', 'CourseController@get_courses_with_classes')->middleware('permission:course/get-courses-by-classes');
     Route::get('export', 'CourseController@export')->name('exportCourses')->middleware('permission:course/export');
-
 });
 
 //USER CRUD ROUTES
