@@ -112,7 +112,7 @@ class UserController extends Controller
             $data = array(
                 'name' => $firstname. " " .$request->lastname[$key], 
                 'meta_data' => array(
-                    "image_link" => (count($request->picture)!=0)?$user_picture->path:null,
+                    "image_link" => ($request->has('picture'))?$user_picture->path:null,
                     'role'=> Role::find($request->role)->name,
                 ),
             );    
