@@ -112,7 +112,7 @@ class UserController extends Controller
             $data = array(
                 'name' => $firstname. " " .$request->lastname[$key], 
                 'meta_data' => array(
-                    "image_link" => (count($request->picture))?$user_picture->path:null,
+                    "image_link" => (count($request->picture)!=0)?$user_picture->path:null,
                     'role'=> Role::find($request->role)->name,
                 ),
             );    
@@ -133,7 +133,8 @@ class UserController extends Controller
                 'real_password' => $request->password[$key],
                 'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0,
                 'chat_uid' => json_decode($res->getBody(),true)['user_id'],
-                'chat_token' => json_decode($res->getBody(),true)['token'],
+                'chat_token' => json_decode($res->getBody(),true)['idToken'],
+                'refresh_chat_token' => json_decode($res->getBody(),true)['refreshToken']
 
             ]);
 
