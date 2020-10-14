@@ -106,11 +106,18 @@ class UserController extends Controller
             $username=User::where('username',$request->username[$key])->pluck('username')->count();
             if($username>0)
                 return HelperController::api_response_format(404 ,$username, 'This username is already  used');
-
+            if (isset($request->picture[$i]))
+                    $user_picture = attachment::upload_attachment($request->picture[$i], 'User');
             $clientt = new Client();
-            $data = json_encode(array(
-                'name' => $firstname. " " .$request->lastname[$key] 
-            ));
+            $data = array(
+                'name' => $firstname. " " .$request->lastname[$key], 
+                'meta_data' => array(
+                    "image_link" => (count($request->picture))?$user_picture->path:null,
+                    'role'=> Role::find($request->role_id)->name,
+                ),
+            );            
+            $data = json_encode($data);
+
             $res = $clientt->request('POST', 'https://us-central1-akwadchattest.cloudfunctions.net/createUser', [
                 'headers'   => [
                     'Content-Type' => 'application/json'
@@ -135,7 +142,7 @@ class UserController extends Controller
                     $user->optional =$request->optional[$i];
                 }
                 if (isset($request->picture[$i]))
-                    $user->picture = attachment::upload_attachment($request->picture[$i], 'User')->id;
+                    $user->picture = $user_picture->id;
                 if ($request->filled($optional)){
                     if($optional =='birthdate')
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
