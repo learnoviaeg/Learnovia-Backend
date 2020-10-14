@@ -62,8 +62,8 @@ class UserController extends Controller
             'password.*' => 'required|string|min:6|max:191',
             // 'role' => 'required|array',
             // 'role.*' => 'required|exists:roles,id',
-            'role' => 'required|exists:roles,id', /// in all system
-            'role_id' => 'required_with:level|exists:roles,id', /// chain role
+            'role' => 'required|integer|exists:roles,id', /// in all system
+            'role_id' => 'required_with:level|exists:roles,id|integer', /// chain role
             'optional.*' => 'exists:courses,id',
             'optional' => 'array',
             'course.*' => 'exists:courses,id',
@@ -113,9 +113,9 @@ class UserController extends Controller
                 'name' => $firstname. " " .$request->lastname[$key], 
                 'meta_data' => array(
                     "image_link" => (count($request->picture))?$user_picture->path:null,
-                    'role'=> Role::find($request->role_id)->name,
+                    'role'=> Role::find($request->role)->name,
                 ),
-            );            
+            );    
             $data = json_encode($data);
 
             $res = $clientt->request('POST', 'https://us-central1-akwadchattest.cloudfunctions.net/createUser', [
