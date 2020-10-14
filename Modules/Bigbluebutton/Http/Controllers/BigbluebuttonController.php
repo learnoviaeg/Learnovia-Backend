@@ -540,7 +540,7 @@ class BigbluebuttonController extends Controller
         ]);
         $logs = AttendanceLog::where('session_id',$request->id)->where('type','online')->get();
         if(count($logs) > 0)
-            return HelperController::api_response_format(200 , null , 'This Class room has students logs, cannot be deleted!');
+            return HelperController::api_response_format(404 , null , 'This Class room has students logs, cannot be deleted!');
             
         $meet = BigbluebuttonModel::whereId($request->id)->delete();
         return HelperController::api_response_format(200 , null , 'Class room deleted!');
