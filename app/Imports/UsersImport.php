@@ -67,9 +67,14 @@ class UsersImport implements ToModel, WithHeadingRow
             die('U Can\'t add users any more');
         $clientt = new Client();
         $data = json_encode(array(
-            'name' => $row['firstname']. " " .$row['lastname'] 
+            'name' => $row['firstname']. " " .$row['lastname'] ,
+            'meta_data' => array(
+                "image_link" => null,
+                'role'=> Role::find($row['role_id'])->name,
+            ),
         ));
-        $res = $clientt->request('POST', 'https://us-central1-akwadchattest.cloudfunctions.net/createUser', [
+        
+        $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
             'headers'   => [
                 'Content-Type' => 'application/json'
             ], 
@@ -82,7 +87,8 @@ class UsersImport implements ToModel, WithHeadingRow
             'password' => bcrypt($password),
             'real_password' => $password,
             'chat_uid' => json_decode($res->getBody(),true)['user_id'],
-            'chat_token' => json_decode($res->getBody(),true)['token'],
+            'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+            'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
         ]);
 
         foreach ($optionals as $optional) {
