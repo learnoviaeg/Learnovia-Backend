@@ -118,7 +118,7 @@ class UserController extends Controller
             );    
             $data = json_encode($data);
 
-            $res = $clientt->request('POST', 'https://us-central1-akwadchattest.cloudfunctions.net/createUser', [
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
                 'headers'   => [
                     'Content-Type' => 'application/json'
                 ], 
@@ -133,8 +133,8 @@ class UserController extends Controller
                 'real_password' => $request->password[$key],
                 'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0,
                 'chat_uid' => json_decode($res->getBody(),true)['user_id'],
-                'chat_token' => json_decode($res->getBody(),true)['idToken'],
-                'refresh_chat_token' => json_decode($res->getBody(),true)['refreshToken']
+                'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+                'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
 
             ]);
 
