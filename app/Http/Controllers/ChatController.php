@@ -40,7 +40,7 @@ class ChatController extends Controller
         }
         
         $data = json_encode($data);
-        $res = $clientt->request('POST', 'https://us-central1-akwadchattest.cloudfunctions.net/createRoom', [
+        $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createRoom', [
             'headers'   => [
                 'Content-Type' => 'application/json'
             ], 
@@ -64,10 +64,9 @@ class ChatController extends Controller
             $user= User::find($request->user_id);
             $data = array(
                 'refresh_token' => $user->refresh_chat_token
-            );
-            
+            );            
             $data = json_encode($data);
-            $res = $clientt->request('POST', 'https://us-central1-akwadchattest.cloudfunctions.net/refreshToken', [
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/refreshToken', [
                 'headers'   => [
                     'Content-Type' => 'application/json'
                 ], 
@@ -76,10 +75,10 @@ class ChatController extends Controller
             $body = json_decode($res->getBody(),true);
 
             $user->refresh_chat_token = $body['refresh_token'];
-            $user->chat_token  = $body['id_token'];
+            $user->chat_token  = $body['custom_token'];
             $user->save();
 
-            return HelperController::api_response_format(200, $body, 'Token is refreshed');
+            return HelperController::api_response_format(200, $user, 'Token is refreshed');
 
             }
 
