@@ -30,6 +30,9 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('dashboard', 'SpatieController@dashboard')->name('dashboard');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('comparepermissions', 'SpatieController@comparepermissions');
+    
+    //for editor
+    Route::post('upload-editor', 'CourseController@Upload')->name('uploadForEditor');
 
     //dashboard routes
     Route::post('dashboard/toggle', 'SpatieController@Toggle_dashboard')->name('toggleDashboard')->middleware('permission:dashboard/toggle');
@@ -216,7 +219,6 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api']], function () {
     Route::get('get-class', 'CourseController@get_class_from_course')->middleware('permission:course/get-classes-by-course');
     Route::post('get-courses-by-classes', 'CourseController@get_courses_with_classes')->middleware('permission:course/get-courses-by-classes');
     Route::get('export', 'CourseController@export')->name('exportCourses')->middleware('permission:course/export');
-
 });
 
 //USER CRUD ROUTES
@@ -406,4 +408,7 @@ Route::group(['prefix' => 'h5p', 'middleware' => 'auth:api'], function () {
         Route::get('update', 'H5PLessonController@edit')->name('edith5p')->middleware('permission:h5p/lesson/update');
 
     });
+});
+Route::group(['prefix' => 'chat', 'middleware' => ['auth:api']], function () {
+    Route::post('add-room', 'ChatController@chat_room')->name('addroom')->middleware('permission:chat/add-room');
 });
