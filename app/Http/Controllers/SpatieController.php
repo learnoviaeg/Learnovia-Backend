@@ -359,8 +359,6 @@ class SpatieController extends Controller
             //chat
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'chat/add-room', 'title' => 'add room']);
 
-
-
             //Add Roles
             $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin' , 'description' => 'System manager that can monitor everything.']);
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'System Admin', 'description' => 'System admin.']);
