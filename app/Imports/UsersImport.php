@@ -52,8 +52,8 @@ class UsersImport implements ToModel, WithHeadingRow
         }
 
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
-                    'language', 'timezone', 'religion', 'second language', 'class_id', 'level', 'type', 'firstname',
-                    'lastname', 'username', 'real_password', 'suspend'];
+                    'language', 'timezone', 'religion', 'second language', 'class_id', 'level', 'type',
+                    'username', 'real_password', 'suspend'];
         $enrollOptional = 'optional'; 
         $teacheroptional='course';
 
