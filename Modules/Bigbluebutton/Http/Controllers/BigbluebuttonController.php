@@ -681,7 +681,7 @@ class BigbluebuttonController extends Controller
                                         'left_date' => Carbon::now()->format('Y-m-d H:i:s')
                                     ]);
 
-                $start = Carbon::parse($found->start_date);
+                $start = Carbon::parse($found[0]->start_date);
                 $end = Carbon::now();
                 $duration= $end->diffInMinutes($start);
                 BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
