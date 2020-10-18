@@ -180,7 +180,7 @@ class BigbluebuttonController extends Controller
                 }
             }
         }
-        return HelperController::api_response_format(200, $created_meetings ,'Meeting created Successfully');
+        return HelperController::api_response_format(200, $created_meetings ,'Class room created Successfully');
     }
 
     public function get_meetings()
@@ -538,8 +538,12 @@ class BigbluebuttonController extends Controller
         $request->validate([
             'id'=>'required|exists:bigbluebutton_models,id',
         ]);
+        $logs = AttendanceLog::where('session_id',$request->id)->where('type','online')->get();
+        if(count($logs) > 0)
+            return HelperController::api_response_format(404 , null , 'This Class room has students logs, cannot be deleted!');
+            
         $meet = BigbluebuttonModel::whereId($request->id)->delete();
-        return HelperController::api_response_format(200 , null , 'Meeting Deleted!');
+        return HelperController::api_response_format(200 , null , 'Class room deleted!');
     }
 
     public function toggle (Request $request)

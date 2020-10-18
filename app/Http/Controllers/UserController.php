@@ -62,8 +62,8 @@ class UserController extends Controller
             'password.*' => 'required|string|min:6|max:191',
             // 'role' => 'required|array',
             // 'role.*' => 'required|exists:roles,id',
-            'role' => 'required|exists:roles,id', /// in all system
-            'role_id' => 'required_with:level|exists:roles,id', /// chain role
+            'role' => 'required|integer|exists:roles,id', /// in all system
+            'role_id' => 'required_with:level|exists:roles,id|integer', /// chain role
             'optional.*' => 'exists:courses,id',
             'optional' => 'array',
             'course.*' => 'exists:courses,id',
@@ -106,12 +106,19 @@ class UserController extends Controller
             $username=User::where('username',$request->username[$key])->pluck('username')->count();
             if($username>0)
                 return HelperController::api_response_format(404 ,$username, 'This username is already  used');
-
+            if (isset($request->picture[$i]))
+                    $user_picture = attachment::upload_attachment($request->picture[$i], 'User');
             $clientt = new Client();
-            $data = json_encode(array(
-                'name' => $firstname. " " .$request->lastname[$key] 
-            ));
-            $res = $clientt->request('POST', 'https://us-central1-akwadchattest.cloudfunctions.net/createUser', [
+            $data = array(
+                'name' => $firstname. " " .$request->lastname[$key], 
+                'meta_data' => array(
+                    "image_link" => ($request->has('picture'))?$user_picture->path:null,
+                    'role'=> Role::find($request->role)->name,
+                ),
+            );    
+            $data = json_encode($data);
+
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
                 'headers'   => [
                     'Content-Type' => 'application/json'
                 ], 
@@ -126,7 +133,8 @@ class UserController extends Controller
                 'real_password' => $request->password[$key],
                 'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0,
                 'chat_uid' => json_decode($res->getBody(),true)['user_id'],
-                'chat_token' => json_decode($res->getBody(),true)['token'],
+                'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+                'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
 
             ]);
 
@@ -135,7 +143,7 @@ class UserController extends Controller
                     $user->optional =$request->optional[$i];
                 }
                 if (isset($request->picture[$i]))
-                    $user->picture = attachment::upload_attachment($request->picture[$i], 'User')->id;
+                    $user->picture = $user_picture->id;
                 if ($request->filled($optional)){
                     if($optional =='birthdate')
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
