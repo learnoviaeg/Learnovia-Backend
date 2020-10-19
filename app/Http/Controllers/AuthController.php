@@ -107,7 +107,8 @@ class AuthController extends Controller
         }
         $job=(new \App\Jobs\MessageDelivered(Auth::User()->id));
         dispatch($job);
-
+        $user->last_login = Carbon::now();
+        $user->save();
         return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
