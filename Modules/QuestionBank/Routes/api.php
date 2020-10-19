@@ -36,7 +36,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('get-student-in-quiz', 'QuizController@getStudentinQuiz')->middleware('permission:quiz/get-student-in-quiz');
     Route::get('get-student-answer-quiz', 'QuizController@getStudentAnswerinQuiz')->middleware('permission:quiz/get-student-answer-quiz');
     Route::get('get-all-students-answer', 'QuizController@getAllStudentsAnswerinQuiz')->middleware('permission:quiz/get-all-students-answer');
-    Route::get('get-single-quiz', 'QuizController@getSingleQuiz')->middleware(['permission:quiz/answer|quiz/detailes', 'ParentCheck']);
+    Route::get('get-single-quiz', 'QuizController@getSingleQuiz')->middleware('permission:quiz/answer|quiz/detailes');
     Route::post('toggle', 'QuizController@toggleQuizVisibity')->middleware('permission:quiz/toggle');
     Route::post('correct-user-quiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
     Route::post('get-attempts', 'QuizController@get_user_quiz')->middleware(['permission:quiz/get-attempts', 'ParentCheck']);
