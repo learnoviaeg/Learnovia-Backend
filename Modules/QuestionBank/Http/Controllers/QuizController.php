@@ -650,13 +650,28 @@ class QuizController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
+
+       
         $user_answer=[];
         $quiz = Quiz::find($request->quiz_id);
         $qq = Quiz::where('id', $request->quiz_id)->first();
         if(!isset($qq->quizLessson[0]))
             return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
+        
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
+        /**delete from */
+        $roles = Auth::user()->roles->pluck('name');
+        if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date > Carbon::now() )
+            return HelperController::api_response_format(400, null , $message = 'Parents can\'t submit quizzes');
+        if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date < Carbon::now() )
+                {
+                if(Auth::user()->currentChild == null)
+                    return HelperController::api_response_format(400, 'please choose your current child');
+                $currentChild =User::find(Auth::user()->currentChild->child_id);
+                Auth::setUser($currentChild);
+            }
+        /** to */
         // if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
         //     return HelperController::api_response_format(400, null, 'Time is out');
         $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where("user_id",Auth::id())->first();
