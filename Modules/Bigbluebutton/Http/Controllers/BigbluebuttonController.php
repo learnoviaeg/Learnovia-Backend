@@ -316,6 +316,7 @@ class BigbluebuttonController extends Controller
         if(count($meet) <= 0){
             $CS_ids=GradeCategoryController::getCourseSegment($request);
             $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+            $classes = Enroll::where('user_id', Auth::id())->pluck('class');
             $CourseSeg = array_intersect($CS_ids->toArray(),$CourseSeg->toArray());
             if($request->user()->can('site/show-all-courses'))
                 $CourseSeg = $CS_ids;
@@ -326,7 +327,7 @@ class BigbluebuttonController extends Controller
             
             $meet = BigbluebuttonModel::whereIn('course_id',$courses)->orderBy('start_date')->get();
             if($request->user()->can('site/course/student'))
-                $meet = BigbluebuttonModel::whereIn('course_id',$courses)->where('show',1)->orderBy('start_date')->get();
+                $meet = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->where('show',1)->orderBy('start_date')->get();
             
         }
 
