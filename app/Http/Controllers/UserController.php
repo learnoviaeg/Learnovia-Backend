@@ -683,12 +683,15 @@ class UserController extends Controller
     Public Function SetCurrentChild(Request $request)
     {
         $request->validate([
-            'child_id' => 'required|exists:parents,child_id'
+            'child_id' => 'exists:parents,child_id'
         ]);
         Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
-        Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
-        $current_child = User::where('id',$request->child_id)->first();
-        return HelperController::api_response_format(200,$current_child ,'Child is choosen successfully');
+        $current_child=null;
+        if(isset($request->child_id)){
+            Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
+            $current_child = User::where('id',$request->child_id)->first();
+        }
+        return HelperController::api_response_format(200,$current_child ,'Children sets successfully');
     }
 
     Public Function getMyChildren(){
