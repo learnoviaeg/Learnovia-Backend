@@ -217,6 +217,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $request->validate([
+            'nickname'=>'string|min:3|max:50',
             'firstname' => 'required|string|min:3|max:50',
             'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
@@ -232,7 +233,7 @@ class UserController extends Controller
 
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address','nationality', 'notes', 'email', 'suspend',
-            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id',
+            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id','nickname'
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
