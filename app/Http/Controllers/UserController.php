@@ -499,8 +499,8 @@ class UserController extends Controller
             $all[$i]['type'] = "";
             $all[$i]['year'] = "";
             if(isset($year_type)){
-                $all[$i]['type'] = AcademicType::find($year_type->academic_year_id);
-                $all[$i]['year'] = AcademicYear::find($year_type->academic_type_id);    
+                $all[$i]['type'] = AcademicType::find($year_type->academic_type_id);
+                $all[$i]['year'] = AcademicYear::find($year_type->academic_year_id);    
             }
             $i++;
         }
