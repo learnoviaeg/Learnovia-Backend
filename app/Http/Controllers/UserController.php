@@ -54,6 +54,8 @@ class UserController extends Controller
     public function create(Request $request)
     {
         $request->validate([
+            'nickname' => 'array',
+            'nickname.*' => 'string|min:3|max:50',
             'firstname' => 'required|array',
             'firstname.*' => 'required|string|min:3|max:50',
             'lastname' => 'required|array',
@@ -88,7 +90,7 @@ class UserController extends Controller
         // return User::max('id');
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email', 'suspend',
-            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id', 'username'
+            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id', 'username','nickname'
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
