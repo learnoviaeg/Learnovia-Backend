@@ -46,6 +46,9 @@ class PageController extends Controller
         $student_permissions=['page/get'];
         $student = \Spatie\Permission\Models\Role::find(3);
         $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+        $parent = \Spatie\Permission\Models\Role::find(7);
+        $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('page/add');
