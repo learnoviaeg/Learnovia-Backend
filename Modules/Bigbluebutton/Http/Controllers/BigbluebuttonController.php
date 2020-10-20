@@ -325,7 +325,11 @@ class BigbluebuttonController extends Controller
                                                             ->where('start_date','<',Carbon::now())
                                                             ->pluck('course_id')->unique()->values();
             
-            $meet = BigbluebuttonModel::whereIn('course_id',$courses)->orderBy('start_date')->get();
+            $meet = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('start_date')->get();
+
+            if($request->user()->can('site/show-all-courses'))
+                $meet = BigbluebuttonModel::whereIn('course_id',$courses)->orderBy('start_date')->get();
+
             if($request->user()->can('site/course/student'))
                 $meet = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->where('show',1)->orderBy('start_date')->get();
             
