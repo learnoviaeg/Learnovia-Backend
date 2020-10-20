@@ -84,6 +84,8 @@ class QuestionBankController extends Controller
         $student_permissions=['quiz/get','quiz/answer','quiz/correct-user-quiz','quiz/get-attempts','site/quiz/store_user_quiz'];
         $student = \Spatie\Permission\Models\Role::find(3);
         $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+        $parent = \Spatie\Permission\Models\Role::find(7);
+        $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('site/quiz/getStudentinQuiz');
