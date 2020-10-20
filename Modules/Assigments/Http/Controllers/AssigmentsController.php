@@ -66,7 +66,10 @@ class AssigmentsController extends Controller
 
         $student_permissions=['assignment/submit','assignment/get','site/assignment/getAssignment'];
         $student = \Spatie\Permission\Models\Role::find(3);
+        $parent = \Spatie\Permission\Models\Role::find(7);
+
         $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+        $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
         
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('assignment/add');

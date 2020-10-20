@@ -59,6 +59,9 @@ class BigbluebuttonController extends Controller
         $student = \Spatie\Permission\Models\Role::find(3);
         $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
 
+        $parent_permissions=['bigbluebutton/get','bigbluebutton/getRecord'];
+        $parent = \Spatie\Permission\Models\Role::find(7);
+        $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $parent_permissions)->get());
 
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('bigbluebutton/create');
