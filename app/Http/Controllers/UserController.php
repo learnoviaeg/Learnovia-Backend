@@ -686,7 +686,8 @@ class UserController extends Controller
             'child_id' => 'required|exists:parents,child_id'
         ]);
         Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
-        return HelperController::api_response_format(200, 'Child is choosen successfully');
+        $current_child = User::where('id',$request->child_id)->first();
+        return HelperController::api_response_format(200,$current_child ,'Child is choosen successfully');
 
     }
 
