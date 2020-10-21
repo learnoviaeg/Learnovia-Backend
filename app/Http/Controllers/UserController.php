@@ -694,6 +694,16 @@ class UserController extends Controller
         return HelperController::api_response_format(200,$current_child ,'Children sets successfully');
     }
 
+    Public Function getCurrentChild(Request $request)
+    {
+        $current = Auth::user()->currentChild;
+        $currentChild = null;
+        if(isset($current))
+            $currentChild =User::find($current->child_id);
+
+        return HelperController::api_response_format(200,$currentChild, 'Current child is...');
+    }
+
     Public Function getMyChildren(){
         $childrenIDS = Parents::where('parent_id',Auth::id())->pluck('child_id');
         $children =  User::whereIn('id',$childrenIDS)->get();
