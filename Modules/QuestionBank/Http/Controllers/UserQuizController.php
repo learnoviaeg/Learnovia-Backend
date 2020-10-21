@@ -357,6 +357,7 @@ class UserQuizController extends Controller
             'Questions.*.mark' => 'required|numeric',
             'Questions.*.feedback' => 'nullable|string',
             'Questions.*.answer' => 'boolean',
+            'Questions.*.right' => 'boolean',
         ]);
 
         // check that question exist in the Quiz
@@ -424,6 +425,8 @@ class UserQuizController extends Controller
                         $data['user_grade'] = $question['mark'];
                         $data['correct'] = isset($question['answer']) ? $question['answer'] : null;
                         $data['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
+                        //to know if teacher refers to that answer as right or wrong
+                        $data['right'] = isset($question['right']) ? $question['right'] : null;
 
                         break;
 
@@ -450,6 +453,9 @@ class UserQuizController extends Controller
                 $userAnswer->feedback = $data['feedback'];
             if(isset($data['correct']))
                 $userAnswer->correct = $data['correct'];
+            if(isset($data['right']))
+                $userAnswer->right = $data['right'];
+
             $userAnswer->save();
         }
 
