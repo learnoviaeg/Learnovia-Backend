@@ -26,17 +26,20 @@ class LessonController extends Controller
             'image' => 'array',
             'image.*' => 'mimes:jpeg,jpg,png,gif|max:10000',
             'description' => 'array',
-            'description.*' => 'string'
+            'description.*' => 'string',
+            'course' => 'required|exists:courses,id',
+            'class' => 'required|exists:classes,id'
         ]);
-        $segments = HelperController::Get_Course_segment_Course($request);
-        if (!$segments['result'] || $segments['value'] == null)
-            return HelperController::api_response_format(400, $segments['value'], 'Something went wrong or no active segments on this class');
+        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
+        if (!isset($courseSegment))
+            return HelperController::api_response_format(200, null,'no courses');
+            
         foreach ($request->name as $key => $name) {
-            $lessons_in_CourseSegment = Lesson::where('course_segment_id', $segments['value']->id)->max('index');
+            $lessons_in_CourseSegment = Lesson::where('course_segment_id', $courseSegment->id)->max('index');
             $Next_index = $lessons_in_CourseSegment + 1;
             $lesson = Lesson::create([
                 'name' => $name,
-                'course_segment_id' => $segments['value']->id,
+                'course_segment_id' => $courseSegment->id,
                 'index' => $Next_index
             ]);
             if (isset($request->image[$key])) {
@@ -47,7 +50,7 @@ class LessonController extends Controller
             }
             $lesson->save();
         }
-        return HelperController::api_response_format(200, $segments['value']->lessons,'added sucessfully');
+        return HelperController::api_response_format(200, $courseSegment->lessons,'added sucessfully');
     }
 
     /**
