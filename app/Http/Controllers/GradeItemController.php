@@ -87,7 +87,7 @@ class GradeItemController extends Controller
 
         $grade = GradeItems::create($data);
         // return $grade;
-        // event(new UserGradeEvent($grade));
+        event(new UserGradeEvent($grade));
 
         $grade_itms=GradeCategory::where('id',$request->grade_category)->with('GradeItems')->first();
         $allWeight = 0;
