@@ -218,6 +218,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-with-role-cs', 'title' => 'get users in course with filter role_id']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/filter-with-role', 'title' => 'filter all users with role']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/current-child', 'title' => 'set current child']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-current-child', 'title' => 'get current child']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-someone-child', 'title' => 'get child by parent_id']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-someone-parent', 'title' => 'get parent by child_id']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/get-my-child', 'title' => 'get my child']);
@@ -366,7 +367,7 @@ class SpatieController extends Controller
             $tecaher = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Teacher', 'description' => 'System teacher.']);
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Manager', 'description' => 'System Manager.']);
             \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Supervisor', 'description' => 'System Supervisor.']);
-            \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Parent', 'description' => 'Students Parent.']);
+            $parent = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Parent', 'description' => 'Students Parent.']);
             $Authenticated = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Authenticated', 'description' => 'Allow user to only login untill has another permissions.']);
 
             //site internal permessions
@@ -401,10 +402,18 @@ class SpatieController extends Controller
             'languages/get','languages/update','languages/delete','languages/dictionary','user/language','languages/activate','languages/deactivate','languages/set-default',
             'grade/user/course-grade','grade/report/user','site/course/student','chat/add-room'];
 
-            $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->where('name','not like','%site/course/student%')->get());
+            $parent_permissions=['notifications/get-all','notifications/get-unread','notifications/mark-as-read','notifications/seen','year/get-all','year/get-my-years',
+            'type/get-all','type/get-my-types','level/get-my-levels','class/get-all','class/get-my-classes','class/get','class/get-lessons','segment/get-all','segment/get',
+            'segment/get-my-segments','course/my-courses','course/layout','course/components','contact/add','contact/get','user/get-by-id','user/get-my-users',
+            'component/get','announcements/get','announcements/getbyid','announcements/get-unread','announcements/mark-as-read','calendar/get','calendar/weekly',
+            'languages/get','languages/update','languages/delete','languages/dictionary','user/language','languages/activate','languages/deactivate','languages/set-default',
+            'grade/user/course-grade','grade/report/user','site/course/student','user/parent-child','user/current-child','user/get-someone-child','user/get-my-child','user/get-current-child'];
+
+            $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->where('name','not like','%site/course/student%')->where('name','not like','user/get-my-child')->get());
             $Authenticated->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%bulk%')->where('name', 'like', '%messages%')->get());
             $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
             $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+            $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $parent_permissions)->get());
 
             $user = new User([
                 'firstname' => 'Learnovia',

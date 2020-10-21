@@ -381,64 +381,61 @@ class CourseController extends Controller
         if($request->filled('course_id'))
             $couuures= CourseSegment::where('course_id', $request->course_id)->pluck('id');
         foreach ($couuures as $enroll) {
-                $teacherz = array();
-                $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
-                $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
-                if(in_array($course->id,$testCourse))
-                    continue;
-                array_push($testCourse,$course->id);
+            $teacherz = array();
+            $segment_Class_id = CourseSegment::where('id', $enroll)->get(['segment_class_id', 'course_id'])->first();
+            $course = Course::where('id', $segment_Class_id->course_id)->with(['category', 'attachment'])->first();
+            if(in_array($course->id,$testCourse))
+                continue;
+            array_push($testCourse,$course->id);
+            
+            $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
+            $flag = new stdClass();
+            $flag->segment = Segment::find($segment->segment_id)->name;
+            $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
+            $class_object = Classes::find($class_id->class_id);
+            $flag->class = 'Not_Found';
+            if(isset($class_object))
+                $flag->class = $class_object->name;
+            $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
+            $level_object = Level::find($level_id->level_id);
+            $flag->level = 'Not_Found';
+            if(isset($level_object))
+                $flag->level = $level_object->name;
+            $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
+            if(isset($AC_type)){
+                $year_object = AcademicYear::find($AC_type->academic_year_id);
+                $type_object = AcademicType::find($AC_type->academic_type_id);
+
+                $flag->year = 'Not_Found';
+                $flag->type = 'Not_Found';
                 
-                $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
-                $flag = new stdClass();
-                $flag->segment = Segment::find($segment->segment_id)->name;
-                $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
-                $class_object = Classes::find($class_id->class_id);
-                $flag->class = 'Not_Found';
-                if(isset($class_object))
-                    $flag->class = $class_object->name;
-                $level_id = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
-                $level_object = Level::find($level_id->level_id);
-                $flag->level = 'Not_Found';
-                if(isset($level_object))
-                    $flag->level = $level_object->name;
-                $AC_type = AcademicYearType::where('id', $level_id->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
-                if(isset($AC_type)){
-                    $year_object = AcademicYear::find($AC_type->academic_year_id);
-                    $type_object = AcademicType::find($AC_type->academic_type_id);
-
-                    $flag->year = 'Not_Found';
-                    $flag->type = 'Not_Found';
-                    
-                    if(isset($year_object))
-                        $flag->year = $year_object->name;
-                    if(isset($type_object))
-                        $flag->type = $type_object->name;
-                }
-                $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
-
-                // $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->first();
-                // $teacher = User::whereId($userr)->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                // if(isset($teacher->attachment))
-                //     $teacher->picture=$teacher->attachment->path;
-                foreach($userr as $teach){
-                    $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
-                    if(isset($teacher)){
-                        if(isset($teacher->attachment))
+                if(isset($year_object))
+                    $flag->year = $year_object->name;
+                if(isset($type_object))
+                    $flag->type = $type_object->name;
+            }
+            $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
+            if(isset($request->course_id))
+                $userr=Enroll::where('role_id', 4)->whereIn('course_segment', $couuures)->pluck('user_id');
+            foreach($userr as $teach){
+                $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
+                if(isset($teacher)){
+                    if(isset($teacher->attachment))
                         $teacher->picture=$teacher->attachment->path;
-                        array_push($teacherz, $teacher);
-                    }
+                    array_push($teacherz, $teacher);
                 }
-                $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
-                if(isset($en->id)  && isset($teacher))
-                    $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
-                $course->flag = $flag;
-                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
-                $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
-                $course->teachers = $teacherz;
-                if(!isset($course->attachment)){
-                    $course->attachment = null;
-                }
-                $all->push($course);
+            }
+            $en=Enroll::where('course_segment',$enroll)->where('user_id',Auth::id())->first();
+            if(isset($en->id)  && isset($teacher))
+                $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
+            $course->flag = $flag;
+            $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
+            $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
+            $course->teachers = $teacherz;
+            if(!isset($course->attachment)){
+                $course->attachment = null;
+            }
+            $all->push($course);
         }
         if (isset($all))
             return HelperController::api_response_format(200, (new Collection($all))->paginate(HelperController::GetPaginate($request)));

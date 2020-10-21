@@ -66,7 +66,10 @@ class AssigmentsController extends Controller
 
         $student_permissions=['assignment/submit','assignment/get','site/assignment/getAssignment'];
         $student = \Spatie\Permission\Models\Role::find(3);
+        $parent = \Spatie\Permission\Models\Role::find(7);
+
         $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+        $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
         
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('assignment/add');
@@ -360,10 +363,15 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
         ]);
+        $roles = Auth::user()->roles->pluck('name');
+        if(in_array("Parent" , $roles->toArray()))
+            return HelperController::api_response_format(400, null , $message = 'Parents can\'t submit assignments');
+        
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if(!isset($assilesson))
             return HelperController::api_response_format(200, null , $message = 'This assignment is not assigned to this lesson');
+
         
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assilesson->id)->first();
         /*

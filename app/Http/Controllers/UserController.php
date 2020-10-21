@@ -54,6 +54,8 @@ class UserController extends Controller
     public function create(Request $request)
     {
         $request->validate([
+            'nickname' => 'array',
+            'nickname.*' => 'string|min:3|max:50',
             'firstname' => 'required|array',
             'firstname.*' => 'required|string|min:3|max:50',
             'lastname' => 'required|array',
@@ -88,7 +90,7 @@ class UserController extends Controller
         // return User::max('id');
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email', 'suspend',
-            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id', 'username'
+            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id', 'username','nickname'
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
@@ -215,6 +217,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $request->validate([
+            'nickname'=>'string|min:3|max:50',
             'firstname' => 'required|string|min:3|max:50',
             'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
@@ -230,7 +233,7 @@ class UserController extends Controller
 
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address','nationality', 'notes', 'email', 'suspend',
-            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id',
+            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id','nickname'
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
@@ -499,8 +502,8 @@ class UserController extends Controller
             $all[$i]['type'] = "";
             $all[$i]['year'] = "";
             if(isset($year_type)){
-                $all[$i]['type'] = AcademicType::find($year_type->academic_year_id);
-                $all[$i]['year'] = AcademicYear::find($year_type->academic_type_id);    
+                $all[$i]['type'] = AcademicType::find($year_type->academic_type_id);
+                $all[$i]['year'] = AcademicYear::find($year_type->academic_year_id);    
             }
             $i++;
         }
@@ -680,11 +683,25 @@ class UserController extends Controller
     Public Function SetCurrentChild(Request $request)
     {
         $request->validate([
-            'child_id' => 'required|exists:parents,child_id'
+            'child_id' => 'exists:parents,child_id'
         ]);
-        Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
-        return HelperController::api_response_format(200, 'Child is choosen successfully');
+        Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+        $current_child=null;
+        if(isset($request->child_id)){
+            Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
+            $current_child = User::where('id',$request->child_id)->first();
+        }
+        return HelperController::api_response_format(200,$current_child ,'Children sets successfully');
+    }
 
+    Public Function getCurrentChild(Request $request)
+    {
+        $current = Auth::user()->currentChild;
+        $currentChild = null;
+        if(isset($current))
+            $currentChild =User::find($current->child_id);
+
+        return HelperController::api_response_format(200,$currentChild, 'Current child is...');
     }
 
     Public Function getMyChildren(){
