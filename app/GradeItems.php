@@ -12,10 +12,9 @@ class GradeItems extends Model
         'plusfactor', 'aggregationcoef', 'aggregationcoef2', 'item_type', 'name', 'item_Entity', 'hidden','type', 'weight', 'id_number','scale_id'
     ];
 
-    protected $dispatchesEvents = [
-        'created' => UserGradeEvent::class,
-        
-    ];
+    // protected $dispatchesEvents = [
+    //     'created' => UserGradeEvent::class,  
+    // ];
 
     protected $appends = ['parent_aggregation'];
 
