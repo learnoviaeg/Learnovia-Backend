@@ -63,7 +63,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            // 'short_name' => 'required|unique:courses',
+            'short_name' => 'required|unique:courses',
             'category' => 'exists:categories,id',
             'chains.*.year' => 'array',
             'chains.*.year.*' => 'required|exists:academic_years,id',
@@ -86,7 +86,7 @@ class CourseController extends Controller
         $no_of_lessons = 4;
         $course = Course::create([
             'name' => $request->name,
-            // 'short_name' => $request->short_name,
+            'short_name' => $request->short_name,
         ]);
         // if course has an image
         if ($request->hasFile('image')) {
@@ -195,14 +195,11 @@ class CourseController extends Controller
             'id' => 'required|exists:courses,id',
             'image' => 'nullable',
             'description' => 'nullable',
-            'mandatory' => 'nullable|in:0,1'
+            'mandatory' => 'nullable|in:0,1',
+            'short_name' => 'unique:courses,short_name,'.$request->id,
         ]);
-        $editable = ['name', 'category_id', 'description', 'mandatory'];
+        $editable = ['name', 'category_id', 'description', 'mandatory','short_name'];
         $course = Course::find($request->id);
-        $course->name = $request->name;
-        if($request->filled('category'))
-            $course->category_id = $request->category;
-
         // if course has an image
         if ($request->hasFile('image')) {
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
@@ -982,23 +979,20 @@ class CourseController extends Controller
     public function getCoursesOptional(Request $request)
     {
         $test = 0;
-        $course_segment = HelperController::Get_Course_segment($request);
-        if ($course_segment == null)
-            return HelperController::api_response_format(404, 'There is no current segment or year');
-        else {
-            if (!$course_segment['result'])
-                return HelperController::api_response_format(400, $course_segment['value']);
-            foreach ($course_segment['value'] as $cs) {
-                if (count($cs->optionalCourses) > 0){
-                    $optional[] = $cs->optionalCourses[0];
-                    $test += 1;
-                }
+        $course_segment = GradeCategoryController::getCourseSegment($request);
+        if (!isset($course_segment))
+            return HelperController::api_response_format(404,null,'There is no courses');
+        foreach ($course_segment as $cs) {
+            $cour_seg=CourseSegment::find($cs);
+            if (count($cour_seg->optionalCourses) > 0){
+                $optional[] = $cour_seg->optionalCourses[0];
+                $test += 1;
             }
-            if ($test > 0)
-                return HelperController::api_response_format(200, $optional);
-            else
-                return HelperController::api_response_format(200,null, 'there is no course optional here');
         }
+        if ($test > 0)
+            return HelperController::api_response_format(200, $optional);
+
+        return HelperController::api_response_format(200,null, 'there is no course optional here');
     }
 
     /**
