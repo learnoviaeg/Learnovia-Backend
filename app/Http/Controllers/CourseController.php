@@ -984,7 +984,7 @@ class CourseController extends Controller
         $test = 0;
         $course_segment = GradeCategoryController::getCourseSegment($request);
         if (!isset($course_segment))
-            return HelperController::api_response_format(404, 'There is no courses');
+            return HelperController::api_response_format(404,null,'There is no courses');
         foreach ($course_segment as $cs) {
             $cour_seg=CourseSegment::find($cs);
             if (count($cour_seg->optionalCourses) > 0){
