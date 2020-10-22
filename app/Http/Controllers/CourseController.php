@@ -63,7 +63,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            // 'short_name' => 'required|unique:courses',
+            'short_name' => 'required|unique:courses',
             'category' => 'exists:categories,id',
             'chains.*.year' => 'array',
             'chains.*.year.*' => 'required|exists:academic_years,id',
@@ -86,7 +86,7 @@ class CourseController extends Controller
         $no_of_lessons = 4;
         $course = Course::create([
             'name' => $request->name,
-            // 'short_name' => $request->short_name,
+            'short_name' => $request->short_name,
         ]);
         // if course has an image
         if ($request->hasFile('image')) {
@@ -195,14 +195,11 @@ class CourseController extends Controller
             'id' => 'required|exists:courses,id',
             'image' => 'nullable',
             'description' => 'nullable',
-            'mandatory' => 'nullable|in:0,1'
+            'mandatory' => 'nullable|in:0,1',
+            'short_name' => 'unique:courses,short_name,'.$request->id,
         ]);
-        $editable = ['name', 'category_id', 'description', 'mandatory'];
+        $editable = ['name', 'category_id', 'description', 'mandatory','short_name'];
         $course = Course::find($request->id);
-        $course->name = $request->name;
-        if($request->filled('category'))
-            $course->category_id = $request->category;
-
         // if course has an image
         if ($request->hasFile('image')) {
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
