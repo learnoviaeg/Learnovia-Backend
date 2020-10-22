@@ -112,23 +112,23 @@ class EnrollUserToCourseController extends Controller
         $request->validate([
             'user_id' => 'required|array|exists:enrolls,user_id',
             'year' => 'exists:academic_years,id',
-            'type' => 'required|exists:academic_types,id',
-            'level' => 'required|exists:levels,id',
-            'class' => 'required|exists:classes,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'class' => 'exists:classes,id',
             'segment' => 'exists:segments,id',
-            'course' => 'exists:courses,id'
+            'courses' => 'array|exists:courses,id'
         ]);
-        $courseSegment = HelperController::Get_Course_segment_Course($request);
+        $courseSegment = GradeCategoryController::getCourseSegment($request);
         if ($courseSegment == null)
-            return HelperController::api_response_format(200, null, 'No current segment or year');
+            return HelperController::api_response_format(200, null, 'No Courses');
 
         foreach ($request->user_id as $users)
-            $course_segment = Enroll::where('course_segment', $courseSegment['value']->id)->where('user_id', $users)->delete();
+            $course_segment = Enroll::whereIn('course_segment', $courseSegment)->where('user_id', $users)->delete();
 
         if ($course_segment > 0)
-            return HelperController::api_response_format(200, $course_segment, 'users UnEnrolled Successfully');
+            return HelperController::api_response_format(200, null, 'users UnEnrolled Successfully');
 
-        return HelperController::api_response_format(200, $course_segment, 'NOT FOUND USER IN THIS COURSE/invalid data');
+        return HelperController::api_response_format(200, null, 'NOT FOUND USER IN THIS COURSE/invalid data');
     }
 
     /**
@@ -523,17 +523,13 @@ class EnrollUserToCourseController extends Controller
         $request->validate([
             'search' => 'nullable'
         ]);
-        $courseSegments = HelperController::Get_Course_segment($request);
-        if ($courseSegments['result'] == false) {
-            return HelperController::api_response_format(400, $courseSegments['value']);
-        }
-        if ($courseSegments['value'] == null) {
-            return HelperController::api_response_format(400, null, 'No Course active in segment');
-        }
+        $course_segment = GradeCategoryController::getCourseSegment($request);
+        if (!isset($course_segment))
+            return HelperController::api_response_format(404, 'There is no courses');
 
-        $ids = Enroll::whereIn('course_segment', $courseSegments['value']->pluck('id'))->pluck('user_id');
+        $ids = Enroll::whereIn('course_segment', $course_segment)->pluck('user_id');
         $userUnenrolls = User::where('username', 'LIKE', "%$request->search%")->whereNotIn('id', $ids)->get();
-        return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'students are ... ');
+        return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'users that unenrolled in this chain  are ... ');
     }
 
     /**

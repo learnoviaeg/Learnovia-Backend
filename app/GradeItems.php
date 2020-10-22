@@ -13,8 +13,7 @@ class GradeItems extends Model
     ];
 
     protected $dispatchesEvents = [
-        'created' => UserGradeEvent::class,
-        
+        'created' => UserGradeEvent::class,  
     ];
 
     protected $appends = ['parent_aggregation'];
