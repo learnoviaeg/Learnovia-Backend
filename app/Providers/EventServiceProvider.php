@@ -19,8 +19,11 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,    
         ],
         
-        'App\Events\UserGradeEvent' => [
-            'App\Listerners\UserGradeListener',
+        // 'App\Events\UserGradeEvent' => [
+        //     'App\Listerners\UserGradeListener',
+        // ],
+        UserGradeEvent::class => [
+            UserGradeListener::class,
         ],
     ];
 
