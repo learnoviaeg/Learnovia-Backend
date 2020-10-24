@@ -231,10 +231,14 @@ class CourseController extends Controller
             'id' => 'exists:courses,id',
             'category_id' => 'nullable|exists:categories,id',
             'year' => 'nullable|exists:academic_years,id',
-            'type' => 'nullable|exists:academic_types,id',
-            'level' => 'nullable|exists:levels,id',
-            'class' => 'nullable|exists:classes,id',
-            'segment' => 'nullable|exists:segments,id',
+            'type' => 'array',
+            'type.*' => 'nullable|exists:academic_types,id',
+            'levels' => 'array',
+            'levels.*' => 'nullable|exists:levels,id',
+            'classes' => 'array',
+            'classes.*' => 'nullable|exists:classes,id',
+            'segments' => 'array',
+            'segments.*' => 'nullable|exists:segments,id',
             'search' => 'nullable',
             'for' => 'in:enroll'
         ]);
@@ -256,7 +260,7 @@ class CourseController extends Controller
                 return HelperController::api_response_format(200, null, ' No Active year here');
         }
 
-        $couresegs = GradeCategoryController::getCourseSegment($request);
+        $couresegs = GradeCategoryController::getCourseSegmentWithArray($request);
         if(count($couresegs) == 0)
             return HelperController::api_response_format(200, null, 'No Courses' );
 
