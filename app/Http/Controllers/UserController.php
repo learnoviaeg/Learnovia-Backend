@@ -54,8 +54,8 @@ class UserController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'nickname' => 'array',
-            'nickname.*' => 'string|min:3|max:50',
+            // 'nickname' => 'array',
+            // 'nickname.*' => 'string|min:3|max:50',
             'firstname' => 'required|array',
             'firstname.*' => 'required|string|min:3|max:50',
             'lastname' => 'required|array',
