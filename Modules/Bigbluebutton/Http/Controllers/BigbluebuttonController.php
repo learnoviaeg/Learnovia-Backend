@@ -267,6 +267,7 @@ class BigbluebuttonController extends Controller
         ]);
 
         $user_name = Auth::user()->username;
+        $full_name = Auth::user()->fullname;
         $bigbb=BigbluebuttonModel::find($request->id);
         $check=Carbon::parse($bigbb->start_date)->addMinutes($bigbb->duration);
         if($check < Carbon::now())
@@ -276,7 +277,7 @@ class BigbluebuttonController extends Controller
         if($request->user()->can('bigbluebutton/session-moderator'))
             $password = $bigbb->moderator_password;
         
-        $joinMeetingParams = new JoinMeetingParameters($bigbb->meeting_id, $user_name, $password);
+        $joinMeetingParams = new JoinMeetingParameters($bigbb->meeting_id, $full_name, $password);
         $joinMeetingParams->setRedirect(true);
         $joinMeetingParams->setJoinViaHtml5(true);
         $joinMeetingParams->setUserId($user_name);
@@ -510,7 +511,7 @@ class BigbluebuttonController extends Controller
         $response = $guzzleClient->get($response);
         $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
 
-        if(!isset($response['attendees']['attendee'][0]['fullName'])){
+        if(!isset($response['attendees']['attendee'][0]['userID'])){
             $all_attendees = AttendanceLog::whereIn('session_id',$meetings_ids)->where('type','online')->update([
                 'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'taker_id' => Auth::id(),
@@ -528,15 +529,17 @@ class BigbluebuttonController extends Controller
 
         $students_id=collect();
         foreach($response['attendees']['attendee'] as $attend){
-            $user=User::where('username',$attend['fullName'])->first();
-            $students_id->push($user->id);
-            $attendance=AttendanceLog::where('student_id',$user->id)->whereIn('session_id',$meetings_ids)->where('type','online')->first();
-            if(isset($attendance)){
-                $attendance->update([
-                    'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'taker_id' => Auth::id(),
-                    'status' => 'Present'
-                ]);
+            $user=User::where('username',$attend['userID'])->first();
+            if(isset($user)){
+                $students_id->push($user->id);
+                $attendance=AttendanceLog::where('student_id',$user->id)->whereIn('session_id',$meetings_ids)->where('type','online')->first();
+                if(isset($attendance)){
+                    $attendance->update([
+                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'taker_id' => Auth::id(),
+                        'status' => 'Present'
+                    ]);
+                }
             }
         }
 
