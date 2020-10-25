@@ -529,14 +529,16 @@ class BigbluebuttonController extends Controller
         $students_id=collect();
         foreach($response['attendees']['attendee'] as $attend){
             $user=User::where('username',$attend['userID'])->first();
-            $students_id->push($user->id);
-            $attendance=AttendanceLog::where('student_id',$user->id)->whereIn('session_id',$meetings_ids)->where('type','online')->first();
-            if(isset($attendance)){
-                $attendance->update([
-                    'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'taker_id' => Auth::id(),
-                    'status' => 'Present'
-                ]);
+            if(isset($user)){
+                $students_id->push($user->id);
+                $attendance=AttendanceLog::where('student_id',$user->id)->whereIn('session_id',$meetings_ids)->where('type','online')->first();
+                if(isset($attendance)){
+                    $attendance->update([
+                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'taker_id' => Auth::id(),
+                        'status' => 'Present'
+                    ]);
+                }
             }
         }
 
