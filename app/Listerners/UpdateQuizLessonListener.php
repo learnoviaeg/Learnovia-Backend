@@ -2,11 +2,11 @@
 
 namespace App\Listerners;
 
-use App\Events\UserGradeEvent;
+use App\Events\QuizLessonEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class CreateAssignmentListener
+class UpdateQuizLessonListener
 {
     /**
      * Create the event listener.
@@ -21,10 +21,10 @@ class CreateAssignmentListener
     /**
      * Handle the event.
      *
-     * @param  UserGradeEvent  $event
+     * @param  QuizLessonEvent  $event
      * @return void
      */
-    public function handle(UserGradeEvent $event)
+    public function handle(QuizLessonEvent $event)
     {
         //
     }

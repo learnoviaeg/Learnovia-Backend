@@ -23,7 +23,6 @@ class TimelineController extends Controller
     {
         //validate the request
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'level' => 'exists:levels,id',
             'class' => 'exists:classes,id',
             'course' => 'exists:courses,id',
@@ -36,7 +35,7 @@ class TimelineController extends Controller
 
         $year = AcademicYear::where('current',1)->pluck('id')->first();
         $segment = Segment::where('current',1)->pluck('id');
-        $course_segment = Enroll::where('user_id',$request->user_id)->where('year',$year)->whereIn('segment',$segment)->pluck('course_segment');
+        $course_segment = Enroll::where('user_id',Auth::id())->where('year',$year)->whereIn('segment',$segment)->pluck('course_segment');
         $current_course_segments = CourseSegment::whereIn('id',$course_segment)->where('start_date','<=',Carbon::now())
                                                 ->where('end_date','>=',Carbon::now())->pluck('id');
         $lessons = Lesson::whereIn('course_segment_id', $current_course_segments)->pluck('id');
