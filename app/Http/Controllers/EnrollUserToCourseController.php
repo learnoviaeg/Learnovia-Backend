@@ -659,7 +659,7 @@ class EnrollUserToCourseController extends Controller
     {
         \DB::enableQueryLog();
         $coursesNotEnrolled=CourseSegment::whereNotIn('id',Enroll::where('role_id',3)->pluck('course_segment'))->pluck('course_id');
-        $courses=Course::whereIn('id',$coursesNotEnrolled)->with(['courseSegments.segmentClasses.classLevel.yearLevels.levels'])->get();
+        $courses=Course::whereIn('id',$coursesNotEnrolled)->pluck('short_name');
         return HelperController::api_response_format(200, $courses , 'empty courses');
     }
 }
