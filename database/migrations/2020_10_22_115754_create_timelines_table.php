@@ -25,6 +25,7 @@ class CreateTimelinesTable extends Migration
             $table->integer('level_id');
             $table->integer('lesson_id');
             $table->string('type');
+            $table->boolean('visible')->default(1);
             $table->timestamps();
         });
     }

@@ -8,10 +8,6 @@ class AssignmentLesson extends Model
 {
     protected $fillable = ['assignment_id','lesson_id','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment'];
 
-    protected $dispatchesEvents = [
-        'created' => \App\Events\AssignmentLessonEvent::class,
-    ];
-
     public function Assignment()
     {
         return $this->hasMany('Modules\Assigments\Entities\assignment', 'id', 'assignment_id');

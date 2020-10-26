@@ -20,10 +20,6 @@ class QuizLesson extends Model
     ];
     protected $table = 'quiz_lessons';
 
-    protected $dispatchesEvents = [
-        'created' => \App\Events\QuizLessonEvent::class
-    ];
-
     public function quiz()
     {
         return $this->belongsTo('Modules\QuestionBank\Entities\quiz', 'quiz_id', 'id');

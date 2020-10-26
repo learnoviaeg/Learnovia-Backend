@@ -11,9 +11,21 @@ use App\Lesson;
 use App\Segment;
 use App\AcademicYear;
 use Illuminate\Support\Facades\Auth;
+use App\Repositories\ChainRepositoryInterface;
 
 class TimelineController extends Controller
 {
+    protected $chain;
+
+    /**
+     * ChainController constructor.
+     *
+     * @param ChainRepositoryInterface $post
+     */
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -33,13 +45,17 @@ class TimelineController extends Controller
             'due_date' => 'date',
         ]);
 
-        $year = AcademicYear::where('current',1)->pluck('id')->first();
-        $segment = Segment::where('current',1)->pluck('id');
-        $course_segment = Enroll::where('user_id',Auth::id())->where('year',$year)->whereIn('segment',$segment)->pluck('course_segment');
-        $current_course_segments = CourseSegment::whereIn('id',$course_segment)->where('start_date','<=',Carbon::now())
-                                                ->where('end_date','>=',Carbon::now())->pluck('id');
-        $lessons = Lesson::whereIn('course_segment_id', $current_course_segments)->pluck('id');
-        $timeline = Timeline::with(['class','course','level'])->whereIn('lesson_id',$lessons)->where('start_date','<=',Carbon::now())->where('due_date','>=',Carbon::now());
+        $current_course_segments = $this->chain->getCourseSegmentByChain($request);
+        if(count($current_course_segments) == 0)
+            return response()->json(['message' => 'There is no active course segments', 'body' => []], 200);
+            
+        $user_course_segments = Enroll::where('user_id',Auth::id())->pluck('course_segment');
+        $user_course_segments = array_intersect($current_course_segments->toArray(),$user_course_segments->toArray());
+        if($request->user()->can('site/show-all-courses'))
+            $user_course_segments = $current_course_segments;
+
+        $lessons = Lesson::whereIn('course_segment_id', $user_course_segments)->pluck('id');
+        $timeline = Timeline::with(['class','course','level'])->whereIn('lesson_id',$lessons)->where('visible',1)->where('start_date','<=',Carbon::now())->where('due_date','>=',Carbon::now());
 
         if($request->has('level'))
             $timeline->where('level_id',$request->level);
