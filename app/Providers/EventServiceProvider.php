@@ -22,19 +22,6 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\UserGradeEvent' => [
             'App\Listerners\UserGradeListener',
         ],
-
-        'App\Events\AssignmentLessonEvent' => [
-            'App\Listerners\CreateAssignmentLessonListener',
-            'App\Listerners\UpdateAssignmentLessonListener',
-            'App\Listerners\DeleteAssignmentLessonListener',
-        ],
-
-        'App\Events\QuizLessonEvent' => [
-            'App\Listerners\CreateQuizLessonListener',
-            'App\Listerners\UpdateQuizLessonListener',
-            'App\Listerners\QuizLessonListener',
-        ],
-
     ];
 
     /**
