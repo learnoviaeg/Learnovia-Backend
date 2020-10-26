@@ -652,6 +652,13 @@ class EnrollUserToCourseController extends Controller
                 }
             }
         }
-        return HelperController::api_response_format(200, 'User Migrated to class ' . $request->new_class);
+        return HelperController::api_response_format(200,null, 'User Migrated to class ' . $request->new_class);
+    }
+
+    public function EmptyCourses()
+    {
+        $coursesNotEnrolled=CourseSegment::whereNotIn('id',Enroll::pluck('course_segment'))->pluck('course_id');
+        $courses=Course::whereIn('id',$coursesNotEnrolled)->get();
+        return HelperController::api_response_format(200, $courses , 'empty courses');
     }
 }
