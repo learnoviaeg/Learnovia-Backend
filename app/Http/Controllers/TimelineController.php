@@ -33,7 +33,7 @@ class TimelineController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware('permission:timeline/store', ['only' => ['store']]);
-        $this->middleware('permission:timeline/get',   ['only' => ['index']]);
+        $this->middleware(['permission:timeline/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
