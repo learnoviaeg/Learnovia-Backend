@@ -12,6 +12,12 @@ use App\Segment;
 use App\AcademicYear;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
+use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\Assigments\Entities\assignmentOverride;
+use Modules\QuestionBank\Entities\QuizOverride;
+use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\Quiz;
+use Modules\Assigments\Entities\Assignment;
 
 class TimelineController extends Controller
 {
@@ -35,10 +41,10 @@ class TimelineController extends Controller
     {
         //validate the request
         $request->validate([
-            'level' => 'exists:levels,id',
-            'class' => 'exists:classes,id',
-            'course' => 'exists:courses,id',
-            'type' => 'in:quiz,assignment',
+            'level_id' => 'exists:levels,id',
+            'class_id' => 'exists:classes,id',
+            'course_id' => 'exists:courses,id',
+            'item_type' => 'in:quiz,assignment',
             'sort_by' => 'in:course,name,due_date|required_with:sort_in',
             'sort_in' => 'in:asc,desc|required_with:sort_by',
             'start_date' => 'date',
@@ -57,17 +63,17 @@ class TimelineController extends Controller
         $lessons = Lesson::whereIn('course_segment_id', $user_course_segments)->pluck('id');
         $timeline = Timeline::with(['class','course','level'])->whereIn('lesson_id',$lessons)->where('visible',1)->where('start_date','<=',Carbon::now())->where('due_date','>=',Carbon::now());
 
-        if($request->has('level'))
-            $timeline->where('level_id',$request->level);
+        if($request->has('level_id'))
+            $timeline->where('level_id',$request->level_id);
 
-        if($request->has('class'))
-            $timeline->where('class_id',$request->class);
+        if($request->has('class_id'))
+            $timeline->where('class_id',$request->class_id);
 
-        if($request->has('course'))
-            $timeline->where('course_id',$request->course);
+        if($request->has('course_id'))
+            $timeline->where('course_id',$request->course_id);
 
-        if($request->has('type'))
-            $timeline->where('type',$request->type);
+        if($request->has('item_type'))
+            $timeline->where('type',$request->item_type);
 
         if($request->has('start_date'))
             $timeline->whereDate('start_date', '=', $request->start_date);
@@ -87,8 +93,32 @@ class TimelineController extends Controller
             $ids_ordered = implode(',', $course_sort->toArray());
             $timeline->orderByRaw("FIELD(id, $ids_ordered)");
         }
-        
-        return response()->json(['message' => 'Timeline List of items', 'body' => $timeline->get()], 200);
+
+        $timelines = $timeline->get();
+        if($request->user()->can('site/course/student')){
+            foreach($timelines as $timeline){
+                $override = null;
+                if($timeline->item_type == 'assignment'){
+                    $assignment_lesson = AssignmentLesson::where('assignment_id',$timeline->item_id)
+                                                        ->where('lesson_id',$timeline->lesson_id)->first();
+                    if(isset($assignment_lesson))
+                        $override = assignmentOverride::where('user_id',Auth::id())->where('assignment_lesson_id',$assignment_lesson->id)->first();
+                }
+
+                if($timeline->item_type == 'quiz'){
+                    $quiz_lesson = QuizLesson::where('quiz_id',$timeline->item_id)->where('lesson_id',$timeline->lesson_id)->first();
+                    if(isset($quiz_lesson))
+                        $override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
+                }
+
+                if(isset($override)){
+                    $timeline->start_date = $override->start_date;
+                    $timeline->due_date = $override->due_date;
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Timeline List of items', 'body' => $timelines], 200);
     }
 
     /**
@@ -101,38 +131,46 @@ class TimelineController extends Controller
     {
         //validate the request
         $request->validate([
-            'item_id' => 'required',
-            'name' => 'required|string',
-            'start_date' => 'required|date',
-            'due_date' => 'required|date',
-            'publish_date' => 'date',
-            'course_id' => 'required|exists:courses,id',
-            'class_id' => 'required|exists:classes,id',
+            'id' => 'required',
             'lesson_id' => 'required|exists:lessons,id',
-            'level_id' => 'required|exists:levels,id',
             'type' => 'required|in:quiz,assignment'
         ]);
 
-        if($request->type == 'assignment')
-            $request->validate(['item_id' => 'required|exists:assignments,id',]);
+        if($request->type == 'assignment'){
+            $request->validate(['id' => 'required|exists:assignments,id',]);
+            $item_Lesson = AssignmentLesson::where('assignment_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
+            $assignment = Assignment::where('id',$item_Lesson->assignment_id)->first();  
+            if(isset($assignment))  
+                $item_name = $assignment->name;
+        }
         
-        if($request->type == 'quiz')
-            $request->validate(['item_id' => 'required|exists:quizzes,id',]);
+        if($request->type == 'quiz'){
+            $request->validate(['id' => 'required|exists:quizzes,id',]);
+            $item_Lesson = QuizLesson::where('quiz_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
+            $quiz = Quiz::where('id',$item_Lesson->quiz_id)->first();  
+            if(isset($quiz))  
+                $item_name = $quiz->name;
+        }
         
-
-        $new_timeline = Timeline::create([
-            'item_id' => $request->item_id,
-            'name' => $request->name,
-            'start_date' => $request->start_date,
-            'due_date' => $request->due_date,
-            'publish_date' => isset($request->publish_date)? $request->publish_date : Carbon::now(),
-            'course_id' => $request->course_id,
-            'class_id' => $request->class_id,
-            'lesson_id' => $request->lesson_id,
-            'level_id' => $request->level_id,
-            'type' => $request->type
-        ]);
-
+        $lesson = Lesson::find($item_Lesson->lesson_id);
+        $course_id = $lesson->courseSegment->course_id;
+        $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
+        if(isset($item_name)){
+           $new_timeline = Timeline::firstOrCreate([
+                'item_id' => $request->id,
+                'name' => $item_name,
+                'start_date' => $item_Lesson->start_date,
+                'due_date' => $item_Lesson->due_date,
+                'publish_date' => isset($item_Lesson->publish_date)? $item_Lesson->publish_date : Carbon::now(),
+                'course_id' => $course_id,
+                'class_id' => $class_id,
+                'lesson_id' => $item_Lesson->lesson_id,
+                'level_id' => $level_id,
+                'type' => $request->type,
+                'visible' => $item_Lesson->visible
+            ]);
+        }
         return response()->json(['message' => 'timeline created.','body' => $new_timeline], 200);
     }
 
