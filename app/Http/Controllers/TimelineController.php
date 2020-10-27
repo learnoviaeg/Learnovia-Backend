@@ -31,6 +31,9 @@ class TimelineController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
+        $this->middleware('auth');
+        $this->middleware('permission:timeline/store', ['only' => ['store']]);
+        $this->middleware('permission:timeline/get',   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
