@@ -7,12 +7,16 @@ use App\Observers\EnrollObserver;
 use App\GradeItems;
 use App\Observers\GradeItemObserver;
 use App\Observers\UserGradeObserver;
+use App\Observers\AssignmentLessonObserver;
+use App\Observers\QuizLessonObserver;
 use App\UserGrade;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
-
+use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\QuestionBank\Entities\QuizLesson;
+use App\Repositories\BackendServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
+        $this->app->register(BackendServiceProvider::class);
     }
 
     public function boot()
@@ -46,5 +50,8 @@ class AppServiceProvider extends ServiceProvider
         // UserGrade::observe(UserGradeObserver::class);
         Enroll::observe(EnrollObserver::class);
         GradeItems::observe(GradeItemObserver::class);
+        AssignmentLesson::observe(AssignmentLessonObserver::class);
+        QuizLesson::observe(QuizLessonObserver::class);
+        
     }
 }
