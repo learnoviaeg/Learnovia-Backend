@@ -168,6 +168,10 @@ class PageController extends Controller
             'content' => $request->content
         ];
         $page->update($data);
+        $page_lesson = pageLesson::where('page_id', $request->id)
+                ->where('lesson_id', $request->lesson_id[0])->first();
+        $page_lesson->updated_at = Carbon::now();
+        $page_lesson->save();
         $pagename = $page->title;
         if($request->filled('lesson_id')){
             $page = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();

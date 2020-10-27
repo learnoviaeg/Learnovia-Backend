@@ -396,6 +396,8 @@ class FilesController extends Controller
                 'publish_date' => $publishdate
             ]);
         }
+        $fileLesson->updated_at = Carbon::now();
+        $fileLesson->save();
         $file->save();
         $lesson = Lesson::find($request->lesson_id);
         $course_seg = Lesson::where('id',$request->lesson_id)->pluck('course_segment_id')->first();

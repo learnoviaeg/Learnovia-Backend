@@ -418,4 +418,5 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api']], function () {
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('timeline', TimelineController::class);
+    Route::Resource('materials', MaterialsController::class);
 });
