@@ -44,9 +44,10 @@ class TimelineController extends Controller
     {
         //validate the request
         $request->validate([
-            'level_id' => 'exists:levels,id',
-            'class_id' => 'exists:classes,id',
-            'course_id' => 'exists:courses,id',
+            'level' => 'exists:levels,id',
+            'class' => 'exists:classes,id',
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
             'item_type' => 'in:quiz,assignment',
             'sort_by' => 'in:course,name,due_date|required_with:sort_in',
             'sort_in' => 'in:asc,desc|required_with:sort_by',
@@ -66,14 +67,7 @@ class TimelineController extends Controller
         $lessons = Lesson::whereIn('course_segment_id', $user_course_segments)->pluck('id');
         $timeline = Timeline::with(['class','course','level'])->whereIn('lesson_id',$lessons)->where('visible',1)->where('start_date','<=',Carbon::now())->where('due_date','>=',Carbon::now());
 
-        if($request->has('level_id'))
-            $timeline->where('level_id',$request->level_id);
 
-        if($request->has('class_id'))
-            $timeline->where('class_id',$request->class_id);
-
-        if($request->has('course_id'))
-            $timeline->where('course_id',$request->course_id);
 
         if($request->has('item_type'))
             $timeline->where('type',$request->item_type);
