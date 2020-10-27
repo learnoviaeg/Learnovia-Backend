@@ -125,6 +125,7 @@ class AnnouncementController extends Controller
                                     $userr->where('segment',$segment);
                                     $userr->where('course',$course);
                                     $userr->where('class',$class);
+                                    // return $userr->get();
 
                                     $ann = Announcement::create([
                                         'title' => $request->title,
@@ -139,10 +140,10 @@ class AnnouncementController extends Controller
                                         'publish_date' => Carbon::parse($publishdate),
                                         'created_by' => Auth::id(),
                                     ]);
-                                    foreach ($users as $user){
+                                    foreach ($userr->get() as $user){
                                         userAnnouncement::create([
                                             'announcement_id' => $ann->id,
-                                            'user_id' => $user
+                                            'user_id' => $user->user_id
                                         ]);
                                     }
                                 
@@ -172,13 +173,13 @@ class AnnouncementController extends Controller
                                             // $user = array_unique($users->toArray());
                                     if($request->filled('role'))
                                     {
-                                        foreach($users as $use)
+                                        foreach($userr->get() as $use)
                                         {
-                                        if($use != Auth::id()){
-                                                $user_obj=User::where('id',$use)->get()->first();
+                                            if($use->user_id != Auth::id()){
+                                                $user_obj=User::where('id',$use->user_id)->get()->first();
                                                 $role_id=$user_obj->roles->pluck('id')->first();
                                                 if($role_id == $request->role)
-                                                    $requ['users'][] = $use;
+                                                    $requ['users'][] = $use->user_id;
                                                 else
                                                     continue;
                                             }
@@ -186,7 +187,7 @@ class AnnouncementController extends Controller
                                         if(!isset($requ['users']))
                                             return HelperController::api_response_format(201,'No User');
                                     }
-                                    $requ['users'] = $users;
+                                    $requ['users'] = $userr->pluck('user_id')->toArray();
                                     $notificatin = User::notify($requ);
                                     // return $notificatin;
                                 }
