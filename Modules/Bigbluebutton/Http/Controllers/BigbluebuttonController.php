@@ -155,7 +155,7 @@ class BigbluebuttonController extends Controller
                             $bigbb->save();
 
                             $bigbb['join'] = $bigbb->started == 1 ? true: false;
-                            
+
                             if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
                             ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
                             {
@@ -271,7 +271,7 @@ class BigbluebuttonController extends Controller
         $bigbb=BigbluebuttonModel::find($request->id);
         $check=Carbon::parse($bigbb->start_date)->addMinutes($bigbb->duration);
 
-        if($check < Carbon::now())
+        if(($check < Carbon::now()) || (!$request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0))
             return HelperController::api_response_format(200,null ,'you can\'t join this classroom');
 
         if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0){
