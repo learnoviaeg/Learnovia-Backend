@@ -52,14 +52,8 @@ class MaterialsController extends Controller
             $material->orderBy("publish_date",$request->sort_in);
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
-        // if($request->has('courses'))
-        //     $material->whereIn('course_id',$request->courses);
 
         return response()->json(['message' => 'materials list.... ', 'body' => $material->get()], 200);
-
-        
-
-
     }
 
     /**
