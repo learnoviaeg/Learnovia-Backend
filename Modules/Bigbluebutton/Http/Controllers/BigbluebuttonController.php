@@ -347,7 +347,7 @@ class BigbluebuttonController extends Controller
                 {
                     $req = new Request([
                         'duration' => $m->duration,
-                        'attendee' =>$m->attendee,
+                        'attendee' =>$m->attendee_password,
                         'id' => $m->id,
                         'name' => $m->name,
                         'moderator_password' => $m->moderator_password,
