@@ -158,9 +158,10 @@ class BigbluebuttonController extends Controller
                             ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
                             {
                                 self::clear();
-                                self::create_hook($request);                            
+                                self::create_hook($request);     
+                                $bigbb['join'] = $bigbb->started == 1 ? true: false;
                                 if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0)
-                                    $bigbb->started = 2; //startmeeting has arrived but meeting didn't start yet
+                                    $bigbb['join'] = true; //startmeeting has arrived but meeting didn't start yet
                             }
                     
                             User::notify([
@@ -252,20 +253,7 @@ class BigbluebuttonController extends Controller
             'started' => 1
         ]);
 
-        $user_name = Auth::user()->username;
-        $full_name = Auth::user()->fullname;
-        $joinMeetingParams = new JoinMeetingParameters($bigbb->meeting_id, $full_name, $bigbb->moderator_password);
-        $joinMeetingParams->setRedirect(true);
-        $joinMeetingParams->setJoinViaHtml5(true);
-        $joinMeetingParams->setUserId($user_name);
-        $url = $bbb->getJoinMeetingURL($joinMeetingParams);
-
-        $output = array(
-            'name' => $bigbb->name,
-            'duration' => $bigbb->duration,
-            'link'=> $url
-        );
-        return HelperController::api_response_format(200, $output,'Joining class room...');
+        return 1;
     }
 
     //Join the meeting
@@ -279,12 +267,20 @@ class BigbluebuttonController extends Controller
             'id'=>'required|exists:bigbluebutton_models,id',
         ]);
 
-        $user_name = Auth::user()->username;
-        $full_name = Auth::user()->fullname;
         $bigbb=BigbluebuttonModel::find($request->id);
         $check=Carbon::parse($bigbb->start_date)->addMinutes($bigbb->duration);
-        if($bigbb->started == 0 || $check < Carbon::now())
+
+        if($check < Carbon::now())
             return HelperController::api_response_format(200,null ,'you can\'t join this classroom');
+
+        if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0){
+            $start_meeting = self::start_meeting($request);
+            if(!$start_meeting)
+                return HelperController::api_response_format(200, [],'Sorry, there is a problem while starting classroom.');
+        }
+            
+        $user_name = Auth::user()->username;
+        $full_name = Auth::user()->fullname;
         
         $password = $bigbb->attendee_password;
         if($request->user()->can('bigbluebutton/session-moderator'))
@@ -358,8 +354,9 @@ class BigbluebuttonController extends Controller
                 ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
                 {
                     self::create_hook($request);
+                    $m['join'] = $m->started == 1 ? true: false;
                     if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
-                        $m->started = 2; //startmeeting has arrived but meeting didn't start yet
+                        $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
                 }
             }
 
