@@ -151,28 +151,16 @@ class BigbluebuttonController extends Controller
                             $bigbb->meeting_id = $meeting_id;
                             $bigbb->user_id = Auth::user()->id;
                             $bigbb->is_recorded = $request->is_recorded;
+                            $bigbb->started = 0;
                             $bigbb->save();
-                            $bigbb['join'] = false;
-            
-                            $req = new Request([
-                                'duration' => $request->duration,
-                                'attendee' =>$attendee,
-                                'id' => $bigbb->id,
-                                'name' => $request->name,
-                                'moderator_password' => $request->moderator_password,
-                                'is_recorded' => $request->is_recorded,
-                                'join' => $bigbb['join'],
-                                'meeting_id' => $meeting_id,
-                            ]);
                     
                             if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
                             ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
                             {
                                 self::clear();
                                 self::create_hook($request);                            
-                                // $check =self::start_meeting($req);
-                                // if($check)
-                                $bigbb['join'] = true;
+                                if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0)
+                                    $bigbb->started = 2; //startmeeting has arrived but meeting didn't start yet
                             }
                     
                             User::notify([
@@ -366,23 +354,12 @@ class BigbluebuttonController extends Controller
 
         foreach($meet as $m)
             {
-                $m['join'] = false;
                 if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
                 ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
                 {
-                    $req = new Request([
-                        'duration' => $m->duration,
-                        'attendee' =>$m->attendee,
-                        'id' => $m->id,
-                        'name' => $m->name,
-                        'moderator_password' => $m->moderator_password,
-                        'is_recorded' => $m->is_recorded,
-                        'meeting_id' => $m->meeting_id,
-                    ]);
                     self::create_hook($request);
-                    // $check=self::start_meeting($req);
-                    // if($check)
-                    $m['join'] = true;
+                    if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
+                        $m->started = 2; //startmeeting has arrived but meeting didn't start yet
                 }
             }
 
