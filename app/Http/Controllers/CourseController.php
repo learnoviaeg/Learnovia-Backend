@@ -1056,7 +1056,6 @@ class CourseController extends Controller
                     $courseSegment = CourseSegment::where('id',$course_Segment->id)->update([
                         'start_date' => $request->start_date,
                         'end_date' => $request->end_date,
-                        'is_active' => 1,
                     ]);
 
                     if ($request->filled('no_of_lessons')) {
