@@ -660,7 +660,7 @@ class EnrollUserToCourseController extends Controller
         $course=array();
         $coursesNotEnrolled=CourseSegment::whereNotIn('id',Enroll::where('role_id',3)->pluck('course_segment'))->get();
         foreach($coursesNotEnrolled as $cor)
-            $course[$cor->courses[0]->short_name][]=$cor->segmentClasses[0]->classLevel[0]->classes[0];
+            $course[$cor->segmentClasses[0]->classLevel[0]->classes[0]->name . "_".  $cor->segmentClasses[0]->classLevel[0]->classes[0]->id][]=$cor->courses[0]->short_name;
 
         return HelperController::api_response_format(200, $course , 'empty courses');
     }
