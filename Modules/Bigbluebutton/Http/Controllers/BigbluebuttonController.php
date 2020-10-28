@@ -153,13 +153,14 @@ class BigbluebuttonController extends Controller
                             $bigbb->is_recorded = $request->is_recorded;
                             $bigbb->started = 0;
                             $bigbb->save();
-                    
+
+                            $bigbb['join'] = $bigbb->started == 1 ? true: false;
+                            
                             if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
                             ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
                             {
                                 self::clear();
                                 self::create_hook($request);     
-                                $bigbb['join'] = $bigbb->started == 1 ? true: false;
                                 if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0)
                                     $bigbb['join'] = true; //startmeeting has arrived but meeting didn't start yet
                             }
@@ -350,11 +351,11 @@ class BigbluebuttonController extends Controller
 
         foreach($meet as $m)
             {
+                $m['join'] = $m->started == 1 ? true: false;
                 if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
                 ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
                 {
                     self::create_hook($request);
-                    $m['join'] = $m->started == 1 ? true: false;
                     if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
                         $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
                 }
