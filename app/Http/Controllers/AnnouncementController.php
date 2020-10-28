@@ -75,6 +75,20 @@ class AnnouncementController extends Controller
             'chains.*.segment.*' => 'exists:segments,id',
             'chains.*.course.*' => 'exists:courses,id',
         ]);
+        if($request->user()->can('announcement/filter-chain')){
+            $request->validate([
+                'chains.*.year' => 'required|array',
+                'chains.*.year.*' => 'exists:academic_years,id',
+                'chains.*.type' => 'required|array',
+                'chains.*.type.*' => 'exists:academic_types,id',
+                'chains.*.level' => 'required|array',
+                'chains.*.level.*' => 'exists:levels,id',
+                'chains.*.class' => 'required|array',
+                'chains.*.class.*' => 'exists:classes,id',
+                'chains.*.segment' => 'required|array',
+                'chains.*.segment.*' => 'exists:segments,id',
+            ]);
+        }
         $date=Carbon::now();
         $publishdate = Carbon::parse($date);
         if (isset($request->publish_date)) 

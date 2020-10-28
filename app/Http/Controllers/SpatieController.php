@@ -242,6 +242,7 @@ class SpatieController extends Controller
             //Announcements Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/delete', 'title' => 'delete announcements']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/send', 'title' => 'send announcements']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcement/filter-chain', 'title' => 'Announcement Filter Chain']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/get', 'title' => 'View Announcements', 'dashboard' => 1 , 'icon'=> 'announcement']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/update', 'title' => 'update announcements']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'announcements/getbyid', 'title' => 'get announcements by id']);
@@ -393,7 +394,7 @@ class SpatieController extends Controller
                 'class/get','segment/get-all','segment/get','segment/get-my-segments','category/get-all','course/my-courses','course/layout','course/optional','course/course-with-teacher',
                 'course/sorted-componenets','course/toggle/letter','course/count-components','course/chain','course/components','course/lessons','course/get-classes-by-course',
                 'course/get-courses-by-classes','enroll/get-enrolled-courses','event/add','event/delete','event/update','event/my-events','contact/add','contact/get','contact/search',
-                'user/get-my-users','component/get','announcements/delete','announcements/send','announcements/get','announcements/update','announcements/getbyid','announcements/get-unread',
+                'user/get-my-users','component/get','announcements/delete','announcements/send','announcements/get','announcement/filter-chain','announcements/update','announcements/getbyid','announcements/get-unread',
                 'announcements/mark-as-read','announcements/my','calendar/get','calendar/weekly','languages/get','languages/add','languages/update','languages/delete','languages/dictionary',
                 'user/language','languages/activate','languages/deactivate','languages/set-default','lesson/add','lesson/get','lesson/delete','lesson/update','lesson/sort',
                 'grade/category/add','grade/category/get','grade/category/delete','grade/category/update','grade/category/tree','grade/category/chain-categories','grade/grades',
