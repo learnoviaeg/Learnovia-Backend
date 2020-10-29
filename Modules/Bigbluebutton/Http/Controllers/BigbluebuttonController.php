@@ -351,7 +351,7 @@ class BigbluebuttonController extends Controller
                         'id' => $m->id,
                         'name' => $m->name,
                         'moderator_password' => $m->moderator_password,
-                        'is_recorded' => $m->is_recorded,
+                        'is_recorded' => 1,
                         'meeting_id' => $m->meeting_id,
                     ]);
                     self::create_hook($request);
