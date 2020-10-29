@@ -123,6 +123,7 @@ class BigbluebuttonController extends Controller
                 $course_segments_ids=collect();
                 $meeting_id = 'Learnovia'.env('DB_DATABASE').uniqid();
                 foreach($object['class_id'] as $class){
+                    $i=0;
                     $courseseg = CourseSegment::GetWithClassAndCourse($class,$object['course_id']);
                     if(isset($courseseg))
                         $course_segments_ids->push($courseseg->id);
@@ -131,7 +132,6 @@ class BigbluebuttonController extends Controller
                         return HelperController::api_response_format(200, null ,'Please check active course segments');
             
                     $usersIDs=Enroll::whereIn('course_segment',$course_segments_ids)->pluck('user_id')->unique()->values()->toarray();
-
                     foreach($request->start_date as $start_date){
                         $last_date = $start_date;
                         if(isset($request->last_day)){
@@ -148,7 +148,7 @@ class BigbluebuttonController extends Controller
                             $bigbb->moderator_password=$request->moderator_password;
                             $bigbb->duration=$duration;
                             $bigbb->start_date=$temp_start->format('Y-m-d H:i:s');
-                            $bigbb->meeting_id = $meeting_id;
+                            $bigbb->meeting_id = $i == 0 ? $meeting_id : $meeting_id.'repeat'.$i;
                             $bigbb->user_id = Auth::user()->id;
                             $bigbb->is_recorded = $request->is_recorded;
                             $bigbb->started = 0;
@@ -179,6 +179,7 @@ class BigbluebuttonController extends Controller
                             ]);
                             $created_meetings->push($bigbb);
                             $temp_start= Carbon::parse($temp_start)->addDays(7);
+                            $i++;
                         }
                     }
                 }
