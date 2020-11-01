@@ -691,4 +691,18 @@ class EnrollUserToCourseController extends Controller
         return HelperController::api_response_format(201,$file, 'Link to file ....');
         // return HelperController::api_response_format(201,$enrolls, 'enrolls');
     }
+
+    public function StudentdInLevels(Request $request)
+    {
+        $allUsers=Enroll::pluck('user_id');
+        $duplicated_users=array();
+        foreach($allUsers as $user)
+        {
+            $count_levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->count();
+            if($count_levels > 1)
+                if(!in_array($user,$duplicated_users))
+                    array_push($duplicated_users,User::find($user)->id);
+        }
+        return User::whereIn('id',$duplicated_users)->pluck('username');
+    }
 }
