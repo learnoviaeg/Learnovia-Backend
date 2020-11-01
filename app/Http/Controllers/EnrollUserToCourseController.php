@@ -698,7 +698,11 @@ class EnrollUserToCourseController extends Controller
             $count_levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->count();
             if($count_levels > 1)
                 if(!in_array($user,$duplicated_users))
-                    array_push($duplicated_users,User::find($user)->id);
+                {
+                    $usr=User::find($user);
+                    if(isset($usr))
+                        array_push($duplicated_users,$usr->id);
+                }
         }
         return User::whereIn('id',$duplicated_users)->pluck('username');
     }
