@@ -21,6 +21,9 @@ use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
 use App\UserGrade;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use App\Exports\teacherwithcourse;
 
 class EnrollUserToCourseController extends Controller
 {
@@ -666,5 +669,20 @@ class EnrollUserToCourseController extends Controller
             $course[$cor->segmentClasses[0]->classLevel[0]->classes[0]->name . "_".  $cor->segmentClasses[0]->classLevel[0]->classes[0]->id][]=$cor->courses[0]->short_name;
 
         return HelperController::api_response_format(200, $course , 'empty courses');
+    }
+
+    public function exportcourseswithteachers(Request $request)
+    {
+        $request->validate([
+            'search' => 'required|string',
+        ]);
+
+        $courses = Course::where('short_name', 'LIKE' ,"%$request->search%")->pluck('id');
+        if(isset($courses))
+            $course_segments = CourseSegment::whereIn('course_id',$courses)->pluck('id');
+        if(isset($course_segments))
+            $enrolls = Enroll::whereIn('course_segment',$course_segments)->where('role_id',4)->with(['user','courseSegment','class','course'])->get();
+
+        return HelperController::api_response_format(201,$enrolls, 'enrolls');
     }
 }
