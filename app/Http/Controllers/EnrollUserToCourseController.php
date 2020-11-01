@@ -16,6 +16,7 @@ use App\CourseSegment;
 use App\Course;
 use App\GradeCategory;
 use App\SegmentClass;
+use App\Classes;
 
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
