@@ -295,6 +295,8 @@ class CourseController extends Controller
                             ->pluck('user_id')
                             )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
                             $le['teachers']  = $teacher ;
+            $le['start_date']=$le->courseSegments->pluck('start_date')->unique();
+            $le['end_date']=$le->courseSegments->pluck('end_date')->unique();
             unset($le->courseSegments);
         }
         if($call == 2 ){ //$call by function update 
