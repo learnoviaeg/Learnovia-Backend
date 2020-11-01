@@ -265,6 +265,7 @@ Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api']], function () {
     Route::post('users', 'EnrollUserToCourseController@enrollWithChain')->name('Enrollusers')->middleware('permission:enroll/users');
     Route::post('migrate-user', 'EnrollUserToCourseController@Migration')->name('migrateuser')->middleware('permission:enroll/migrate-user');
     Route::post('empty-courses', 'EnrollUserToCourseController@EmptyCourses');
+    Route::post('StudentdInLevels', 'EnrollUserToCourseController@StudentdInLevels');
 });
 
 //Messages Routes
