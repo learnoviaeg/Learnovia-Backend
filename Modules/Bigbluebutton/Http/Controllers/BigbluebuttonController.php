@@ -355,7 +355,7 @@ class BigbluebuttonController extends Controller
             $meeting->where('status',$request->status);
 
         if($request->has('start_date'))
-            $timeline->whereDate('start_date', '=', $request->start_date);
+            $meeting->where('start_date', '=', $request->start_date);
 
         if($request->has('id'))
             $meeting->where('id',$request->id);
