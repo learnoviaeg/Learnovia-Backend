@@ -87,7 +87,7 @@ class QuizLessonController extends Controller
             // }
             $lesson_obj = Lesson::find($lessons);
             $course_segment =  CourseSegment::find($lesson_obj->course_segment_id);
-            if( $course_segment->end_date < $request->closing_date )
+            if( $course_segment->end_date < $request->closing_time )
                 return HelperController::api_response_format(400, null , 'Please enter closing date before '.$course_segment->end_date." ");
             $index = QuizLesson::where('lesson_id',$lessons)->get()->max('index');
             $Next_index = $index + 1;
