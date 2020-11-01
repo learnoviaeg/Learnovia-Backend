@@ -197,6 +197,8 @@ class CourseController extends Controller
             'description' => 'nullable',
             'mandatory' => 'nullable|in:0,1',
             'short_name' => 'unique:courses,short_name,'.$request->id,
+            'start_date' => 'date',
+            'end_date' =>'date|after:start_date'
         ]);
         $editable = ['name', 'category_id', 'description', 'mandatory','short_name'];
         $course = Course::find($request->id);
@@ -209,6 +211,14 @@ class CourseController extends Controller
                 $course->$key = $request->$key;
             }
         }
+        $course_segment = CourseSegment::where("course_id",$request->id);
+        if ($request->filled('start_date')) {
+             $course_segment->update(['start_date'=>$request->start_date]); 
+        }
+        if ($request->filled('end_date')) {
+            $course_segment->update(['end_date' => $request->end_date]);
+        }
+         
         $course->save();
         $req = new Request();
 
