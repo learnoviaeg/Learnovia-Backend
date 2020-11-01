@@ -56,13 +56,13 @@ class Enroll extends Model
     {
         return $this->belongsTo('App\User','user_id','id');
     }
-    public function class()
+    public function classre()
     {
-        return $this->belongsTo('App\classes','class','id');
+        return $this->belongsTo('App\Classes','class','id');
     }
-    public function course()
+    public function coursere()
     {
-        return $this->belongsTo('App\course','course','id');
+        return $this->belongsTo('App\Course','course','id');
     }
 
     public function roles()

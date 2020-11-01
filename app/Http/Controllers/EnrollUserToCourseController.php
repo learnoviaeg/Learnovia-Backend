@@ -16,14 +16,15 @@ use App\CourseSegment;
 use App\Course;
 use App\GradeCategory;
 use App\SegmentClass;
+use App\Classes;
 
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
 use App\UserGrade;
+use App\Exports\teacherwithcourse;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-use App\Exports\teacherwithcourse;
 
 class EnrollUserToCourseController extends Controller
 {
@@ -681,8 +682,13 @@ class EnrollUserToCourseController extends Controller
         if(isset($courses))
             $course_segments = CourseSegment::whereIn('course_id',$courses)->pluck('id');
         if(isset($course_segments))
-            $enrolls = Enroll::whereIn('course_segment',$course_segments)->where('role_id',4)->with(['user','courseSegment','class','course'])->get();
+            $enrolls = Enroll::whereIn('course_segment',$course_segments)->where('role_id',4)->with(['user','courseSegment','classre','coursere'])->get();
 
-        return HelperController::api_response_format(201,$enrolls, 'enrolls');
+            // return $enrolls;
+        $filename = uniqid();
+        $file = Excel::store(new teacherwithcourse($enrolls), 'tech'.$filename.'.xls','public');
+        $file = url(Storage::url('tech'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        // return HelperController::api_response_format(201,$enrolls, 'enrolls');
     }
 }
