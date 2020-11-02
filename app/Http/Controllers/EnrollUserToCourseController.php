@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\User;
 use Auth;
 use App\Enroll;
+use App\Level;
 use App\Segment;
 use App\ClassLevel;
 use App\CourseSegment;
@@ -697,10 +698,25 @@ class EnrollUserToCourseController extends Controller
         $duplicated_users=array();
         foreach($allUsers as $user)
         {
-            $count_levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->unique()->count();
-            if($count_levels > 1)
-                array_push($duplicated_users,$user);
+            $usr=User::find($user);
+            if(isset($usr)){
+                $levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->unique();
+                if(count($levels) > 1){
+                    foreach($levels as $level){
+                        $lvlOBJ=Level::find($level);
+                        if(isset($lvlOBJ))
+                            $lvl[]=$lvlOBJ->name;
+                    }
+                    $duplicated_users[$usr->username]=$lvl;
+                    $lvl=[];
+                }
+            }
         }
-        return User::whereIn('id',$duplicated_users)->pluck('username');
+
+        // $filename = uniqid();
+        // $file = Excel::store(new StudentEnrolls($duplicated_users), 'students'.$filename.'.xlsx','public');
+        // $file = url(Storage::url('students'.$filename.'.xlsx'));
+        // return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return $duplicated_users;
     }
 }
