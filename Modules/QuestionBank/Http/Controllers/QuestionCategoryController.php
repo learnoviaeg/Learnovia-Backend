@@ -164,13 +164,18 @@ class QuestionCategoryController extends Controller
         ]);
 
         $questioncat=QuestionsCategory::find($request->id);
-        $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
-        if(in_array($questioncat->course_segment_id,$myCourseSeg->toArray()))
-            $check=$questioncat->delete();
-        else
+        if(count($questioncat->questions)>0)
             return HelperController::api_response_format(200, 'you can\'t delete this question category');
-        
-        if($check)
-            return HelperController::api_response_format(200, $questioncat, 'Question Category deleted Successfully');
+        $questioncat->delete();
+        return HelperController::api_response_format(200, $questioncat, 'Question Category deleted Successfully');
+
+
+        // $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
+        // if(in_array($questioncat->course_segment_id,$myCourseSeg->toArray()))
+        //     $check=$questioncat->delete();
+        // else
+        //     return HelperController::api_response_format(200, 'you can\'t delete this question category');
+        // if($check)
+        //     return HelperController::api_response_format(200, $questioncat, 'Question Category deleted Successfully');
     }
 }
