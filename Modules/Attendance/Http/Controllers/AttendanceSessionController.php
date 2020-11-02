@@ -75,11 +75,11 @@ class AttendanceSessionController extends Controller
 
     public function createSession(Request $request)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string',
             'object' => 'required|array',
             'main' => 'required|array',
-            'main.*.class_id' => 'required|exists:classes,id',
+            'main.*.class_id' => 'required|unique:classes,id',
             'main.*.course_id' => 'required|exists:courses,id',
             'graded' => 'required|in:0,1',
             'object.*.grade_category_id' => 'required_if:graded,==,1|exists:grade_categories,id',
@@ -99,7 +99,13 @@ class AttendanceSessionController extends Controller
             'time.*.from.*' => 'required_with:time.*.to.*|date_format:H:i',
             'time.*.to.*' => 'required_with:time.*.from.*|date_format:H:i|after:time.*.from.*',
 
-        ]);
+        ];
+
+    $customMessages = [
+        'unique'=> 'you can\'t assign different courses to the same class'
+    ];
+    $validator = Validator::make($request->all(), $rules,$customMessages)->validate();
+
         if($request->type=="daily"){
             $days = ['sunday','monday','tuesday','wednesday','thursday'];
             $times_collect=collect();
