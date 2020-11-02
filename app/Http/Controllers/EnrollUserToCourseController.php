@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\User;
 use Auth;
 use App\Enroll;
+use App\Level;
 use App\Segment;
 use App\ClassLevel;
 use App\CourseSegment;
@@ -23,6 +24,7 @@ use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
 use App\UserGrade;
 use App\Exports\teacherwithcourse;
+use App\Exports\StudentEnrolls;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
@@ -691,19 +693,30 @@ class EnrollUserToCourseController extends Controller
 
     public function StudentdInLevels(Request $request)
     {
-        $allUsers=Enroll::pluck('user_id');
+        $allUsers=Enroll::pluck('user_id')->unique();
+
         $duplicated_users=array();
         foreach($allUsers as $user)
         {
-            $count_levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->count();
-            if($count_levels > 1)
-                if(!in_array($user,$duplicated_users))
-                {
-                    $usr=User::find($user);
-                    if(isset($usr))
-                        array_push($duplicated_users,$usr->id);
+            $usr=User::find($user);
+            if(isset($usr)){
+                $levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->unique();
+                if(count($levels) > 1){
+                    foreach($levels as $level){
+                        $lvlOBJ=Level::find($level);
+                        if(isset($lvlOBJ))
+                            $lvl[]=$lvlOBJ->name;
+                    }
+                    $duplicated_users[$usr->username]=$lvl;
+                    $lvl=[];
                 }
+            }
         }
-        return User::whereIn('id',$duplicated_users)->pluck('username');
+
+        // $filename = uniqid();
+        // $file = Excel::store(new StudentEnrolls($duplicated_users), 'students'.$filename.'.xlsx','public');
+        // $file = url(Storage::url('students'.$filename.'.xlsx'));
+        // return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return $duplicated_users;
     }
 }
