@@ -315,21 +315,20 @@ class BigbluebuttonController extends Controller
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id',
             'level' => 'exists:levels,id',
-            'class_id' => 'exists:classes,id',
+            'class' => 'exists:classes,id',
             'segment' => 'exists:segments,id',
-            'course_id'    => 'exists:courses,id',
+            'course'    => 'exists:courses,id',
             'status'    => 'in:past,future,current',
             'start_date' => 'date',
         ]);
 
         $classes = [];
-        if(isset($request->class_id)){
-            $request['class'] = $request->class_id;
-            $classes = [$request->class_id];
+        if(isset($request->class)){
+            $classes = [$request->class];
         }
 
-        if(isset($request->course_id)){
-            $request['courses']= [$request->course_id];
+        if(isset($request->course)){
+            $request['courses']= [$request->course];
         }
 
         self::clear(); 
