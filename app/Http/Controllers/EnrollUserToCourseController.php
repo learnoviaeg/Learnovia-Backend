@@ -23,6 +23,7 @@ use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
 use App\UserGrade;
 use App\Exports\teacherwithcourse;
+use App\Exports\StudentEnrolls;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
@@ -691,18 +692,14 @@ class EnrollUserToCourseController extends Controller
 
     public function StudentdInLevels(Request $request)
     {
-        $allUsers=Enroll::pluck('user_id');
+        $allUsers=Enroll::pluck('user_id')->unique();
+
         $duplicated_users=array();
         foreach($allUsers as $user)
         {
-            $count_levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->count();
+            $count_levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->unique()->count();
             if($count_levels > 1)
-                if(!in_array($user,$duplicated_users))
-                {
-                    $usr=User::find($user);
-                    if(isset($usr))
-                        array_push($duplicated_users,$usr->id);
-                }
+                array_push($duplicated_users,$user);
         }
         return User::whereIn('id',$duplicated_users)->pluck('username');
     }
