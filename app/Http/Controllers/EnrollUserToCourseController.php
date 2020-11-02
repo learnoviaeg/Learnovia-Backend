@@ -680,7 +680,7 @@ class EnrollUserToCourseController extends Controller
         if(isset($courses))
             $course_segments = CourseSegment::whereIn('course_id',$courses)->pluck('id');
         if(isset($course_segments))
-            $enrolls = Enroll::whereIn('course_segment',$course_segments)->where('role_id',4)->with(['user','courseSegment','classre','coursere'])->get();
+            $enrolls = Enroll::whereIn('course_segment',$course_segments)->where('role_id',4)->with(['user','courseSegment','classes','courses'])->get();
 
             // return $enrolls;
         $filename = uniqid();
@@ -715,7 +715,7 @@ class EnrollUserToCourseController extends Controller
         if(count($CS_ids) == 0)
             return HelperController::api_response_format(201,[], 'No active course segments');
             
-        $enrolls = Enroll::whereIn('course_segment',$CS_ids)->where('role_id',3)->with(['user','levelre','classre'])->get()->groupBy(['levelre.name','classre.name']);
+        $enrolls = Enroll::whereIn('course_segment',$CS_ids)->where('role_id',3)->with(['user','levels','classes'])->get()->groupBy(['levels.name','classes.name']);
         $filename = uniqid();
         $file = Excel::store(new classeswithstudents($enrolls), 'students'.$filename.'.xls','public');
         $file = url(Storage::url('students'.$filename.'.xls'));
