@@ -26,13 +26,17 @@ class classeswithstudents implements FromCollection,WithHeadings
                     'Level_Name' => $lev[0]['levels'] ? $lev[0]['levels']['name'] : '-',
                     'Class_Name' => $lev[0]['classes']? $lev[0]['classes']['name'] : '-',
                 ]);
-
+                
+                $students= [];
                 for($i=0;$i<count($lev);$i++){
-                    $enrolls->push([
-                        'Level_Name' =>' ',
-                        'Class_Name' => ' ',
-                        'Student_Username' => $lev[$i]['user'] ? $lev[$i]['user']['username'] : '-',
-                    ]);
+                    if(!in_array($lev[$i]['user']['username'],$students)){
+                        $enrolls->push([
+                            'Level_Name' =>' ',
+                            'Class_Name' => ' ',
+                            'Student_Username' => $lev[$i]['user'] ? $lev[$i]['user']['username'] : '-',
+                        ]);
+                    }
+                    $students[]=$lev[$i]['user']['username'];
                 }
             }
         }
