@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceLog;
 use Modules\Attendance\Entities\AttendanceSession;
-
+use Validator;
 use App\Enroll;
 use App\Level;
 use App\CourseSegment;
