@@ -334,12 +334,12 @@ class BigbluebuttonController extends Controller
         self::clear(); 
         $CS_ids=GradeCategoryController::getCourseSegment($request);
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
-        $classes = count($classes) == 0 ? Enroll::where('user_id', Auth::id())->pluck('class') : $classes;
         $CourseSeg = array_intersect($CS_ids->toArray(),$CourseSeg->toArray());
         if($request->user()->can('site/show-all-courses')){
             $CourseSeg = $CS_ids;
             $classes = count($classes) == 0? Classes::pluck('id') : $classes;
         }
+        $classes = count($classes) == 0 ? Enroll::where('user_id', Auth::id())->pluck('class') : $classes;
         
         $courses=CourseSegment::whereIn('id',$CourseSeg)->where('end_date','>',Carbon::now())
                                                         ->where('start_date','<',Carbon::now())
