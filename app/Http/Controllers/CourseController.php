@@ -427,9 +427,9 @@ class CourseController extends Controller
                 if(isset($type_object))
                     $flag->type = $type_object->name;
             }
-            $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
+            $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->unique();
             if(isset($request->course_id))
-                $userr=Enroll::where('role_id', 4)->whereIn('course_segment', $couuures)->pluck('user_id');
+                $userr=Enroll::where('role_id', 4)->whereIn('course_segment', $couuures)->pluck('user_id')->unique();
             foreach($userr as $teach){
                 $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
                 if(isset($teacher)){
