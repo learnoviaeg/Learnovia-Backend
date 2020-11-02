@@ -23,8 +23,8 @@ class classeswithstudents implements FromCollection,WithHeadings
         foreach($this->enroll as $level){
             foreach($level as $lev){
                 $enrolls->push([
-                    'Level_Name' => $lev[0]['levelre'] ? $lev[0]['levelre']['name'] : '-',
-                    'Class_Name' => $lev[0]['classre']? $lev[0]['classre']['name'] : '-',
+                    'Level_Name' => $lev[0]['levels'] ? $lev[0]['levels']['name'] : '-',
+                    'Class_Name' => $lev[0]['classes']? $lev[0]['classes']['name'] : '-',
                 ]);
 
                 for($i=0;$i<count($lev);$i++){
