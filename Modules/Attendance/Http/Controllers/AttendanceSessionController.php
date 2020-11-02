@@ -107,7 +107,7 @@ class AttendanceSessionController extends Controller
         {
             $classes[]=   $main['class_id'];
         }
-        $check_dublications = (count($input_array) === count(array_flip($input_array)));
+        $check_dublications = (count($classes) === count(array_flip($classes)));
         if(!$check_dublications)
                 return HelperController::api_response_format(400,null ,'Sorry you can\'t add different courses to the same class.');
 
