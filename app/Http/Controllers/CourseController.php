@@ -283,7 +283,10 @@ class CourseController extends Controller
             $cs[]=$cc->course_id;
         }
 
-        $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
+        $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])
+                            ->where(function($q)use($request){
+                                $q->orWhere('name', 'LIKE', "%$request->search%")
+                                ->orWhere('short_name', 'LIKE' ,"%$request->search%");})->get();
         if($call == 1 ){
             return $courses;
         }
@@ -427,9 +430,9 @@ class CourseController extends Controller
                 if(isset($type_object))
                     $flag->type = $type_object->name;
             }
-            $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
+            $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->unique();
             if(isset($request->course_id))
-                $userr=Enroll::where('role_id', 4)->whereIn('course_segment', $couuures)->pluck('user_id');
+                $userr=Enroll::where('role_id', 4)->whereIn('course_segment', $couuures)->pluck('user_id')->unique();
             foreach($userr as $teach){
                 $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
                 if(isset($teacher)){
@@ -442,7 +445,10 @@ class CourseController extends Controller
             if(isset($en->id)  && isset($teacher))
                 $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
             $course->flag = $flag;
-            $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
+            $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])
+                            ->where(function($q)use($request){
+                                    $q->orWhere('name', 'LIKE', "%$request->search%")
+                                    ->orWhere('short_name', 'LIKE' ,"%$request->search%");})->first();
             $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
             $course->teachers = $teacherz;
             if(!isset($course->attachment)){
@@ -563,7 +569,10 @@ class CourseController extends Controller
                 }
                
                 $course->flag = $flag;
-                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
+                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])
+                                ->where(function($q)use($request){
+                                    $q->orWhere('name', 'LIKE', "%$request->search%")
+                                    ->orWhere('short_name', 'LIKE' ,"%$request->search%");})->first();
                 $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
                 $course->teachers = $teacherz;
                 $course->attachment;
@@ -679,7 +688,10 @@ class CourseController extends Controller
                 }
                
                 $course->flag = $flag;
-                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
+                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])
+                                    ->where(function($q)use($request){
+                                        $q->orWhere('name', 'LIKE', "%$request->search%")
+                                        ->orWhere('short_name', 'LIKE' ,"%$request->search%");})->first();
                 $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
                 $course->teachers = $teacherz;
                 $course->attachment;
