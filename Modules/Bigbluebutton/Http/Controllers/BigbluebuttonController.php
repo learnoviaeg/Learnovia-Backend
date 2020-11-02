@@ -180,6 +180,15 @@ class BigbluebuttonController extends Controller
                                 'publish_date'=> $temp_start,
                             ]);
                             $created_meetings->push($bigbb);
+                            
+                            $end_date = Carbon::parse($temp_start)->addMinutes($request->duration);
+                            $seconds = $end_date->diffInSeconds(Carbon::now());
+                            if($seconds < 0) {
+                                $seconds = 0;
+                            }
+                            $job = (new \App\Jobs\bigbluebuttonEndMeeting($bigbb))->delay($seconds);
+                            dispatch($job);
+
                             $temp_start= Carbon::parse($temp_start)->addDays(7);
                             $i++;
                         }
