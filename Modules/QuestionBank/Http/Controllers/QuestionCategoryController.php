@@ -165,7 +165,7 @@ class QuestionCategoryController extends Controller
 
         $questioncat=QuestionsCategory::find($request->id);
         if(count($questioncat->questions)>0)
-            return HelperController::api_response_format(200, 'you can\'t delete this question category');
+            return HelperController::api_response_format(200, null,'you can\'t delete this question category');
         $questioncat->delete();
         return HelperController::api_response_format(200, $questioncat, 'Question Category deleted Successfully');
 
