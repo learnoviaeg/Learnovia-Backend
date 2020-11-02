@@ -731,7 +731,7 @@ class AssigmentsController extends Controller
             'allow_attachment' => 'required|integer|min:0|max:3',
             'publish_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
-            'closing_date' => 'date|date_format:Y-m-d H:i:s',
+            'closing_date' => 'date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
             'grade_category' => 'array|required_if:is_graded,==,1',
             'grade_category.*' => 'exists:grade_categories,id',
             'scale' => 'exists:scales,id',
@@ -749,7 +749,10 @@ class AssigmentsController extends Controller
             $assignment_lesson->mark = $request->mark;
             $assignment_lesson->is_graded = $request->is_graded;
             $assignment_lesson->allow_attachment = $request->allow_attachment;
-
+            $lesson_obj = Lesson::find($lesson);
+            $course_segment =  CourseSegment::find($lesson_obj->course_segment_id);
+            if( $request->filled('closing_date') && $course_segment->end_date < Carbon::parse($request->closing_date) )
+                return HelperController::api_response_format(400, null , 'Please enter closing date before '.$course_segment->end_date);
             if ($request->filled('closing_date'))
                 $assignment_lesson->due_date = $request->closing_date;
             if ($request->filled('scale'))
@@ -829,7 +832,12 @@ class AssigmentsController extends Controller
         $assigmentlesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->pluck('id')->first();
         if(!isset($assigmentlesson))
             return HelperController::api_response_format(200, null , 'This assignment is not assigned to this lesson');
-            
+        $assignment = AssignmentLesson::find($assigmentlesson);
+        $lesson = Lesson::find($assignment->lesson_id);
+        $course_segment = $lesson->courseSegment;
+        if($course_segment->end_date < Carbon::parse($request->due_date))
+            return HelperController::api_response_format(400, null , 'Please enter due date before '.$course_segment->end_date);
+      
         foreach($request->user_id as $user)
         {
             $assignmentOerride[] = assignmentOverride::firstOrCreate([
@@ -839,8 +847,6 @@ class AssigmentsController extends Controller
                 'due_date' => $request->due_date,
             ]);
         }
-        $assignment = AssignmentLesson::find($assigmentlesson);
-        $lesson = Lesson::find($assignment->lesson_id);
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 

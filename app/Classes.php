@@ -32,6 +32,10 @@ class Classes extends Model
         return $this->hasMany('Modules\Attendance\Entities\AttendanceSession','class_id','id');
     }
 
+    public function timeline()
+    {
+        return $this->hasMany('App\Timeline','class_id','id');
+    }
 
     public static function Validate($data)
     {

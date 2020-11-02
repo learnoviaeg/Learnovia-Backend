@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddStartedAttribute extends Migration
+class AddStatusActualStartAttributes extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,8 @@ class AddStartedAttribute extends Migration
     public function up()
     {
         Schema::table('bigbluebutton_models', function (Blueprint $table) {
-            $table->boolean('started')->nullable()->default(false);
-            $table->boolean('is_recorded')->nullable()->default(false);
+            $table->dateTime('actutal_start_date')->nullable();
+            $table->enum('status',['past','future','current'])->default('future')->nullable();
         });
     }
 

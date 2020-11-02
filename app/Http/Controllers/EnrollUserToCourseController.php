@@ -224,9 +224,12 @@ class EnrollUserToCourseController extends Controller
                     }
                 }
 
-                $check = Enroll::where('user_id', $user)->whereIn('course_segment', $segments)->pluck('id');
-                if (count($check) == 0) {
+                // $check = Enroll::where('user_id', $user)->whereIn('course_segment', $segments)->pluck('id');
+                // if (count($check) == 0) {
                     foreach ($segments as $segment) {
+                        $check = Enroll::where('user_id', $user)->where('course_segment', $segment)->pluck('id');
+                        if(count($check) > 0)
+                            continue;
                         Enroll::firstOrCreate([
                             'user_id' => $user,
                             'course_segment' => $segment,
@@ -239,17 +242,17 @@ class EnrollUserToCourseController extends Controller
                             'course' => CourseSegment::whereId($segment)->pluck('course_id')->first(),
                         ]);
                     }
-                } else {
-                    $count++;
-                    $exist_user->push(User::find($user));
-                }
+                // } else {
+                //     $count++;
+                    // $exist_user->push(User::find($user));
+                // }
             } else
                 return HelperController::api_response_format(400, [], 'No Current segment or year');
         }
         //($count);
-        if ($count > 0) {
-            return HelperController::api_response_format(200, $exist_user->paginate(HelperController::GetPaginate($request)), 'enrolled and found user added before');
-        }
+        // if ($count > 0) {
+        //     return HelperController::api_response_format(200, $exist_user->paginate(HelperController::GetPaginate($request)), 'enrolled and found user added before');
+        // }
         return HelperController::api_response_format(200, [], 'added successfully');
     }
 

@@ -83,7 +83,7 @@ class PageController extends Controller
             'publish_date' => 'nullable|date'
         ]);
         if ($request->filled('publish_date')) {
-            $publishdate = $request->publish_date;
+            $publishdate = Carbon::parse($request->publish_date);
             if (Carbon::parse($request->publish_date)->isPast()) {
                 $publishdate = Carbon::now();
             }

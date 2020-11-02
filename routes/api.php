@@ -418,3 +418,7 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api']], function () {
     Route::post('add-room', 'ChatController@chat_room')->name('addroom')->middleware('permission:chat/add-room');
     Route::post('refresh-token', 'ChatController@refresh_token')->name('refreshtoken')->middleware('permission:chat/add-room');
 });
+
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::Resource('timeline', TimelineController::class);
+});

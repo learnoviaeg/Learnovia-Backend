@@ -42,4 +42,9 @@ class Level extends Model
     protected $hidden = [
         'created_at','updated_at'
     ];
+
+    public function timeline()
+    {
+        return $this->hasMany('App\Timeline','level_id','id');
+    }
 }
