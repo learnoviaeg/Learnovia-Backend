@@ -272,7 +272,8 @@ class BigbluebuttonController extends Controller
         ]);
 
         $bigbb=BigbluebuttonModel::find($request->id);
-        $check=Carbon::parse($bigbb->start_date)->addMinutes($bigbb->duration);
+        $meeting_start = isset($bigbb->actutal_start_date) ? $bigbb->actutal_start_date : $bigbb->start_date;
+        $check=Carbon::parse($meeting_start)->addMinutes($bigbb->duration);
 
         if(($check < Carbon::now()) || (!$request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0))
             return HelperController::api_response_format(200,null ,'you can\'t join this classroom');
@@ -605,12 +606,13 @@ class BigbluebuttonController extends Controller
             }
 
             $first_login=null;
+            $meeting_start = isset($meeting->actutal_start_date) ? $meeting->actutal_start_date : $meeting->start_date;
             if(isset($logs[0]['entered_date']))
-                $first_login = Carbon::parse($logs[0]['entered_date'])->diffInMinutes(Carbon::parse($meeting->start_date));
+                $first_login = Carbon::parse($logs[0]['entered_date'])->diffInMinutes(Carbon::parse($meeting_start));
 
             $last_logout=null;
             if(isset($logs[count($logs)-1]['left_date']))
-                $last_logout = Carbon::parse($meeting->start_date)->addMinutes($meeting->duration)->diffInMinutes(Carbon::parse($logs[count($logs)-1]['left_date']));
+                $last_logout = Carbon::parse($meeting_start)->addMinutes($meeting->duration)->diffInMinutes(Carbon::parse($logs[count($logs)-1]['left_date']));
 
             $final_logs->push([
                 'username' => $logs[0]['User']['username'],
@@ -714,7 +716,8 @@ class BigbluebuttonController extends Controller
                                         'left_date' => Carbon::now()->format('Y-m-d H:i:s')
                                     ]);
 
-                $start = Carbon::parse($found[0]->start_date);
+                $meeting_start = isset($found[0]->actutal_start_date) ? $found[0]->actutal_start_date : $found[0]->start_date;
+                $start = Carbon::parse($meeting_start);
                 $end = Carbon::now();
                 $duration= $end->diffInMinutes($start);
                 BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
