@@ -25,8 +25,8 @@ class teacherwithcourse implements FromCollection,WithHeadings
             // dd($en['class']['name']);
             $enrolls->push([
                 'teacher' => $en['user'] ? $en['user']['username'] : '-',
-                'classname' => $en['classre']? $en['classre']['name'] : '-',
-                'coursename' => $en['coursere'] ? $en['coursere']['short_name'] : '-',
+                'classname' => $en['classes']? $en['classes']['name'] : '-',
+                'coursename' => $en['courses'] ? $en['courses']['short_name'] : '-',
             ]);
         }
 
