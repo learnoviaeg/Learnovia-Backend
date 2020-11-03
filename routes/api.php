@@ -423,4 +423,5 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('quiz', QuizController::class);
     Route::Resource('materials', MaterialsController::class);
+    Route::Resource('assignments', AssignmentController::class);
 });
