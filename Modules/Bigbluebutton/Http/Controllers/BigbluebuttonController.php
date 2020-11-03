@@ -364,8 +364,10 @@ class BigbluebuttonController extends Controller
         if($request->has('status'))
             $meeting->where('status',$request->status);
 
-        if($request->has('start_date'))
-            $meeting->where('start_date', '=', $request->start_date);
+        if($request->has('start_date')){
+            $to = Carbon::parse($request->start_date)->addMinutes(1);
+            $meeting->where('start_date', '>=', $request->start_date)->where('start_date','<',$to);
+        }
 
         if($request->has('id'))
             $meeting->where('id',$request->id);
