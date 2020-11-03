@@ -47,10 +47,10 @@ class QuizController extends Controller
         }
         $lessons =  array_values (array_unique($lessons)) ;
         if($request->filled('lesson')){
-            if (in_array($request->lesson,$lessons))
-                $lessons  = [$request->lesson];
-            else 
-                return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 200);
+            if (!in_array($request->lesson,$lessons)){
+                return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
+            }
+            $lessons  = [$request->lesson];
         }
         $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->get()->sortByDesc('start_date');
         $quizzes = collect([]);
