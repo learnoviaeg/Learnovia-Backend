@@ -16,7 +16,7 @@ class AssignmentController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        // $this->middleware(['permission:quiz/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:assignment/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
