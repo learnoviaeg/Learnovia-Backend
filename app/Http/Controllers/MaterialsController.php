@@ -57,10 +57,6 @@ class MaterialsController extends Controller
             $material->where('type',$request->item_type);
 
         return response()->json(['message' => 'materials list.... ', 'body' => $material->get()], 200);
-
-        
-
-
     }
 
     /**
