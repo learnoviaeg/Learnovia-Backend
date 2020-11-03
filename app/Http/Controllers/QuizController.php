@@ -32,12 +32,17 @@ class QuizController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
 
         ]);
-        $enrolls = $this->chain->getCourseSegmentByChain($request);
-        $user_course_segments = $enrolls;
+        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses'))//student
-            $user_course_segments = $enrolls->where('user_id',Auth::id());
-        $user_course_segments = $user_course_segments->pluck('course_segment');
-        $lessons = Lesson::whereIn('course_segment_id', $user_course_segments)->pluck('id');
+            {
+                $user_course_segments = $enrolls->where('user_id',Auth::id());
+            }  
+        $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
+        $lessons =[];
+        foreach ($user_course_segments as $user_course_segment){
+            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
+        }
+        $lessons =  array_values (array_unique($lessons)) ;
         $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->get()->sortByDesc('start_date');
         $quizzes = collect([]);
         foreach($quiz_lessons as $quiz_lesson){
