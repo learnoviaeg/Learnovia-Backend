@@ -85,7 +85,10 @@ class QuizLessonController extends Controller
             // if(count($check) > 0){
             //     return HelperController::api_response_format(500, null,'This Quiz is aleardy assigned to this lesson');
             // }
-
+            $lesson_obj = Lesson::find($lessons);
+            $course_segment =  CourseSegment::find($lesson_obj->course_segment_id);
+            if( $course_segment->end_date < Carbon::parse($request->closing_time) )
+                return HelperController::api_response_format(400, null , 'Please enter closing date before '.$course_segment->end_date." ");
             $index = QuizLesson::where('lesson_id',$lessons)->get()->max('index');
             $Next_index = $index + 1;
             $quizLesson[] = QuizLesson::create([
@@ -296,6 +299,10 @@ class QuizLessonController extends Controller
         return HelperController::api_response_format(400,null, 'This quiz doesn\'t assign in this lesson');
 
     }
+    $lesson= Lesson::find( $quizLesson->lesson_id);
+    $course_segment = $lesson->courseSegment;
+    if($course_segment->end_date < Carbon::parse($request->due_date))
+            return HelperController::api_response_format(400, null , 'Please enter due date before '.$course_segment->end_date);
 
     $usersOverride =array();
     foreach ($request->users_id as $user_id) {
@@ -308,7 +315,6 @@ class QuizLessonController extends Controller
     ]);
 
         }
-        $lesson= Lesson::find( $quizLesson->lesson_id);
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
             user::notify([

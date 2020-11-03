@@ -197,6 +197,8 @@ class CourseController extends Controller
             'description' => 'nullable',
             'mandatory' => 'nullable|in:0,1',
             'short_name' => 'unique:courses,short_name,'.$request->id,
+            'start_date' => 'date',
+            'end_date' =>'date|after:start_date'
         ]);
         $editable = ['name', 'category_id', 'description', 'mandatory','short_name'];
         $course = Course::find($request->id);
@@ -209,6 +211,14 @@ class CourseController extends Controller
                 $course->$key = $request->$key;
             }
         }
+        $course_segment = CourseSegment::where("course_id",$request->id);
+        if ($request->filled('start_date')) {
+             $course_segment->update(['start_date'=>$request->start_date]); 
+        }
+        if ($request->filled('end_date')) {
+            $course_segment->update(['end_date' => $request->end_date]);
+        }
+         
         $course->save();
         $req = new Request();
 
@@ -231,10 +241,14 @@ class CourseController extends Controller
             'id' => 'exists:courses,id',
             'category_id' => 'nullable|exists:categories,id',
             'year' => 'nullable|exists:academic_years,id',
-            'type' => 'nullable|exists:academic_types,id',
-            'level' => 'nullable|exists:levels,id',
-            'class' => 'nullable|exists:classes,id',
-            'segment' => 'nullable|exists:segments,id',
+            'type' => 'array',
+            'type.*' => 'nullable|exists:academic_types,id',
+            'levels' => 'array',
+            'levels.*' => 'nullable|exists:levels,id',
+            'classes' => 'array',
+            'classes.*' => 'nullable|exists:classes,id',
+            'segments' => 'array',
+            'segments.*' => 'nullable|exists:segments,id',
             'search' => 'nullable',
             'for' => 'in:enroll'
         ]);
@@ -256,7 +270,7 @@ class CourseController extends Controller
                 return HelperController::api_response_format(200, null, ' No Active year here');
         }
 
-        $couresegs = GradeCategoryController::getCourseSegment($request);
+        $couresegs = GradeCategoryController::getCourseSegmentWithArray($request);
         if(count($couresegs) == 0)
             return HelperController::api_response_format(200, null, 'No Courses' );
 
@@ -269,7 +283,10 @@ class CourseController extends Controller
             $cs[]=$cc->course_id;
         }
 
-        $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->get();
+        $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])
+                            ->where(function($q)use($request){
+                                $q->orWhere('name', 'LIKE', "%$request->search%")
+                                ->orWhere('short_name', 'LIKE' ,"%$request->search%");})->get();
         if($call == 1 ){
             return $courses;
         }
@@ -281,6 +298,8 @@ class CourseController extends Controller
                             ->pluck('user_id')
                             )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
                             $le['teachers']  = $teacher ;
+            $le['start_date']=$le->courseSegments->pluck('start_date')->unique();
+            $le['end_date']=$le->courseSegments->pluck('end_date')->unique();
             unset($le->courseSegments);
         }
         if($call == 2 ){ //$call by function update 
@@ -411,9 +430,9 @@ class CourseController extends Controller
                 if(isset($type_object))
                     $flag->type = $type_object->name;
             }
-            $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id');
+            $userr=Enroll::where('role_id', 4)->where('course_segment', $enroll)->pluck('user_id')->unique();
             if(isset($request->course_id))
-                $userr=Enroll::where('role_id', 4)->whereIn('course_segment', $couuures)->pluck('user_id');
+                $userr=Enroll::where('role_id', 4)->whereIn('course_segment', $couuures)->pluck('user_id')->unique();
             foreach($userr as $teach){
                 $teacher = User::whereId($teach)->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture'])->first();
                 if(isset($teacher)){
@@ -426,7 +445,10 @@ class CourseController extends Controller
             if(isset($en->id)  && isset($teacher))
                 $teacher->class = $en->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0];
             $course->flag = $flag;
-            $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
+            $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])
+                            ->where(function($q)use($request){
+                                    $q->orWhere('name', 'LIKE', "%$request->search%")
+                                    ->orWhere('short_name', 'LIKE' ,"%$request->search%");})->first();
             $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
             $course->teachers = $teacherz;
             if(!isset($course->attachment)){
@@ -547,7 +569,10 @@ class CourseController extends Controller
                 }
                
                 $course->flag = $flag;
-                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
+                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])
+                                ->where(function($q)use($request){
+                                    $q->orWhere('name', 'LIKE', "%$request->search%")
+                                    ->orWhere('short_name', 'LIKE' ,"%$request->search%");})->first();
                 $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
                 $course->teachers = $teacherz;
                 $course->attachment;
@@ -663,7 +688,10 @@ class CourseController extends Controller
                 }
                
                 $course->flag = $flag;
-                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->where('name', 'LIKE', "%$request->search%")->first();
+                $coursa =  Course::where('id', $course->id)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])
+                                    ->where(function($q)use($request){
+                                        $q->orWhere('name', 'LIKE', "%$request->search%")
+                                        ->orWhere('short_name', 'LIKE' ,"%$request->search%");})->first();
                 $course->levels = $coursa->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
                 $course->teachers = $teacherz;
                 $course->attachment;

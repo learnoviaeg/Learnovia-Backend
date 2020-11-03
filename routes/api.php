@@ -264,6 +264,10 @@ Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api']], function () {
     Route::get('get-unenrolled-users-Bulk', 'EnrollUserToCourseController@unEnrolledUsersBulk')->name('getUnEnrolleduser')->middleware('permission:enroll/get-unenrolled-users-Bulk');
     Route::post('users', 'EnrollUserToCourseController@enrollWithChain')->name('Enrollusers')->middleware('permission:enroll/users');
     Route::post('migrate-user', 'EnrollUserToCourseController@Migration')->name('migrateuser')->middleware('permission:enroll/migrate-user');
+    Route::post('empty-courses', 'EnrollUserToCourseController@EmptyCourses');
+    Route::get('with-teach-courses', 'EnrollUserToCourseController@exportcourseswithteachers')->middleware('permission:site/show-all-courses');
+    Route::get('students-enroll', 'EnrollUserToCourseController@exportstudentsenrolls')->middleware('permission:site/show-all-courses');
+    Route::post('StudentdInLevels', 'EnrollUserToCourseController@StudentdInLevels');
 });
 
 //Messages Routes
@@ -417,4 +421,5 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api']], function () {
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('timeline', TimelineController::class);
+    Route::Resource('quiz', QuizController::class);
 });

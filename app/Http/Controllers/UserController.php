@@ -54,8 +54,8 @@ class UserController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'nickname' => 'array',
-            'nickname.*' => 'string|min:3|max:50',
+            // 'nickname' => 'array',
+            // 'nickname.*' => 'string|min:3|max:50',
             'firstname' => 'required|array',
             'firstname.*' => 'required|string|min:3|max:50',
             'lastname' => 'required|array',
@@ -744,7 +744,8 @@ class UserController extends Controller
             'levels' => 'array',
             'levels.*' => 'exists:levels,id',
             'roles' => 'array',
-            'roles.*' => 'exists:roles,id'
+            'roles.*' => 'exists:roles,id',
+            'search' => 'string'
         ]);
 
         $Given_courseSegments = GradeCategoryController::getCourseSegmentWithArray($request);
@@ -761,6 +762,16 @@ class UserController extends Controller
         foreach ($students as $student)
             if(isset($student->attachment))
                 $student->picture = $student->attachment->path;
+
+        if(isset($request->search))
+        {
+            $students = user::whereIn('id',$users->toArray())->where('id','!=',Auth::id())
+                                ->where( function($q)use($request){
+                                            $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                                                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                                                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+                                            })->with('attachment')->get();
+        }
 
         return HelperController::api_response_format(200,$students ,'Users are.......');
     }
