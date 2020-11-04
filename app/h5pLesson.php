@@ -15,8 +15,5 @@ class h5pLesson extends Model
         'user_id'
     ];
 
-    //   public function contents()
-    //   {
-    //       return $this->hasMany('', 'id', 'content_id');
-    //   }
+
 }
