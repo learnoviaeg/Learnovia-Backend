@@ -29,7 +29,10 @@ class MediaLessonObserver
                 'lesson_id' => $mediaLesson->lesson_id,
                 'type' => 'media',
                 'visible' => 1,
-                'link' => $media->link
+                'link' => $media->link,
+                'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
+
+
             ]);
         }
     }
@@ -52,7 +55,8 @@ class MediaLessonObserver
                 'lesson_id' => $mediaLesson->lesson_id,
                 'type' => 'media',
                 'visible' => $mediaLesson->visible,
-                'link' => $media->link
+                'link' => $media->link,
+                'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
             ]);
         }
     }

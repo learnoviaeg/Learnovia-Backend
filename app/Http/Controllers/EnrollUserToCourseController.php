@@ -10,17 +10,23 @@ use Illuminate\Http\Request;
 use App\User;
 use Auth;
 use App\Enroll;
+use App\Level;
 use App\Segment;
 use App\ClassLevel;
 use App\CourseSegment;
 use App\Course;
 use App\GradeCategory;
 use App\SegmentClass;
-
+use App\Classes;
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
 use App\UserGrade;
+use App\Exports\teacherwithcourse;
+use App\Exports\StudentEnrolls;
+use App\Exports\classeswithstudents;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 class EnrollUserToCourseController extends Controller
 {
@@ -218,9 +224,12 @@ class EnrollUserToCourseController extends Controller
                     }
                 }
 
-                $check = Enroll::where('user_id', $user)->whereIn('course_segment', $segments)->pluck('id');
-                if (count($check) == 0) {
+                // $check = Enroll::where('user_id', $user)->whereIn('course_segment', $segments)->pluck('id');
+                // if (count($check) == 0) {
                     foreach ($segments as $segment) {
+                        $check = Enroll::where('user_id', $user)->where('course_segment', $segment)->pluck('id');
+                        if(count($check) > 0)
+                            continue;
                         Enroll::firstOrCreate([
                             'user_id' => $user,
                             'course_segment' => $segment,
@@ -233,17 +242,17 @@ class EnrollUserToCourseController extends Controller
                             'course' => CourseSegment::whereId($segment)->pluck('course_id')->first(),
                         ]);
                     }
-                } else {
-                    $count++;
-                    $exist_user->push(User::find($user));
-                }
+                // } else {
+                //     $count++;
+                    // $exist_user->push(User::find($user));
+                // }
             } else
                 return HelperController::api_response_format(400, [], 'No Current segment or year');
         }
         //($count);
-        if ($count > 0) {
-            return HelperController::api_response_format(200, $exist_user->paginate(HelperController::GetPaginate($request)), 'enrolled and found user added before');
-        }
+        // if ($count > 0) {
+        //     return HelperController::api_response_format(200, $exist_user->paginate(HelperController::GetPaginate($request)), 'enrolled and found user added before');
+        // }
         return HelperController::api_response_format(200, [], 'added successfully');
     }
 
@@ -657,9 +666,75 @@ class EnrollUserToCourseController extends Controller
 
     public function EmptyCourses()
     {
-        \DB::enableQueryLog();
-        $coursesNotEnrolled=CourseSegment::whereNotIn('id',Enroll::where('role_id',3)->pluck('course_segment'))->pluck('course_id');
-        $courses=Course::whereIn('id',$coursesNotEnrolled)->pluck('short_name');
-        return HelperController::api_response_format(200, $courses , 'empty courses');
+        $course=array();
+        $coursesNotEnrolled=CourseSegment::whereNotIn('id',Enroll::where('role_id',3)->pluck('course_segment'))->get();
+        foreach($coursesNotEnrolled as $cor)
+            $course[$cor->segmentClasses[0]->classLevel[0]->classes[0]->name . "_".  $cor->segmentClasses[0]->classLevel[0]->classes[0]->id][]=$cor->courses[0]->short_name;
+
+        return HelperController::api_response_format(200, $course , 'empty courses');
+    }
+
+    public function exportcourseswithteachers(Request $request)
+    {
+        $request->validate([
+            'search' => 'required|string',
+        ]);
+
+        $courses = Course::where('short_name', 'LIKE' ,"%$request->search%")->pluck('id');
+        if(isset($courses))
+            $course_segments = CourseSegment::whereIn('course_id',$courses)->pluck('id');
+        if(isset($course_segments))
+            $enrolls = Enroll::whereIn('course_segment',$course_segments)->where('role_id',4)->with(['user','courseSegment','classes','courses'])->get();
+
+            // return $enrolls;
+        $filename = uniqid();
+        $file = Excel::store(new teacherwithcourse($enrolls), 'tech'.$filename.'.xls','public');
+        $file = url(Storage::url('tech'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        // return HelperController::api_response_format(201,$enrolls, 'enrolls');
+    }
+
+    public function StudentdInLevels(Request $request)
+    {
+        $allUsers=Enroll::pluck('user_id')->unique();
+
+        $duplicated_users=array();
+        foreach($allUsers as $user)
+        {
+            $usr=User::find($user);
+            if(isset($usr)){
+                $levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->unique();
+                if(count($levels) > 1){
+                    foreach($levels as $level){
+                        $lvlOBJ=Level::find($level);
+                        if(isset($lvlOBJ))
+                            $lvl[]=$lvlOBJ->name;
+                    }
+                    $duplicated_users[$usr->username]=$lvl;
+                    $lvl=[];
+                }
+            }
+        }
+
+        // $filename = uniqid();
+        // $file = Excel::store(new StudentEnrolls($duplicated_users), 'students'.$filename.'.xlsx','public');
+        // $file = url(Storage::url('students'.$filename.'.xlsx'));
+        // return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return $duplicated_users;
+    }
+
+    public function exportstudentsenrolls(Request $request)
+    {
+
+        $CS_ids=GradeCategoryController::getCourseSegment($request);
+        if(count($CS_ids) == 0)
+            return HelperController::api_response_format(201,[], 'No active course segments');
+            
+        $enrolls = Enroll::whereIn('course_segment',$CS_ids)->where('role_id',3)->with(['user','levels','classes'])->get()->groupBy(['levels.name','classes.name']);
+        $filename = uniqid();
+        $file = Excel::store(new classeswithstudents($enrolls), 'students'.$filename.'.xls','public');
+        $file = url(Storage::url('students'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        // return HelperController::api_response_format(201,$enrolls, 'enrolls');
     }
 }

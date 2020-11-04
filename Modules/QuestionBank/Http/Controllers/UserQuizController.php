@@ -423,7 +423,7 @@ class UserQuizController extends Controller
                         }
 
                         $data['user_grade'] = $question['mark'];
-                        $data['correct'] = isset($question['answer']) ? $question['answer'] : null;
+                        $data['correct'] = isset($question['right']) ? 1 : null;//isset($question['answer']) ? $question['answer'] : null;
                         $data['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
                         //to know if teacher refers to that answer as right or wrong
                         $data['right'] = isset($question['right']) ? $question['right'] : null;
