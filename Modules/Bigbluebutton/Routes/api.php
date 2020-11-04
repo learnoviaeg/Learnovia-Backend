@@ -36,5 +36,6 @@ Route::group(['prefix' => 'bigbluebutton', 'middleware' => 'auth:api'], function
     Route::get('create_hook', 'BigbluebuttonController@create_hook');
     Route::get('destroy_hook', 'BigbluebuttonController@destroy_hook');
     Route::get('list_hook', 'BigbluebuttonController@list_hook');
+    Route::get('refresh', 'BigbluebuttonController@refresh_meetings')->middleware('permission:site/show-all-courses');
 
 });
