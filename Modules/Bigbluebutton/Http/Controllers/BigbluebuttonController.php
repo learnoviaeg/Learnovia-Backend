@@ -762,4 +762,24 @@ class BigbluebuttonController extends Controller
         $req=$bbb->getHooksListUrl();
         return $req;
     }
+
+    public function refresh_meetings(Request $request){
+        $bbb = new BigBlueButton();
+        $response = $bbb->getMeetings();
+        $current_meetings = collect();
+        if ($response->getReturnCode() == 'SUCCESS') {
+            foreach ($response->getRawXml()->meetings->meeting as $meeting) {
+                $current_meetings->push($meeting->meetingID);
+            }
+        }
+
+        $meeting = BigbluebuttonModel::whereIn('meeting_id',$current_meetings)->where('started',0)->where('status','future')->update([
+            'started' => 1,
+            'status' => 'current',
+            'actutal_start_date' => Carbon::now()
+        ]);
+
+        return HelperController::api_response_format(200 , $meeting , 'Classrooms refreshed successfully');
+    }
+
 }
