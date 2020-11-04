@@ -350,7 +350,7 @@ class AttendanceSessionController extends Controller
         if(isset($log))
             return HelperController::api_response_format(200,'fail' ,'You can\'t delete this session, it\'s attendnace taken already!');
             
-        $session = AttendanceSession::where('id',$request->session_id)->delete();
+        $session = AttendanceSession::where('id',$request->session_id)->first()->delete();
         return HelperController::api_response_format(200,null ,'Session deleted successfully.');
     }   
 

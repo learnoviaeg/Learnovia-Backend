@@ -7,7 +7,7 @@
     ),
     'App\\Events\\UserGradeEvent' => 
     array (
-      0 => 'App\\Listerners\\UserGradeListener',
+      0 => 'App\\Listeners\\UserGradeListener',
     ),
   ),
 );

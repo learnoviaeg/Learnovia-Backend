@@ -2,21 +2,50 @@
 
 namespace App\Providers;
 
-use App\Enroll;
-use App\Observers\EnrollObserver;
-use App\GradeItems;
-use App\Observers\GradeItemObserver;
-use App\Observers\UserGradeObserver;
-use App\Observers\AssignmentLessonObserver;
-use App\Observers\QuizLessonObserver;
-use App\UserGrade;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
-use Modules\Assigments\Entities\AssignmentLesson;
-use Modules\QuestionBank\Entities\QuizLesson;
 use App\Repositories\BackendServiceProvider;
+use App\Enroll;
+use App\Observers\EnrollObserver;
+use App\GradeItems;
+use App\Observers\GradeItemObserver;
+use App\UserGrade;
+use App\Observers\UserGradeObserver;
+
+use Modules\Assigments\Entities\Assignment;
+use Modules\Assigments\Entities\AssignmentLesson;
+use App\Observers\AssignmentLessonObserver;
+use Modules\QuestionBank\Entities\Quiz;
+use Modules\QuestionBank\Entities\QuizLesson;
+use App\Observers\QuizLessonObserver;
+use Modules\UploadFiles\Entities\File;
+use Modules\UploadFiles\Entities\FileLesson;
+use Modules\UploadFiles\Entities\Media;
+use Modules\UploadFiles\Entities\MediaLesson;
+use Modules\Page\Entities\Page;
+use Modules\Page\Entities\PageLesson;
+use App\h5pLesson;
+use App\Observers\LogsObserver;
+
+use App\User;
+use App\AcademicType;
+use App\Announcement;
+use App\AcademicYear;
+use App\classes;
+use App\Course;
+use App\Level;
+use App\Segment;
+use App\YearLevel;
+use App\ClassLevel;
+use App\AcademicYearType;
+use App\CourseSegment;
+
+use App\Timeline;
+use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
+use Modules\Attendance\Entities\AttendanceLog;
+use Modules\Attendance\Entities\AttendanceSession;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,11 +76,41 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        // UserGrade::observe(UserGradeObserver::class);
-        Enroll::observe(EnrollObserver::class);
-        GradeItems::observe(GradeItemObserver::class);
+        Assignment::observe(LogsObserver::class);
         AssignmentLesson::observe(AssignmentLessonObserver::class);
+
+        Quiz::observe(LogsObserver::class);
         QuizLesson::observe(QuizLessonObserver::class);
-        
+
+        File::observe(LogsObserver::class);
+        FileLesson::observe(LogsObserver::class);
+
+        Media::observe(LogsObserver::class);
+        MediaLesson::observe(LogsObserver::class);
+
+        Page::observe(LogsObserver::class);
+        PageLesson::observe(LogsObserver::class);
+        h5pLesson::observe(LogsObserver::class);
+
+        AcademicType::observe(LogsObserver::class);
+        AcademicYear::observe(LogsObserver::class);
+        classes::observe(LogsObserver::class);
+        Course::observe(LogsObserver::class);
+        Level::observe(LogsObserver::class);
+        Segment::observe(LogsObserver::class);
+        AcademicYearType::observe(LogsObserver::class);
+        ClassLevel::observe(LogsObserver::class);
+        YearLevel::observe(LogsObserver::class);
+        User::observe(LogsObserver::class);
+        CourseSegment::observe(LogsObserver::class);
+        Enroll::observe(EnrollObserver::class);
+
+        // UserGrade::observe(UserGradeObserver::class);
+        GradeItems::observe(GradeItemObserver::class);
+        BigbluebuttonModel::observe(LogsObserver::class);
+        Announcement::observe(LogsObserver::class);
+        Timeline::observe(LogsObserver::class);
+        AttendanceLog::observe(LogsObserver::class);
+        AttendanceSession::observe(LogsObserver::class);
     }
 }

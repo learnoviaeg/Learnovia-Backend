@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Classes;
 use Nwidart\Modules\Collection;
+use Log;
 use App\Course;
 use App\CourseSegment;
 use App\Lesson;
@@ -139,6 +140,10 @@ class CourseController extends Controller
                                     'letter' => 1,
                                     'letter_id' => 1
                                 ]);
+                                // Log::info($request->user()->username.' created course '.$course.' in year '.$year.
+                                //         ' in level '.$level.' in segment '.$segment.' in type '.$type.' in class '.$class.
+                                //         ' start_at '.$request->start_date.' and end_at '.$request->end_date.' created_at '.Carbon::now()->format('Y-m-d H:i:s'));
+
                                 $gradeCat = GradeCategory::firstOrCreate([
                                     'name' => 'Course Total',
                                     'course_segment_id' => $courseSegment->id,

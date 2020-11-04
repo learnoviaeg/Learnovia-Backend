@@ -6,7 +6,10 @@ use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Lesson;
 use App\Timeline;
-use Carbon;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use Log;
+use App\User;
 
 class QuizLessonObserver
 {
@@ -37,6 +40,8 @@ class QuizLessonObserver
                 'type' => 'quiz'
             ]);
         }
+
+        Log::info(User::find(Auth::id())->username.' created '.$quizLesson);
     }
 
     /**
@@ -61,6 +66,8 @@ class QuizLessonObserver
                 'visible' => $quizLesson->visible
             ]);
         }
+
+        Log::info(User::find(Auth::id())->username.' updated '.$quizLesson);
     }
 
     /**
@@ -72,6 +79,8 @@ class QuizLessonObserver
     public function deleted(QuizLesson $quizLesson)
     {
         Timeline::where('lesson_id',$quizLesson->lesson_id)->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
+
+        Log::info(User::find(Auth::id())->username.' deleted '.$quizLesson);
     }
 
     /**

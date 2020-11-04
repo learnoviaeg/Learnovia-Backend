@@ -6,8 +6,11 @@ use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\assignment;
 use App\Timeline;
 use App\Lesson;
+use App\User;
 use Log;
-use Carbon;
+use carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+
 
 class AssignmentLessonObserver
 {
@@ -38,6 +41,8 @@ class AssignmentLessonObserver
                 'type' => 'assignment'
             ]);
         }
+
+        Log::info(User::find(Auth::id())->username.' created '.$assignmentLesson);
     }
 
     /**
@@ -48,8 +53,6 @@ class AssignmentLessonObserver
      */
     public function updated(AssignmentLesson $assignmentLesson)
     {
-        
-        
         $assignment = Assignment::where('id',$assignmentLesson->assignment_id)->first();
         if(isset($assignment)){
             Timeline::where('item_id',$assignmentLesson->assignment_id)->where('lesson_id',$assignmentLesson->lesson_id)->where('type' , 'assignment')
@@ -64,6 +67,8 @@ class AssignmentLessonObserver
                 'visible' => $assignmentLesson->visible
             ]);
         }
+
+        Log::info(User::find(Auth::id())->username.' updated '.$assignmentLesson);
     }
 
     /**
@@ -75,6 +80,8 @@ class AssignmentLessonObserver
     public function deleted(AssignmentLesson $assignmentLesson)
     {
         Timeline::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
+    
+        Log::info(User::find(Auth::id())->username.' deleted '.$assignmentLesson);
     }
 
     /**
