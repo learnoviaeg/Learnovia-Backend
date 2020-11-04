@@ -32,7 +32,7 @@ class MaterialsController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'sort_in' => 'in:asc,desc',
-            'item_type' => 'string|in:page,media,file',
+            'item_type' => 'string|in:page,media,file'
 
         ]);
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
