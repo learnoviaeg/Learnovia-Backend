@@ -14,6 +14,8 @@ class Material extends Model
     public function getMediaTypeAttribute(){
         if($this->mime_type != null)
             return $this->mime_type ;
+        if($this->type=='file')
+            return null;
         return 'Link';
     }
     public function course(){
