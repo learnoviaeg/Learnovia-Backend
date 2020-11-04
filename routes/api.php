@@ -424,4 +424,5 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('quiz', QuizController::class);
     Route::Resource('materials', MaterialsController::class);
     Route::Resource('assignments', AssignmentController::class);
+    Route::Resource('courses', CoursesController::class);
 });
