@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Modules\UploadFiles\Entities\file;
+use Modules\UploadFiles\Entities\media;
+
 
 
 class Material extends Model
@@ -23,6 +25,8 @@ class Material extends Model
     public function getAttachmentNameAttribute(){
         if($this->type == 'file')
             return file::find($this->item_id)->attachment_name;
+        if($this->type == 'media' && $this->media_type!='Link' && $this->media_type!='media link')
+            return media::find($this->item_id)->attachment_name;
     
     }
     public function course(){
