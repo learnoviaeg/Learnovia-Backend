@@ -13,12 +13,13 @@ use App\Lesson;
 
 class MaterialsController extends Controller
 {
+    protected $chain;
 
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
         $this->middleware('auth');
-         $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
 
     /**
