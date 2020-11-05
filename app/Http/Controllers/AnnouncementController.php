@@ -75,7 +75,7 @@ class AnnouncementController extends Controller
             'chains.*.segment.*' => 'exists:segments,id',
             'chains.*.course.*' => 'exists:courses,id',
         ]);
-        if($request->user()->can('announcement/filter-chain')){
+        if($request->user()->can('announcements/filter-chain')){
             $request->validate([
                 'chains.*.year' => 'required|array',
                 'chains.*.year.*' => 'exists:academic_years,id',
