@@ -39,34 +39,37 @@ class CoursesController extends Controller
             $enrolls->where('user_id',Auth::id());
         }
 
-        $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['level','course']);
+        $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);
 
         $user_courses=collect();
-        $i=0;
-        foreach($enrolls as $level){
+        
+        foreach($enrolls as $course){
+            $levels=[];
+            foreach($course as $level){
 
-            foreach($level as $course){
+                if($level[0]->courseSegment->end_date > Carbon::now() && $level[0]->courseSegment->start_date <= Carbon::now()){
 
-                if($course[0]->courseSegment->end_date > Carbon::now() && $course[0]->courseSegment->start_date <= Carbon::now()){
-                    
-                    if(!isset($course[0]->courseSegment->courses[0]))
-                        continue;
+                    $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
+                    $temp_course = $level[0]->courseSegment->courses[0];
 
-                    $user_courses->push([
-                        'id' => $course[0]->courseSegment->courses[0]->id ,
-                        'name' => $course[0]->courseSegment->courses[0]->name ,
-                        'short_name' => $course[0]->courseSegment->courses[0]->short_name ,
-                        'image' => isset($course[0]->courseSegment->courses[0]->image) ? $course[0]->courseSegment->courses[0]->attachment->path : null,
-                        'description' => $course[0]->courseSegment->courses[0]->description ,
-                        'mandatory' => $course[0]->courseSegment->courses[0]->mandatory == 1 ? true : false ,
-                        'level' => isset($course[0]->levels) ? $course[0]->levels->name : null, 
-                    ]);
-    
                 }
             }
+
+            if(!isset($temp_course))
+                continue;
+
+            $user_courses->push([
+                'id' => $temp_course->id ,
+                'name' => $temp_course->name ,
+                'short_name' => $temp_course->short_name ,
+                'image' => isset($temp_course->image) ? $temp_course->attachment->path : null,
+                'description' => $temp_course->description ,
+                'mandatory' => $temp_course->mandatory == 1 ? true : false ,
+                'level' => $levels, 
+            ]);
         }
 
-        return response()->json(['message' => 'User courses list', 'body' => $user_courses->unique()->values()], 200);
+        return response()->json(['message' => 'User courses list', 'body' => $user_courses], 200);
 
     }
 
