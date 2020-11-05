@@ -13,6 +13,8 @@ use Carbon\Carbon;
 
 class InterActiveController extends Controller
 {
+    protected $chain;
+
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
@@ -68,7 +70,9 @@ class InterActiveController extends Controller
             $content->original->lesson = Lesson::find($h5p->lesson_id);
             $h5p_contents[]=$content->original;
         }
-        return $h5p_contents;
+        return response()->json(['message' => 'InterActive vedios  List ....', 'body' => $h5p_contents], 200);
+
+        
     }
 
     /**
