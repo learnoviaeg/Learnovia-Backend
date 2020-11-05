@@ -32,7 +32,13 @@ class CoursesController extends Controller
         //validate the request
         $request->validate([
             'class' => 'nullable|integer|exists:classes,id',
+            'paginate' => 'integer'
         ]);
+
+        $paginate = 12;
+        if($request->has('paginate')){
+            $paginate = $request->paginate;
+        }
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
@@ -70,7 +76,7 @@ class CoursesController extends Controller
             $temp_course = null;
         }
 
-        return response()->json(['message' => 'User courses list', 'body' => $user_courses], 200);
+        return response()->json(['message' => 'User courses list', 'body' => $user_courses->paginate($paginate)], 200);
 
     }
 
