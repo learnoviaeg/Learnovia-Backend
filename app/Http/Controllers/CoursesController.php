@@ -42,7 +42,6 @@ class CoursesController extends Controller
         $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);
 
         $user_courses=collect();
-        
         foreach($enrolls as $course){
             $levels=[];
             foreach($course as $level){
@@ -67,6 +66,8 @@ class CoursesController extends Controller
                 'mandatory' => $temp_course->mandatory == 1 ? true : false ,
                 'level' => $levels, 
             ]);
+
+            $temp_course = null;
         }
 
         return response()->json(['message' => 'User courses list', 'body' => $user_courses], 200);
