@@ -17,8 +17,14 @@ use App\Observers\UserGradeObserver;
 use Modules\Assigments\Entities\Assignment;
 use Modules\Assigments\Entities\AssignmentLesson;
 use App\Observers\AssignmentLessonObserver;
+use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\QuestionsCategory;
+use Modules\QuestionBank\Entities\QuestionsAnswer;
+use Modules\QuestionBank\Entities\QuestionsType;
 use Modules\QuestionBank\Entities\Quiz;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\UserQuizAnswer;
+use Modules\QuestionBank\Entities\UserQuiz;
 use App\Observers\QuizLessonObserver;
 use Modules\UploadFiles\Entities\File;
 use Modules\UploadFiles\Entities\FileLesson;
@@ -79,8 +85,14 @@ class AppServiceProvider extends ServiceProvider
         Assignment::observe(LogsObserver::class);
         AssignmentLesson::observe(AssignmentLessonObserver::class);
 
+        Questions::observe(LogsObserver::class);
+        QuestionsAnswer::observe(LogsObserver::class);
+        QuestionsCategory::observe(LogsObserver::class);
+        QuestionsType::observe(LogsObserver::class);
         Quiz::observe(LogsObserver::class);
         QuizLesson::observe(QuizLessonObserver::class);
+        UserQuiz::observe(LogsObserver::class);
+        UserQuizAnswer::observe(LogsObserver::class);
 
         File::observe(LogsObserver::class);
         FileLesson::observe(LogsObserver::class);

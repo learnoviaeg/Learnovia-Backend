@@ -71,6 +71,12 @@ return [
             ],
         ],
 
+        'massoperationlog' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/massoperationlog.log'),
+            'level' => 'info',
+        ],
+
         'stderr' => [
             'driver' => 'monolog',
             'handler' => StreamHandler::class,
