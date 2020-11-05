@@ -18,7 +18,7 @@ class MaterialsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
+         $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
 
     /**
@@ -32,8 +32,8 @@ class MaterialsController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'sort_in' => 'in:asc,desc',
-            'item_type' => 'string|in:page,media,file'
-
+            'item_type' => 'string|in:page,media,file',
+            'class' => 'nullable|integer|exists:classes,id',
         ]);
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses'))//student
