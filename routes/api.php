@@ -427,4 +427,5 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('iteractive', InterActiveController::class);
     Route::Resource('courses', CoursesController::class);
     Route::Resource('lessons', LessonsController::class);
+    Route::Resource('classes', ClassesController::class);
 });
