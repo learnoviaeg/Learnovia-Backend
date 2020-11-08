@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
 use Carbon\Carbon;
-use App\Course;
 
 class CoursesController extends Controller
 {
