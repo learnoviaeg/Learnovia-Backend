@@ -76,7 +76,7 @@ class LevelsController extends Controller
         if (count($class_level) > 0)
             return HelperController::api_response_format(404, [] , 'This level assigned to classe/s, cannot be deleted.');
 
-        Level::whereId($request->id)->delete();
+        Level::whereId($request->id)->first()->delete();
         YearLevel::where('level_id',$request->id)->delete();
         User::where('level',$request->id)->update([
             'level' => null

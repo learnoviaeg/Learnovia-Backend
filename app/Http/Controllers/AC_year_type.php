@@ -109,7 +109,7 @@ class AC_year_type extends Controller
         if(!(count($segment) == 0 && count($level) == 0)){
             return HelperController::api_response_format(404, [], 'This type assigned to level or segment, cannot be deleted.');
         }
-        $types = AcademicType::whereId($req->id)->delete();
+        $types = AcademicType::whereId($req->id)->first()->delete();
         AcademicYearType::where('academic_type_id',$req->id)->delete();
         User::where('type',$req->id)->update([
             'type' => null

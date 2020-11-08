@@ -438,7 +438,7 @@ class BigbluebuttonController extends Controller
         if(count($logs) > 0)
             return HelperController::api_response_format(404 , null , 'This Class room has students logs, cannot be deleted!');
             
-        $meet = BigbluebuttonModel::whereId($request->id)->delete();
+        $meet = BigbluebuttonModel::whereId($request->id)->first()->delete();
         return HelperController::api_response_format(200 , null , 'Class room deleted!');
     }
 

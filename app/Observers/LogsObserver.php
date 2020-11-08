@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Log;
+use App\Log;
 use App\User;
 
 class LogsObserver
@@ -16,7 +16,11 @@ class LogsObserver
      */
     public function created($req)
     {
-        Log::info(User::find(Auth::id())->username.' created '.$req);
+        $log=Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'created',
+            'data' => serialize($req),
+        ]);
     }
 
     /**
@@ -26,7 +30,16 @@ class LogsObserver
      */
     public function updated($req)
     {
-        Log::info(User::find(Auth::id())->username.' updated '.$req); 
+        $arr=array();
+        $arr['before']=$req->getOriginal();
+        $arr['after']=$req;
+
+        Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'updated',
+            'data' => serialize($arr),
+        ]);
+        
     }
 
     /**
@@ -36,7 +49,11 @@ class LogsObserver
      */
     public function deleted($req)
     {
-        Log::info(User::find(Auth::id())->username.' deleted '.$req);
+        Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'deleted',
+            'data' => serialize($req),
+        ]);
     }
 
     /**
