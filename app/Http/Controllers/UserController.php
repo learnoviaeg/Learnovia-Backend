@@ -261,10 +261,24 @@ class UserController extends Controller
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
 
         foreach ($optionals as $optional) {
-            if ($request->filled($optional))
+            if ($request->filled($optional)){
+
+                $user->$optional = $request->$optional;
+
                 if($optional =='birthdate')
                     $user->$optional = Carbon::parse($request->$optional)->format('Y-m-d');
-                $user->$optional = $request->$optional;
+
+                if($optional == 'suspend' && $request->suspend == 1){
+                    $user->token = null;
+
+                    $tokens = $user->tokens->where('revoked',false);
+                    foreach($tokens as $token){
+                        $token->revoke();
+                    }
+                
+                    unset($user->tokens);
+                }
+            }
         }
         $user->save();
 
@@ -439,8 +453,18 @@ class UserController extends Controller
 
         $user = User::find($request->id);
         $check = $user->update([
-            'suspend' => 1
+            'suspend' => 1,
+            'token' => null
         ]);
+
+        $tokens = $user->tokens->where('revoked',false);
+
+        foreach($tokens as $token){
+            $token->revoke();
+        }
+    
+        unset($user->tokens);
+
         return HelperController::api_response_format(201, $user, 'User Blocked Successfully');
     }
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Modules\UploadFiles\Entities\file;
+use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
 use App\Lesson;
@@ -21,6 +22,9 @@ use App\User;
 use App\Http\Controllers\HelperController;
 use App\Component;
 use App\LessonComponent;
+use  Modules\Page\Entities\pageLesson;
+use  Modules\Page\Entities\page;
+use App\Material;
 
 class FilesController extends Controller
 {
@@ -396,6 +400,8 @@ class FilesController extends Controller
                 'publish_date' => $publishdate
             ]);
         }
+        $fileLesson->updated_at = Carbon::now();
+        $fileLesson->save();
         $file->save();
         $lesson = Lesson::find($request->lesson_id);
         $course_seg = Lesson::where('id',$request->lesson_id)->pluck('course_segment_id')->first();
@@ -559,4 +565,65 @@ class FilesController extends Controller
             return HelperController::api_response_format(400, null, 'Please Try again');
         }
     }
+    public function AssignFileMediaPAgeLesson(Request $request)
+
+
+    {
+        $materials['page']=pageLesson::whereNotIn('page_id',Material::where('type','page')->pluck('item_id'))->get();
+        $materials['files']= fileLesson::whereNotIn('file_id',Material::where('type','file')->pluck('item_id'))->get();
+        $materials['media']= mediaLesson::whereNotIn('media_id',Material::where('type','media')->pluck('item_id'))->get();
+
+        $Allmaterials=[];
+        foreach($materials['page'] as $page){
+            $material = collect([]);
+            $material['item_id'] = $page->page_id;
+            $material['name'] =page::find($page->page_id)->title;
+            $material['course_id'] =Lesson::find($page->lesson_id)->courseSegment->course_id;
+            $material['lesson_id']=$page->lesson_id;
+            $material['publish_date']= $page->publish_date;
+            $material['type']='page';
+            $material['visible'] = $page->visible;
+            $material['link'] = null;
+            $material['mime_type']= null;
+            $Allmaterials[] =  $material;
+        }
+        foreach($materials['files'] as $file){
+            $fileObj=file::find($file->file_id);
+            $material = collect([]);
+            $material['item_id'] = $file->file_id;
+            $material['name'] =$fileObj->name;
+            $material['course_id'] =Lesson::find($file->lesson_id)->courseSegment->course_id;
+            $material['lesson_id']=$file->lesson_id;
+            $material['publish_date']= $file->publish_date;
+            $material['type']='file';
+            $material['visible'] = $file->visible;
+            $material['link'] = $fileObj->url;
+            $material['mime_type']= $fileObj->type;
+            $Allmaterials[] =  $material;
+        }
+        foreach($materials['media'] as $media){
+            $mediaObj=media::find($media->media_id); 
+            $material = collect([]);
+            $material['item_id'] = $media->media_id;
+            $material['name'] =$mediaObj->name;
+            $material['course_id'] =Lesson::find($media->lesson_id)->courseSegment->course_id;
+            $material['lesson_id']=$media->lesson_id;
+            $material['publish_date']= $media->publish_date;
+            $material['type']='media';
+            $material['visible'] = $media->visible;
+            $material['link'] = $mediaObj->link;
+            $material['mime_type']= ($mediaObj->show&&$mediaObj->type==null )?'media link':$mediaObj->type;
+            $Allmaterials[] =  $material;
+        
+        }
+        $Allmaterials = collect($Allmaterials)->sortBy('publish_date')->values();
+        Material::insert($Allmaterials->toArray());
+        if(count($Allmaterials->toArray())==0)
+            return response()->json(['message' => 'all materials is assigned before ', 'body' => $Allmaterials], 200);
+
+        return response()->json(['message' => 'all materials is assigned', 'body' => $Allmaterials], 200);
+
+
+    }
+
 }

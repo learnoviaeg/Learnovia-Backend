@@ -604,6 +604,7 @@ class UserQuizController extends Controller
 
             $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
+            $attemps['fullname'] =ucfirst($user->firstname) . ' ' . ucfirst($user->lastname);
             $attemps['picture'] = $user->attachment;
             $attemps['Attempts'] = $All_attemp;
             array_push($user_attempts, $attemps);

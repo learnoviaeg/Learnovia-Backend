@@ -7,6 +7,7 @@ use App\CourseSegment;
 use App\AcademicYear;
 use App\YearLevel;
 use App\Level;
+use App\Enroll;
 use App\Segment;
 
 class ChainRepository implements ChainRepositoryInterface
@@ -15,37 +16,31 @@ class ChainRepository implements ChainRepositoryInterface
         $year = AcademicYear::Get_current();
         if ($request->filled('year'))
             $year = AcademicYear::find($request->year);
-        if(isset($year)){
-            $YearTypes = $year->where('id', $year->id)->with(['YearType' => function ($query) use ($request) {
-                if ($request->filled('type'))
-                    $query->where('academic_type_id', $request->type);
-            }, 'YearType.yearLevel' => function ($query) use ($request) {
-                if ($request->filled('level'))
-                    $query->where('level_id', $request->level);
-            }, 'YearType.yearLevel.classLevels' => function ($query) use ($request) {
-                if ($request->filled('class'))
-                    $query->where('class_id', $request->class);
-            }, 'YearType.yearLevel.classLevels.segmentClass' => function ($query) use ($request) {
-                if ($request->filled('type')) {
-                    $segment_id = Segment::Get_current($request->type);
-                    if(isset($segment_id))
-                        $segment_id = Segment::Get_current($request->type)->id;
-                    if ($request->filled('segment'))
-                        $segment_id = $request->segment;
-                    $query->where('segment_id', $segment_id);
-                }
-            }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function ($query)  use ($request) {
-                if ($request->filled('courses'))
-                    $query->whereIn('course_id', $request->courses);
-                if ($request->filled('typical'))
-                    $query->where('typical', $request->typical);
-            }])->get()->pluck('YearType')[0];
-
-            return $YearTypes->pluck('yearLevel.*')->collapse()->pluck('classLevels.*')
-                                                   ->collapse()->pluck('segmentClass.*')
-                                                   ->collapse()->pluck('courseSegment.*.id')->collapse();
+        if (!isset($year)){
+            throw new \Exception('There is no active year');
         }
-        return [];
+        $enrolls =  Enroll::where('year', $year->id);
+        if ($request->filled('type'))
+            {            
+            $enrolls=$enrolls->where('type', $request->type);
+            $segment_id = Segment::Get_current($request->type);
+            if(!isset($segment_id))
+                throw new \Exception('There is no active segment in this type'.$request->type);
+            $segment_id = Segment::Get_current($request->type)->id;
+            if ($request->filled('segment'))
+                $segment_id = $request->segment;
+            $enrolls=$enrolls->where('segment_id', $segment_id);
+            }        
+        if ($request->filled('level'))
+            $enrolls=$enrolls->where('level', $request->level);
+        if ($request->filled('class'))
+            $enrolls=$enrolls->where('class', $request->class);
+        if ($request->filled('courses'))
+            $enrolls=$enrolls->whereIn('course', $request->courses);
+
+    return $enrolls;
+
+    
     }
 
 }

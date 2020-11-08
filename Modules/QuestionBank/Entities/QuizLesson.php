@@ -3,7 +3,8 @@
 namespace Modules\QuestionBank\Entities;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 class QuizLesson extends Model
 {
     protected $fillable = [
@@ -19,6 +20,15 @@ class QuizLesson extends Model
         'visible','index'
     ];
     protected $table = 'quiz_lessons';
+    protected $appends = ['started'];
+
+    public function getStartedAttribute(){
+        $started = true;
+        if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now()))
+            $started = false;
+
+        return $started;  
+    }
 
     public function quiz()
     {
