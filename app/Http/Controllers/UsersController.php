@@ -49,7 +49,10 @@ class UsersController extends Controller
         if($request->has('role_id'))
             $users->where('role_id',$request->role_id);
 
-        $users = $users->get()->pluck('user')->map->only(['id','firstname', 'lastname', 'username','fullname','arabicname', 'email','attachment'])->unique()->values();
+        $users = $users->get()->pluck('user');
+
+        if(count($users) > 0)
+            $users = $users->map->only(['id','firstname', 'lastname', 'username','fullname','arabicname', 'email','attachment'])->unique()->values();
 
         return response()->json(['message' => 'Users List', 'body' => $users], 200);
     }
