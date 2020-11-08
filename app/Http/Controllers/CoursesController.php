@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
 use Carbon\Carbon;
+use App\Course;
 
 class CoursesController extends Controller
 {
@@ -21,6 +22,7 @@ class CoursesController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:course/my-courses' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:course/layout' , 'ParentCheck'],   ['only' => ['show']]);
     }
     /**
      * Display a listing of the resource.
@@ -99,7 +101,12 @@ class CoursesController extends Controller
      */
     public function show($id)
     {
-        //
+        $course = Course::find($id);
+
+        if(isset($course))
+            return response()->json(['message' => 'course objet', 'body' => $course], 200);
+
+        return response()->json(['message' => 'Course not fount!', 'body' => [] ], 400);
     }
 
     /**
