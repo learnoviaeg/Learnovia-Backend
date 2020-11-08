@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class Timeline extends Model
 {
     protected $fillable = [
-        'item_id', 'name','start_date','due_date','publish_date','course_id','class_id','level_id','lesson_id','type'
+        'item_id', 'name','start_date','due_date','publish_date','course_id','class_id','level_id','lesson_id','type','visible'
     ];
 
     protected $appends = ['started'];

@@ -364,8 +364,10 @@ class BigbluebuttonController extends Controller
         if($request->has('status'))
             $meeting->where('status',$request->status);
 
-        if($request->has('start_date'))
-            $meeting->where('start_date', '=', $request->start_date);
+        if($request->has('start_date')){
+            $to = Carbon::parse($request->start_date)->addMinutes(1);
+            $meeting->where('start_date', '>=', $request->start_date)->where('start_date','<',$to);
+        }
 
         if($request->has('id'))
             $meeting->where('id',$request->id);
@@ -374,6 +376,9 @@ class BigbluebuttonController extends Controller
         foreach($meetings as $m)
             {
                 $m['join'] = $m->started == 1 ? true: false;
+                $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d h:i:s a'): null;
+                $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d h:i:s a');
+                
                 if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
                 ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
                 {
@@ -760,4 +765,24 @@ class BigbluebuttonController extends Controller
         $req=$bbb->getHooksListUrl();
         return $req;
     }
+
+    public function refresh_meetings(Request $request){
+        $bbb = new BigBlueButton();
+        $response = $bbb->getMeetings();
+        $current_meetings = collect();
+        if ($response->getReturnCode() == 'SUCCESS') {
+            foreach ($response->getRawXml()->meetings->meeting as $meeting) {
+                $current_meetings->push($meeting->meetingID);
+            }
+        }
+
+        $meeting = BigbluebuttonModel::whereIn('meeting_id',$current_meetings)->where('started',0)->where('status','future')->update([
+            'started' => 1,
+            'status' => 'current',
+            'actutal_start_date' => Carbon::now()
+        ]);
+
+        return HelperController::api_response_format(200 , $meeting , 'Classrooms refreshed successfully');
+    }
+
 }

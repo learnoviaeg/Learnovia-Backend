@@ -17,6 +17,12 @@ use Illuminate\Support\Facades\Schema;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\QuestionBank\Entities\QuizLesson;
 use App\Repositories\BackendServiceProvider;
+use App\Observers\MediaLessonObserver;
+use Modules\UploadFiles\Entities\MediaLesson;
+use App\Observers\FileLessonObserver;
+use Modules\UploadFiles\Entities\FileLesson;
+use App\Observers\PageLessonObserver;
+use Modules\Page\Entities\PageLesson;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,6 +58,8 @@ class AppServiceProvider extends ServiceProvider
         GradeItems::observe(GradeItemObserver::class);
         AssignmentLesson::observe(AssignmentLessonObserver::class);
         QuizLesson::observe(QuizLessonObserver::class);
-        
+        PageLesson::observe(PageLessonObserver::class);
+        FileLesson::observe(FileLessonObserver::class);
+        MediaLesson::observe(MediaLessonObserver::class);
     }
 }

@@ -860,7 +860,7 @@ class AssigmentsController extends Controller
             'lesson_id' => $assignment->lesson_id,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $assignment->assignment_id,
-            'publish_date' => $request->start_date,
+            'publish_date' => Carbon::parse($request->start_date),
         ]);
         return HelperController::api_response_format(200, $assignmentOerride, 'Assignment override successfully');
     }
