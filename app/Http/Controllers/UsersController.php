@@ -51,7 +51,7 @@ class UsersController extends Controller
 
         $users = $users->get()->pluck('user')->unique()->values();
 
-        return response()->json(['message' => 'Users List', 'body' => $users], 200);
+        return response()->json(['message' => 'Users List', 'body' => $users->filter()->values()], 200);
     }
 
     /**
