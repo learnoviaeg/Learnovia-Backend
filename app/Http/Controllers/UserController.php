@@ -439,8 +439,18 @@ class UserController extends Controller
 
         $user = User::find($request->id);
         $check = $user->update([
-            'suspend' => 1
+            'suspend' => 1,
+            'token' => null
         ]);
+
+        $tokens = $user->tokens->where('revoked',false);
+
+        foreach($tokens as $token){
+            $token->revoke();
+        }
+    
+        unset($user->tokens);
+
         return HelperController::api_response_format(201, $user, 'User Blocked Successfully');
     }
 
