@@ -19,7 +19,7 @@ class ClassesController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:classes/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:course/layout' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
