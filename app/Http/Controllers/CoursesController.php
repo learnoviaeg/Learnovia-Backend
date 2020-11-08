@@ -101,7 +101,7 @@ class CoursesController extends Controller
      */
     public function show($id)
     {
-        $course = Course::find($id);
+        $course = Course::with('attachment')->find($id);
 
         if(isset($course))
             return response()->json(['message' => 'course objet', 'body' => $course], 200);
