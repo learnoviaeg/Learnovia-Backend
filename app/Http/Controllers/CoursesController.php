@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
 use Carbon\Carbon;
+use App\Course;
 
 class CoursesController extends Controller
 {
@@ -99,7 +100,18 @@ class CoursesController extends Controller
      */
     public function show($id)
     {
-        //
+        $course = Course::whereId($id);
+
+        $teachers = $course->with(['courseSegments.enroll.user'])->get()
+                           ->pluck('courseSegments.*.enroll.*')->collapse()
+                           ->where('role_id',4)->pluck('user')->unique()->values();
+
+        $classes = $course->with(['courseSegments.enroll.classes'])->get()
+                          ->pluck('courseSegments.*.enroll.*')->collapse()->pluck('classes')->unique()->values();
+        return $course->with(['courseSegments.enroll.classes'])->get();
+        // return $course;with(['courseSegments.enroll.user'])
+
+
     }
 
     /**
