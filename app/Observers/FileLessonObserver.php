@@ -29,7 +29,9 @@ class FileLessonObserver
                 'lesson_id' => $fileLesson->lesson_id,
                 'type' => 'file',
                 'visible' => 1,
-                'link' => $file->url
+                'link' => $file->url,
+                'mime_type'=> $file->type,
+
             ]);
         }
     }
@@ -52,7 +54,9 @@ class FileLessonObserver
                 'lesson_id' => $fileLesson->lesson_id,
                 'type' => 'file',
                 'visible' => $fileLesson->visible,
-                'link' => $file->url
+                'link' => $file->url,    
+                'mime_type'=> $file->type,
+
             ]);
         }
     }

@@ -19,6 +19,7 @@ Route::group(['prefix' => 'file', 'middleware' => 'auth:api'], function () {
     Route::get('get-all','FilesController@getAllFiles')->name('getAllFiles')->middleware('permission:file/get-all');
     Route::get('get','FilesController@GetFileByID')->name('GetFileByID')->middleware(['permission:file/get' , 'ParentCheck']);
     Route::post('assign','FilesController@AssignFileToLesson')->name('assignfiletolesson')->middleware('permission:file/assign');
+    Route::post('assign-in-material','FilesController@AssignFileMediaPAgeLesson');//->name('assignfiletolesson')->middleware('permission:file/assign');
 
 
 });

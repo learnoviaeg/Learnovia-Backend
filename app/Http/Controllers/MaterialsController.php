@@ -39,7 +39,8 @@ class MaterialsController extends Controller
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses'))//student
             {
-                $user_course_segments = $enrolls->where('user_id',Auth::id());
+                $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+                
             }
 
         $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
