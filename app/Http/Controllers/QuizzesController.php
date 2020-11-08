@@ -12,7 +12,7 @@ use App\Lesson;
 use Modules\QuestionBank\Entities\QuizLesson;
 
 
-class QuizController extends Controller
+class QuizzesController extends Controller
 {
     public function __construct(ChainRepositoryInterface $chain)
     {
