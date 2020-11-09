@@ -20,7 +20,7 @@ class AssignmentLesson extends Model
             $this->due_date = $override->due_date;
         }
         if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now()))
-        $started = false;
+            $started = false;
 
         return $started;  
     }
