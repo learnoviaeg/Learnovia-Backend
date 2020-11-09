@@ -19,7 +19,7 @@ class MaterialsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
 
     /**
@@ -35,27 +35,35 @@ class MaterialsController extends Controller
             'sort_in' => 'in:asc,desc',
             'item_type' => 'string|in:page,media,file',
             'class' => 'nullable|integer|exists:classes,id',
-
-
+            'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
+
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+
         if(!$request->user()->can('site/show-all-courses'))//student
-            {
-                $user_course_segments = $enrolls->where('user_id',Auth::id());
-            }
+        {
+            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+        }
 
         $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
-        $lessons =[];
-        foreach ($user_course_segments as $user_course_segment){
-            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
+
+        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->unique()->values()->pluck('id');
+      
+        if($request->has('lesson')){
+            if(!in_array($request->lesson,$lessons->toArray()))
+                return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
+
+            $lessons = [$request->lesson];
         }
-        $lessons =  array_values (array_unique($lessons)) ;
-        // $lessons = Lesson::whereIn('course_segment_id', $user_course_segments)->pluck('id');
+            
         $material = Material::with(['lesson','course'])->whereIn('lesson_id',$lessons);
+
         if($request->user()->can('site/course/student'))
             $material->where('visible',1);
+
         if($request->has('sort_in'))
             $material->orderBy("publish_date",$request->sort_in);
+
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
 
