@@ -96,14 +96,14 @@ class TimelineController extends Controller
         if($request->user()->can('site/course/student')){
             foreach($timelines as $timeline){
                 $override = null;
-                if($timeline->item_type == 'assignment'){
+                if($timeline->type == 'assignment'){
                     $assignment_lesson = AssignmentLesson::where('assignment_id',$timeline->item_id)
                                                         ->where('lesson_id',$timeline->lesson_id)->first();
                     if(isset($assignment_lesson))
                         $override = assignmentOverride::where('user_id',Auth::id())->where('assignment_lesson_id',$assignment_lesson->id)->first();
                 }
 
-                if($timeline->item_type == 'quiz'){
+                if($timeline->type == 'quiz'){
                     $quiz_lesson = QuizLesson::where('quiz_id',$timeline->item_id)->where('lesson_id',$timeline->lesson_id)->first();
                     if(isset($quiz_lesson))
                         $override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
