@@ -14,7 +14,7 @@ class Material extends Model
     protected $fillable = [
         'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type'
     ];
-    protected $appends = ['media_type','attachment_name','content'];
+    protected $appends = ['media_type','attachment_name'];
     protected $hidden = ['mime_type'];
     public function getMediaTypeAttribute(){
         if($this->mime_type != null)
@@ -28,12 +28,8 @@ class Material extends Model
             return file::find($this->item_id)->attachment_name;
         if($this->type == 'media' && $this->media_type!='Link' && $this->media_type!='media link')
             return media::find($this->item_id)->attachment_name;
-    
     }
-    public function getContentAttribute(){
-        if($this->type == 'page')
-            return page::find($this->item_id)->content;
-    }
+
     public function course(){
         return $this->belongsTo('App\Course');
     }
