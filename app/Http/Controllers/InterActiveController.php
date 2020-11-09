@@ -53,7 +53,12 @@ class InterActiveController extends Controller
             }
             $lessons  = [$request->lesson];
         }
-        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->where('visible', '=', 1)->where('publish_date', '<=', Carbon::now())->get()->sortByDesc('start_date');
+        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->where('publish_date', '<=', Carbon::now());
+        if(!$request->user()->can('site/show-all-courses'))//student
+        {
+            $h5p_lessons =$h5p_lessons->where('visible', '=', 1);
+        }
+        $h5p_lessons = $h5p_lessons->get()->sortByDesc('start_date');
         $h5p_contents=[];
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
 
