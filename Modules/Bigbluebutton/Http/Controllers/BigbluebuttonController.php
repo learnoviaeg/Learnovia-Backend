@@ -417,6 +417,13 @@ class BigbluebuttonController extends Controller
         ]);
         $urls=null;
         $bigbb=BigbluebuttonModel::find($request->id);
+        
+        $meeting_start = isset($bigbb->actutal_start_date) ? $bigbb->actutal_start_date : $bigbb->start_date;
+        $check=Carbon::parse($meeting_start)->addMinutes($bigbb->duration);
+
+        if($check < Carbon::now() && !isset($bigbb->actutal_start_date))
+            return HelperController::api_response_format(200,null ,'No one entered this classroom.');
+          
         $bbb = new BigBlueButton();
         $recordingParams = new GetRecordingsParameters();
         $response = $bbb->getRecordings($recordingParams);
