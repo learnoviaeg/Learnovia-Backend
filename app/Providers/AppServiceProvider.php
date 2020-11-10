@@ -66,7 +66,7 @@ class AppServiceProvider extends ServiceProvider
 
         AcademicType::observe(LogsObserver::class);
         AcademicYear::observe(LogsObserver::class);
-        classes::observe(LogsObserver::class);
+        Classes::observe(LogsObserver::class);
         Course::observe(LogsObserver::class);
         Level::observe(LogsObserver::class);
         Segment::observe(LogsObserver::class);
