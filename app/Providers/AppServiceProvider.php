@@ -22,7 +22,7 @@ use App\User;
 use App\AcademicType;
 use App\Announcement;
 use App\AcademicYear;
-use App\classes;
+use App\Classes;
 use App\Course;
 use App\Level;
 use App\Segment;

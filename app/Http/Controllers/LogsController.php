@@ -57,7 +57,7 @@ class LogsController extends Controller
             }            
             $AllLogs[]=$log;
         }
-        return $AllLogs;
+        return HelperController::api_response_format(200, $AllLogs, 'Logs are');
     }
 
     /**
