@@ -111,11 +111,9 @@ class AC_year_type extends Controller
         }
         $types = AcademicType::whereId($req->id)->first()->delete();
         AcademicYearType::where('academic_type_id',$req->id)->delete();
-        $returnValue=User::where('type',$req->id)->update([
+        User::where('type',$req->id)->update([
             'type' => null
         ]);
-        return $returnValue ;
-
         Enroll::where('type',$req->id)->update([
             'type' => null
         ]);
