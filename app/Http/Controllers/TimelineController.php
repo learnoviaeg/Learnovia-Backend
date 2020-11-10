@@ -33,7 +33,7 @@ class TimelineController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware('permission:timeline/store', ['only' => ['store']]);
-        $this->middleware(['permission:timeline/get' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:timeline/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -61,14 +61,17 @@ class TimelineController extends Controller
         }
 
         $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
-        $lessons =[];
-        foreach ($user_course_segments as $user_course_segment){
-            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
-        }
-        $lessons =  array_values (array_unique($lessons)) ;  
-        $timeline = Timeline::with(['class','course','level'])->whereIn('lesson_id',$lessons)->where('visible',1)->where('start_date','<=',Carbon::now())->where('due_date','>=',Carbon::now());
 
+        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->unique()->values()->pluck('id');
 
+        $timeline = Timeline::with(['class','course','level'])
+                            ->whereIn('lesson_id',$lessons)
+                            ->where('visible',1)
+                            ->where('start_date','<=',Carbon::now())
+                            ->where('due_date','>=',Carbon::now())
+                            ->where(function ($query) {
+                                $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
+                            });
 
         if($request->has('item_type'))
             $timeline->where('type',$request->item_type);
@@ -92,31 +95,7 @@ class TimelineController extends Controller
             $timeline->orderByRaw("FIELD(id, $ids_ordered)");
         }
 
-        $timelines = $timeline->get();
-        if($request->user()->can('site/course/student')){
-            foreach($timelines as $timeline){
-                $override = null;
-                if($timeline->type == 'assignment'){
-                    $assignment_lesson = AssignmentLesson::where('assignment_id',$timeline->item_id)
-                                                        ->where('lesson_id',$timeline->lesson_id)->first();
-                    if(isset($assignment_lesson))
-                        $override = assignmentOverride::where('user_id',Auth::id())->where('assignment_lesson_id',$assignment_lesson->id)->first();
-                }
-
-                if($timeline->type == 'quiz'){
-                    $quiz_lesson = QuizLesson::where('quiz_id',$timeline->item_id)->where('lesson_id',$timeline->lesson_id)->first();
-                    if(isset($quiz_lesson))
-                        $override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
-                }
-
-                if(isset($override)){
-                    $timeline->start_date = $override->start_date;
-                    $timeline->due_date = $override->due_date;
-                }
-            }
-        }
-
-        return response()->json(['message' => 'Timeline List of items', 'body' => $timelines], 200);
+        return response()->json(['message' => 'Timeline List of items', 'body' => $timeline->get()], 200);
     }
 
     /**

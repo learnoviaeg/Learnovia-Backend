@@ -15,6 +15,9 @@ use Modules\QuestionBank\Entities\UserQuiz;
 use App\Observers\LogsObserver;
 use Modules\QuestionBank\Observers\UserQuizAnswerObserver;
 use Modules\QuestionBank\Observers\QuizLessonObserver;
+use Modules\QuestionBank\Entities\QuizOverride;
+use Modules\QuestionBank\Observers\QuizOverwrite;
+
 
 class QuestionBankServiceProvider extends ServiceProvider
 {
@@ -40,6 +43,7 @@ class QuestionBankServiceProvider extends ServiceProvider
         QuizLesson::observe(QuizLessonObserver::class);
         UserQuiz::observe(LogsObserver::class);
         UserQuizAnswer::observe(LogsObserver::class);
+        QuizOverride::observe(QuizOverwrite::class);
     }
 
     /**
