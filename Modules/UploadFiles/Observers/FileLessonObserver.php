@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Observers;
+namespace Modules\UploadFiles\Observers;
 
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\File;
@@ -44,7 +44,7 @@ class FileLessonObserver
     {
         $file = File::where('id',$fileLesson->file_id)->first();
         if(isset($file)){
-            Material::where('item_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->lesson_id)->where('type' , 'file')
+            Material::where('item_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->lesson_id)->where('type' , 'file')->first()
             ->update([
                 'item_id' => $fileLesson->file_id,
                 'name' => $file->name,

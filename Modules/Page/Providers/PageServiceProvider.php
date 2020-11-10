@@ -8,6 +8,7 @@ use Modules\Page\Entities\pageLesson;
 use Modules\Page\Entities\page;
 use Modules\Page\Observers\PageObserver;
 use App\Observers\LogsObserver;
+use Modules\Page\Observers\PageLessonObserver;
 
 class PageServiceProvider extends ServiceProvider
 {
@@ -34,6 +35,7 @@ class PageServiceProvider extends ServiceProvider
         pageLesson::observe(PageObserver::class);
         Page::observe(LogsObserver::class);
         PageLesson::observe(LogsObserver::class);
+        PageLesson::observe(PageLessonObserver::class);
     }
 
     /**
