@@ -22,7 +22,7 @@ use App\User;
 use App\AcademicType;
 use App\Announcement;
 use App\AcademicYear;
-use App\classes;
+use App\Classes;
 use App\Course;
 use App\Level;
 use App\Segment;
@@ -66,7 +66,7 @@ class AppServiceProvider extends ServiceProvider
 
         AcademicType::observe(LogsObserver::class);
         AcademicYear::observe(LogsObserver::class);
-        classes::observe(LogsObserver::class);
+        Classes::observe(LogsObserver::class);
         Course::observe(LogsObserver::class);
         Level::observe(LogsObserver::class);
         Segment::observe(LogsObserver::class);
