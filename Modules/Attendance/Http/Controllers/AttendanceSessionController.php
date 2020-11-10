@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceLog;
 use Modules\Attendance\Entities\AttendanceSession;
-
+use Validator;
 use App\Enroll;
 use App\Level;
 use App\CourseSegment;
@@ -100,6 +100,17 @@ class AttendanceSessionController extends Controller
             'time.*.to.*' => 'required_with:time.*.from.*|date_format:H:i|after:time.*.from.*',
 
         ]);
+
+        $classes=[];
+         
+        foreach($request->main  as $main)
+        {
+            $classes[]=   $main['class_id'];
+        }
+        $check_dublications = (count($classes) === count(array_flip($classes)));
+        if(!$check_dublications)
+                return HelperController::api_response_format(400,null ,'Sorry you can\'t add different courses to the same class.');
+
         if($request->type=="daily"){
             $days = ['sunday','monday','tuesday','wednesday','thursday'];
             $times_collect=collect();

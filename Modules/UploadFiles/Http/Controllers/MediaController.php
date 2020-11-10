@@ -295,6 +295,8 @@ class MediaController extends Controller
             }
             $mediaLesson->update(['publish_date' => $publishdate]);
         }
+        $mediaLesson->updated_at = Carbon::now();
+        $mediaLesson->save();
         $tempReturn = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'media')->get();
         $lesson = Lesson::find($request->lesson_id[0]);
         $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();

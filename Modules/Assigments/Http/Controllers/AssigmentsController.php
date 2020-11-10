@@ -751,7 +751,7 @@ class AssigmentsController extends Controller
             $assignment_lesson->allow_attachment = $request->allow_attachment;
             $lesson_obj = Lesson::find($lesson);
             $course_segment =  CourseSegment::find($lesson_obj->course_segment_id);
-            if( $request->filled('closing_date') && $course_segment->end_date < $request->closing_date )
+            if( $request->filled('closing_date') && $course_segment->end_date < Carbon::parse($request->closing_date) )
                 return HelperController::api_response_format(400, null , 'Please enter closing date before '.$course_segment->end_date);
             if ($request->filled('closing_date'))
                 $assignment_lesson->due_date = $request->closing_date;
@@ -835,7 +835,7 @@ class AssigmentsController extends Controller
         $assignment = AssignmentLesson::find($assigmentlesson);
         $lesson = Lesson::find($assignment->lesson_id);
         $course_segment = $lesson->courseSegment;
-        if($course_segment->end_date < $request->due_date)
+        if($course_segment->end_date < Carbon::parse($request->due_date))
             return HelperController::api_response_format(400, null , 'Please enter due date before '.$course_segment->end_date);
       
         foreach($request->user_id as $user)
@@ -860,7 +860,7 @@ class AssigmentsController extends Controller
             'lesson_id' => $assignment->lesson_id,
             'type' => 'assignment',
             'link' => url(route('getAssignment')) . '?assignment_id=' . $assignment->assignment_id,
-            'publish_date' => $request->start_date,
+            'publish_date' => Carbon::parse($request->start_date),
         ]);
         return HelperController::api_response_format(200, $assignmentOerride, 'Assignment override successfully');
     }

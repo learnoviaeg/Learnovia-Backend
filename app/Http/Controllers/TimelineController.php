@@ -54,17 +54,18 @@ class TimelineController extends Controller
             'start_date' => 'date',
             'due_date' => 'date',
         ]);
+        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+        if(!$request->user()->can('site/show-all-courses'))//student
+            {
+                $user_course_segments = $enrolls->where('user_id',Auth::id());
+            }
 
-        $current_course_segments = $this->chain->getCourseSegmentByChain($request);
-        if(count($current_course_segments) == 0)
-            return response()->json(['message' => 'There is no active course segments', 'body' => []], 200);
-            
-        $user_course_segments = Enroll::where('user_id',Auth::id())->pluck('course_segment');
-        $user_course_segments = array_intersect($current_course_segments->toArray(),$user_course_segments->toArray());
-        if($request->user()->can('site/show-all-courses'))
-            $user_course_segments = $current_course_segments;
-
-        $lessons = Lesson::whereIn('course_segment_id', $user_course_segments)->pluck('id');
+        $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
+        $lessons =[];
+        foreach ($user_course_segments as $user_course_segment){
+            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
+        }
+        $lessons =  array_values (array_unique($lessons)) ;  
         $timeline = Timeline::with(['class','course','level'])->whereIn('lesson_id',$lessons)->where('visible',1)->where('start_date','<=',Carbon::now())->where('due_date','>=',Carbon::now());
 
 

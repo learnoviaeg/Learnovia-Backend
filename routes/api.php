@@ -421,6 +421,11 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api']], function () {
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('timeline', TimelineController::class);
+    Route::Resource('quizzes', QuizzesController::class);
+    Route::Resource('materials', MaterialsController::class);
+    Route::Resource('assignments', AssignmentController::class);
+    Route::Resource('iteractive', InterActiveController::class);
+    Route::Resource('courses', CoursesController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
