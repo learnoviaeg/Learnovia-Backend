@@ -656,7 +656,7 @@ class EnrollUserToCourseController extends Controller
                                 'raw_grade' => $useGrade[0]->raw_grade
                             ]);
                         }
-                        UserGrade::where('grade_item_id', $oldItems->id)->where('user_id', $user1)->delete();
+                        UserGrade::where('grade_item_id', $oldItems->id)->where('user_id', $user1)->first()->delete();
                     }
                 }
             }

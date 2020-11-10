@@ -2,33 +2,25 @@
 
 namespace App\Observers;
 
-use App\CourseSegment;
-use App\Enroll;
-use App\Http\Controllers\HelperController;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Log;
 use App\User;
-use PhpParser\Node\Stmt\Continue_;
 
-class EnrollObserver
+class LogsObserver
 {
-    public function created(Enroll $enroll)
+    /**
+     * Handle the user "created" event.
+     *
+     * @return void
+     */
+    public function created($req)
     {
-        if ($enroll->courseSegment->courses[0]->mandatory == 1) {
-            $user = User::find($enroll->user_id);
-            $user->update([
-                'class_id' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->class_id,
-                'level' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id,
-                'type' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id
-            ]);
-        }
-
         $log=Log::create([
             'user' => User::find(Auth::id())->username,
             'action' => 'created',
-            'model' => 'Enroll',
-            'data' => serialize($enroll),
+            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
+            'data' => serialize($req),
         ]);
     }
 
@@ -37,7 +29,7 @@ class EnrollObserver
      *
      * @return void
      */
-    public function updated(Enroll $req)
+    public function updated($req)
     {
         $arr=array();
         $arr['before']=$req->getOriginal();
@@ -46,7 +38,7 @@ class EnrollObserver
         Log::create([
             'user' => User::find(Auth::id())->username,
             'action' => 'updated',
-            'model' => 'Enroll',
+            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
             'data' => serialize($arr),
         ]);
     }
@@ -56,12 +48,12 @@ class EnrollObserver
      *
      * @return void
      */
-    public function deleted(Enroll $req)
+    public function deleted($req)
     {
-        $log=Log::create([
+        Log::create([
             'user' => User::find(Auth::id())->username,
             'action' => 'deleted',
-            'model' => 'Enroll',
+            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
             'data' => serialize($req),
         ]);
     }
@@ -71,7 +63,7 @@ class EnrollObserver
      *
      * @return void
      */
-    public function restored(Enroll $req)
+    public function restored($req)
     {
         //
     }
@@ -81,7 +73,7 @@ class EnrollObserver
      *
      * @return void
      */
-    public function forceDeleted(Enroll $req)
+    public function forceDeleted($req)
     {
         //
     }

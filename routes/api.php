@@ -430,3 +430,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('classes', ClassesController::class);
     Route::Resource('users', UsersController::class);
 });
+
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::Resource('log', LogsController::class);
+});

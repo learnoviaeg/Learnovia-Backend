@@ -280,7 +280,7 @@ class segment_class_Controller extends Controller
         if (count($course_segments) > 0) 
              return HelperController::api_response_format(404, [] , 'This Segment assigned to course/s, cannot be deleted.');
         
-        Segment::whereId($req->id)->delete();
+        Segment::whereId($req->id)->first()->delete();
         SegmentClass::where('segment_id',$req->id)->delete();
         Enroll::where('segment',$req->id)->update([
             'segment' => null
