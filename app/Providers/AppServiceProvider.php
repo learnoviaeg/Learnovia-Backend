@@ -15,12 +15,6 @@ use App\Observers\GradeItemObserver;
 use App\UserGrade;
 use App\Observers\UserGradeObserver;
 
-use Modules\UploadFiles\Entities\File;
-use Modules\UploadFiles\Entities\FileLesson;
-use Modules\UploadFiles\Entities\Media;
-use Modules\UploadFiles\Entities\MediaLesson;
-use Modules\Page\Entities\Page;
-use Modules\Page\Entities\PageLesson;
 use App\h5pLesson;
 use App\Observers\LogsObserver;
 

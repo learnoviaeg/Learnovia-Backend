@@ -11,6 +11,7 @@ use App\AcademicType;
 use App\Segment;
 use App\Level;
 use App\User;
+use Carbon\Carbon;
 
 class LogsController extends Controller
 {
@@ -25,10 +26,10 @@ class LogsController extends Controller
         $request->validate([
             'user' => 'exists:logs,user',
             'model' => 'exists:logs,model',
-            'start_date' => 'date|before:end_date',
+            'start_date' => 'date',
             'end_date' => 'date'
         ]);
-        $logs=Log::all();
+        $logs=Log::whereNotNull('id');
         if(isset($request->user))
             $logs->where('user',$request->user);
         if(isset($request->model))
@@ -37,9 +38,10 @@ class LogsController extends Controller
             $end_date=Carbon::now();
             if(isset($request->end_date))
                 $end_date=$request->end_date;
-            $logs=where('created_at', '>=', $request->start_date)->where('created_at', '<=', $end_date);
+            $logs=Log::where('created_at', '>=', $request->start_date)->where('created_at', '<=', $end_date);
         }
-        foreach($logs as $log)
+        $AllLogs=array();
+        foreach($logs->get() as $log)
         {
             $log->data=unserialize($log->data);
             if($log->model == 'Enroll')
@@ -52,9 +54,10 @@ class LogsController extends Controller
                 $log->data->type=AcademicType::find($log->data->type);
                 $log->data->segment=Segment::find($log->data->segment);
                 unset($log->data->courseSegment);
-            }
+            }            
+            $AllLogs[]=$log;
         }
-        return $logs;
+        return $AllLogs;
     }
 
     /**
