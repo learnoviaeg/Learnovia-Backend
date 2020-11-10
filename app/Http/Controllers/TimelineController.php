@@ -44,8 +44,11 @@ class TimelineController extends Controller
     {
         //validate the request
         $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
             'level' => 'exists:levels,id',
             'class' => 'exists:classes,id',
+            'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'item_type' => 'in:quiz,assignment',
@@ -87,12 +90,14 @@ class TimelineController extends Controller
 
         if($request->has('sort_by') && $request->sort_by == 'course' && $request->has('sort_in')){
             $object_sort = $timeline;
-            $course_sort =  $object_sort->get()->sortBy('course.name')->values()->pluck('id');
-            if($request->sort_in == 'desc')
-                $course_sort =  $object_sort->get()->sortByDesc('course.name')->values()->pluck('id');
-
-            $ids_ordered = implode(',', $course_sort->toArray());
-            $timeline->orderByRaw("FIELD(id, $ids_ordered)");
+            if(count($object_sort->get()) > 0){
+                $course_sort =  $object_sort->get()->sortBy('course.name')->values()->pluck('id');
+                if($request->sort_in == 'desc')
+                    $course_sort =  $object_sort->get()->sortByDesc('course.name')->values()->pluck('id');
+    
+                $ids_ordered = implode(',', $course_sort->toArray());
+                $timeline->orderByRaw("FIELD(id, $ids_ordered)");
+            }
         }
 
         return response()->json(['message' => 'Timeline List of items', 'body' => $timeline->get()], 200);
