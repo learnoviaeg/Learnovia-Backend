@@ -5,7 +5,9 @@ namespace Modules\Page\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\Page\Entities\pageLesson;
+use Modules\Page\Entities\page;
 use Modules\Page\Observers\PageObserver;
+use App\Observers\LogsObserver;
 
 class PageServiceProvider extends ServiceProvider
 {
@@ -30,7 +32,8 @@ class PageServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         pageLesson::observe(PageObserver::class);
-
+        Page::observe(LogsObserver::class);
+        PageLesson::observe(LogsObserver::class);
     }
 
     /**

@@ -7,7 +7,7 @@ use App\Enroll;
 use App\Http\Controllers\HelperController;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Log;
+use App\Log;
 use App\User;
 use PhpParser\Node\Stmt\Continue_;
 
@@ -23,7 +23,13 @@ class EnrollObserver
                 'type' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id
             ]);
         }
-        Log::info(User::find(Auth::id())->username.' created '.$enroll);
+
+        $log=Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'created',
+            'model' => 'Enroll',
+            'data' => serialize($enroll),
+        ]);
     }
 
     /**
@@ -33,7 +39,16 @@ class EnrollObserver
      */
     public function updated(Enroll $req)
     {
-        Log::info(User::find(Auth::id())->username.' updated '.$req); 
+        $arr=array();
+        $arr['before']=$req->getOriginal();
+        $arr['after']=$req;
+
+        Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'updated',
+            'model' => 'Enroll',
+            'data' => serialize($arr),
+        ]);
     }
 
     /**
@@ -43,7 +58,12 @@ class EnrollObserver
      */
     public function deleted(Enroll $req)
     {
-        Log::info(User::find(Auth::id())->username.' deleted '.$req);
+        $log=Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'deleted',
+            'model' => 'Enroll',
+            'data' => serialize($req),
+        ]);
     }
 
     /**
@@ -63,6 +83,6 @@ class EnrollObserver
      */
     public function forceDeleted(Enroll $req)
     {
-        Log::info(User::find(Auth::id())->username.' deleted '.$req);
+        //
     }
 }

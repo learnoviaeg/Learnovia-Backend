@@ -10,22 +10,11 @@ use App\Repositories\BackendServiceProvider;
 use App\Enroll;
 use App\Observers\EnrollObserver;
 use App\GradeItems;
+use App\GradeCategory;
 use App\Observers\GradeItemObserver;
 use App\UserGrade;
 use App\Observers\UserGradeObserver;
 
-use Modules\Assigments\Entities\Assignment;
-use Modules\Assigments\Entities\AssignmentLesson;
-use App\Observers\AssignmentLessonObserver;
-use Modules\QuestionBank\Entities\Questions;
-use Modules\QuestionBank\Entities\QuestionsCategory;
-use Modules\QuestionBank\Entities\QuestionsAnswer;
-use Modules\QuestionBank\Entities\QuestionsType;
-use Modules\QuestionBank\Entities\Quiz;
-use Modules\QuestionBank\Entities\QuizLesson;
-use Modules\QuestionBank\Entities\UserQuizAnswer;
-use Modules\QuestionBank\Entities\UserQuiz;
-use App\Observers\QuizLessonObserver;
 use Modules\UploadFiles\Entities\File;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\Media;
@@ -49,9 +38,6 @@ use App\AcademicYearType;
 use App\CourseSegment;
 
 use App\Timeline;
-use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
-use Modules\Attendance\Entities\AttendanceLog;
-use Modules\Attendance\Entities\AttendanceSession;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -82,26 +68,6 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        Assignment::observe(LogsObserver::class);
-        AssignmentLesson::observe(AssignmentLessonObserver::class);
-
-        Questions::observe(LogsObserver::class);
-        QuestionsAnswer::observe(LogsObserver::class);
-        QuestionsCategory::observe(LogsObserver::class);
-        QuestionsType::observe(LogsObserver::class);
-        Quiz::observe(LogsObserver::class);
-        QuizLesson::observe(QuizLessonObserver::class);
-        UserQuiz::observe(LogsObserver::class);
-        UserQuizAnswer::observe(LogsObserver::class);
-
-        File::observe(LogsObserver::class);
-        FileLesson::observe(LogsObserver::class);
-
-        Media::observe(LogsObserver::class);
-        MediaLesson::observe(LogsObserver::class);
-
-        Page::observe(LogsObserver::class);
-        PageLesson::observe(LogsObserver::class);
         h5pLesson::observe(LogsObserver::class);
 
         AcademicType::observe(LogsObserver::class);
@@ -119,10 +85,8 @@ class AppServiceProvider extends ServiceProvider
 
         // UserGrade::observe(UserGradeObserver::class);
         GradeItems::observe(GradeItemObserver::class);
-        BigbluebuttonModel::observe(LogsObserver::class);
+        GradeCategory::observe(LogsObserver::class);
         Announcement::observe(LogsObserver::class);
         Timeline::observe(LogsObserver::class);
-        AttendanceLog::observe(LogsObserver::class);
-        AttendanceSession::observe(LogsObserver::class);
     }
 }

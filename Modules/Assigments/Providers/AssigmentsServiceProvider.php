@@ -5,7 +5,9 @@ namespace Modules\Assigments\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\Assigments\Entities\AssignmentLesson;
-use Modules\Assigments\Observers\AssignmentObserver;
+use Modules\Assigments\Entities\Assignment;
+use Modules\Assigments\Observers\AssignmentLessonObserver;
+use App\Observers\LogsObserver;
 
 class AssigmentsServiceProvider extends ServiceProvider
 {
@@ -22,8 +24,8 @@ class AssigmentsServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        AssignmentLesson::observe(AssignmentObserver::class);
-
+        Assignment::observe(LogsObserver::class);
+        AssignmentLesson::observe(AssignmentLessonObserver::class);
     }
 
     /**

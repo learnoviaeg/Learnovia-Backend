@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Observers;
+namespace Modules\QuestionBank\Observers;
 
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
@@ -8,8 +8,9 @@ use App\Lesson;
 use App\Timeline;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Log;
+use App\Log;
 use App\User;
+use App\LessonComponent;
 
 class QuizLessonObserver
 {
@@ -41,7 +42,12 @@ class QuizLessonObserver
             ]);
         }
 
-        Log::info(User::find(Auth::id())->username.' created '.$quizLesson);
+        Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'created',
+            'model' => 'QuizLesson',
+            'data' => serialize($quizLesson),
+        ]);
     }
 
     /**
@@ -54,7 +60,7 @@ class QuizLessonObserver
     {
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
         if(isset($quiz)){
-            Timeline::where('item_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->lesson_id)->where('type' , 'quiz')
+            Timeline::where('item_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->lesson_id)->where('type' , 'quiz')->first()
             ->update([
                 'item_id' => $quizLesson->quiz_id,
                 'name' => $quiz->name,
@@ -67,7 +73,16 @@ class QuizLessonObserver
             ]);
         }
 
-        Log::info(User::find(Auth::id())->username.' updated '.$quizLesson);
+        $arr=array();
+        $arr['before']=$quizLesson->getOriginal();
+        $arr['after']=$quizLesson;
+
+        Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'updated',
+            'model' => 'QuizLesson',
+            'data' => serialize($arr),
+        ]);
     }
 
     /**
@@ -79,8 +94,16 @@ class QuizLessonObserver
     public function deleted(QuizLesson $quizLesson)
     {
         Timeline::where('lesson_id',$quizLesson->lesson_id)->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
+        
+        Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'deleted',
+            'model' => 'QuizLesson',
+            'data' => serialize($quizLesson),
+        ]);
 
-        Log::info(User::find(Auth::id())->username.' deleted '.$quizLesson);
+        LessonComponent::where('comp_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->lesson_id)
+        ->where('module','Quiz')->delete();
     }
 
     /**

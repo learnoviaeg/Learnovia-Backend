@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Observers;
+namespace Modules\Assigments\Observers;
 
 use Modules\Assigments\Entities\AssignmentLesson;
-use Modules\Assigments\Entities\assignment;
+use Modules\Assigments\Entities\Assignment;
 use App\Timeline;
 use App\Lesson;
 use App\User;
-use Log;
+use App\Log;
 use carbon\Carbon;
+use App\LessonComponent;
 use Illuminate\Support\Facades\Auth;
-
 
 class AssignmentLessonObserver
 {
@@ -42,7 +42,12 @@ class AssignmentLessonObserver
             ]);
         }
 
-        Log::info(User::find(Auth::id())->username.' created '.$assignmentLesson);
+        $log=Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'created',
+            'model' => 'AssignmentLesson',
+            'data' => serialize($assignmentLesson),
+        ]);
     }
 
     /**
@@ -55,7 +60,7 @@ class AssignmentLessonObserver
     {
         $assignment = Assignment::where('id',$assignmentLesson->assignment_id)->first();
         if(isset($assignment)){
-            Timeline::where('item_id',$assignmentLesson->assignment_id)->where('lesson_id',$assignmentLesson->lesson_id)->where('type' , 'assignment')
+            Timeline::where('item_id',$assignmentLesson->assignment_id)->where('lesson_id',$assignmentLesson->lesson_id)->where('type' , 'assignment')->first()
             ->update([
                 'item_id' => $assignmentLesson->assignment_id,
                 'name' => $assignment->name,
@@ -68,7 +73,16 @@ class AssignmentLessonObserver
             ]);
         }
 
-        Log::info(User::find(Auth::id())->username.' updated '.$assignmentLesson);
+        $arr=array();
+        $arr['before']=$assignmentLesson->getOriginal();
+        $arr['after']=$assignmentLesson;
+
+        Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'updated',
+            'model' => 'AssignmentLesson',
+            'data' => serialize($arr),
+        ]);
     }
 
     /**
@@ -81,7 +95,15 @@ class AssignmentLessonObserver
     {
         Timeline::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
     
-        Log::info(User::find(Auth::id())->username.' deleted '.$assignmentLesson);
+        $log=Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'deleted',
+            'model' => 'AssignmentLesson',
+            'data' => serialize($assignmentLesson),
+        ]);
+
+        LessonComponent::where('lesson_id',$assignmentLesson->lesson_id)->where('comp_id',$assignmentLesson->assignment_id)
+        ->where('module','Assignment')->delete();
     }
 
     /**

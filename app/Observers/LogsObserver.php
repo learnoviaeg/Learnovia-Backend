@@ -19,6 +19,7 @@ class LogsObserver
         $log=Log::create([
             'user' => User::find(Auth::id())->username,
             'action' => 'created',
+            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
             'data' => serialize($req),
         ]);
     }
@@ -37,9 +38,9 @@ class LogsObserver
         Log::create([
             'user' => User::find(Auth::id())->username,
             'action' => 'updated',
+            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
             'data' => serialize($arr),
         ]);
-        
     }
 
     /**
@@ -52,6 +53,7 @@ class LogsObserver
         Log::create([
             'user' => User::find(Auth::id())->username,
             'action' => 'deleted',
+            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
             'data' => serialize($req),
         ]);
     }
@@ -73,6 +75,6 @@ class LogsObserver
      */
     public function forceDeleted($req)
     {
-        Log::info(User::find(Auth::id())->username.' deleted '.$req);
+        //
     }
 }
