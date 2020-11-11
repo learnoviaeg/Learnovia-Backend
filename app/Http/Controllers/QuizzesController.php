@@ -19,6 +19,8 @@ class QuizzesController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:quiz/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:quiz/detailes' , 'ParentCheck'],   ['only' => ['show']]);
+
     }
     /**
      * Display a listing of the resource.
@@ -80,9 +82,14 @@ class QuizzesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id,Request $request)
     {
-        //
+        $quiz = quiz::find($id);
+
+        if(isset($quiz))
+            return response()->json(['message' => 'quiz objet ..', 'body' => $quiz ], 200);
+
+        return response()->json(['message' => 'quiz not fount!', 'body' => [] ], 400);
     }
 
     /**

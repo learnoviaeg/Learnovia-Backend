@@ -429,4 +429,6 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('lessons', LessonsController::class);
     Route::Resource('classes', ClassesController::class);
     Route::Resource('users', UsersController::class);
+    Route::Resource('questions', QuestionsController::class);
+    Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes' , 'ParentCheck']);
 });
