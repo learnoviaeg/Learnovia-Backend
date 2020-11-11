@@ -278,6 +278,10 @@ class UserController extends Controller
                 
                     unset($user->tokens);
                 }
+
+                if($optional == 'nickname' && $request->optional == 'null')
+                    $user->$optional = null;
+
             }
         }
         $user->save();
