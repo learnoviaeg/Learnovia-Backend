@@ -320,7 +320,8 @@ class BigbluebuttonController extends Controller
             'segment' => 'exists:segments,id',
             'course'    => 'exists:courses,id',
             'status'    => 'in:past,future,current',
-            'start_date' => 'date',
+            'start_date' => 'date|required_with:due_date',
+            'due_date' => 'date|required_with:start_date',
         ]);
 
         $classes = [];
@@ -355,7 +356,7 @@ class BigbluebuttonController extends Controller
             $meeting->where('status',$request->status);
 
         if($request->has('start_date'))
-            $meeting->where('start_date', '=', $request->start_date);
+            $meeting->where('start_date', '>=', $request->start_date)->where('start_date','<=',$request->due_date);
 
         if($request->has('id'))
             $meeting->where('id',$request->id);
