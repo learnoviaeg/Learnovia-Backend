@@ -332,6 +332,7 @@ class BigbluebuttonController extends Controller
             'status'    => 'in:past,future,current',
             'start_date' => 'date|required_with:due_date',
             'due_date' => 'date|required_with:start_date',
+            'sort_in' => 'in:asc,desc'
         ]);
 
         $classes = [];
@@ -343,21 +344,30 @@ class BigbluebuttonController extends Controller
             $request['courses']= [$request->course];
         }
 
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
         self::clear(); 
+
         $CS_ids=GradeCategoryController::getCourseSegment($request);
+
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+
         $CourseSeg = array_intersect($CS_ids->toArray(),$CourseSeg->toArray());
+
         if($request->user()->can('site/show-all-courses')){
             $CourseSeg = $CS_ids;
             $classes = count($classes) == 0? Classes::pluck('id') : $classes;
         }
+
         $classes = count($classes) == 0 ? Enroll::where('user_id', Auth::id())->pluck('class') : $classes;
         
         $courses=CourseSegment::whereIn('id',$CourseSeg)->where('end_date','>',Carbon::now())
                                                         ->where('start_date','<',Carbon::now())
                                                         ->pluck('course_id')->unique()->values();
 
-        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('start_date');
+        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('start_date',$sort_in);
 
         if($request->user()->can('site/course/student'))
             $meeting->where('show',1);
