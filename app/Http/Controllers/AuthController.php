@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Events\MassLogsEvent;
 use Carbon\Carbon;
 use App\User;
+use App\LastAction;
 use App\Language;
 use Spatie\Permission\Models\Permission;
 use Laravel\Passport\Passport;
@@ -110,6 +111,14 @@ class AuthController extends Controller
         dispatch($job);
         $user->last_login = Carbon::now();
         $user->save();
+        LastAction::create([
+            'user_id' => $request->user()->id 
+            ,'name' => 'login'
+            ,'method'=>$request->route()->methods[0]
+            ,'uri' =>  $request->route()->uri
+            ,'resource' =>  $request->route()->action['controller']
+            ,'date' => Carbon::now()->format('Y-m-d H:i:s a')
+            ]);
         return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
@@ -166,7 +175,6 @@ class AuthController extends Controller
         $user->token=null;
         $user->save();
         $request->user()->token()->revoke();
-
         //for log event
         $logsbefore=Parents::where('parent_id',Auth::id())->get();
         $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);

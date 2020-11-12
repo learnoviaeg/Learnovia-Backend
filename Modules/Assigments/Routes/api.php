@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'assignment', 'middleware' =>[ 'auth:api','LastAction']], function () {
 
     //install Assignments Routes
     Route::get('install','AssigmentsController@install_Assignment');
