@@ -16,8 +16,8 @@ Route::get('h5p_protect', function(Request $request)
      $stream =  new \App\VideoStream($filePath);
      $stream->start();
 
-})->name('h5p_protect')->middleware('LastAction');
-Route::resource('h5p', "H5pController")->middleware('LastAction');
+})->name('h5p_protect');
+Route::resource('h5p', "H5pController");
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     //user main routes without permissions
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
