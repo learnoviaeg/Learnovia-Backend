@@ -11,7 +11,8 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use Modules\UploadFiles\Observers\FileObserver;
 use Modules\UploadFiles\Observers\MediaObserver;
 use Modules\UploadFiles\Observers\FileLessonObserver;
-use Modules\UploadFiles\Observers\MediaLessonObserver;use App\Observers\LogsObserver;
+use Modules\UploadFiles\Observers\MediaLessonObserver;
+use App\Observers\LogsObserver;
 
 class UploadFilesServiceProvider extends ServiceProvider
 {
