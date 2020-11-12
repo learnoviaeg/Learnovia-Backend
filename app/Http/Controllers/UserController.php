@@ -261,7 +261,7 @@ class UserController extends Controller
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
 
         foreach ($optionals as $optional) {
-            if ($request->filled($optional)){
+            if ($request->has($optional)){
 
                 $user->$optional = $request->$optional;
 
@@ -281,7 +281,6 @@ class UserController extends Controller
 
                 if($optional == 'nickname' && $request->$optional == 'null')
                     $user->$optional = null;
-
             }
         }
         $user->save();
