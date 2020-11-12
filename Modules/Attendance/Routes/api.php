@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::group(['prefix' => 'attendance', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'attendance', 'middleware' =>[ 'auth:api','LastAction']], function () {
     Route::get('install','AttendanceSessionController@install');
     Route::post('add-session', 'AttendanceSessionController@createSession')->name('addsession')->middleware('permission:attendance/add-session');
     Route::get('get-all-users', 'AttendanceSessionController@get_users_in_sessions')->name('getusersinsession')->middleware('permission:attendance/get-users-in-session|attendance/get-daily');

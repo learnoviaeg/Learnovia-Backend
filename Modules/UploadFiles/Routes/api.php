@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 
 /* File Routes */
 
-Route::group(['prefix' => 'file', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'file', 'middleware' => ['auth:api','LastAction']], function () {
 
     //install Files permissions
     Route::get('install' ,'FilesController@install_file');
@@ -25,7 +25,7 @@ Route::group(['prefix' => 'file', 'middleware' => 'auth:api'], function () {
 });
 
 /* Media Routes */
-Route::group(['prefix' => 'media', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'media', 'middleware' => ['auth:api','LastAction']], function () {
     Route::post('add', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
     Route::post('update', 'MediaController@update')->name('updateMedia')->middleware('permission:media/update');
     Route::post('delete', 'MediaController@destroy')->name('deleteMedia')->middleware('permission:media/delete');
