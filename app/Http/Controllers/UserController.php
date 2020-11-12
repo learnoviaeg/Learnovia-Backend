@@ -13,6 +13,7 @@ use App\Language;
 use App\Level;
 use App\Classes;
 use App\Enroll;
+use App\Events\MassLogsEvent;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use stdClass;
@@ -713,10 +714,16 @@ class UserController extends Controller
         $request->validate([
             'child_id' => 'exists:parents,child_id'
         ]);
-        Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+
+        //for log event
+        $logsbefore=Parents::where('parent_id',Auth::id())->get();
+        $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
+
         $current_child=null;
         if(isset($request->child_id)){
-            Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
+            Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->first()->update(['current'=> 1]);
             $current_child = User::where('id',$request->child_id)->first();
         }
         return HelperController::api_response_format(200,$current_child ,'Children sets successfully');

@@ -245,10 +245,12 @@ class AnnouncementController extends Controller
         $users = array();
         foreach ($deleted as $de) {
             $users[] = $de->notifiable_id;
-
-            DB::table('notifications')
-                ->where('id', $de->id)
-                ->update(['read_at' => null]);
+            
+            //for log event
+            $logsbefore=DB::table('notifications')->where('id', $de->id)->get();
+            $check=DB::table('notifications')->where('id', $de->id)->update(['read_at' => null]);
+            if($check > 0)
+                event(new MassLogsEvent($logsbefore));
         }
         //Validtaionof updated data
         $request->validate([
@@ -316,7 +318,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $announce->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate),
                 'title' => $announce->title,
                 'description' => $announce->description,
                 'attached_file' => $announce->attached_file,
@@ -331,7 +333,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $announce->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate),
                 'title' => $announce->title,
                 'description' => $announce->description,
                 'attached_file' => $attached,
@@ -369,11 +371,9 @@ class AnnouncementController extends Controller
         $dataencode = json_encode($announcefinal);
         //get data from notifications
         $deleted = DB::table('notifications')->where('data', $dataencode)->get();
-        foreach ($deleted as $de) {
-            DB::table('notifications')
-                ->where('id', $de->id)
-                ->delete();
-        }
+        foreach ($deleted as $de) 
+            DB::table('notifications')->where('id', $de->id)->first()->delete();
+        
         $announce->delete();
         $anounce = AnnouncementController::get_announcement($request);
         $anouncenew = AnnouncementController::new_user_announcements($request);
@@ -578,10 +578,14 @@ class AnnouncementController extends Controller
                 $not->data= json_decode($not->data, true);
                 if($not->data['type'] == 'announcement')
                 {
+                    //for log event
+                    $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+
                     if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message)
-                    {
-                        DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
-                    }
+                        $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+                
+                    if($check > 0)
+                        event(new MassLogsEvent($logsbefore));
                 }
             }
             $print=self::get($request);
@@ -595,7 +599,11 @@ class AnnouncementController extends Controller
                 $not->data= json_decode($not->data, true);
                 if($not->data['type'] == 'announcement')
                 {
-                    DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                    //for log event
+                    $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+                    $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+                    if($check > 0)
+                        event(new MassLogsEvent($logsbefore));
                 }
             }
             $print=self::get($request);

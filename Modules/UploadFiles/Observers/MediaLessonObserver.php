@@ -31,8 +31,6 @@ class MediaLessonObserver
                 'visible' => 1,
                 'link' => $media->link,
                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
-
-
             ]);
         }
     }
@@ -69,7 +67,11 @@ class MediaLessonObserver
      */
     public function deleted(MediaLesson $mediaLesson)
     {
-        Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->delete();
+        //for log event
+        $logsbefore=Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->get();
+        $all = Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->delete();
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'deleted'));
     }
 
     /**

@@ -32,6 +32,7 @@ use App\AcademicYearType;
 use App\CourseSegment;
 
 use App\Timeline;
+use App\Material;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -82,5 +83,6 @@ class AppServiceProvider extends ServiceProvider
         GradeCategory::observe(LogsObserver::class);
         Announcement::observe(LogsObserver::class);
         Timeline::observe(LogsObserver::class);
+        Material::observe(LogsObserver::class);
     }
 }

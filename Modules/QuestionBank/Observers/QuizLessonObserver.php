@@ -93,7 +93,11 @@ class QuizLessonObserver
      */
     public function deleted(QuizLesson $quizLesson)
     {
-        Timeline::where('lesson_id',$quizLesson->lesson_id)->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
+        //for log event
+        $logsbefore=Timeline::where('lesson_id',$quizLesson->lesson_id)->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->get();
+        $all = Timeline::where('lesson_id',$quizLesson->lesson_id)->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'deleted'));
         
         Log::create([
             'user' => User::find(Auth::id())->username,
