@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\Assignment;
+use Modules\Assigments\Entities\UserAssigment;
 use Modules\Assigments\Observers\AssignmentLessonObserver;
 use App\Observers\LogsObserver;
 use Modules\Assigments\Entities\assignmentOverride;
@@ -27,6 +28,7 @@ class AssigmentsServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         Assignment::observe(LogsObserver::class);
+        UserAssigment::observe(LogsObserver::class);
         AssignmentLesson::observe(AssignmentLessonObserver::class);
         assignmentOverride::observe(AssignmentOverwrite::class);
     }
