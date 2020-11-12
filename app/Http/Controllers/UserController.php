@@ -229,6 +229,7 @@ class UserController extends Controller
             'suspend' => 'boolean',
             'language' => 'integer|exists:languages,id',
             'second language' => 'integer|exists:languages,id',
+            'birthdate' => 'nullable|date'
         ]);
 
         $users_is = collect([]);
