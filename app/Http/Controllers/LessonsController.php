@@ -45,7 +45,7 @@ class LessonsController extends Controller
 
         $lessons = $enrolls->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons')->collapse()->unique()->values();
 
-        return response()->json(['message' => 'Lessons List', 'body' => $lessons], 200);
+        return response()->json(['message' => 'Lessons List', 'body' => $lessons->filter()->values()], 200);
     }
 
     /**
