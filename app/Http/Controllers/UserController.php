@@ -266,7 +266,7 @@ class UserController extends Controller
 
                 $user->$optional = $request->$optional;
 
-                if($optional =='birthdate')
+                if($optional =='birthdate' && isset($request->birthdate))
                     $user->$optional = Carbon::parse($request->$optional)->format('Y-m-d');
 
                 if($optional == 'suspend' && $request->suspend == 1){
