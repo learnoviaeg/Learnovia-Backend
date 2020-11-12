@@ -8,6 +8,7 @@ use App\Dictionary;
 use App\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\MassLogsEvent;
 use Carbon\Carbon;
 use App\User;
 use App\Language;
@@ -165,7 +166,13 @@ class AuthController extends Controller
         $user->token=null;
         $user->save();
         $request->user()->token()->revoke();
-        Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+
+        //for log event
+        $logsbefore=Parents::where('parent_id',Auth::id())->get();
+        $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
+
         return HelperController::api_response_format(200, [], 'Successfully logged out');
     }
  /**

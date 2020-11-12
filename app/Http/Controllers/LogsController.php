@@ -44,7 +44,7 @@ class LogsController extends Controller
         foreach($logs->get() as $log)
         {
             $log->data=unserialize($log->data);
-            if($log->model == 'Enroll')
+            if($log->model == 'Enroll' && !isset($log->data['before']))
             {
                 $log->data->user_id=User::find($log->data->user_id);
                 $log->data->course=Course::find($log->data->course);
