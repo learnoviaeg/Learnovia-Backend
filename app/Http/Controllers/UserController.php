@@ -217,7 +217,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'nickname'=>'string|min:3|max:50',
+            'nickname'=>'nullable|string|min:3|max:50',
             'firstname' => 'required|string|min:3|max:50',
             'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
