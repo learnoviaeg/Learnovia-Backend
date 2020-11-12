@@ -111,7 +111,7 @@ class AuthController extends Controller
         dispatch($job);
         $user->last_login = Carbon::now();
         $user->save();
-        LastAction::create([
+       LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
             'user_id' => $request->user()->id 
             ,'name' => 'login'
             ,'method'=>$request->route()->methods[0]
