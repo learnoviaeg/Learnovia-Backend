@@ -17,6 +17,7 @@ use App\Observers\UserGradeObserver;
 
 use App\h5pLesson;
 use App\Observers\LogsObserver;
+use Modules\Attendance\Entities\AttendanceSession;
 
 use App\User;
 use App\AcademicType;
@@ -84,5 +85,6 @@ class AppServiceProvider extends ServiceProvider
         Announcement::observe(LogsObserver::class);
         Timeline::observe(LogsObserver::class);
         Material::observe(LogsObserver::class);
+        AttendanceSession::observe(LogsObserver::class);
     }
 }

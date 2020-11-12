@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
+use App\Classes;
 use Modules\QuestionBank\Entities\QuizLesson;
 
 
@@ -64,6 +65,8 @@ class QuizzesController extends Controller
             $quiz=quiz::with('course')->where('id',$quiz_lesson->quiz_id)->first();
             $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
+            $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
         return response()->json(['message' => 'Quizzes List ....', 'body' => $quizzes], 200);

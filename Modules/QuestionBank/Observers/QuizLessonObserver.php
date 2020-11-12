@@ -4,6 +4,7 @@ namespace Modules\QuestionBank\Observers;
 
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
+use App\Events\MassLogsEvent;
 use App\Lesson;
 use App\Timeline;
 use Illuminate\Support\Facades\Auth;

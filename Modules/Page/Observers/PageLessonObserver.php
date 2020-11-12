@@ -3,6 +3,7 @@
 namespace Modules\Page\Observers;
 
 use Modules\Page\Entities\PageLesson;
+use App\Events\MassLogsEvent;
 use Modules\Page\Entities\Page;
 use App\Material;
 use App\Lesson;
@@ -64,7 +65,11 @@ class PageLessonObserver
      */
     public function deleted(PageLesson $pageLesson)
     {
-        Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->delete();
+        //for log event
+        $logsbefore= Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->get();
+        $all = Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->delete();
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'deleted'));
     }
 
     /**
