@@ -7,6 +7,7 @@ use Modules\Assigments\Entities\Assignment;
 use App\Timeline;
 use App\Lesson;
 use App\User;
+use App\Events\MassLogsEvent;
 use App\Log;
 use carbon\Carbon;
 use App\LessonComponent;

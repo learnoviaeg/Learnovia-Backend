@@ -3,6 +3,7 @@
 namespace Modules\UploadFiles\Observers;
 
 use Modules\UploadFiles\Entities\MediaLesson;
+use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\Media;
 use App\Lesson;
 use App\Material;
