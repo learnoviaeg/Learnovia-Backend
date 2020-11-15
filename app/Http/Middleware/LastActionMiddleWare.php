@@ -25,12 +25,7 @@ class LastActionMiddleWare
             if( str_contains($middleware, 'permission:'))
                 $permission_name =  explode(':',$middleware)[1];
         }
-        // dd(collect($request->route()->controller->getMiddleware())->pluck('middleware'));
-        // // resource 
-        // if($permission_name==null &&count($request->route()->controller['middleware'])>0)
-        //     dd($request->route()->controller['middleware']);
 
-        // dd($request->route()->action['middleware'] );
         $title = Permission::where('name',$permission_name)->first();
         $last_action = LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
                 'user_id' => $request->user()->id 
@@ -40,7 +35,8 @@ class LastActionMiddleWare
                 ,'resource' =>  $request->route()->action['controller']
                 ,'date' => Carbon::now()->format('Y-m-d H:i:s a')
         ]);
-       
+        \Artisan::call('cache:clear', ['--env' => 'local']);
+        \Artisan::call('config:clear', ['--env' => 'local']);
         return $next($request);
     }
 
