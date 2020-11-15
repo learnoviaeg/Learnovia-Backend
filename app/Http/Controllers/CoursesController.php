@@ -47,36 +47,10 @@ class CoursesController extends Controller
             $enrolls->where('user_id',Auth::id());
         }
 
-        $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);
-
-        $user_courses=collect();
-        foreach($enrolls as $course){
-            $levels=[];
-            foreach($course as $level){
-
-                if($level[0]->courseSegment->end_date > Carbon::now() && $level[0]->courseSegment->start_date <= Carbon::now()){
-
-                    $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
-                    $temp_course = $level[0]->courseSegment->courses[0];
-
-                }
-            }
-
-            if(!isset($temp_course))
-                continue;
-
-            $user_courses->push([
-                'id' => $temp_course->id ,
-                'name' => $temp_course->name ,
-                'short_name' => $temp_course->short_name ,
-                'image' => isset($temp_course->image) ? $temp_course->attachment->path : null,
-                'description' => $temp_course->description ,
-                'mandatory' => $temp_course->mandatory == 1 ? true : false ,
-                'level' => $levels, 
-            ]);
-
-            $temp_course = null;
-        }
+        $user_courses = $enrolls->with(['courseSegment.courses.attachment'])->get()
+                                ->where('courseSegment.end_date','>',Carbon::now())
+                                ->where('courseSegment.start_date','<=',Carbon::now())
+                                ->pluck('courses')->unique()->values();
 
         return response()->json(['message' => 'User courses list', 'body' => $user_courses->paginate($paginate)], 200);
 
