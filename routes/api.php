@@ -402,7 +402,7 @@ Route::group(['prefix' => 'payment', 'middleware' => 'auth:api','LastAction'], f
     Route::post('pay-payment', 'PaymentController@payPayment')->name('paypayment')->middleware('permission:payment/pay-payment');
 });
 
-Route::group(['prefix' => 'h5p', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'h5p', 'middleware' => ['auth:api','LastAction']], function () {
     Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
 
         Route::get('install', 'H5PLessonController@install')->name('installh5p');
