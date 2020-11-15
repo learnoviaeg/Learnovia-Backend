@@ -163,7 +163,7 @@ class BigbluebuttonController extends Controller
                             ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
                             {
                                 self::clear();
-                                self::create_hook($request);     
+                                self::create_hook($request,$bigbb->meeting_id);     
                                 if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0)
                                     $bigbb['join'] = true; //startmeeting has arrived but meeting didn't start yet
                             }
@@ -273,7 +273,7 @@ class BigbluebuttonController extends Controller
     //Join the meeting
     public function join(Request $request)
     {
-        self::create_hook($request);
+        
         $bbb = new BigBlueButton();
 
         //Validating the Input
@@ -282,6 +282,9 @@ class BigbluebuttonController extends Controller
         ]);
 
         $bigbb=BigbluebuttonModel::find($request->id);
+
+        self::create_hook($request,$bigbb->meeting_id); 
+
         $meeting_start = isset($bigbb->actutal_start_date) ? $bigbb->actutal_start_date : $bigbb->start_date;
         $check=Carbon::parse($meeting_start)->addMinutes($bigbb->duration);
 
@@ -392,7 +395,7 @@ class BigbluebuttonController extends Controller
                 if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
                 ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
                 {
-                    self::create_hook($request);
+                    self::create_hook($request,$m->meeting_id); 
                     if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
                         $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
                 }
@@ -698,104 +701,116 @@ class BigbluebuttonController extends Controller
     }
 
     public function callback_function(Request $request){
-        $arr=[];
-        $arr=json_decode($request['event'],true);
 
-        $found=BigbluebuttonModel::where('meeting_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])->get();
-        $meetings_ids = $found->pluck('id');
-        if(count($found) > 0 && Carbon::parse($found[0]->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
+        try {
+            $arr=[];
+            $arr=json_decode($request['event'],true);
 
-            if($arr[0]['data']['id'] == 'meeting-created'){
-                //for log event
-                $logsbefore=BigbluebuttonModel::whereIn('id',$meetings_ids)->get();
-                $all_attendees = BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
-                    'started' => 1,
-                    'status' => 'current',
-                    'actutal_start_date' => Carbon::now()
-                ]);
-                if($all_attendees > 0)
-                    event(new MassLogsEvent($logsbefore,'updated'));
-            }
-                
-            if($arr[0]['data']['id'] == 'user-joined'){
-                Log::debug($arr[0]['data']['id']);
-                Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
-                Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
+            $found=BigbluebuttonModel::where('meeting_id',$arr[0]['data']['attributes']['meeting']['external-meeting-id'])->get();
+            $meetings_ids = $found->pluck('id');
+            if(count($found) > 0 && Carbon::parse($found[0]->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
 
-                $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
-                $log = AttendanceLog::whereIn('session_id',$meetings_ids)
-                                    ->where('type','online')
-                                    ->where('student_id',$user_id)->first();
-                if(isset($log)){
-                    $attendance = AttendanceLog::updateOrCreate(['student_id' => $user_id,'session_id'=> $log->session_id,'type'=>'online','entered_date'=> null],
-                    [
-                        'ip_address' => \Request::ip(),
-                        'student_id' => $user_id,
-                        'session_id' => $log->session_id,
-                        'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                        'type' => 'online',
-                        'entered_date' => Carbon::now()->format('Y-m-d H:i:s'),
-                        'taker_id' => $found[0]->user_id
-                    ]);
-                }
-            }
-            
-            if($arr[0]['data']['id'] == 'user-left'){
-                Log::debug($arr[0]['data']['id']);
-                Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
-                Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
-
-                $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
-                $log = AttendanceLog::whereIn('session_id',$meetings_ids)
-                                    ->where('type','online')
-                                    ->where('student_id',$user_id)
-                                    ->where('entered_date','!=',null)
-                                    ->where('left_date',null)->first();
-                if(isset($log))
-                    $log->update(['left_date' => Carbon::now()->format('Y-m-d H:i:s')]);
-            }
-    
-            if($arr[0]['data']['id'] == 'meeting-ended'){
-                Log::debug($arr[0]['data']['id']);
-
+                if($arr[0]['data']['id'] == 'meeting-created'){
                     //for log event
-                    $logsbefore=AttendanceLog::whereIn('session_id',$meetings_ids)
-                                ->where('type','online')
-                                ->where('entered_date','!=',null)
-                                ->where('left_date',null)->get();
-                    $all_attendees = AttendanceLog::whereIn('session_id',$meetings_ids)
-                                ->where('type','online')
-                                ->where('entered_date','!=',null)
-                                ->where('left_date',null)->update([
-                                    'left_date' => Carbon::now()->format('Y-m-d H:i:s')
-                                ]);
+                    $logsbefore=BigbluebuttonModel::whereIn('id',$meetings_ids)->get();
+                    $all_attendees = BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
+                        'started' => 1,
+                        'status' => 'current',
+                        'actutal_start_date' => Carbon::now()
+                    ]);
                     if($all_attendees > 0)
                         event(new MassLogsEvent($logsbefore,'updated'));
+                }
+                    
+                if($arr[0]['data']['id'] == 'user-joined'){
+                    Log::debug($arr[0]['data']['id']);
+                    Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
+                    Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
 
-                $meeting_start = isset($found[0]->actutal_start_date) ? $found[0]->actutal_start_date : $found[0]->start_date;
-                $start = Carbon::parse($meeting_start);
-                $end = Carbon::now();
-                $duration= $end->diffInMinutes($start);
-
-                //for log event
-                $logsbefore=BigbluebuttonModel::whereIn('id',$meetings_ids)->get();
-                $all_attendees = BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
-                            'duration' => $duration,
-                            'started' => 0,
-                            'status' => 'past',
+                    $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
+                    $log = AttendanceLog::whereIn('session_id',$meetings_ids)
+                                        ->where('type','online')
+                                        ->where('student_id',$user_id)->first();
+                    if(isset($log)){
+                        $attendance = AttendanceLog::updateOrCreate(['student_id' => $user_id,'session_id'=> $log->session_id,'type'=>'online','entered_date'=> null],
+                        [
+                            'ip_address' => \Request::ip(),
+                            'student_id' => $user_id,
+                            'session_id' => $log->session_id,
+                            'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                            'type' => 'online',
+                            'entered_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                            'taker_id' => $found[0]->user_id
                         ]);
-                if($all_attendees > 0)
-                    event(new MassLogsEvent($logsbefore,'updated'));   
+                    }
+                }
+                
+                if($arr[0]['data']['id'] == 'user-left'){
+                    Log::debug($arr[0]['data']['id']);
+                    Log::debug($arr[0]['data']['attributes']['meeting']['external-meeting-id']);
+                    Log::debug($arr[0]['data']['attributes']['user']['external-user-id']);
+
+                    $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
+                    $log = AttendanceLog::whereIn('session_id',$meetings_ids)
+                                        ->where('type','online')
+                                        ->where('student_id',$user_id)
+                                        ->where('entered_date','!=',null)
+                                        ->where('left_date',null)->first();
+                    if(isset($log))
+                        $log->update(['left_date' => Carbon::now()->format('Y-m-d H:i:s')]);
+                }
+        
+                if($arr[0]['data']['id'] == 'meeting-ended'){
+                    Log::debug($arr[0]['data']['id']);
+
+                        //for log event
+                        $logsbefore=AttendanceLog::whereIn('session_id',$meetings_ids)
+                                    ->where('type','online')
+                                    ->where('entered_date','!=',null)
+                                    ->where('left_date',null)->get();
+                        $all_attendees = AttendanceLog::whereIn('session_id',$meetings_ids)
+                                    ->where('type','online')
+                                    ->where('entered_date','!=',null)
+                                    ->where('left_date',null)->update([
+                                        'left_date' => Carbon::now()->format('Y-m-d H:i:s')
+                                    ]);
+                        if($all_attendees > 0)
+                            event(new MassLogsEvent($logsbefore,'updated'));
+
+                    $meeting_start = isset($found[0]->actutal_start_date) ? $found[0]->actutal_start_date : $found[0]->start_date;
+                    $start = Carbon::parse($meeting_start);
+                    $end = Carbon::now();
+                    $duration= $end->diffInMinutes($start);
+
+                    //for log event
+                    $logsbefore=BigbluebuttonModel::whereIn('id',$meetings_ids)->get();
+                    $all_attendees = BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
+                                'duration' => $duration,
+                                'started' => 0,
+                                'status' => 'past',
+                            ]);
+                    if($all_attendees > 0)
+                        event(new MassLogsEvent($logsbefore,'updated'));   
+                }
             }
+
+            Log::debug('callback Bigbluebutton success');
+
+        } catch (\Exception $e) {
+
+           Log::debug($e->getMessage());
+           return HelperController::api_response_format(200,null, 'success to bbb server');
+
         }
     }
 
-    public function create_hook(Request $request){
+    public function create_hook(Request $request,$id){
         
         // $hookParameter = new HooksCreateParameters("https://webhook.site/3fb81c64-5b58-4513-9fa3-622a9f7b17ea");
         $bbb = new BigBlueButton();
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $hookParameter = new HooksCreateParameters($url."/api/callback_function");
+        $hookParameter->setMeetingId($id);
         $hookRes = $bbb->hooksCreate($hookParameter);
         return $hookRes->getHookId();
     }
