@@ -51,7 +51,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ['fullname'];
+    protected $appends = ['fullname','lastaction'];
 
     private static function getUserCounter($lastid)
     {
@@ -208,5 +208,12 @@ class User extends Authenticatable
         if($this->nickname)
             return ucfirst($this->firstname) . ' ' . ucfirst($this->lastname).' ( ' . ucfirst($this->nickname) . ' )' ;
         return ucfirst($this->firstname) . ' ' . ucfirst($this->lastname);
+    }
+
+    public function getLastActionAttribute() {
+       $last_action  = LastAction :: where('user_id',$this->id)->first();
+       if (isset($last_action))
+            return Carbon::Parse($last_action->date)->format('Y-m-d H:i:s a');
+        
     }
 }

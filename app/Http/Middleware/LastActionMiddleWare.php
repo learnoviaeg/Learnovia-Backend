@@ -21,6 +21,7 @@ class LastActionMiddleWare
     {
         $permission_name = null;
         //for controller 
+        // dd($request->route()->action) ;
         foreach($request->route()->action['middleware'] as $middleware){
             if( str_contains($middleware, 'permission:'))
                 $permission_name =  explode(':',$middleware)[1];
