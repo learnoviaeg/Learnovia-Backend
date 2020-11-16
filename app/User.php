@@ -213,7 +213,7 @@ class User extends Authenticatable
     public function getLastActionAttribute() {
        $last_action  = LastAction :: where('user_id',$this->id)->first();
        if (isset($last_action))
-            return Carbon::Parse($last_action->date)->format('Y-m-d H:i:s a');
+            return Carbon::Parse($last_action->date);
         
     }
 }
