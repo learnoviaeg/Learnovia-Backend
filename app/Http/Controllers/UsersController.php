@@ -20,7 +20,7 @@ class UsersController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -31,27 +31,42 @@ class UsersController extends Controller
     {
         //validate the request
         $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
             'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
             'class' => 'exists:classes,id',
-            'courses'    => 'nullable|array',
-            'courses.*'  => 'nullable|integer|exists:courses,id',
-            'role_id' => 'exists:roles,id'
+            'roles' => 'array',
+            'roles.*' => 'exists:roles,id',
+            'search' => 'string'
         ]);
 
         //only users with course/participants permission can get any users the rest of them cannot
-        if(($request->has('role_id') && $request->role_id != 4 && !$request->user()->can('course/participants')) || (!$request->has('role_id') && !$request->user()->can('course/participants')))
-            return response()->json(['message' => 'User does not have the right permissions.', 'body' => []], 400);
+        // if(($request->has('role_id') && $request->role_id != 4 && !$request->user()->can('course/participants')) || (!$request->has('role_id') && !$request->user()->can('course/participants')))
+        //     return response()->json(['message' => 'User does not have the right permissions.', 'body' => []], 400);
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
+        if($request->filled('roles')){
+            $users = $enrolls->whereIn('role_id',$request->roles);
+        }
+        $users = $enrolls->pluck('user_id');
 
-        $users = $enrolls->with('user.attachment');
+        if($request->filled('search'))
+        {
+            $users  = user::whereIn('id',$users)->where('id','!=',Auth::id())
+                                ->where( function($q)use($request){
+                                            $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                                                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                                                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+                                            })->pluck('id');
 
-        if($request->has('role_id'))
-            $users->where('role_id',$request->role_id);
+        }
 
-        $users = $users->get()->pluck('user')->unique()->values();
+         $users = user:: whereIn('id',$users)->with('attachment')->get();
 
-        return response()->json(['message' => 'Users List', 'body' => $users->filter()->values()], 200);
+        return response()->json(['message' => 'Users List', 'body' => $users], 200);
     }
 
     /**
