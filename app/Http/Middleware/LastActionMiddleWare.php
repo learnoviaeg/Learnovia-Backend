@@ -36,8 +36,8 @@ class LastActionMiddleWare
                 ,'resource' =>  $request->route()->action['controller']
                 ,'date' => Carbon::now()
         ]);
-        \Artisan::call('cache:clear', ['--env' => 'local']);
-        \Artisan::call('config:clear', ['--env' => 'local']);
+        // \Artisan::call('cache:clear', ['--env' => 'local']);
+        // \Artisan::call('config:clear', ['--env' => 'local']);
         return $next($request);
     }
 
