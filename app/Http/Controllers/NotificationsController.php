@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Notification;
 use App\User;
 use Carbon\Carbon;
 use Auth;
+use DB;
 
 class NotificationsController extends Controller
 {
@@ -22,9 +23,40 @@ class NotificationsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $notify = DB::table('notifications')->select('data','read_at','id')->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();
+        $user_notify = collect();
+
+        foreach($notify as $notify_object) {
+
+            $decoded_data= json_decode($notify_object->data, true);
+
+            if($decoded_data['type'] != 'announcement'){
+
+                if(isset($decoded_data['publish_date'])){
+
+                    if(Carbon::parse($decoded_data['publish_date']) < Carbon::now())
+                    {
+                        $user_notify->push([
+                            'id' => $decoded_data['id'],
+                            'read_at' => $notify_object->read_at,
+                            'notification_id' => $notify_object->id,
+                            'message' => $decoded_data['message'],
+                            'publish_date' => Carbon::parse($decoded_data['publish_date'])->format('Y-m-d H:i:s'),
+                            'type' => $decoded_data['type'],
+                            'course_id' => $decoded_data['course_id'],
+                            'class_id' => $decoded_data['class_id'],
+                            'lesson_id'  => $decoded_data['lesson_id'],
+                            'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
+                        ]);
+                    }
+                }
+            }
+            
+        }
+
+        return response()->json(['message' => 'User notification list.','body' => $user_notify], 200);
     }
 
     /**
