@@ -729,7 +729,18 @@ class SpatieController extends Controller
         }
         $roles = Role::all();
         foreach ($roles as $role) {
+            $conts=Enroll::pluck('role_id')->toArray();
+            $contsofrole=array_count_values($conts);
+
             $role->count = User::role($role)->count();
+
+            if(in_array($role->id,array_keys($contsofrole)))
+            {
+                if($contsofrole[$role->id] == $role->count)
+                    continue;
+                $role->count = User::role($role)->count()+$contsofrole[$role->id];
+            }
+
             $role->permissions;
         }
         $roles->toArray();
