@@ -14,8 +14,7 @@ class NotificationsController extends Controller
 
     public function __construct()
     {
-        // $this->middleware('permission:timeline/store', ['only' => ['store']]);
-        // $this->middleware(['permission:timeline/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware('permission:notifications/send', ['only' => ['store']]);
     }
 
     /**
