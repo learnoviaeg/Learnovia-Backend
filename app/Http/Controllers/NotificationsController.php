@@ -57,7 +57,10 @@ class NotificationsController extends Controller
         }
 
         $filter_notify = $notifications->where('publish_date', '<=', Carbon::now());
+
+        //assign data with stutible headers
         $user_notify['unread'] = count($filter_notify->where('read_at',null));
+
         $user_notify['notifications'] = $filter_notify;
 
         return response()->json(['message' => 'User notification list.','body' => $user_notify], 200);
