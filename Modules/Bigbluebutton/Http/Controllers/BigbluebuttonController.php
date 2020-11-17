@@ -31,6 +31,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\GradeCategoryController;
 use Illuminate\Support\Str;
 use App\Classes;
+use App\Paginate;
+
 
 class BigbluebuttonController extends Controller
 {
@@ -400,6 +402,8 @@ class BigbluebuttonController extends Controller
 
         if(count($meetings) == 0)
             return HelperController::api_response_format(200 , [] , 'Classroom is not found');
+        if($request->has('pagination') && $request->pagination==true)
+            return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),'Classrooms list');
         return HelperController::api_response_format(200 , $meetings,'Classrooms list');
     }
 
