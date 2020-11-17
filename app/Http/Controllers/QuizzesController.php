@@ -10,6 +10,7 @@ use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
 use App\Classes;
+use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
 
 
@@ -69,7 +70,7 @@ class QuizzesController extends Controller
             unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
-        return response()->json(['message' => 'Quizzes List ....', 'body' => $quizzes], 200);
+        return response()->json(['message' => 'Quizzes List ....', 'body' => $quizzes->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
