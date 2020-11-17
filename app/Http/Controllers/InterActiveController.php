@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use Illuminate\Support\Facades\Auth;
+use App\Paginate;
 use App\h5pLesson;
 use DB;
 use App\Lesson;
@@ -19,7 +20,7 @@ class InterActiveController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -79,7 +80,7 @@ class InterActiveController extends Controller
             $content->original->lesson = Lesson::find($h5p->lesson_id);
             $h5p_contents[]=$content->original;
         }
-        return response()->json(['message' => 'InterActive vedios  List ....', 'body' => $h5p_contents], 200);
+        return response()->json(['message' => 'InterActive vedios  List ....', 'body' => collect($h5p_contents)->paginate(Paginate::GetPaginate($request))], 200);
 
         
     }

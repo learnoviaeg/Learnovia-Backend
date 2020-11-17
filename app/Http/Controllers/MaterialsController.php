@@ -8,6 +8,8 @@ use App\Enroll;
 use App\Material;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
+use App\Paginate;
+
 
 
 
@@ -71,7 +73,7 @@ class MaterialsController extends Controller
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
 
-        return response()->json(['message' => 'materials list.... ', 'body' => $material->get()], 200);
+        return response()->json(['message' => 'materials list.... ', 'body' => $material->get()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

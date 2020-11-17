@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Lesson;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\assignment;
+use App\Paginate;
+
 
 class AssignmentController extends Controller
 {
@@ -63,8 +65,7 @@ class AssignmentController extends Controller
             $assignments[]=$assignment;
 
         }
-        return response()->json(['message' => 'Assignments List ....', 'body' => $assignments], 200);
-
+        return response()->json(['message' => 'Assignments List ....', 'body' => $assignments->paginate(Paginate::GetPaginate($request))], 200);
 
     }
 
