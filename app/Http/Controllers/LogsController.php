@@ -15,6 +15,12 @@ use Carbon\Carbon;
 
 class LogsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware(['permission:logs/get'],['only' => ['index']]);
+    }
+    
     /**
      * Display a listing of the resource.
      *
