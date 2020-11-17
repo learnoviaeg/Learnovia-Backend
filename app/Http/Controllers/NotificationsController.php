@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Notification;
 use App\User;
 use Carbon\Carbon;
 use Auth;
+use DB;
 
 class NotificationsController extends Controller
 {
@@ -15,6 +16,8 @@ class NotificationsController extends Controller
     public function __construct()
     {
         $this->middleware('permission:notifications/send', ['only' => ['store']]);
+        $this->middleware('permission:notifications/get-all', ['only' => ['index']]);
+        $this->middleware('permission:notifications/seen', ['only' => ['update']]);
     }
 
     /**
@@ -22,9 +25,45 @@ class NotificationsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $notify = DB::table('notifications')->select('data','read_at','id')
+                                            ->where('notifiable_id', $request->user()->id)
+                                            ->orderBy('created_at','desc')->get();
+                                
+        $notifications = collect();
+
+        foreach($notify as $notify_object) {
+
+            $decoded_data= json_decode($notify_object->data, true);
+
+            if($decoded_data['type'] != 'announcement'){
+
+                $notifications->push([
+                    'id' => $decoded_data['id'],
+                    'read_at' => $notify_object->read_at,
+                    'notification_id' => $notify_object->id,
+                    'message' => $decoded_data['message'],
+                    'publish_date' => Carbon::parse($decoded_data['publish_date'])->format('Y-m-d H:i:s'),
+                    'type' => $decoded_data['type'],
+                    'course_id' => $decoded_data['course_id'],
+                    'class_id' => $decoded_data['class_id'],
+                    'lesson_id'  => $decoded_data['lesson_id'],
+                    'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
+                ]);
+
+            }
+
+        }
+
+        $filter_notify = $notifications->where('publish_date', '<=', Carbon::now());
+
+        //assign data with stutible headers
+        $user_notify['unread'] = count($filter_notify->where('read_at',null));
+
+        $user_notify['notifications'] = $filter_notify;
+
+        return response()->json(['message' => 'User notification list.','body' => $user_notify], 200);
     }
 
     /**
@@ -107,7 +146,16 @@ class NotificationsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+        $notify = DB::table('notifications')->where('id', $id)
+                    ->update([
+                        'read_at' => Carbon::now()->toDateTimeString()
+                    ]);
+
+        if($notify == 0 )
+            return response()->json(['message' => 'This notification not found','body' => null], 404);
+
+        return response()->json(['message' => 'Notification readed','body' => $notify], 200);        
     }
 
     /**
