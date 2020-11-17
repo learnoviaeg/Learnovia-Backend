@@ -52,21 +52,20 @@ class UsersController extends Controller
             $users = $enrolls->whereIn('role_id',$request->roles);
         }
         $users = $enrolls->pluck('user_id');
+        $users = user:: whereIn('id',$users)->with('attachment');
 
         if($request->filled('search'))
         {
-            $users  = user::whereIn('id',$users)->where('id','!=',Auth::id())
+            $users  =$users->where('id','!=',Auth::id())
                                 ->where( function($q)use($request){
                                             $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                                                     ->orWhere('username', 'LIKE' ,"%$request->search%" )
                                                     ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-                                            })->pluck('id');
+                                            });
 
         }
 
-         $users = user:: whereIn('id',$users)->with('attachment')->get();
-
-        return response()->json(['message' => 'Users List', 'body' => $users], 200);
+        return response()->json(['message' => 'Users List', 'body' =>  $users->get()], 200);
     }
 
     /**
