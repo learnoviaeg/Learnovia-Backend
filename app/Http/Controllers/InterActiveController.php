@@ -20,7 +20,7 @@ class InterActiveController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        // $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
