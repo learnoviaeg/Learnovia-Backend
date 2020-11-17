@@ -335,7 +335,8 @@ class BigbluebuttonController extends Controller
             'status'    => 'in:past,future,current',
             'start_date' => 'date|required_with:due_date',
             'due_date' => 'date|required_with:start_date',
-            'sort_in' => 'in:asc,desc'
+            'sort_in' => 'in:asc,desc',
+            'pagination' => 'boolean'
         ]);
 
         $classes = [];
