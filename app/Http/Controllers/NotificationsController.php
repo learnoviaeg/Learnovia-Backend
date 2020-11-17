@@ -32,40 +32,33 @@ class NotificationsController extends Controller
                                             ->orderBy('created_at','desc')->get();
                                 
         $notifications = collect();
-        $unread = 0;
+
         foreach($notify as $notify_object) {
 
             $decoded_data= json_decode($notify_object->data, true);
 
             if($decoded_data['type'] != 'announcement'){
 
-                if(isset($decoded_data['publish_date'])){
+                $notifications->push([
+                    'id' => $decoded_data['id'],
+                    'read_at' => $notify_object->read_at,
+                    'notification_id' => $notify_object->id,
+                    'message' => $decoded_data['message'],
+                    'publish_date' => Carbon::parse($decoded_data['publish_date'])->format('Y-m-d H:i:s'),
+                    'type' => $decoded_data['type'],
+                    'course_id' => $decoded_data['course_id'],
+                    'class_id' => $decoded_data['class_id'],
+                    'lesson_id'  => $decoded_data['lesson_id'],
+                    'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
+                ]);
 
-                    if(Carbon::parse($decoded_data['publish_date']) < Carbon::now())
-                    {
-                        if(!isset($notify_object->read_at))
-                            $unread++;
-
-                        $notifications->push([
-                            'id' => $decoded_data['id'],
-                            'read_at' => $notify_object->read_at,
-                            'notification_id' => $notify_object->id,
-                            'message' => $decoded_data['message'],
-                            'publish_date' => Carbon::parse($decoded_data['publish_date'])->format('Y-m-d H:i:s'),
-                            'type' => $decoded_data['type'],
-                            'course_id' => $decoded_data['course_id'],
-                            'class_id' => $decoded_data['class_id'],
-                            'lesson_id'  => $decoded_data['lesson_id'],
-                            'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
-                        ]);
-                    }
-                }
             }
-            
+
         }
 
-        $user_notify['unread'] = $unread;
-        $user_notify['notifications'] = $notifications;
+        $filter_notify = $notifications->where('publish_date', '<=', Carbon::now());
+        $user_notify['unread'] = count($filter_notify->where('read_at',null));
+        $user_notify['notifications'] = $filter_notify;
 
         return response()->json(['message' => 'User notification list.','body' => $user_notify], 200);
     }
