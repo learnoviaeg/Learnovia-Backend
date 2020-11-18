@@ -434,6 +434,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes' , 'ParentCheck']);
 });
 
-Route::group(['middleware' => ['auth:api','LastAction']], function () {
-    Route::Resource('log', LogsController::class);
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::get('logs/list-types', 'LogsController@List_Types')->name('types');
+    Route::Resource('logs', LogsController::class);
+
 });
