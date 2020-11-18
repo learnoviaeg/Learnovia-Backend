@@ -55,7 +55,7 @@ class UsersController extends Controller
         }
         $mychains=Enroll::where('user_id',Auth::id())->pluck('course_segment');
         if($request->user()->can('site/show-all-courses'))
-            $mychains=$enrolls;
+            $mychains=$enrolls->pluck('course_segment');
         $coursesegments = array_intersect($enrolls->pluck('course_segment')->toArray(),$mychains->toArray());
         // $users = $enrolls->pluck('user_id');
         // $users = user:: whereIn('id',$users)->with('attachment');
