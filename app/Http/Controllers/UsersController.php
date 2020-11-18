@@ -6,6 +6,7 @@ use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\User;
+use App\Enroll;
 use App\Paginate;
 
 class UsersController extends Controller
@@ -21,7 +22,7 @@ class UsersController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -52,8 +53,14 @@ class UsersController extends Controller
         if($request->filled('roles')){
             $users = $enrolls->whereIn('role_id',$request->roles);
         }
-        $users = $enrolls->pluck('user_id');
-        $users = user:: whereIn('id',$users)->with('attachment');
+        $mychains=Enroll::where('user_id',Auth::id())->pluck('course_segment');
+        if($request->user()->can('site/show-all-courses'))
+            $mychains=$enrolls;
+        $coursesegments = array_intersect($enrolls->pluck('course_segment')->toArray(),$mychains->toArray());
+        // $users = $enrolls->pluck('user_id');
+        // $users = user:: whereIn('id',$users)->with('attachment');
+        $enro = Enroll::whereIn('course_segment',$coursesegments)->pluck('user_id');
+        $users = user:: whereIn('id',$enro)->with('attachment');
 
         if($request->filled('search'))
         {
