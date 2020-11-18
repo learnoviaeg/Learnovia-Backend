@@ -23,8 +23,8 @@ class AttendanceServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(module_path('Attendance', 'Database/Migrations'));
 
-        AttendanceLog::observe(LogsObserver::class);
-        AttendanceSession::observe(LogsObserver::class);
+        // AttendanceLog::observe(LogsObserver::class);
+        // AttendanceSession::observe(LogsObserver::class);
     }
 
     /**
