@@ -26,7 +26,7 @@ class LogsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request,$list_types=null)
+    public function index(Request $request)
     {
         //username
         $request->validate([
