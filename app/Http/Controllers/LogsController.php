@@ -18,7 +18,7 @@ class LogsController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware(['permission:logs/get'],['only' => ['index','List_Types']]);
+        $this->middleware(['permission:user/logs'],['only' => ['index','List_Types']]);
     }
     
     /**
