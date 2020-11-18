@@ -73,7 +73,12 @@ class AnnouncementsController extends Controller
      */
     public function show($id)
     {
-        //
+        $announcement = Announcement::where('id',$id)->with('attachment')->first();
+
+        if(isset($announcement))
+            return response()->json(['message' => 'announcement objet', 'body' => $announcement], 200);
+
+        return response()->json(['message' => 'Announcement not fount!', 'body' => [] ], 400);
     }
 
     /**
