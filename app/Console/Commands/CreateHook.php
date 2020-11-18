@@ -40,6 +40,7 @@ class CreateHook extends Command
      */
     public function handle()
     {
+        \Artisan::call('config:cache', ['--env' => 'local']);
         \Artisan::call('cache:clear', ['--env' => 'local']);
         \Artisan::call('config:clear', ['--env' => 'local']);
 
