@@ -6,6 +6,7 @@ use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\User;
+use App\Paginate;
 
 class UsersController extends Controller
 {
@@ -65,7 +66,7 @@ class UsersController extends Controller
 
         }
 
-        return response()->json(['message' => 'Users List', 'body' =>  $users->get()], 200);
+        return response()->json(['message' => 'Users List', 'body' =>  $users->get()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
