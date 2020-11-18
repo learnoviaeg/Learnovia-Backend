@@ -46,8 +46,8 @@ class CreateHook extends Command
 
         $url = config('app.url');
 
-        \Log::info("Cron is working fine!");
-        \Log::info($url."api/callback_function");
+        // \Log::info("Cron is working fine!");
+        // \Log::info($url."api/callback_function");
 
         $bbb = new BigBlueButton();
         $hookParameter = new HooksCreateParameters($url."api/callback_function");
