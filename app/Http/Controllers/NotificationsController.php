@@ -60,10 +60,10 @@ class NotificationsController extends Controller
         $notifications = $notifications->where('publish_date', '<=', Carbon::now());
 
         if($request->has('read') && $request->read == 'unread')//get unread
-            $notifications = $notifications->whereNull('read');
+            $notifications = $notifications->where('read_at',null);
 
         if($request->has('read') && $request->read == 'read')//get read
-            $notifications = $notifications->whereNotNull('read');
+            $notifications = $notifications->where('read_at','!=',null);
 
         if($request->type == 'announcement')
             $notifications = $notifications->where('type','announcement');
