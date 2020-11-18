@@ -38,14 +38,20 @@ class AnnouncementsController extends Controller
         }
 
         $announcements =  userAnnouncement::with('announcements')
-                                        ->where('user_id', Auth::id())
-                                        ->get()
-                                        // ->where('announcements.title', 'LIKE' , "%{$request->search}%")
-                                        ->pluck('announcements')
-                                        ->sortByDesc('publish_date')
-                                        ->unique()->values();
+                                            ->where('user_id', Auth::id())
+                                            ->get()
+                                            ->pluck('announcements')
+                                            ->sortByDesc('publish_date')
+                                            ->unique()->values();
 
-        return $announcements;
+        if($request->has('search') && isset($request->search)){
+
+            $announcements = collect($announcements)->filter(function ($item) use ($request) {
+                return str_contains($item->title, $request->search);
+            });
+        }
+
+        return response()->json(['message' => 'Announcements assigned to user.', 'body' => $announcements->values()->paginate($paginate)], 200);
     }
 
     /**
