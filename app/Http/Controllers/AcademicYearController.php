@@ -121,8 +121,8 @@ class AcademicYearController extends Controller
         $logsbefore=Enroll::where('year',$request->id)->get();
         
         $check=Enroll::where('year',$request->id)->update(["year"=>null]);
-        if($check > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($check > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         if ($year->delete()) {
             return HelperController::api_response_format(200, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), 'Year Deleted Successfully');            
