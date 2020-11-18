@@ -437,6 +437,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('announcements/{created}', 'AnnouncementsController@index')->middleware('permission:announcements/my');
 });
 
-Route::group(['middleware' => ['auth:api','LastAction']], function () {
-    Route::Resource('log', LogsController::class);
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::get('logs/list-types', 'LogsController@List_Types')->name('types');
+    Route::Resource('logs', LogsController::class);
+
 });

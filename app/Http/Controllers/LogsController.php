@@ -31,15 +31,18 @@ class LogsController extends Controller
         //username
         $request->validate([
             'user' => 'exists:logs,user',
-            'model' => 'exists:logs,model',
+            'type' => 'exists:logs,model',
             'start_date' => 'date',
-            'end_date' => 'date'
+            'end_date' => 'date',
+            'action' => 'in:updated,deleted,created'
         ]);
         $logs=Log::whereNotNull('id');
         if(isset($request->user))
             $logs->where('user',$request->user);
-        if(isset($request->model))
-            $logs->where('model',$request->model);
+        if(isset($request->type))
+            $logs->where('model',$request->type);
+        if(isset($request->action))
+            $logs->where('action',$request->action);
         if(isset($request->start_date)){
             $end_date=Carbon::now();
             if(isset($request->end_date))
@@ -66,14 +69,9 @@ class LogsController extends Controller
         return HelperController::api_response_format(200, $AllLogs, 'Logs are');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+    public function List_Types(Request $request){
+        $types=Log::where('user',$request->user()->username)->pluck('model')->unique();
+        return array_values($types->toArray());
     }
 
     /**
