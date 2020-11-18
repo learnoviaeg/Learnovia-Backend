@@ -50,9 +50,9 @@ class NotificationsController extends Controller
                 'message' => $decoded_data['message'],
                 'publish_date' => Carbon::parse($decoded_data['publish_date'])->format('Y-m-d H:i:s'),
                 'type' => $decoded_data['type'],
-                'course_id' => $decoded_data['course_id'],
-                'class_id' => $decoded_data['class_id'],
-                'lesson_id'  => $decoded_data['lesson_id'],
+                'course_id' => isset($decoded_data['course_id']) ? $decoded_data['course_id'] : null ,
+                'class_id' => isset($decoded_data['class_id']) ? $decoded_data['class_id'] : null,
+                'lesson_id'  => isset($decoded_data['lesson_id']) ? $decoded_data['lesson_id'] : null,
                 'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
             ]);
         }
