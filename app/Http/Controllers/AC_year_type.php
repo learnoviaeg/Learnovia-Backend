@@ -120,14 +120,14 @@ class AC_year_type extends Controller
         //for log event
         $logsbefore=User::where('type',$req->id)->get();
         $returnValue=User::where('type',$req->id)->update(['type' => null]);
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         //for log event
         $logsbefore=Enroll::where('type',$req->id)->get();
         $returnValue=Enroll::where('type',$req->id)->update(['type' => null]);
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         $req['returnmsg'] = 'delete';
         $print = self::get($req);

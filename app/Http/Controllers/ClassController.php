@@ -241,14 +241,14 @@ class ClassController extends Controller
         //for log event
         $logsbefore=User::where('class_id',$request->id)->get();
         $returnValue=User::where('class_id',$request->id)->update(["class_id"=>null]);
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
        
         //for log event
         $logsbefore=Enroll::where('class',$request->id)->get();
         $returnValue=Enroll::where('class',$request->id)->update(["class"=>null]);
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
         
         $class->delete();
         return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), 'Class Deleted Successfully');
