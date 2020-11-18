@@ -30,7 +30,7 @@ class NotificationsController extends Controller
         $notify = DB::table('notifications')->select('data','read_at','id')
                                             ->where('notifiable_id', $request->user()->id)
                                             ->orderBy('created_at','desc')->get();
-                                
+                                            
         $notifications = collect();
 
         foreach($notify as $notify_object) {
@@ -56,14 +56,9 @@ class NotificationsController extends Controller
 
         }
 
-        $filter_notify = $notifications->where('publish_date', '<=', Carbon::now());
+        $notifications = $notifications->where('publish_date', '<=', Carbon::now());
 
-        //assign data with stutible headers
-        $user_notify['unread'] = count($filter_notify->where('read_at',null));
-
-        $user_notify['notifications'] = $filter_notify;
-
-        return response()->json(['message' => 'User notification list.','body' => $user_notify], 200);
+        return response()->json(['message' => 'User notification list.','body' => $notifications], 200);
     }
 
     /**
