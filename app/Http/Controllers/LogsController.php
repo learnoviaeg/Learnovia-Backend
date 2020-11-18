@@ -38,7 +38,16 @@ class LogsController extends Controller
         ]);
         $logs=Log::whereNotNull('id');
         if(isset($request->user))
-            $logs->where('user','LIKE',"%$request->user%");
+        {
+            $users=User::where(
+                function ($query) use ($request) {
+                    $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->user%' ")
+                            ->orWhere('arabicname', 'LIKE' ,"%$request->user%" )
+                            ->orWhere('username', 'LIKE', "%$request->user%");
+                })->pluck('username');
+            $logs->whereIn('user',$users);
+        }
+        // $logs->where('user','LIKE',"%$request->user%");
         if(isset($request->type))
             $logs->where('model',$request->type);
         if(isset($request->action))
@@ -47,7 +56,7 @@ class LogsController extends Controller
             $end_date=Carbon::now();
             if(isset($request->end_date))
                 $end_date=$request->end_date;
-            $logs=Log::where('created_at', '>=', $request->start_date)->where('created_at', '<=', $end_date);
+            $logs->where('created_at', '>=', $request->start_date)->where('created_at', '<=', $end_date);
         }
         $AllLogs=collect();
         foreach($logs->get() as $log)
