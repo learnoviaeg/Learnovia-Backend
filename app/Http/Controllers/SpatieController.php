@@ -396,6 +396,8 @@ class SpatieController extends Controller
             //Materials Resources Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'material/get', 'title' => 'Get Materials']);
 
+            //logs
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'logs/get', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'Log']);
 
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
             $teacher_permissions = [
