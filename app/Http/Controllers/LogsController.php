@@ -30,7 +30,7 @@ class LogsController extends Controller
     {
         //username
         $request->validate([
-            'user' => 'exists:logs,user',
+            'user' => 'string',
             'type' => 'exists:logs,model',
             'start_date' => 'date',
             'end_date' => 'date',
@@ -38,7 +38,7 @@ class LogsController extends Controller
         ]);
         $logs=Log::whereNotNull('id');
         if(isset($request->user))
-            $logs->where('user',$request->user);
+            $logs->where('user','LIKE',"%$request->user%");
         if(isset($request->type))
             $logs->where('model',$request->type);
         if(isset($request->action))
@@ -49,7 +49,7 @@ class LogsController extends Controller
                 $end_date=$request->end_date;
             $logs=Log::where('created_at', '>=', $request->start_date)->where('created_at', '<=', $end_date);
         }
-        $AllLogs=array();
+        $AllLogs=collect();
         foreach($logs->get() as $log)
         {
             $log->data=unserialize($log->data);
@@ -64,9 +64,9 @@ class LogsController extends Controller
                 $log->data->segment=Segment::find($log->data->segment);
                 unset($log->data->courseSegment);
             }            
-            $AllLogs[]=$log;
+            $AllLogs->push($log);
         }
-        return HelperController::api_response_format(200, $AllLogs, 'Logs are');
+        return HelperController::api_response_format(200, $AllLogs->paginate(HelperController::GetPaginate($request)), 'Logs are');
     }
 
     public function List_Types(Request $request){
