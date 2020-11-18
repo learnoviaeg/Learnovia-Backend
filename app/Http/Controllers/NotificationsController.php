@@ -58,7 +58,7 @@ class NotificationsController extends Controller
 
         $notifications = $notifications->where('publish_date', '<=', Carbon::now());
 
-        return response()->json(['message' => 'User notification list.','body' => $notifications], 200);
+        return response()->json(['message' => 'User notification list.','body' => $notifications->values()], 200);
     }
 
     /**
