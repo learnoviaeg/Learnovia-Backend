@@ -438,7 +438,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
-    Route::get('logs/list-types', 'LogsController@List_Types')->name('types');
+    Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);
-
 });
