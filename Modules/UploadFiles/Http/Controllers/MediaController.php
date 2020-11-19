@@ -362,10 +362,7 @@ class MediaController extends Controller
         $file->delete();
         $media = media::whereId($request->mediaId)->first();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
-
-        $mediaLessons = MediaLesson::where('media_id', $request->mediaId)->get();
-        if(count($mediaLessons) == 0)
-            $media->delete();
+        $media->delete();
 
         if($media_type != null)
         {
