@@ -38,5 +38,5 @@ Route::group(['prefix' => 'bigbluebutton', 'middleware' => ['auth:api','LastActi
     Route::get('list_hook', 'BigbluebuttonController@list_hook');
     Route::get('refresh', 'BigbluebuttonController@refresh_meetings')->middleware('permission:site/show-all-courses');
     Route::get('refresh_records', 'BigbluebuttonController@refresh_records')->middleware('permission:site/show-all-courses');
-
+    Route::get('get_by_id', 'BigbluebuttonController@show')->middleware('permission:bigbluebutton/get-all');
 });

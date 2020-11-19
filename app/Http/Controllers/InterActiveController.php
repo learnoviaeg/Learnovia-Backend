@@ -20,7 +20,7 @@ class InterActiveController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index','show']]);
     }
     /**
      * Display a listing of the resource.
@@ -104,7 +104,17 @@ class InterActiveController extends Controller
      */
     public function show($id)
     {
-        //
+        $interactive = response()->json(DB::table('h5p_contents')->whereId($id)->first());
+
+        $interactive = $interactive->original;
+
+        unset($interactive->parameters,$interactive->filtered,$interactive->metadata);
+
+        if(isset($interactive))
+            return response()->json(['message' => 'interactive objet', 'body' => $interactive], 200);
+
+        return response()->json(['message' => 'interactive not fount!', 'body' => [] ], 400);
+
     }
 
     /**

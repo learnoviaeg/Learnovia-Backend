@@ -865,4 +865,15 @@ class BigbluebuttonController extends Controller
 
         return HelperController::api_response_format(200 , $records_meetings , 'Classrooms refreshed successfully');
     }
+
+    public function show(Request $request)
+    {
+        $meetings = BigbluebuttonModel::where('id',$request->id)->first();
+        
+        if(isset($meetings))
+            return response()->json(['message' => 'meetings objet', 'body' => $meetings], 200);
+
+        return response()->json(['message' => 'meetings not fount!', 'body' => [] ], 400);
+
+    }
 }
