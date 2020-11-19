@@ -208,6 +208,12 @@ class PageController extends Controller
         if($page)
         {
             $page->delete();
+            $pagelesson = PageLesson::where('page_id', $request->page_id)->get();
+
+            if(count($pagelesson) == 0 ){
+                Page::whereId($request->page_id)->delete();
+            }
+
             $tempReturn = Lesson::find($request->lesson_id)->module('Page', 'page')->get();
             return HelperController::api_response_format(200, $tempReturn, 'Page deleted successfully');
         }
