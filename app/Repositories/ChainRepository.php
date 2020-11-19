@@ -29,7 +29,7 @@ class ChainRepository implements ChainRepositoryInterface
             $segment_id = Segment::Get_current($request->type)->id;
             if ($request->filled('segment'))
                 $segment_id = $request->segment;
-            $enrolls=$enrolls->where('segment_id', $segment_id);
+            $enrolls=$enrolls->where('segment', $segment_id);
             }        
         if ($request->filled('level'))
             $enrolls=$enrolls->where('level', $request->level);

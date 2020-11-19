@@ -13,6 +13,7 @@ use App\Language;
 use App\Level;
 use App\Classes;
 use App\Enroll;
+use App\Events\MassLogsEvent;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use stdClass;
@@ -217,7 +218,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'nickname'=>'string|min:3|max:50',
+            'nickname'=>'nullable|string|min:3|max:50',
             'firstname' => 'required|string|min:3|max:50',
             'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
@@ -229,6 +230,7 @@ class UserController extends Controller
             'suspend' => 'boolean',
             'language' => 'integer|exists:languages,id',
             'second language' => 'integer|exists:languages,id',
+            'birthdate' => 'nullable|date'
         ]);
 
         $users_is = collect([]);
@@ -261,11 +263,11 @@ class UserController extends Controller
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
 
         foreach ($optionals as $optional) {
-            if ($request->filled($optional)){
+            if ($request->has($optional)){
 
                 $user->$optional = $request->$optional;
 
-                if($optional =='birthdate')
+                if($optional =='birthdate' && isset($request->birthdate))
                     $user->$optional = Carbon::parse($request->$optional)->format('Y-m-d');
 
                 if($optional == 'suspend' && $request->suspend == 1){
@@ -278,6 +280,9 @@ class UserController extends Controller
                 
                     unset($user->tokens);
                 }
+
+                if($optional == 'nickname' && $request->$optional == 'null')
+                    $user->$optional = null;
             }
         }
         $user->save();
@@ -709,10 +714,16 @@ class UserController extends Controller
         $request->validate([
             'child_id' => 'exists:parents,child_id'
         ]);
-        Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+
+        //for log event
+        $logsbefore=Parents::where('parent_id',Auth::id())->get();
+        $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
+
         $current_child=null;
         if(isset($request->child_id)){
-            Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
+            Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->first()->update(['current'=> 1]);
             $current_child = User::where('id',$request->child_id)->first();
         }
         return HelperController::api_response_format(200,$current_child ,'Children sets successfully');

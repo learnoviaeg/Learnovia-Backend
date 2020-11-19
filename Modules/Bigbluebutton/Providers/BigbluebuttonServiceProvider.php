@@ -4,6 +4,8 @@ namespace Modules\Bigbluebutton\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
+use App\Observers\LogsObserver;
 
 class BigbluebuttonServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,8 @@ class BigbluebuttonServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
+        BigbluebuttonModel::observe(LogsObserver::class);
     }
 
     /**

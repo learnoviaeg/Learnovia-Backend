@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use Illuminate\Support\Facades\Auth;
+use App\Paginate;
 use App\h5pLesson;
 use DB;
 use App\Lesson;
@@ -29,12 +30,16 @@ class InterActiveController extends Controller
     public function index(Request $request)
     {
         $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id' 
-
         ]);
+        
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses'))//student
             {
@@ -53,7 +58,12 @@ class InterActiveController extends Controller
             }
             $lessons  = [$request->lesson];
         }
-        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->where('visible', '=', 1)->where('publish_date', '<=', Carbon::now())->get()->sortByDesc('start_date');
+        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->where('publish_date', '<=', Carbon::now());
+        if(!$request->user()->can('site/show-all-courses'))//student
+        {
+            $h5p_lessons =$h5p_lessons->where('visible', '=', 1);
+        }
+        $h5p_lessons = $h5p_lessons->get()->sortByDesc('start_date');
         $h5p_contents=[];
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
 
@@ -70,7 +80,7 @@ class InterActiveController extends Controller
             $content->original->lesson = Lesson::find($h5p->lesson_id);
             $h5p_contents[]=$content->original;
         }
-        return response()->json(['message' => 'InterActive vedios  List ....', 'body' => $h5p_contents], 200);
+        return response()->json(['message' => 'InterActive vedios  List ....', 'body' => collect($h5p_contents)->paginate(Paginate::GetPaginate($request))], 200);
 
         
     }

@@ -10,9 +10,17 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuestionsCategory;
+use App\Repositories\ChainRepositoryInterface;
+
 
 class QuestionCategoryController extends Controller
 {
+    protected $chain;
+
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+    }
     /**
      * Show the form for creating a new resource.
      * @return Response
@@ -72,11 +80,17 @@ class QuestionCategoryController extends Controller
             'dropdown' => 'boolean',
             'class' => 'array|exists:classes,id'
         ]);
+        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+        if(!$request->user()->can('site/show-all-courses'))//  teacher 
+            {
+                $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+            }
+        $user_course_segments = $user_course_segments->pluck('course_segment');
 
         $ques_cat=QuestionsCategory::where(function($q) use($request){
             if($request->filled('text'))
                 $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-        })->with('CourseSegment.courses')->get();
+            })->whereIn('course_segment_id',$user_course_segments)->with('CourseSegment.courses')->get();
 
         if($request->filled('course_id'))
         {

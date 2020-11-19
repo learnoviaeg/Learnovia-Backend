@@ -50,7 +50,7 @@ class Sendnotify implements ShouldQueue
         }
         $access_token = $client->getAccessToken()['access_token'];
         // Log::debug('access_token is '.$access_token);
-
+        
         $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token')->pluck('token');
         // dd($this->request['users']);
         // Log::debug(' users '. $this->request['users']);
@@ -65,7 +65,7 @@ class Sendnotify implements ShouldQueue
                 $fordata = array(
                         "id" => (string)$this->request['id'],
                         "message" => $this->request['message'],
-                        "fromm" => (string)$this->request['from'],
+                        "fromm" => isset($this->request['from']) ? (string)$this->request['from'] : null,
                         "type" => $this->request['type'],
                         "course_id" => (string)$this->request['course_id'],
                         "class_id" => (string)$this->request['class_id'],

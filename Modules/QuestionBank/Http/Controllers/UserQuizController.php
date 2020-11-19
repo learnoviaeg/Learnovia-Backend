@@ -518,6 +518,9 @@ class UserQuizController extends Controller
             $essay = 0;
         
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!$quiz_lesson)
+            return HelperController::api_response_format(200, null, 'This quiz doesn\'t exist');
+
         $quiz_duration_ended=false;
         if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
             $quiz_duration_ended=true;

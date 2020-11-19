@@ -44,8 +44,11 @@ class TimelineController extends Controller
     {
         //validate the request
         $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
             'level' => 'exists:levels,id',
             'class' => 'exists:classes,id',
+            'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'item_type' => 'in:quiz,assignment',
@@ -61,14 +64,17 @@ class TimelineController extends Controller
         }
 
         $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
-        $lessons =[];
-        foreach ($user_course_segments as $user_course_segment){
-            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
-        }
-        $lessons =  array_values (array_unique($lessons)) ;  
-        $timeline = Timeline::with(['class','course','level'])->whereIn('lesson_id',$lessons)->where('visible',1)->where('start_date','<=',Carbon::now())->where('due_date','>=',Carbon::now());
 
+        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->unique()->values()->pluck('id');
 
+        $timeline = Timeline::with(['class','course','level'])
+                            ->whereIn('lesson_id',$lessons)
+                            ->where('visible',1)
+                            ->where('start_date','<=',Carbon::now())
+                            ->where('due_date','>=',Carbon::now())
+                            ->where(function ($query) {
+                                $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
+                            });
 
         if($request->has('item_type'))
             $timeline->where('type',$request->item_type);
@@ -84,39 +90,17 @@ class TimelineController extends Controller
 
         if($request->has('sort_by') && $request->sort_by == 'course' && $request->has('sort_in')){
             $object_sort = $timeline;
-            $course_sort =  $object_sort->get()->sortBy('course.name')->values()->pluck('id');
-            if($request->sort_in == 'desc')
-                $course_sort =  $object_sort->get()->sortByDesc('course.name')->values()->pluck('id');
-
-            $ids_ordered = implode(',', $course_sort->toArray());
-            $timeline->orderByRaw("FIELD(id, $ids_ordered)");
-        }
-
-        $timelines = $timeline->get();
-        if($request->user()->can('site/course/student')){
-            foreach($timelines as $timeline){
-                $override = null;
-                if($timeline->item_type == 'assignment'){
-                    $assignment_lesson = AssignmentLesson::where('assignment_id',$timeline->item_id)
-                                                        ->where('lesson_id',$timeline->lesson_id)->first();
-                    if(isset($assignment_lesson))
-                        $override = assignmentOverride::where('user_id',Auth::id())->where('assignment_lesson_id',$assignment_lesson->id)->first();
-                }
-
-                if($timeline->item_type == 'quiz'){
-                    $quiz_lesson = QuizLesson::where('quiz_id',$timeline->item_id)->where('lesson_id',$timeline->lesson_id)->first();
-                    if(isset($quiz_lesson))
-                        $override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
-                }
-
-                if(isset($override)){
-                    $timeline->start_date = $override->start_date;
-                    $timeline->due_date = $override->due_date;
-                }
+            if(count($object_sort->get()) > 0){
+                $course_sort =  $object_sort->get()->sortBy('course.name')->values()->pluck('id');
+                if($request->sort_in == 'desc')
+                    $course_sort =  $object_sort->get()->sortByDesc('course.name')->values()->pluck('id');
+    
+                $ids_ordered = implode(',', $course_sort->toArray());
+                $timeline->orderByRaw("FIELD(id, $ids_ordered)");
             }
         }
 
-        return response()->json(['message' => 'Timeline List of items', 'body' => $timelines], 200);
+        return response()->json(['message' => 'Timeline List of items', 'body' => $timeline->get()], 200);
     }
 
     /**

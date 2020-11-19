@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Observers;
+namespace Modules\UploadFiles\Observers;
 
 use Modules\UploadFiles\Entities\MediaLesson;
+use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\Media;
 use App\Lesson;
 use App\Material;
@@ -31,8 +32,6 @@ class MediaLessonObserver
                 'visible' => 1,
                 'link' => $media->link,
                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
-
-
             ]);
         }
     }
@@ -47,7 +46,7 @@ class MediaLessonObserver
     {
         $media = Media::where('id',$mediaLesson->media_id)->first();
         if(isset($media)){
-            Material::where('item_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)->where('type' , 'media')
+            Material::where('item_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)->where('type' , 'media')->first()
             ->update([
                 'item_id' => $mediaLesson->media_id,
                 'name' => $media->name,
@@ -69,7 +68,11 @@ class MediaLessonObserver
      */
     public function deleted(MediaLesson $mediaLesson)
     {
-        Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->delete();
+        //for log event
+        $logsbefore=Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->get();
+        $all = Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->delete();
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'deleted'));
     }
 
     /**

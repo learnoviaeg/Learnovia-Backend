@@ -4,6 +4,9 @@ namespace Modules\Attendance\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\Attendance\Entities\AttendanceLog;
+use Modules\Attendance\Entities\AttendanceSession;
+use App\Observers\LogsObserver;
 
 class AttendanceServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,9 @@ class AttendanceServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->registerFactories();
         $this->loadMigrationsFrom(module_path('Attendance', 'Database/Migrations'));
+
+        // AttendanceLog::observe(LogsObserver::class);
+        // AttendanceSession::observe(LogsObserver::class);
     }
 
     /**

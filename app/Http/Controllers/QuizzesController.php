@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
+use App\Classes;
+use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
 
 
@@ -19,6 +21,8 @@ class QuizzesController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:quiz/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:quiz/detailes' , 'ParentCheck'],   ['only' => ['show']]);
+
     }
     /**
      * Display a listing of the resource.
@@ -28,12 +32,16 @@ class QuizzesController extends Controller
     public function index(Request $request)
     {
         $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id' 
-
         ]);
+        
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses'))//student
             {
@@ -58,9 +66,11 @@ class QuizzesController extends Controller
             $quiz=quiz::with('course')->where('id',$quiz_lesson->quiz_id)->first();
             $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
+            $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
-        return response()->json(['message' => 'Quizzes List ....', 'body' => $quizzes], 200);
+        return response()->json(['message' => 'Quizzes List ....', 'body' => $quizzes->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
@@ -82,7 +92,12 @@ class QuizzesController extends Controller
      */
     public function show($id)
     {
-        //
+        $quiz = quiz::find($id);
+
+        if(isset($quiz))
+            return response()->json(['message' => 'quiz objet ..', 'body' => $quiz ], 200);
+
+        return response()->json(['message' => 'quiz not fount!', 'body' => [] ], 400);
     }
 
     /**

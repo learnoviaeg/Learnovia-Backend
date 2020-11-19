@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Classes;
 use Nwidart\Modules\Collection;
+use Log;
 use App\Course;
 use App\CourseSegment;
 use App\Lesson;
@@ -139,6 +140,10 @@ class CourseController extends Controller
                                     'letter' => 1,
                                     'letter_id' => 1
                                 ]);
+                                // Log::info($request->user()->username.' created course '.$course.' in year '.$year.
+                                //         ' in level '.$level.' in segment '.$segment.' in type '.$type.' in class '.$class.
+                                //         ' start_at '.$request->start_date.' and end_at '.$request->end_date.' created_at '.Carbon::now()->format('Y-m-d H:i:s'));
+
                                 $gradeCat = GradeCategory::firstOrCreate([
                                     'name' => 'Course Total',
                                     'course_segment_id' => $courseSegment->id,
@@ -378,7 +383,8 @@ class CourseController extends Controller
         }
         else
         {
-            foreach ($request->user()->enroll as $enroll) {  
+            foreach ($request->user()->enroll->whereIn('role_id',[3,4]) as $enroll) {
+                // foreach ($request->user()->enroll as $enroll) {
                 if(in_array($enroll->CourseSegment->id, $CS->toArray())){
                     if ($enroll->CourseSegment->end_date > Carbon::now() && $enroll->CourseSegment->start_date < Carbon::now()) {
                         if($request->filled('year') || $request->filled('segment') || $request->filled('type') || $request->filled('level') || $request->filled('class') ){

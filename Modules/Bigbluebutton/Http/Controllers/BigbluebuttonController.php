@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 use BigBlueButton\BigBlueButton;
 use App\Component;
 use App\User;
+use App\Events\MassLogsEvent;
 use App\Enroll;
 use Auth;
 use Log;
@@ -30,6 +31,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\GradeCategoryController;
 use Illuminate\Support\Str;
 use App\Classes;
+use App\Paginate;
+
 
 class BigbluebuttonController extends Controller
 {
@@ -330,7 +333,10 @@ class BigbluebuttonController extends Controller
             'segment' => 'exists:segments,id',
             'course'    => 'exists:courses,id',
             'status'    => 'in:past,future,current',
-            'start_date' => 'date',
+            'start_date' => 'date|required_with:due_date',
+            'due_date' => 'date|required_with:start_date',
+            'sort_in' => 'in:asc,desc',
+            'pagination' => 'boolean'
         ]);
 
         $classes = [];
@@ -342,21 +348,30 @@ class BigbluebuttonController extends Controller
             $request['courses']= [$request->course];
         }
 
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
         self::clear(); 
+
         $CS_ids=GradeCategoryController::getCourseSegment($request);
+
         $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+
         $CourseSeg = array_intersect($CS_ids->toArray(),$CourseSeg->toArray());
+
         if($request->user()->can('site/show-all-courses')){
             $CourseSeg = $CS_ids;
             $classes = count($classes) == 0? Classes::pluck('id') : $classes;
         }
+
         $classes = count($classes) == 0 ? Enroll::where('user_id', Auth::id())->pluck('class') : $classes;
         
         $courses=CourseSegment::whereIn('id',$CourseSeg)->where('end_date','>',Carbon::now())
                                                         ->where('start_date','<',Carbon::now())
                                                         ->pluck('course_id')->unique()->values();
 
-        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('start_date');
+        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('start_date',$sort_in);
 
         if($request->user()->can('site/course/student'))
             $meeting->where('show',1);
@@ -364,10 +379,8 @@ class BigbluebuttonController extends Controller
         if($request->has('status'))
             $meeting->where('status',$request->status);
 
-        if($request->has('start_date')){
-            $to = Carbon::parse($request->start_date)->addMinutes(1);
-            $meeting->where('start_date', '>=', $request->start_date)->where('start_date','<',$to);
-        }
+        if($request->has('start_date'))
+            $meeting->where('start_date', '>=', $request->start_date)->where('start_date','<=',$request->due_date);
 
         if($request->has('id'))
             $meeting->where('id',$request->id);
@@ -390,6 +403,8 @@ class BigbluebuttonController extends Controller
 
         if(count($meetings) == 0)
             return HelperController::api_response_format(200 , [] , 'Classroom is not found');
+        if($request->has('pagination') && $request->pagination==true)
+            return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),'Classrooms list');
         return HelperController::api_response_format(200 , $meetings,'Classrooms list');
     }
 
@@ -417,6 +432,13 @@ class BigbluebuttonController extends Controller
         ]);
         $urls=null;
         $bigbb=BigbluebuttonModel::find($request->id);
+        
+        $meeting_start = isset($bigbb->actutal_start_date) ? $bigbb->actutal_start_date : $bigbb->start_date;
+        $check=Carbon::parse($meeting_start)->addMinutes($bigbb->duration);
+
+        if($check < Carbon::now() && !isset($bigbb->actutal_start_date))
+            return HelperController::api_response_format(200,null ,'No one entered this classroom.');
+          
         $bbb = new BigBlueButton();
         $recordingParams = new GetRecordingsParameters();
         $response = $bbb->getRecordings($recordingParams);
@@ -464,7 +486,7 @@ class BigbluebuttonController extends Controller
         if(count($logs) > 0)
             return HelperController::api_response_format(404 , null , 'This Class room has students logs, cannot be deleted!');
             
-        $meet = BigbluebuttonModel::whereId($request->id)->delete();
+        $meet = BigbluebuttonModel::whereId($request->id)->first()->delete();
         return HelperController::api_response_format(200 , null , 'Class room deleted!');
     }
 
@@ -477,10 +499,10 @@ class BigbluebuttonController extends Controller
         $bigbb=BigbluebuttonModel::find($request->id);
 
         if($bigbb->show == 1){
-            BigbluebuttonModel::where('id',$request->id)->update(['show' => 0]);
+            BigbluebuttonModel::where('id',$request->id)->first()->update(['show' => 0]);
         }
         else{
-            BigbluebuttonModel::where('id',$request->id)->update(['show' => 1]);
+            BigbluebuttonModel::where('id',$request->id)->first()->update(['show' => 1]);
         }
 
         $b=BigbluebuttonModel::find($request->id);
@@ -539,20 +561,28 @@ class BigbluebuttonController extends Controller
         $response  = json_decode(json_encode(simplexml_load_string($response->getBody()->getContents())), true);
 
         if(!isset($response['attendees']['attendee'][0]['userID'])){
+            //for log event
+            $logsbefore=AttendanceLog::whereIn('session_id',$meetings_ids)->where('type','online')->get();
             $all_attendees = AttendanceLog::whereIn('session_id',$meetings_ids)->where('type','online')->update([
                 'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'taker_id' => Auth::id(),
                 'status' => 'Absent'
             ]);
+            if($all_attendees > 0)
+                event(new MassLogsEvent($logsbefore,'updated'));
 
             return HelperController::api_response_format(200 , null , 'Attendance taken successfully!');
         }
 
+        //for log event
+        $logsbefore=AttendanceLog::whereIn('session_id',$meetings_ids)->where('type','online')->get();
         $attendance_status=AttendanceLog::whereIn('session_id',$meetings_ids)->where('type','online')->update([
             'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'taker_id' => Auth::id(),
             'status' => null
         ]);
+        if($attendance_status > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
 
         $students_id=collect();
         foreach($response['attendees']['attendee'] as $attend){
@@ -572,11 +602,16 @@ class BigbluebuttonController extends Controller
 
         $attendance_absent=AttendanceLog::where('status',null)->whereIn('session_id',$meetings_ids)->where('type','online')->whereNotIn('student_id',$students_id)->get()->unique('student_id');
         $absent_ids = $attendance_absent->pluck('id');
-        AttendanceLog::whereIn('id',$absent_ids)->update([
+
+        //for log event
+        $logsbefore=AttendanceLog::whereIn('id',$absent_ids)->get();
+        $all_attendees = AttendanceLog::whereIn('id',$absent_ids)->update([
             'taken_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'taker_id' => Auth::id(),
             'status' => 'Absent'
         ]);
+        if($all_attendees > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
 
         return HelperController::api_response_format(200 , null , 'Attendance taken successfully!');
 
@@ -676,11 +711,15 @@ class BigbluebuttonController extends Controller
         if(count($found) > 0 && Carbon::parse($found[0]->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
 
             if($arr[0]['data']['id'] == 'meeting-created'){
-                BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
+                //for log event
+                $logsbefore=BigbluebuttonModel::whereIn('id',$meetings_ids)->get();
+                $all_attendees = BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
                     'started' => 1,
                     'status' => 'current',
                     'actutal_start_date' => Carbon::now()
                 ]);
+                if($all_attendees > 0)
+                    event(new MassLogsEvent($logsbefore,'updated'));
             }
                 
             if($arr[0]['data']['id'] == 'user-joined'){
@@ -723,22 +762,35 @@ class BigbluebuttonController extends Controller
     
             if($arr[0]['data']['id'] == 'meeting-ended'){
                 Log::debug($arr[0]['data']['id']);
-                $log = AttendanceLog::whereIn('session_id',$meetings_ids)
-                                    ->where('type','online')
-                                    ->where('entered_date','!=',null)
-                                    ->where('left_date',null)->update([
-                                        'left_date' => Carbon::now()->format('Y-m-d H:i:s')
-                                    ]);
+
+                    //for log event
+                    $logsbefore=AttendanceLog::whereIn('session_id',$meetings_ids)
+                                ->where('type','online')
+                                ->where('entered_date','!=',null)
+                                ->where('left_date',null)->get();
+                    $all_attendees = AttendanceLog::whereIn('session_id',$meetings_ids)
+                                ->where('type','online')
+                                ->where('entered_date','!=',null)
+                                ->where('left_date',null)->update([
+                                    'left_date' => Carbon::now()->format('Y-m-d H:i:s')
+                                ]);
+                    if($all_attendees > 0)
+                        event(new MassLogsEvent($logsbefore,'updated'));
 
                 $meeting_start = isset($found[0]->actutal_start_date) ? $found[0]->actutal_start_date : $found[0]->start_date;
                 $start = Carbon::parse($meeting_start);
                 $end = Carbon::now();
                 $duration= $end->diffInMinutes($start);
-                BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
-                    'duration' => $duration,
-                    'started' => 0,
-                    'status' => 'past',
-                ]);
+
+                //for log event
+                $logsbefore=BigbluebuttonModel::whereIn('id',$meetings_ids)->get();
+                $all_attendees = BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
+                            'duration' => $duration,
+                            'started' => 0,
+                            'status' => 'past',
+                        ]);
+                if($all_attendees > 0)
+                    event(new MassLogsEvent($logsbefore,'updated'));   
             }
         }
     }
@@ -776,13 +828,41 @@ class BigbluebuttonController extends Controller
             }
         }
 
+        //for log event
+        $logsbefore=BigbluebuttonModel::whereIn('meeting_id',$current_meetings)->where('started',0)->where('status','future')->get();
         $meeting = BigbluebuttonModel::whereIn('meeting_id',$current_meetings)->where('started',0)->where('status','future')->update([
             'started' => 1,
             'status' => 'current',
             'actutal_start_date' => Carbon::now()
         ]);
+        if($meeting > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
 
         return HelperController::api_response_format(200 , $meeting , 'Classrooms refreshed successfully');
     }
 
+    public function refresh_records(Request $request){
+        $bbb = new BigBlueButton();
+        $records_meetings = collect();
+        
+        $recordingParams = new GetRecordingsParameters();
+        $response = $bbb->getRecordings($recordingParams);
+        if ($response->getReturnCode() == 'SUCCESS') {
+            foreach ($response->getRawXml()->recordings->recording as $recording) {
+
+                $meetings = BigbluebuttonModel::where('meeting_id',$recording->meetingID)->whereNull('actutal_start_date')->get();
+
+                if(count($meetings) > 0){
+                    foreach($meetings as $meeting){
+                        $meeting->update([
+                            'actutal_start_date' => $meeting->start_date
+                        ]);
+                        $records_meetings->push($meeting);
+                    }
+                }
+            }
+        }
+
+        return HelperController::api_response_format(200 , $records_meetings , 'Classrooms refreshed successfully');
+    }
 }

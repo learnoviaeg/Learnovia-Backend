@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use Nwidart\Modules\Collection;
-
+use App\Events\MassLogsEvent;
 use App\AcademicType;
 use App\AcademicYear;
 use App\AcademicYearType;
@@ -109,14 +109,26 @@ class AC_year_type extends Controller
         if(!(count($segment) == 0 && count($level) == 0)){
             return HelperController::api_response_format(404, [], 'This type assigned to level or segment, cannot be deleted.');
         }
-        $types = AcademicType::whereId($req->id)->delete();
-        AcademicYearType::where('academic_type_id',$req->id)->delete();
-        User::where('type',$req->id)->update([
-            'type' => null
-        ]);
-        Enroll::where('type',$req->id)->update([
-            'type' => null
-        ]);
+        $types = AcademicType::whereId($req->id)->first()->delete();
+
+        //for log event
+        $logsbefore=AcademicYearType::where('academic_type_id',$req->id)->get();
+        $returnValue=AcademicYearType::where('academic_type_id',$req->id)->delete();
+        if($returnValue > 0)
+            event(new MassLogsEvent($logsbefore,'deleted'));
+
+        //for log event
+        $logsbefore=User::where('type',$req->id)->get();
+        $returnValue=User::where('type',$req->id)->update(['type' => null]);
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
+
+        //for log event
+        $logsbefore=Enroll::where('type',$req->id)->get();
+        $returnValue=Enroll::where('type',$req->id)->update(['type' => null]);
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
+
         $req['returnmsg'] = 'delete';
         $print = self::get($req);
         return $print;

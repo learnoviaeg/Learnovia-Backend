@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Observers;
+namespace Modules\UploadFiles\Observers;
 
 use Modules\UploadFiles\Entities\FileLesson;
+use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\File;
 use App\Lesson;
 use App\Material;
@@ -46,7 +47,7 @@ class FileLessonObserver
     {
         $file = File::where('id',$fileLesson->file_id)->first();
         if(isset($file)){
-            Material::where('item_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->lesson_id)->where('type' , 'file')
+            Material::where('item_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->lesson_id)->where('type' , 'file')->first()
             ->update([
                 'item_id' => $fileLesson->file_id,
                 'name' => $file->name,
@@ -69,7 +70,11 @@ class FileLessonObserver
      */
     public function deleted(FileLesson $fileLesson)
     {
-        Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->delete();
+        //for log event
+        $logsbefore=Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->get();
+        $all = Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->delete();
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'deleted'));
     }
 
     /**

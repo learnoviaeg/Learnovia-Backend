@@ -8,6 +8,8 @@ use App\Enroll;
 use App\Material;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
+use App\Paginate;
+
 
 
 
@@ -30,35 +32,48 @@ class MaterialsController extends Controller
     public function index(Request $request)
     {
         $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'sort_in' => 'in:asc,desc',
             'item_type' => 'string|in:page,media,file',
             'class' => 'nullable|integer|exists:classes,id',
+            'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
+
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+
         if(!$request->user()->can('site/show-all-courses'))//student
-            {
-                $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-                
-            }
+        {
+            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+        }
 
         $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
-        $lessons =[];
-        foreach ($user_course_segments as $user_course_segment){
-            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
+
+        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->unique()->values()->pluck('id');
+      
+        if($request->has('lesson')){
+            if(!in_array($request->lesson,$lessons->toArray()))
+                return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
+
+            $lessons = [$request->lesson];
         }
-        $lessons =  array_values (array_unique($lessons)) ;
-        // $lessons = Lesson::whereIn('course_segment_id', $user_course_segments)->pluck('id');
+            
         $material = Material::with(['lesson','course'])->whereIn('lesson_id',$lessons);
+
         if($request->user()->can('site/course/student'))
             $material->where('visible',1);
+
         if($request->has('sort_in'))
             $material->orderBy("publish_date",$request->sort_in);
+
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
 
-        return response()->json(['message' => 'materials list.... ', 'body' => $material->get()], 200);
+        return response()->json(['message' => 'materials list.... ', 'body' => $material->get()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

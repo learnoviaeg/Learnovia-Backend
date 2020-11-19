@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 
-Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'quiz', 'middleware' =>[ 'auth:api','LastAction']], function () {
 
     //Install Question Bank
     Route::get('install', 'QuestionBankController@install_question_bank');
@@ -45,7 +45,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     // Route::post('get-fully-detailed-attempt', 'UserQuizController@get_fully_detailed_attempt')->middleware('permission:quiz/get-fully-detailed-attempt');
 });
 
-Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'question', 'middleware' => ['auth:api','LastAction']], function () {
     //Add/Update Question
     Route::post('add', 'QuestionBankController@store')->middleware('permission:question/add');
     Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
