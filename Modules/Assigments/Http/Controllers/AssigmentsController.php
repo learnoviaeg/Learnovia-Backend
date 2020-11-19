@@ -32,6 +32,11 @@ use App\Component;
 use App\LessonComponent;
 use App\status;
 use Illuminate\Support\Facades\Validator;
+use App\Timeline;
+use Modules\QuestionBank\Entities\QuizOverride;
+use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\Quiz;
+
 
 class AssigmentsController extends Controller
 {
@@ -568,7 +573,7 @@ class AssigmentsController extends Controller
         $request->validate([
             'assignment_id' => 'required|exists:assignments,id'
         ]);
-        $assign = Assignment::where('id', $request->assignment_id);
+        $assign = Assignment::where('id', $request->assignment_id)->first();
         $assign->delete();
 
         return HelperController::api_response_format(200, Assignment::all(), $message = 'Assignment deleted successfully');
@@ -883,5 +888,81 @@ class AssigmentsController extends Controller
             $images_path->push('data:image/png;base64,'.$b64image);
         }
         return HelperController::api_response_format(200, $images_path, 'Here pdf\'s images');
+    }
+
+    public function overwriteScript(){
+
+        $overwrites=collect();
+
+        $assignments_overwrite = assignmentOverride::get();
+
+        foreach($assignments_overwrite as $overwrite){
+            $assignmentLesson = AssignmentLesson::whereId($overwrite->assignment_lesson_id)->first();
+            $check = Timeline::where('item_id', $assignmentLesson->assignment_id)
+                            ->where('lesson_id',$assignmentLesson->lesson_id)
+                            ->where('type','assignment')
+                            ->where('overwrite_user_id',$overwrite->user_id)->first();
+            if(isset($assignmentLesson) && !isset($check)){
+                $assignment = Assignment::where('id',$assignmentLesson->assignment_id)->first();
+                $lesson = Lesson::find($assignmentLesson->lesson_id);
+                $course_id = $lesson->courseSegment->course_id;
+                $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+                $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
+                if(isset($assignment) ){
+                    $overwrites->push([
+                        'item_id' => $assignmentLesson->assignment_id,
+                        'name' => $assignment->name,
+                        'start_date' => $overwrite->start_date,
+                        'due_date' => $overwrite->due_date,
+                        'publish_date' => isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
+                        'course_id' => $course_id,
+                        'class_id' => $class_id,
+                        'lesson_id' => $assignmentLesson->lesson_id,
+                        'level_id' => $level_id,
+                        'type' => 'assignment',
+                        'overwrite_user_id' => $overwrite->user_id
+                    ]);
+                }
+            }
+        }
+
+        $quiz_overwrite = QuizOverride::get();
+        
+        foreach($quiz_overwrite as $overwrite){
+            $quizLesson = QuizLesson::whereId($overwrite->quiz_lesson_id)->first();
+            $check = Timeline::where('item_id', $quizLesson->quiz_id)
+                            ->where('lesson_id',$quizLesson->lesson_id)
+                            ->where('type','quiz')
+                            ->where('overwrite_user_id',$overwrite->user_id)->first();
+            if(isset($quizLesson) && !isset($check)){
+                $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
+                $lesson = Lesson::find($quizLesson->lesson_id);
+                $course_id = $lesson->courseSegment->course_id;
+                $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+                $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
+                if(isset($quiz)){
+                    $overwrites->push([
+                        'item_id' => $quizLesson->quiz_id,
+                        'name' => $quiz->name,
+                        'start_date' => $overwrite->start_date,
+                        'due_date' => $overwrite->due_date,
+                        'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
+                        'course_id' => $course_id,
+                        'class_id' => $class_id,
+                        'lesson_id' => $quizLesson->lesson_id,
+                        'level_id' => $level_id,
+                        'type' => 'quiz',
+                        'overwrite_user_id' => $overwrite->user_id
+                    ]);
+                }
+            }
+        }
+
+        $overwrites = $overwrites->sortBy('publish_date')->values();
+        Timeline::insert($overwrites->toArray());
+        if(count($overwrites->toArray())==0)
+            return response()->json(['message' => 'all overwrites is assigned before ', 'body' => $overwrites], 200);
+
+        return response()->json(['message' => 'all overwrites is assigned', 'body' => $overwrites], 200);
     }
 }

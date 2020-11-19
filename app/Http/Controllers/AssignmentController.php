@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Lesson;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\assignment;
+use App\Paginate;
+
 
 class AssignmentController extends Controller
 {
@@ -26,12 +28,16 @@ class AssignmentController extends Controller
     public function index(Request $request)
     {
         $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id' 
-
         ]);
+
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses'))//student
             {
@@ -59,8 +65,7 @@ class AssignmentController extends Controller
             $assignments[]=$assignment;
 
         }
-        return response()->json(['message' => 'Assignments List ....', 'body' => $assignments], 200);
-
+        return response()->json(['message' => 'Assignments List ....', 'body' => $assignments->paginate(Paginate::GetPaginate($request))], 200);
 
     }
 

@@ -129,7 +129,7 @@ class EnrollUserToCourseController extends Controller
             return HelperController::api_response_format(200, null, 'No Courses');
 
         foreach ($request->user_id as $users)
-            $course_segment = Enroll::whereIn('course_segment', $courseSegment)->where('user_id', $users)->delete();
+            $course_segment = Enroll::whereIn('course_segment', $courseSegment)->where('user_id', $users)->first()->delete();
 
         if ($course_segment > 0)
             return HelperController::api_response_format(200, null, 'users UnEnrolled Successfully');
@@ -656,7 +656,7 @@ class EnrollUserToCourseController extends Controller
                                 'raw_grade' => $useGrade[0]->raw_grade
                             ]);
                         }
-                        UserGrade::where('grade_item_id', $oldItems->id)->where('user_id', $user1)->delete();
+                        UserGrade::where('grade_item_id', $oldItems->id)->where('user_id', $user1)->first()->delete();
                     }
                 }
             }

@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Facades\Storage;
+use App\Events\MassLogsEvent;
 use App\AcademicYearType;
 use App\YearLevel;
 use App\Level;
@@ -19,7 +20,6 @@ use Auth;
 use App\Http\Resources\Classes as Classs;
 use Validator;
 use App\AcademicType;
-
 use App\AcademicYear;
 use App\Exports\ClassesExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -233,12 +233,23 @@ class ClassController extends Controller
         $class = Classes::find($request->id);
         $Segment_class = SegmentClass::whereIn("class_level_id",ClassLevel::where('class_id',$request->id)->pluck('id'))->get();
         
-        if(count($Segment_class)>0){
+        if(count($Segment_class)>0)
             return HelperController::api_response_format(400, [], 'This class assigned to segments, cannot be deleted');
-        }
-        ClassLevel::where('class_id',$request->id)->delete();
-        Enroll::where('class',$request->id)->update(["class"=>null]);
-        User::where('class_id',$request->id)->update(["class_id"=>null]);
+        
+        ClassLevel::where('class_id',$request->id)->first()->delete();
+       
+        //for log event
+        $logsbefore=User::where('class_id',$request->id)->get();
+        $returnValue=User::where('class_id',$request->id)->update(["class_id"=>null]);
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
+       
+        //for log event
+        $logsbefore=Enroll::where('class',$request->id)->get();
+        $returnValue=Enroll::where('class',$request->id)->update(["class"=>null]);
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
+        
         $class->delete();
         return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), 'Class Deleted Successfully');
     }

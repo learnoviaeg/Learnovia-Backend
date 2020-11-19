@@ -7,6 +7,7 @@ use App\AcademicYearType;
 use App\ClassLevel;
 use App\YearLevel;
 use Illuminate\Http\Request;
+use App\Events\MassLogsEvent;
 use App\AcademicType;
 use App\AcademicYear;
 use Validator;
@@ -280,11 +281,14 @@ class segment_class_Controller extends Controller
         if (count($course_segments) > 0) 
              return HelperController::api_response_format(404, [] , 'This Segment assigned to course/s, cannot be deleted.');
         
-        Segment::whereId($req->id)->delete();
-        SegmentClass::where('segment_id',$req->id)->delete();
-        Enroll::where('segment',$req->id)->update([
-            'segment' => null
-        ]);
+        Segment::whereId($req->id)->first()->delete();
+        SegmentClass::where('segment_id',$req->id)->first()->delete();
+
+        //for log event
+        $logsbefore=Enroll::where('segment',$req->id)->get();
+        $returnValue=Enroll::where('segment',$req->id)->update(['segment' => null]);
+        if($returnValue > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
 
         $req['id'] = null;
         $req['returnmsg'] = 'delete';

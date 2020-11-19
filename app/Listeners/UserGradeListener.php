@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Listerners;
+namespace App\Listeners;
 
 use App\Events\UserGradeEvent;
 use App\Enroll;

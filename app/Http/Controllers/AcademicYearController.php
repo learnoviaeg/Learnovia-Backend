@@ -9,6 +9,7 @@ use App\AcademicYearType;
 use App\AcademicType;
 use App\Enroll;
 use App\Segment;
+use App\Events\MassLogsEvent;
 use App\User;
 use Auth;
 use Carbon\Carbon;
@@ -115,12 +116,20 @@ class AcademicYearController extends Controller
         if(count( $year->YearType)>0){
             return HelperController::api_response_format(400, [], 'This year assigned to types, cannot be deleted');
         }
-        Enroll::where('year',$request->id)->update(["year"=>null]);
+        
+        //for log event
+        $logsbefore=Enroll::where('year',$request->id)->get();
+        
+        $check=Enroll::where('year',$request->id)->update(["year"=>null]);
+        // if($check > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
+
         if ($year->delete()) {
             return HelperController::api_response_format(200, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), 'Year Deleted Successfully');            
         }
         return HelperController::api_response_format(404, [], 'Not Found');
     }
+    
     public function setCurrent_year(Request $request)
     {
         $request->validate([
@@ -143,8 +152,12 @@ class AcademicYearController extends Controller
         else
             $year->update(['current' => 1]);
         
-        $all = AcademicYear::where('id', '!=', $request->id)
-            ->update(['current' => 0]);
+        //for log event
+        $logsbefore=AcademicYear::where('id', '!=', $request->id)->get();
+
+        $all = AcademicYear::where('id', '!=', $request->id)->update(['current' => 0]);
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
 
         return HelperController::api_response_format(200, $year , 'Year toggled successfully');
     }

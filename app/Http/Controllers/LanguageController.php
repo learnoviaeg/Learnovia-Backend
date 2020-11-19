@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Dictionary;
 use App\Language;
 use App\User;
+use App\Events\MassLogsEvent;
 use Illuminate\Support\Facades\Auth;
 
 class LanguageController extends Controller
@@ -17,16 +18,20 @@ class LanguageController extends Controller
             'name' => 'required|string',
             'default' => 'boolean',
         ]);
-        if($request->default == 1 )
-        Language::where('default' , '1')->update([
-            'default'=> 0, 
-        ]);
+        if($request->default == 1 ){
+            //for log event
+            $logsbefore=Language::where('default' , '1')->get();
+            $returnValue=Language::where('default' , '1')->update(['default'=> 0]);
+            if($returnValue > 0)
+                event(new MassLogsEvent($logsbefore,'updated'));
+        }
         Language::create([
             'name' => $request->name,
             'default' => (isset($request->default) && $request->default == 1) ? 1 : 0,
         ]);
         return HelperController::api_response_format(200, Language::all() , 'New language is added...');
     }
+
     public function update_language(Request $request)
     {
         $request->validate([
@@ -38,10 +43,13 @@ class LanguageController extends Controller
         if(isset($request->default) && $request->default == 0 && $lang->default == 1)
             return HelperController::api_response_format(200, [] , 'This is the default language and cannot be toggled unless you choose a default one instead');
 
-        if($request->default == 1 && $lang->default != 1)
-            Language::where('default' , '1')->update([
-                'default'=> 0, 
-            ]);
+        if($request->default == 1 && $lang->default != 1){
+            //for log event
+            $logsbefore=Language::where('default' , '1')->get();
+            $returnValue=Language::where('default' , '1')->update(['default'=> 0]);
+            if($returnValue > 0)
+                event(new MassLogsEvent($logsbefore,'updated'));
+        }
         
         if(isset($request->name ))
             $lang->name = $request->name;
@@ -82,8 +90,7 @@ class LanguageController extends Controller
         $lang = Language::where('id' , $request->id)->first();
         if($lang->default == 1)
             return HelperController::api_response_format(200, [] , 'This is the default language and cannot be deleted unless you choose a default one instead'); 
-    $lang->delete();
-    return HelperController::api_response_format(200, Language::all(), 'Language is deleted....');
-
+        $lang->delete();
+        return HelperController::api_response_format(200, Language::all(), 'Language is deleted....');
     }
 }
