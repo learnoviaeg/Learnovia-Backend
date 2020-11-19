@@ -362,23 +362,20 @@ class MediaController extends Controller
         $file->delete();
         $media = media::whereId($request->mediaId)->first();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
+        $media->delete();
 
         if($media_type != null)
         {
             if(str_contains($media_type , 'image'))
             {
-                $media->delete();
                 return HelperController::api_response_format(200, $tempReturn, 'Image deleted successfully');
             }else if(str_contains($media_type , 'video'))
             {
-                $media->delete();
                 return HelperController::api_response_format(200, $tempReturn, 'Video deleted successfully');
             }else if(str_contains($media_type , 'audio'))
             {
-                $media->delete();
                 return HelperController::api_response_format(200, $tempReturn, 'Audio deleted successfully');
             }else{
-                $media->delete();
                 return HelperController::api_response_format(200, $tempReturn, 'Media deleted successfully');
             }
         }else{
