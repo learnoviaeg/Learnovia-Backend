@@ -81,7 +81,38 @@ class ChatController extends Controller
             return HelperController::api_response_format(200, $user, 'Token is refreshed');
 
             }
+    public function chat_token(Request $request) //using by back-end only when user does not have the chat token 
+    {
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            ]);
+            $user= User::where('id',$request->user_id)->with('attachment')->first();
+            $clientt = new Client();
+            $data = array(
+                'name' => $user->firstname. " " .$user->lastname, 
+                'meta_data' => array(
+                    "image_link" => ($user->picture)?$user->attachment->path:null,
+                    'role'=> $user->roles[0]->name,
+                ),
+            );    
+            $data = json_encode($data);
 
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                'headers'   => [
+                    'Content-Type' => 'application/json'
+                ], 
+                'body' => $data
+            ]);
+
+            $user->update([
+                    'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+                'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+                'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
+                ]);
+                unset($user->roles,$user->attachment);
+
+            return response()->json(['message' => 'chat token is created....', 'body' => $user], 200);
+        }
 
 
 }

@@ -417,6 +417,7 @@ Route::group(['prefix' => 'h5p', 'middleware' => ['auth:api','LastAction']], fun
 Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], function () {
     Route::post('add-room', 'ChatController@chat_room')->name('addroom')->middleware('permission:chat/add-room');
     Route::post('refresh-token', 'ChatController@refresh_token')->name('refreshtoken')->middleware('permission:chat/add-room');
+    Route::post('chat-token', 'ChatController@chat_token')->name('chattohen');
 });
 
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
