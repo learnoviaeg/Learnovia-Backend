@@ -432,7 +432,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('classes', ClassesController::class);
     Route::Resource('users', UsersController::class);
     Route::Resource('questions', QuestionsController::class);
-    Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes' , 'ParentCheck']);
+    Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::Resource('notify', NotificationsController::class);
     Route::Resource('announcement', AnnouncementsController::class);
     Route::get('announcements/{created}', 'AnnouncementsController@index')->middleware('permission:announcements/my');
