@@ -711,15 +711,11 @@ class BigbluebuttonController extends Controller
         if(count($found) > 0 && Carbon::parse($found[0]->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
 
             if($arr[0]['data']['id'] == 'meeting-created'){
-                //for log event
-                $logsbefore=BigbluebuttonModel::whereIn('id',$meetings_ids)->get();
-                $all_attendees = BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
+                BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
                     'started' => 1,
                     'status' => 'current',
                     'actutal_start_date' => Carbon::now()
                 ]);
-                if($all_attendees > 0)
-                    event(new MassLogsEvent($logsbefore,'updated'));
             }
                 
             if($arr[0]['data']['id'] == 'user-joined'){
