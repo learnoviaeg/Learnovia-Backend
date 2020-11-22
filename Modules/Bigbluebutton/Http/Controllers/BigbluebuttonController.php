@@ -762,35 +762,22 @@ class BigbluebuttonController extends Controller
     
             if($arr[0]['data']['id'] == 'meeting-ended'){
                 Log::debug($arr[0]['data']['id']);
-
-                    //for log event
-                    $logsbefore=AttendanceLog::whereIn('session_id',$meetings_ids)
-                                ->where('type','online')
-                                ->where('entered_date','!=',null)
-                                ->where('left_date',null)->get();
-                    $all_attendees = AttendanceLog::whereIn('session_id',$meetings_ids)
-                                ->where('type','online')
-                                ->where('entered_date','!=',null)
-                                ->where('left_date',null)->update([
-                                    'left_date' => Carbon::now()->format('Y-m-d H:i:s')
-                                ]);
-                    if($all_attendees > 0)
-                        event(new MassLogsEvent($logsbefore,'updated'));
+                $log = AttendanceLog::whereIn('session_id',$meetings_ids)
+                                    ->where('type','online')
+                                    ->where('entered_date','!=',null)
+                                    ->where('left_date',null)->update([
+                                        'left_date' => Carbon::now()->format('Y-m-d H:i:s')
+                                    ]);
 
                 $meeting_start = isset($found[0]->actutal_start_date) ? $found[0]->actutal_start_date : $found[0]->start_date;
                 $start = Carbon::parse($meeting_start);
                 $end = Carbon::now();
                 $duration= $end->diffInMinutes($start);
-
-                //for log event
-                $logsbefore=BigbluebuttonModel::whereIn('id',$meetings_ids)->get();
-                $all_attendees = BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
-                            'duration' => $duration,
-                            'started' => 0,
-                            'status' => 'past',
-                        ]);
-                if($all_attendees > 0)
-                    event(new MassLogsEvent($logsbefore,'updated'));   
+                BigbluebuttonModel::whereIn('id',$meetings_ids)->update([
+                    'duration' => $duration,
+                    'started' => 0,
+                    'status' => 'past',
+                ]);   
             }
         }
     }
