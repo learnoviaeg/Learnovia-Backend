@@ -279,11 +279,9 @@ class AnnouncementController extends Controller
             'publish_date' => 'nullable|after:' . Carbon::now()->addMinutes(1),
         ]);
 
-        if (isset($request->publish_date)) {
+        $publishdate = Carbon::now();
+        if (isset($request->publish_date)) 
             $publishdate = $request->publish_date;
-        } else {
-            $publishdate = Carbon::now();
-        }
 
         if($request->start_date < Carbon::now())
         {
@@ -292,12 +290,9 @@ class AnnouncementController extends Controller
             $start_date = $request->start_date;
         }
 
+        $due_date = $announce->due_date;
         if(isset($request->due_date))
-        {
             $due_date = $request->due_date;
-        } else {
-            $due_date = $announce->due_date;
-        }
 
         //Files uploading
         if (Input::hasFile('attached_file')) {
@@ -623,7 +618,7 @@ class AnnouncementController extends Controller
 
     public function My_announc(Request $request)
     {
-        $my = Announcement::where('created_by',Auth::id());
+        $my = Announcement::where('created_by',Auth::id())->whereHas('UserAnnouncement');
            if($request->filled('search')){
             $my->where(function ($query) use ($request) {
                 $query->where('title', 'LIKE' , "%$request->search%");
