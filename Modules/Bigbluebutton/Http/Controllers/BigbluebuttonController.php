@@ -855,4 +855,22 @@ class BigbluebuttonController extends Controller
 
         return HelperController::api_response_format(200 , $records_meetings , 'Classrooms refreshed successfully');
     }
+
+    public function close_meetings(Request $request){
+        $bbb = new BigBlueButton();
+        $response = $bbb->getMeetings();
+        $current_meetings = collect();
+        if ($response->getReturnCode() == 'SUCCESS') {
+            foreach ($response->getRawXml()->meetings->meeting as $meeting) {
+                $current_meetings->push($meeting->meetingID);
+            }
+        }
+
+        $meeting = BigbluebuttonModel::whereNotIn('meeting_id',$current_meetings)->where('started',1)->where('status','current')->update([
+            'started' => 0,
+            'status' => 'past',
+        ]);
+
+        return HelperController::api_response_format(200 , $meeting , 'Classrooms closed successfully');
+    }
 }
