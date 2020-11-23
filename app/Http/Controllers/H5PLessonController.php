@@ -147,7 +147,7 @@ class H5PLessonController extends Controller
         }
 
         $h5pLesson->delete();
-        DB::table('h5p_contents')->whereId($request->content_id)->first()->delete();
+        DB::table('h5p_contents')->where('id', $request->content_id)->delete();
 
         return HelperController::api_response_format(200, null, 'Content deleted successfully');
     }
