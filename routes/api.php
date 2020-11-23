@@ -417,6 +417,7 @@ Route::group(['prefix' => 'h5p', 'middleware' => ['auth:api','LastAction']], fun
 Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], function () {
     Route::post('add-room', 'ChatController@chat_room')->name('addroom')->middleware('permission:chat/add-room');
     Route::post('refresh-token', 'ChatController@refresh_token')->name('refreshtoken')->middleware('permission:chat/add-room');
+    Route::post('chat-token', 'ChatController@chat_token')->name('chattohen');
 });
 
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
@@ -431,7 +432,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('classes', ClassesController::class);
     Route::Resource('users', UsersController::class);
     Route::Resource('questions', QuestionsController::class);
-    Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes' , 'ParentCheck']);
+    Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::Resource('notify', NotificationsController::class);
     Route::Resource('announcement', AnnouncementsController::class);
     Route::get('announcements/{created}', 'AnnouncementsController@index')->middleware('permission:announcements/my');
