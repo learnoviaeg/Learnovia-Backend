@@ -44,6 +44,11 @@ class AnnouncementsController extends Controller
                                             ->sortByDesc('publish_date')
                                             ->unique()->values();
 
+        if($request->user()->can('site/show-all-courses')){ //admin
+
+            $announcements = Announcement::orderBy('publish_date','desc')->get();
+        }
+
         if($request->has('search') && isset($request->search)){
 
             $announcements = collect($announcements)->filter(function ($item) use ($request) {
