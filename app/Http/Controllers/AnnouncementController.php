@@ -149,7 +149,7 @@ class AnnouncementController extends Controller
                                         $userr->where('role_id',$role);
                                         // return $userr->get();
     
-                                        $ann = Announcement::create([
+                                        $ann = Announcement::firstOrCreate([
                                             'title' => $request->title,
                                             'description' => $request->description,
                                             'attached_file' => $file_id,
