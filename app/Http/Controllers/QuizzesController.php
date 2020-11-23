@@ -10,9 +10,9 @@ use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
 use App\Classes;
+use App\Level;
 use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
-
 
 class QuizzesController extends Controller
 {
@@ -67,6 +67,7 @@ class QuizzesController extends Controller
             $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            $quiz['level'] = Level::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
             unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }

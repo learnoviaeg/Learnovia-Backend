@@ -8,10 +8,9 @@ use App\Enroll;
 use App\Material;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
+use App\Level;
+use App\Classes;
 use App\Paginate;
-
-
-
 
 class MaterialsController extends Controller
 {
@@ -21,7 +20,7 @@ class MaterialsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
 
     /**
@@ -73,7 +72,14 @@ class MaterialsController extends Controller
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
 
-        return response()->json(['message' => 'materials list.... ', 'body' => $material->get()->paginate(Paginate::GetPaginate($request))], 200);
+        $AllMat=$material->get();
+        foreach($AllMat as $one){
+            $one->class = Classes::find($one->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            $one->level = Level::find($one->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            unset($one->lesson->courseSegment);
+        }
+
+        return response()->json(['message' => 'materials list.... ', 'body' => $AllMat->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
