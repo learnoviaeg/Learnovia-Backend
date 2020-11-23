@@ -7,6 +7,8 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
+use App\Level;
+use App\Classes;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\assignment;
 use App\Paginate;
@@ -62,11 +64,12 @@ class AssignmentController extends Controller
             $assignment=assignment::where('id',$assignment_lesson->assignment_id)->first();
             $assignment['assignmentlesson'] = $assignment_lesson;
             $assignment['lesson'] = Lesson::find($assignment_lesson->lesson_id);
+            $assignment['class'] = Classes::find($assignment['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            $assignment['level'] = Level::find($assignment['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            unset($assignment['lesson']->courseSegment);
             $assignments[]=$assignment;
-
         }
         return response()->json(['message' => 'Assignments List ....', 'body' => $assignments->paginate(Paginate::GetPaginate($request))], 200);
-
     }
 
     /**
