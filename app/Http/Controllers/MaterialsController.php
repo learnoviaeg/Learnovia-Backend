@@ -20,7 +20,7 @@ class MaterialsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        // $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
 
     /**

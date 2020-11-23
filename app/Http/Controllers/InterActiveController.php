@@ -20,7 +20,7 @@ class InterActiveController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -78,6 +78,9 @@ class InterActiveController extends Controller
             }
             unset($content->original->parameters,$content->original->filtered,$content->original->metadata);
             $content->original->lesson = Lesson::find($h5p->lesson_id);
+            $content->original->class = Classes::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            $content->original->level = Level::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            unset($content->original->lesson->courseSegment);
             $h5p_contents[]=$content->original;
         }
         return response()->json(['message' => 'InterActive vedios  List ....', 'body' => collect($h5p_contents)->paginate(Paginate::GetPaginate($request))], 200);
