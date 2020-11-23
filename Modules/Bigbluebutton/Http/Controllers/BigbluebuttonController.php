@@ -873,4 +873,17 @@ class BigbluebuttonController extends Controller
 
         return HelperController::api_response_format(200 , $meeting , 'Classrooms closed successfully');
     }
+
+    public function logs_meetings(Request $request){
+        $present_logs = AttendanceLog::where('status','Present')->where('entered_date',null)->where('type','online')->get();
+        foreach($present_logs as $log){
+
+            $meetings=BigbluebuttonModel::where('id',$log->session_id)->first();
+            $log->entered_date = $log->taken_at;
+            $log->left_date = Carbon::parse($meetings->start_date)->addMinutes($meetings->duration)->format('Y-m-d H:i:s');
+            $log->save();
+        }
+        
+        return HelperController::api_response_format(200 , $present_logs , 'logs edited successfully');
+    }
 }
