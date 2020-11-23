@@ -866,15 +866,36 @@ class QuizController extends Controller
                 
             $attempts_index []= $user_Quiz->id;
         }
-
+        $user_quizzes = $attempts_index;
+        $userQuizesgrade = UserQuiz::whereIn('id',$user_quizzes)->pluck('grade');
+        switch ($quiz['grading_method']){
+            case 1: //first
+                $user_Quiz= min($user_quizzes);
+                break;
+            case 2 : //last
+                $user_Quiz= max($user_quizzes);
+                break;
+            case 4 : // highest
+                $index_max_attemp=array_search(max($userQuizesgrade->toArray()), $userQuizesgrade->toArray());
+                $user_Quiz = $user_quizzes[$index_max_attemp];
+                break;
+            case 5 :  //lowest
+                $index_min_attemp=array_search(min($userQuizesgrade->toArray()), $userQuizesgrade->toArray());
+                $user_Quiz = $user_quizzes[$index_min_attemp];
+                break;
+            default : //last attemp when method average
+                $user_Quiz= max($user_quizzes);
+        }
         if($request->filled('attempt_index'))
-            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->get();
-        foreach($user_quizzes as $user_Quiz)
-        {
-            $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz->id)->get();
+            {
+            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->pluck('id');
+            if(isset($user_quizzes))
+                $user_Quiz  =  $request->attempt_index;
+            }
+        $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz)->get();
             if(count($user_answer)>0)
                 $userAnswers=$user_answer;
-        }
+        
         // return $userAnswers;
         // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
         $quiz['attempts_index'] = $attempts_index;
