@@ -88,7 +88,13 @@ class AssignmentController extends Controller
      */
     public function show($id)
     {
-        //
+        $assignment = assignment::where('id',$id)->with('Lesson')->first();
+
+        if(isset($assignment))
+            return response()->json(['message' => 'assignment objet', 'body' => $assignment], 200);
+
+        return response()->json(['message' => 'assignment not fount!', 'body' => [] ], 400);
+        
     }
 
     /**
