@@ -6,9 +6,27 @@ use Illuminate\Http\Request;
 use App\userAnnouncement;
 use App\Announcement;
 use Auth;
+use Carbon\Carbon;
+use Illuminate\Validation\Rule;
+use App\Repositories\ChainRepositoryInterface;
 
 class AnnouncementsController extends Controller
 {
+
+    protected $chain;
+
+    /**
+     * ChainController constructor.
+     *
+     * @param ChainRepositoryInterface $post
+     */
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+        $this->middleware('auth');
+        $this->middleware(['permission:announcements/get'],   ['only' => ['index']]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -67,7 +85,122 @@ class AnnouncementsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        //check if user must filter with the whole chain
+        $chain_filter = 0;
+        if($request->user()->can('announcements/filter-chain')){
+            $chain_filter = 1;
+        }
+
+        //Validtaion
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+            'attached_file' => 'nullable|file|mimetypes:mp3,application/pdf,
+                                application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                application/msword,
+                                application/vnd.ms-excel,
+                                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                                application/vnd.ms-powerpoint,
+                                application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                                application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,
+                                video/ogg,jpg,image/jpeg,image/png',
+            'start_date' => 'before:due_date',
+            'due_date' => 'after:' . Carbon::now(),
+            'publish_date' => 'nullable|after:' . Carbon::now(),
+            'chains' => 'required|array',
+            'chains.*.role' => 'exists:roles,id',
+            'chains.*.year' => 'required|exists:academic_years,id',
+            'chains.*.type' => ['exists:academic_types,id',Rule::requiredIf($chain_filter === 1)],
+            'chains.*.level' => ['exists:levels,id',Rule::requiredIf($chain_filter === 1)],
+            'chains.*.class' => ['exists:classes,id',Rule::requiredIf($chain_filter === 1)],
+            'chains.*.segment' => ['exists:segments,id',Rule::requiredIf($chain_filter === 1)],
+            'chains.*.course' => ['exists:courses,id',Rule::requiredIf($chain_filter === 1)]
+        ]);
+
+        $publish_date = Carbon::now()->format('Y-m-d H:i:s');
+        if($request->has('publish_date')){
+            $publish_date = $request->publish_date;
+        }
+
+        $file = null;
+        if($request->has('attached_file')){
+            $file = attachment::upload_attachment($request->attached_file, 'Announcement');
+        }
+
+        $new_announcements = collect();
+        foreach($request->chains as $chain){
+
+            //chain object
+            $chain_request = new Request ([
+                'year' => $chain['year'],
+                'type' => isset($chain['type']) ? $chain['type'] : null,
+                'level' => isset($chain['level']) ? $chain['level'] : null,
+                'class' => isset($chain['class']) ? $chain['class'] : null,
+                'segment' => isset($chain['segment']) ? $chain['segment'] : null,
+                'courses' => isset($chain['course']) ? [$chain['course']] : null,
+            ]);
+
+            //get users that should receive the announcement
+            $enrolls = $this->chain->getCourseSegmentByChain($chain_request)->where('user_id','!=' ,Auth::id());
+
+            if(isset($chain['role'])){
+                $enrolls->where('role_id',$chain['role']);
+            }
+
+            $users = $enrolls->with('user')->get()->pluck('user')->unique()->filter()->values()->pluck('id');
+
+            //create announcement
+            $announcement = Announcement::create([
+                'title' => $request->title,
+                'description' => $request->description,
+                'attached_file' => isset($file) ? $file->id : null,
+                'class_id' => isset($chain['class']) ? $chain['class'] : null,
+                'course_id' => isset($chain['course']) ? $chain['course'] : null,
+                'level_id' => isset($chain['level']) ? $chain['level'] : null,
+                'year_id' => isset($chain['year']) ? $chain['year'] : null,
+                'type_id' => isset($chain['type']) ? $chain['type'] : null,
+                'segment_id' => isset($chain['segment']) ? $chain['segment'] : null,
+                'publish_date' => $publish_date,
+                'created_by' => Auth::id(),
+                'start_date' => isset($request->start_date) ? $request->start_date : null,
+                'due_date' => isset($request->due_date) ? $request->due_date : null,
+            ]);
+
+            //check if there's a students to send for them or skip that part
+            if(count($users) > 0){
+
+                //add user announcements
+                $users->map(function ($user) use ($announcement) {
+                    userAnnouncement::create([
+                        'announcement_id' => $announcement->id,
+                        'user_id' => $user
+                    ]);
+                });
+
+                //notification object
+                $notify_request = new Request ([
+                    'id' => $announcement->id,
+                    'type' => 'announcement',
+                    'publish_date' => $publish_date,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'attached_file' => $file,
+                    'start_date' => $announcement->start_date,
+                    'due_date' => $announcement->due_date,
+                    'message' => $request->title.' announcement is added',
+                    'from' => $announcement->created_by,
+                    'users' => $users->toArray()
+                ]);
+
+                // use notify store function to notify users with the announcement
+                $notify = (new NotificationsController)->store($notify_request);
+            }
+
+            $new_announcements->push($announcement);
+        }
+
+        return response()->json(['message' => 'Announcement sent successfully.', 'body' => $new_announcements], 200);
     }
 
     /**

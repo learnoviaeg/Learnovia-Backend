@@ -116,7 +116,7 @@ class NotificationsController extends Controller
 
         $users = User::whereIn('id',$request->users)->whereNull('deleted_at')->get();
 
-        $date = $request->publish_date;
+        $date = Carbon::parse($request->publish_date);
 
         $seconds = $date->diffInSeconds(Carbon::now()); //calculate time the job should fire at
         if($seconds < 0) {
