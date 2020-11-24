@@ -108,14 +108,14 @@ class AnnouncementsController extends Controller
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|after:' . Carbon::now(),
-            'role' => 'exists:roles,id',
-            'year' => ['exists:academic_years,id',Rule::requiredIf($chain_filter === 1)],
-            'type' => ['exists:academic_types,id',Rule::requiredIf($chain_filter === 1)],
-            'level' => ['exists:levels,id',Rule::requiredIf($chain_filter === 1)],
-            'class' => ['exists:classes,id',Rule::requiredIf($chain_filter === 1)],
-            'segment' => ['exists:segments,id',Rule::requiredIf($chain_filter === 1)],
-            'courses'    => 'array',
-            'courses.*' => ['exists:courses,id',Rule::requiredIf($chain_filter === 1)]
+            'chains' => 'required|array',
+            'chains.*.role' => 'exists:roles,id',
+            'chains.*.year' => 'required|exists:academic_years,id',
+            'chains.*.type' => ['exists:academic_types,id',Rule::requiredIf($chain_filter === 1)],
+            'chains.*.level' => ['exists:levels,id',Rule::requiredIf($chain_filter === 1)],
+            'chains.*.class' => ['exists:classes,id',Rule::requiredIf($chain_filter === 1)],
+            'chains.*.segment' => ['exists:segments,id',Rule::requiredIf($chain_filter === 1)],
+            'chains.*.course' => ['exists:courses,id',Rule::requiredIf($chain_filter === 1)]
         ]);
 
         $publish_date = Carbon::now()->format('Y-m-d H:i:s');
@@ -128,57 +128,79 @@ class AnnouncementsController extends Controller
             $file = attachment::upload_attachment($request->attached_file, 'Announcement');
         }
 
-        //get users that should receive the announcement
-        $enrolls = $this->chain->getCourseSegmentByChain($request)->where('user_id','!=' ,Auth::id());
+        $new_announcements = collect();
+        foreach($request->chains as $chain){
 
-        if($request->has('role')){
-            $enrolls->where('role_id',$request->role);
+            //chain object
+            $chain_request = new Request ([
+                'year' => $chain['year'],
+                'type' => isset($chain['type']) ? $chain['type'] : null,
+                'level' => isset($chain['level']) ? $chain['level'] : null,
+                'class' => isset($chain['class']) ? $chain['class'] : null,
+                'segment' => isset($chain['segment']) ? $chain['segment'] : null,
+                'courses' => isset($chain['course']) ? [$chain['course']] : null,
+            ]);
+
+            //get users that should receive the announcement
+            $enrolls = $this->chain->getCourseSegmentByChain($chain_request)->where('user_id','!=' ,Auth::id());
+
+            if(isset($chain['role'])){
+                $enrolls->where('role_id',$chain['role']);
+            }
+
+            $users = $enrolls->with('user')->get()->pluck('user')->unique()->filter()->values()->pluck('id');
+
+            //create announcement
+            $announcement = Announcement::create([
+                'title' => $request->title,
+                'description' => $request->description,
+                'attached_file' => isset($file) ? $file->id : null,
+                'class_id' => isset($chain['class']) ? $chain['class'] : null,
+                'course_id' => isset($chain['course']) ? $chain['course'] : null,
+                'level_id' => isset($chain['level']) ? $chain['level'] : null,
+                'year_id' => isset($chain['year']) ? $chain['year'] : null,
+                'type_id' => isset($chain['type']) ? $chain['type'] : null,
+                'segment_id' => isset($chain['segment']) ? $chain['segment'] : null,
+                'publish_date' => $publish_date,
+                'created_by' => Auth::id(),
+                'start_date' => isset($request->start_date) ? $request->start_date : null,
+                'due_date' => isset($request->due_date) ? $request->due_date : null,
+            ]);
+
+            //check if there's a students to send for them or skip that part
+            if(count($users) > 0){
+
+                //add user announcements
+                $users->map(function ($user) use ($announcement) {
+                    userAnnouncement::create([
+                        'announcement_id' => $announcement->id,
+                        'user_id' => $user
+                    ]);
+                });
+
+                //notification object
+                $notify_request = new Request ([
+                    'id' => $announcement->id,
+                    'type' => 'announcement',
+                    'publish_date' => $publish_date,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'attached_file' => $file,
+                    'start_date' => $announcement->start_date,
+                    'due_date' => $announcement->due_date,
+                    'message' => $request->title.' announcement is added',
+                    'from' => $announcement->created_by,
+                    'users' => $users->toArray()
+                ]);
+
+                // use notify store function to notify users with the announcement
+                $notify = (new NotificationsController)->store($notify_request);
+            }
+
+            $new_announcements->push($announcement);
         }
 
-        $users = $enrolls->with('user')->get()->pluck('user')->unique()->filter()->values()->pluck('id');
-
-        //create announcement
-        $announcement = Announcement::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'attached_file' => isset($file) ? $file->id : null,
-            'class_id' => isset($request->class) ? $request->class : null,
-            'course_id' => $request->has('courses') && count($request->courses) > 0 ? $request->courses[0] : null,
-            'level_id' => isset($request->level) ? $request->level : null,
-            'year_id' => isset($request->year) ? $request->year : null,
-            'type_id' => isset($request->type) ? $request->type : null,
-            'segment_id' => isset($request->segment) ? $request->segment : null,
-            'publish_date' => $publish_date,
-            'created_by' => Auth::id(),
-            'start_date' => isset($request->start_date) ? $request->start_date : null,
-            'due_date' => isset($request->due_date) ? $request->due_date : null,
-        ]);
-
-        //add announcement id to users object
-        $users->map(function ($user) use ($announcement) {
-            userAnnouncement::create([
-                'announcement_id' => $announcement->id,
-                'user_id' => $user
-            ]);
-        });
-
-        //notification object
-        $notify_request = ([
-            'id' => $announcement->id,
-            'type' => 'announcement',
-            'publish_date' => $publish_date,
-            'title' => $request->title,
-            'description' => $request->description,
-            'attached_file' => $file,
-            'start_date' => $announcement->start_date,
-            'due_date' => $announcement->due_date,
-            'message' => $request->title.' announcement is added'
-        ]);
-
-
-        return $users;
-
-
+        return response()->json(['message' => 'Announcement sent successfully.', 'body' => $new_announcements], 200);
     }
 
     /**
