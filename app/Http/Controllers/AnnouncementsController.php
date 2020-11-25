@@ -285,7 +285,7 @@ class AnnouncementsController extends Controller
                 $notify_request = new Request ([
                     'id' => $announcement->id,
                     'type' => 'announcement',
-                    'publish_date' => Carbon::now(),
+                    'publish_date' => Carbon::now()->format('Y-m-d H:i:s'),
                     'title' => $announcement->title,
                     'description' => $announcement->description,
                     'attached_file' => $file,
