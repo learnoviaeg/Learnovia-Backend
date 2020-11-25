@@ -547,7 +547,7 @@ class FilesController extends Controller
         $request->validate([
             'id' => 'required|integer|exists:files,id',
         ]);
-        $File = file::find($request->id);
+        $File = file::with('FileLesson')->find($request->id);
         return HelperController::api_response_format(200, $File);
     }
     public function AssignFileToLesson(Request $request)

@@ -491,7 +491,7 @@ class MediaController extends Controller
         $request->validate([
             'id' => 'required|integer|exists:media,id',
         ]);
-        $Media = media::find($request->id);
+        $Media = media::with('MediaLesson')->find($request->id);
         return HelperController::api_response_format(200, $Media);
     }
     public function AssignMediaToLesson(Request $request)
