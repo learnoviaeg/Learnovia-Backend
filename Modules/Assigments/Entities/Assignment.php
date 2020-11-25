@@ -34,4 +34,8 @@ class assignment extends Model
             return $this->attachment->path;
         }
     }
+    public function assignmentLessson()
+    {
+        return $this->hasMany('Modules\Assigments\Entities\AssignmentLesson', 'assignment_id', 'id');
+    }
 }
