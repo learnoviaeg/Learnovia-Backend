@@ -11,6 +11,8 @@ use App\Level;
 use App\Classes;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\assignment;
+use Modules\Assigments\Entities\UserAssigment;
+use Modules\Assigments\Entities\assignmentOverride;
 use App\Paginate;
 
 
@@ -20,7 +22,7 @@ class AssignmentController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:assignment/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:assignment/get' , 'ParentCheck'],   ['only' => ['index','show']]);
     }
     /**
      * Display a listing of the resource.
@@ -87,9 +89,34 @@ class AssignmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($assignment_id,$lesson_id)
     {
-        //
+        $user = Auth::user();
+
+        $assigLessonID = AssignmentLesson::where('assignment_id', $assignment_id)->where('lesson_id', $lesson_id)->first();        
+        if(!isset($assigLessonID))
+            return response()->json(['message' =>'this assigment doesn\'t belong to this lesson', 'body' => [] ], 400);
+
+        $assignment = assignment::where('id',$assignment_id)->first();
+        if(!isset($assignment))
+            return response()->json(['message' => 'assignment not fount!', 'body' => [] ], 400);
+
+        
+        $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
+        if (count($userassigments) > 0) {
+            $assignment['allow_edit'] = false;
+        } else {
+            $assignment['allow_edit'] = true;
+        }
+        $assignment['user_submit']=null;
+          /////////////student
+        if ($user->can('site/assignment/getAssignment')) {
+        $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
+        if(isset($studentassigment)){
+            $assignment['user_submit'] =$studentassigment;}
+        }
+       
+            return response()->json(['message' => 'assignment objet', 'body' => $assignment], 200);        
     }
 
     /**
