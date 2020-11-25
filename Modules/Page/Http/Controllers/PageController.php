@@ -236,6 +236,7 @@ class PageController extends Controller
         else
             return HelperController::api_response_format(200, null , 'This page is not assigned to the given lesson');
         $page->course_id=$course_id;
+        $page->page_lesson = PageLesson::where('page_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
         unset($page->lesson);
         
         return HelperController::api_response_format(200, $page);
