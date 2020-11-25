@@ -25,7 +25,9 @@ class AnnouncementsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:announcements/get'],   ['only' => ['index']]);
+        $this->middleware(['permission:announcements/get'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:announcements/update'],   ['only' => ['update']]);
+        $this->middleware(['permission:announcements/delete'],   ['only' => ['destroy']]);
     }
 
     /**
