@@ -268,6 +268,7 @@ Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api','LastAction']], 
     Route::get('with-teach-courses', 'EnrollUserToCourseController@exportcourseswithteachers')->middleware('permission:site/show-all-courses');
     Route::get('students-enroll', 'EnrollUserToCourseController@exportstudentsenrolls')->middleware('permission:site/show-all-courses');
     Route::post('StudentdInLevels', 'EnrollUserToCourseController@StudentdInLevels');
+    Route::post('update_enrolls', 'EnrollUserToCourseController@updateenrolls')->middleware('permission:site/show-all-courses');
 });
 
 //Messages Routes
