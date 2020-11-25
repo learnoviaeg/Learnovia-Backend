@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\userAnnouncement;
 use App\Announcement;
+use App\Attachment;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
@@ -24,7 +25,9 @@ class AnnouncementsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:announcements/get'],   ['only' => ['index']]);
+        $this->middleware(['permission:announcements/get'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:announcements/update'],   ['only' => ['update']]);
+        $this->middleware(['permission:announcements/delete'],   ['only' => ['destroy']]);
     }
 
     /**
@@ -228,7 +231,76 @@ class AnnouncementsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $announcement = Announcement::where('id',$id)->with('attachment')->first();
+
+        if(!isset($announcement))
+            return response()->json(['message' => 'Announcement not fount!', 'body' => [] ], 400);
+
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+            'attached_file' => 'nullable|file|mimetypes:mp3,application/pdf,
+                                application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                application/msword,
+                                application/vnd.ms-excel,
+                                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                                application/vnd.ms-powerpoint,
+                                application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                                application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,
+                                video/ogg,jpg,image/jpeg,image/png',
+            'start_date' => 'before:due_date',
+            'due_date' => 'after:' . Carbon::now(),
+        ]);
+
+        if($request->filled('title'))
+            $announcement->title = $request->title;
+
+        if($request->filled('description'))
+            $announcement->description = $request->description;
+
+        if($request->filled('start_date'))
+            $announcement->start_date = $request->start_date;
+
+        if($request->filled('due_date'))
+            $announcement->due_date = $request->due_date;
+
+        $file = $announcement->attachment;
+        if($request->filled('attached_file')){
+            $file = attachment::upload_attachment($request->attached_file, 'Announcement');
+            $announcement->attached_file = $file->id;
+        }
+
+        $announcement->save();
+
+        //check if announcement has already been sent to send the update
+        if($announcement->publish_date < Carbon::now()){
+
+            $users = userAnnouncement::where('announcement_id', $announcement->id)->pluck('user_id')->unique('user_id');
+
+            //check if there's a students to send for them or skip that part
+            if(count($users) > 0){
+
+                //notification object
+                $notify_request = new Request ([
+                    'id' => $announcement->id,
+                    'type' => 'announcement',
+                    'publish_date' => Carbon::now(),
+                    'title' => $announcement->title,
+                    'description' => $announcement->description,
+                    'attached_file' => $file,
+                    'start_date' => $announcement->start_date,
+                    'due_date' => $announcement->due_date,
+                    'message' => $announcement->title.' announcement is updated',
+                    'from' => $announcement->created_by,
+                    'users' => $users->toArray()
+                ]);
+
+                // use notify store function to notify users with the announcement
+                $notify = (new NotificationsController)->store($notify_request);
+            }
+        }
+
+        return response()->json(['message' => 'Announcement updated successfully.', 'body' => $announcement], 200);
     }
 
     /**
@@ -239,6 +311,13 @@ class AnnouncementsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $announcement = Announcement::where('id',$id)->with('attachment')->first();
+
+        if(!isset($announcement))
+            return response()->json(['message' => 'Announcement not fount!', 'body' => [] ], 400);
+
+        $announcement->delete();
+
+        return response()->json(['message' => 'Announcement deleted successfully.', 'body' => $announcement], 200);
     }
 }
