@@ -737,4 +737,25 @@ class EnrollUserToCourseController extends Controller
         return HelperController::api_response_format(201,$file, 'Link to file ....');
         // return HelperController::api_response_format(201,$enrolls, 'enrolls');
     }
+
+    public function updateenrolls(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'except_courses' => 'array',
+            'except_courses.*' => 'exists:courses,id',
+            'new_role' => 'required|exists:roles,id'
+        ]);
+
+        $enrolls = Enroll::where('user_id',$request->user_id);
+
+        if($request->filled('except_courses'))//courses that thier role shoudn't be changed
+            $enrolls->whereNotIn('course',$request->except_courses);
+
+        $enrolls->update([
+            'role_id' => $request->new_role
+        ]);
+
+        return HelperController::api_response_format(201,$enrolls, 'updated');
+    }
 }
