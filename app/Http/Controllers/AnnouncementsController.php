@@ -112,7 +112,8 @@ class AnnouncementsController extends Controller
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|after:' . Carbon::now(),
             'chains' => 'required|array',
-            'chains.*.role' => 'exists:roles,id',
+            'chains.*.roles' => 'array',
+            'chains.*.roles.*' => 'exists:roles,id',
             'chains.*.year' => 'required|exists:academic_years,id',
             'chains.*.type' => ['exists:academic_types,id',Rule::requiredIf($chain_filter === 1)],
             'chains.*.level' => ['exists:levels,id',Rule::requiredIf($chain_filter === 1)],
@@ -147,8 +148,8 @@ class AnnouncementsController extends Controller
             //get users that should receive the announcement
             $enrolls = $this->chain->getCourseSegmentByChain($chain_request)->where('user_id','!=' ,Auth::id());
 
-            if(isset($chain['role'])){
-                $enrolls->where('role_id',$chain['role']);
+            if(isset($chain['roles']) && count($chain['roles']) > 0){
+                $enrolls->whereIn('role_id',$chain['roles']);
             }
 
             $users = $enrolls->with('user')->get()->pluck('user')->unique()->filter()->values()->pluck('id');
