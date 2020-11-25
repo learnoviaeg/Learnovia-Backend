@@ -57,7 +57,7 @@ class NotificationsController extends Controller
             ]);
         }
 
-        $notifications = $notifications->where('publish_date', '<=', Carbon::now());
+        $notifications = $notifications->where('publish_date', '<=', Carbon::now())->sortByDesc('publish_date');
 
         if($request->has('read') && $request->read == 'unread')//get unread
             $notifications = $notifications->where('read_at',null);
