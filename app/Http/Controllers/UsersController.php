@@ -50,7 +50,6 @@ class UsersController extends Controller
         if($request->filled('roles')){
            $enrolls->whereIn('role_id',$request->roles);
         }
-        $enrolls =  $enrolls->with(['user.attachment','user.roles']);
         
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
@@ -58,9 +57,8 @@ class UsersController extends Controller
                 if($request->user()->can('site/show-all-courses')) //admin
                     $mychains=$enrolls->pluck('course_segment');
                $enrolls =  Enroll::whereIn('course_segment',$mychains)->where('user_id' ,'!=' , Auth::id());
-        }
-        
-        $enrolls =  $enrolls->get()->pluck('user')->unique()->values();
+            }
+        $enrolls =  $enrolls->with(['user.attachment','user.roles'])->get()->pluck('user')->unique()->values();
         if($request->filled('search'))
         {
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
