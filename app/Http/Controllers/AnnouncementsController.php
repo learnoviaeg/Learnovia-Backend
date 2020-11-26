@@ -70,10 +70,10 @@ class AnnouncementsController extends Controller
             $announcements = Announcement::orderBy('publish_date','desc')->get();
         }
 
-        if($request->has('search') && isset($request->search)){
+        if($request->filled('search')){
 
             $announcements = collect($announcements)->filter(function ($item) use ($request) {
-                return str_contains($item->title, $request->search);
+                return str_contains(strtolower($item->title), strtolower($request->search));
             });
         }
 
