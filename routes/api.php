@@ -434,6 +434,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('levels', LevelController::class);
     Route::Resource('classes', ClassesController::class);
     Route::Resource('users', UsersController::class);
+    Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:course/teachers|course/participants']);
     Route::Resource('questions', QuestionsController::class);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::Resource('notify', NotificationsController::class);
