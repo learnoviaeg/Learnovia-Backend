@@ -58,7 +58,6 @@ class UsersController extends Controller
                 if($request->user()->can('site/show-all-courses')) //admin
                     $mychains=$enrolls->pluck('course_segment');
                $enrolls =  $enrolls->whereIn('course_segment',$mychains)->where('user_id' ,'!=' , Auth::id());
-               return $enrolls->get()->pluck('user')->unique()->values();
         }
         
         $enrolls =  $enrolls->get()->pluck('user')->unique()->values();
