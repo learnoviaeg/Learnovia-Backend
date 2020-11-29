@@ -48,9 +48,9 @@ class MaterialsController extends Controller
         if(!$request->user()->can('site/show-all-courses'))//student
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
-        $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
+        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
 
-        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->unique()->values()->pluck('id');
+        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
