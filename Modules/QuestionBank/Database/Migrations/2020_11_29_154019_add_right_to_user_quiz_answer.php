@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterUserQuizAnswerTable extends Migration
+class AddRightToUserQuizAnswer extends Migration
 {
     /**
      * Run the migrations.
@@ -25,6 +25,8 @@ class AlterUserQuizAnswerTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('user_quiz_answers', function (Blueprint $table) {
+            //
+        });
     }
 }
