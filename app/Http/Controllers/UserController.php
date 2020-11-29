@@ -723,7 +723,9 @@ class UserController extends Controller
 
         $current_child=null;
         if(isset($request->child_id)){
-            Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->first()->update(['current'=> 1]);
+            $test=Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->first();
+            $test->current=1;
+            $test->save();
             $current_child = User::where('id',$request->child_id)->first();
         }
         return HelperController::api_response_format(200,$current_child ,'Children sets successfully');
