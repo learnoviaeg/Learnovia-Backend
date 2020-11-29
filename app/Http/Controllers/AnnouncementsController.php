@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\userAnnouncement;
 use App\Announcement;
-use App\Attachment;
+use App\attachment;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
