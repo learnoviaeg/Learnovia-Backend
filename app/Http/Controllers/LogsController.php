@@ -58,10 +58,16 @@ class LogsController extends Controller
                 $end_date=$request->end_date;
             $logs->where('created_at', '>=', $request->start_date)->where('created_at', '<=', $end_date);
         }
+        
+        $paginate=HelperController::GetPaginate($request);
+        $offset=1;
+        if(isset($request->page))
+            $offset=$request->page;
+
         $AllLogs=collect();
-        foreach($logs->get() as $log)
+        foreach($logs->limit($paginate * $offset)->get() as $log)
         {
-            $log->data=@unserialize($log->data);
+            $log->data=unserialize($log->data);
             if($log->model == 'Enroll' && !isset($log->data['before']))
             {
                 $log->data->user_id=User::find($log->data->user_id);
@@ -75,7 +81,7 @@ class LogsController extends Controller
             }            
             $AllLogs->push($log);
         }
-        return HelperController::api_response_format(200, $AllLogs->paginate(HelperController::GetPaginate($request)), 'Logs are');
+        return HelperController::api_response_format(200, $AllLogs->paginate($paginate), 'Logs are');
     }
 
     public function List_Types(Request $request){
