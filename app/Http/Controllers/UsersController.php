@@ -22,7 +22,7 @@ class UsersController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -62,7 +62,7 @@ class UsersController extends Controller
         {
 
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
-                if( str_contains($item->arabicname, $request->search) || str_contains(strtolower($item->username), strtolower($request->search))|| str_contains(strtolower($item->fullname), strtolower($request->search) ) ) 
+                if(  (($item->arabicname!=null) && str_contains($item->arabicname, $request->search) )|| str_contains(strtolower($item->username), strtolower($request->search))|| str_contains(strtolower($item->fullname), strtolower($request->search) ) ) 
                     return $item; 
             });
         }
