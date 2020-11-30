@@ -232,15 +232,7 @@ class AnnouncementsController extends Controller
         $request->validate([
             'title' => 'required',
             'description' => 'required',
-            'attached_file' => 'nullable|file|mimetypes:mp3,application/pdf,
-                                application/vnd.openxmlformats-officedocument.wordprocessingml.document,
-                                application/msword,
-                                application/vnd.ms-excel,
-                                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
-                                application/vnd.ms-powerpoint,
-                                application/vnd.openxmlformats-officedocument.presentationml.presentation,
-                                application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,
-                                video/ogg,jpg,image/jpeg,image/png',
+            'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
         ]);
