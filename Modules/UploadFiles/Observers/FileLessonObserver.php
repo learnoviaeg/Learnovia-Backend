@@ -48,20 +48,17 @@ class FileLessonObserver
         $file = File::where('id',$fileLesson->file_id)->first();
         if(isset($file)){
             $logsbefore=Material::where('item_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->lesson_id)
-                                ->where('type' , 'file')->get();
-            $all = Material::where('item_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->lesson_id)->where('type' , 'file')
-                                ->update([
-                                    'item_id' => $fileLesson->file_id,
-                                    'name' => $file->name,
-                                    'publish_date' => $fileLesson->publish_date,
-                                    'lesson_id' => $fileLesson->lesson_id,
-                                    'type' => 'file',
-                                    'visible' => $fileLesson->visible,
-                                    'link' => $file->url,    
-                                    'mime_type'=> $file->type,
-                                ]);
-            if($all > 0)
-                event(new MassLogsEvent($logsbefore,'updated'));
+                                ->where('type' , 'file')->first();
+            $logsbefore->update([
+                            'item_id' => $fileLesson->file_id,
+                            'name' => $file->name,
+                            'publish_date' => $fileLesson->publish_date,
+                            'lesson_id' => $fileLesson->lesson_id,
+                            'type' => 'file',
+                            'visible' => $fileLesson->visible,
+                            'link' => $file->url,    
+                            'mime_type'=> $file->type,
+                        ]);
         }
     }
 

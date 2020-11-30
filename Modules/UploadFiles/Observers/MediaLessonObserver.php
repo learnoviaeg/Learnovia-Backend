@@ -47,9 +47,8 @@ class MediaLessonObserver
         $media = Media::where('id',$mediaLesson->media_id)->first();
         if(isset($media)){
             $logsbefore=Material::where('item_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)
-                                    ->where('type' , 'media')->get();
-            $all=Material::where('item_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)->where('type' , 'media')
-                            ->update([
+                                    ->where('type' , 'media')->first();
+            $logsbefore ->update([
                                 'item_id' => $mediaLesson->media_id,
                                 'name' => $media->name,
                                 'publish_date' => $mediaLesson->publish_date,
@@ -59,8 +58,6 @@ class MediaLessonObserver
                                 'link' => $media->link,
                                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
                             ]);
-            if($all > 0)
-                event(new MassLogsEvent($logsbefore,'updated'));
         }
     }
 
