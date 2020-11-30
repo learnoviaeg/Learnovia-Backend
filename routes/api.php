@@ -440,6 +440,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('notify', NotificationsController::class);
     Route::Resource('announcement', AnnouncementsController::class);
     Route::get('announcements/{created}', 'AnnouncementsController@index')->middleware('permission:announcements/my');
+    Route::Resource('virtual', VirtualClassRoomController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
