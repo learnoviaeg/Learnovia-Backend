@@ -67,7 +67,7 @@ class LogsController extends Controller
         $AllLogs=collect();
         foreach($logs->limit($paginate * $offset)->get() as $log)
         {
-            $log->data=@unserialize($log->data);
+            $log->data=unserialize($log->data);
             if($log->model == 'Enroll' && !isset($log->data['before']))
             {
                 $log->data->user_id=User::find($log->data->user_id);
