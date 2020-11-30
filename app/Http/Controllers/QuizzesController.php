@@ -39,26 +39,27 @@ class QuizzesController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
-            'lesson' => 'nullable|integer|exists:lessons,id' 
+            'lesson' => 'nullable|integer|exists:lessons,id',
+            // 'page'=>'required|integer|min:1' 
         ]);
         
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses'))//student
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
-        $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
-        $lessons =[];
-        foreach ($user_course_segments as $user_course_segment)
-            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
-        
-        $lessons =  array_values (array_unique($lessons)) ;
+        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
+        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+
         if($request->filled('lesson')){
-            if (!in_array($request->lesson,$lessons))
+            if (!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
             
             $lessons  = [$request->lesson];
         }
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->get()->sortByDesc('start_date');
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date','desc')->get();
+        // ->offset(Paginate::GetPage($request)*(Paginate::GetPaginate($request)))
+        // ->limit(Paginate::GetPaginate($request))->get();
+
         $quizzes = collect([]);
         foreach($quiz_lessons as $quiz_lesson){
             $quiz=quiz::with('course')->where('id',$quiz_lesson->quiz_id)->first();
