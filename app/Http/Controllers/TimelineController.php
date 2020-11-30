@@ -63,8 +63,8 @@ class TimelineController extends Controller
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
         }
 
-        $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->pluck('courseSegment.lessons.*.id')->collapse();
-        
+        $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$lessons)
                             ->where('visible',1)
