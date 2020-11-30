@@ -39,7 +39,8 @@ class QuizzesController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
-            'lesson' => 'nullable|integer|exists:lessons,id' 
+            'lesson' => 'nullable|integer|exists:lessons,id',
+            // 'page'=>'required|integer|min:1' 
         ]);
         
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
@@ -50,12 +51,15 @@ class QuizzesController extends Controller
         $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
 
         if($request->filled('lesson')){
-            if (!in_array($request->lesson,$lessons))
+            if (!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
             
             $lessons  = [$request->lesson];
         }
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->get()->sortByDesc('start_date');
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date','desc')->get();
+        // ->offset(Paginate::GetPage($request)*(Paginate::GetPaginate($request)))
+        // ->limit(Paginate::GetPaginate($request))->get();
+
         $quizzes = collect([]);
         foreach($quiz_lessons as $quiz_lesson){
             $quiz=quiz::with('course')->where('id',$quiz_lesson->quiz_id)->first();
