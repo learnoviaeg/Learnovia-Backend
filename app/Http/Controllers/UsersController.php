@@ -22,7 +22,7 @@ class UsersController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -53,20 +53,20 @@ class UsersController extends Controller
         
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
-                $mychains=$enrolls->where('user_id',Auth::id())->pluck('course_segment');
-                if($request->user()->can('site/show-all-courses')) //admin
-                    $mychains=$enrolls->pluck('course_segment');
-               $enrolls =  Enroll::whereIn('course_segment',$mychains)->where('user_id' ,'!=' , Auth::id());
+                if(!$request->user()->can('site/show-all-courses')) //student
+                    $enrolls=$enrolls->where('user_id',Auth::id());
+               $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
             }
-        $enrolls =  $enrolls->with(['user.attachment','user.roles'])->get()->pluck('user')->unique()->values();
+        $enrolls =  $enrolls->select('user_id')->distinct()->with(['user.attachment','user.roles'])->get()->pluck('user')->filter()->values();
         if($request->filled('search'))
         {
+
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
                 if( str_contains($item->arabicname, $request->search) || str_contains(strtolower($item->username), strtolower($request->search))|| str_contains(strtolower($item->fullname), strtolower($request->search) ) ) 
                     return $item; 
             });
         }
-        return response()->json(['message' => 'Users List', 'body' =>   $enrolls->values()->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => 'Users List', 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
