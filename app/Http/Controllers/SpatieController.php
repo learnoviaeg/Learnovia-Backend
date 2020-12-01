@@ -17,6 +17,7 @@ use App\Contract;
 use App\scale;
 use Carbon\Carbon;
 use DB;
+use GuzzleHttp\Client;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Http\Controllers\ExcelController;
 use Maatwebsite\Excel\Facades\Excel;
@@ -436,13 +437,32 @@ class SpatieController extends Controller
             $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
             $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $parent_permissions)->get());
 
+            $clientt = new Client();
+            $data = array(
+                'name' => 'Learnovia Company', 
+                'meta_data' => array(
+                    "image_link" => null,
+                    'role'=> 'Super Admin',
+                ),
+            );    
+            $data = json_encode($data);
+
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                'headers'   => [
+                    'Content-Type' => 'application/json'
+                ], 
+                'body' => $data
+            ]);
             $user = new User([
                 'firstname' => 'Learnovia',
                 'lastname' => 'Company',
                 'username' => 'Admin',
                 'email' => 'admin@learnovia.com',
                 'password' => bcrypt('Learnovia123'),
-                'real_password' => 'Learnovia123'
+                'real_password' => 'Learnovia123',
+                'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+                'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+                'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
             ]);
             $user->save();
             $user->assignRole($super);
