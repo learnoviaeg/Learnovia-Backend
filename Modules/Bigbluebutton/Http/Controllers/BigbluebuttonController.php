@@ -664,7 +664,7 @@ class BigbluebuttonController extends Controller
                 $last_logout = Carbon::parse($meeting_start)->addMinutes($meeting->duration)->diffInMinutes(Carbon::parse($logs[count($logs)-1]['left_date']));
 
             $duration_percentage = 0;
-            if(!$meeting->duration == 0)
+            if($meeting->duration != 0)
                 $duration_percentage = round(($diffrence/$meeting->duration)*100,2);
 
             $final_logs->push([
