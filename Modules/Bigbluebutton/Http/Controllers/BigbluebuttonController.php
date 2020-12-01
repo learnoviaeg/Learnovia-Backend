@@ -670,7 +670,7 @@ class BigbluebuttonController extends Controller
             $final_logs->push([
                 'username' => $logs[0]['User']['username'],
                 'fullname' => $logs[0]['User']['fullname'],
-                'attend_duration' => $diffrence . ' Minute/s',
+                'attend_duration' => $diffrence,
                 'duration_percentage' => $duration_percentage . ' %',
                 'first_login' => isset($first_login)? $first_login . ' Minute/s' : null,
                 'last_logout' => isset($last_logout)? $last_logout . ' Minute/s' : null,
