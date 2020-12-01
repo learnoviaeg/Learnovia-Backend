@@ -39,7 +39,8 @@ class InterActiveController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
-            'lesson' => 'nullable|integer|exists:lessons,id' 
+            'lesson' => 'nullable|integer|exists:lessons,id',
+            'sort_in' => 'in:asc,desc', 
         ]);
         
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
@@ -58,7 +59,11 @@ class InterActiveController extends Controller
         if(!$request->user()->can('site/show-all-courses'))//student
             $h5p_lessons =$h5p_lessons->where('visible', '=', 1);
 
-        $h5p_lessons = $h5p_lessons->get()->sortByDesc('start_date');
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
+        $h5p_lessons = $h5p_lessons->orderBy('start_date',$sort_in)->get();
         $h5p_contents=[];
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
 
