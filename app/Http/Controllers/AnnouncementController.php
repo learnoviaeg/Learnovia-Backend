@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\File;
 use App\Notifications\Announcment;
+use App\Events\MassLogsEvent;
 use Illuminate\Http\Request;
 use App\Announcement;
 use App\userAnnouncement;
