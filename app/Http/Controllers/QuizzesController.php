@@ -40,7 +40,8 @@ class QuizzesController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id',
-            // 'page'=>'required|integer|min:1' 
+            // 'page'=>'required|integer|min:1' ,
+            'sort_in' => 'in:asc,desc',
         ]);
         
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
@@ -56,7 +57,12 @@ class QuizzesController extends Controller
             
             $lessons  = [$request->lesson];
         }
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date','desc')->get();
+
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in)->get();
         // ->offset(Paginate::GetPage($request)*(Paginate::GetPaginate($request)))
         // ->limit(Paginate::GetPaginate($request))->get();
 
