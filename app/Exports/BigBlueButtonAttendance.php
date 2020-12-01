@@ -27,7 +27,7 @@ class BigBlueButtonAttendance implements FromCollection, WithHeadings
             $bbb_logs->push([
                 'user name' => $bbb['username'],
                 'full name' => $bbb['fullname'],
-                'attend duration' => $bbb['attend_duration'],
+                'attend duration' => $bbb['attend_duration'] .' Minute/s',
                 'duration percentage' => $bbb['duration_percentage'],
                 'first login' => $bbb['first_login'] == null? '-' : 'After '.$bbb['first_login'],
                 'last logout' => $bbb['last_logout'] == null ? '-' : 'Before '.$bbb['last_logout'],
