@@ -585,11 +585,12 @@ class AnnouncementController extends Controller
                     //for log event
                     $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
 
-                    if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message)
+                    if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message){
                         $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
                 
-                    if($check > 0)
-                        event(new MassLogsEvent($logsbefore));
+                        if($check > 0)
+                            event(new MassLogsEvent($logsbefore));
+                    }
                 }
             }
             $print=self::get($request);
