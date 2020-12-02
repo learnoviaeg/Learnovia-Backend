@@ -424,6 +424,7 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], fu
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('quizzes', QuizzesController::class);
+    Route::get('quiz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
     Route::Resource('materials', MaterialsController::class);
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
@@ -434,7 +435,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('levels', LevelController::class);
     Route::Resource('classes', ClassesController::class);
     Route::Resource('users', UsersController::class);
-    Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:course/teachers|course/participants']);
+    Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::Resource('notify', NotificationsController::class);

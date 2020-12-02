@@ -29,7 +29,7 @@ class QuizzesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$count = null)
     {
         $request->validate([
             'year' => 'exists:academic_years,id',
@@ -40,14 +40,16 @@ class QuizzesController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id',
-            // 'page'=>'required|integer|min:1' 
+            'sort_in' => 'in:asc,desc',
         ]);
-        
+
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+
         if(!$request->user()->can('site/show-all-courses'))//student
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
         $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
+
         $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
 
         if($request->filled('lesson')){
@@ -56,11 +58,21 @@ class QuizzesController extends Controller
             
             $lessons  = [$request->lesson];
         }
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date','desc')->get();
-        // ->offset(Paginate::GetPage($request)*(Paginate::GetPaginate($request)))
-        // ->limit(Paginate::GetPaginate($request))->get();
+
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+
+        if($count == 'count'){
+            return response()->json(['message' => 'Quizzes count', 'body' => $quiz_lessons->count() ], 200);
+        }
+
+        $quiz_lessons = $quiz_lessons->get();
 
         $quizzes = collect([]);
+
         foreach($quiz_lessons as $quiz_lesson){
             $quiz=quiz::with('course')->where('id',$quiz_lesson->quiz_id)->first();
             $quiz['quizlesson'] = $quiz_lesson;
@@ -70,6 +82,7 @@ class QuizzesController extends Controller
             unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
+
         return response()->json(['message' => 'Quizzes List ....', 'body' => $quizzes->paginate(Paginate::GetPaginate($request))], 200);
     }
 

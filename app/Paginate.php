@@ -30,4 +30,9 @@ class Paginate extends Model
         }
         return 0 ;
     }
+
+    public static function allPages($countQuery, $paginate)
+    {
+        return ceil($countQuery/$paginate);
+    }
 }

@@ -39,7 +39,8 @@ class AssignmentController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
-            'lesson' => 'nullable|integer|exists:lessons,id' 
+            'lesson' => 'nullable|integer|exists:lessons,id',
+            'sort_in' => 'in:asc,desc', 
         ]);
 
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
@@ -54,7 +55,12 @@ class AssignmentController extends Controller
             
             $lessons  = [$request->lesson];
         }
-        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->orderBy('start_date','desc')->get();
+
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
+        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in)->get();
         $assignments = collect([]);
         foreach($assignment_lessons as $assignment_lesson){
             $assignment=assignment::where('id',$assignment_lesson->assignment_id)->first();
