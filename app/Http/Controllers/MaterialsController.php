@@ -11,6 +11,7 @@ use App\Lesson;
 use App\Level;
 use App\Classes;
 use App\Paginate;
+use DB;
 
 class MaterialsController extends Controller
 {
@@ -28,8 +29,9 @@ class MaterialsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$count = null)
     {
+    
         $request->validate([
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id',
@@ -69,6 +71,17 @@ class MaterialsController extends Controller
 
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
+
+        if($count == 'count'){
+
+            $counts = $material->select(DB::raw
+                (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
+                    COUNT(case `type` when 'media' then 1 else null end) as media ,
+                    COUNT(case `type` when 'page' then 1 else null end) as page" 
+                ))->first()->only(['file','media','page']);
+
+            return response()->json(['message' => 'Materials count', 'body' => $counts], 200);
+        }
 
         $AllMat=$material->get();
         foreach($AllMat as $one){
