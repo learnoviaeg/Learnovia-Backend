@@ -29,7 +29,7 @@ class AssignmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$count = null)
     {
         $request->validate([
             'year' => 'exists:academic_years,id',
@@ -60,8 +60,17 @@ class AssignmentController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in)->get();
+        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+
+        if($count == 'count'){
+            
+            return response()->json(['message' => 'Assignments count', 'body' => $assignment_lessons->count()], 200);        
+        }
+
+        $assignment_lessons = $assignment_lessons->get();
+
         $assignments = collect([]);
+
         foreach($assignment_lessons as $assignment_lesson){
             $assignment=assignment::where('id',$assignment_lesson->assignment_id)->first();
             $assignment['assignmentlesson'] = $assignment_lesson;
@@ -71,6 +80,7 @@ class AssignmentController extends Controller
             unset($assignment['lesson']->courseSegment);
             $assignments[]=$assignment;
         }
+
         return response()->json(['message' => 'Assignments List ....', 'body' => $assignments->paginate(Paginate::GetPaginate($request))], 200);
     }
 
