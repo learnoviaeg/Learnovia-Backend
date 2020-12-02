@@ -29,14 +29,14 @@ class LogsController extends Controller
      */
     public function index(Request $request)
     {
-        //username
         $request->validate([
-            'user' => 'string',
+            'user' => 'string', //username
             'type' => 'exists:logs,model',
             'start_date' => 'date',
             'end_date' => 'date',
             'action' => 'in:updated,deleted,created'
         ]);
+
         $logs=Log::whereNotNull('id');
         if(isset($request->user))
         {
@@ -46,7 +46,6 @@ class LogsController extends Controller
                         ->orWhere('username', 'LIKE', "%$request->user%");
             }]);
         }
-        // $logs->where('user','LIKE',"%$request->user%");
         if(isset($request->type))
             $logs->where('model',$request->type);
         if(isset($request->action))
@@ -57,19 +56,16 @@ class LogsController extends Controller
                 $end_date=$request->end_date;
             $logs->where('created_at', '>=', $request->start_date)->where('created_at', '<=', $end_date);
         }
-        
-        // $paginate=HelperController::GetPaginate($request);
-        // $offset=1;
-        // if(isset($request->page))
-        //     $offset=$request->page;
 
         $AllLogs=collect();
-        $lastpage=collect();
+        $all_logs=collect();
+        $page=Paginate::GetPage($request);
+        $paginate=Paginate::GetPaginate($request);
         $countLogs=$logs->count();
-        $loggs=$logs->offset(Paginate::GetPage($request)*(Paginate::GetPaginate($request)))->limit(Paginate::GetPaginate($request))->get();
-        
-        $lastpage['current_page']=Paginate::GetPage($request)+1;
-        $lastpage['last_page']=Paginate::allPages($countLogs,Paginate::GetPaginate($request));
+        $all_logs['current_page']=$page+1;
+        $all_logs['last_page']=Paginate::allPages($countLogs,$paginate);
+
+        $loggs=$logs->offset($page*($paginate))->limit($paginate)->get();
         foreach($loggs as $log)
         {
             $log->data=unserialize($log->data);
@@ -86,9 +82,9 @@ class LogsController extends Controller
             }            
             $AllLogs->push($log);
         }
-        $lastpage['data']=$AllLogs;
+        $all_logs['data']=$AllLogs;
         
-        return HelperController::api_response_format(200, $lastpage, 'Logs are');
+        return HelperController::api_response_format(200, $all_logs, 'Logs are');
     }
 
     public function List_Types(Request $request){
