@@ -368,6 +368,7 @@ class FilesController extends Controller
             wpd,rpm,z,ods,xlsm,pps,odp',
             'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable|date',
+            'updated_lesson_id' =>'nullable|exists:lessons,id'
         ]);
         $file = file::find($request->id);
 
@@ -386,7 +387,7 @@ class FilesController extends Controller
 
         }
         $tempReturn = null;
-        $fileLesson = FileLesson::where('lesson_id', $request->lesson_id)->where('file_id', $request->id)->first();
+        $fileLesson = FileLesson::where('file_id', $request->id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($fileLesson))
             return HelperController::api_response_format(200, null , 'This file is not assigned to this file');
         if ($request->filled('publish_date')) {
@@ -396,10 +397,17 @@ class FilesController extends Controller
             } else {
                 $publishdate = Carbon::parse($request->publish_date);
             }
+            
             $fileLesson->update([
-                'publish_date' => $publishdate
+                'publish_date' => $publishdate,
             ]);
         }
+        if (!$request->filled('updated_lesson_id')) {
+          $request->updated_lesson_id= $request->lesson_id;
+        }
+        $fileLesson->update([
+            'lesson_id' => $request->updated_lesson_id
+        ]);
         $fileLesson->updated_at = Carbon::now();
         $fileLesson->save();
         $file->save();
