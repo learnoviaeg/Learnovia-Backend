@@ -171,6 +171,8 @@ class PageController extends Controller
         $page->update($data);
         $page_lesson = pageLesson::where('page_id', $request->id)
                 ->where('lesson_id', $request->lesson_id[0])->first();
+        if(!isset($page_lesson))
+            return HelperController::api_response_format(200, null , 'This file is not assigned to this lesson');
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id[0];
             }
