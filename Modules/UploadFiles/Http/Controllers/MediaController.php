@@ -259,7 +259,9 @@ class MediaController extends Controller
             'url' => 'nullable|active_url',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
-            'publish_date' => 'nullable|date'
+            'publish_date' => 'nullable|date',
+            'updated_lesson_id' =>'nullable|exists:lessons,id'
+
         ]);
 
         $media = media::find($request->id);
@@ -295,6 +297,12 @@ class MediaController extends Controller
             }
             $mediaLesson->update(['publish_date' => $publishdate]);
         }
+        if (!$request->filled('updated_lesson_id')) {
+            $request->updated_lesson_id= $request->lesson_id;
+          }
+        $mediaLesson->update([
+            'lesson_id' => $request->updated_lesson_id
+        ]);
         $mediaLesson->updated_at = Carbon::now();
         $mediaLesson->save();
         $tempReturn = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'media')->get();
