@@ -161,6 +161,8 @@ class QuizLessonController extends Controller
             'grading_method_id' => 'required',
             'grade' => 'required',
             // 'grade_category_id' => 'required|integer|exists:grade_categories,id'
+            'updated_lesson_id' =>'nullable|exists:lessons,id'
+
         ]);
 
         $start=Carbon::now();
@@ -202,7 +204,7 @@ class QuizLessonController extends Controller
 
         $quizLesson->update([
             'quiz_id' => $request->quiz_id,
-            'lesson_id' => $request->lesson_id,
+            'lesson_id' => ($request->filled('updated_lesson_id'))?$request->updated_lesson_id:$request->lesson_id,
             'start_date' => $start,
             'publish_date' => $start,
             'due_date' => $request->closing_time,
