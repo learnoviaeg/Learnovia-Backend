@@ -427,7 +427,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('materials', MaterialsController::class);
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
-    Route::get('assignment/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
+    Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
 
     Route::Resource('interactive', InterActiveController::class);
     Route::Resource('courses', CoursesController::class);
