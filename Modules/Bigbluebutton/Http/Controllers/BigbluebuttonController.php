@@ -322,7 +322,7 @@ class BigbluebuttonController extends Controller
      * @param int $id
      * @return Response
      */
-    public function get(Request $request)
+    public function get(Request $request,$count = null)
     {
         $request->validate([
             'id' => 'exists:bigbluebutton_models,id',
@@ -338,7 +338,7 @@ class BigbluebuttonController extends Controller
             'sort_in' => 'in:asc,desc',
             'pagination' => 'boolean'
         ]);
-
+            
         $classes = [];
         if(isset($request->class)){
             $classes = [$request->class];
@@ -385,7 +385,13 @@ class BigbluebuttonController extends Controller
         if($request->has('id'))
             $meeting->where('id',$request->id);
 
+        if($count == 'count'){
+        
+            return response()->json(['message' => 'Virtual classrooms count', 'body' => $meeting->count()], 200);        
+        }
+        
         $meetings = $meeting->get();
+        
         foreach($meetings as $m)
             {
                 $m['join'] = $m->started == 1 ? true: false;
