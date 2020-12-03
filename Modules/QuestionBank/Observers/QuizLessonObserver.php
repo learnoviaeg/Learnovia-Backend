@@ -61,7 +61,7 @@ class QuizLessonObserver
     {
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
         if(isset($quiz)){
-            Timeline::where('item_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->lesson_id)->where('type' , 'quiz')->first()
+            Timeline::where('item_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('type' , 'quiz')->first()
             ->update([
                 'item_id' => $quizLesson->quiz_id,
                 'name' => $quiz->name,
