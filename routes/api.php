@@ -432,6 +432,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('assignment/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
 
     Route::Resource('interactive', InterActiveController::class);
+    Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
     Route::Resource('courses', CoursesController::class);
     Route::Resource('lessons', LessonsController::class);
     Route::Resource('levels', LevelController::class);
