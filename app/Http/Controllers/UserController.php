@@ -40,6 +40,7 @@ use App\SegmentClass;
 use App\Exports\UsersExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
+use Str;
 class UserController extends Controller
 {
     /**
@@ -435,7 +436,7 @@ class UserController extends Controller
             $roles = Role::get();
             $users= $users->pluck('id');
             foreach($roles as $role){
-                $count[$role->name] = $user_role = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
+                $count[Str::slug($role->name, '_')] = $user_role = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
             }
 
             return HelperController::api_response_format(200 ,$count,'User roles count');
