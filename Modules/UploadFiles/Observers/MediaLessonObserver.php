@@ -46,7 +46,7 @@ class MediaLessonObserver
     {
         $media = Media::where('id',$mediaLesson->media_id)->first();
         if(isset($media)){
-            $logsbefore=Material::where('item_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)
+            $logsbefore=Material::where('item_id',$mediaLesson->media_id)//->where('lesson_id',$mediaLesson->lesson_id)
                                     ->where('type' , 'media')->first();
             $logsbefore ->update([
                                 'item_id' => $mediaLesson->media_id,
