@@ -270,6 +270,8 @@ class AssigmentsController extends Controller
             'visible' => 'boolean',
             'publish_date' => 'date |date_format:Y-m-d H:i:s|before:closing_date',
             'grade_category' => 'exists:grade_categories,id',
+            'updated_lesson_id' =>'nullable|exists:lessons,id'
+
         ]);
             $AssignmentLesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             if (!isset($AssignmentLesson)) {
@@ -291,6 +293,12 @@ class AssigmentsController extends Controller
                 $AssignmentLesson->due_date = $request->closing_date;
             if ($request->filled('publish_date'))
                 $AssignmentLesson->publish_date = $request->publish_date;
+            if (!$request->filled('updated_lesson_id')) {
+                $request->updated_lesson_id= $request->lesson_id;
+                }
+            $AssignmentLesson->update([
+                'lesson_id' => $request->updated_lesson_id
+            ]);
             $AssignmentLesson->save();
 
             $usersIDs = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();

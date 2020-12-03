@@ -298,7 +298,7 @@ class MediaController extends Controller
             $mediaLesson->update(['publish_date' => $publishdate]);
         }
         if (!$request->filled('updated_lesson_id')) {
-            $request->updated_lesson_id= $request->lesson_id;
+            $request->updated_lesson_id= $request->lesson_id[0];
           }
         $mediaLesson->update([
             'lesson_id' => $request->updated_lesson_id
