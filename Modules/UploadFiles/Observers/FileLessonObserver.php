@@ -47,7 +47,7 @@ class FileLessonObserver
     {
         $file = File::where('id',$fileLesson->file_id)->first();
         if(isset($file)){
-            $logsbefore=Material::where('item_id',$fileLesson->file_id)//->where('lesson_id',$fileLesson->lesson_id)
+            $logsbefore=Material::where('item_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->getOriginal('lesson_id'))
                                 ->where('type' , 'file')->first();
             $logsbefore->update([
                             'item_id' => $fileLesson->file_id,
