@@ -39,6 +39,7 @@ use App\attachment;
 use App\SegmentClass;
 use App\Exports\UsersExport;
 use Maatwebsite\Excel\Facades\Excel;
+use DB;
 class UserController extends Controller
 {
     /**
@@ -372,6 +373,7 @@ class UserController extends Controller
             'year' => 'nullable|integer|exists:academic_years,id',
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
+            'count' => 'in:1,0'
         ]);
         $users = User::where('id','!=',0)->with('roles');
         if($request->filled('country'))
@@ -428,6 +430,17 @@ class UserController extends Controller
                 return $students;
             }
     
+        if($request->has('count') && $request->count == 1){
+            $count = [];
+            $roles = Role::get();
+            $users= $users->pluck('id');
+            foreach($roles as $role){
+                $count[$role->name] = $user_role = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
+            }
+
+            return HelperController::api_response_format(200 ,$count,'User roles count');
+        }
+
         $users = $users->paginate(HelperController::GetPaginate($request));
         foreach($users->items() as $user)
         {
