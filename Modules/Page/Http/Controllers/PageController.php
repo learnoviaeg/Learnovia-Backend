@@ -160,6 +160,7 @@ class PageController extends Controller
             'id' => 'required|exists:pages,id',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
+            'updated_lesson_id' =>'nullable|exists:lessons,id'
             ]);
 
         $page = Page::find($request->id);
@@ -170,6 +171,12 @@ class PageController extends Controller
         $page->update($data);
         $page_lesson = pageLesson::where('page_id', $request->id)
                 ->where('lesson_id', $request->lesson_id[0])->first();
+        if (!$request->filled('updated_lesson_id')) {
+            $request->updated_lesson_id= $request->lesson_id[0];
+            }
+            $page_lesson->update([
+                'lesson_id' => $request->updated_lesson_id
+            ]);
         $page_lesson->updated_at = Carbon::now();
         $page_lesson->save();
         $pagename = $page->title;
