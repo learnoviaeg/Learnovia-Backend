@@ -29,7 +29,7 @@ class InterActiveController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$count = null)
     {
         $request->validate([
             'year' => 'exists:academic_years,id',
@@ -63,8 +63,16 @@ class InterActiveController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $h5p_lessons = $h5p_lessons->orderBy('start_date',$sort_in)->get();
+        $h5p_lessons = $h5p_lessons->orderBy('start_date',$sort_in);
+
+        if($count == 'count'){
+            return response()->json(['message' => 'InterActive count', 'body' => $h5p_lessons->count()], 200);
+        }
+
+        $h5p_lessons = $h5p_lessons->get();
+
         $h5p_contents=[];
+
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
 
         foreach($h5p_lessons as $h5p){                                
