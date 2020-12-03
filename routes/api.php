@@ -424,7 +424,7 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], fu
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('quizzes', QuizzesController::class);
-    Route::get('quiz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
+    Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
     Route::Resource('materials', MaterialsController::class);
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
