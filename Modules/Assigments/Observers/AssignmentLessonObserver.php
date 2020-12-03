@@ -61,7 +61,7 @@ class AssignmentLessonObserver
     {
         $assignment = Assignment::where('id',$assignmentLesson->assignment_id)->first();
         if(isset($assignment)){
-            Timeline::where('item_id',$assignmentLesson->assignment_id)->where('lesson_id',$assignmentLesson->lesson_id)->where('type' , 'assignment')->first()
+            Timeline::where('item_id',$assignmentLesson->assignment_id)->where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('type' , 'assignment')->first()
             ->update([
                 'item_id' => $assignmentLesson->assignment_id,
                 'name' => $assignment->name,
