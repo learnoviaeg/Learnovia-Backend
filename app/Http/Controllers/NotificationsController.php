@@ -109,7 +109,7 @@ class NotificationsController extends Controller
             $request['link'] = null;
 
         if(!isset($request->publish_date))
-            $request['publish_date'] = Carbon::now();
+            $request['publish_date'] = Carbon::now()->format('Y-m-d H:i:s');
 
         if(!isset($request->from))
             $request['from'] = Auth::id();
