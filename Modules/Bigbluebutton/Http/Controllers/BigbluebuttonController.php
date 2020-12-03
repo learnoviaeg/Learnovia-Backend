@@ -737,8 +737,9 @@ class BigbluebuttonController extends Controller
                     $user_id = User::where('username',$arr[0]['data']['attributes']['user']['external-user-id'])->pluck('id')->first();
                     $log = AttendanceLog::whereIn('session_id',$meetings_ids)
                                         ->where('type','online')
-                                        ->where('student_id',$user_id)->first();
-                    if(isset($log)){
+                                        ->where('student_id',$user_id)->latest()->first();
+                                        
+                    if(isset($log) && $log->left_date != null){
                         $attendance = AttendanceLog::updateOrCreate(['student_id' => $user_id,'session_id'=> $log->session_id,'type'=>'online','entered_date'=> null],
                         [
                             'ip_address' => \Request::ip(),
