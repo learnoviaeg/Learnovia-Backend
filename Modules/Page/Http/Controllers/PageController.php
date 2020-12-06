@@ -111,7 +111,7 @@ class PageController extends Controller
             $usersIDs = Enroll::where('course_segment', $TempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
             User::notify([
                 'id' => $page->id,
-                'message' => $page->title . ' is added',
+                'message' => $page->title . ' page is added',
                 'from' => Auth::user()->id,
                 'users' => $usersIDs,
                 'course_id' => $TempLesson->courseSegment->courses[0]->id,
