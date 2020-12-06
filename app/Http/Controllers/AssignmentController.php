@@ -8,6 +8,7 @@ use App\Enroll;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
 use App\Level;
+use App\Course;
 use App\Classes;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\assignment;
@@ -77,6 +78,7 @@ class AssignmentController extends Controller
             $assignment['lesson'] = Lesson::find($assignment_lesson->lesson_id);
             $assignment['class'] = Classes::find($assignment['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
             $assignment['level'] = Level::find($assignment['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            $assignment['course'] = Course::find($assignment['lesson']->courseSegment->course_id);
             unset($assignment['lesson']->courseSegment);
             $assignments[]=$assignment;
         }
