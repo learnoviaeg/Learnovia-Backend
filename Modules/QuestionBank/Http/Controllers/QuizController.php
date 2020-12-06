@@ -18,6 +18,7 @@ use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use Modules\QuestionBank\Entities\userQuiz;
 use Spatie\Permission\Models\Permission;
+use App\GradeItems;
 use Validator;
 use App\Classes;
 
@@ -310,7 +311,8 @@ class QuizController extends Controller
         ]);
 
         $quiz=Quiz::where('id', $request->quiz_id)->first();
-        // destroy($request->quiz_id);
+        $grade_item=GradeItems::where('item_Entity',$request->quiz_id)->first();
+        $grade_item->delete();
         $quiz->delete();
         return HelperController::api_response_format(200, [], 'Quiz deleted successfully');
     }
