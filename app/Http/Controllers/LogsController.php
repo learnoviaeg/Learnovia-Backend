@@ -64,6 +64,7 @@ class LogsController extends Controller
         $countLogs=$logs->count();
         $all_logs['current_page']=$page+1;
         $all_logs['last_page']=Paginate::allPages($countLogs,$paginate);
+        $all_logs['total']=$countLogs;
 
         $loggs=$logs->offset($page*($paginate))->limit($paginate)->get();
         foreach($loggs as $log)
