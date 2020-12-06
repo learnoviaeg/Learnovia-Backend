@@ -11,6 +11,7 @@ use App\CourseSegment;
 use Validator;
 use Auth;
 use App\Enroll;
+use App\ItemType;
 use App\Letter;
 use App\Language;
 use App\Contract;
@@ -455,6 +456,13 @@ class SpatieController extends Controller
             $lan2=Language::create([
                 'name' => 'Arabic',
                 'default' => 0,
+            ]);
+
+            $item_type1=ItemType::create([
+                'name' => 'Quiz',
+            ]);
+            $item_type2=ItemType::create([
+                'name' => 'Assignment',
             ]);
 
             $formateLetter = [
