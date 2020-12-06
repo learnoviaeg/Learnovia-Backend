@@ -12,6 +12,7 @@ use DB;
 use App\Lesson;
 use App\Level;
 use App\Classes;
+use App\Course;
 use Carbon\Carbon;
 
 class InterActiveController extends Controller
@@ -89,6 +90,7 @@ class InterActiveController extends Controller
             $content->original->lesson = Lesson::find($h5p->lesson_id);
             $content->original->class = Classes::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
             $content->original->level = Level::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            $content->original->course = Course::find($content->original->lesson->courseSegment->course_id);
             unset($content->original->lesson->courseSegment);
 
             $h5p_contents[]=$content->original;
