@@ -260,15 +260,15 @@ class MediaController extends Controller
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'publish_date' => 'nullable|date',
-            'updated_lesson_id' =>'nullable|exists:lessons,id'
-
+            'updated_lesson_id' =>'nullable|exists:lessons,id',
+            'type' => 'required|in:0,1'
         ]);
 
         $media = media::find($request->id);
         $mediaLesson = MediaLesson::whereIn('lesson_id' , $request->lesson_id)->where('media_id' , $request->id)->first();
         if(!isset($mediaLesson))
             return HelperController::api_response_format(400, null, 'This media is not in this lesson');
-        if ($media->type != null && $request->hasFile('Imported_file')) {
+        if ($request->type == 0 && isset($request->Imported_file)) {
             $extension = $request->Imported_file->getClientOriginalExtension();
             $fileName = $request->Imported_file->getClientOriginalName();
             $size = $request->Imported_file->getSize();
@@ -280,9 +280,8 @@ class MediaController extends Controller
             $media->link = url('storage/media/' . $name);
         }
 
-        if ($media->type == null && $request->filled('url')) {
+        if ($request->type == 1 && $request->filled('url')) 
             $media->link = $request->url;
-        }
 
         if ($request->filled('description'))
             $media->description = $request->description;
