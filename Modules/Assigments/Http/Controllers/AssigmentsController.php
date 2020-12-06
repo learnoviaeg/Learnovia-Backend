@@ -12,6 +12,7 @@ use App\ClassLevel;
 use App\GradeCategory;
 use App\GradeItems;
 use App\Classes;
+use App\Http\Controllers\Controller;
 use App\UserGrade;
 use Spatie\Permission\Models\Permission;
 use URL;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
+// use Illuminate\Routing\Controller;
 use App\Http\Controllers\HelperController;
 use Carbon\Carbon;
 use Modules\Assigments\Entities\assignment;
@@ -372,10 +373,16 @@ class AssigmentsController extends Controller
     */
     public function submitAssigment(Request $request)
     {
-        $request->validate([
+        $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-        ]);
+            'file'=>'file|distinct|mimes:pdf'
+        ];
+        $customMessages = [
+            'file.mimes' => 'please enter a pdf file.'
+        ];
+    
+        $this->validate($request, $rules, $customMessages);
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()))
             return HelperController::api_response_format(400, null , $message = 'Parents can\'t submit assignments');
