@@ -46,14 +46,10 @@ class InterActiveController extends Controller
         if(!$request->user()->can('site/show-all-courses'))//student
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
-        $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
-        $lessons =[];
-        foreach ($user_course_segments as $user_course_segment)
-            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
-        
-        $lessons =  array_values (array_unique($lessons)) ;
+            $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+      
         if($request->filled('lesson')){
-            if (!in_array($request->lesson,$lessons))
+            if (!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
 
             $lessons  = [$request->lesson];
