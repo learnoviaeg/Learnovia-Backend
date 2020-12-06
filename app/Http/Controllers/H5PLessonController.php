@@ -157,20 +157,28 @@ class H5PLessonController extends Controller
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
+            'updated_lesson_id' => 'nullable|exists:lessons,id'
         ]);
-        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+        // $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!isset($h5pLesson))
+            return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this interactive');
+        if ($request->filled('updated_lesson_id')) {
+            $h5pLesson->update([
+                'lesson_id' => $request->updated_lesson_id
+            ]);
+            }
+           
+        // $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
+        // // $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';
+        // $content->pivot = [
+        //     'lesson_id' =>  $h5pLesson->lesson_id,
+        //     'content_id' =>  $h5pLesson->content_id,
+        //     'publish_date' => $h5pLesson->publish_date,
+        //     'created_at' =>  $h5pLesson->created_at,
+        // ];
 
-        $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
-        $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';
-        $content->pivot = [
-            'lesson_id' =>  $h5pLesson->lesson_id,
-            'content_id' =>  $h5pLesson->content_id,
-            'publish_date' => $h5pLesson->publish_date,
-            'created_at' =>  $h5pLesson->created_at,
-        ];
-
-        return HelperController::api_response_format(200, $content->original, 'Learnovia Interactive');
+        return HelperController::api_response_format(200, [], 'Learnovia Interactive updated successfully');
     }
     
 }
