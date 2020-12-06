@@ -261,7 +261,7 @@ class MediaController extends Controller
             'lesson_id.*' => 'required|exists:lessons,id',
             'publish_date' => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
-            'type' => 'in:0,1'
+            'type' => 'required|in:0,1'
         ]);
 
         $media = media::find($request->id);
