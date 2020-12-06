@@ -137,17 +137,20 @@ class User extends Authenticatable
         if($seconds < 0) {
             $seconds = 0 ;
         }
-        $date=Carbon::parse($request['publish_date'])->format('Y-m-d H:i:s');
+        
+        $request['publish_date']=Carbon::parse($request['publish_date'])->format('Y-m-d H:i:s');
 
         $request['title']=null;
         if($request['type']=='announcement'){
             // $request['message']="A new announcement will be published";
             $request['title']=Announcement::whereId($request['id'])->first()->title;
         }
+
+        Notification::send( $touserid, new NewMessage($request));
+
          $job = ( new \App\Jobs\Sendnotify(
               $request))->delay($seconds);
              dispatch($job);
-         Notification::send( $touserid, new NewMessage($request));
         return 1;
     }
 
