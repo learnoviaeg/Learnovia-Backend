@@ -240,7 +240,7 @@ class AssigmentsController extends Controller
         if ($request->hasFile('file')) {
 
             $request->validate([
-                'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
+                'file' => 'file|distinct|mimes:pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,xlsx,xls,csv,txt',
             ]);
             // if (isset($request->file_description)) {
                 $description = (isset($request->file_description))? $request->file_description :null;
