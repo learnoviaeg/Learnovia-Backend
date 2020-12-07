@@ -51,7 +51,7 @@ class Sendnotify implements ShouldQueue
         $access_token = $client->getAccessToken()['access_token'];
         // Log::debug('access_token is '.$access_token);
         
-        $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token');
+        $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token')->get();
         // dd($this->request['users']);
         // Log::debug(' users '. $this->request['users']);
 
