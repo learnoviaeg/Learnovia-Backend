@@ -155,8 +155,8 @@ class PageController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'title' => 'required|string',
-            'content' => 'required|string',
+            'title' => 'string',
+            'content' => 'string',
             'id' => 'required|exists:pages,id',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
@@ -164,15 +164,17 @@ class PageController extends Controller
             ]);
 
         $page = Page::find($request->id);
-        $data = [
-            'title' => $request->title,
-            'content' => $request->content
-        ];
-        $page->update($data);
         $page_lesson = pageLesson::where('page_id', $request->id)
                 ->where('lesson_id', $request->lesson_id[0])->first();
         if(!isset($page_lesson))
             return HelperController::api_response_format(200, null , 'This file is not assigned to this lesson');
+
+        if($request->filled('title'))
+            $page->update([ 'title' => $request->title]);
+        
+        if($request->filled('content'))
+            $page->update(['content' => $request->content]);
+
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id[0];
             }
