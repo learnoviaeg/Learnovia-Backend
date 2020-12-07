@@ -71,7 +71,7 @@ class Sendnotify implements ShouldQueue
                 }
             }
 
-            Log::debug('notifictaion id is' . $notification_id);
+            // Log::debug('notifictaion id is' . $notification_id);
             if($this->request['type'] !='announcement'){
                 $fordata = array(
                         "id" => (string)$this->request['id'],
