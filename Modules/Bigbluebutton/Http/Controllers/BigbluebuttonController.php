@@ -216,6 +216,13 @@ class BigbluebuttonController extends Controller
 
         $bigbb=BigbluebuttonModel::find($request->id);
 
+        $url= config('app.url');
+        $url = substr($url, 0, strpos($url, "api"));
+        $open_link = 'https://learnovia.com/';
+        if(isset($url)){
+            $open_link = $url.'.learnovia.com/#/viewAllVirtualClassRoom';
+        }
+
         //Creating the meeting
         $bbb = new BigBlueButton();
         $createMeetingParams = new CreateMeetingParameters($bigbb->meeting_id, $bigbb->name);
@@ -223,7 +230,7 @@ class BigbluebuttonController extends Controller
         $createMeetingParams->setModeratorPassword($bigbb->moderator_password);
         $createMeetingParams->setDuration($bigbb->duration);
         // $createMeetingParams->setRedirect(false);
-        $createMeetingParams->setLogoutUrl('https://learnovia.com/');
+        $createMeetingParams->setLogoutUrl($open_link);
         $createMeetingParams->setWelcomeMessage('Welcome to Learnovia Class Room');
         if($bigbb->is_recorded == 1){
             $createMeetingParams->setRecord(true);
