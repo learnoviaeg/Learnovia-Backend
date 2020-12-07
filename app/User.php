@@ -151,10 +151,6 @@ class User extends Authenticatable
          $job = ( new \App\Jobs\Sendnotify(
               $request))->delay($seconds);
              dispatch($job);
-            
-        $jobs = ( new \App\Jobs\SendNotifications(
-        $request))->delay($seconds);
-        dispatch($jobs);
         return 1;
     }
 
