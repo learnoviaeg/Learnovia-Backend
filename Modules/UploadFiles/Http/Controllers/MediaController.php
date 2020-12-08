@@ -305,8 +305,8 @@ class MediaController extends Controller
         ]);
         $mediaLesson->updated_at = Carbon::now();
         $mediaLesson->save();
-        $tempReturn = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'media')->get();
-        $lesson = Lesson::find($request->lesson_id[0]);
+        $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'media')->get();
+        $lesson = Lesson::find($request->updated_lesson_id);
         $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
         $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
