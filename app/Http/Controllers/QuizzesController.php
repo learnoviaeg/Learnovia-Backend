@@ -66,9 +66,8 @@ class QuizzesController extends Controller
 
         $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
 
-        if($count == 'count'){
+        if($count == 'count')
             return response()->json(['message' => 'Quizzes count', 'body' => $quiz_lessons->count() ], 200);
-        }
 
         $quiz_lessons = $quiz_lessons->get();
 
@@ -80,7 +79,6 @@ class QuizzesController extends Controller
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
             $quiz['level'] = Level::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-            $quiz['course'] = Course::find($quiz['lesson']->courseSegment->course_id);
             unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }

@@ -590,7 +590,8 @@ class AssigmentsController extends Controller
         ]);
         $assign = Assignment::where('id', $request->assignment_id)->first();
         $grade_item=GradeItems::where('item_Entity',$request->assignment_id)->first();
-        $grade_item->delete();
+        if(isset($grade_item))
+            $grade_item->delete();
         $assign->delete();
 
         return HelperController::api_response_format(200, Assignment::all(), $message = 'Assignment deleted successfully');
