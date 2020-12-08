@@ -411,8 +411,8 @@ class FilesController extends Controller
         $fileLesson->updated_at = Carbon::now();
         $fileLesson->save();
         $file->save();
-        $lesson = Lesson::find($request->lesson_id);
-        $course_seg = Lesson::where('id',$request->lesson_id)->pluck('course_segment_id')->first();
+        $lesson = Lesson::find($request->updated_lesson_id);
+        $course_seg = Lesson::where('id',$request->updated_lesson_id)->pluck('course_segment_id')->first();
         $courseID = CourseSegment::where('id', $course_seg)->pluck('course_id')->first();
         $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $course_seg)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
@@ -428,12 +428,12 @@ class FilesController extends Controller
                 'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
                 'course_id' => $courseID,
                 'class_id' => $class_id,
-                'lesson_id' => $request->lesson_id,
+                'lesson_id' => $request->updated_lesson_id,
                 'type' => 'file',
                 'link' => $file->url,
                 'publish_date' => carbon::parse($publish_date),
         ]);
-        $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
+        $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, 'File edited successfully');
     }
 

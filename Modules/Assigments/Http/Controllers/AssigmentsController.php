@@ -276,7 +276,7 @@ class AssigmentsController extends Controller
         ]);
             $AssignmentLesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
             if (!isset($AssignmentLesson)) {
-                return HelperController::api_response_format(400, $message = 'Assignment lesson not found');
+                return HelperController::api_response_format(400,[], $message = 'Assignment lesson not found');
             }
             if ($request->filled('is_graded'))
                 $AssignmentLesson->is_graded = $request->is_graded;
@@ -304,7 +304,7 @@ class AssigmentsController extends Controller
 
             $usersIDs = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
             $lessonId = AssignmentLesson::where('assignment_id', $request->assignment_id)->pluck('lesson_id')->first();
-            $courseSegment = Lesson::where('id', $request->lesson_id)->pluck('course_segment_id')->first();
+            $courseSegment = Lesson::where('id', $request->updated_lesson_id)->pluck('course_segment_id')->first();
             $courseID = CourseSegment::where('id', $courseSegment)->pluck('course_id')->first();
             $segmentClass = CourseSegment::where('id', $courseSegment)->pluck('segment_class_id')->first();
             $ClassLevel = SegmentClass::where('id', $segmentClass)->pluck('class_level_id')->first();
