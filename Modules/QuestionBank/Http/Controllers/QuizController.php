@@ -311,8 +311,9 @@ class QuizController extends Controller
         ]);
 
         $quiz=Quiz::where('id', $request->quiz_id)->first();
-        $grade_item=GradeItems::where('item_Entity',$request->quiz_id)->first();
-        $grade_item->delete();
+        $grade_item=GradeItems::where('item_Entity',$request->quiz_id)->where('item_type',1)->first();
+        if(isset($grade_item))
+            $grade_item->delete();
         $quiz->delete();
         return HelperController::api_response_format(200, [], 'Quiz deleted successfully');
     }
