@@ -109,7 +109,7 @@ class BigbluebuttonController extends Controller
             'moderator_password' => 'required|string',
             'duration' => 'nullable',
             'is_recorded' => 'required|bool',
-            'start_date' => 'required|array|date',
+            'start_date' => 'required|array',
             'last_day' => 'date'
         ]);
 
