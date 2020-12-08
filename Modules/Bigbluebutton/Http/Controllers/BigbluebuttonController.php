@@ -661,7 +661,8 @@ class BigbluebuttonController extends Controller
                     if(count($check_exist) == 0){
                         $enter = Carbon::parse($log['entered_date']);
                         $left = Carbon::parse($log['left_date']);
-                        $diffrence = $diffrence +  $left->diffInMinutes($enter);
+                        $diffrence = $diffrence +  $left->floatDiffInMinutes($enter);
+                        $diffrence = round($diffrence,0);
                         $logs_time->push([
                             'entered_date' => $log['entered_date'],
                             'left_date' => $log['left_date']
