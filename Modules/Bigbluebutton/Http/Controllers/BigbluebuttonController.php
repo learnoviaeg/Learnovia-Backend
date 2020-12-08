@@ -109,7 +109,8 @@ class BigbluebuttonController extends Controller
             'moderator_password' => 'required|string',
             'duration' => 'nullable',
             'is_recorded' => 'required|bool',
-            'start_date' => 'required|array',
+            'start_date' => 'required|array|date',
+            'last_day' => 'date'
         ]);
 
         $attendee= 'learnovia123';
