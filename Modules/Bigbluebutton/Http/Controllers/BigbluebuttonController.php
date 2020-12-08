@@ -414,10 +414,12 @@ class BigbluebuttonController extends Controller
                 }
             }
 
-        if(count($meetings) == 0)
-            return HelperController::api_response_format(200 , [] , 'Classroom is not found');
         if($request->has('pagination') && $request->pagination==true)
             return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),'Classrooms list');
+            
+        if(count($meetings) == 0)
+            return HelperController::api_response_format(200 , [] , 'Classroom is not found');
+
         return HelperController::api_response_format(200 , $meetings,'Classrooms list');
     }
 
