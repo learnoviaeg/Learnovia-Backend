@@ -110,6 +110,7 @@ class BigbluebuttonController extends Controller
             'duration' => 'nullable',
             'is_recorded' => 'required|bool',
             'start_date' => 'required|array',
+            'start_date.*' => 'date',
             'last_day' => 'date'
         ]);
 
