@@ -374,7 +374,7 @@ class FilesController extends Controller
 
         if ($request->filled('name'))
             $file->name = $request->name;
-        if ($request->hasFile('Imported_file')) {
+        if (isset($request->Imported_file)) {
             $extension = $request->Imported_file->getClientOriginalExtension();
             $name = uniqid() . '.' . $extension;
             Storage::disk('public')->putFileAs('files/', $request->Imported_file, $name);
