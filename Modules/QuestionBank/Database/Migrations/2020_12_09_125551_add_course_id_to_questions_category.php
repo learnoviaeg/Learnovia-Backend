@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateQuestionCategories extends Migration
+class AddCourseIdToQuestionsCategory extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,8 @@ class UpdateQuestionCategories extends Migration
     public function up()
     {
         Schema::table('questions_categories', function (Blueprint $table) {
-            $table->unsignedBigInteger('course_segment_id')->nullable();
-            $table->foreign('course_segment_id')->references('id')->on('course_segments')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('course_id')->nullable();
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
@@ -26,8 +26,8 @@ class UpdateQuestionCategories extends Migration
      */
     public function down()
     {
-        Schema::table('', function (Blueprint $table) {
-
+        Schema::table('questions_categories', function (Blueprint $table) {
+            //
         });
     }
 }

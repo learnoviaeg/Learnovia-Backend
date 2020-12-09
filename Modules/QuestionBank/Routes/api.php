@@ -55,6 +55,7 @@ Route::group(['prefix' => 'question', 'middleware' => ['auth:api','LastAction']]
         Route::get('get', 'QuestionCategoryController@show')->middleware('permission:question/category/get');
         Route::post('update', 'QuestionCategoryController@update')->middleware('permission:question/category/update');
         Route::post('delete', 'QuestionCategoryController@destroy')->middleware('permission:question/category/delete');
+        Route::get('migration', 'QuestionCategoryController@MigrationScript')->middleware('permission:site/show-all-courses');
     });
 
     Route::get('get', 'QuestionBankController@index')->middleware(['permission:question/get' , 'ParentCheck']);
