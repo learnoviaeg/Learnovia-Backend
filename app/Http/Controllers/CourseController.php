@@ -383,7 +383,7 @@ class CourseController extends Controller
         }
         else
         {
-            foreach ($request->user()->enroll->whereNot('role_id',6) as $enroll) {
+            foreach ($request->user()->enroll->whereNotIn('role_id',[6]) as $enroll) {
                 // foreach ($request->user()->enroll->whereIn('role_id',[3,4]) as $enroll) {
                 // foreach ($request->user()->enroll as $enroll) {
                 if(in_array($enroll->CourseSegment->id, $CS->toArray())){
