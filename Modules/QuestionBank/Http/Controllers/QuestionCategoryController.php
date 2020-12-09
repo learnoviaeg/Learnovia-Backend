@@ -36,9 +36,15 @@ class QuestionCategoryController extends Controller
         if(isset($duplicate))
             return HelperController::api_response_format(400, $duplicate, 'This category added before');
 
+        //course segment doesn't have any need better to be removed
+        $course_segment = CourseSegment::where('course_id',$request->course)->first();
+        if(!isset($course_segment))
+            return HelperController::api_response_format(400, null, 'This course is not assigned to chain');
+            
         $quest_cat = QuestionsCategory::firstOrCreate([
             'name' => $request->name,
-            'course_id' => $request->course_id
+            'course_id' => $request->course,
+            'course_segment_id' => $course_segment->id
         ]);
 
         $quest_cat = [$quest_cat];
@@ -76,7 +82,12 @@ class QuestionCategoryController extends Controller
         $ques_cat=QuestionsCategory::where(function($q) use($request){
             if($request->filled('text'))
                 $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-        })->whereIn('course_id',$enrolls)->with('course')->get();
+        })->whereIn('course_id',$enrolls)->with(['course','CourseSegment.courses'])->get();
+
+        foreach($ques_cat as $cat)
+        {
+            $cat->class= isset($cat->CourseSegment)  && count($cat->CourseSegment->segmentClasses) > 0  && count($cat->CourseSegment->segmentClasses[0]->classLevel) > 0 && count($cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes) > 0 ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
+        }
 
         if(isset($request->lastpage) && $request->lastpage == true){
             $request['page'] = $ques_cat->paginate(HelperController::GetPaginate($request))->lastPage();
