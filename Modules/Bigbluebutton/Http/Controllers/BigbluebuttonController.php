@@ -136,7 +136,7 @@ class BigbluebuttonController extends Controller
                         $course_segments_ids->push($courseseg->id);
 
                     if(count($course_segments_ids) <= 0)
-                        return HelperController::api_response_format(200, null ,'Please check active course segments');
+                        return HelperController::api_response_format(404, null ,'Please check active course segments');
             
                     $usersIDs=Enroll::whereIn('course_segment',$course_segments_ids)->where('user_id','!=', Auth::id())->pluck('user_id')->unique()->values()->toarray();
                     foreach($request->start_date as $start_date){
@@ -693,8 +693,8 @@ class BigbluebuttonController extends Controller
                 'fullname' => $logs[0]['User']['fullname'],
                 'attend_duration' => $diffrence,
                 'duration_percentage' => $duration_percentage . ' %',
-                'first_login' => isset($first_login)? $first_login . ' Minute/s' : null,
-                'last_logout' => isset($last_logout)? $last_logout . ' Minute/s' : null,
+                'first_login' => isset($first_login)? $first_login : null,
+                'last_logout' => isset($last_logout)? $last_logout : null,
                 'log_times' => $logs_time,
                 'status' => $logs[0]['status'],
             ]);
