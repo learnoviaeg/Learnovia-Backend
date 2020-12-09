@@ -77,7 +77,7 @@ class AnnouncementsController extends Controller
             });
         }
 
-        return response()->json(['message' => 'Announcements assigned to user.', 'body' => $announcements->values()->paginate($paginate)], 200);
+        return response()->json(['message' => 'Announcements assigned to user.', 'body' => $announcements->filter()->values()->paginate($paginate)], 200);
     }
 
     /**
