@@ -276,8 +276,8 @@ class MediaController extends Controller
             $media->type = $request->Imported_file->getClientMimeType();
             $media->size = $size;
             $media->attachment_name = $fileName;
-            Storage::disk('public')->putFileAs('media/', $request->Imported_file, $fileName);
             $media->link = url('storage/media/' . $name);
+            Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
         }
 
         if ($request->filled('url')) 
