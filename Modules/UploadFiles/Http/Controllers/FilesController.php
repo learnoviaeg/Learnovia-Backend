@@ -409,8 +409,8 @@ class FilesController extends Controller
             'lesson_id' => $request->updated_lesson_id
         ]);
         $fileLesson->updated_at = Carbon::now();
-        $fileLesson->save();
         $file->save();
+        $fileLesson->save();
         $lesson = Lesson::find($request->lesson_id);
         $course_seg = Lesson::where('id',$request->lesson_id)->pluck('course_segment_id')->first();
         $courseID = CourseSegment::where('id', $course_seg)->pluck('course_id')->first();
