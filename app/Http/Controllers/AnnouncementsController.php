@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\userAnnouncement;
+use App\AnnouncementsChain;
 use App\Announcement;
 use App\attachment;
 use Auth;
@@ -124,7 +125,19 @@ class AnnouncementsController extends Controller
             $file = attachment::upload_attachment($request->attached_file, 'Announcement');
         }
 
-        $new_announcements = collect();
+        //create announcement
+        $announcement = Announcement::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'attached_file' => isset($file) ? $file->id : null,
+            'publish_date' => $publish_date,
+            'created_by' => Auth::id(),
+            'start_date' => isset($request->start_date) ? $request->start_date : null,
+            'due_date' => isset($request->due_date) ? $request->due_date : null,
+        ]);
+
+
+        $users = collect();
         foreach($request->chains as $chain){
 
             //chain object
@@ -144,59 +157,53 @@ class AnnouncementsController extends Controller
                 $enrolls->whereIn('role_id',$chain['roles']);
             }
 
-            $users = $enrolls->with('user')->get()->pluck('user')->unique()->filter()->values()->pluck('id');
+            $users->push($enrolls->with('user')->get()->pluck('user')->unique()->filter()->values()->pluck('id'));
 
-            //create announcement
-            $announcement = Announcement::create([
-                'title' => $request->title,
-                'description' => $request->description,
-                'attached_file' => isset($file) ? $file->id : null,
-                'class_id' => isset($chain['class']) ? $chain['class'] : null,
-                'course_id' => isset($chain['course']) ? $chain['course'] : null,
-                'level_id' => isset($chain['level']) ? $chain['level'] : null,
-                'year_id' => isset($chain['year']) ? $chain['year'] : null,
-                'type_id' => isset($chain['type']) ? $chain['type'] : null,
-                'segment_id' => isset($chain['segment']) ? $chain['segment'] : null,
-                'publish_date' => $publish_date,
-                'created_by' => Auth::id(),
-                'start_date' => isset($request->start_date) ? $request->start_date : null,
-                'due_date' => isset($request->due_date) ? $request->due_date : null,
+            $announcement_chain = AnnouncementsChain::create([
+                'announcement_id' => $announcement->id,
+                'year' => $chain['year'],
+                'type'=> isset($chain['type']) ? $chain['type'] : null,
+                'level' => isset($chain['level']) ? $chain['level'] : null,
+                'class' => isset($chain['class']) ? $chain['class'] : null,
+                'segment' => isset($chain['segment']) ? $chain['segment'] : null,
+                'course' => isset($chain['course']) ? $chain['course'] : null,
             ]);
-
-            //check if there's a students to send for them or skip that part
-            if(count($users) > 0){
-
-                //add user announcements
-                $users->map(function ($user) use ($announcement) {
-                    userAnnouncement::create([
-                        'announcement_id' => $announcement->id,
-                        'user_id' => $user
-                    ]);
-                });
-
-                //notification object
-                $notify_request = new Request ([
-                    'id' => $announcement->id,
-                    'type' => 'announcement',
-                    'publish_date' => $publish_date,
-                    'title' => $request->title,
-                    'description' => $request->description,
-                    'attached_file' => $file,
-                    'start_date' => $announcement->start_date,
-                    'due_date' => $announcement->due_date,
-                    'message' => $request->title.' announcement is added',
-                    'from' => $announcement->created_by,
-                    'users' => $users->toArray()
-                ]);
-
-                // use notify store function to notify users with the announcement
-                $notify = (new NotificationsController)->store($notify_request);
-            }
-
-            $new_announcements->push($announcement);
         }
 
-        return response()->json(['message' => 'Announcement sent successfully.', 'body' => $new_announcements], 200);
+        //filter users
+        $users = $users->collapse()->unique()->values();
+
+        //check if there's a students to send for them or skip that part
+        if(count($users) > 0){
+
+            //add user announcements
+            $users->map(function ($user) use ($announcement) {
+                userAnnouncement::create([
+                    'announcement_id' => $announcement->id,
+                    'user_id' => $user
+                ]);
+            });
+
+            //notification object
+            $notify_request = new Request ([
+                'id' => $announcement->id,
+                'type' => 'announcement',
+                'publish_date' => $publish_date,
+                'title' => $request->title,
+                'description' => $request->description,
+                'attached_file' => $file,
+                'start_date' => $announcement->start_date,
+                'due_date' => $announcement->due_date,
+                'message' => $request->title.' announcement is added',
+                'from' => $announcement->created_by,
+                'users' => $users->toArray()
+            ]);
+
+            // use notify store function to notify users with the announcement
+            $notify = (new NotificationsController)->store($notify_request);
+        }
+
+        return response()->json(['message' => 'Announcement sent successfully.', 'body' => $announcement], 200);
     }
 
     /**
