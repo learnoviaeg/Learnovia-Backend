@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
 use Carbon\Carbon;
 use App\Course;
-
+use App\LastAction;
 class CoursesController extends Controller
 {
     protected $chain;
@@ -108,9 +108,10 @@ class CoursesController extends Controller
     {
         $course = Course::with('attachment')->find($id);
 
-        if(isset($course))
-            return response()->json(['message' => 'course objet', 'body' => $course], 200);
-
+        if(isset($course)){
+        LastAction::lastActionInCourse($id);
+        return response()->json(['message' => 'course objet', 'body' => $course], 200);
+        }
         return response()->json(['message' => 'Course not fount!', 'body' => [] ], 400);
     }
 

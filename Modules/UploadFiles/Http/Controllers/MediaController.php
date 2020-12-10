@@ -373,6 +373,9 @@ class MediaController extends Controller
         $media = media::whereId($request->mediaId)->first();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
         $media->delete();
+        $lesson = Lesson::find($request->lesson_id);
+        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($courseID);
 
         if($media_type != null)
         {
@@ -418,7 +421,9 @@ class MediaController extends Controller
             if (!isset($mediaLesson)) {
                 return HelperController::api_response_format(400, null, 'Try again , Data invalid');
             }
-
+            $lesson = Lesson::find($request->LessonID);
+            $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+            LastAction::lastActionInCourse($courseID);
             $mediaLesson->visible = ($mediaLesson->visible == 1) ? 0 : 1;
             $mediaLesson->save();
 

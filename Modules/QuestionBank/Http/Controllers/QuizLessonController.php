@@ -21,7 +21,7 @@ use App\Enroll;
 use App\LessonComponent;
 use App\User;
 use Carbon\Carbon;
-
+use App\LastAction;
 use Auth;
 
 class QuizLessonController extends Controller
@@ -58,6 +58,8 @@ class QuizLessonController extends Controller
             //for notification
             $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
             $course = $lesson->courseSegment->course_id;
+            LastAction::lastActionInCourse($course);
+
             $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
             if($request->grade_category_id[$key] != null)
@@ -170,16 +172,16 @@ class QuizLessonController extends Controller
             $start= $request->opening_time;
 
         $quiz = quiz::find($request->quiz_id);
-        $lesson = Lesson::find($request->lesson_id);
+        $lesson_drag = Lesson::find($request->lesson_id);
 
-        //for notification
-        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
-        $course = $lesson->courseSegment->course_id;
-        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $course_drag = $lesson_drad->courseSegment->course_id;
+    
         
         if($quiz->course_id != $lesson->courseSegment->course_id){
             return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
         }
+        LastAction::lastActionInCourse($course_drag);
+
         if($request->grade_category_id != null)
         {
             $gradeCats= $lesson->courseSegment->GradeCategory;
@@ -224,6 +226,11 @@ class QuizLessonController extends Controller
             'publish_date' => $start,
         ]);
         $quiz=Quiz::find($request->quiz_id);
+        $lesson = Lesson::find($request->updated_lesson_id);
+        //for notification
+        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
+        $course = $lesson->courseSegment->course_id;
+        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         if(carbon::parse($start)->isPast())
             $publish_date=Carbon::now();
         $requ = ([
@@ -248,6 +255,8 @@ class QuizLessonController extends Controller
             'course_id' => 'required|integer|exists:courses,id',
             'class_id' => 'required|integer|exists:classes,id',
         ]);
+        LastAction::lastActionInCourse($request->course_id);
+    
         $couse_segment_id= CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id)->id;
         $course_segment = CourseSegment::find($couse_segment_id);
         return HelperController::api_response_format(200, $course_segment->GradeCategory,'These are grade category in this course');
