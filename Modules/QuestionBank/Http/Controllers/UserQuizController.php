@@ -543,7 +543,7 @@ class UserQuizController extends Controller
 
         //count attempts NotGraded
         $userEssayCheckAnswer=UserQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)
-                                                ->whereNull('correct')->pluck('user_quiz_id');
+                                                ->whereNull('correct')->where('answered',1)->where('force_submit',1)->pluck('user_quiz_id');
         // $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
         $countOfNotGraded = count($userEssayCheckAnswer);
         
