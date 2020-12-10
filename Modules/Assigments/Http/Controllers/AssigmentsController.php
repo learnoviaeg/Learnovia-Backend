@@ -312,8 +312,6 @@ class AssigmentsController extends Controller
             $assignment=Assignment::find($request->assignment_id);
 
             $publish_date=$AssignmentLesson->publish_date;
-            if(carbon::parse($publish_date)->isPast())
-                $publish_date=Carbon::now();
                 
             user::notify([
                 'id' => $request->assignment_id,
