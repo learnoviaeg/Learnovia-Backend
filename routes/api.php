@@ -444,6 +444,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('notify', NotificationsController::class);
     Route::Resource('announcement', AnnouncementsController::class);
     Route::get('announcements/{created}', 'AnnouncementsController@index')->middleware('permission:announcements/my');
+    Route::delete('enroll/', 'EnrollController@destroy');
+    Route::Resource('enroll', EnrollController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
