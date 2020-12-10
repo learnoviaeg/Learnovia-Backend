@@ -11,7 +11,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use App\Repositories\ChainRepositoryInterface;
-
+use Modules\QuestionBank\Entities\Questions;
 
 class QuestionCategoryController extends Controller
 {
@@ -29,41 +29,27 @@ class QuestionCategoryController extends Controller
     {
         $request->validate([
             'course' => 'required|integer|exists:courses,id',
-            'class' => 'array|exists:classes,id',
             'name' => 'string|required'
         ]);
-        $quest_cat=[];
-        $course_seg_id = [];
+    
+        $duplicate=QuestionsCategory::where('name',$request->name)->where('course_id',$request->course)->first();
+        if(isset($duplicate))
+            return HelperController::api_response_format(400, $duplicate, 'This category added before');
 
-        $course_seg_id =CourseSegment::where('course_id',$request->course)->pluck('id');
-        if(count($course_seg_id) < 1)
-            return HelperController::api_response_format(200,null,'you doesn\'t have any courses'); 
+        //course segment doesn't have any need better to be removed
+        $course_segment = CourseSegment::where('course_id',$request->course)->first();
+        if(!isset($course_segment))
+            return HelperController::api_response_format(400, null, 'This course is not assigned to chain');
+            
+        $quest_cat = QuestionsCategory::firstOrCreate([
+            'name' => $request->name,
+            'course_id' => $request->course,
+            'course_segment_id' => $course_segment->id
+        ]);
 
-        if($request->filled('class'))
-        {
-            $courses=[];
-            foreach($request->class as $class)
-            {
-                $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course);
-                if(isset($course_seg))
-                    $courses[]=$course_seg->id;
-            }
-            $course_seg_id=$courses;
-        }
-
-        // return $course_seg_id;
-        foreach($course_seg_id as $CourseSeg)
-        {
-            $duplicate=QuestionsCategory::where('name',$request->name)->where('course_segment_id',$CourseSeg)->get()->first();
-            if(isset($duplicate->course_segment_id) && isset($duplicate->name))
-                return HelperController::api_response_format(400, $duplicate, 'This category added before');
-
-            $quest_cat[]=QuestionsCategory::firstOrCreate([
-                'name' => $request->name,
-                'course_segment_id' => $CourseSeg
-            ]);
-        }
-        return HelperController::api_response_format(200, array_values(array_unique($quest_cat)), 'Question categories added Successfully');
+        $quest_cat = [$quest_cat];
+        
+        return HelperController::api_response_format(200, $quest_cat, 'Question category added Successfully');
     }
 
     /**
@@ -80,43 +66,29 @@ class QuestionCategoryController extends Controller
             'dropdown' => 'boolean',
             'class' => 'array|exists:classes,id'
         ]);
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        if(!$request->user()->can('site/show-all-courses'))//  teacher 
-            {
-                $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            }
-        $user_course_segments = $user_course_segments->pluck('course_segment');
+
+        $enrolls = $this->chain->getCourseSegmentByChain($request);
+        
+        if(!$request->user()->can('site/show-all-courses'))//teacher 
+        {
+            $enrolls = $enrolls->where('user_id',Auth::id());
+        }
+
+        if($request->filled('course_id'))
+            $enrolls->where('course',$request->course_id);
+
+        $enrolls = $enrolls->select('course')->distinct()->pluck('course');
 
         $ques_cat=QuestionsCategory::where(function($q) use($request){
             if($request->filled('text'))
                 $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-            })->whereIn('course_segment_id',$user_course_segments)->with('CourseSegment.courses')->get();
+        })->whereIn('course_id',$enrolls)->with(['course','CourseSegment.courses'])->get();
 
-        if($request->filled('course_id'))
-        {
-            $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
-            if($request->filled('class'))
-            {
-                $courses=[];
-                foreach($request->class as $class)
-                {
-                    $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course_id);
-                    // return $course_seg;
-                    if(isset($course_seg))
-                        $courses[]=$course_seg->id;
-                }
-                $all_courses=$courses;
-            }
-            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
-                if($request->filled('text'))
-                    $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-            })->with('CourseSegment.courses')->get();
-        }
         foreach($ques_cat as $cat)
         {
-            $cat->course=isset($cat->CourseSegment) ? $cat->CourseSegment->courses[0] : null;
             $cat->class= isset($cat->CourseSegment)  && count($cat->CourseSegment->segmentClasses) > 0  && count($cat->CourseSegment->segmentClasses[0]->classLevel) > 0 && count($cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes) > 0 ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
         }
+
         if(isset($request->lastpage) && $request->lastpage == true){
             $request['page'] = $ques_cat->paginate(HelperController::GetPaginate($request))->lastPage();
         }
@@ -135,34 +107,16 @@ class QuestionCategoryController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'course' => 'integer|exists:courses,id',
-            'class' => 'exists:classes,id',
             'name' => 'string',
             'id' => 'required|exists:questions_categories,id'
         ]);
+
         $questioncat=QuestionsCategory::find($request->id);
-        $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
-        $course_seg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
-        if($request->user()->can('question/category/update'))
-        {
-            $questioncat->update([
-                'name' => isset($request->name) ? $request->name : $questioncat->name,
-                'course_segment_id' => isset($course_seg) ? $course_seg->id : $questioncat->course_segment_id
-            ]);
-        }
-        if($request->filled('class') && $request->filled('course')){
-            $course_seg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
-            if(!isset($course_seg))
-                return HelperController::api_response_format(200,'Can\'t update Question Category');
-            if(in_array($course_seg->id,$myCourseSeg->toArray()))
-                $course_seg_id=$course_seg->id;
-            else
-                return HelperController::api_response_format(200,'Can\'t update Question Category');
-        }
-        $questioncat->update([
-            'name' => isset($request->name) ? $request->name : $questioncat->name,
-            'course_segment_id' => isset($course_seg) ? $course_seg_id : $questioncat->course_segment_id
-        ]);
+        
+        if($request->filled('name'))
+            $questioncat->name = $request->name;
+
+        $questioncat->save();
         return HelperController::api_response_format(200, $questioncat, 'Question Category updated Successfully');
     }
 
@@ -183,13 +137,42 @@ class QuestionCategoryController extends Controller
         $questioncat->delete();
         return HelperController::api_response_format(200, $questioncat, 'Question Category deleted Successfully');
 
+    }
 
-        // $myCourseSeg=Enroll::where('user_id',Auth::id())->pluck('course_segment');
-        // if(in_array($questioncat->course_segment_id,$myCourseSeg->toArray()))
-        //     $check=$questioncat->delete();
-        // else
-        //     return HelperController::api_response_format(200, 'you can\'t delete this question category');
-        // if($check)
-        //     return HelperController::api_response_format(200, $questioncat, 'Question Category deleted Successfully');
+    public function MigrationScript(Request $request)
+    {
+        $categories = QuestionsCategory::get();
+
+        foreach($categories as $category){
+            $category->course_id = CourseSegment::where('id',$category->course_segment_id)->pluck('course_id')->first();
+            $category->save();
+        }
+
+        $i = 0;
+        $count = count($categories);
+        while($count != $i){
+
+            $categories = QuestionsCategory::get()->toArray();
+            $category = $categories[$i];
+
+            $id = $category['id'];
+
+            $will_update = QuestionsCategory::where('id','!=',$id)->where('name',$category['name'])
+                                                                  ->where('created_at',$category['created_at'])
+                                                                  ->where('course_id',$category['course_id'])
+                                                                  ->pluck('id');
+
+            Questions::whereIn('question_category_id', $will_update)->update([
+                'question_category_id' => $id
+            ]);
+
+            QuestionsCategory::whereIn('id',$will_update)->delete();
+
+            $count = QuestionsCategory::count();
+            $i++;
+        }
+
+        return 'done';
+       
     }
 }
