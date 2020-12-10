@@ -42,13 +42,6 @@ class QuizLessonObserver
                 'type' => 'quiz'
             ]);
         }
-
-        Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'created',
-            'model' => 'QuizLesson',
-            'data' => serialize($quizLesson),
-        ]);
     }
 
     /**
@@ -61,8 +54,8 @@ class QuizLessonObserver
     {
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
         if(isset($quiz)){
-            Timeline::where('item_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('type' , 'quiz')->first()
-            ->update([
+            $forLogs=Timeline::where('item_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('type' , 'quiz')->first();
+            $forLogs->update([
                 'item_id' => $quizLesson->quiz_id,
                 'name' => $quiz->name,
                 'start_date' => $quizLesson->start_date,
@@ -73,17 +66,6 @@ class QuizLessonObserver
                 'visible' => $quizLesson->visible
             ]);
         }
-
-        $arr=array();
-        $arr['before']=$quizLesson->getOriginal();
-        $arr['after']=$quizLesson;
-
-        Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'updated',
-            'model' => 'QuizLesson',
-            'data' => serialize($arr),
-        ]);
     }
 
     /**
@@ -99,13 +81,6 @@ class QuizLessonObserver
         $all = Timeline::where('lesson_id',$quizLesson->lesson_id)->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
-        
-        Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'deleted',
-            'model' => 'QuizLesson',
-            'data' => serialize($quizLesson),
-        ]);
 
         LessonComponent::where('comp_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->lesson_id)
         ->where('module','Quiz')->delete();
