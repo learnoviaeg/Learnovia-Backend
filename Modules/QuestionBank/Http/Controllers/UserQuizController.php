@@ -178,6 +178,14 @@ class UserQuizController extends Controller
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
         ]);
+        
+        $end_date = Carbon::parse($userQuiz->open_time)->addMinutes($quiz_duration);
+        $seconds = $end_date->diffInSeconds(Carbon::now());
+        if($seconds < 0) {
+            $seconds = 0;
+        }
+        $job = (new \App\Jobs\CloseQuizAttempt($userQuiz))->delay($seconds);
+        dispatch($job);
 
         foreach($quiz_lesson->quiz->Question as $question){
             userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
