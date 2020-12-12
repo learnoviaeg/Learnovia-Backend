@@ -179,7 +179,7 @@ class UserQuizController extends Controller
             'submit_time'=> null,
         ]);
         
-        $end_date = Carbon::parse($userQuiz->open_time)->addMinutes($quiz_duration);
+        $end_date = Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration);
         $seconds = $end_date->diffInSeconds(Carbon::now());
         if($seconds < 0) {
             $seconds = 0;
