@@ -260,7 +260,7 @@ class AnnouncementController extends Controller
             $logsbefore=DB::table('notifications')->where('id', $de->id)->get();
             $check=DB::table('notifications')->where('id', $de->id)->update(['read_at' => null]);
             if($check > 0)
-                event(new MassLogsEvent($logsbefore));
+                event(new MassLogsEvent($logsbefore,'updated'));
         }
         //Validtaionof updated data
         $request->validate([
@@ -590,7 +590,7 @@ class AnnouncementController extends Controller
                         $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
                 
                         if($check > 0)
-                            event(new MassLogsEvent($logsbefore));
+                            event(new MassLogsEvent($logsbefore,'updated'));
                     }
                 }
             }
@@ -609,7 +609,7 @@ class AnnouncementController extends Controller
                     $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
                     $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
                     if($check > 0)
-                        event(new MassLogsEvent($logsbefore));
+                        event(new MassLogsEvent($logsbefore,'updated'));
                 }
             }
             $print=self::get($request);
