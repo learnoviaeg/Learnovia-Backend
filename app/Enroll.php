@@ -68,6 +68,18 @@ class Enroll extends Model
     {
         return $this->belongsTo('App\Level','level','id');
     }
+    public function year()
+    {
+        return $this->belongsTo('App\Classes','year','id');
+    }
+    public function type()
+    {
+        return $this->belongsTo('App\Course','type','id');
+    }
+    public function segment()
+    {
+        return $this->belongsTo('App\Level','segment','id');
+    }
 
     public function roles()
     {
