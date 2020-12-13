@@ -336,9 +336,6 @@ class AssigmentsController extends Controller
     */
     public function assignAsstoUsers($request)
     {
-        // $roles = Permission::where('name', 'assignment/submit')->first();
-        // $roles_id = $roles->roles->pluck('id');
-        // $usersIDs = Enroll::where('course_segment', $request['course_segment'])->whereIn('role_id', $roles_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         $usersIDs = Enroll::where('course_segment', $request['course_segment'])->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
@@ -390,7 +387,6 @@ class AssigmentsController extends Controller
         if(!isset($assilesson))
             return HelperController::api_response_format(200, null , $message = 'This assignment is not assigned to this lesson');
 
-        
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assilesson->id)->first();
         /*
             0===================>content
