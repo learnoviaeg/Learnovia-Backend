@@ -11,7 +11,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use App\Repositories\ChainRepositoryInterface;
-
+use App\LastAction;
 
 class QuestionCategoryController extends Controller
 {
@@ -39,6 +39,7 @@ class QuestionCategoryController extends Controller
         if(count($course_seg_id) < 1)
             return HelperController::api_response_format(200,null,'you doesn\'t have any courses'); 
 
+        LastAction::lastActionInCourse($request->course);
         if($request->filled('class'))
         {
             $courses=[];
@@ -94,6 +95,8 @@ class QuestionCategoryController extends Controller
 
         if($request->filled('course_id'))
         {
+        LastAction::lastActionInCourse($request->course_id);
+
             $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
             if($request->filled('class'))
             {
@@ -151,6 +154,7 @@ class QuestionCategoryController extends Controller
             ]);
         }
         if($request->filled('class') && $request->filled('course')){
+            LastAction::lastActionInCourse($request->course);        
             $course_seg=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
             if(!isset($course_seg))
                 return HelperController::api_response_format(200,'Can\'t update Question Category');
@@ -176,8 +180,11 @@ class QuestionCategoryController extends Controller
         $request->validate([
             'id' => 'required|exists:questions_categories,id'
         ]);
-
+            
         $questioncat=QuestionsCategory::find($request->id);
+        $course_segment = CourseSegment::find($questioncat->course_segment_id);
+        if(isset($course_segment))
+            LastAction::lastActionInCourse($course_segment->course_id);        
         if(count($questioncat->questions)>0)
             return HelperController::api_response_format(200, null,'you can\'t delete this question category');
         $questioncat->delete();

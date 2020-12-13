@@ -11,7 +11,7 @@ use App\Level;
 use Illuminate\Http\Request;
 use App\Segment;
 use stdClass;
-
+use App\LastAction;
 class GradeCategoryController extends Controller
 {
     /**
@@ -684,6 +684,7 @@ class GradeCategoryController extends Controller
         if($coursesegment)
         {
             $gradeCategories=$coursesegment->GradeCategory;
+            LastAction::lastActionInCourse($request->course_id);
             return HelperController::api_response_format(200, $gradeCategories);
         }
         return HelperController::api_response_format(200, null,'No available course segment');

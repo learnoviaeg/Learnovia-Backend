@@ -37,6 +37,7 @@ use App\Timeline;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
+use App\LastAction;
 
 
 class AssigmentsController extends Controller
@@ -294,6 +295,8 @@ class AssigmentsController extends Controller
                 $AssignmentLesson->due_date = $request->closing_date;
             if ($request->filled('publish_date'))
                 $AssignmentLesson->publish_date = $request->publish_date;
+            $lesson=Lesson::find($request->lesson_id);
+            LastAction::lastActionInCourse($lesson->courseSegment->course_id);
             if (!$request->filled('updated_lesson_id')) {
                 $request->updated_lesson_id= $request->lesson_id;
                 }
@@ -310,7 +313,9 @@ class AssigmentsController extends Controller
             $ClassLevel = SegmentClass::where('id', $segmentClass)->pluck('class_level_id')->first();
             $classId = ClassLevel::where('id', $ClassLevel)->pluck('class_id')->first();
             $assignment=Assignment::find($request->assignment_id);
-
+            LastAction::lastActionInCourse($courseID);
+    
+    
             $publish_date=$AssignmentLesson->publish_date;
             if(carbon::parse($publish_date)->isPast())
                 $publish_date=Carbon::now();
@@ -354,6 +359,7 @@ class AssigmentsController extends Controller
         $classId = CourseSegment::find($request['course_segment'])->segmentClasses[0]->classLevel[0]->class_id;
         $lesson_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('lesson_id')->first();
         $assignment_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('assignment_id')->first();
+        LastAction::lastActionInCourse($courseID);
         user::notify([
             'id' => $assignment_id,
             'message' => 'A new Assignment is added',
@@ -386,13 +392,16 @@ class AssigmentsController extends Controller
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()))
             return HelperController::api_response_format(400, null , $message = 'Parents can\'t submit assignments');
-        
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if(!isset($assilesson))
             return HelperController::api_response_format(200, null , $message = 'This assignment is not assigned to this lesson');
 
         
+    
+    
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assilesson->id)->first();
         /*
             0===================>content
@@ -472,7 +481,10 @@ class AssigmentsController extends Controller
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first(); 
         if(!isset($assilesson))
             return HelperController::api_response_format(200, null, $message = 'This assignment is not assigned to this lesson');
-            
+
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
         // $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if ($assilesson->mark < $request->grade) {
@@ -518,7 +530,9 @@ class AssigmentsController extends Controller
             $userassigment->corrected_file = attachment::upload_attachment($request->corrected_file, 'assignment', null)->id;
         }
         $userassigment->grade = $request->grade;
-
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $usergrade=UserGrade::where('user_id',$request->user_id)
                                 ->where('grade_item_id',GradeItems::where('name',$assigment->name)->pluck('id')->first())
@@ -551,6 +565,8 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200, $body =  $userassigment, $message = 'user ' . $request->user_id . ' now can submit');
         }
         if (isset($request->course_segment)) {
+            $course_segment = CourseSegment::find($request->course_segment);
+            LastAction::lastActionInCourse($course_segment->course_id);
             $usersIDs = Enroll::where('course_segment', $request['course_segment'])->pluck('user_id')->toarray();
             foreach ($usersIDs as $userId) {
                 # code...
@@ -577,6 +593,10 @@ class AssigmentsController extends Controller
         $assigment = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($assigment))
             return HelperController::api_response_format(400,null,'This assigment is not assigned to this lesson');
+        
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        
         $assigment->delete();
         $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
 
@@ -607,6 +627,7 @@ class AssigmentsController extends Controller
         $user = Auth::user();
         $lesson=Lesson::find($request->lesson_id);
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
 
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();        
@@ -736,6 +757,8 @@ class AssigmentsController extends Controller
 
             $assigment->visible = ($assigment->visible == 1) ? 0 : 1;
             $assigment->save();
+            $lesson=Lesson::find($request->lesson_id);
+            LastAction::lastActionInCourse($lesson->courseSegment->course_id);
 
             return HelperController::api_response_format(200, $assigment, 'Toggle Successfully');
         } catch (Exception $ex) {
@@ -834,6 +857,7 @@ class AssigmentsController extends Controller
                 "submit_date" => Carbon::now(),
                 "publish_date" => Carbon::parse($request->publish_date)
             );
+            LastAction::lastActionInCourse($lesson->courseSegment->course_id);
             $this->assignAsstoUsers($data);
 
         }
@@ -872,6 +896,7 @@ class AssigmentsController extends Controller
             ]);
         }
         $course = $lesson->courseSegment->course_id;
+        LastAction::lastActionInCourse($course);
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
         user::notify([
