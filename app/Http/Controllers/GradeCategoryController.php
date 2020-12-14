@@ -47,6 +47,8 @@ class GradeCategoryController extends Controller
         ///type 1 => value
         ///type 0 => scale
         $course_segment_id = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
+        LastAction::lastActionInCourse($request->course);
+        
         if (isset($course_segment_id)) {
             $grade_cat=GradeCategory::where('course_segment_id',$course_segment_id->id)->whereNull('parent')->get()->first();
             $segclass=CourseSegment::find($course_segment_id->id)->segmentClasses;
@@ -359,7 +361,11 @@ class GradeCategoryController extends Controller
             'course' => 'required|exists:courses,id',
             'class'  => 'required|exists:classes,id'
         ]);
+        
+        LastAction::lastActionInCourse($request->course);
+
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
+        
         if ($courseSegment == null)
             return HelperController::api_response_format(200, null, 'This Course not assigned to this class');
         $grade_category = GradeCategory::where('course_segment_id', $courseSegment->id)->with('Children', 'GradeItems')

@@ -9,6 +9,7 @@ use App\User;
 use Carbon\Carbon;
 use Auth;
 use DB;
+use App\LastAction;
 
 class NotificationsController extends Controller
 {
@@ -38,6 +39,9 @@ class NotificationsController extends Controller
                                             ->orderBy('created_at','desc')->get();
                                             
         $notifications = collect();
+        if(isset($decoded_data['course_id'])){
+            LastAction::lastActionInCourse(isset($decoded_data['course_id']));
+        }
 
         foreach($notify as $notify_object) {
 
@@ -102,6 +106,9 @@ class NotificationsController extends Controller
         if(!isset($request->course_id))
             $request['course_id'] = null;   
 
+        if(isset($request->course_id))
+            LastAction::lastActionInCourse($request->course_id);
+        
         if(!isset($request->class_id))
             $request['class_id'] = null;
         
