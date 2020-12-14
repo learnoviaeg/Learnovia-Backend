@@ -73,7 +73,7 @@ class QuizzesController extends Controller
         if($count == 'count'){
             return response()->json(['message' => 'Quizzes count', 'body' => $quiz_lessons->count() ], 200);
         }
-
+        
         $quiz_lessons = $quiz_lessons->get();
 
         $quizzes = collect([]);
