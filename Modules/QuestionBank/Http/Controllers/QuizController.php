@@ -18,6 +18,7 @@ use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use Modules\QuestionBank\Entities\userQuiz;
 use Spatie\Permission\Models\Permission;
+use App\GradeItems;
 use Validator;
 use App\Classes;
 
@@ -310,7 +311,9 @@ class QuizController extends Controller
         ]);
 
         $quiz=Quiz::where('id', $request->quiz_id)->first();
-        // destroy($request->quiz_id);
+        $grade_item=GradeItems::where('item_Entity',$request->quiz_id)->where('item_type',1)->first();
+        if(isset($grade_item))
+            $grade_item->delete();
         $quiz->delete();
         return HelperController::api_response_format(200, [], 'Quiz deleted successfully');
     }
@@ -654,11 +657,11 @@ class QuizController extends Controller
         $user_answer=[];
         $quiz = Quiz::find($request->quiz_id);
         $qq = Quiz::where('id', $request->quiz_id)->first();
-        if(!isset($qq->quizLessson[0]))
-            return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
+        $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
+        if(!isset($quiz_lesson))
+            return HelperController::api_response_format(422,null,'This item is deleted');
         
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
-        $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
         /**delete from */
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date > Carbon::now() )
@@ -666,7 +669,7 @@ class QuizController extends Controller
         if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date < Carbon::now() )
                 {
                 if(Auth::user()->currentChild == null)
-                    return HelperController::api_response_format(400, 'please choose your current child');
+                    return HelperController::api_response_format(400,null, 'please choose your current child');
                 $currentChild =User::find(Auth::user()->currentChild->child_id);
                 Auth::setUser($currentChild);
             }
@@ -866,15 +869,36 @@ class QuizController extends Controller
                 
             $attempts_index []= $user_Quiz->id;
         }
-
+        $user_quizzes = $attempts_index;
+        $userQuizesgrade = UserQuiz::whereIn('id',$user_quizzes)->pluck('grade');
+        switch ($quiz['grading_method']){
+            case 1: //first
+                $user_Quiz= min($user_quizzes);
+                break;
+            case 2 : //last
+                $user_Quiz= max($user_quizzes);
+                break;
+            case 4 : // highest
+                $index_max_attemp=array_search(max($userQuizesgrade->toArray()), $userQuizesgrade->toArray());
+                $user_Quiz = $user_quizzes[$index_max_attemp];
+                break;
+            case 5 :  //lowest
+                $index_min_attemp=array_search(min($userQuizesgrade->toArray()), $userQuizesgrade->toArray());
+                $user_Quiz = $user_quizzes[$index_min_attemp];
+                break;
+            default : //last attemp when method average
+                $user_Quiz= max($user_quizzes);
+        }
         if($request->filled('attempt_index'))
-            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->get();
-        foreach($user_quizzes as $user_Quiz)
-        {
-            $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz->id)->get();
+            {
+            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->pluck('id');
+            if(isset($user_quizzes))
+                $user_Quiz  =  $request->attempt_index;
+            }
+        $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz)->get();
             if(count($user_answer)>0)
                 $userAnswers=$user_answer;
-        }
+        
         // return $userAnswers;
         // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
         $quiz['attempts_index'] = $attempts_index;

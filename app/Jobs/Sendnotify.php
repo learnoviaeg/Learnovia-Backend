@@ -15,7 +15,7 @@ use App\User;
 use Log;
 use Exception;
 use Carbon\Carbon;
-
+use DB;
 
 class Sendnotify implements ShouldQueue
 {
@@ -51,7 +51,7 @@ class Sendnotify implements ShouldQueue
         $access_token = $client->getAccessToken()['access_token'];
         // Log::debug('access_token is '.$access_token);
         
-        $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token')->pluck('token');
+        $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token')->get();
         // dd($this->request['users']);
         // Log::debug(' users '. $this->request['users']);
 
@@ -61,6 +61,17 @@ class Sendnotify implements ShouldQueue
         {
             // Log::debug('single token is '. $token);
 
+            $notification_id = null;
+            $noti = DB::table('notifications')->where('notifiable_id', $token->id)->get();
+            foreach ($noti as $not) {
+                $not->data= json_decode($not->data, true);
+                if($not->data['type'] == $this->request['type'] && $not->data['id'] == $this->request['id'] && $not->data['message'] == $this->request['message'])
+                {
+                    $notification_id = $not->id;
+                }
+            }
+
+            // Log::debug('notifictaion id is' . $notification_id);
             if($this->request['type'] !='announcement'){
                 $fordata = array(
                         "id" => (string)$this->request['id'],
@@ -73,7 +84,8 @@ class Sendnotify implements ShouldQueue
                         "publish_date" => Carbon::parse($this->request['publish_date'])->format('Y-m-d H:i:s'),
                         "read_at" => null,
                         "link" => isset($this->request['link'])?$this->request['link']:null,
-                        'deleted'=> "0"
+                        'deleted'=> "0",
+                        'notification_id' => $notification_id
                     );
                     // Log::debug('type is not announcement ');
 
@@ -96,7 +108,8 @@ class Sendnotify implements ShouldQueue
                         "start_date" => $this->request['start_date'],
                         "due_date" => $this->request['due_date'],
                         "attached_file" => $att,
-                        'deleted'=> '0'
+                        'deleted'=> '0',
+                        'notification_id' => $notification_id
                     );
             }
             $count++;
@@ -109,7 +122,7 @@ class Sendnotify implements ShouldQueue
             }
             $data = json_encode(array(
                 'message' => array(
-                    "token" => $token,
+                    "token" => $token->token,
                     "notification" => array(
                         "body" => $this->request['message'],
                         "title" => 'Learnovia',

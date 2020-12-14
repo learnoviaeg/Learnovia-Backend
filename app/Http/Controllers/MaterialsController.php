@@ -8,10 +8,11 @@ use App\Enroll;
 use App\Material;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
+use App\Level;
+use App\Classes;
 use App\Paginate;
-
-
-
+use DB;
+use Carbon\Carbon;
 
 class MaterialsController extends Controller
 {
@@ -29,8 +30,9 @@ class MaterialsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$count = null)
     {
+    
         $request->validate([
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id',
@@ -47,13 +49,11 @@ class MaterialsController extends Controller
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
 
         if(!$request->user()->can('site/show-all-courses'))//student
-        {
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-        }
 
-        $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
+        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
 
-        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->unique()->values()->pluck('id');
+        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
@@ -64,8 +64,9 @@ class MaterialsController extends Controller
             
         $material = Material::with(['lesson','course'])->whereIn('lesson_id',$lessons);
 
-        if($request->user()->can('site/course/student'))
-            $material->where('visible',1);
+        if($request->user()->can('site/course/student')){
+            $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+        }
 
         if($request->has('sort_in'))
             $material->orderBy("publish_date",$request->sort_in);
@@ -73,7 +74,25 @@ class MaterialsController extends Controller
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
 
-        return response()->json(['message' => 'materials list.... ', 'body' => $material->get()->paginate(Paginate::GetPaginate($request))], 200);
+        if($count == 'count'){
+
+            $counts = $material->select(DB::raw
+                (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
+                    COUNT(case `type` when 'media' then 1 else null end) as media ,
+                    COUNT(case `type` when 'page' then 1 else null end) as page" 
+                ))->first()->only(['file','media','page']);
+
+            return response()->json(['message' => 'Materials count', 'body' => $counts], 200);
+        }
+
+        $AllMat=$material->get();
+        foreach($AllMat as $one){
+            $one->class = Classes::find($one->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            $one->level = Level::find($one->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            unset($one->lesson->courseSegment);
+        }
+
+        return response()->json(['message' => 'materials list.... ', 'body' => $AllMat->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

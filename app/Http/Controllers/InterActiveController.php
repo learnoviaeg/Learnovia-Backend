@@ -10,6 +10,9 @@ use App\Paginate;
 use App\h5pLesson;
 use DB;
 use App\Lesson;
+use App\Level;
+use App\Classes;
+use App\Course;
 use Carbon\Carbon;
 
 class InterActiveController extends Controller
@@ -27,7 +30,7 @@ class InterActiveController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$count = null)
     {
         $request->validate([
             'year' => 'exists:academic_years,id',
@@ -37,34 +40,41 @@ class InterActiveController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
-            'lesson' => 'nullable|integer|exists:lessons,id' 
+            'lesson' => 'nullable|integer|exists:lessons,id',
+            'sort_in' => 'in:asc,desc', 
         ]);
         
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses'))//student
-            {
-                $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            }
+            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
-        $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
-        $lessons =[];
-        foreach ($user_course_segments as $user_course_segment){
-            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
-        }
-        $lessons =  array_values (array_unique($lessons)) ;
+            $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+      
         if($request->filled('lesson')){
-            if (!in_array($request->lesson,$lessons)){
+            if (!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
-            }
+
             $lessons  = [$request->lesson];
         }
-        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->where('publish_date', '<=', Carbon::now());
-        if(!$request->user()->can('site/show-all-courses'))//student
-        {
-            $h5p_lessons =$h5p_lessons->where('visible', '=', 1);
+
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
+        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+
+        if($request->user()->can('site/course/student')){
+           $h5p_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
         }
-        $h5p_lessons = $h5p_lessons->get()->sortByDesc('start_date');
+
+        if($count == 'count'){
+            return response()->json(['message' => 'InterActive count', 'body' => $h5p_lessons->count()], 200);
+        }
+
+        $h5p_lessons = $h5p_lessons->get();
+
         $h5p_contents=[];
+
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
 
         foreach($h5p_lessons as $h5p){                                
@@ -73,16 +83,20 @@ class InterActiveController extends Controller
             $content->original->item_lesson_id = $h5p->id;
             $content->original->visible = $h5p->visible;
             $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit'.'?editting_done=false';
-            if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id() ){
+            if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id())
                 $content->original->edit_link = null;
-            }
+            
             unset($content->original->parameters,$content->original->filtered,$content->original->metadata);
+
             $content->original->lesson = Lesson::find($h5p->lesson_id);
+            $content->original->class = Classes::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            $content->original->level = Level::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            $content->original->course = Course::find($content->original->lesson->courseSegment->course_id);
+            unset($content->original->lesson->courseSegment);
+
             $h5p_contents[]=$content->original;
         }
         return response()->json(['message' => 'InterActive vedios  List ....', 'body' => collect($h5p_contents)->paginate(Paginate::GetPaginate($request))], 200);
-
-        
     }
 
     /**

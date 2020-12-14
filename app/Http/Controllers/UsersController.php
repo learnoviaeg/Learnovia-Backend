@@ -29,7 +29,7 @@ class UsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$my_chain=null)
     {
         //validate the request
         $request->validate([
@@ -45,35 +45,28 @@ class UsersController extends Controller
             'search' => 'string'
         ]);
 
-        //only users with course/participants permission can get any users the rest of them cannot
-        // if(($request->has('role_id') && $request->role_id != 4 && !$request->user()->can('course/participants')) || (!$request->has('role_id') && !$request->user()->can('course/participants')))
-        //     return response()->json(['message' => 'User does not have the right permissions.', 'body' => []], 400);
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
         if($request->filled('roles')){
-            $users = $enrolls->whereIn('role_id',$request->roles);
+           $enrolls->whereIn('role_id',$request->roles);
         }
-        $mychains=Enroll::where('user_id',Auth::id())->pluck('course_segment');
-        if($request->user()->can('site/show-all-courses'))
-            $mychains=$enrolls->pluck('course_segment');
-        $coursesegments = array_intersect($enrolls->pluck('course_segment')->toArray(),$mychains->toArray());
-        // $users = $enrolls->pluck('user_id');
-        // $users = user:: whereIn('id',$users)->with('attachment');
-        $enro = Enroll::whereIn('course_segment',$coursesegments)->pluck('user_id');
-        $users = user:: whereIn('id',$enro)->with('attachment');
-
+        
+        //using in chat api new route { api/user/my_chain}
+        if($my_chain=='my_chain'){
+                if(!$request->user()->can('site/show-all-courses')) //student
+                    $enrolls=$enrolls->where('user_id',Auth::id());
+               $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
+            }
+        $enrolls =  $enrolls->select('user_id')->distinct()->with(['user.attachment','user.roles'])->get()->pluck('user')->filter()->values();
         if($request->filled('search'))
         {
-            $users  =$users->where('id','!=',Auth::id())
-                                ->where( function($q)use($request){
-                                            $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
-                                                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
-                                                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-                                            });
 
+            $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
+                if(  (($item->arabicname!=null) && str_contains($item->arabicname, $request->search) )|| str_contains(strtolower($item->username), strtolower($request->search))|| str_contains(strtolower($item->fullname), strtolower($request->search) ) ) 
+                    return $item; 
+            });
         }
-
-        return response()->json(['message' => 'Users List', 'body' =>  $users->get()->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => 'Users List', 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

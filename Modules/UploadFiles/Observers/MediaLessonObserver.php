@@ -46,17 +46,18 @@ class MediaLessonObserver
     {
         $media = Media::where('id',$mediaLesson->media_id)->first();
         if(isset($media)){
-            Material::where('item_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)->where('type' , 'media')->first()
-            ->update([
-                'item_id' => $mediaLesson->media_id,
-                'name' => $media->name,
-                'publish_date' => $mediaLesson->publish_date,
-                'lesson_id' => $mediaLesson->lesson_id,
-                'type' => 'media',
-                'visible' => $mediaLesson->visible,
-                'link' => $media->link,
-                'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
-            ]);
+            $logsbefore=Material::where('item_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->getOriginal('lesson_id'))
+                                    ->where('type' , 'media')->first();
+            $logsbefore ->update([
+                                'item_id' => $mediaLesson->media_id,
+                                'name' => $media->name,
+                                'publish_date' => $mediaLesson->publish_date,
+                                'lesson_id' => $mediaLesson->lesson_id,
+                                'type' => 'media',
+                                'visible' => $mediaLesson->visible,
+                                'link' => $media->link,
+                                'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
+                            ]);
         }
     }
 

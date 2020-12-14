@@ -34,7 +34,8 @@ class CoursesController extends Controller
         //validate the request
         $request->validate([
             'class' => 'nullable|integer|exists:classes,id',
-            'paginate' => 'integer'
+            'paginate' => 'integer',
+            'role_id' => 'integer|exists:roles,id'
         ]);
 
         $paginate = 12;
@@ -45,6 +46,10 @@ class CoursesController extends Controller
         $enrolls = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
             $enrolls->where('user_id',Auth::id());
+        }
+
+        if($request->has('role_id')){
+            $enrolls->where('role_id',$request->role_id);
         }
 
         $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);

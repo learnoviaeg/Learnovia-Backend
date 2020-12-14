@@ -411,7 +411,7 @@ Route::group(['prefix' => 'h5p', 'middleware' => ['auth:api','LastAction']], fun
         Route::get('toggle', 'H5PLessonController@toggleVisibility')->name('toggleh5p')->middleware('permission:h5p/lesson/toggle');
         Route::get('get', 'H5PLessonController@get')->name('geth5p')->middleware('permission:h5p/lesson/get-all');
         Route::get('delete', 'H5PLessonController@delete')->name('deleteh5p')->middleware('permission:h5p/lesson/delete');
-        Route::get('update', 'H5PLessonController@edit')->name('edith5p')->middleware('permission:h5p/lesson/update');
+        Route::post('update', 'H5PLessonController@edit')->name('edith5p')->middleware('permission:h5p/lesson/update');
 
     });
 });
@@ -424,19 +424,30 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], fu
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('quizzes', QuizzesController::class);
+    Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
     Route::Resource('materials', MaterialsController::class);
+    Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);;
     Route::Resource('assignments', AssignmentController::class);
+    Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
+    Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
+
     Route::Resource('interactive', InterActiveController::class);
+    Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
     Route::Resource('courses', CoursesController::class);
     Route::Resource('lessons', LessonsController::class);
     Route::Resource('levels', LevelController::class);
     Route::Resource('classes', ClassesController::class);
     Route::Resource('users', UsersController::class);
+    Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::Resource('notify', NotificationsController::class);
     Route::Resource('announcement', AnnouncementsController::class);
     Route::get('announcements/{created}', 'AnnouncementsController@index')->middleware('permission:announcements/my');
+    Route::Resource('assign/role', AssignRoleController::class);
+    Route::delete('assign/role/', 'AssignRoleController@destroy');
+    Route::delete('enroll/', 'EnrollController@destroy');
+    Route::Resource('enroll', EnrollController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {

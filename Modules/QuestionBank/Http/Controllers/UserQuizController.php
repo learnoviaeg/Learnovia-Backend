@@ -178,6 +178,14 @@ class UserQuizController extends Controller
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
         ]);
+        
+        $end_date = Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration);
+        $seconds = $end_date->diffInSeconds(Carbon::now());
+        if($seconds < 0) {
+            $seconds = 0;
+        }
+        $job = (new \App\Jobs\CloseQuizAttempt($userQuiz))->delay($seconds);
+        dispatch($job);
 
         foreach($quiz_lesson->quiz->Question as $question){
             userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
@@ -543,7 +551,7 @@ class UserQuizController extends Controller
 
         //count attempts NotGraded
         $userEssayCheckAnswer=UserQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)
-                                                ->whereNull('correct')->pluck('user_quiz_id');
+                                                ->whereNull('correct')->where('answered',1)->where('force_submit',1)->pluck('user_quiz_id');
         // $countOfNotGraded = userQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
         $countOfNotGraded = count($userEssayCheckAnswer);
         

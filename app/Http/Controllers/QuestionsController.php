@@ -7,6 +7,7 @@ use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
+use App\Paginate;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\CourseSegment;
 
@@ -45,7 +46,7 @@ class QuestionsController extends Controller
             $questions = quiz_questions::where('quiz_id',$quiz_id)
                     ->with(['Question.question_answer','Question.question_category','Question.question_type'])->get()
                     ->pluck('Question.*')->collapse();
-                return response()->json(['message' => 'questions List ....', 'body' => $questions], 200);
+            return response()->json(['message' => 'questions List ....', 'body' => $questions->paginate(Paginate::GetPaginate($request))], 200);
         }
 
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
@@ -68,8 +69,7 @@ class QuestionsController extends Controller
             $questions->whereIn('question_type_id', $request->question_type);
         }
 
-        return response()->json(['message' => 'questions List ....', 'body' => $questions->get()], 200);
-
+        return response()->json(['message' => 'questions List ....', 'body' => $questions->get()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

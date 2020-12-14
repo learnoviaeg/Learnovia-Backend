@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuestionsCategory extends Model
 {
-    protected $fillable = ['name','course_segment_id'];
+    protected $fillable = ['name','course_segment_id','course_id'];
     
     protected $hidden = [ 'updated_at',];
 
@@ -18,5 +18,10 @@ class QuestionsCategory extends Model
     public function CourseSegment()
     {
         return $this->belongsTo('App\CourseSegment', 'course_segment_id','id');
+    }
+
+    public function course()
+    {
+        return $this->belongsTo('App\Course', 'course_id','id');
     }
 }

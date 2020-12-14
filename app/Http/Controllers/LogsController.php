@@ -10,6 +10,7 @@ use App\AcademicYear;
 use App\AcademicType;
 use App\Segment;
 use App\Level;
+use App\Paginate;
 use App\User;
 use Carbon\Carbon;
 
@@ -28,26 +29,23 @@ class LogsController extends Controller
      */
     public function index(Request $request)
     {
-        //username
         $request->validate([
-            'user' => 'string',
+            'user' => 'string', //username
             'type' => 'exists:logs,model',
             'start_date' => 'date',
             'end_date' => 'date',
             'action' => 'in:updated,deleted,created'
         ]);
+
         $logs=Log::whereNotNull('id');
         if(isset($request->user))
         {
-            $users=User::where(
-                function ($query) use ($request) {
-                    $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->user%' ")
-                            ->orWhere('arabicname', 'LIKE' ,"%$request->user%" )
-                            ->orWhere('username', 'LIKE', "%$request->user%");
-                })->pluck('username');
-            $logs->whereIn('user',$users);
+            $logs->with(['user' => function ($query) use ($request) {
+                $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->user%' ")
+                        ->orWhere('arabicname', 'LIKE' ,"%$request->user%" )
+                        ->orWhere('username', 'LIKE', "%$request->user%");
+            }]);
         }
-        // $logs->where('user','LIKE',"%$request->user%");
         if(isset($request->type))
             $logs->where('model',$request->type);
         if(isset($request->action))
@@ -58,14 +56,18 @@ class LogsController extends Controller
                 $end_date=$request->end_date;
             $logs->where('created_at', '>=', $request->start_date)->where('created_at', '<=', $end_date);
         }
-        
-        $paginate=HelperController::GetPaginate($request);
-        $offset=1;
-        if(isset($request->page))
-            $offset=$request->page;
 
         $AllLogs=collect();
-        foreach($logs->limit($paginate * $offset)->get() as $log)
+        $all_logs=collect();
+        $page=Paginate::GetPage($request);
+        $paginate=Paginate::GetPaginate($request);
+        $countLogs=$logs->count();
+        $all_logs['current_page']=$page+1;
+        $all_logs['last_page']=Paginate::allPages($countLogs,$paginate);
+        $all_logs['total']=$countLogs;
+
+        $loggs=$logs->offset($page*($paginate))->limit($paginate)->get();
+        foreach($loggs as $log)
         {
             $log->data=unserialize($log->data);
             if($log->model == 'Enroll' && !isset($log->data['before']))
@@ -81,7 +83,9 @@ class LogsController extends Controller
             }            
             $AllLogs->push($log);
         }
-        return HelperController::api_response_format(200, $AllLogs->paginate($paginate), 'Logs are');
+        $all_logs['data']=$AllLogs;
+        
+        return HelperController::api_response_format(200, $all_logs, 'Logs are');
     }
 
     public function List_Types(Request $request){

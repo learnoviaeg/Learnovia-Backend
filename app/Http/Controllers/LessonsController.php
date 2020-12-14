@@ -43,7 +43,7 @@ class LessonsController extends Controller
             $enrolls->where('user_id',Auth::id());
         }
 
-        $lessons = $enrolls->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons')->collapse()->unique()->values();
+        $lessons = $enrolls->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons')->collapse();
 
         return response()->json(['message' => 'Lessons List', 'body' => $lessons->filter()->values()], 200);
     }

@@ -57,7 +57,7 @@ class NotificationsController extends Controller
             ]);
         }
 
-        $notifications = $notifications->where('publish_date', '<=', Carbon::now());
+        $notifications = $notifications->where('publish_date', '<=', Carbon::now())->sortByDesc('publish_date');
 
         if($request->has('read') && $request->read == 'unread')//get unread
             $notifications = $notifications->where('read_at',null);
@@ -109,14 +109,14 @@ class NotificationsController extends Controller
             $request['link'] = null;
 
         if(!isset($request->publish_date))
-            $request['publish_date'] = Carbon::now();
+            $request['publish_date'] = Carbon::now()->format('Y-m-d H:i:s');
 
         if(!isset($request->from))
             $request['from'] = Auth::id();
 
         $users = User::whereIn('id',$request->users)->whereNull('deleted_at')->get();
 
-        $date = $request->publish_date;
+        $date = Carbon::parse($request->publish_date);
 
         $seconds = $date->diffInSeconds(Carbon::now()); //calculate time the job should fire at
         if($seconds < 0) {
