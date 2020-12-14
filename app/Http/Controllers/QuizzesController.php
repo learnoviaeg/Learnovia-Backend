@@ -13,6 +13,7 @@ use App\Classes;
 use App\Level;
 use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Carbon\Carbon;
 
 class QuizzesController extends Controller
 {
@@ -64,6 +65,10 @@ class QuizzesController extends Controller
             $sort_in = $request->sort_in;
 
         $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+
+        if($request->user()->can('site/course/student')){
+            $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+        }
 
         if($count == 'count'){
             return response()->json(['message' => 'Quizzes count', 'body' => $quiz_lessons->count() ], 200);
