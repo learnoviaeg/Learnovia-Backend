@@ -16,8 +16,8 @@ class AlterUserAssignmentLesson extends Migration
         Schema::table('user_assigments', function (Blueprint $table) {
             $table->dropForeign(['assignment_lesson_id']);
             $table->dropColumn(['assignment_lesson_id']);
-          
-        });    }
+        });    
+    }
 
     /**
      * Reverse the migrations.
