@@ -12,6 +12,7 @@ use App\Level;
 use App\Classes;
 use App\Paginate;
 use DB;
+use Carbon\Carbon;
 
 class MaterialsController extends Controller
 {
@@ -63,8 +64,9 @@ class MaterialsController extends Controller
             
         $material = Material::with(['lesson','course'])->whereIn('lesson_id',$lessons);
 
-        if($request->user()->can('site/course/student'))
-            $material->where('visible',1);
+        if($request->user()->can('site/course/student')){
+            $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+        }
 
         if($request->has('sort_in'))
             $material->orderBy("publish_date",$request->sort_in);
