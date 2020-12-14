@@ -80,7 +80,7 @@ class EnrollController extends Controller
 
         //for logs
         $logsbefore=$chains->get();
-        event(new MassLogsEvent($logsbefore));
+        event(new MassLogsEvent($logsbefore,'deleted'));
 
         $chains->delete();
         return response()->json(['message' => 'Deleted Successfully', 'body' => null], 200);
