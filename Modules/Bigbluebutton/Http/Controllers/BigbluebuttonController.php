@@ -360,8 +360,8 @@ class BigbluebuttonController extends Controller
         if(isset($request->course)){
             $request['courses']= [$request->course];
         }
-        if(isset($request->course) && count($request->course)==1){
-        LastAction::lastActionInCourse($request->course[0]);
+        if($request->filled('course')){
+            LastAction::lastActionInCourse($request->course);
         }
 
         $sort_in = 'desc';
@@ -510,11 +510,12 @@ class BigbluebuttonController extends Controller
         ]);
         $logs = AttendanceLog::where('session_id',$request->id)->where('type','online')->get();
         $bigbb=BigbluebuttonModel::find($request->id);
-        LastAction::lastActionInCourse($bigbb->course_id);
 
         if(count($logs) > 0)
             return HelperController::api_response_format(404 , null , 'This Class room has students logs, cannot be deleted!');
             
+        LastAction::lastActionInCourse($bigbb->course_id);
+
         $meet = BigbluebuttonModel::whereId($request->id)->first()->delete();
         return HelperController::api_response_format(200 , null , 'Class room deleted!');
     }
