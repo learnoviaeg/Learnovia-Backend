@@ -55,15 +55,16 @@ class InterActiveController extends Controller
 
             $lessons  = [$request->lesson];
         }
-        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->where('publish_date', '<=', Carbon::now());
-        if(!$request->user()->can('site/show-all-courses'))//student
-            $h5p_lessons =$h5p_lessons->where('visible', '=', 1);
 
         $sort_in = 'desc';
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $h5p_lessons = $h5p_lessons->orderBy('start_date',$sort_in);
+        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+
+        if($request->user()->can('site/course/student')){
+           $h5p_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+        }
 
         if($count == 'count'){
             return response()->json(['message' => 'InterActive count', 'body' => $h5p_lessons->count()], 200);
