@@ -117,7 +117,7 @@ class NotificationsController extends Controller
             $request['from'] = Auth::id();
 
         $request['course_name'] = null;
-        if(isset($request['course_id']))
+        if(isset($request->course_id))
             $request['course_name'] = Course::whereId($request['course_id'])->pluck('name')->first();
 
         $users = User::whereIn('id',$request->users)->whereNull('deleted_at')->get();
