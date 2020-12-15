@@ -9,6 +9,7 @@ use App\User;
 use Carbon\Carbon;
 use Auth;
 use DB;
+use App\Course;
 
 class NotificationsController extends Controller
 {
@@ -54,6 +55,7 @@ class NotificationsController extends Controller
                 'class_id' => isset($decoded_data['class_id']) ? $decoded_data['class_id'] : null,
                 'lesson_id'  => isset($decoded_data['lesson_id']) ? $decoded_data['lesson_id'] : null,
                 'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
+                'course_name' => isset($decoded_data['course_name'])?$decoded_data['course_name']:null,
             ]);
         }
 
@@ -113,6 +115,10 @@ class NotificationsController extends Controller
 
         if(!isset($request->from))
             $request['from'] = Auth::id();
+
+        $request['course_name'] = null;
+        if(isset($request['course_id']))
+            $request['course_name'] = Course::whereId($request['course_id'])->pluck('name')->first();
 
         $users = User::whereIn('id',$request->users)->whereNull('deleted_at')->get();
 
