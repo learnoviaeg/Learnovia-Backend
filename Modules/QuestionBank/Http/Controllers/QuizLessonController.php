@@ -47,6 +47,7 @@ class QuizLessonController extends Controller
             'grade_min' => 'integer',
             'grade_max' => 'integer',
             'grade_to_pass' => 'integer',
+            'visible'=>"in:1,0"
         ]);
 
         $quiz = quiz::find($request->quiz_id);
@@ -101,7 +102,8 @@ class QuizLessonController extends Controller
                 'grade' => $request->grade,
                 'grade_category_id' => $request->grade_category_id[$key],
                 'publish_date' => $request->opening_time,
-                'index' => $Next_index
+                'index' => $Next_index,
+                'visible' => isset($request->visible)?$request->visible:1
             ]);
 
             $requ = ([

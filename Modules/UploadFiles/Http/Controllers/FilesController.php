@@ -199,6 +199,7 @@ class FilesController extends Controller
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
+            'visible' =>'in:0,1'
         ]);
 
         if ($request->filled('publish_date')) {
@@ -247,6 +248,8 @@ class FilesController extends Controller
                     $fileLesson->file_id = $file->id;
                     $fileLesson->index = FileLesson::getNextIndex($lesson);
                     $fileLesson->publish_date = $publishdate;
+                    $fileLesson->visible = isset($request->visible)?$request->visible:1;
+
                     $fileLesson->save();
                     LessonComponent::create([
                         'lesson_id' => $fileLesson->lesson_id,
