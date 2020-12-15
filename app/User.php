@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Modules\Attendance\Entities\AttendanceLog;
+use App\Course;
 
 class User extends Authenticatable
 {
@@ -124,6 +125,8 @@ class User extends Authenticatable
                 $errors = $validater->errors();
                 return response()->json($errors, 400);
             }
+
+            $request['course_name'] = Course::whereId($request['course_id'])->pluck('name')->first();
         }
         $touserid = array();
         foreach($request['users'] as $user)
