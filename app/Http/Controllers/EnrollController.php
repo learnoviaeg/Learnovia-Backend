@@ -12,7 +12,7 @@ class EnrollController extends Controller
     {
         $this->middleware('auth');
         $this->middleware(['permission:enroll/get' , 'ParentCheck'],   ['only' => ['index']]);
-        $this->middleware(['permission:enroll/delete' , 'ParentCheck'],   ['only' => ['destroy']]);
+        // $this->middleware(['permission:enroll/delete' , 'ParentCheck'],   ['only' => ['destroy']]);
     }
 
     /**
