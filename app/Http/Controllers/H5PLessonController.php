@@ -65,7 +65,9 @@ class H5PLessonController extends Controller
     {
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
-            'lesson_id' => 'required|exists:lessons,id'
+            'lesson_id' => 'required|exists:lessons,id',
+            'visible'=>'in:0,1'
+
         ]);
         
         $h5p_lesson = h5pLesson::where('content_id',$request->content_id)->where('lesson_id',$request->lesson_id)->first();
@@ -75,7 +77,8 @@ class H5PLessonController extends Controller
                 'lesson_id' => $request->lesson_id,
                 'publish_date' => Carbon::now(),
                 'start_date' => Carbon::now(),
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
+                'visible'=>isset($request->visible)?$request->visible:1
             ]);
         }
 

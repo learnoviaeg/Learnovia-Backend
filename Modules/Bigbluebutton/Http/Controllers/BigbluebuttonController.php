@@ -111,7 +111,8 @@ class BigbluebuttonController extends Controller
             'is_recorded' => 'required|bool',
             'start_date' => 'required|array',
             'start_date.*' => 'date',
-            'last_day' => 'date'
+            'last_day' => 'date',
+            'visible' => 'in:0,1'
         ]);
 
         $attendee= 'learnovia123';
@@ -159,6 +160,7 @@ class BigbluebuttonController extends Controller
                             $bigbb->user_id = Auth::user()->id;
                             $bigbb->is_recorded = $request->is_recorded;
                             $bigbb->started = 0;
+                            $bigbb->show = isset($request->visible)?$request->visible:1;
                             $bigbb->save();
 
                             $bigbb['join'] = $bigbb->started == 1 ? true: false;
