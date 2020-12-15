@@ -41,6 +41,7 @@ use App\Exports\UsersExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
+use App\LastAction;
 class UserController extends Controller
 {
     /**
@@ -406,6 +407,7 @@ class UserController extends Controller
             $flag=true;
         }if ($request->filled('course')){            
             $enrolled_users=$enrolled_users->where('course',$request->course);
+
             $flag=true;
         }if ($request->filled('year')){            
             $enrolled_users=$enrolled_users->where('year',$request->year);
@@ -452,6 +454,12 @@ class UserController extends Controller
         {
             if(isset($user->attachment)){
                 $user->picture = $user->attachment->path;
+            }
+            if ($request->filled('course')){
+                $last_action  = LastAction :: where('user_id',$user->id)->where('course_id',$request->course_id)->first();
+                $user->last_action_in_course =null;
+                    if (isset($last_action))
+                        $user->last_action_in_course = $last_action->date;
             }
         }
 
