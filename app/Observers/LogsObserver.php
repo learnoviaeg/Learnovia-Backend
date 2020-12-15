@@ -18,7 +18,7 @@ class LogsObserver
     {
         $user = User::find(Auth::id());
         $log=Log::create([
-            'user' => isset($user) ? $user->username : null,
+            'user' => isset($user) ? $user->username : 'UnKnown',
             'action' => 'created',
             'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
             'data' => serialize($req),

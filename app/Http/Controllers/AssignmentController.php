@@ -16,7 +16,7 @@ use Modules\Assigments\Entities\UserAssigment;
 use Modules\Assigments\Entities\assignmentOverride;
 use App\Paginate;
 use App\LastAction;
-
+use Carbon\Carbon;
 
 class AssignmentController extends Controller
 {
@@ -63,6 +63,10 @@ class AssignmentController extends Controller
             $sort_in = $request->sort_in;
 
         $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+
+        if($request->user()->can('site/course/student')){
+            $assignment_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+        }
 
         if($count == 'count'){
             

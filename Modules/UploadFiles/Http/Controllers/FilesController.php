@@ -413,11 +413,11 @@ class FilesController extends Controller
             'lesson_id' => $request->updated_lesson_id
         ]);
         $fileLesson->updated_at = Carbon::now();
-        $fileLesson->save();
         $file->save();
         $course_seg_drag = Lesson::where('id',$request->lesson_id)->pluck('course_segment_id')->first();
         $courseID_drag = CourseSegment::where('id', $course_seg_drag)->pluck('course_id')->first();
         LastAction::lastActionInCourse($courseID_drag);
+        $fileLesson->save();
         $lesson = Lesson::find($request->updated_lesson_id);
         $course_seg = Lesson::where('id',$request->updated_lesson_id)->pluck('course_segment_id')->first();
         $courseID = CourseSegment::where('id', $course_seg)->pluck('course_id')->first();

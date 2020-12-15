@@ -194,6 +194,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/users', 'title' => 'enroll users with chain']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/migrate-user', 'title' => 'migrate user to another class']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-unenroll-users-role', 'title' => 'Get unenrolled users']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get', 'title' => 'Get Chain']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/delete', 'title' => 'Destroy Chain']);
 
 
             //Events

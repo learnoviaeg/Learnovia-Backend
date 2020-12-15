@@ -85,7 +85,8 @@ class Sendnotify implements ShouldQueue
                         "read_at" => null,
                         "link" => isset($this->request['link'])?$this->request['link']:null,
                         'deleted'=> "0",
-                        'notification_id' => $notification_id
+                        'notification_id' => $notification_id,
+                        "course_name" => (string)$this->request['course_name'],
                     );
                     // Log::debug('type is not announcement ');
 

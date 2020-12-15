@@ -179,7 +179,7 @@ class NotificationController extends Controller
                 $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
                 $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
                 if($check > 0)
-                    event(new MassLogsEvent($logsbefore));
+                    event(new MassLogsEvent($logsbefore,'updated'));
             }
         }
         return HelperController::api_response_format(200, null, 'Read');
@@ -266,7 +266,7 @@ class NotificationController extends Controller
                         $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
                 
                     if($check > 0)
-                        event(new MassLogsEvent($logsbefore));
+                        event(new MassLogsEvent($logsbefore,'updated'));
                 }
             }
             $print=self::getallnotifications($request);
@@ -283,7 +283,7 @@ class NotificationController extends Controller
                     $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
                     $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
                     if($check > 0)
-                        event(new MassLogsEvent($logsbefore));
+                        event(new MassLogsEvent($logsbefore,'updated'));
                 }
             }
             $print=self::getallnotifications($request);

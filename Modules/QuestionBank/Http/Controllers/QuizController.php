@@ -666,7 +666,7 @@ class QuizController extends Controller
         $qq = Quiz::where('id', $request->quiz_id)->first();
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
         if(!isset($quiz_lesson))
-            return HelperController::api_response_format(422,null,'This quiz is not assigned to this lesson');
+            return HelperController::api_response_format(422,null,'This item is deleted');
         
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         /**delete from */

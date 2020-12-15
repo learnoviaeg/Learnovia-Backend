@@ -533,6 +533,7 @@ class UserController extends Controller
         $i = 0;
         foreach ($user->enroll as $enroll) {
             $all[$i]['role'] = $enroll->roles;
+            $all[$i]['enroll_id'] = $enroll->id;
 
             $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
             $all[$i]['Course'] = Course::where('id', $segment_Class_id->course_id)->first();
