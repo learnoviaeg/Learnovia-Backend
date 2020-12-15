@@ -45,6 +45,21 @@ class UsersController extends Controller
             'search' => 'string'
         ]);
 
+        //using in chat api new route { api/user/all}
+        if($my_chain == 'all'){
+
+            $users = User::with(['attachment','roles']);
+
+            if($request->filled('search')){
+                $users->where(function($q) use($request){
+                    $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+                });
+            }
+
+            return response()->json(['message' => 'All Users List', 'body' =>   $users->paginate(Paginate::GetPaginate($request))], 200);
+        }
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
         if($request->filled('roles')){
@@ -53,14 +68,15 @@ class UsersController extends Controller
         
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
-                if(!$request->user()->can('site/show-all-courses')) //student
-                    $enrolls=$enrolls->where('user_id',Auth::id());
-               $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
-            }
+            if(!$request->user()->can('site/show-all-courses')) //student
+                $enrolls=$enrolls->where('user_id',Auth::id());
+            $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
+        }
+
         $enrolls =  $enrolls->select('user_id')->distinct()->with(['user.attachment','user.roles'])->get()->pluck('user')->filter()->values();
+
         if($request->filled('search'))
         {
-
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
                 if(  (($item->arabicname!=null) && str_contains($item->arabicname, $request->search) )|| str_contains(strtolower($item->username), strtolower($request->search))|| str_contains(strtolower($item->fullname), strtolower($request->search) ) ) 
                     return $item; 
