@@ -77,20 +77,20 @@ class LevelsController extends Controller
         if (count($class_level) > 0)
             return HelperController::api_response_format(404, [] , 'This level assigned to classe/s, cannot be deleted.');
 
-        Level::whereId($request->id)->first()->delete();
         YearLevel::where('level_id',$request->id)->first()->delete();
+        Level::whereId($request->id)->first()->delete();
 
         //for log event
-        $logsbefore=User::where('level',$request->id)->get();
+        // $logsbefore=User::where('level',$request->id)->get();
         $returnValue=User::where('level',$request->id)->update(["level"=>null]);
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
                
         //for log event
-        $logsbefore=Enroll::where('level',$request->id)->get();
+        // $logsbefore=Enroll::where('level',$request->id)->get();
         $returnValue=Enroll::where('level',$request->id)->update(["level"=>null]);
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(203, $levels, 'Level Deleted Successfully');
