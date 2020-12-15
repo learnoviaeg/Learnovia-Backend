@@ -66,6 +66,7 @@ class NewMessage extends Notification
                 'class_id'=>$this->mess['class_id'],
                 'lesson_id'=>$this->mess['lesson_id'],
                 'publish_date' => $this->mess['publish_date'],
+                'course_name' => $this->mess['course_name'],
             ];
             if(isset($this->mess['link']))
                 $array['link'] = $this->mess['link'];
