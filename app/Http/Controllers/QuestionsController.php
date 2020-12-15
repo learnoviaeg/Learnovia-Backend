@@ -56,7 +56,7 @@ class QuestionsController extends Controller
 
         $course_ides = $user_course_segments->with('courseSegment')->get()->pluck('courseSegment.course_id')->unique()->values();
 
-        $questions = Questions::whereIn('course_id',$course_ides)->where('survey',0)->with(['question_answer','question_category','question_type']);
+        $questions = Questions::whereIn('course_id',$course_ides)->where('survey',0)->with(['course','question_answer','question_category','question_type']);
 
         if($request->filled('search'))
         {
