@@ -77,20 +77,22 @@ class LevelsController extends Controller
         if (count($class_level) > 0)
             return HelperController::api_response_format(404, [] , 'This level assigned to classe/s, cannot be deleted.');
 
+        $yearLevel=YearLevel::where('level_id',$request->id)->first();
+        if(isset($yearLevel))
+            $yearLevel->delete();
         Level::whereId($request->id)->first()->delete();
-        YearLevel::where('level_id',$request->id)->first()->delete();
 
         //for log event
-        $logsbefore=User::where('level',$request->id)->get();
+        // $logsbefore=User::where('level',$request->id)->get();
         $returnValue=User::where('level',$request->id)->update(["level"=>null]);
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
                
         //for log event
-        $logsbefore=Enroll::where('level',$request->id)->get();
+        // $logsbefore=Enroll::where('level',$request->id)->get();
         $returnValue=Enroll::where('level',$request->id)->update(["level"=>null]);
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(203, $levels, 'Level Deleted Successfully');
@@ -142,24 +144,18 @@ class LevelsController extends Controller
         }
         
         $levels = new Level;
-
-        if($request->filled('years') || $request->filled('types')){
-
-            $levels = Level::whereHas("years", function ($q) use ($request) {
-                if($request->filled('years'))
-                    $q->whereIn("academic_year_id", $request->years);
-                if($request->filled('types'))
-                    $q->whereIn("academic_type_id", $request->types);
-            });
-        }
+        $levels = Level::whereHas("years", function ($q) use ($request) {
+                                                if($request->filled('years'))
+                                                    $q->whereIn("academic_year_id", $request->years);
+                                                if($request->filled('types'))
+                                                        $q->whereIn("academic_type_id", $request->types);
+                                            });
         
         if($request->filled('search'))
-        {
             $levels=$levels->where('name', 'LIKE' , "%$request->search%");
-        }
 
         $all_levels = collect([]);
-        $levels= $levels->get(); 
+        $levels= $levels->get();  
 
         foreach ($levels as $level)
         {
@@ -253,7 +249,6 @@ class LevelsController extends Controller
             }
         }
         return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));  
-
     }
 
     public function GetMyLevels(Request $request)
@@ -315,6 +310,7 @@ class LevelsController extends Controller
         
         return HelperController::api_response_format(201, 'You haven\'t Levels');
     }
+
     public function export(Request $request)
     {
         $levelsIDs = self::GetAllLevelsInYear($request,1);
@@ -323,6 +319,4 @@ class LevelsController extends Controller
         $file = url(Storage::url('levels'.$filename.'.xls'));
         return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
-    
-    
 }
