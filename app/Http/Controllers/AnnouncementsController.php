@@ -104,7 +104,7 @@ class AnnouncementsController extends Controller
             'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
-            'publish_date' => 'nullable|after:' . Carbon::now(),
+            'publish_date' => 'date',
             'chains' => 'required|array',
             'chains.*.roles' => 'array',
             'chains.*.roles.*' => 'exists:roles,id',
@@ -117,7 +117,7 @@ class AnnouncementsController extends Controller
         ]);
 
         $publish_date = Carbon::now()->format('Y-m-d H:i:s');
-        if($request->has('publish_date')){
+        if($request->has('publish_date') && $request->publish_date >= Carbon::now()){
             $publish_date = $request->publish_date;
         }
 
