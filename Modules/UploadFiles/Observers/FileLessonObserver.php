@@ -29,7 +29,7 @@ class FileLessonObserver
                 'course_id' => $course_id,
                 'lesson_id' => $fileLesson->lesson_id,
                 'type' => 'file',
-                'visible' => 1,
+                'visible' => $fileLesson->visible,
                 'link' => $file->url,
                 'mime_type'=> $file->type,
 

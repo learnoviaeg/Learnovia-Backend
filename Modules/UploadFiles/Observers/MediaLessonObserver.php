@@ -29,7 +29,7 @@ class MediaLessonObserver
                 'course_id' => $course_id,
                 'lesson_id' => $mediaLesson->lesson_id,
                 'type' => 'media',
-                'visible' => 1,
+                'visible' => $mediaLesson->visible,
                 'link' => $media->link,
                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
             ]);

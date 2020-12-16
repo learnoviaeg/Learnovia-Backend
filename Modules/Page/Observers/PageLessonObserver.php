@@ -29,7 +29,7 @@ class PageLessonObserver
                 'course_id' => $course_id,
                 'lesson_id' => $pageLesson->lesson_id,
                 'type' => 'page',
-                'visible' => 1,
+                'visible' => $pageLesson->visible,
             ]);
         }
     }
