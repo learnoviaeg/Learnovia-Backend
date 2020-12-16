@@ -371,7 +371,8 @@ class FilesController extends Controller
             wpd,rpm,z,ods,xlsm,pps,odp',
             'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable|date',
-            'updated_lesson_id' =>'nullable|exists:lessons,id'
+            'updated_lesson_id' =>'nullable|exists:lessons,id',
+            'visible' =>'in:0,1'
         ]);
         $file = file::find($request->id);
 
@@ -405,6 +406,12 @@ class FilesController extends Controller
                 'publish_date' => $publishdate,
             ]);
         }
+        if ($request->filled('visible')) {
+            $fileLesson->update([
+                'visible' => $request->visible,
+            ]);
+          }
+        
         if (!$request->filled('updated_lesson_id')) {
           $request->updated_lesson_id= $request->lesson_id;
         }
