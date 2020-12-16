@@ -40,7 +40,7 @@ class LevelsController extends Controller
             'type' => 'array|required_with:year',
             'type.*' => 'exists:academic_types,id',
         ]);
-        $level = Level::firstOrCreate([
+        $level = Level::create([
             'name' => $request->name,
         ]);
         if ($request->filled('year') && $request->filled('type')) {
