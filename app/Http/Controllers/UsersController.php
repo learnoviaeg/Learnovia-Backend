@@ -58,32 +58,14 @@ class UsersController extends Controller
                     $enrolls=$enrolls->where('user_id',Auth::id());
                $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
             }
-        $enrolls =  $enrolls->select('user_id')->distinct()->with(['user.attachment','user.roles'])
-        // ->whereHas('user', function ($query) use($request){
-        //     dd($query->pluck('id'));
-        //     if ($request->filled('courses')){
-        //         $last_action  = LastAction :: whereIn('user_id',$query->pluck('id'))->whereIn('course_id',$request->courses)->first();
-        //         $user->last_action_in_course =null;
-        //             if (isset($last_action))
-        //                 $user->last_action_in_course = $last_action->date;
-        //     }
-
-        // })
-        ->get()->pluck('user')->filter()->values();
-        foreach($enrolls as $user)
-        { 
-            if ($request->filled('courses')){
-                        $last_action  = LastAction :: where('user_id',$user->id)->whereIn('course_id',$request->courses)->first();
-                        $user->last_action_in_course =null;
-                            if (isset($last_action))
-                                $user->last_action_in_course = $last_action->date;
-                    }
-
+        if ($request->filled('courses')){
+                $enrolls->with(['user.lastactionincourse'=>function ($query) use($request){
+                        $query->whereIn('course_id',$request->courses);
+                    }]);
         }
-
-            if($request->filled('search'))
+        $enrolls =  $enrolls->select('user_id')->distinct()->with(['user.attachment','user.roles'])->get()->pluck('user')->filter()->values();
+         if($request->filled('search'))
         {
-
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
                 if(  (($item->arabicname!=null) && str_contains($item->arabicname, $request->search) )|| str_contains(strtolower($item->username), strtolower($request->search))|| str_contains(strtolower($item->fullname), strtolower($request->search) ) ) 
                     return $item; 

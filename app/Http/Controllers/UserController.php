@@ -455,12 +455,6 @@ class UserController extends Controller
             if(isset($user->attachment)){
                 $user->picture = $user->attachment->path;
             }
-            if ($request->filled('course')){
-                $last_action  = LastAction :: where('user_id',$user->id)->where('course_id',$request->course_id)->first();
-                $user->last_action_in_course =null;
-                    if (isset($last_action))
-                        $user->last_action_in_course = $last_action->date;
-            }
         }
 
         if (Auth::user()->can('show/real-password')) {

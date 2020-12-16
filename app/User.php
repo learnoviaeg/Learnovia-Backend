@@ -186,6 +186,10 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\CourseSegment');
     }
+    public function lastactionincourse()
+    {
+        return $this->hasMany('App\LastAction');
+    }
     public function enroll(){
        return $this->hasMany('App\Enroll' , 'user_id');
     }
