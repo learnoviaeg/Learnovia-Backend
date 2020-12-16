@@ -160,7 +160,10 @@ class H5PLessonController extends Controller
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
-            'updated_lesson_id' => 'nullable|exists:lessons,id'
+            'updated_lesson_id' => 'nullable|exists:lessons,id',
+            'visible'=>'in:0,1'
+
+
         ]);
         // $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
@@ -171,6 +174,12 @@ class H5PLessonController extends Controller
                 'lesson_id' => $request->updated_lesson_id
             ]);
             }
+        if ($request->filled('visible')) {
+            $h5pLesson->update([
+                'visible' => $request->visible
+            ]); 
+        }
+
            
         // $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
         // // $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';

@@ -265,7 +265,8 @@ class MediaController extends Controller
             'lesson_id.*' => 'required|exists:lessons,id',
             'publish_date' => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
-            'type' => 'in:0,1'
+            'type' => 'in:0,1',
+            'visible' => 'in:0,1',
         ]);
 
         $media = media::find($request->id);
@@ -307,6 +308,10 @@ class MediaController extends Controller
             }
             $mediaLesson->update(['publish_date' => $publishdate]);
         }
+        if ($request->filled('visible')) {
+            $mediaLesson->update(['visible' => $request->visible]);
+        }
+
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id[0];
           }

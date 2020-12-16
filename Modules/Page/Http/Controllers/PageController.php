@@ -163,7 +163,8 @@ class PageController extends Controller
             'id' => 'required|exists:pages,id',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
-            'updated_lesson_id' =>'nullable|exists:lessons,id'
+            'updated_lesson_id' =>'nullable|exists:lessons,id',
+            'visible'=>'in:1,0'
             ]);
 
         $page = Page::find($request->id);
@@ -177,6 +178,8 @@ class PageController extends Controller
         
         if($request->filled('content'))
             $page->update(['content' => $request->content]);
+        if($request->filled('visible'))
+            $page_lesson->update(['visible' => $request->visible]);
 
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id[0];
