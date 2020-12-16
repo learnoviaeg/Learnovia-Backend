@@ -39,7 +39,9 @@ class QuizLessonObserver
                 'class_id' => $class_id,
                 'lesson_id' => $quizLesson->lesson_id,
                 'level_id' => $level_id,
-                'type' => 'quiz'
+                'type' => 'quiz',
+                'visible' => $quizLesson->visible
+
             ]);
         }
     }
