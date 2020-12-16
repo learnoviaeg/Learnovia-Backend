@@ -11,6 +11,7 @@ use Auth;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use App\Repositories\ChainRepositoryInterface;
+use Illuminate\Support\Facades\Input;
 
 class AnnouncementsController extends Controller
 {
@@ -229,20 +230,18 @@ class AnnouncementsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $announcement = Announcement::where('id',$id)->with('attachment')->first();
-
-        if(!isset($announcement))
-            return response()->json(['message' => 'Announcement not fount!', 'body' => [] ], 400);
-
         $request->validate([
+            'id' => 'required|integer|exists:announcements,id',
             'title' => 'required',
             'description' => 'required',
             'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
         ]);
+
+        $announcement = Announcement::where('id',$request->id)->with('attachment')->first();
 
         if($request->filled('title'))
             $announcement->title = $request->title;
@@ -257,7 +256,7 @@ class AnnouncementsController extends Controller
             $announcement->due_date = $request->due_date;
 
         $file = $announcement->attachment;
-        if($request->filled('attached_file')){
+        if(Input::hasFile('attached_file')){
             $file = attachment::upload_attachment($request->attached_file, 'Announcement');
             $announcement->attached_file = $file->id;
         }
