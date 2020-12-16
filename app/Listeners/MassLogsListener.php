@@ -9,17 +9,19 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Log;
 use App\User;
+use App\Repositories\EnrollmentRepositoryInterface;
 
 class MassLogsListener
 {
+    protected $unEnroll;
     /**
      * Create the event listener.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(EnrollmentRepositoryInterface $unEnroll)
     {
-        //
+        $this->unEnroll = $unEnroll;
     }
 
     /**
@@ -45,13 +47,18 @@ class MassLogsListener
                     'data' => serialize($arr),
                 ]);
             }
-            if($event->action == 'deleted')
-                Log::create([
+            if($event->action == 'deleted'){
+                $log = Log::create([
                     'user' => User::find(Auth::id())->username,
                     'action' => 'deleted',
                     'model' => substr(get_class($one),strripos(get_class($one),'\\')+1),
                     'data' => serialize($one),
                 ]);
+
+                if($log->model == 'Enroll'){
+                    $this->unEnroll->RemoveAllDataRelatedToRemovedChain($one);
+                }
+            }
                 
             //for DB object updated ---> handle error in get original
             Log::create([
