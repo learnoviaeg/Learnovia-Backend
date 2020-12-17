@@ -629,6 +629,16 @@ class UserController extends Controller
         return HelperController::api_response_format(201,null,'There is no data for you.');
     }
 
+    public function getFamily()
+    {
+        $users=array();
+        $parents=Parents::pluck('parent_id');
+        $users['parents']=User::whereIn('id',$parents)->get();
+        $childs=Parents::pluck('child_id');
+        $users['childs']=User::whereIn('id',$childs)->get();
+        return HelperController::api_response_format(201,$users,'There is parent and child');
+    }
+
     /**
      * set paresnt's child
      *

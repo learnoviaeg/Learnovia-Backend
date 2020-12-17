@@ -725,9 +725,9 @@ class QuizController extends Controller
 
         $quiz['grading_method']=$quiz_lesson->grading_method_id;
         $quiz['max_attemp']=$quiz_lesson->max_attemp;
+        $quiz['visible']=$quiz_lesson->visible;
         $quiz['mark']=$quiz_lesson->grade;
         $quiz['grade_category']=$gradecat;
-
         foreach($quiz->Question as $question){
             if(count($question->childeren) > 0){
                 foreach($question->childeren as $single){
