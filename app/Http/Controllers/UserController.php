@@ -629,14 +629,17 @@ class UserController extends Controller
         return HelperController::api_response_format(201,null,'There is no data for you.');
     }
 
-    public function getFamily()
+    public function getParents(Request $request)
     {
         $users=array();
-        $parents=Parents::pluck('parent_id');
-        $users['parents']=User::whereIn('id',$parents)->get();
-        $childs=Parents::pluck('child_id');
-        $users['childs']=User::whereIn('id',$childs)->get();
-        return HelperController::api_response_format(201,$users,'There is parent and child');
+        $parents=User::whereHas("roles",function ($q){
+            $q->where('name','Parent');
+        })->where( function($q)use($request){
+            $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+        })->with('attachment')->get();
+        return HelperController::api_response_format(201,$parents->paginate(HelperController::GetPaginate($request)),'There r parents');
     }
 
     /**
