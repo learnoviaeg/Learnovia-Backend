@@ -868,10 +868,10 @@ class AssigmentsController extends Controller
         }
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-
+        $assignment_name = Assignment::find($request->assignment_id)->name;
         user::notify([
             'id' => $assignment->assignment_id,
-            'message' => 'You can answer '.$assignment->name.' assignment now',
+            'message' => 'You can answer '.$assignment_name.' assignment now',
             'from' => Auth::user()->id,
             'users' => $request->user_id,
             'course_id' => $course,
