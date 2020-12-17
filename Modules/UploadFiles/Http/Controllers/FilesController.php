@@ -199,6 +199,7 @@ class FilesController extends Controller
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
+            'visible' =>'in:0,1'
         ]);
 
         if ($request->filled('publish_date')) {
@@ -247,6 +248,8 @@ class FilesController extends Controller
                     $fileLesson->file_id = $file->id;
                     $fileLesson->index = FileLesson::getNextIndex($lesson);
                     $fileLesson->publish_date = $publishdate;
+                    $fileLesson->visible = isset($request->visible)?$request->visible:1;
+
                     $fileLesson->save();
                     LessonComponent::create([
                         'lesson_id' => $fileLesson->lesson_id,
@@ -368,7 +371,8 @@ class FilesController extends Controller
             wpd,rpm,z,ods,xlsm,pps,odp',
             'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable|date',
-            'updated_lesson_id' =>'nullable|exists:lessons,id'
+            'updated_lesson_id' =>'nullable|exists:lessons,id',
+            'visible' =>'in:0,1'
         ]);
         $file = file::find($request->id);
 
@@ -402,6 +406,12 @@ class FilesController extends Controller
                 'publish_date' => $publishdate,
             ]);
         }
+        if ($request->filled('visible')) {
+            $fileLesson->update([
+                'visible' => $request->visible,
+            ]);
+          }
+        
         if (!$request->filled('updated_lesson_id')) {
           $request->updated_lesson_id= $request->lesson_id;
         }

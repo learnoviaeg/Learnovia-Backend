@@ -122,7 +122,9 @@ class MediaController extends Controller
             'url.*' => 'required|active_url',
             'type' => 'required|in:0,1',
             'name' => 'required',
-            'show' => 'nullable|in:0,1'
+            'show' => 'nullable|in:0,1',
+            'visible' =>'in:0,1'
+
         ]);
 
         if ($request->filled('publish_date')) {
@@ -187,6 +189,8 @@ class MediaController extends Controller
                 $mediaLesson->media_id = $media->id;
                 $mediaLesson->index = MediaLesson::getNextIndex($lesson);
                 $mediaLesson->publish_date = $publishdate;
+                $mediaLesson->visible = isset($request->visible)?$request->visible:1;
+
                 $mediaLesson->save();
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
@@ -261,7 +265,8 @@ class MediaController extends Controller
             'lesson_id.*' => 'required|exists:lessons,id',
             'publish_date' => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
-            'type' => 'in:0,1'
+            'type' => 'in:0,1',
+            'visible' => 'in:0,1',
         ]);
 
         $media = media::find($request->id);
@@ -303,6 +308,10 @@ class MediaController extends Controller
             }
             $mediaLesson->update(['publish_date' => $publishdate]);
         }
+        if ($request->filled('visible')) {
+            $mediaLesson->update(['visible' => $request->visible]);
+        }
+
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id[0];
           }

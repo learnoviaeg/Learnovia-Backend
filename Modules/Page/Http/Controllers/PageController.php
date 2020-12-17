@@ -80,7 +80,9 @@ class PageController extends Controller
             'content' => 'required|string',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
-            'publish_date' => 'nullable|date'
+            'publish_date' => 'nullable|date',
+            'visible' =>'in:0,1'
+            
         ]);
         if ($request->filled('publish_date')) {
             $publishdate = Carbon::parse($request->publish_date);
@@ -98,7 +100,8 @@ class PageController extends Controller
             pageLesson::firstOrCreate([
                 'page_id' => $page->id,
                 'lesson_id' => $lesson,
-                'publish_date' => $publishdate
+                'publish_date' => $publishdate,
+                'visible' =>isset($request->visible)?$request->visible:1
             ]);
             LessonComponent::create([
                 'lesson_id' => $lesson,
@@ -160,7 +163,8 @@ class PageController extends Controller
             'id' => 'required|exists:pages,id',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
-            'updated_lesson_id' =>'nullable|exists:lessons,id'
+            'updated_lesson_id' =>'nullable|exists:lessons,id',
+            'visible'=>'in:1,0'
             ]);
 
         $page = Page::find($request->id);
@@ -174,6 +178,8 @@ class PageController extends Controller
         
         if($request->filled('content'))
             $page->update(['content' => $request->content]);
+        if($request->filled('visible'))
+            $page_lesson->update(['visible' => $request->visible]);
 
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id[0];

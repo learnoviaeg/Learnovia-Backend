@@ -47,6 +47,7 @@ class QuizLessonController extends Controller
             'grade_min' => 'integer',
             'grade_max' => 'integer',
             'grade_to_pass' => 'integer',
+            'visible'=>"in:1,0"
         ]);
 
         $quiz = quiz::find($request->quiz_id);
@@ -101,7 +102,8 @@ class QuizLessonController extends Controller
                 'grade' => $request->grade,
                 'grade_category_id' => $request->grade_category_id[$key],
                 'publish_date' => $request->opening_time,
-                'index' => $Next_index
+                'index' => $Next_index,
+                'visible' => isset($request->visible)?$request->visible:1
             ]);
 
             $requ = ([
@@ -161,7 +163,8 @@ class QuizLessonController extends Controller
             'grading_method_id' => 'integer',
             'grade' => 'integer',
             // 'grade_category_id' => 'required|integer|exists:grade_categories,id'
-            'updated_lesson_id' =>'nullable|exists:lessons,id'
+            'updated_lesson_id' =>'nullable|exists:lessons,id',
+            'visible'=>'in:0,1'
 
         ]);
 
@@ -211,6 +214,8 @@ class QuizLessonController extends Controller
             $quizLesson->update([ 'grade' => $request->grade]);
         if($request->filled('grade_category_id'))
             $quizLesson->update(['grade_category_id' =>$request->grade_category_id]);
+        if($request->filled('visible'))
+            $quizLesson->update(['visible' =>$request->visible]);
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id;
             }

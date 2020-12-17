@@ -39,7 +39,9 @@ class AssignmentLessonObserver
                 'class_id' => $class_id,
                 'lesson_id' => $assignmentLesson->lesson_id,
                 'level_id' => $level_id,
-                'type' => 'assignment'
+                'type' => 'assignment',  
+                'visible' => isset($assignmentLesson->visible)?$assignmentLesson->visible:1
+
             ]);
         }
     }
