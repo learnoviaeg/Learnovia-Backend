@@ -351,7 +351,7 @@ class AssigmentsController extends Controller
         $assignment_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('assignment_id')->first();
         user::notify([
             'id' => $assignment_id,
-            'message' => 'A new Assignment is added',
+            'message' => $request['assignment_name'].' assignment is added',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
@@ -826,7 +826,8 @@ class AssigmentsController extends Controller
                 "course_segment" => $lesson->course_segment_id,
                 "assignment_lesson_id" => $assignment_lesson->id,
                 "submit_date" => Carbon::now(),
-                "publish_date" => Carbon::parse($request->publish_date)
+                "publish_date" => Carbon::parse($request->publish_date),
+                "assignment_name" => Assignment::find($request->assignment_id)->name
             );
             $this->assignAsstoUsers($data);
 
@@ -870,7 +871,7 @@ class AssigmentsController extends Controller
 
         user::notify([
             'id' => $assignment->assignment_id,
-            'message' => 'You can answer this assignment now',
+            'message' => 'You can answer '.$assignment->name.' assignment now',
             'from' => Auth::user()->id,
             'users' => $request->user_id,
             'course_id' => $course,
