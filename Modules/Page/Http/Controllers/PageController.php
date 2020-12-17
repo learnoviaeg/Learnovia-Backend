@@ -196,7 +196,7 @@ class PageController extends Controller
         $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         User::notify([
             'id' => $request->id,
-            'message' => $pagename.' is updated',
+            'message' => $pagename.' page is updated',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $lesson->courseSegment->courses[0]->id,

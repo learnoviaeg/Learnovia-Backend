@@ -315,7 +315,7 @@ class AssigmentsController extends Controller
                 
         user::notify([
             'id' => $request->assignment_id,
-            'message' => $assignment->name .' is updated',
+            'message' => $assignment->name .' assignment is updated',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
