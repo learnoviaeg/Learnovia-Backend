@@ -236,7 +236,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/generate-username-password', 'title' => 'generate username and password']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/GetAllCountries', 'title' => 'Get all countries']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/GetAllNationalities', 'title' => 'Get all nationalities']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Set parents and childs']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Assign Parent','dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/export', 'title' => 'Export Users']);
 
 
