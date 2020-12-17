@@ -28,6 +28,8 @@ use Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController;
 use Modules\Attendance\Http\Controllers\AttendanceSessionController;
 use App\Http\Controllers\H5PLessonController;
 use Modules\Assigments\Http\Controllers\AssigmentsController;
+use App\Exports\ExportRoleWithPermissions;
+use Illuminate\Support\Facades\Storage;
 
 class SpatieController extends Controller
 {
@@ -1034,5 +1036,21 @@ class SpatieController extends Controller
             }
         }
         return HelperController::api_response_format(200, ['permissions' => $dashbordPermission], 'Successfully');
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'ids' => 'array',
+            'ids.*' => 'exists:roles,id'
+        ]); 
+
+        if(!$request->filled('ids'))
+            $request['ids']= Role::pluck('id');
+
+        $filename = uniqid();
+        $file = Excel::store(new ExportRoleWithPermissions($request->ids), 'roles'.$filename.'.xls','public');
+        $file = url(Storage::url('roles'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }

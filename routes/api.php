@@ -46,6 +46,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::get('export', 'SpatieController@Export_Role_with_Permission')->name('exportroleswithper')->middleware('permission:spatie/export');
         Route::post('import', 'SpatieController@Import_Role_with_Permission')->name('importroleswithper')->middleware('permission:spatie/import');
         Route::get('list-permissions-and-roles', 'SpatieController@List_Roles_Permissions')->name('listpermissionandrole')->middleware('permission:spatie/list-permissions-and-roles');
+        Route::get('exports', 'SpatieController@export')->name('exportroleswithper')->middleware('permission:spatie/export');
     });
 
     //permissions routes
