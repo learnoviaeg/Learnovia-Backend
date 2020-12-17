@@ -12,4 +12,13 @@ class Parents extends Model
         'created_at', 'updated_at'
     ];
 
+    public function parent()
+    {
+        return $this->hasMany('App\User','id' , 'parent_id');
+    }
+
+    public function child()
+    {
+        return $this->hasMany('App\User','id' , 'child_id');
+    }
 }
