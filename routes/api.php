@@ -233,6 +233,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], fu
     Route::get('parent-child', 'UserController@parent_child')->name('parentchild')->middleware('permission:user/parent-child');
     Route::get('getParents', 'UserController@getParents')->name('getFamily')->middleware('permission:user/parent-child');
     Route::post('set-parent-child', 'UserController@set_parent_child')->name('setparentchild')->middleware('permission:user/set-parent-child');
+    Route::post('unset-parent-child', 'UserController@unset_parent_child')->name('setparentchild')->middleware('permission:user/set-parent-child');
     Route::get('get-by-id', 'UserController@GetUserById')->name('getbyid')->middleware('permission:user/get-by-id');
     Route::get('get-with-role-cs', 'UserController@get_users_with_filter_role')->name('getbyroleid')->middleware('permission:user/get-with-role-cs');
     Route::get('filter-with-role', 'UserController@allUserFilterRole')->name('filterallbyrole')->middleware('permission:user/filter-with-role');

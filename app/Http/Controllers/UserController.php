@@ -631,13 +631,21 @@ class UserController extends Controller
 
     public function getParents(Request $request)
     {
-        $users=array();
+        $request->validate([
+            'parent_id' => 'exists:parents,parent_id',
+        ]);
+        if(isset($request->parent_id))
+        {
+            $par_chil=Parents::where('parent_id',$request->parent_id)->with('child')->get();
+            return HelperController::api_response_format(201,$par_chil->paginate(HelperController::GetPaginate($request)),'There r parents');
+        }
+
         $parents=User::whereHas("roles",function ($q){
             $q->where('name','Parent');
-        })->where( function($q)use($request){
-            $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
-                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
-                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+        })->where(function($q)use($request){
+                    $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                        ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                        ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
         })->with('attachment')->get();
         return HelperController::api_response_format(201,$parents->paginate(HelperController::GetPaginate($request)),'There r parents');
     }
@@ -653,13 +661,31 @@ class UserController extends Controller
             'parent_id' => 'required|array|exists:users,id',
             'child_id' => 'required|array|exists:users,id'
         ]);
-        
+
         foreach($request->parent_id as $parent)
             foreach($request->child_id as $child)
                 $parent=Parents::firstOrCreate([
                     'child_id' => $child,
                     'parent_id' => $parent
                 ]);
+
+        return HelperController::api_response_format(201,null,'Assigned Successfully');
+    }
+
+        /**
+     * set paresnt's child
+     *
+     * @return unAssigned Successfully
+    */
+    public function unset_parent_child(Request $request)
+    {
+        $request->validate([
+            'parent_id' => 'required|exists:users,id',
+            'child_id' => 'required|array|exists:users,id'
+        ]);
+
+        foreach($request->child_id as $child)
+            $parent=Parents::where('child_id',$request->child)->where('parent_id',$request->parent)->first()->delete();
 
         return HelperController::api_response_format(201,null,'Assigned Successfully');
     }
