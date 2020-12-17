@@ -685,7 +685,7 @@ class UserController extends Controller
         ]);
 
         foreach($request->child_id as $child)
-            $parent=Parents::where('child_id',$request->child)->where('parent_id',$request->parent)->first()->delete();
+            $parent=Parents::where('child_id',$child)->where('parent_id',$request->parent)->first()->delete();
 
         return HelperController::api_response_format(201,null,'Assigned Successfully');
     }
