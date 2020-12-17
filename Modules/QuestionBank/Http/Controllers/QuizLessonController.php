@@ -107,7 +107,7 @@ class QuizLessonController extends Controller
             ]);
 
             $requ = ([
-                'message' => 'the quiz is added',
+                'message' => $quiz->name.' quiz is added',
                 'id' => $request->quiz_id,
                 'users' => $users,
                 'type' =>'quiz',
@@ -334,8 +334,9 @@ class QuizLessonController extends Controller
         }
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $quiz_name = Quiz::find($quizLesson->quiz_id)->name;
             user::notify([
-                'message' => 'you can answer this quiz now',
+                'message' => 'you can answer '.$quiz_name.' quiz now',
                 'id' => $quizLesson->quiz_id,
                 'users' => $request->users_id,
                 'type' =>'quiz',
