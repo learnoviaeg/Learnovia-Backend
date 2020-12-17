@@ -77,7 +77,9 @@ class UsersController extends Controller
         if($request->filled('search'))
         {
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
-                if(  (($item->arabicname!=null) && str_contains($item->arabicname, $request->search) )|| str_contains(strtolower($item->username), strtolower($request->search))|| str_contains(strtolower($item->fullname), strtolower($request->search) ) ) 
+                if((($item->arabicname!=null) && str_contains($item->arabicname, $request->search))||
+                 str_contains(strtolower($item->username),strtolower($request->search))||
+                  str_contains(strtolower($item->fullname),strtolower($request->search))) 
                     return $item; 
             });
         }

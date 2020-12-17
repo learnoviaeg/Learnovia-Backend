@@ -684,8 +684,11 @@ class UserController extends Controller
             'child_id' => 'required|array|exists:users,id'
         ]);
 
-        foreach($request->child_id as $child)
-            $parent=Parents::where('child_id',$child)->where('parent_id',$request->parent)->first()->delete();
+        foreach($request->child_id as $child){
+            $parent=Parents::where('child_id',$child)->where('parent_id',$request->parent)->first();
+            if(isset($parents))
+                $parents->delete();
+        }
 
         return HelperController::api_response_format(201,null,'Assigned Successfully');
     }
