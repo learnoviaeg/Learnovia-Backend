@@ -30,7 +30,10 @@ class ImportRoleWithPermissions implements ToModel , WithHeadingRow
 
         if(isset($row['id']) && isset($row['name']))
             throw new \Exception('Plese, enter only name of new role or id of existing one');
-            
+
+        if(!isset($row['id']) && !isset($row['name']))
+            throw new \Exception('Plese, you must enter only name of new role or id of existing one');
+
         $permission = 'permission';
 
         if(isset($row['id']))
