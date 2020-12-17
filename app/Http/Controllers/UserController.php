@@ -650,16 +650,17 @@ class UserController extends Controller
     public function set_parent_child(Request $request)
     {
         $request->validate([
-            'parent_id' => 'required|exists:users,id',
+            'parent_id' => 'required|array|exists:users,id',
             'child_id' => 'required|array|exists:users,id'
         ]);
-        foreach($request->child_id as $child)
-        {
-            $parent=Parents::firstOrCreate([
-                'child_id' => $child,
-                'parent_id' => $request->parent_id
-            ]);
-        }
+        
+        foreach($request->parent_id as $parent)
+            foreach($request->child_id as $child)
+                $parent=Parents::firstOrCreate([
+                    'child_id' => $child,
+                    'parent_id' => $parent
+                ]);
+
         return HelperController::api_response_format(201,null,'Assigned Successfully');
     }
 
