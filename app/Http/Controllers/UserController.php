@@ -680,14 +680,14 @@ class UserController extends Controller
     public function unset_parent_child(Request $request)
     {
         $request->validate([
-            'parent_id' => 'required|exists:users,id',
-            'child_id' => 'required|array|exists:users,id'
+            'parent_id' => 'required|exists:parents,parent_id',
+            'child_id' => 'required|array|exists:parents,child_id'
         ]);
 
         foreach($request->child_id as $child){
-            $parent=Parents::where('child_id',$child)->where('parent_id',$request->parent)->first();
-            if(isset($parents))
-                $parents->delete();
+            $parent=Parents::where('child_id',$child)->where('parent_id',$request->parent_id)->first();
+            if(isset($parent))
+                $parent->delete();
         }
 
         return HelperController::api_response_format(201,null,'Assigned Successfully');
