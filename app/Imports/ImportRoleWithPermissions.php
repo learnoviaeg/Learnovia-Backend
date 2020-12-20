@@ -20,12 +20,13 @@ class ImportRoleWithPermissions implements ToModel , WithHeadingRow
     {
         $messages = [
             'unique' => 'Role name must be unique',
-            'exists' => 'Id must exist in roles list',
+            'exists' => 'Id must exist in the lists',
         ];
         
         $validator = Validator::make($row,[
-            'name' => 'nullable|unique:roles,name',
+            'name' => 'nullable',
             'id' => 'nullable|exists:roles,id',
+            'permission_id' => 'exists:permissions,id'
         ],$messages)->validate();
 
         if(isset($row['id']) && isset($row['name']))
@@ -34,29 +35,26 @@ class ImportRoleWithPermissions implements ToModel , WithHeadingRow
         if(!isset($row['id']) && !isset($row['name']))
             throw new \Exception('Plese, you must enter only name of new role or id of existing one');
 
-        $permission = 'permission';
 
         if(isset($row['id']))
             $role = Role::find($row['id']);
 
         if(isset($row['name'])){
-            $role = Role::create([
-                'name' => $row['name']
-            ]);
+            $role = Role::where('name',$row['name'])->first();
+
+            if(!isset($role)){
+                $role = Role::create([
+                    'name' => $row['name']
+                ]);
+            }
         }
 
-        $count=1;
-        while(isset($row[$permission.$count])) {
-            
-            $permission_exist = Permission::find($row[$permission.$count]);
+        if(isset($row['permission_id'])){
 
-            if(!isset($permission_exist))
-                continue;
+            $permission = Permission::find($row['permission_id']);
 
-            $role->givePermissionTo($permission_exist);
-
-            $count++;
+            $role->givePermissionTo($permission);
         }
-        
+
     }
 }
