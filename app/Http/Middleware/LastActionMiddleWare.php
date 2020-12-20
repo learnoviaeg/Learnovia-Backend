@@ -7,6 +7,8 @@ use App\LastAction;
 
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\App;
+use App\Language;
 
 class LastActionMiddleWare
 {
@@ -19,6 +21,17 @@ class LastActionMiddleWare
      */
     public function handle($request, Closure $next)
     {
+        $defult_lang = Language::where('default', 1)->first();
+        $lang = $request->user()->language ? $request->user()->language : ($defult_lang ? $defult_lang->id : null);
+        // __('messages.welcome')
+        if(isset($lang)){
+            if($lang == 1)
+                App::setLocale('en');
+
+            if($lang == 2)
+                App::setLocale('ar');
+        }
+
         $permission_name = null;
         //for controller 
         // dd($request->route()->action) ;
