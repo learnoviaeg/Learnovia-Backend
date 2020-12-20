@@ -347,6 +347,10 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
         ]);
 
+        $enrolls=Enroll::where('user_id',$request->id)->get();
+        $all=Enroll::where('user_id',$request->id)->delete();
+        if($all > 0)
+            event(new MassLogsEvent($enrolls,'deleted'));
         $user = User::find($request->id);
         $user->delete();
 
