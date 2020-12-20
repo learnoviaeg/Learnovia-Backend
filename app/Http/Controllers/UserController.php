@@ -664,7 +664,7 @@ class UserController extends Controller
 
         foreach($request->parent_id as $parent)
             foreach($request->child_id as $child)
-                $parent=Parents::firstOrCreate([
+                Parents::firstOrCreate([
                     'child_id' => $child,
                     'parent_id' => $parent
                 ]);
@@ -690,7 +690,7 @@ class UserController extends Controller
                 $parent->delete();
         }
 
-        return HelperController::api_response_format(201,null,'Assigned Successfully');
+        return HelperController::api_response_format(201,null,'unAssigned Successfully');
     }
 
     /**

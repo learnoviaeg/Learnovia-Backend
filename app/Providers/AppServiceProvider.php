@@ -20,6 +20,7 @@ use App\Observers\LogsObserver;
 use Modules\Attendance\Entities\AttendanceSession;
 
 use App\User;
+use App\Parents;
 use App\AcademicType;
 use App\Announcement;
 use App\AcademicYear;
@@ -78,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
         ClassLevel::observe(LogsObserver::class);
         YearLevel::observe(LogsObserver::class);
         User::observe(LogsObserver::class);
+        Parents::observe(LogsObserver::class);
         CourseSegment::observe(LogsObserver::class);
         Enroll::observe(EnrollObserver::class);
 
