@@ -14,11 +14,11 @@ class Parents extends Model
 
     public function parent()
     {
-        return $this->hasMany('App\User','id' , 'parent_id');
+        return $this->belongsTo('App\User','parent_id' , 'id');
     }
 
     public function child()
     {
-        return $this->hasMany('App\User','id' , 'child_id');
+        return $this->belongsTo('App\User','child_id' , 'id');
     }
 }
