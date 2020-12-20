@@ -9,7 +9,7 @@ use Spatie\Permission\Models\Role;
 
 class ExportRoleWithPermissions implements FromCollection, WithHeadings
 {
-    protected $fields = ['role_id','role_name'];
+    protected $fields = ['id','name','permission_id','permission_title'];
 
     /**
     * @return \Illuminate\Support\Collection
@@ -34,20 +34,21 @@ class ExportRoleWithPermissions implements FromCollection, WithHeadings
 
             $permissions = $role->permissions;
 
-            $obj['id'] = $role->id;
-            $obj['name'] = $role->name;
+            $roles->push([
+                'id' => $role->id,
+                'name' => $role->name,
+                'permission_id' => count($permissions) > 0 ? $permissions[0]->id : '',
+                'permission_title' => count($permissions) > 0 ? $permissions[0]->title : ''
+            ]);
 
-            $i=1;
-            foreach($permissions as $perm){
-
-                $this->fields = array_merge( $this->fields, ['permission'.$i] );
-
-                $obj['permission'.$i] = $perm->title;
-                
-                $i++;
+            for($i=1;$i<count($permissions);$i++){
+                $roles->push([
+                    'id' => '',
+                    'name' => '',
+                    'permission_id' => count($permissions) > 0 ? $permissions[$i]->id : '',
+                    'permission_title' => count($permissions) > 0 ? $permissions[$i]->title : ''
+                ]);
             }
-
-            $roles->push($obj);
             
             $role->setHidden([])->setVisible($this->fields);
         }
