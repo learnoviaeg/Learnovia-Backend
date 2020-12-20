@@ -38,6 +38,7 @@ use App\ClassLevel;
 use App\attachment;
 use App\SegmentClass;
 use App\Exports\UsersExport;
+use App\Exports\ParentChildExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
@@ -872,6 +873,17 @@ class UserController extends Controller
         }
 
         return HelperController::api_response_format(200,$students ,'Users are.......');
+    }
+
+    public function exportParentChild(Request $request)
+    {
+        $fields = ['username_parent', 'username_child'];
+
+        $filename = uniqid();
+        $file = Excel::store(new ParentChildExport($fields), 'parent_child'.$filename.'.xls','public');
+        $file = url(Storage::url('parent_child'.$filename.'.xls'));
+
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 
     public function export(Request $request)
