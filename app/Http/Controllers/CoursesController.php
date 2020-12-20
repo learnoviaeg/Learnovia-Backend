@@ -33,7 +33,16 @@ class CoursesController extends Controller
     {
         //validate the request
         $request->validate([
-            'class' => 'nullable|integer|exists:classes,id',
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
             'paginate' => 'integer',
             'role_id' => 'integer|exists:roles,id'
         ]);
@@ -43,7 +52,7 @@ class CoursesController extends Controller
             $paginate = $request->paginate;
         }
 
-        $enrolls = $this->chain->getCourseSegmentByChain($request);
+        $enrolls = $this->chain->getCourseSegmentByManyChain($request);
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
             $enrolls->where('user_id',Auth::id());
         }
