@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Auth;
 use DB;
 use App\Course;
+use App\Paginate;
 
 class NotificationsController extends Controller
 {
@@ -31,7 +32,9 @@ class NotificationsController extends Controller
 
         $request->validate([
             'read' => 'in:unread,read',
-            'type'=>'string|in:announcement,notification',
+            'type'=>'string|in:announcement,notification',  
+            'course_id' => 'integer|exists:courses,id',
+
         ]);
 
         $notify = DB::table('notifications')->select('data','read_at','id')
@@ -73,7 +76,11 @@ class NotificationsController extends Controller
         if($request->type == 'notification')
             $notifications = $notifications->where('type','!=','announcement');
 
-        return response()->json(['message' => 'User notification list.','body' => $notifications->values()], 200);
+        if($request->filled('course_id'))
+            $notifications = $notifications->where('course_id',$request->course_id);
+
+
+        return response()->json(['message' => 'User notification list.','body' => $notifications->values()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
