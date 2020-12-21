@@ -33,7 +33,7 @@ class NotificationsController extends Controller
             'read' => 'in:unread,read',
             'type'=>'string|in:announcement,notification',  
             'course_id' => 'integer|exists:courses,id',
-            'component_type' => 'string|in:file,media,Page,quiz,assignment,h5p,meeting|required_if:type,==,notification'
+            'component_type' => 'string|in:file,media,Page,quiz,assignment,h5p,meeting'
         ]);
 
         $notify = DB::table('notifications')->select('data','read_at','id')
