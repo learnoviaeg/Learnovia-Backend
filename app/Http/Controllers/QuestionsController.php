@@ -46,7 +46,7 @@ class QuestionsController extends Controller
             $questions = quiz_questions::where('quiz_id',$quiz_id)
                     ->with(['Question.question_answer','Question.question_category','Question.question_type'])->get()
                     ->pluck('Question.*')->collapse();
-            return response()->json(['message' => 'questions List ....', 'body' => $questions->paginate(Paginate::GetPaginate($request))], 200);
+            return response()->json(['message' => __('messages.question.list'), 'body' => $questions->paginate(Paginate::GetPaginate($request))], 200);
         }
 
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
@@ -69,7 +69,7 @@ class QuestionsController extends Controller
             $questions->whereIn('question_type_id', $request->question_type);
         }
 
-        return response()->json(['message' => 'questions List ....', 'body' => $questions->get()->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.question.list'), 'body' => $questions->get()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

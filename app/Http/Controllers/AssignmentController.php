@@ -52,7 +52,7 @@ class AssignmentController extends Controller
        
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
-                return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
+                return response()->json(['message' => __('messages.assignment.no_active_for_lesson'), 'body' => []], 400);
             
             $lessons  = [$request->lesson];
         }
@@ -69,7 +69,7 @@ class AssignmentController extends Controller
 
         if($count == 'count'){
             
-            return response()->json(['message' => 'Assignments count', 'body' => $assignment_lessons->count()], 200);        
+            return response()->json(['message' => __('messages.assignment.count'), 'body' => $assignment_lessons->count()], 200);        
         }
 
         $assignment_lessons = $assignment_lessons->get();
@@ -87,7 +87,7 @@ class AssignmentController extends Controller
             $assignments[]=$assignment;
         }
 
-        return response()->json(['message' => 'Assignments List ....', 'body' => $assignments->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.assignment.list'), 'body' => $assignments->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
@@ -113,11 +113,11 @@ class AssignmentController extends Controller
 
         $assigLessonID = AssignmentLesson::where('assignment_id', $assignment_id)->where('lesson_id', $lesson_id)->first();        
         if(!isset($assigLessonID))
-            return response()->json(['message' =>'this assigment doesn\'t belong to this lesson', 'body' => [] ], 400);
+            return response()->json(['message' => __('messages.assignment.assignment_not_belong'), 'body' => [] ], 400);
 
         $assignment = assignment::where('id',$assignment_id)->first();
         if(!isset($assignment))
-            return response()->json(['message' => 'assignment not fount!', 'body' => [] ], 400);
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
 
         
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
@@ -134,7 +134,7 @@ class AssignmentController extends Controller
             $assignment['user_submit'] =$studentassigment;}
         }
        
-            return response()->json(['message' => 'assignment objet', 'body' => $assignment], 200);        
+            return response()->json(['message' => __('messages.assignment.assignment_object'), 'body' => $assignment], 200);        
     }
 
     /**

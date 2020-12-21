@@ -72,12 +72,12 @@ class QuizLessonController extends Controller
                 }
 
                 if($flag==false){
-                    return HelperController::api_response_format(400, $request->grade_category_id[$key],'there is a grade category invalid');
+                    return HelperController::api_response_format(400, $request->grade_category_id[$key],__('messages.error.data_invalid'));
                 }
             }
 
             if($quiz->course_id != $lesson->courseSegment->course_id){
-                return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
+                return HelperController::api_response_format(500, null,__('messages.quiz.quiz_not_belong'));
             }
 
             // $check = QuizLesson::where('quiz_id',$request->quiz_id)
@@ -89,7 +89,7 @@ class QuizLessonController extends Controller
             $lesson_obj = Lesson::find($lessons);
             $course_segment =  CourseSegment::find($lesson_obj->course_segment_id);
             if( $course_segment->end_date < Carbon::parse($request->closing_time) )
-                return HelperController::api_response_format(400, null , 'Please enter closing date before '.$course_segment->end_date." ");
+                return HelperController::api_response_format(400, null , __('messages.date.end_before').$course_segment->end_date." ");
             $index = QuizLesson::where('lesson_id',$lessons)->get()->max('index');
             $Next_index = $index + 1;
             $quizLesson[] = QuizLesson::create([
@@ -143,7 +143,7 @@ class QuizLessonController extends Controller
                 'index'     => LessonComponent::getNextIndex($lessons)
             ]);
         }
-        return HelperController::api_response_format(200, $quizLesson,'Quiz added successfully');
+        return HelperController::api_response_format(200, $quizLesson,__('messages.quiz.add'));
     }
 
     /**
@@ -181,7 +181,7 @@ class QuizLessonController extends Controller
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         
         if($quiz->course_id != $lesson->courseSegment->course_id){
-            return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
+            return HelperController::api_response_format(500, null, __('messages.quiz.quiz_not_belong'));
         }
         if($request->grade_category_id != null)
         {
@@ -194,7 +194,7 @@ class QuizLessonController extends Controller
             }
 
             if($flag==false){
-                return HelperController::api_response_format(400, null,'there is a grade category invalid');
+                return HelperController::api_response_format(400, null,__('messages.error.data_invalid'));
             }
         }
 
@@ -202,7 +202,7 @@ class QuizLessonController extends Controller
                         ->where('lesson_id',$request->lesson_id)->first();
 
         if(!isset($quizLesson)){
-            return HelperController::api_response_format(404, null,'This quiz doesn\'t belongs to the lesson');
+            return HelperController::api_response_format(404, null, __('messages.quiz.quiz_not_belong'));
         }
         if($request->filled('grading_method_id'))
                 $quizLesson->update(['grading_method_id' => $request->grading_method_id]);
@@ -244,7 +244,7 @@ class QuizLessonController extends Controller
         ]);
         user::notify($requ);
         $all = Lesson::find($request->updated_lesson_id)->module('QuestionBank', 'quiz')->get();
-        return HelperController::api_response_format(200, $all,'Quiz edited successfully');
+        return HelperController::api_response_format(200, $all,__('messages.quiz.update'));
     }
 
     public function getGradeCategory(Request $request)
@@ -255,7 +255,7 @@ class QuizLessonController extends Controller
         ]);
         $couse_segment_id= CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id)->id;
         $course_segment = CourseSegment::find($couse_segment_id);
-        return HelperController::api_response_format(200, $course_segment->GradeCategory,'These are grade category in this course');
+        return HelperController::api_response_format(200, $course_segment->GradeCategory,__('messages.grade.grade_category_list'));
     }
 
     /**
@@ -273,11 +273,11 @@ class QuizLessonController extends Controller
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
 
         if(!isset($quizLesson))
-            return HelperController::api_response_format(404, null,'This quiz doesn\'t belongs to the lesson');
+            return HelperController::api_response_format(404, null,__('messages.quiz.quiz_not_belong'));
 
         $quizLesson->delete();
         $all = Lesson::find($request->lesson_id)->module('QuestionBank', 'quiz')->get();
-        return HelperController::api_response_format(200, $all,'Quiz deleted successfully');
+        return HelperController::api_response_format(200, $all,__('messages.quiz.delete'));
     }
 
     public function getQuizInLesson(Request $request)
@@ -313,13 +313,13 @@ class QuizLessonController extends Controller
     
     $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
     if(!isset($quizLesson)){
-        return HelperController::api_response_format(400,null, 'This quiz doesn\'t assign in this lesson');
+        return HelperController::api_response_format(400,null, __('messages.quiz.quiz_not_belong'));
 
     }
     $lesson= Lesson::find( $quizLesson->lesson_id);
     $course_segment = $lesson->courseSegment;
     if($course_segment->end_date < Carbon::parse($request->due_date))
-            return HelperController::api_response_format(400, null , 'Please enter due date before '.$course_segment->end_date);
+            return HelperController::api_response_format(400, null , __('messages.date.end_before').$course_segment->end_date);
 
     $usersOverride =array();
     foreach ($request->users_id as $user_id) {
@@ -346,7 +346,7 @@ class QuizLessonController extends Controller
                 'lesson_id'=> $quizLesson->lesson_id,
                 'from' => Auth::id(),
             ]);
-    return HelperController::api_response_format(201, $usersOverride, 'Quiz override successfully');
+    return HelperController::api_response_format(201, $usersOverride, __('messages.quiz.override'));
 
     }
 }

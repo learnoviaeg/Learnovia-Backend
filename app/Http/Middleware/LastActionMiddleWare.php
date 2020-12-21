@@ -23,7 +23,7 @@ class LastActionMiddleWare
     {
         $defult_lang = Language::where('default', 1)->first();
         $lang = $request->user()->language ? $request->user()->language : ($defult_lang ? $defult_lang->id : null);
-        // __('messages.welcome')
+        
         if(isset($lang)){
             if($lang == 1)
                 App::setLocale('en');
