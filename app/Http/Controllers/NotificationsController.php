@@ -33,12 +33,16 @@ class NotificationsController extends Controller
             'read' => 'in:unread,read',
             'type'=>'string|in:announcement,notification',  
             'course_id' => 'integer|exists:courses,id',
-            'component_type' => 'string|in:file,media,Page,quiz,assignment,h5p,meeting'
+            'component_type' => 'string|in:file,media,Page,quiz,assignment,h5p,meeting',
+            'sort_in' => 'in:asc,desc', 
         ]);
 
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
         $notify = DB::table('notifications')->select('data','read_at','id')
-                                            ->where('notifiable_id', $request->user()->id)
-                                            ->orderBy('created_at','desc')->get();
+            ->where('notifiable_id', $request->user()->id)->orderBy('created_at',$sort_in)->get();
                                             
         $notifications = collect();
         $notifications_types =collect();
