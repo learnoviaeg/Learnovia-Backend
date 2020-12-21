@@ -37,12 +37,10 @@ class NotificationsController extends Controller
             'sort_in' => 'in:asc,desc', 
         ]);
 
-        $sort_in = 'desc';
-        if($request->has('sort_in'))
-            $sort_in = $request->sort_in;
+     
 
         $notify = DB::table('notifications')->select('data','read_at','id')
-            ->where('notifiable_id', $request->user()->id)->orderBy('created_at',$sort_in)->get();
+            ->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();
                                             
         $notifications = collect();
         $notifications_types =collect();
@@ -71,6 +69,8 @@ class NotificationsController extends Controller
             return response()->json(['message' => 'notification types list.','body' => $notifications_types->unique()->values()], 200);
 
         $notifications = $notifications->where('publish_date', '<=', Carbon::now())->sortByDesc('publish_date');
+        if($request->has('sort_in') && $request->sort_in == 'asc')
+            $notifications = $notifications->where('publish_date', '<=', Carbon::now())->sortBy('publish_date');
 
         if($request->has('read') && $request->read == 'unread')//get unread
             $notifications = $notifications->where('read_at',null);
