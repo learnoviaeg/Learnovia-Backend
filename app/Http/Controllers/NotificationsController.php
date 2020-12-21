@@ -27,14 +27,13 @@ class NotificationsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$types=null)
     {
-
         $request->validate([
             'read' => 'in:unread,read',
             'type'=>'string|in:announcement,notification',  
             'course_id' => 'integer|exists:courses,id',
-
+            'component_type' => 'string|in:file,media,Page,quiz,assignment,h5p,meeting|required_if:type,==,notification'
         ]);
 
         $notify = DB::table('notifications')->select('data','read_at','id')
@@ -42,6 +41,7 @@ class NotificationsController extends Controller
                                             ->orderBy('created_at','desc')->get();
                                             
         $notifications = collect();
+        $notifications_types =collect();
 
         foreach($notify as $notify_object) {
 
@@ -60,7 +60,11 @@ class NotificationsController extends Controller
                 'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
                 'course_name' => isset($decoded_data['course_name'])?$decoded_data['course_name']:null,
             ]);
+            $notifications_types->push($decoded_data['type']);
         }
+        // for route api/notifications/{types} 
+        if($types=='types')
+            return response()->json(['message' => 'notification types list.','body' => $notifications_types->unique()->values()], 200);
 
         $notifications = $notifications->where('publish_date', '<=', Carbon::now())->sortByDesc('publish_date');
 
@@ -73,12 +77,13 @@ class NotificationsController extends Controller
         if($request->type == 'announcement')
             $notifications = $notifications->where('type','announcement');
         
-        if($request->type == 'notification')
+        if($request->type == 'notification'){
             $notifications = $notifications->where('type','!=','announcement');
-
+            if($request->filled('component_type'))
+                $notifications = $notifications->where('type',$request->component_type);
+        }
         if($request->filled('course_id'))
             $notifications = $notifications->where('course_id',$request->course_id);
-
 
         return response()->json(['message' => 'User notification list.','body' => $notifications->values()->paginate(Paginate::GetPaginate($request))], 200);
     }
