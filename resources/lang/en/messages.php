@@ -247,4 +247,10 @@ return [
         'assign' => 'Role assigned successfully',
         'revoke' => 'Role revoked successfully',
     ],
+    'enroll' => [
+        'add' => 'Users enrolled successfully',
+        'delete' => 'User/s unenrolled successfully',
+        'already_enrolled' => 'Those users are already enrolled',
+        'no_courses_belong_to_class' => 'No courses belong to this class',
+    ],
 ];
