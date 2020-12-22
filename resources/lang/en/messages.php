@@ -202,4 +202,10 @@ return [
         'delete' => 'Type deleted successfully',
         'list' => 'Types List',
     ],
+    'level' => [
+        'add' => 'Level added successfully',
+        'update' => 'Level updated successfully',
+        'delete' => 'Level deleted successfully',
+        'list' => 'Levels List',
+    ],
 ];
