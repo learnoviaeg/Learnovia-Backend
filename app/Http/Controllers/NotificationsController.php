@@ -35,6 +35,7 @@ class NotificationsController extends Controller
             'course_id' => 'integer|exists:courses,id',
             'component_type' => 'string|in:file,media,Page,quiz,assignment,h5p,meeting',
             'sort_in' => 'in:asc,desc', 
+            'search' => 'string'
         ]);
 
      
@@ -89,6 +90,12 @@ class NotificationsController extends Controller
         if($request->filled('course_id'))
             $notifications = $notifications->where('course_id',$request->course_id);
 
+        if($request->filled('search')){
+            $notifications = $notifications->filter(function ($item) use ($request) {
+            if(  (($item['message']!=null) && str_contains(strtolower($item['message']), strtolower($request->search)))) 
+                return $item; 
+        });
+        }
         return response()->json(['message' => 'User notification list.','body' => $notifications->values()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
