@@ -208,4 +208,10 @@ return [
         'delete' => 'Level deleted successfully',
         'list' => 'Levels List',
     ],
+    'class' => [
+        'add' => 'Class added successfully',
+        'update' => 'Class updated successfully',
+        'delete' => 'Class deleted successfully',
+        'list' => 'Classes List',
+    ],
 ];
