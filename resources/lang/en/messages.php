@@ -231,4 +231,12 @@ return [
         'object' => 'Course details',
         'assign' => 'Course assigned successfully',
     ],
+    'announcement' => [
+        'add' => 'Announcement sent successfully',
+        'update' => 'Announcement updated successfully',
+        'delete' => 'Announcement deleted successfully',
+        'list' => 'Announcements List',
+        'created_list' => 'My Announcements List',
+        'object' => 'Announcement details',
+    ],
 ];
