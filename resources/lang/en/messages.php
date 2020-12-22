@@ -19,6 +19,7 @@ return [
         'no_available_data' => 'No available data to show',
         'cannot_see_feedback' => 'You are not allowed to see feedback',
         'no_active_for_lesson' => 'No active segment for this lesson',
+        'already_exist' => 'Item is already exist',
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
@@ -92,5 +93,57 @@ return [
     'users' => [
         'students_list' => 'Students list',
         'parent_choose_child'=> 'Please, choose your child first',
+    ],
+    'page' => [
+        'add' => 'Page added successfully',
+        'update' => 'Page updated successfully',
+        'delete' => 'Page deleted successfully',
+        'list' => 'Pages List',
+        'page_not_belong' => 'This page does not belong to this lesson',
+    ],
+    'file' => [
+        'add' => 'File uploaded successfully',
+        'update' => 'File updated successfully',
+        'delete' => 'File deleted successfully',
+        'list' => 'Files List',
+        'file_not_belong' => 'This file does not belong to this lesson',
+    ],
+    'media' => [
+        'add' => 'Media uploaded successfully',
+        'update' => 'Media updated successfully',
+        'delete' => 'Media deleted successfully',
+        'list' => 'Medias List',
+        'media_not_belong' => 'This media does not belong to this lesson',
+        'only_url_or_media' => 'Please, either upload media or add a URL',
+
+        'image' => [
+            'add' => 'Image uploaded successfully',
+            'update' => 'Image updated successfully',
+            'delete' => 'Image deleted successfully',
+        ],
+        'video' => [
+            'add' => 'Video uploaded successfully',
+            'update' => 'Video updated successfully',
+            'delete' => 'Video deleted successfully',
+        ],
+        'audio' => [
+            'add' => 'Audio uploaded successfully',
+            'update' => 'Audio updated successfully',
+            'delete' => 'Audio deleted successfully',
+        ],
+        'link' => [
+            'add' => 'Link uploaded successfully',
+            'update' => 'Link updated successfully',
+            'delete' => 'Link deleted successfully',
+        ],
+        'url' => [
+            'add' => 'URL uploaded successfully',
+            'update' => 'URL updated successfully',
+            'delete' => 'URL deleted successfully',
+        ],
+    ],
+    'materials' => [
+        'list' => 'Materials list',
+        'count' => 'Materials count',
     ],
 ];
