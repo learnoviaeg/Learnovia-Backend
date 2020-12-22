@@ -52,7 +52,7 @@ class AssignmentController extends Controller
        
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
-                return response()->json(['message' => __('messages.assignment.no_active_for_lesson'), 'body' => []], 400);
+                return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
             
             $lessons  = [$request->lesson];
         }

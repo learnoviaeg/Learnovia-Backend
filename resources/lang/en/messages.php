@@ -18,6 +18,7 @@ return [
         'grade_less_than' => 'Please, put grade less than ',
         'no_available_data' => 'No available data to show',
         'cannot_see_feedback' => 'You are not allowed to see feedback',
+        'no_active_for_lesson' => 'No active segment for this lesson',
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
@@ -36,7 +37,6 @@ return [
         'delete' => 'Assignment deleted successfully',
         'list' => 'Assignments List',
         'count' => 'Assignments count',
-        'no_active_for_lesson' => 'No active segment for this lesson',
         'assignment_not_belong' => 'This assignment does not belong to this lesson',
         'assignment_object' => 'Assignment details',
         'content_only' => 'Please, enter only content',
@@ -78,11 +78,13 @@ return [
         'update' => 'Quiz updated successfully',
         'delete' => 'Quiz deleted successfully',
         'list' => 'Quizzes List',
+        'count' => 'Quizzes count',
         'invaled_feedback' => 'Invalid feedback type, feedback can not be After submission',
         'quiz_not_belong' => 'This quiz does not belong to this lesson',
         'override' => 'Quiz date updated to selected students successfully',
         'continue_quiz' => 'You can continue your last attempt',
         'students_attempts_list' => 'Students attempts list',
+        'quiz_object' => 'Quiz details',
     ],
     'permissions' => [
         'no_roles_assigned' => 'There is no roles assigned to this permission'
