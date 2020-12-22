@@ -153,7 +153,25 @@ return [
         'update' => 'Session updated successfully',
         'delete' => 'Session deleted successfully',
         'list' => 'Sessions list',
-        'same_time_session' => 'Sorry you can not add different sessions to the same class',
+        'same_time_session' => 'Sorry you cannot add different sessions to the same class',
         'taken' => 'Attendance taken successfully',
+    ],
+    'virtual' => [
+        'add' => 'Virtual class/es added successfully',
+        'update' => 'Virtual class updated successfully',
+        'delete' => 'Virtual class deleted successfully',
+        'list' => 'Virtual classes list',
+        'cannot_join' => 'Sorry, you cannot join this class',
+        'join' => 'Joining class...',
+        'no_one_entered' => 'No one entered this class',
+
+        'record' => [
+            'list' => 'Virtual classes records list',
+            'no_records' => 'No records found',
+        ],
+
+        'attendnace' => [
+            'list' => 'Virtual class attendnace list',
+        ],
     ],
 ];
