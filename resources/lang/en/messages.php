@@ -157,21 +157,21 @@ return [
         'taken' => 'Attendance taken successfully',
     ],
     'virtual' => [
-        'add' => 'Virtual class/es added successfully',
-        'update' => 'Virtual class updated successfully',
-        'delete' => 'Virtual class deleted successfully',
-        'list' => 'Virtual classes list',
-        'cannot_join' => 'Sorry, you cannot join this class',
-        'join' => 'Joining class...',
-        'no_one_entered' => 'No one entered this class',
+        'add' => 'Virtual classroom/s added successfully',
+        'update' => 'Virtual classroom updated successfully',
+        'delete' => 'Virtual classroom deleted successfully',
+        'list' => 'Virtual classrooms list',
+        'cannot_join' => 'Sorry, you cannot join this virtual classroom',
+        'join' => 'Joining virtual classroom...',
+        'no_one_entered' => 'No one entered this virtual classroom',
 
         'record' => [
-            'list' => 'Virtual classes records list',
+            'list' => 'Virtual classrooms records list',
             'no_records' => 'No records found',
         ],
 
         'attendnace' => [
-            'list' => 'Virtual class attendnace list',
+            'list' => 'Virtual classroom attendnace list',
         ],
     ],
 ];
