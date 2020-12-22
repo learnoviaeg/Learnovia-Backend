@@ -63,6 +63,7 @@ return [
         'add' => 'Question added successfully',
         'update' => 'Question updated successfully',
         'delete' => 'Question deleted successfully',
+        'answer_delete' => 'Question answer deleted successfully',
         'list' => 'Questions List',
         'question_type_error' => 'This Question is not Essay or true and false',
     ],
@@ -213,5 +214,13 @@ return [
         'update' => 'Class updated successfully',
         'delete' => 'Class deleted successfully',
         'list' => 'Classes List',
+    ],
+    'segment' => [
+        'add' => 'Segment added successfully',
+        'update' => 'Segment updated successfully',
+        'delete' => 'Segment deleted successfully',
+        'list' => 'Segments List',
+        'type_invalid' => 'The chosen type has reached his maximum, please choose another',
+        'activate' => 'Segment activated successfully',
     ],
 ];
