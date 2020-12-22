@@ -20,10 +20,12 @@ return [
         'cannot_see_feedback' => 'You are not allowed to see feedback',
         'no_active_for_lesson' => 'No active segment for this lesson',
         'already_exist' => 'Item is already exist',
+        'no_active_segment' => 'There is no active segment for this item',
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
         'toggle' => 'Item toggle successfully',
+        'link_to_file' => 'Link to the file',
     ],
     'lesson' => [
         'add' => 'Lesson added successfully',
@@ -145,5 +147,13 @@ return [
     'materials' => [
         'list' => 'Materials list',
         'count' => 'Materials count',
+    ],
+    'attendance_session' => [
+        'add' => 'Session added successfully',
+        'update' => 'Session updated successfully',
+        'delete' => 'Session deleted successfully',
+        'list' => 'Sessions list',
+        'same_time_session' => 'Sorry you can not add different sessions to the same class',
+        'taken' => 'Attendance taken successfully',
     ],
 ];
