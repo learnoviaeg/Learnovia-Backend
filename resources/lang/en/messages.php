@@ -21,6 +21,7 @@ return [
         'no_active_for_lesson' => 'No active segment for this lesson',
         'already_exist' => 'Item is already exist',
         'no_active_segment' => 'There is no active segment for this item',
+        'no_active_year' => 'There is no active year available',
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
@@ -194,5 +195,11 @@ return [
         'update' => 'Academic year updated successfully',
         'delete' => 'Academic year deleted successfully',
         'list' => 'Academic years List',
+    ],
+    'type' => [
+        'add' => 'Type added successfully',
+        'update' => 'Type updated successfully',
+        'delete' => 'Type deleted successfully',
+        'list' => 'Types List',
     ],
 ];
