@@ -239,4 +239,12 @@ return [
         'created_list' => 'My Announcements List',
         'object' => 'Announcement details',
     ],
+    'role' => [
+        'add' => 'Role added successfully',
+        'update' => 'Role updated successfully',
+        'delete' => 'Role deleted successfully',
+        'list' => 'Roles List',
+        'assign' => 'Role assigned successfully',
+        'revoke' => 'Role revoked successfully',
+    ],
 ];
