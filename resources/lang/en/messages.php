@@ -90,7 +90,8 @@ return [
         'quiz_object' => 'Quiz details',
     ],
     'permissions' => [
-        'no_roles_assigned' => 'There is no roles assigned to this permission'
+        'no_roles_assigned' => 'There is no roles assigned to this permission',
+        'user_doesnot_has_permission' => 'You do not have the permission',
     ],
     'users' => [
         'students_list' => 'Students list',
@@ -173,5 +174,13 @@ return [
         'attendnace' => [
             'list' => 'Virtual classroom attendnace list',
         ],
+    ],
+    'interactive' => [
+        'add' => 'Interactive content added successfully',
+        'update' => 'Interactive content updated successfully',
+        'delete' => 'Interactive content deleted successfully',
+        'list' => 'Interactive list',
+        'count' => 'Interactive count',
+        'interactive_not_belong' => 'This interactive content does not belong to this lesson',
     ],
 ];
