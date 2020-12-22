@@ -183,4 +183,10 @@ return [
         'count' => 'Interactive count',
         'interactive_not_belong' => 'This interactive content does not belong to this lesson',
     ],
+    'auth' => [
+        'invalid_username_password' => 'Invalid username or password',
+        'blocked' => 'Your account is blocked',
+        'login' => 'logged in successfully',
+        'logout' => 'logged out successfully',
+    ],
 ];
