@@ -223,4 +223,12 @@ return [
         'type_invalid' => 'The chosen type has reached his maximum, please choose another',
         'activate' => 'Segment activated successfully',
     ],
+    'course' => [
+        'add' => 'Course added successfully',
+        'update' => 'Course updated successfully',
+        'delete' => 'Course deleted successfully',
+        'list' => 'Courses List',
+        'object' => 'Course details',
+        'assign' => 'Course assigned successfully',
+    ],
 ];
