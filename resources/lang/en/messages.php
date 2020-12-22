@@ -189,4 +189,10 @@ return [
         'login' => 'logged in successfully',
         'logout' => 'logged out successfully',
     ],
+    'year' => [
+        'add' => 'Academic year added successfully',
+        'update' => 'Academic year updated successfully',
+        'delete' => 'Academic year deleted successfully',
+        'list' => 'Academic years List',
+    ],
 ];
