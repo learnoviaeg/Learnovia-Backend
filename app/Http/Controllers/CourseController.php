@@ -1550,6 +1550,7 @@ class CourseController extends Controller
                 }
                 $ass[] = $item;
             }
+            
             $ass = collect($ass)->sortByDesc('due_date');
 
             if(isset($request->assort)){
