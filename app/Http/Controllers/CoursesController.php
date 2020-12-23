@@ -92,7 +92,7 @@ class CoursesController extends Controller
             $temp_course = null;
         }
 
-        return response()->json(['message' => 'User courses list', 'body' => $user_courses->paginate($paginate)], 200);
+        return response()->json(['message' => __('messages.course.list'), 'body' => $user_courses->paginate($paginate)], 200);
 
     }
 
@@ -118,9 +118,9 @@ class CoursesController extends Controller
         $course = Course::with('attachment')->find($id);
 
         if(isset($course))
-            return response()->json(['message' => 'course objet', 'body' => $course], 200);
+            return response()->json(['message' => __('messages.course.object'), 'body' => $course], 200);
 
-        return response()->json(['message' => 'Course not fount!', 'body' => [] ], 400);
+        return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
     }
 
     /**

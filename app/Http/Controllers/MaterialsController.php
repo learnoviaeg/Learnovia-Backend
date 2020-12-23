@@ -57,7 +57,7 @@ class MaterialsController extends Controller
       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
-                return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
+                return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
 
             $lessons = [$request->lesson];
         }
@@ -82,7 +82,7 @@ class MaterialsController extends Controller
                     COUNT(case `type` when 'page' then 1 else null end) as page" 
                 ))->first()->only(['file','media','page']);
 
-            return response()->json(['message' => 'Materials count', 'body' => $counts], 200);
+            return response()->json(['message' => __('messages.materials.count'), 'body' => $counts], 200);
         }
 
         $AllMat=$material->get();
@@ -92,7 +92,7 @@ class MaterialsController extends Controller
             unset($one->lesson->courseSegment);
         }
 
-        return response()->json(['message' => 'materials list.... ', 'body' => $AllMat->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.materials.list'), 'body' => $AllMat->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

@@ -50,7 +50,7 @@ class LessonController extends Controller
             }
             $lesson->save();
         }
-        return HelperController::api_response_format(200, $courseSegment->lessons,'added sucessfully');
+        return HelperController::api_response_format(200, $courseSegment->lessons,__('messages.lesson.add'));
     }
 
     /**
@@ -88,7 +88,7 @@ class LessonController extends Controller
             $temp->index = $temp->index - 1;
             $temp->save();
         }
-        return HelperController::api_response_format(200, null, 'Lesson is deleted Successfully');
+        return HelperController::api_response_format(200, null, __('messages.lesson.delete'));
     }
 
     /**
@@ -118,7 +118,7 @@ class LessonController extends Controller
         }
         $lesson->save();
 
-        return HelperController::api_response_format(200, $lesson, 'Lesson is updated Successfully');
+        return HelperController::api_response_format(200, $lesson, __('messages.lesson.update'));
     }
 
     /**
@@ -194,7 +194,7 @@ class LessonController extends Controller
         } else {
             $lessons = $this->SortUp($request->lesson_id, $request->index);
         }
-        return HelperController::api_response_format(200, $lessons, 'all Lessons sorted Successfully');
+        return HelperController::api_response_format(200, $lessons, __('messages.lesson.sort'));
     }
 
     public function AddNumberOfLessons(Request $request)
@@ -216,6 +216,6 @@ class LessonController extends Controller
             ]);
         }
 
-        return HelperController::api_response_format(200, $lessons, 'added Successfully');
+        return HelperController::api_response_format(200, $lessons, __('messages.lesson.add'));
     }
 }
