@@ -16,6 +16,7 @@ use App\Language;
 use Spatie\Permission\Models\Permission;
 use Laravel\Passport\Passport;
 use Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController;
+use Illuminate\Support\Facades\App;
 
 class AuthController extends Controller
 {
@@ -71,6 +72,18 @@ class AuthController extends Controller
         $credentials = request(['username', 'password']);
         if (!Auth::attempt($credentials))
             return HelperController::api_response_format(401, [], __('messages.auth.invalid_username_password'));
+
+        //to detect user language
+        $defult_lang = Language::where('default', 1)->first();
+        $lang = $request->user()->language ? $request->user()->language : ($defult_lang ? $defult_lang->id : null);
+        
+        if(isset($lang)){
+            if($lang == 1)
+                App::setLocale('en');
+
+            if($lang == 2)
+                App::setLocale('ar');
+        }
 
         if ($request->user()->suspend == 1) {
             return HelperController::api_response_format(200, null, __('messages.auth.blocked'));
