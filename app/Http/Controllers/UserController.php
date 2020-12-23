@@ -38,7 +38,10 @@ use App\ClassLevel;
 use App\attachment;
 use App\SegmentClass;
 use App\Exports\UsersExport;
+use App\Exports\ParentChildExport;
 use Maatwebsite\Excel\Facades\Excel;
+use DB;
+use Str;
 class UserController extends Controller
 {
     /**
@@ -344,6 +347,10 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
         ]);
 
+        $enrolls=Enroll::where('user_id',$request->id)->get();
+        $all=Enroll::where('user_id',$request->id)->delete();
+        if($all > 0)
+            event(new MassLogsEvent($enrolls,'deleted'));
         $user = User::find($request->id);
         $user->delete();
 
@@ -372,6 +379,7 @@ class UserController extends Controller
             'year' => 'nullable|integer|exists:academic_years,id',
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
+            'count' => 'in:1,0'
         ]);
         $users = User::where('id','!=',0)->with('roles');
         if($request->filled('country'))
@@ -428,6 +436,22 @@ class UserController extends Controller
                 return $students;
             }
     
+        if($request->has('count') && $request->count == 1){
+            $count = [];
+            $roles = new Role;
+            if($request->filled('roles'))
+                $roles = $roles->whereIn('id',$request->roles);
+
+            $roles = $roles->get();
+            $users= $users->pluck('id');
+
+            foreach($roles as $role){
+                $count[Str::slug($role->name, '_')] = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
+            }
+
+            return HelperController::api_response_format(200 ,$count,'User roles count');
+        }
+
         $users = $users->paginate(HelperController::GetPaginate($request));
         foreach($users->items() as $user)
         {
@@ -514,6 +538,7 @@ class UserController extends Controller
         $i = 0;
         foreach ($user->enroll as $enroll) {
             $all[$i]['role'] = $enroll->roles;
+            $all[$i]['enroll_id'] = $enroll->id;
 
             $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
             $all[$i]['Course'] = Course::where('id', $segment_Class_id->course_id)->first();
@@ -609,6 +634,27 @@ class UserController extends Controller
         return HelperController::api_response_format(201,null,'There is no data for you.');
     }
 
+    public function getParents(Request $request)
+    {
+        $request->validate([
+            'parent_id' => 'exists:parents,parent_id',
+        ]);
+        if(isset($request->parent_id))
+        {
+            $par_chil=Parents::where('parent_id',$request->parent_id)->with('child')->get();
+            return HelperController::api_response_format(201,$par_chil->paginate(HelperController::GetPaginate($request)),'There r parents');
+        }
+
+        $parents=User::whereHas("roles",function ($q){
+            $q->where('name','Parent');
+        })->where(function($q)use($request){
+                    $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                        ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                        ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+        })->with('attachment')->get();
+        return HelperController::api_response_format(201,$parents->paginate(HelperController::GetPaginate($request)),'There r parents');
+    }
+
     /**
      * set paresnt's child
      *
@@ -617,17 +663,39 @@ class UserController extends Controller
     public function set_parent_child(Request $request)
     {
         $request->validate([
-            'parent_id' => 'required|exists:users,id',
+            'parent_id' => 'required|array|exists:users,id',
             'child_id' => 'required|array|exists:users,id'
         ]);
-        foreach($request->child_id as $child)
-        {
-            $parent=Parents::firstOrCreate([
-                'child_id' => $child,
-                'parent_id' => $request->parent_id
-            ]);
-        }
+
+        foreach($request->parent_id as $parent)
+            foreach($request->child_id as $child)
+                Parents::firstOrCreate([
+                    'child_id' => $child,
+                    'parent_id' => $parent
+                ]);
+
         return HelperController::api_response_format(201,null,'Assigned Successfully');
+    }
+
+        /**
+     * set paresnt's child
+     *
+     * @return unAssigned Successfully
+    */
+    public function unset_parent_child(Request $request)
+    {
+        $request->validate([
+            'parent_id' => 'required|exists:parents,parent_id',
+            'child_id' => 'required|array|exists:parents,child_id'
+        ]);
+
+        foreach($request->child_id as $child){
+            $parent=Parents::where('child_id',$child)->where('parent_id',$request->parent_id)->first();
+            if(isset($parent))
+                $parent->delete();
+        }
+
+        return HelperController::api_response_format(201,null,'unAssigned Successfully');
     }
 
     /**
@@ -809,6 +877,17 @@ class UserController extends Controller
         }
 
         return HelperController::api_response_format(200,$students ,'Users are.......');
+    }
+
+    public function exportParentChild(Request $request)
+    {
+        $fields = ['username_parent', 'username_child'];
+
+        $filename = uniqid();
+        $file = Excel::store(new ParentChildExport($fields), 'parent_child'.$filename.'.xls','public');
+        $file = url(Storage::url('parent_child'.$filename.'.xls'));
+
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 
     public function export(Request $request)

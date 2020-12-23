@@ -33,8 +33,18 @@ class CoursesController extends Controller
     {
         //validate the request
         $request->validate([
-            'class' => 'nullable|integer|exists:classes,id',
-            'paginate' => 'integer'
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'paginate' => 'integer',
+            'role_id' => 'integer|exists:roles,id'
         ]);
 
         $paginate = 12;
@@ -42,9 +52,13 @@ class CoursesController extends Controller
             $paginate = $request->paginate;
         }
 
-        $enrolls = $this->chain->getCourseSegmentByChain($request);
+        $enrolls = $this->chain->getCourseSegmentByManyChain($request);
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
             $enrolls->where('user_id',Auth::id());
+        }
+
+        if($request->has('role_id')){
+            $enrolls->where('role_id',$request->role_id);
         }
 
         $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);

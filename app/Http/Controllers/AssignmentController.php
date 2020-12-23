@@ -7,10 +7,15 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
+use App\Level;
+use App\Course;
+use App\Classes;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\assignment;
+use Modules\Assigments\Entities\UserAssigment;
+use Modules\Assigments\Entities\assignmentOverride;
 use App\Paginate;
-
+use Carbon\Carbon;
 
 class AssignmentController extends Controller
 {
@@ -18,14 +23,14 @@ class AssignmentController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:assignment/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:assignment/get' , 'ParentCheck'],   ['only' => ['index','show']]);
     }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$count = null)
     {
         $request->validate([
             'year' => 'exists:academic_years,id',
@@ -35,38 +40,54 @@ class AssignmentController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
-            'lesson' => 'nullable|integer|exists:lessons,id' 
+            'lesson' => 'nullable|integer|exists:lessons,id',
+            'sort_in' => 'in:asc,desc', 
         ]);
 
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
         if(!$request->user()->can('site/show-all-courses'))//student
-            {
-                $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            }
+            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
-        $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
-        $lessons =[];
-        foreach ($user_course_segments as $user_course_segment){
-            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
-        }
-        $lessons =  array_values (array_unique($lessons)) ;
+        $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+       
         if($request->filled('lesson')){
-            if (!in_array($request->lesson,$lessons)){
+            if (!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
-            }
+            
             $lessons  = [$request->lesson];
         }
-        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->get()->sortByDesc('start_date');
+
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
+        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+
+        if($request->user()->can('site/course/student')){
+            $assignment_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+        }
+
+        if($count == 'count'){
+            
+            return response()->json(['message' => 'Assignments count', 'body' => $assignment_lessons->count()], 200);        
+        }
+
+        $assignment_lessons = $assignment_lessons->get();
+
         $assignments = collect([]);
+
         foreach($assignment_lessons as $assignment_lesson){
             $assignment=assignment::where('id',$assignment_lesson->assignment_id)->first();
             $assignment['assignmentlesson'] = $assignment_lesson;
             $assignment['lesson'] = Lesson::find($assignment_lesson->lesson_id);
+            $assignment['class'] = Classes::find($assignment['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            $assignment['level'] = Level::find($assignment['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            $assignment['course'] = Course::find($assignment['lesson']->courseSegment->course_id);
+            unset($assignment['lesson']->courseSegment);
             $assignments[]=$assignment;
-
         }
-        return response()->json(['message' => 'Assignments List ....', 'body' => $assignments->paginate(Paginate::GetPaginate($request))], 200);
 
+        return response()->json(['message' => 'Assignments List ....', 'body' => $assignments->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
@@ -86,9 +107,35 @@ class AssignmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($assignment_id,$lesson_id)
     {
-        //
+        $user = Auth::user();
+
+        $assigLessonID = AssignmentLesson::where('assignment_id', $assignment_id)->where('lesson_id', $lesson_id)->first();        
+        if(!isset($assigLessonID))
+            return response()->json(['message' =>'this assigment doesn\'t belong to this lesson', 'body' => [] ], 400);
+
+        $assignment = assignment::where('id',$assignment_id)->first();
+        if(!isset($assignment))
+            return response()->json(['message' => 'assignment not fount!', 'body' => [] ], 400);
+
+        
+        $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
+        if (count($userassigments) > 0) {
+            $assignment['allow_edit'] = false;
+        } else {
+            $assignment['allow_edit'] = true;
+        }
+        $assignment['user_submit']=null;
+        $assignment['visible'] = $assigLessonID->visible;
+          /////////////student
+        if ($user->can('site/assignment/getAssignment')) {
+        $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
+        if(isset($studentassigment)){
+            $assignment['user_submit'] =$studentassigment;}
+        }
+       
+            return response()->json(['message' => 'assignment objet', 'body' => $assignment], 200);        
     }
 
     /**

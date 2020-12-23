@@ -18,4 +18,21 @@ class Paginate extends Model
         }
         return 10 ;
     }
+
+    public static function GetPage($request)
+    {
+        $request->validate([
+            'page' => 'integer',
+        ]);
+
+        if($request->filled('page') && $request->page >0){
+            return ($request->page)-1;
+        }
+        return 0 ;
+    }
+
+    public static function allPages($countQuery, $paginate)
+    {
+        return ceil($countQuery/$paginate);
+    }
 }

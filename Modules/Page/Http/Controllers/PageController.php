@@ -80,7 +80,9 @@ class PageController extends Controller
             'content' => 'required|string',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
-            'publish_date' => 'nullable|date'
+            'publish_date' => 'nullable|date',
+            'visible' =>'in:0,1'
+            
         ]);
         if ($request->filled('publish_date')) {
             $publishdate = Carbon::parse($request->publish_date);
@@ -98,7 +100,8 @@ class PageController extends Controller
             pageLesson::firstOrCreate([
                 'page_id' => $page->id,
                 'lesson_id' => $lesson,
-                'publish_date' => $publishdate
+                'publish_date' => $publishdate,
+                'visible' =>isset($request->visible)?$request->visible:1
             ]);
             LessonComponent::create([
                 'lesson_id' => $lesson,
@@ -111,7 +114,7 @@ class PageController extends Controller
             $usersIDs = Enroll::where('course_segment', $TempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
             User::notify([
                 'id' => $page->id,
-                'message' => 'A new Page is added',
+                'message' => $page->title . ' page is added',
                 'from' => Auth::user()->id,
                 'users' => $usersIDs,
                 'course_id' => $TempLesson->courseSegment->courses[0]->id,
@@ -155,42 +158,56 @@ class PageController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'title' => 'required|string',
-            'content' => 'required|string',
+            'title' => 'string',
+            'content' => 'string',
             'id' => 'required|exists:pages,id',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
+            'updated_lesson_id' =>'nullable|exists:lessons,id',
+            'visible'=>'in:1,0'
             ]);
 
         $page = Page::find($request->id);
-        $data = [
-            'title' => $request->title,
-            'content' => $request->content
-        ];
-        $page->update($data);
         $page_lesson = pageLesson::where('page_id', $request->id)
                 ->where('lesson_id', $request->lesson_id[0])->first();
+        if(!isset($page_lesson))
+            return HelperController::api_response_format(200, null , 'This file is not assigned to this lesson');
+
+        if($request->filled('title'))
+            $page->update([ 'title' => $request->title]);
+        
+        if($request->filled('content'))
+            $page->update(['content' => $request->content]);
+        if($request->filled('visible'))
+            $page_lesson->update(['visible' => $request->visible]);
+
+        if (!$request->filled('updated_lesson_id')) {
+            $request->updated_lesson_id= $request->lesson_id[0];
+            }
+            $page_lesson->update([
+                'lesson_id' => $request->updated_lesson_id
+            ]);
         $page_lesson->updated_at = Carbon::now();
         $page_lesson->save();
         $pagename = $page->title;
-        if($request->filled('lesson_id')){
-            $page = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();
-        }
-        $lesson = Lesson::find($request->lesson_id[0]);
+        // $page = Lesson::find($request->updated_lesson_id)->module('Page', 'page')->get();
+        $page['lesson'] =  $page->Lesson;
+        $lesson = Lesson::find($request->updated_lesson_id);
         $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         User::notify([
             'id' => $request->id,
-            'message' => $pagename.' is updated',
+            'message' => $pagename.' page is updated',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $lesson->courseSegment->courses[0]->id,
             'class_id' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->classes[0]->id,
-            'lesson_id' => $request->lesson_id[0],
+            'lesson_id' => $request->updated_lesson_id,
             'type' => 'Page',
             'link' => url(route('getPage')) . '?id=' . $request->id,
             'publish_date' => Carbon::now()
         ]);
         return HelperController::api_response_format(200, $page, 'Page edited successfully');
+        
     }
 
     /**
@@ -236,6 +253,7 @@ class PageController extends Controller
         else
             return HelperController::api_response_format(200, null , 'This page is not assigned to the given lesson');
         $page->course_id=$course_id;
+        $page->page_lesson = PageLesson::where('page_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
         unset($page->lesson);
         
         return HelperController::api_response_format(200, $page);

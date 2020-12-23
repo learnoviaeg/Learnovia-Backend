@@ -10,9 +10,22 @@ use Carbon\Carbon;
 use App\Log;
 use App\User;
 use PhpParser\Node\Stmt\Continue_;
+use App\Repositories\EnrollmentRepositoryInterface;
 
 class EnrollObserver
 {
+    protected $unEnroll;
+
+    /**
+     * EnrollObserver constructor.
+     *
+     * @param EnrollmentRepositoryInterface $unEnroll
+     */
+    public function __construct(EnrollmentRepositoryInterface $unEnroll)
+    {
+        $this->unEnroll = $unEnroll;
+    }
+
     public function created(Enroll $enroll)
     {
         if ($enroll->courseSegment->courses[0]->mandatory == 1) {
@@ -64,6 +77,8 @@ class EnrollObserver
             'model' => 'Enroll',
             'data' => serialize($req),
         ]);
+
+        $this->unEnroll->RemoveAllDataRelatedToRemovedChain($req);
     }
 
     /**

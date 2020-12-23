@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Modules\Attendance\Entities\AttendanceLog;
+use App\Course;
 
 class User extends Authenticatable
 {
@@ -124,6 +125,8 @@ class User extends Authenticatable
                 $errors = $validater->errors();
                 return response()->json($errors, 400);
             }
+
+            $request['course_name'] = Course::whereId($request['course_id'])->pluck('name')->first();
         }
         $touserid = array();
         foreach($request['users'] as $user)
@@ -137,17 +140,20 @@ class User extends Authenticatable
         if($seconds < 0) {
             $seconds = 0 ;
         }
-        $date=Carbon::parse($request['publish_date'])->format('Y-m-d H:i:s');
+        
+        $request['publish_date']=Carbon::parse($request['publish_date'])->format('Y-m-d H:i:s');
 
         $request['title']=null;
         if($request['type']=='announcement'){
             // $request['message']="A new announcement will be published";
             $request['title']=Announcement::whereId($request['id'])->first()->title;
         }
+
+        Notification::send( $touserid, new NewMessage($request));
+
          $job = ( new \App\Jobs\Sendnotify(
               $request))->delay($seconds);
              dispatch($job);
-         Notification::send( $touserid, new NewMessage($request));
         return 1;
     }
 

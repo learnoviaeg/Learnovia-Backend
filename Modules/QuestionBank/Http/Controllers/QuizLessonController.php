@@ -47,6 +47,7 @@ class QuizLessonController extends Controller
             'grade_min' => 'integer',
             'grade_max' => 'integer',
             'grade_to_pass' => 'integer',
+            'visible'=>"in:1,0"
         ]);
 
         $quiz = quiz::find($request->quiz_id);
@@ -101,11 +102,12 @@ class QuizLessonController extends Controller
                 'grade' => $request->grade,
                 'grade_category_id' => $request->grade_category_id[$key],
                 'publish_date' => $request->opening_time,
-                'index' => $Next_index
+                'index' => $Next_index,
+                'visible' => isset($request->visible)?$request->visible:1
             ]);
 
             $requ = ([
-                'message' => 'the quiz is added',
+                'message' => $quiz->name.' quiz is added',
                 'id' => $request->quiz_id,
                 'users' => $users,
                 'type' =>'quiz',
@@ -127,8 +129,8 @@ class QuizLessonController extends Controller
                     'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
                     'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
                     'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
-                    'item_type' => (isset($request->item_type)) ? $request->item_type : null,
-                    'item_Entity' => $quizLesson[0]->id,
+                    'item_type' => 1, //Quiz
+                    'item_Entity' => $request->quiz_id,
                     'name' => $quizLesson[0]->quiz->name,
                     'weight' => 0,
                  ]);
@@ -156,15 +158,18 @@ class QuizLessonController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
             'opening_time' => 'date',
-            'closing_time' => 'required|date|after:opening_time',
-            'max_attemp' => 'required|integer|min:1',
-            'grading_method_id' => 'required',
-            'grade' => 'required',
+            'closing_time' => 'date|after:opening_time',
+            'max_attemp' => 'integer|min:1',
+            'grading_method_id' => 'integer',
+            'grade' => 'integer',
             // 'grade_category_id' => 'required|integer|exists:grade_categories,id'
+            'updated_lesson_id' =>'nullable|exists:lessons,id',
+            'visible'=>'in:0,1'
+
         ]);
 
         $start=Carbon::now();
-        if(isset($request->opening_time))
+        if($request->filled('opening_time'))
             $start= $request->opening_time;
 
         $quiz = quiz::find($request->quiz_id);
@@ -174,7 +179,7 @@ class QuizLessonController extends Controller
         $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-
+        
         if($quiz->course_id != $lesson->courseSegment->course_id){
             return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this quiz');
         }
@@ -199,17 +204,29 @@ class QuizLessonController extends Controller
         if(!isset($quizLesson)){
             return HelperController::api_response_format(404, null,'This quiz doesn\'t belongs to the lesson');
         }
-
+        if($request->filled('grading_method_id'))
+                $quizLesson->update(['grading_method_id' => $request->grading_method_id]);
+        if($request->filled('closing_time'))
+            $quizLesson->update(['due_date' => $request->closing_time]);
+        if($request->filled('max_attemp'))
+            $quizLesson->update(['max_attemp' => $request->max_attemp]);
+        if($request->filled('grade'))
+            $quizLesson->update([ 'grade' => $request->grade]);
+        if($request->filled('grade_category_id'))
+            $quizLesson->update(['grade_category_id' =>$request->grade_category_id]);
+        if($request->filled('visible'))
+            $quizLesson->update(['visible' =>$request->visible]);
+        if (!$request->filled('updated_lesson_id')) {
+            $request->updated_lesson_id= $request->lesson_id;
+            }
+        $quizLesson->update([
+            'lesson_id' => $request->updated_lesson_id
+        ]);
         $quizLesson->update([
             'quiz_id' => $request->quiz_id,
-            'lesson_id' => $request->lesson_id,
+            'lesson_id' => $request->updated_lesson_id,
             'start_date' => $start,
             'publish_date' => $start,
-            'due_date' => $request->closing_time,
-            'max_attemp' => $request->max_attemp,
-            'grading_method_id' => $request->grading_method_id,
-            'grade' => $request->grade,
-            'grade_category_id' => ($request->filled('grade_category_id')) ? $request->grade_category_id : null,
         ]);
         $quiz=Quiz::find($request->quiz_id);
         if(carbon::parse($start)->isPast())
@@ -222,11 +239,11 @@ class QuizLessonController extends Controller
             'publish_date'=> Carbon::parse($publish_date),
             'course_id' => $course,
             'class_id'=> $class,
-            'lesson_id'=> $request->lesson_id,
+            'lesson_id'=> $request->updated_lesson_id,
             'from' => Auth::id(),
         ]);
         user::notify($requ);
-        $all = Lesson::find($request->lesson_id)->module('QuestionBank', 'quiz')->get();
+        $all = Lesson::find($request->updated_lesson_id)->module('QuestionBank', 'quiz')->get();
         return HelperController::api_response_format(200, $all,'Quiz edited successfully');
     }
 
@@ -317,8 +334,9 @@ class QuizLessonController extends Controller
         }
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $quiz_name = Quiz::find($quizLesson->quiz_id)->name;
             user::notify([
-                'message' => 'you can answer this quiz now',
+                'message' => 'you can answer '.$quiz_name.' quiz now',
                 'id' => $quizLesson->quiz_id,
                 'users' => $request->users_id,
                 'type' =>'quiz',

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterUserAssignmentLesson extends Migration
+class EditDefaultStartAssignment extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,13 @@ class AlterUserAssignmentLesson extends Migration
      */
     public function up()
     {
-        Schema::table('user_assigments', function (Blueprint $table) {
-            $table->dropForeign(['assignment_lesson_id']);
-            $table->dropColumn(['assignment_lesson_id']);
-        });    
+        Schema::table('assignment_lessons', function (Blueprint $table) {
+            $table->dropColumn(['start_date']);
+        });
+
+        Schema::table('assignment_lessons', function (Blueprint $table) {
+            $table->timestamp('start_date');
+        });
     }
 
     /**

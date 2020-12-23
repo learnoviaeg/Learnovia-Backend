@@ -115,14 +115,16 @@ class MediaController extends Controller
         $request->validate([
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'required_if:type,==,0|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav',
+            'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'url' => 'required_if:type,==,1|array',
             'url.*' => 'required|active_url',
             'type' => 'required|in:0,1',
             'name' => 'required',
-            'show' => 'nullable|in:0,1'
+            'show' => 'nullable|in:0,1',
+            'visible' =>'in:0,1'
+
         ]);
 
         if ($request->filled('publish_date')) {
@@ -187,6 +189,8 @@ class MediaController extends Controller
                 $mediaLesson->media_id = $media->id;
                 $mediaLesson->index = MediaLesson::getNextIndex($lesson);
                 $mediaLesson->publish_date = $publishdate;
+                $mediaLesson->visible = isset($request->visible)?$request->visible:1;
+
                 $mediaLesson->save();
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
@@ -255,18 +259,25 @@ class MediaController extends Controller
             'id' => 'required|integer|exists:media,id',
             'name' => 'nullable|string|max:190',
             'description' => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav',
+            'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr',
             'url' => 'nullable|active_url',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
-            'publish_date' => 'nullable|date'
+            'publish_date' => 'nullable|date',
+            'updated_lesson_id' =>'nullable|exists:lessons,id',
+            'type' => 'in:0,1',
+            'visible' => 'in:0,1',
         ]);
 
         $media = media::find($request->id);
         $mediaLesson = MediaLesson::whereIn('lesson_id' , $request->lesson_id)->where('media_id' , $request->id)->first();
         if(!isset($mediaLesson))
             return HelperController::api_response_format(400, null, 'This media is not in this lesson');
-        if ($media->type != null && $request->hasFile('Imported_file')) {
+
+        if(isset($request->Imported_file) && $request->filled('url'))
+            return HelperController::api_response_format(400, null, 'Please, either upload media or add a URL.');
+
+        if (isset($request->Imported_file)) {
             $extension = $request->Imported_file->getClientOriginalExtension();
             $fileName = $request->Imported_file->getClientOriginalName();
             $size = $request->Imported_file->getSize();
@@ -275,12 +286,14 @@ class MediaController extends Controller
             $media->size = $size;
             $media->attachment_name = $fileName;
             $media->link = url('storage/media/' . $name);
-            Storage::disk('public')->putFileAs('media/', $request->Imported_file, $fileName);
+            Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
         }
 
-        if ($media->type == null && $request->filled('url')) {
+        if ($request->filled('url')){
             $media->link = $request->url;
-        }
+            $media->size = null;
+            $media->type = null;
+        } 
 
         if ($request->filled('description'))
             $media->description = $request->description;
@@ -295,10 +308,20 @@ class MediaController extends Controller
             }
             $mediaLesson->update(['publish_date' => $publishdate]);
         }
+        if ($request->filled('visible')) {
+            $mediaLesson->update(['visible' => $request->visible]);
+        }
+
+        if (!$request->filled('updated_lesson_id')) {
+            $request->updated_lesson_id= $request->lesson_id[0];
+          }
+        $mediaLesson->update([
+            'lesson_id' => $request->updated_lesson_id
+        ]);
         $mediaLesson->updated_at = Carbon::now();
         $mediaLesson->save();
-        $tempReturn = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'media')->get();
-        $lesson = Lesson::find($request->lesson_id[0]);
+        $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'media')->get();
+        $lesson = Lesson::find($request->updated_lesson_id);
         $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
         $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
@@ -491,7 +514,7 @@ class MediaController extends Controller
         $request->validate([
             'id' => 'required|integer|exists:media,id',
         ]);
-        $Media = media::find($request->id);
+        $Media = media::with('MediaLesson')->find($request->id);
         return HelperController::api_response_format(200, $Media);
     }
     public function AssignMediaToLesson(Request $request)

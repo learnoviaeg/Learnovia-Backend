@@ -11,6 +11,7 @@ use App\CourseSegment;
 use Validator;
 use Auth;
 use App\Enroll;
+use App\ItemType;
 use App\Letter;
 use App\Language;
 use App\Contract;
@@ -27,6 +28,8 @@ use Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController;
 use Modules\Attendance\Http\Controllers\AttendanceSessionController;
 use App\Http\Controllers\H5PLessonController;
 use Modules\Assigments\Http\Controllers\AssigmentsController;
+use App\Exports\ExportRoleWithPermissions;
+use Illuminate\Support\Facades\Storage;
 
 class SpatieController extends Controller
 {
@@ -193,6 +196,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/users', 'title' => 'enroll users with chain']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/migrate-user', 'title' => 'migrate user to another class']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get-unenroll-users-role', 'title' => 'Get unenrolled users']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/get', 'title' => 'Get Chain']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/delete', 'title' => 'Destroy Chain']);
 
 
             //Events
@@ -233,7 +238,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/generate-username-password', 'title' => 'generate username and password']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/GetAllCountries', 'title' => 'Get all countries']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/GetAllNationalities', 'title' => 'Get all nationalities']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Set parents and childs']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Assign Parent','dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/export', 'title' => 'Export Users']);
 
 
@@ -397,7 +402,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'material/get', 'title' => 'Get Materials']);
 
             //logs
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'logs/get', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'Log']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/logs', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'User']);
 
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
             $teacher_permissions = [
@@ -430,7 +435,7 @@ class SpatieController extends Controller
             'grade/user/course-grade','grade/report/user','site/course/student','user/parent-child','user/current-child','user/get-someone-child','user/get-my-child','user/get-current-child',
             'timeline/get','material/get','course/teachers'];
 
-            $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%parent%')->where('name','not like','%site/course/student%')->where('name','not like','user/get-my-child')->get());
+            $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%user/parent-child%')->where('name','not like','%site/course/student%')->where('name','not like','user/get-my-child')->where('name','not like','%user/get-current-child%')->get());
             $Authenticated->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%bulk%')->where('name', 'like', '%messages%')->get());
             $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
             $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
@@ -455,6 +460,13 @@ class SpatieController extends Controller
             $lan2=Language::create([
                 'name' => 'Arabic',
                 'default' => 0,
+            ]);
+
+            $item_type1=ItemType::create([
+                'name' => 'Quiz',
+            ]);
+            $item_type2=ItemType::create([
+                'name' => 'Assignment',
             ]);
 
             $formateLetter = [
@@ -1024,5 +1036,21 @@ class SpatieController extends Controller
             }
         }
         return HelperController::api_response_format(200, ['permissions' => $dashbordPermission], 'Successfully');
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'ids' => 'array',
+            'ids.*' => 'exists:roles,id'
+        ]); 
+
+        if(!$request->filled('ids'))
+            $request['ids']= Role::pluck('id');
+
+        $filename = uniqid();
+        $file = Excel::store(new ExportRoleWithPermissions($request->ids), 'roles'.$filename.'.xls','public');
+        $file = url(Storage::url('roles'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, 'Link to file ....');
     }
 }

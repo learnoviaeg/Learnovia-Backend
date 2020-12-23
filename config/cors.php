@@ -20,14 +20,15 @@ return [
         'allow_credentials' => true,
 
         'allow_origins' => [
-           'http://localhost:80/',
-           'http://169.62.201.2/',
-           'http://qaitbay.learnovia.com/',
-           'http://localhost:4200',
-           'https://dev.learnovia.com',
-           'https://13.52.205.38/',
-           'https://staging.learnovia.com',
-           'http://staging.learnovia.com',
+            '*'
+        //    'http://localhost:80/',
+        //    'http://169.62.201.2/',
+        //    'http://qaitbay.learnovia.com/',
+        //    'http://localhost:4200',
+        //    'https://dev.learnovia.com',
+        //    'https://13.52.205.38/',
+        //    'https://staging.learnovia.com',
+        //    'http://staging.learnovia.com',
 
         ],
 

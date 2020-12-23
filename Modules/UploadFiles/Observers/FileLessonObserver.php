@@ -29,7 +29,7 @@ class FileLessonObserver
                 'course_id' => $course_id,
                 'lesson_id' => $fileLesson->lesson_id,
                 'type' => 'file',
-                'visible' => 1,
+                'visible' => $fileLesson->visible,
                 'link' => $file->url,
                 'mime_type'=> $file->type,
 
@@ -47,18 +47,18 @@ class FileLessonObserver
     {
         $file = File::where('id',$fileLesson->file_id)->first();
         if(isset($file)){
-            Material::where('item_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->lesson_id)->where('type' , 'file')->first()
-            ->update([
-                'item_id' => $fileLesson->file_id,
-                'name' => $file->name,
-                'publish_date' => $fileLesson->publish_date,
-                'lesson_id' => $fileLesson->lesson_id,
-                'type' => 'file',
-                'visible' => $fileLesson->visible,
-                'link' => $file->url,    
-                'mime_type'=> $file->type,
-
-            ]);
+            $logsbefore=Material::where('item_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->getOriginal('lesson_id'))
+                                ->where('type' , 'file')->first();
+            $logsbefore->update([
+                            'item_id' => $fileLesson->file_id,
+                            'name' => $file->name,
+                            'publish_date' => $fileLesson->publish_date,
+                            'lesson_id' => $fileLesson->lesson_id,
+                            'type' => 'file',
+                            'visible' => $fileLesson->visible,
+                            'link' => $file->url,    
+                            'mime_type'=> $file->type,
+                        ]);
         }
     }
 
