@@ -160,7 +160,7 @@ class AuthController extends Controller
         $lang = Language::where('name', $request->name)->first();
         $user->language = $lang->id;
         $user->save();
-        $dictionary = self::Get_Dictionary(1);
+        $dictionary = self::Get_Dictionary(1,$request);
         return HelperController::api_response_format(200, null , 'Language changed successfully...');  
     }
 
