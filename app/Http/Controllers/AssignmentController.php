@@ -127,6 +127,7 @@ class AssignmentController extends Controller
             $assignment['allow_edit'] = true;
         }
         $assignment['user_submit']=null;
+        $assignment['visible'] = $assigLessonID->visible;
           /////////////student
         if ($user->can('site/assignment/getAssignment')) {
         $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();

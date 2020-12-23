@@ -62,9 +62,8 @@ class UsersController extends Controller
         }
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
-        if($request->filled('roles')){
+        if($request->filled('roles'))
            $enrolls->whereIn('role_id',$request->roles);
-        }
         
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
@@ -78,10 +77,21 @@ class UsersController extends Controller
         if($request->filled('search'))
         {
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
-                if(  (($item->arabicname!=null) && str_contains($item->arabicname, $request->search) )|| str_contains(strtolower($item->username), strtolower($request->search))|| str_contains(strtolower($item->fullname), strtolower($request->search) ) ) 
+                if((($item->arabicname!=null) && str_contains($item->arabicname, $request->search))||
+                 str_contains(strtolower($item->username),strtolower($request->search))||
+                  str_contains(strtolower($item->fullname),strtolower($request->search))) 
                     return $item; 
             });
         }
+        // return $enrolls;
+    //     if($request->filled('country'))
+    //     $enrolls->where('country','LIKE',"%$request->country%");
+    // if($request->filled('nationality'))
+    //     $enrolls->where('nationality','LIKE',"%$request->nationality%");
+    // if($request->filled('religion'))
+    //     $enrolls->where('religion','LIKE',"%$request->religion%");
+    // if($request->filled('gender'))
+    //     $enrolls->where('gender','LIKE',"$request->gender");
         return response()->json(['message' => 'Users List', 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
     }
 
