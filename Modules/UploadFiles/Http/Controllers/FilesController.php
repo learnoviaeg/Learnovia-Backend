@@ -25,6 +25,8 @@ use App\LessonComponent;
 use  Modules\Page\Entities\pageLesson;
 use  Modules\Page\Entities\page;
 use App\Material;
+use  App\LastAction;
+
 
 class FilesController extends Controller
 {
@@ -230,6 +232,8 @@ class FilesController extends Controller
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
                 $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $tempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
+                LastAction::lastActionInCourse($courseID);
+
                 User::notify([
                     'id' => $file->id,
                     'message' => $file->name.' file is added',
@@ -420,13 +424,17 @@ class FilesController extends Controller
         ]);
         $fileLesson->updated_at = Carbon::now();
         $file->save();
+        $course_seg_drag = Lesson::where('id',$request->lesson_id)->pluck('course_segment_id')->first();
+        $courseID_drag = CourseSegment::where('id', $course_seg_drag)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($courseID_drag);
         $fileLesson->save();
         $lesson = Lesson::find($request->updated_lesson_id);
         $course_seg = Lesson::where('id',$request->updated_lesson_id)->pluck('course_segment_id')->first();
         $courseID = CourseSegment::where('id', $course_seg)->pluck('course_id')->first();
         $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $course_seg)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
-        
+        LastAction::lastActionInCourse($courseID);
+
         $publish_date=$fileLesson->publish_date;
         if(carbon::parse($publish_date)->isPast())
             $publish_date=Carbon::now();
@@ -462,6 +470,9 @@ class FilesController extends Controller
         ]);
 
         $file = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
+        $lesson = Lesson::find($request->lesson_id);
+        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($courseID);
         $file->delete();
         File::whereId($request->fileID)->delete();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
@@ -485,6 +496,9 @@ class FilesController extends Controller
         if (!isset($fileLesson)) {
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
+        $lesson = Lesson::find($request->lesson_id);
+        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($courseID);
         $fileLesson->visible = ($fileLesson->visible == 1) ? 0 : 1;
         $fileLesson->save();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();

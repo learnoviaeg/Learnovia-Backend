@@ -23,6 +23,7 @@ use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuestionsAnswer;
 use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
+use App\LastAction;
 use function Opis\Closure\serialize;
 
 class UserQuizController extends Controller
@@ -48,7 +49,8 @@ class UserQuizController extends Controller
         }
         // if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
         //     return HelperController::api_response_format(400, null, 'Time is out');
-
+        $lesson = Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse( $lesson->courseSegment->course_id);
         $max_attempt_index = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
             ->where('user_id', Auth::user()->id)
             ->get()->max('attempt_index');
@@ -190,6 +192,7 @@ class UserQuizController extends Controller
         foreach($quiz_lesson->quiz->Question as $question){
             userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
         }
+
         return HelperController::api_response_format(200, $userQuiz);
     }
 
@@ -213,7 +216,11 @@ class UserQuizController extends Controller
 
         // return HelperController::api_response_format(200, $answer2, 'Quiz Answers are Registered Successfully(forced)');
         // }
-
+        
+        //to last action in course
+        $Quizlesson = QuizLesson::find($user_quiz->quiz_lesson_id);
+        $lesson = Lesson :: find($Quizlesson->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
         $allData = collect([]);
         foreach ($request->Questions as $index => $question) {
             if(isset($question['id'])){
@@ -630,6 +637,9 @@ class UserQuizController extends Controller
         $all_users['notGraded'] = $countOfNotGraded ;
         $final->put('submittedAndNotSub',$all_users);
         $final->put('users',$user_attempts);
+        $lesson = Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+
         return HelperController::api_response_format(200, $final, __('messages.quiz.students_attempts_list'));
     }
 

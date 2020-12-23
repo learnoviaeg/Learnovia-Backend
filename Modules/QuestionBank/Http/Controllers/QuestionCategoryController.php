@@ -11,6 +11,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use App\Repositories\ChainRepositoryInterface;
+use App\LastAction;
 use Modules\QuestionBank\Entities\Questions;
 
 class QuestionCategoryController extends Controller
@@ -35,6 +36,8 @@ class QuestionCategoryController extends Controller
         $duplicate=QuestionsCategory::where('name',$request->name)->where('course_id',$request->course)->first();
         if(isset($duplicate))
             return HelperController::api_response_format(400, $duplicate, __('messages.error.item_added_before'));
+
+        LastAction::lastActionInCourse($request->course);
 
         //course segment doesn't have any need better to be removed
         $course_segment = CourseSegment::where('course_id',$request->course)->first();
@@ -84,6 +87,28 @@ class QuestionCategoryController extends Controller
                 $q->orWhere('name', 'LIKE' ,"%$request->text%" );
         })->whereIn('course_id',$enrolls)->with(['course','CourseSegment.courses'])->get();
 
+        if($request->filled('course_id'))
+        {
+        LastAction::lastActionInCourse($request->course_id);
+
+            $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
+            if($request->filled('class'))
+            {
+                $courses=[];
+                foreach($request->class as $class)
+                {
+                    $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course_id);
+                    // return $course_seg;
+                    if(isset($course_seg))
+                        $courses[]=$course_seg->id;
+                }
+                $all_courses=$courses;
+            }
+            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
+                if($request->filled('text'))
+                    $q->orWhere('name', 'LIKE' ,"%$request->text%" );
+            })->with('CourseSegment.courses')->get();
+        }
         foreach($ques_cat as $cat)
         {
             $cat->class= isset($cat->CourseSegment)  && count($cat->CourseSegment->segmentClasses) > 0  && count($cat->CourseSegment->segmentClasses[0]->classLevel) > 0 && count($cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes) > 0 ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
@@ -116,6 +141,8 @@ class QuestionCategoryController extends Controller
         if($request->filled('name'))
             $questioncat->name = $request->name;
 
+        LastAction::lastActionInCourse($questioncat->course_id);        
+
         $questioncat->save();
         return HelperController::api_response_format(200, $questioncat, __('messages.question_category.update'));
     }
@@ -130,8 +157,11 @@ class QuestionCategoryController extends Controller
         $request->validate([
             'id' => 'required|exists:questions_categories,id'
         ]);
-
+            
         $questioncat=QuestionsCategory::find($request->id);
+        $course_segment = CourseSegment::find($questioncat->course_segment_id);
+        if(isset($course_segment))
+            LastAction::lastActionInCourse($course_segment->course_id);        
         if(count($questioncat->questions)>0)
             return HelperController::api_response_format(200, null,__('messages.error.cannot_delete'));
         $questioncat->delete();

@@ -19,6 +19,7 @@ use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\QuestionsType;
 use App\Component;
+use App\LastAction;
 
 class QuestionBankController extends Controller
 {
@@ -311,6 +312,9 @@ class QuestionBankController extends Controller
         if (!isset($arr)) {
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
+        if(isset($Question['course_id']))
+            LastAction::lastActionInCourse($Question['course_id']);        
+
         $Questions = collect([]);
         $cat = Questions::firstOrCreate([
             'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
@@ -355,6 +359,8 @@ class QuestionBankController extends Controller
         if (!isset($arr)) {
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
+        if( isset($Question['course_id']))
+            LastAction::lastActionInCourse($Question['course_id']);        
         $cat = Questions::Create([
             'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
             'mark' => $Question['mark'],
@@ -619,6 +625,8 @@ class QuestionBankController extends Controller
                 'text' => 'required|string|min:1',
             ]);
         }
+        LastAction::lastActionInCourse($question->course_id);        
+
         $question->update([
             'text' => ($request->text == null) ? "Match the correct Answer" : $request->text,
             'mark' => $request->mark,
@@ -652,6 +660,8 @@ class QuestionBankController extends Controller
                 'text' => 'required|string|min:1',
             ]);
         }
+        LastAction::lastActionInCourse($question->course_id);        
+
         $question->update([
             'text' => ($squestion['text'] == null) ? "Match the correct Answer" : $squestion['text'],
             'mark' =>$squestion['mark'],
@@ -944,8 +954,9 @@ class QuestionBankController extends Controller
             'question_id' => 'required|integer|exists:questions,id'
         ]);
 
-        $check = Questions::destroy($request->question_id);
-
+        $question = Questions::find($request->question_id);
+        LastAction::lastActionInCourse($question->course_id);        
+        $question->delete();
         return HelperController::api_response_format(200, [], __('messages.question.delete'));
     }
 
