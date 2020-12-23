@@ -58,7 +58,7 @@ class UsersController extends Controller
                 });
             }
 
-            return response()->json(['message' => 'All Users List', 'body' =>   $users->paginate(Paginate::GetPaginate($request))], 200);
+            return response()->json(['message' => __('messages.users.all_list'), 'body' =>   $users->paginate(Paginate::GetPaginate($request))], 200);
         }
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
@@ -83,16 +83,8 @@ class UsersController extends Controller
                     return $item; 
             });
         }
-        // return $enrolls;
-    //     if($request->filled('country'))
-    //     $enrolls->where('country','LIKE',"%$request->country%");
-    // if($request->filled('nationality'))
-    //     $enrolls->where('nationality','LIKE',"%$request->nationality%");
-    // if($request->filled('religion'))
-    //     $enrolls->where('religion','LIKE',"%$request->religion%");
-    // if($request->filled('gender'))
-    //     $enrolls->where('gender','LIKE',"$request->gender");
-        return response()->json(['message' => 'Users List', 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
+
+        return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
