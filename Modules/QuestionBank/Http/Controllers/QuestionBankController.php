@@ -587,7 +587,7 @@ class QuestionBankController extends Controller
             }
         }
         if($type == 0){
-            return HelperController::api_response_format(200, $re, null);
+            return HelperController::api_response_format(200, $re, __('messages.question.add'));
         }
         else{
             return $re->pluck('id');
