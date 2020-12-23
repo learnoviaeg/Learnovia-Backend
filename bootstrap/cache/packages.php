@@ -61,7 +61,7 @@
   array (
     'providers' => 
     array (
-      0 => 'Illuminated\\Database\\DbProfilerServiceProvider',
+      // 0 => 'Illuminated\\Database\\DbProfilerServiceProvider',
     ),
   ),
   'laravel/passport' => 
