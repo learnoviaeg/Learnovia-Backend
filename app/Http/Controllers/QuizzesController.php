@@ -14,6 +14,7 @@ use App\Course;
 use App\Level;
 use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
+use App\LastAction;
 use Carbon\Carbon;
 
 class QuizzesController extends Controller
@@ -113,8 +114,10 @@ class QuizzesController extends Controller
     {
         $quiz = quiz::find($id);
 
-        if(isset($quiz))
+        if(isset($quiz)){
+            LastAction::lastActionInCourse($quiz->course_id);
             return response()->json(['message' => 'quiz objet ..', 'body' => $quiz ], 200);
+        }
 
         return response()->json(['message' => 'quiz not fount!', 'body' => [] ], 400);
     }
