@@ -516,17 +516,10 @@ class BigbluebuttonController extends Controller
             'id'=>'required|exists:bigbluebutton_models,id',
         ]);
         $bigbb=BigbluebuttonModel::find($request->id);
+        $bigbb->show = ($bigbb->show == 1)? 0 : 1;
+        $bigbb->save();
 
-        if($bigbb->show == 1){
-            BigbluebuttonModel::where('id',$request->id)->first()->update(['show' => 0]);
-        }
-        else{
-            BigbluebuttonModel::where('id',$request->id)->first()->update(['show' => 1]);
-        }
-
-        $b=BigbluebuttonModel::find($request->id);
-
-        return HelperController::api_response_format(200 , $b , 'Toggled!');
+        return HelperController::api_response_format(200 , $bigbb , 'Toggled!');
     }
 
     public function getmeetingInfo(Request $request)
