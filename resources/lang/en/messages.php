@@ -27,6 +27,7 @@ return [
         'submit_success' => 'Answer submitted successfully',
         'toggle' => 'Item toggle successfully',
         'link_to_file' => 'Link to the file',
+        'data_imported' => 'Data imported successfully',
     ],
     'lesson' => [
         'add' => 'Lesson added successfully',
