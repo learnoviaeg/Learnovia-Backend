@@ -35,7 +35,7 @@ class AcademicYearController extends Controller
             'name' => $request->name
         ]);
         $years = AcademicYear::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(201, $years, 'Year Created Successfully');
+        return HelperController::api_response_format(201, $years, __('messages.year.add'));
     }
 
  /**
@@ -97,7 +97,7 @@ class AcademicYearController extends Controller
         $year = AcademicYear::whereId($request->id)->first();
         $year->update($request->all());
         $years=AcademicYear::get()->paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(200, $years , 'Year edited successfully');
+        return HelperController::api_response_format(200, $years , __('messages.year.update'));
     }
 
     /**
@@ -114,7 +114,7 @@ class AcademicYearController extends Controller
 
         $year = AcademicYear::whereId($request->id)->first();
         if(count( $year->YearType)>0){
-            return HelperController::api_response_format(400, [], 'This year assigned to types, cannot be deleted');
+            return HelperController::api_response_format(400, [], __('messages.error.cannot_delete'));
         }
         
         //for log event
@@ -125,9 +125,9 @@ class AcademicYearController extends Controller
         //     event(new MassLogsEvent($logsbefore,'updated'));
 
         if ($year->delete()) {
-            return HelperController::api_response_format(200, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), 'Year Deleted Successfully');            
+            return HelperController::api_response_format(200, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), __('messages.year.delete'));            
         }
-        return HelperController::api_response_format(404, [], 'Not Found');
+        return HelperController::api_response_format(404, [], __('messages.error.not_found'));
     }
     
     public function setCurrent_year(Request $request)
@@ -159,7 +159,7 @@ class AcademicYearController extends Controller
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'updated'));
 
-        return HelperController::api_response_format(200, $year , 'Year toggled successfully');
+        return HelperController::api_response_format(200, $year , __('messages.success.toggle'));
     }
 
     // public function GetMyYears(Request $request)
@@ -197,9 +197,9 @@ class AcademicYearController extends Controller
         {
             $year = AcademicYear::get();
             if(count($year) == 0)
-                return HelperController::api_response_format(201,null, 'No available years in the system');
+                return HelperController::api_response_format(201,null, __('messages.error.not_found'));
 
-            return HelperController::api_response_format(201,$year, 'Here are your years');
+            return HelperController::api_response_format(201,$year, __('messages.year.list'));
         }
 
         $course_segments = Enroll::where('user_id',Auth::id())->with(['courseSegment' => function($query){
@@ -211,9 +211,9 @@ class AcademicYearController extends Controller
         $years = Enroll::where('user_id',Auth::id())->whereIn('course_segment' ,$CS)->pluck('year');
         $yearr = AcademicYear::whereIn('id', $years)->get();
         if(isset($yearr) && count($yearr) > 0)
-            return HelperController::api_response_format(201,$yearr, 'Here are your years');
+            return HelperController::api_response_format(201,$yearr, __('messages.year.list'));
         
-        return HelperController::api_response_format(201,null, 'You are not enrolled in any year');
+        return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
     }
 
     public function export(Request $request)
@@ -222,6 +222,6 @@ class AcademicYearController extends Controller
         $filename = uniqid();
          $file = Excel::store(new YearsExport($years), 'Year'.$filename.'.xls','public');
          $file = url(Storage::url('Year'.$filename.'.xls'));
-         return HelperController::api_response_format(201,$file, 'Link to file ....');
+         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

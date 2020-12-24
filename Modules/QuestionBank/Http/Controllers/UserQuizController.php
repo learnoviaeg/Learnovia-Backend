@@ -44,7 +44,7 @@ class UserQuizController extends Controller
         
         // return $quiz_lesson->due_date;
         if (!isset($quiz_lesson)) {
-            return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
+            return HelperController::api_response_format(400, null, __('messages.quiz.quiz_not_belong'));
         }
         // if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
         //     return HelperController::api_response_format(400, null, 'Time is out');
@@ -104,7 +104,7 @@ class UserQuizController extends Controller
                     {
                         //case in last attempt in override
                         if($override->attemps == 0)
-                            return HelperController::api_response_format(400, null, 'Max Attempt number reached and you can\'t answer again');
+                            return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
 
                         $override->attemps=$override->attemps-1;
                         $override->save();
@@ -124,7 +124,7 @@ class UserQuizController extends Controller
                         {
                             //case in last attempt in override
                             if($override->attemps == 0)
-                                return HelperController::api_response_format(400, null, 'Max Attempt number reached and you can\'t answer again');
+                                return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
                             $override->attemps--;
                             $override->save();
                         }
@@ -132,14 +132,14 @@ class UserQuizController extends Controller
 
                     //his time isn't ended 
                     else
-                        return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
+                        return HelperController::api_response_format(200, $userQuiz, __('messages.quiz.continue_quiz'));
                 }
             } else {  
                 $answ=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
                 if($answ > 0){
-                    return HelperController::api_response_format(200, $userQuiz, 'you can enter again');
+                    return HelperController::api_response_format(200, $userQuiz, __('messages.quiz.continue_quiz'));
                 }
-                return HelperController::api_response_format(400, null, 'Max Attempt number reached');
+                return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
             }
         }
 
@@ -251,7 +251,7 @@ class UserQuizController extends Controller
                         ]);
 
                         if (!$question_answers->contains($question['answer_id'])) {
-                            return HelperController::api_response_format(400, $question['answer_id'], 'This answer didn\'t belongs to this question');
+                            return HelperController::api_response_format(400, $question['answer_id'], __('messages.answer.not_belong_to_question'));
                         }
 
                         $answer = QuestionsAnswer::find($question['answer_id']);
@@ -271,7 +271,7 @@ class UserQuizController extends Controller
                         $flag = 1;
                         foreach ($question['mcq_answers_array'] as $mcq_answer) {
                             if (!$question_answers->contains($mcq_answer)) {
-                                return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
+                                return HelperController::api_response_format(400, null, __('messages.answer.not_belong_to_question'));
                             }
                             $answer = QuestionsAnswer::find($mcq_answer);
                             if ($answer->is_true == 0) {
@@ -292,14 +292,14 @@ class UserQuizController extends Controller
 
                         $trueAnswer = $currentQuestion->question_answer->where('is_true', 1)->pluck('id');
 
-                        if (count($question['choices_array']) != count($trueAnswer)) {
-                            return HelperController::api_response_format(400, null, 'Please submit all choices');
+                        if (count($question['choices_array']) != count($trueAnswer)) {//must submit all choices
+                            return HelperController::api_response_format(400, null, __('messages.error.incomplete_data'));
                         }
                         $true_counter = 0;
                         $false_counter = 0;
                         foreach ($question['choices_array'] as $choice) {
                             if (!$question_answers->contains($choice)) {
-                                return HelperController::api_response_format(400, null, 'This answer didn\'t belongs to this question');
+                                return HelperController::api_response_format(400, null,__('messages.answer.not_belong_to_question'));
                             }
                             $answer = QuestionsAnswer::find($choice);
                             if ($answer->is_true == 0) {
@@ -330,8 +330,8 @@ class UserQuizController extends Controller
                 }
 
                 $allData->push($data);
-            } else {
-                return HelperController::api_response_format(400, null, 'No type determine to this question');
+            } else {//must enter question type
+                return HelperController::api_response_format(400, null, __('messages.error.incomplete_data'));
             }
         }
         $answer1= userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->where('question_id',$question['id'])->first();
@@ -353,7 +353,7 @@ class UserQuizController extends Controller
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
         }
 
-        return HelperController::api_response_format(200, $allData, 'Answer submitted successfully');
+        return HelperController::api_response_format(200, $allData, __('messages.success.submit_success'));
     }
 
     public function estimateEssayandAndWhy(Request $request)
@@ -381,10 +381,10 @@ class UserQuizController extends Controller
 
                 if (isset($check_question->parent)) {
                     if (!$questions_ids->contains($check_question->parent)) {
-                        return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+                        return HelperController::api_response_format(400, null, __('messages.error.not_found'));
                     }
                 } else {
-                    return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
+                    return HelperController::api_response_format(400, null, __('messages.error.not_found'));
                 }
             }
 
@@ -399,7 +399,7 @@ class UserQuizController extends Controller
                 ->where('question_id', $question['id'])->first();
 
             if (!isset($userQuizAnswer)) {
-                return HelperController::api_response_format(400, null, 'No User Answer found to this Question');
+                return HelperController::api_response_format(400, null, __('messages.error.not_found'));
             }
 
             if (isset($question_type_id)) {
@@ -409,7 +409,7 @@ class UserQuizController extends Controller
 
                         if (isset($currentQuestion->And_why)) {
                             if ($currentQuestion->And_why_mark < $question['mark']) {
-                                return HelperController::api_response_format(400, null, 'Mark should be less than or equal the Question mark');
+                                return HelperController::api_response_format(400, null, __('messages.error.grade_less_than').$question['mark']);
                             }
 
                             $user_grade = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
@@ -427,7 +427,7 @@ class UserQuizController extends Controller
                         # code...
 
                         if ($currentQuestion->mark < $question['mark']) {
-                            return HelperController::api_response_format(400, null, 'Mark should be less than or equal the Question mark');
+                            return HelperController::api_response_format(400, null, __('messages.error.grade_less_than').$question['mark']);
                         }
 
                         $data['user_grade'] = $question['mark'];
@@ -439,7 +439,7 @@ class UserQuizController extends Controller
                         break;
 
                     default:
-                        return HelperController::api_response_format(400, null, 'This Question isn\'t Essay or true and false');
+                        return HelperController::api_response_format(400, null, __('messages.question.question_type_error'));
                         break;
 
                 }
@@ -448,7 +448,7 @@ class UserQuizController extends Controller
                     $allData->push($data);
                 }
             } else {
-                return HelperController::api_response_format(400, null, 'No type determine to this question');
+                return HelperController::api_response_format(400, null, __('messages.error.incomplete_data'));
             }
 
         }
@@ -467,7 +467,7 @@ class UserQuizController extends Controller
             $userAnswer->save();
         }
 
-        return HelperController::api_response_format(200, $allData, 'Grade submitted successfully');
+        return HelperController::api_response_format(200, $allData, __('messages.grade.graded'));
     }
 
     public function gradeUserQuiz(Request $request)
@@ -480,7 +480,7 @@ class UserQuizController extends Controller
         $userQuiz = userQuiz::find($request->user_quiz_id);
         $quiz_lesson = QuizLesson::find($userQuiz->quiz_lesson_id);
         if ($quiz_lesson->grade < $request->grade) {
-            return HelperController::api_response_format(400, $body = [], $message = 'please put grade less than ' . $quiz_lesson->grade);
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.grade_less_than') . $quiz_lesson->grade);
         }
 
         $userQuiz->grade = $request->grade;
@@ -504,7 +504,7 @@ class UserQuizController extends Controller
             $userQuiz->feedback = $request->feedback;
             $user_grade->update(['feedback'=> $request->feedback]);
         }
-        return HelperController::api_response_format(200, $body = $user_grade, $message = 'Grade submitted successfully');
+        return HelperController::api_response_format(200, $body = $user_grade, $message = __('messages.grade.graded'));
     }
 
     public function get_all_users_quiz_attempts(Request $request)
@@ -527,7 +527,7 @@ class UserQuizController extends Controller
         
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if(!$quiz_lesson)
-            return HelperController::api_response_format(200, null, 'This quiz doesn\'t exist');
+            return HelperController::api_response_format(200, null, __('messages.error.not_found'));
 
         $quiz_duration_ended=false;
         if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s')){
@@ -538,13 +538,13 @@ class UserQuizController extends Controller
         // $Submitted_users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->distinct('user_id')->pluck('id')->count();
 
         if (!isset($quiz_lesson))
-            return HelperController::api_response_format(400, null, 'No quiz assign to this lesson');
+            return HelperController::api_response_format(400, null, __('messages.quiz.quiz_not_belong'));
 
         if($request->filled('user_id')){
             unset($users);
             $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$request->user_id)->pluck('user_id')->unique();
             if(count ($users) == 0)
-                return HelperController::api_response_format(200, 'This quiz is not assigned to this user');
+                return HelperController::api_response_format(200, __('messages.error.user_not_assign'));
         }
         $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
         // return ($allUserQuizzes);
@@ -630,7 +630,7 @@ class UserQuizController extends Controller
         $all_users['notGraded'] = $countOfNotGraded ;
         $final->put('submittedAndNotSub',$all_users);
         $final->put('users',$user_attempts);
-        return HelperController::api_response_format(200, $final, 'Students attempts are ...');
+        return HelperController::api_response_format(200, $final, __('messages.quiz.students_attempts_list'));
     }
 
     public function get_fully_detailed_attempt(Request $request){
@@ -686,11 +686,11 @@ class UserQuizController extends Controller
         $quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
         $user_quiz = userQuiz::where('quiz_lesson_id',$quiz_lesson->id)->where('user_id',$request->user_id)->get();
         if($user_quiz ->count() == 0){
-            return HelperController::api_response_format(200, 'No Submitted quizzes to be shown');}
+            return HelperController::api_response_format(200, __('messages.error.no_available_data'));}
         $Due_date= QuizLesson::find($quiz_lesson->id);
         $show_is_true=1;
         if($quiz->feedback == 3)
-            return HelperController::api_response_format(200, Null , 'You are not allowed to view feedback!');
+            return HelperController::api_response_format(200, Null , __('messages.error.cannot_see_feedback'));
         elseif(($quiz->feedback == 1 || $quiz_lesson->max_attemp == 1) && $quiz->is_graded == 0 )
            $Final= self::get_feedback($request,$show_is_true   , $user_quiz);
         elseif($quiz->feedback == 2 && Carbon::now() > $Due_date->due_date)

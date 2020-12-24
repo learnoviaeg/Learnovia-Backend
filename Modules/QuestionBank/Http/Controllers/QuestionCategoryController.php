@@ -34,12 +34,12 @@ class QuestionCategoryController extends Controller
     
         $duplicate=QuestionsCategory::where('name',$request->name)->where('course_id',$request->course)->first();
         if(isset($duplicate))
-            return HelperController::api_response_format(400, $duplicate, 'This category added before');
+            return HelperController::api_response_format(400, $duplicate, __('messages.error.item_added_before'));
 
         //course segment doesn't have any need better to be removed
         $course_segment = CourseSegment::where('course_id',$request->course)->first();
         if(!isset($course_segment))
-            return HelperController::api_response_format(400, null, 'This course is not assigned to chain');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
             
         $quest_cat = QuestionsCategory::firstOrCreate([
             'name' => $request->name,
@@ -49,7 +49,7 @@ class QuestionCategoryController extends Controller
 
         $quest_cat = [$quest_cat];
         
-        return HelperController::api_response_format(200, $quest_cat, 'Question category added Successfully');
+        return HelperController::api_response_format(200, $quest_cat, __('messages.question_category.add'));
     }
 
     /**
@@ -93,9 +93,9 @@ class QuestionCategoryController extends Controller
             $request['page'] = $ques_cat->paginate(HelperController::GetPaginate($request))->lastPage();
         }
         if(isset($request->dropdown) && $request->dropdown == true)
-            return HelperController::api_response_format(200, $ques_cat, 'Question Categories');    
+            return HelperController::api_response_format(200, $ques_cat, __('messages.question_category.list'));    
         else
-            return HelperController::api_response_format(200, $ques_cat->paginate(HelperController::GetPaginate($request)), 'Question Categories');    
+            return HelperController::api_response_format(200, $ques_cat->paginate(HelperController::GetPaginate($request)), __('messages.question_category.list'));    
     }
 
     /**
@@ -117,7 +117,7 @@ class QuestionCategoryController extends Controller
             $questioncat->name = $request->name;
 
         $questioncat->save();
-        return HelperController::api_response_format(200, $questioncat, 'Question Category updated Successfully');
+        return HelperController::api_response_format(200, $questioncat, __('messages.question_category.update'));
     }
 
     /**
@@ -133,9 +133,9 @@ class QuestionCategoryController extends Controller
 
         $questioncat=QuestionsCategory::find($request->id);
         if(count($questioncat->questions)>0)
-            return HelperController::api_response_format(200, null,'you can\'t delete this question category');
+            return HelperController::api_response_format(200, null,__('messages.error.cannot_delete'));
         $questioncat->delete();
-        return HelperController::api_response_format(200, $questioncat, 'Question Category deleted Successfully');
+        return HelperController::api_response_format(200, $questioncat, __('messages.question_category.delete'));
 
     }
 

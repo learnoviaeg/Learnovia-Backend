@@ -109,7 +109,7 @@ class AttendanceSessionController extends Controller
         }
         $check_dublications = (count($classes) === count(array_flip($classes)));
         if(!$check_dublications)
-                return HelperController::api_response_format(400,null ,'Sorry you can\'t add different courses to the same class.');
+                return HelperController::api_response_format(400,null ,__('messages.attendance_session.same_time_session'));
 
         if($request->type=="daily"){
             $days = ['sunday','monday','tuesday','wednesday','thursday'];
@@ -137,7 +137,7 @@ class AttendanceSessionController extends Controller
                     $temp_start = date('Y-m-d H:i:s', strtotime("next ".$day['name'], strtotime($day_before))); 
                     while(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::parse($object['end_date'])->format('Y-m-d H:i:s')){
                         if (count($day['from']) != count($day['to'])) {
-                            return HelperController::api_response_format(400, null, 'invalid size of from , to ');
+                            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
                         }
                         foreach($day['from']  as $key => $from)
                         {
@@ -163,7 +163,7 @@ class AttendanceSessionController extends Controller
                     }
                 }
             }
-            return HelperController::api_response_format(200,null ,'Sessions Created Successfully');
+            return HelperController::api_response_format(200,null ,__('messages.attendance_session.add'));
     }
 
     public function get_users_in_sessions (Request $request,$call =0)
@@ -187,7 +187,7 @@ class AttendanceSessionController extends Controller
 
         $courseseg=CourseSegment::GetWithClassAndCourse($class_id,$course_id);
         if(!isset($courseseg))
-            return HelperController::api_response_format(400, [] ,'Please check active course segments');
+            return HelperController::api_response_format(400, [] ,__('messages.error.no_active_segment'));
 
         $usersIDs=Enroll::where('course_segment',$courseseg->id)->pluck('user_id')->toarray();
 
@@ -242,7 +242,7 @@ class AttendanceSessionController extends Controller
         if($call == 1)
             return $attendees_object;
 
-        return HelperController::api_response_format(200,$attendees_object ,'List of users in this session.');
+        return HelperController::api_response_format(200,$attendees_object ,__('messages.users.students_list'));
     }
 
     public function take_attendnace (Request $request)
@@ -291,7 +291,7 @@ class AttendanceSessionController extends Controller
             
         }
 
-        return HelperController::api_response_format(200,null ,'Attendnace taken successfully.');
+        return HelperController::api_response_format(200,null ,__('messages.attendance_session.taken'));
     }
 
     public function get_sessions (Request $request)
@@ -345,7 +345,7 @@ class AttendanceSessionController extends Controller
             $sessions = $sessions->where('name', 'LIKE' , "%$request->search%");
 
             
-        return HelperController::api_response_format(200,$sessions->get() ,'List of all sessions.');
+        return HelperController::api_response_format(200,$sessions->get() ,__('messages.attendance_session.list'));
 
     }
 
@@ -359,10 +359,10 @@ class AttendanceSessionController extends Controller
                                                 ->where('type','offline')
                                                 ->first();
         if(isset($log))
-            return HelperController::api_response_format(200,'fail' ,'You can\'t delete this session, it\'s attendnace taken already!');
+            return HelperController::api_response_format(200,'fail' ,__('messages.error.cannot_delete'));
             
         $session = AttendanceSession::where('id',$request->session_id)->first()->delete();
-        return HelperController::api_response_format(200,null ,'Session deleted successfully.');
+        return HelperController::api_response_format(200,null ,__('messages.attendance_session.delete'));
     }   
 
     public function update_session (Request $request)
@@ -389,7 +389,7 @@ class AttendanceSessionController extends Controller
             $sessions->start_date = $request->start_date;
 
         $sessions->save();
-        return HelperController::api_response_format(200,null ,'Session edited successfully.');
+        return HelperController::api_response_format(200,null ,__('messages.attendance_session.update'));
 
     } 
 
@@ -402,6 +402,6 @@ class AttendanceSessionController extends Controller
         $filename = uniqid();
         $file = Excel::store(new AttendnaceExport($attendnace_object), 'attendance'.$filename.'.xls','public');
         $file = url(Storage::url('attendance'.$filename.'.xls'));
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

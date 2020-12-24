@@ -101,7 +101,7 @@ class H5PLessonController extends Controller
             'publish_date' => Carbon::now(),
         ]);
         
-        return HelperController::api_response_format(200,$h5p_lesson, 'Interactive content added successfully');
+        return HelperController::api_response_format(200,$h5p_lesson, __('messages.interactive.add'));
     }
 
     public function toggleVisibility(Request $request)
@@ -113,11 +113,11 @@ class H5PLessonController extends Controller
 
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
         if (!isset($h5pLesson)) {
-            return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $h5pLesson->visible = ($h5pLesson->visible == 1) ? 0 : 1;
         $h5pLesson->save();
-        return HelperController::api_response_format(200, $h5pLesson, 'Content toggled successfully');
+        return HelperController::api_response_format(200, $h5pLesson, __('messages.success.toggle'));
     }
 
     public function get (Request $request){
@@ -130,7 +130,7 @@ class H5PLessonController extends Controller
             $content->link =  $url.'/api/h5p/'.$h5p->content_id;
             $h5p_content->push($content);
         }
-        return HelperController::api_response_format(200, $h5p_content, 'List of Learnovia Interactive');
+        return HelperController::api_response_format(200, $h5p_content, __('messages.interactive.list'));
     }
 
     public function delete(Request $request)
@@ -142,17 +142,17 @@ class H5PLessonController extends Controller
 
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
         if (!isset($h5pLesson)) {
-            return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
 
         if(!$request->user()->can('h5p/lesson/allow-delete') && $h5pLesson->user_id != Auth::id() ){
-            return HelperController::api_response_format(400, null, 'You dont have permission to delete this content.');
+            return HelperController::api_response_format(400, null, __('messages.permissions.user_doesnot_has_permission'));
         }
 
         $h5pLesson->delete();
         DB::table('h5p_contents')->where('id', $request->content_id)->delete();
 
-        return HelperController::api_response_format(200, null, 'Content deleted successfully');
+        return HelperController::api_response_format(200, null, __('messages.interactive.delete'));
     }
 
     public function edit (Request $request){
@@ -168,7 +168,7 @@ class H5PLessonController extends Controller
         // $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($h5pLesson))
-            return HelperController::api_response_format(500, null,'This lesson doesn\'t belongs to the course of this interactive');
+            return HelperController::api_response_format(500, null,__('messages.interactive.interactive_not_belong'));
         if ($request->filled('updated_lesson_id')) {
             $h5pLesson->update([
                 'lesson_id' => $request->updated_lesson_id
@@ -190,7 +190,7 @@ class H5PLessonController extends Controller
         //     'created_at' =>  $h5pLesson->created_at,
         // ];
 
-        return HelperController::api_response_format(200, [], 'Learnovia Interactive updated successfully');
+        return HelperController::api_response_format(200, [], __('messages.interactive.update'));
     }
     
 }

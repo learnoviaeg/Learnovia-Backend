@@ -53,7 +53,7 @@ class AssignRoleController extends Controller
             $User->assignRole($Role->name);
         }
 
-        return response()->json(['message' => 'Role assigned successfully', 'body' => null ], 200);
+        return response()->json(['message' => __('messages.role.assign'), 'body' => null ], 200);
     }
 
     /**
@@ -103,6 +103,6 @@ class AssignRoleController extends Controller
             $User->removeRole($Role->name);
         }
 
-        return response()->json(['message' => 'Role revoked successfully', 'body' => null ], 200);
+        return response()->json(['message' => __('messages.role.revoke'), 'body' => null ], 200);
     }
 }
