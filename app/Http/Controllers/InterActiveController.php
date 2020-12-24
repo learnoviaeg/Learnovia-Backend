@@ -52,7 +52,7 @@ class InterActiveController extends Controller
       
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
-                return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
+                return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
 
             $lessons  = [$request->lesson];
         }
@@ -68,7 +68,7 @@ class InterActiveController extends Controller
         }
 
         if($count == 'count'){
-            return response()->json(['message' => 'InterActive count', 'body' => $h5p_lessons->count()], 200);
+            return response()->json(['message' => __('messages.interactive.count'), 'body' => $h5p_lessons->count()], 200);
         }
 
         $h5p_lessons = $h5p_lessons->get();
@@ -96,7 +96,7 @@ class InterActiveController extends Controller
 
             $h5p_contents[]=$content->original;
         }
-        return response()->json(['message' => 'InterActive vedios  List ....', 'body' => collect($h5p_contents)->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.interactive.list'), 'body' => collect($h5p_contents)->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

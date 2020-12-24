@@ -57,7 +57,7 @@ class LevelsController extends Controller
             }
         }
         $levels = Level::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(201, $levels, 'Level Created Successfully');
+        return HelperController::api_response_format(201, $levels, __('messages.level.add'));
     }
 
     /**
@@ -75,7 +75,7 @@ class LevelsController extends Controller
         $year_levels_id= YearLevel::where('level_id',$request->id)->pluck('id');
         $class_level = ClassLevel::whereIn('year_level_id',$year_levels_id)->get();
         if (count($class_level) > 0)
-            return HelperController::api_response_format(404, [] , 'This level assigned to classe/s, cannot be deleted.');
+            return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
 
         $yearLevel=YearLevel::where('level_id',$request->id)->first();
         if(isset($yearLevel))
@@ -95,7 +95,7 @@ class LevelsController extends Controller
         //     event(new MassLogsEvent($logsbefore,'updated'));
 
         $levels = Level::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(203, $levels, 'Level Deleted Successfully');
+        return HelperController::api_response_format(203, $levels, __('messages.level.delete'));
     }
 
     /**
@@ -113,12 +113,12 @@ class LevelsController extends Controller
         ]);
 
         if ($valid->fails())
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
         $level = Level::find($request->id);
         $level->name = $request->name;
         $level->save();
         $levels=Level::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(200, $levels, 'Level edited successfully');
+        return HelperController::api_response_format(200, $levels, __('messages.level.update'));
     }
 
     /**
@@ -270,7 +270,7 @@ class LevelsController extends Controller
                 $year_type = AcademicYearType::whereIn('academic_type_id',$request->type)->pluck('id');
 
             if(!isset($year_type))
-                return HelperController::api_response_format(200,null, 'No active year available, please enter types you want.');
+                return HelperController::api_response_format(200,null, __('messages.error.no_active_year'));
 
             $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('level_id');
             $levels;
@@ -278,9 +278,9 @@ class LevelsController extends Controller
                 $levels = Level::whereIn('id',$year_levels)->get();
 
             if(count($levels) == 0)
-                return HelperController::api_response_format(201,null, 'You haven\'t levels');
+                return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
 
-            return HelperController::api_response_format(200,$levels, 'There are your levels');
+            return HelperController::api_response_format(200,$levels, __('messages.level.list'));
         }
 
         $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
@@ -306,9 +306,9 @@ class LevelsController extends Controller
         }
                              
         if(count($lev) > 0)
-            return HelperController::api_response_format(201,$lev, 'There are your Levels');
+            return HelperController::api_response_format(201,$lev, __('messages.level.list'));
         
-        return HelperController::api_response_format(201, 'You haven\'t Levels');
+        return HelperController::api_response_format(201, __('messages.error.no_available_data'));
     }
 
     public function export(Request $request)
@@ -317,6 +317,6 @@ class LevelsController extends Controller
         $filename = uniqid();
         $file = Excel::store(new LevelsExport($levelsIDs), 'levels'.$filename.'.xls','public');
         $file = url(Storage::url('levels'.$filename.'.xls'));
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

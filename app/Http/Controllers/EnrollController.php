@@ -83,6 +83,6 @@ class EnrollController extends Controller
         event(new MassLogsEvent($logsbefore,'deleted'));
 
         $chains->delete();
-        return response()->json(['message' => 'Deleted Successfully', 'body' => null], 200);
+        return response()->json(['message' => __('messages.enroll.delete'), 'body' => null], 200);
     }
 }

@@ -268,7 +268,7 @@ class FilesController extends Controller
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
 
-        return HelperController::api_response_format(200,$file , 'File uploaded successfully');
+        return HelperController::api_response_format(200,$file , __('messages.file.add'));
     }
 
     /**
@@ -393,7 +393,7 @@ class FilesController extends Controller
         $tempReturn = null;
         $fileLesson = FileLesson::where('file_id', $request->id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($fileLesson))
-            return HelperController::api_response_format(200, null , 'This file is not assigned to this file');
+            return HelperController::api_response_format(200, null , __('messages.file.file_not_belong'));
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
             if (Carbon::parse($request->publish_date)->isPast()) {
@@ -444,7 +444,7 @@ class FilesController extends Controller
                 'publish_date' => carbon::parse($publish_date),
         ]);
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'file')->get();
-        return HelperController::api_response_format(200, $tempReturn, 'File edited successfully');
+        return HelperController::api_response_format(200, $tempReturn, __('messages.file.update'));
     }
 
     /**
@@ -465,7 +465,7 @@ class FilesController extends Controller
         $file->delete();
         File::whereId($request->fileID)->delete();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
-        return HelperController::api_response_format(200, $tempReturn, $message = 'File deleted successfully');
+        return HelperController::api_response_format(200, $tempReturn, $message = __('messages.file.delete'));
     }
 
     /**
@@ -483,12 +483,12 @@ class FilesController extends Controller
         ]);
         $fileLesson = FileLesson::where('file_id', $request->fileID)->where('lesson_id', '=', $request->lesson_id)->first();
         if (!isset($fileLesson)) {
-            return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $fileLesson->visible = ($fileLesson->visible == 1) ? 0 : 1;
         $fileLesson->save();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
-        return HelperController::api_response_format(200, $tempReturn, 'File toggled successfully');
+        return HelperController::api_response_format(200, $tempReturn, __('messages.success.toggle'));
     }
 
     public function sortLessonFile(Request $request)
@@ -502,7 +502,7 @@ class FilesController extends Controller
         $minIndex = $fileLesson->min('index');
 
         if (!($request->index <= $maxIndex && $request->index >= $minIndex)) {
-            return HelperController::api_response_format(400, null, ' invalid index');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
 
         $currentIndex = $fileLesson->index;
@@ -579,9 +579,9 @@ class FilesController extends Controller
             $file_lessons = FileLesson::create([
                 'lesson_id' => $request->lesson_id, 'file_id' => $request->file_id, 'publish_date' => $request->publish_date
             ]);
-            return HelperController::api_response_format(200, $file_lessons, 'File assigned successfully');
+            return HelperController::api_response_format(200, $file_lessons, __('messages.file.add'));
         } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
+            return HelperController::api_response_format(400, null, __('messages.error.try_again'));
         }
     }
     public function AssignFileMediaPAgeLesson(Request $request)

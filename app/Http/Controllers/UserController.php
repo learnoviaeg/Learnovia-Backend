@@ -106,12 +106,12 @@ class UserController extends Controller
             $count+=1;
 
         if((count($users) + $count) > $max_allowed_users)
-            return HelperController::api_response_format(404 ,$max_allowed_users, 'exceed MAX, U Can\'t add users any more');
+            return HelperController::api_response_format(404 ,$max_allowed_users, __('messages.users.exeed_max_users'));
 
         foreach ($request->firstname as $key => $firstname) {
             $username=User::where('username',$request->username[$key])->pluck('username')->count();
             if($username>0)
-                return HelperController::api_response_format(404 ,$username, 'This username is already  used');
+                return HelperController::api_response_format(404 ,$username, __('messages.users.username_already_used'));
             if (isset($request->picture[$i]))
                     $user_picture = attachment::upload_attachment($request->picture[$i], 'User');
             $clientt = new Client();
@@ -203,7 +203,7 @@ class UserController extends Controller
             }
             $users_is->push($user);
         }
-        return HelperController::api_response_format(201, $users_is, 'User Created Successfully');
+        return HelperController::api_response_format(201, $users_is, __('messages.users.add'));
     }
 
     /**
@@ -331,7 +331,7 @@ class UserController extends Controller
                 $teachercounter++;
             }
         }
-        return HelperController::api_response_format(201, $user, 'User updated Successfully');
+        return HelperController::api_response_format(201, $user, __('messages.users.update'));
     }
 
     /**
@@ -354,7 +354,7 @@ class UserController extends Controller
         $user = User::find($request->id);
         $user->delete();
 
-        return HelperController::api_response_format(201, null, 'User Deleted Successfully');
+        return HelperController::api_response_format(201, null, __('messages.users.delete'));
     }
 
     /**
@@ -449,7 +449,7 @@ class UserController extends Controller
                 $count[Str::slug($role->name, '_')] = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
             }
 
-            return HelperController::api_response_format(200 ,$count,'User roles count');
+            return HelperController::api_response_format(200 ,$count,__('messages.users.count'));
         }
 
         $users = $users->paginate(HelperController::GetPaginate($request));
@@ -494,7 +494,7 @@ class UserController extends Controller
     
         unset($user->tokens);
 
-        return HelperController::api_response_format(201, $user, 'User Blocked Successfully');
+        return HelperController::api_response_format(201, $user, __('messages.users.user_blocked'));
     }
 
     /**
@@ -512,7 +512,7 @@ class UserController extends Controller
         $check = $user->update([
             'suspend' => 0
         ]);
-        return HelperController::api_response_format(201, $user, 'User Un Blocked Successfully');
+        return HelperController::api_response_format(201, $user, __('messages.users.user_un_blocked'));
     }
 
     /**
@@ -568,7 +568,7 @@ class UserController extends Controller
             return HelperController::api_response_format(201, $user, null);
         }
 
-        return HelperController::api_response_format(200, $user, 'there is no courses');
+        return HelperController::api_response_format(200, $user, __('messages.error.no_available_data'));
     }
 
     /**
@@ -590,7 +590,7 @@ class UserController extends Controller
             'password' => bcrypt($request->password)
         ]);
 
-        return HelperController::api_response_format(201, $user, 'User Updated Successfully');
+        return HelperController::api_response_format(201, $user, __('messages.users.update'));
     }
 
     /**
@@ -631,7 +631,7 @@ class UserController extends Controller
         if(count($parent) > 0)
             return HelperController::api_response_format(201, ['Parent'=>$parent]);
 
-        return HelperController::api_response_format(201,null,'There is no data for you.');
+        return HelperController::api_response_format(201,null,__('messages.error.no_available_data'));
     }
 
     public function getParents(Request $request)
@@ -642,7 +642,7 @@ class UserController extends Controller
         if(isset($request->parent_id))
         {
             $par_chil=Parents::where('parent_id',$request->parent_id)->with('child')->get();
-            return HelperController::api_response_format(201,$par_chil->paginate(HelperController::GetPaginate($request)),'There r parents');
+            return HelperController::api_response_format(201,$par_chil->paginate(HelperController::GetPaginate($request)),__('messages.users.parents_list'));
         }
 
         $parents=User::whereHas("roles",function ($q){
@@ -652,7 +652,7 @@ class UserController extends Controller
                         ->orWhere('username', 'LIKE' ,"%$request->search%" )
                         ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
         })->with('attachment')->get();
-        return HelperController::api_response_format(201,$parents->paginate(HelperController::GetPaginate($request)),'There r parents');
+        return HelperController::api_response_format(201,$parents->paginate(HelperController::GetPaginate($request)),__('messages.users.parents_list'));
     }
 
     /**
@@ -674,7 +674,7 @@ class UserController extends Controller
                     'parent_id' => $parent
                 ]);
 
-        return HelperController::api_response_format(201,null,'Assigned Successfully');
+        return HelperController::api_response_format(201,null,__('messages.users.parent_assign_child'));
     }
 
         /**
@@ -695,7 +695,7 @@ class UserController extends Controller
                 $parent->delete();
         }
 
-        return HelperController::api_response_format(201,null,'unAssigned Successfully');
+        return HelperController::api_response_format(201,null,__('messages.users.parent_unassign_child'));
     }
 
     /**
@@ -761,10 +761,10 @@ class UserController extends Controller
             $course_segments = $user->enroll->pluck('course_segment');
             $users_id = Enroll::whereIn('course_segment', $course_segments)->pluck('user_id');
             $users = $users->whereIn('id', $users_id)->get();
-            return HelperController::api_response_format(200, $users, 'all users in course segment ...');
+            return HelperController::api_response_format(200, $users, __('messages.users.list'));
         }
         $users = $users ->get();
-        return HelperController::api_response_format(200, $users, 'all users are  ...');
+        return HelperController::api_response_format(200, $users, __('messages.users.list'));
     }
 
     Public Function Overview_Report()
@@ -794,7 +794,7 @@ class UserController extends Controller
             Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
             $current_child = User::where('id',$request->child_id)->first();
         }
-        return HelperController::api_response_format(200,$current_child ,'Children sets successfully');
+        return HelperController::api_response_format(200,$current_child ,__('messages.users.parent_assign_child'));
     }
 
     Public Function getCurrentChild(Request $request)
@@ -804,7 +804,7 @@ class UserController extends Controller
         if(isset($current))
             $currentChild =User::find($current->child_id);
 
-        return HelperController::api_response_format(200,$currentChild, 'Current child is...');
+        return HelperController::api_response_format(200,$currentChild, __('messages.users.current_child'));
     }
 
     Public Function getMyChildren(){
@@ -814,7 +814,7 @@ class UserController extends Controller
             if(isset($child->attachment))
                 $child->picture = $child->attachment->path;
 
-        return HelperController::api_response_format(200,$children ,'Children are.......');
+        return HelperController::api_response_format(200,$children ,__('messages.users.childs_list'));
 
     }
 
@@ -824,7 +824,7 @@ class UserController extends Controller
         ]);
         $childrenIDS = Parents::where('parent_id',$request->parent_id)->pluck('child_id');
         $children =  User::whereIn('id',$childrenIDS)->get();
-        return HelperController::api_response_format(200,$children ,'Children are.......');
+        return HelperController::api_response_format(200,$children ,__('messages.users.childs_list'));
 
     }
 
@@ -835,7 +835,7 @@ class UserController extends Controller
         ]);
         $parentID = Parents::where('child_id',$request->child_id)->first('parent_id');
         $parent =  User::find($parentID);
-        return HelperController::api_response_format(200,$parent ,'Your Parent is ...');
+        return HelperController::api_response_format(200,$parent ,__('messages.users.parents_list'));
     }
 
     Public function get_my_users(Request $request){
@@ -876,7 +876,7 @@ class UserController extends Controller
                                             })->with('attachment')->get();
         }
 
-        return HelperController::api_response_format(200,$students ,'Users are.......');
+        return HelperController::api_response_format(200,$students ,__('messages.users.list'));
     }
 
     public function exportParentChild(Request $request)
@@ -887,7 +887,7 @@ class UserController extends Controller
         $file = Excel::store(new ParentChildExport($fields), 'parent_child'.$filename.'.xls','public');
         $file = url(Storage::url('parent_child'.$filename.'.xls'));
 
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
     public function export(Request $request)
@@ -912,7 +912,7 @@ class UserController extends Controller
         $filename = uniqid();
         $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xls','public');
         $file = url(Storage::url('users'.$filename.'.xls'));
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
     public function generate_username_password(Request $request)
@@ -920,7 +920,7 @@ class UserController extends Controller
         $auth = collect([]);
         $auth['username'] = User::generateUsername();
         $auth['password'] =  User::generatePassword()."";
-        return HelperController::api_response_format(200,$auth, 'your username and password is ........');
+        return HelperController::api_response_format(200,$auth, __('messages.users.your_username_pass'));
 
     }
 

@@ -23,7 +23,7 @@ class ParentCheck
             return $next($request);
         }
         if(Auth::user()->currentChild == null)
-            return HelperController::api_response_format(400, 'please choose your current child');
+            return HelperController::api_response_format(400, __('messages.users.parent_choose_child'));
         $currentChild =User::find(Auth::user()->currentChild->child_id);
         Auth::setUser($currentChild);
         return $next($request);

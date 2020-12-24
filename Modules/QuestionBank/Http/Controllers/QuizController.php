@@ -53,8 +53,8 @@ class QuizController extends Controller
              * feedback 3 => No feedback
             */
         ]);
-        if($request->is_graded==1 && $request->feedback == 1)
-            return HelperController::api_response_format(200, null, 'invalid feedback, feedback should be in 2 or 3 ');
+        if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
+            return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
 
         $request->validate([
             'Question' => 'nullable|array',
@@ -81,7 +81,7 @@ class QuizController extends Controller
                         ]);
 
                         if ($validator->fails()) {
-                            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+                            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.try_again'));
                         }
                         break;
 
@@ -100,11 +100,11 @@ class QuizController extends Controller
                         ]);
 
                         if ($question['Is_True'] > count($question['answers']) - 1) {
-                            return HelperController::api_response_format(400, $question, 'is True invalid');
+                            return HelperController::api_response_format(400, $question, __('messages.error.data_invalid'));
                         }
 
                         if ($validator->fails()) {
-                            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+                            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.try_again'));
                         }
                         break;
 
@@ -123,10 +123,10 @@ class QuizController extends Controller
                             'parent' => 'integer|exists:questions,id',
                         ]);
                         if ($validator->fails()) {
-                            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+                            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.try_again'));
                         }
                         if (count($question['match_A']) > count($question['match_B'])) {
-                            return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
+                            return HelperController::api_response_format(400, null, __('messages.question.questions_answers_count'));
                         }
                         break;
                     case 5: // para
@@ -165,7 +165,7 @@ class QuizController extends Controller
                 'Shuffle' => quiz::checkSuffle($request),
                 'feedback' => isset($request->feedback) ? $request->feedback : 1,
             ]);
-            return HelperController::api_response_format(200, $quiz,'Quiz added successfully');
+            return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
         }
 
         if ($questionsIDs != null) {
@@ -189,9 +189,9 @@ class QuizController extends Controller
                 $question->question_course;
                 $question->question_answer;
             }
-            return HelperController::api_response_format(200, $quiz,'Quiz added successfully');
+            return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
         }
-        return HelperController::api_response_format(200, null, 'There\'s no Questions for this course in Question Bank');
+        return HelperController::api_response_format(200, null, __('messages.error.not_found'));
     }
 
     // New Questions
@@ -278,7 +278,7 @@ class QuizController extends Controller
 
             $quiz->Question()->detach();
 
-            return HelperController::api_response_format(200, $quiz,'Quiz edited successfully');
+            return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
         }
 
         $quiz->update([
@@ -301,7 +301,7 @@ class QuizController extends Controller
             $question->question_course;
             $question->question_answer;
         }
-        return HelperController::api_response_format(200, $quiz,'Quiz edited successfully');
+        return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
 
     public function destroy(Request $request)
@@ -315,7 +315,7 @@ class QuizController extends Controller
         if(isset($grade_item))
             $grade_item->delete();
         $quiz->delete();
-        return HelperController::api_response_format(200, [], 'Quiz deleted successfully');
+        return HelperController::api_response_format(200, [], __('messages.quiz.delete'));
     }
 
     public function get(Request $request)
@@ -328,7 +328,7 @@ class QuizController extends Controller
         $qq = Quiz::where('id', $request->quiz_id)->first();
         $quizles=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
         if(!isset($quizles))
-            return HelperController::api_response_format(200, 'This Quiz is not assigned to this lesson');
+            return HelperController::api_response_format(200, __('messages.quiz.quiz_not_belong'));
 
         $max_attemp= $qq->quizLessson[0]->max_attemp;
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
@@ -575,14 +575,14 @@ class QuizController extends Controller
         ]);
         $check = QuizLesson::whereQuiz_id($request->quiz)->whereLesson_id($request->lesson)->first();
         if ($check == null)
-            return HelperController::api_response_format(400, null, 'This Quiz not in this lesson');
+            return HelperController::api_response_format(400, null, __('messages.quiz.quiz_not_belong'));
         $USERS = collect([]);
         $quiz = quiz::find($request->quiz_id);
         $quizLessons = $check->id;
         $courseSegment = $check->lesson->courseSegment; //$quiz->course->courseSegments->where('is_active',1)->first();
         $per=  Permission::where('name','site/quiz/getStudentinQuiz')->first();
         if(count($per->roles) <= 0)
-            return HelperController::api_response_format(200, null , 'There is no roles assigned to this permission');
+            return HelperController::api_response_format(200, null , __('messages.permissions.no_roles_assigned'));
         $roles_id= $per->roles->pluck('id');
         $enroll = $courseSegment->Enroll->whereIn('role_id', $roles_id);
         foreach ($enroll as $enrollment) {
@@ -617,7 +617,7 @@ class QuizController extends Controller
         ]);
         $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if ($quizLesson == null)
-            return HelperController::api_response_format(400, [], 'No avaiable date for this info');
+            return HelperController::api_response_format(400, [], __('messages.error.data_invalid'));
         $userQuizes = userQuiz::with(['UserQuizAnswer.Question'])->where('quiz_lesson_id', $quizLesson->id)->where('user_id', $request->student_id)->get();
         return HelperController::api_response_format(200, $userQuizes);
     }
@@ -630,7 +630,7 @@ class QuizController extends Controller
         ]);
         $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($quizLesson))
-            return HelperController::api_response_format(400, 'This quiz is not assigned to this lesson');
+            return HelperController::api_response_format(400, null,__('messages.quiz.quiz_not_belong'));
 
         $students = userQuiz::where('quiz_lesson_id', $quizLesson->id)->with(['quiz_lesson', 'quiz_lesson.quiz', 'quiz_lesson.quiz.Question'])->get();
         //return $students;
@@ -644,7 +644,7 @@ class QuizController extends Controller
             }
             $count += 1;
         }
-        return HelperController::api_response_format(200,$students, 'All Students');
+        return HelperController::api_response_format(200,$students, __('messages.users.students_list'));
     }
 
     public function getSingleQuiz(Request $request){
@@ -659,17 +659,17 @@ class QuizController extends Controller
         $qq = Quiz::where('id', $request->quiz_id)->first();
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
         if(!isset($quiz_lesson))
-            return HelperController::api_response_format(422,null,'This item is deleted');
+            return HelperController::api_response_format(422,null,__('messages.error.item_deleted'));
         
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         /**delete from */
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date > Carbon::now() )
-            return HelperController::api_response_format(400, null , $message = 'Parents can\'t submit quizzes');
+            return HelperController::api_response_format(400, null , $message = __('messages.error.parent_cannot_submit'));
         if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date < Carbon::now() )
                 {
                 if(Auth::user()->currentChild == null)
-                    return HelperController::api_response_format(400,null, 'please choose your current child');
+                    return HelperController::api_response_format(400,null, __('messages.users.parent_choose_child'));
                 $currentChild =User::find(Auth::user()->currentChild->child_id);
                 Auth::setUser($currentChild);
             }
@@ -769,15 +769,15 @@ class QuizController extends Controller
             $Quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)
                 ->where('lesson_id',$request->lesson_id)->first();
             if(!isset($Quiz_lesson)){
-                return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+                return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
             }
 
             $Quiz_lesson->visible = ($Quiz_lesson->visible == 1) ? 0 : 1;
             $Quiz_lesson->save();
 
-            return HelperController::api_response_format(200, $Quiz_lesson, 'Toggle Successfully');
+            return HelperController::api_response_format(200, $Quiz_lesson, __('messages.success.toggle'));
         } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
+            return HelperController::api_response_format(400, null, __('messages.error.try_again'));
         }
     }
 
@@ -805,7 +805,7 @@ class QuizController extends Controller
                 'name' =>'Lowest'
             ]
         ];
-        return HelperController::api_response_format(200, $total, 'Grading methods are....');
+        return HelperController::api_response_format(200, $total, __('messages.grade.grading_method_list'));
     }
 
     public function get_user_quiz(Request $request){
@@ -819,12 +819,12 @@ class QuizController extends Controller
         $quiz = Quiz::find($request->quiz_id);
         $qq = Quiz::where('id', $request->quiz_id)->first();
         if(!isset($qq->quizLessson[0]))
-            return HelperController::api_response_format(200,'This quiz is not assigned to this lesson');
+            return HelperController::api_response_format(200,__('messages.quiz.quiz_not_belong'));
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
         // return $quiz_lesson->due_date;
         if(!isset($quiz_lesson))
-            return HelperController::api_response_format(200, 'there is quiz in this lesson');
+            return HelperController::api_response_format(200, __('messages.quiz.quiz_not_belong'));
         if(User::find(Auth::id())->can('site/quiz/store_user_quiz')){
             if($quiz->feedback == 1 )
                 $show_is_true=1;
