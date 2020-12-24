@@ -45,7 +45,7 @@ class QuizController extends Controller
              */
             'is_graded' => 'required|boolean',
             'duration' => 'required|integer',
-            'shuffle' => 'boolean',
+            'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'feedback' => 'integer| in:1,2,3',
             /**
              * feedback 1 => After submission
@@ -162,7 +162,7 @@ class QuizController extends Controller
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
-                'Shuffle' => quiz::checkSuffle($request),
+                'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
                 'feedback' => isset($request->feedback) ? $request->feedback : 1,
             ]);
             return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
@@ -175,7 +175,7 @@ class QuizController extends Controller
                 'is_graded' => $request->is_graded,
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
-                'Shuffle' => quiz::checkSuffle($request),
+                'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
                 'feedback' => isset($request->feedback) ? $request->feedback : 1,
             ]);
 
@@ -324,7 +324,7 @@ class QuizController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|exists:lessons,id'
         ]);
-        $quiz = Quiz::where('id', $request->quiz_id)->pluck('shuffle')->first();
+        $quiz_shuffle = Quiz::where('id', $request->quiz_id)->pluck('shuffle')->first();
         $qq = Quiz::where('id', $request->quiz_id)->first();
         $quizles=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
         if(!isset($quizles))
@@ -335,11 +335,11 @@ class QuizController extends Controller
 
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
         //return $quizLesson;
-        if ($quiz == 0) {
-            $quiz = quiz::find($request->quiz_id);
-            $quiz['max_attemp']=$max_attemp;
-            $quiz['grade_category']=$gradecat;
+        $quiz = quiz::find($request->quiz_id);
+        $quiz['max_attemp']=$max_attemp;
+        $quiz['grade_category']=$gradecat;
 
+        if ($quiz_shuffle == 'No Shuffle') {
             $Questions = $quiz->Question;
             foreach ($Questions as $Question) {
                 if ($Question->question_type_id==3){
@@ -361,10 +361,7 @@ class QuizController extends Controller
 
             }
             return HelperController::api_response_format(200, $Questions);
-        } else {
-            $quiz = quiz::find($request->quiz_id);
-            $quiz['max_attemp']=$max_attemp;
-            $quiz['grade_category']=$gradecat;
+        } else if($quiz_shuffle == 'Questions') {
             $shuffledQuestion = $quiz->Question->shuffle();
             foreach ($shuffledQuestion as $question) {
                 if (count($question->childeren) > 0) {
@@ -433,7 +430,31 @@ class QuizController extends Controller
             // TXPDF::Output(Storage_path('app\public\PDF\\Quiz '.$request->quiz_id.'.pdf'), 'F');
 
             return HelperController::api_response_format(200, $quiz);
-        }
+        }else if($quiz_shuffle == 'Answers'){
+            $Questions = $quiz->Question;
+            foreach ($Questions as $Question) {
+                if ($Question->question_type_id==2){
+                $Question->question_answer->shuffle();
+                $answers = $Question->question_answer->shuffle();
+                $Question->answers = $answers;
+                unset($Question->question_answer);
+                }
+            }
+            return HelperController::api_response_format(200, $quiz);
+        }else{ //  shuffle is questions and answers
+            $Questions_Suffle = $quiz->Question->shuffle();
+            $quiz['question']=$quiz->Question->shuffle();
+            foreach ($Questions_Suffle as $Question) {
+                if ($Question->question_type_id==2){
+                $Question->question_answer->shuffle();
+                $answers = $Question->question_answer->shuffle();
+                $Question->answers = $answers;
+                unset($Question->question_answer);
+                }
+            }
+            unset($quiz->Question);
+
+            return HelperController::api_response_format(200, $quiz);        }
     }
 
     public function sortDown($quiz_id, $index)
@@ -722,13 +743,18 @@ class QuizController extends Controller
         }
 
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
-
+        $quiz_shuffle = Quiz::where('id', $request->quiz_id)->pluck('shuffle')->first();
         $quiz['grading_method']=$quiz_lesson->grading_method_id;
         $quiz['max_attemp']=$quiz_lesson->max_attemp;
         $quiz['visible']=$quiz_lesson->visible;
         $quiz['mark']=$quiz_lesson->grade;
         $quiz['grade_category']=$gradecat;
-        foreach($quiz->Question as $question){
+        if($quiz_shuffle == 'Questions'|| $quiz_shuffle == 'Questions and Answers'){
+            $Questions_Suffle = $quiz->Question->shuffle();
+            $quiz['question']=$quiz->Question->shuffle();
+            unset($quiz->Question);
+        }
+        foreach($quiz['question'] as $question){
             if(count($question->childeren) > 0){
                 foreach($question->childeren as $single){
                     $single->question_type;
@@ -737,7 +763,7 @@ class QuizController extends Controller
                     unset($single->pivot);
                 }
             }
-            else{
+            else {
                 unset($question->childeren);
             }
             if($user_answer)
@@ -746,7 +772,14 @@ class QuizController extends Controller
                     if($U_Ans->question_id == $question->id)
                         $question->User_Answer=$U_Ans;
             }
-            $question->question_answer;
+           $question['question_answer']=$question->question_answer;
+
+        if($quiz_shuffle == 'Answers'|| $quiz_shuffle == 'Questions and Answers'){
+            $answers = $question->question_answer->shuffle();
+            unset($question->question_answer);
+            $question['question_answer'] =$answers;
+
+            }
             $question->question_category;
             $question->question_type;
             unset($question->pivot);
@@ -960,5 +993,18 @@ class QuizController extends Controller
         }
 
         return HelperController::api_response_format(200,$quiz);
+    }
+
+    public function ScriptShuffle(){
+        $all_quizzes = Quiz::all();
+        foreach ($all_quizzes as  $quiz){
+            if($quiz->shuffle==''){
+                $quiz->shuffle = 'No Shuffle';
+                $quiz->save();
+        }
+            }
+            return HelperController::api_response_format(200,$all_quizzes);
+
+
     }
 }
