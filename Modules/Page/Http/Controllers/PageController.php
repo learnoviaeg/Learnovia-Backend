@@ -126,7 +126,7 @@ class PageController extends Controller
             ]);
         }
         $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
-        return HelperController::api_response_format(200, $tempReturn, 'Page added successfully');
+        return HelperController::api_response_format(200, $tempReturn, __('messages.page.add'));
 
     }
 
@@ -138,14 +138,14 @@ class PageController extends Controller
         ]);
         $check = pageLesson::where('page_id', $request->page_id)->where('lesson_id', $request->lesson_id)->pluck('id')->first();
         if ($check != null) {
-            return HelperController::api_response_format(422, [], 'relation is already exist');
+            return HelperController::api_response_format(422, [], __('messages.error.already_exist'));
 
         }
         $page = new pageLesson();
         $page->page_id = $request->page_id;
         $page->lesson_id = $request->lesson_id;
         $page->save();
-        return HelperController::api_response_format(200, $page, 'Page linked with lesson successfully');
+        return HelperController::api_response_format(200, $page, __('messages.page.add'));
 
     }
 
@@ -171,7 +171,7 @@ class PageController extends Controller
         $page_lesson = pageLesson::where('page_id', $request->id)
                 ->where('lesson_id', $request->lesson_id[0])->first();
         if(!isset($page_lesson))
-            return HelperController::api_response_format(200, null , 'This file is not assigned to this lesson');
+            return HelperController::api_response_format(200, null , __('messages.page.page_not_belong'));
 
         if($request->filled('title'))
             $page->update([ 'title' => $request->title]);
@@ -206,7 +206,7 @@ class PageController extends Controller
             'link' => url(route('getPage')) . '?id=' . $request->id,
             'publish_date' => Carbon::now()
         ]);
-        return HelperController::api_response_format(200, $page, 'Page edited successfully');
+        return HelperController::api_response_format(200, $page, __('messages.page.update'));
         
     }
 
@@ -232,9 +232,9 @@ class PageController extends Controller
             }
 
             $tempReturn = Lesson::find($request->lesson_id)->module('Page', 'page')->get();
-            return HelperController::api_response_format(200, $tempReturn, 'Page deleted successfully');
+            return HelperController::api_response_format(200, $tempReturn, __('messages.page.delete'));
         }
-        return HelperController::api_response_format(404, [], 'Not Found');
+        return HelperController::api_response_format(404, [], __('messages.error.not_found'));
     }
 
 
@@ -246,12 +246,12 @@ class PageController extends Controller
         ]);
         $page = page::whereId($request->id)->first();
         if ($page == null)
-            return HelperController::api_response_format(200, null, 'This page is not visible');
+            return HelperController::api_response_format(200, null, __('messages.error.not_found'));
         $lesson = $page->lesson->where('id', $request->lesson_id)->first();
         if(isset($lesson))
             $course_id= $lesson->courseSegment->course_id;
         else
-            return HelperController::api_response_format(200, null , 'This page is not assigned to the given lesson');
+            return HelperController::api_response_format(200, null , __('messages.page.page_not_belong'));
         $page->course_id=$course_id;
         $page->page_lesson = PageLesson::where('page_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
         unset($page->lesson);
@@ -270,15 +270,15 @@ class PageController extends Controller
             $page_lesson = pageLesson::where('page_id', $request->page_id)
                 ->where('lesson_id', $request->lesson_id)->first();
             if (!isset($page_lesson)) {
-                return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+                return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
             }
 
             $page_lesson->visible = ($page_lesson->visible == 1) ? 0 : 1;
             $page_lesson->save();
 
-            return HelperController::api_response_format(200, $page_lesson, 'Toggle Successfully');
+            return HelperController::api_response_format(200, $page_lesson, __('messages.success.toggle'));
         } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
+            return HelperController::api_response_format(400, null, __('messages.error.try_again'));
         }
     }
 

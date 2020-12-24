@@ -57,7 +57,7 @@ class AnnouncementsController extends Controller
             if(isset($request->search))
                 $announcements->where('title', 'LIKE' , "%$request->search%");
 
-            return response()->json(['message' => 'Announcements created by user.', 'body' => $announcements->get()->paginate($paginate)], 200);
+            return response()->json(['message' => __('messages.announcement.created_list'), 'body' => $announcements->get()->paginate($paginate)], 200);
         }
 
         $announcements =  userAnnouncement::with('announcements')
@@ -79,7 +79,7 @@ class AnnouncementsController extends Controller
             });
         }
 
-        return response()->json(['message' => 'Announcements assigned to user.', 'body' => $announcements->filter()->values()->paginate($paginate)], 200);
+        return response()->json(['message' => __('messages.announcement.list'), 'body' => $announcements->filter()->values()->paginate($paginate)], 200);
     }
 
     /**
@@ -204,7 +204,7 @@ class AnnouncementsController extends Controller
             $notify = (new NotificationsController)->store($notify_request);
         }
 
-        return response()->json(['message' => 'Announcement sent successfully.', 'body' => $announcement], 200);
+        return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);
     }
 
     /**
@@ -218,9 +218,9 @@ class AnnouncementsController extends Controller
         $announcement = Announcement::where('id',$id)->with('attachment')->first();
 
         if(isset($announcement))
-            return response()->json(['message' => 'announcement objet', 'body' => $announcement], 200);
+            return response()->json(['message' => __('messages.announcement.object'), 'body' => $announcement], 200);
 
-        return response()->json(['message' => 'Announcement not fount!', 'body' => [] ], 400);
+        return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
     }
 
     /**
@@ -291,7 +291,7 @@ class AnnouncementsController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Announcement updated successfully.', 'body' => $announcement], 200);
+        return response()->json(['message' => __('messages.announcement.update'), 'body' => $announcement], 200);
     }
 
     /**
@@ -305,10 +305,10 @@ class AnnouncementsController extends Controller
         $announcement = Announcement::where('id',$id)->with('attachment')->first();
 
         if(!isset($announcement))
-            return response()->json(['message' => 'Announcement not fount!', 'body' => [] ], 400);
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
 
         $announcement->delete();
 
-        return response()->json(['message' => 'Announcement deleted successfully.', 'body' => $announcement], 200);
+        return response()->json(['message' => __('messages.announcement.delete'), 'body' => $announcement], 200);
     }
 }

@@ -533,7 +533,7 @@ class SpatieController extends Controller
             'name' => $request->name,
             'description' => $request->description
         ]);
-        return HelperController::api_response_format(201, $role, 'Role Added Successfully');
+        return HelperController::api_response_format(201, $role, __('messages.role.add'));
     }
     
     /**
@@ -588,7 +588,7 @@ class SpatieController extends Controller
         unset($role->created_at);
         unset($role->updated_at);
 
-        return HelperController::api_response_format(201, $role, 'Role Updated Successfully');
+        return HelperController::api_response_format(201, $role, __('messages.role.update'));
     }
 
     /*
@@ -605,7 +605,7 @@ class SpatieController extends Controller
         $find = Role::find($request->id);
         if ($find) {
             $find->delete();
-            return HelperController::api_response_format(200, $find, 'Role Deleted Successfully');
+            return HelperController::api_response_format(200, $find, __('messages.role.delete'));
         }
         return HelperController::NOTFOUND();
     }
@@ -628,7 +628,7 @@ class SpatieController extends Controller
             $finduser = User::find($user);
             $finduser->assignRole($findrole->name);
         }
-        return HelperController::api_response_format(201, [], 'Role assigned successfully');
+        return HelperController::api_response_format(201, [], __('messages.role.assign'));
     }
 
     /*
@@ -796,7 +796,7 @@ class SpatieController extends Controller
         foreach ($request->permissions as $per) {
             $role->givePermissionTo($per);
         }
-        return HelperController::api_response_format(200, $role,'Role added successfully');
+        return HelperController::api_response_format(200, $role,__('messages.role.add'));
     }
 
     /*
@@ -1051,6 +1051,6 @@ class SpatieController extends Controller
         $filename = uniqid();
         $file = Excel::store(new ExportRoleWithPermissions($request->ids), 'roles'.$filename.'.xls','public');
         $file = url(Storage::url('roles'.$filename.'.xls'));
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

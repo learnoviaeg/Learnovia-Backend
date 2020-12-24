@@ -56,7 +56,7 @@ class QuizzesController extends Controller
 
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
-                return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
+                return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
             
             $lessons  = [$request->lesson];
         }
@@ -72,7 +72,7 @@ class QuizzesController extends Controller
         }
 
         if($count == 'count'){
-            return response()->json(['message' => 'Quizzes count', 'body' => $quiz_lessons->count() ], 200);
+            return response()->json(['message' => __('messages.quiz.count'), 'body' => $quiz_lessons->count() ], 200);
         }
         
         $quiz_lessons = $quiz_lessons->get();
@@ -89,7 +89,7 @@ class QuizzesController extends Controller
             $quizzes[]=$quiz;
         }
 
-        return response()->json(['message' => 'Quizzes List ....', 'body' => $quizzes->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.quiz.list'), 'body' => $quizzes->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
@@ -114,9 +114,9 @@ class QuizzesController extends Controller
         $quiz = quiz::find($id);
 
         if(isset($quiz))
-            return response()->json(['message' => 'quiz objet ..', 'body' => $quiz ], 200);
+            return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
 
-        return response()->json(['message' => 'quiz not fount!', 'body' => [] ], 400);
+        return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
     }
 
     /**

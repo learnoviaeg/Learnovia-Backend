@@ -184,7 +184,7 @@ class QuestionBankController extends Controller
             $cs = [];
             $couresegs = GradeCategoryController::getCourseSegment($request);
             if(count($couresegs) == 0)
-                return HelperController::api_response_format(200, collect($cs)->paginate(HelperController::GetPaginate($request)), 'No questions found' );
+                return HelperController::api_response_format(200, collect($cs)->paginate(HelperController::GetPaginate($request)), __('messages.error.not_found') );
 
             foreach($couresegs as $one){
                 $cc=CourseSegment::find($one);
@@ -301,7 +301,7 @@ class QuestionBankController extends Controller
             'survey' => 'boolean',
         ]);
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
         }
      
         $arr = array();
@@ -309,7 +309,7 @@ class QuestionBankController extends Controller
             $arr = Questions::where('id', $Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
         }
         if (!isset($arr)) {
-            return HelperController::api_response_format(400, null, 'this is not valid parent');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $Questions = collect([]);
         $cat = Questions::firstOrCreate([
@@ -343,7 +343,7 @@ class QuestionBankController extends Controller
         ]);
 
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
         }
 
         $Questions = collect([]);
@@ -353,7 +353,7 @@ class QuestionBankController extends Controller
             $arr = Questions::where('id', $Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
         }
         if (!isset($arr)) {
-            return HelperController::api_response_format(400, null, 'this is not valid parent');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $cat = Questions::Create([
             'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
@@ -384,7 +384,7 @@ class QuestionBankController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.try_again'));
         }
 
         $cat = $this::CreateOrFirstQuestion($Question,$parent);
@@ -424,10 +424,10 @@ class QuestionBankController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.try_again'));
         }
         if ($Question['Is_True'] > count($Question['answers']) - 1) {
-            return HelperController::api_response_format(400, null, 'is True invalid');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
         $ansA = QuestionsAnswer::where('question_id', $id)->pluck('content')->toArray();
@@ -471,10 +471,10 @@ class QuestionBankController extends Controller
             'match_B.*' => 'required|distinct',
         ]);
         if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.try_again'));
         }
         if (count($Question['match_A']) > count($Question['match_B'])) {
-            return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
+            return HelperController::api_response_format(400, null, __('messages.question.questions_answers_count'));
         }
         $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
         $ansA = QuestionsAnswer::where('question_id', $id)->pluck('match_A')->toArray();
@@ -587,7 +587,7 @@ class QuestionBankController extends Controller
             }
         }
         if($type == 0){
-            return HelperController::api_response_format(200, $re, null);
+            return HelperController::api_response_format(200, $re, __('messages.question.add'));
         }
         else{
             return $re->pluck('id');
@@ -609,7 +609,7 @@ class QuestionBankController extends Controller
             $arr = Questions::where('id', $request->parent)->where('question_type_id', 5)->pluck('id')->first();
         }
         if (!isset($arr)) {
-            return HelperController::api_response_format(400, null, 'this is not valid parent');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $question = Questions::find($request->question_id);
         //dd($question);
@@ -787,7 +787,7 @@ class QuestionBankController extends Controller
             'match_B.*' => 'required|distinct'
         ]);
         if (count($request->match_A) > count($request->match_B)) {
-            return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
+            return HelperController::api_response_format(400, null, __('messages.question.questions_answers_count'));
         }
 
         if ($parent==null){
@@ -934,7 +934,7 @@ class QuestionBankController extends Controller
                 break;
 
         }
-        return HelperController::api_response_format(200, $re, 'Question edited successfully');
+        return HelperController::api_response_format(200, $re, __('messages.question.update'));
     }
 
 
@@ -946,7 +946,7 @@ class QuestionBankController extends Controller
 
         $check = Questions::destroy($request->question_id);
 
-        return HelperController::api_response_format(200, [], 'Question deleted Successfully');
+        return HelperController::api_response_format(200, [], __('messages.question.delete'));
     }
 
     public function deleteAnswer(Request $request)
@@ -957,7 +957,7 @@ class QuestionBankController extends Controller
 
         $check = QuestionsAnswer::destroy($request->answer_id);
 
-        return HelperController::api_response_format(200, [], 'Answer deleted Successfully');
+        return HelperController::api_response_format(200, [], __('messages.answer.delete'));
     }
 
     public function addAnswer(Request $request)
@@ -980,7 +980,7 @@ class QuestionBankController extends Controller
             'question_id' => $request->question_id
         ]);
 
-        return HelperController::api_response_format(200, $answer, 'Answer Added Successfully');
+        return HelperController::api_response_format(200, $answer, __('messages.answer.add'));
     }
 
     public function getAllTypes(Request $request){

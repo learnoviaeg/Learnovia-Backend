@@ -43,7 +43,7 @@ class ClassesController extends Controller
 
         $classes = $enrolls->with('classes')->get()->pluck('classes')->unique()->values();
 
-        return response()->json(['message' => 'Classes List', 'body' => $classes->filter()->values()], 200);
+        return response()->json(['message' => __('messages.class.list'), 'body' => $classes->filter()->values()], 200);
     }
 
     /**
