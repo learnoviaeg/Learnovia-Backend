@@ -45,7 +45,7 @@ class CalendarsController extends Controller
         ]);
 
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        $user_announcements = Announcement::pluck('id');
+        $calendar['announcements'] = Announcement::pluck('id');
 
         if(!$request->user()->can('site/show-all-courses'))//student
         {
@@ -53,14 +53,12 @@ class CalendarsController extends Controller
             $user_announcements = userAnnouncement::where('user_id',Auth::id())->pluck('announcement_id');
         }
 
-        $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
-
+        $calendar['lessons'] = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+        
         $timeline = Timeline::with(['class','course','level'])
-                            ->where(function ($query) use ($user_announcements , $lessons) {
-                                $query->whereIn('lesson_id',$lessons)->orWhereIn('item_id',$user_announcements);
+                            ->where(function ($query) use ($calendar) {
+                                $query->whereIn('item_id',$calendar['announcements'])->orWhereIn('lesson_id',$calendar['lessons']);
                             })
-                            // ->whereIn('lesson_id',$lessons)
-                            // ->orWhereIn('item_id',$user_announcements)
                             ->where('visible',1)
                             ->whereDate('start_date', $request->date)
                             ->where(function ($query) {
