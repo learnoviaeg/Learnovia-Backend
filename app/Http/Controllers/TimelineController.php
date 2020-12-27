@@ -70,6 +70,7 @@ class TimelineController extends Controller
                             ->where('visible',1)
                             ->where('start_date','<=',Carbon::now())
                             ->where('due_date','>=',Carbon::now())
+                            ->whereIn('type', ['quiz','assignment'])
                             ->where(function ($query) {
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });
