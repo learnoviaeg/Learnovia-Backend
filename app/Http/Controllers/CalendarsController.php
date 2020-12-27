@@ -41,7 +41,9 @@ class CalendarsController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'item_type' => 'in:quiz,assignment,announcement',
-            'date' => 'required|date',
+            'calendar_year' => 'required|integer',
+            'calendar_month' => 'integer|required_with:calendar_day',
+            'calendar_day' => 'integer',
         ]);
 
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
@@ -60,10 +62,16 @@ class CalendarsController extends Controller
                                 $query->whereIn('item_id',$calendar['announcements'])->orWhereIn('lesson_id',$calendar['lessons']);
                             })
                             ->where('visible',1)
-                            ->whereDate('start_date', $request->date)
+                            ->whereYear('start_date', $request->calendar_year)
                             ->where(function ($query) {
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });
+        
+        if(isset($request->calendar_month))
+            $timeline->whereMonth('start_date', $request->calendar_month);
+
+        if(isset($request->calendar_day))
+            $timeline->whereDay('start_date', $request->calendar_day);
 
         return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->get()], 200);
     }
