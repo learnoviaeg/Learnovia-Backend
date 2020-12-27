@@ -65,7 +65,7 @@ class CalendarsController extends Controller
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });
 
-        return response()->json(['message' => 'user calendar', 'body' => $timeline->get()], 200);
+        return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->get()], 200);
     }
 
     /**

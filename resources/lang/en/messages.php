@@ -28,6 +28,7 @@ return [
         'toggle' => 'Item toggle successfully',
         'link_to_file' => 'Link to the file',
         'data_imported' => 'Data imported successfully',
+        'user_list_items' => 'User list of items',
     ],
     'lesson' => [
         'add' => 'Lesson added successfully',
