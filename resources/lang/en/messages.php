@@ -131,6 +131,7 @@ return [
         'delete' => 'File deleted successfully',
         'list' => 'Files List',
         'file_not_belong' => 'This file does not belong to this lesson',
+        'file_hidden' => 'This file is hidden'
     ],
     'media' => [
         'add' => 'Media uploaded successfully',
