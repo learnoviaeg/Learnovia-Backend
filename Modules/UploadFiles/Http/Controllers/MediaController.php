@@ -4,7 +4,8 @@ namespace Modules\UploadFiles\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
+// use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\MediaLesson;
@@ -511,10 +512,19 @@ class MediaController extends Controller
     }
     public function GetMediaByID(Request $request)
     {
-        $request->validate([
+
+        $rules = [
             'id' => 'required|integer|exists:media,id',
-        ]);
+        ];
+        $customMessages = [
+            'exists' => 'This media is invalid.'
+        ];
+    
+        $this->validate($request, $rules, $customMessages);
         $Media = media::with('MediaLesson')->find($request->id);
+        if( $request->user()->can('site/course/student') && $Media->MediaLesson->visible==0)
+            return HelperController::api_response_format(301,null, __('messages.media.media_hidden'));
+
         return HelperController::api_response_format(200, $Media);
     }
     public function AssignMediaToLesson(Request $request)
