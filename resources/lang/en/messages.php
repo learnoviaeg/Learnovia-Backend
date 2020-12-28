@@ -50,6 +50,7 @@ return [
         'content_or_file' => 'Please, enter content or file',
         'override' => 'Assignment date updated to selected students successfully',
         'cant_update' => 'Sorry, students answered this assignment, cannot be updated',
+        'assignment_hidden' => 'This assignment is hidden '
     ],
     'grade' => [
         'graded' => 'Grade submitted successfully',

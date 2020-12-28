@@ -593,11 +593,15 @@ class AssigmentsController extends Controller
 
     public function GetAssignment(Request $request)
     {
-        $request->validate([
-            'assignment_id' => 'required|exists:assignments,id',
-            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'
-        ]);
 
+        $rules = [
+            'assignment_id' => 'required|exists:assignments,id',
+            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'        ];
+        $customMessages = [
+            'exists' => 'This assignment is invalid.' // assignmet or lesson  but this message for user 
+        ];
+
+        $this->validate($request, $rules, $customMessages);
         $user = Auth::user();
         $lesson=Lesson::find($request->lesson_id);
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
@@ -607,6 +611,8 @@ class AssigmentsController extends Controller
         if(!isset($assigLessonID))
             return HelperController::api_response_format(200, null, __('messages.assignment.assignment_not_belong'));
 
+        if( $request->user()->can('site/course/student') && $assigLessonID->visible==0)
+            return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assigLessonID->id)->first();
         if (count($userassigments) > 0) {
