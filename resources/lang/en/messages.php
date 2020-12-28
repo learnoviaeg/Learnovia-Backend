@@ -140,6 +140,7 @@ return [
         'list' => 'Medias List',
         'media_not_belong' => 'This media does not belong to this lesson',
         'only_url_or_media' => 'Please, either upload media or add a URL',
+        'media_hidden' => 'This media is hidden',
 
         'image' => [
             'add' => 'Image uploaded successfully',
