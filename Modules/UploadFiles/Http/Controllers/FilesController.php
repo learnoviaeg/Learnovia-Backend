@@ -4,7 +4,8 @@ namespace Modules\UploadFiles\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
+// use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
 use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\FileLesson;
@@ -562,9 +563,15 @@ class FilesController extends Controller
     }
     public function GetFileByID(Request $request)
     {
-        $request->validate([
+
+        $rules = [
             'id' => 'required|integer|exists:files,id',
-        ]);
+        ];
+        $customMessages = [
+            'exists' => 'This file is invalid.'
+        ];
+    
+        $this->validate($request, $rules, $customMessages);
         $File = file::with('FileLesson')->find($request->id);
         if( $request->user()->can('site/course/student') && $File->FileLesson->visible==0)
              return HelperController::api_response_format(301,null, __('messages.file.file_hidden'));
