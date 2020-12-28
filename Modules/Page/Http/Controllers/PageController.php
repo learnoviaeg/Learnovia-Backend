@@ -13,7 +13,8 @@ use App\CourseSegment;
 use App\SegmentClass;
 use App\ClassLevel;
 use App\User;
-use Illuminate\Routing\Controller;
+// use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
 use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
 use Illuminate\Support\Carbon;
@@ -240,10 +241,13 @@ class PageController extends Controller
 
     public function get(Request $request)
     {
-        $request->validate([
+        $rules = [
             'id' => 'required|exists:pages,id',
-            'lesson_id' => 'required|exists:lessons,id'
-        ]);
+            'lesson_id' => 'required|exists:lessons,id'        ];
+        $customMessages = [
+            'exists'   => 'This page is invalid.', //attribute  but bage for user
+        ];
+        $this->validate($request, $rules, $customMessages);
         $page = page::whereId($request->id)->first();
         if ($page == null)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
@@ -254,6 +258,8 @@ class PageController extends Controller
             return HelperController::api_response_format(200, null , __('messages.page.page_not_belong'));
         $page->course_id=$course_id;
         $page->page_lesson = PageLesson::where('page_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
+        if( $request->user()->can('site/course/student') && $page->page_lesson->visible==0)
+            return HelperController::api_response_format(301,null, __('messages.page.page_hidden'));
         unset($page->lesson);
         
         return HelperController::api_response_format(200, $page);
