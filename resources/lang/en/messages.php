@@ -124,6 +124,8 @@ return [
         'delete' => 'Page deleted successfully',
         'list' => 'Pages List',
         'page_not_belong' => 'This page does not belong to this lesson',
+        'page_hidden' => 'This page is hidden'
+
     ],
     'file' => [
         'add' => 'File uploaded successfully',
