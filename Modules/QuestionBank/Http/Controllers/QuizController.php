@@ -9,7 +9,8 @@ use App\GradeCategory;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
+// use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
@@ -669,11 +670,13 @@ class QuizController extends Controller
     }
 
     public function getSingleQuiz(Request $request){
-        $request->validate([
+        $rules = [
             'quiz_id' => 'required|integer|exists:quizzes,id',
-            'lesson_id' => 'required|integer|exists:lessons,id',
-        ]);
-
+            'lesson_id' => 'required|integer|exists:lessons,id',     ];
+        $customMessages = [
+            'exists'   => 'This quiz is invalid.', //attribute  but quiz for user
+        ];
+        $this->validate($request, $rules, $customMessages);
        
         $user_answer=[];
         $quiz = Quiz::find($request->quiz_id);
@@ -681,6 +684,9 @@ class QuizController extends Controller
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
         if(!isset($quiz_lesson))
             return HelperController::api_response_format(422,null,__('messages.error.item_deleted'));
+
+        if( $request->user()->can('site/course/student') && $quiz_lesson->visible==0)
+            return HelperController::api_response_format(301,null, __('messages.quiz.quiz_hidden'));
         
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
         /**delete from */

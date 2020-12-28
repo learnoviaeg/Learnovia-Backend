@@ -92,6 +92,7 @@ return [
         'continue_quiz' => 'You can continue your last attempt',
         'students_attempts_list' => 'Students attempts list',
         'quiz_object' => 'Quiz details',
+        'quiz_hidden' => 'This quiz is hidden'
     ],
     'permissions' => [
         'no_roles_assigned' => 'There is no roles assigned to this permission',
