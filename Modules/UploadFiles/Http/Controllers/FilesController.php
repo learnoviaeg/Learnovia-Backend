@@ -566,6 +566,9 @@ class FilesController extends Controller
             'id' => 'required|integer|exists:files,id',
         ]);
         $File = file::with('FileLesson')->find($request->id);
+        if( !$request->user()->can('site/show-all-courses') && $File->FileLesson->visible==0)
+             return HelperController::api_response_format(301,null, __('messages.file.file_hidden'));
+
         return HelperController::api_response_format(200, $File);
     }
     public function AssignFileToLesson(Request $request)
