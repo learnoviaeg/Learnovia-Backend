@@ -33,6 +33,7 @@ use Auth;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
+use App\Http\Controllers\AuthController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\attachment;
@@ -254,12 +255,21 @@ class UserController extends Controller
                 if (isset($request->password)){
                     $user->real_password=$request->password;
                     $user->password =   bcrypt($request->password);
+                    $user->token=null;
+                    $user->save();
+                    $user->token()->revoke();
+                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
                 }
             }
 
             if (Auth::user()->can('user/update-username')) {
-                if (isset($request->username))
+                if (isset($request->username)){
                     $user->username=$request->username;
+                    $user->token=null;
+                    $user->save();
+                    $user->token()->revoke();
+                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+                }
             }
 
         if (isset($request->picture))
