@@ -4,7 +4,7 @@ namespace Modules\Bigbluebutton\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
+// use Illuminate\Routing\Controller;
 use BigBlueButton\BigBlueButton;
 use App\Component;
 use App\User;
@@ -32,7 +32,7 @@ use App\Http\Controllers\GradeCategoryController;
 use Illuminate\Support\Str;
 use App\Classes;
 use App\Paginate;
-
+use App\Http\Controllers\Controller;
 
 class BigbluebuttonController extends Controller
 {
@@ -335,7 +335,7 @@ class BigbluebuttonController extends Controller
      */
     public function get(Request $request,$count = null)
     {
-        $request->validate([
+        $rules = [
             'id' => 'exists:bigbluebutton_models,id',
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id',
@@ -348,7 +348,13 @@ class BigbluebuttonController extends Controller
             'due_date' => 'date|required_with:start_date',
             'sort_in' => 'in:asc,desc',
             'pagination' => 'boolean'
-        ]);
+        ];
+
+        $customMessages = [
+            'id.exists' => 'This virtual classroom is invalid.'
+        ];
+
+        $this->validate($request, $rules, $customMessages);
             
         $classes = [];
         if(isset($request->class)){

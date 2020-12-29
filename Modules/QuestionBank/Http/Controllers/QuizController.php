@@ -674,7 +674,7 @@ class QuizController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',     ];
         $customMessages = [
-            'exists'   => 'This quiz is invalid.', //attribute  but quiz for user
+            'quiz_id.exists'   => 'This quiz is invalid.', 
         ];
         $this->validate($request, $rules, $customMessages);
        
