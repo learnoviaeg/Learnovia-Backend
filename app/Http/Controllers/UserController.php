@@ -88,7 +88,8 @@ class UserController extends Controller
              'username' => 'required|array', 'type' => 'nullable|array',
             'level' => 'nullable|array', 'real_password' => 'nullable|array',
             'suspend.*' => 'boolean',
-            'suspend'=>'array'
+            'suspend'=>'array',
+            'username.*' => 'alpha_dash|unique:users,username'
         ]);
 
         // return User::max('id');
@@ -227,7 +228,7 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
             'password' => 'string|min:6|max:191',
-            'username' => 'unique:users,username,'.$request->id,
+            'username' => 'alpha_dash|unique:users,username,'.$request->id,
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
             'suspend' => 'boolean',
