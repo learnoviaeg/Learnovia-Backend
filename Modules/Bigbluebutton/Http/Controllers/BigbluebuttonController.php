@@ -403,6 +403,10 @@ class BigbluebuttonController extends Controller
         
         $meetings = $meeting->get();
         
+        if($request->has('id') && $request->user()->can('site/course/student') && count($meetings) == 0){
+            return HelperController::api_response_format(301,null, __('messages.virtual.virtual_hidden'));
+        }
+        
         foreach($meetings as $m)
             {
                 $m['join'] = $m->started == 1 ? true: false;
