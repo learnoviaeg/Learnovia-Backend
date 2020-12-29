@@ -351,7 +351,7 @@ class BigbluebuttonController extends Controller
         ];
 
         $customMessages = [
-            'exists' => 'This virtual classroom is invalid.'
+            'id.exists' => 'This virtual classroom is invalid.'
         ];
 
         $this->validate($request, $rules, $customMessages);
