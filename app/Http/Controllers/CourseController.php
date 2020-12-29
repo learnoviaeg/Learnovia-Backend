@@ -1756,4 +1756,26 @@ class CourseController extends Controller
             $attachment=attachment::where('id',$request->id)->first();
         return HelperController::api_response_format(201,$attachment, 'file');
     }
+
+    public function AddQuestionCategorytoCourses(Request $request){
+        $existing_courses = QuestionsCategory::pluck('course_id');
+        
+        $courses = Course::whereNotIn('id',$existing_courses->filter()->values())->get();
+        
+        foreach($courses as $course){
+
+            $course_segment_id = null;
+            if(count($course->courseSegments) > 0)
+                $course_segment_id = $course->courseSegments[0]->id;
+    
+            //Creating defult question category
+            $quest_cat = QuestionsCategory::firstOrCreate([
+                'name' => 'Category one',
+                'course_id' => $course->id,
+                'course_segment_id' => $course_segment_id
+            ]);
+        }
+
+        return HelperController::api_response_format(201,null,'done');
+    }
 }
