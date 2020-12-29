@@ -45,7 +45,7 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use App\Exports\CoursesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-
+use Modules\QuestionBank\Entities\QuestionsCategory;
 
 
 class CourseController extends Controller
@@ -110,6 +110,7 @@ class CourseController extends Controller
             $course->mandatory = $request->mandatory;
             $course->save();
         }
+
         foreach ($request->chains as $chain){
             // dd($chain);
         if(count($chain['year'])>0){
@@ -165,6 +166,17 @@ class CourseController extends Controller
             }
         }
     }
+        $course_segment_id = null;
+        if(count($course->courseSegments) > 0)
+            $course_segment_id = $course->courseSegments[0]->id;
+
+        //Creating defult question category
+        $quest_cat = QuestionsCategory::firstOrCreate([
+            'name' => 'Category one',
+            'course_id' => $course->id,
+            'course_segment_id' => $course_segment_id
+        ]);
+
         $course->attachment;
         $courses =  Course::with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->get();
         foreach($courses as $le){
