@@ -192,6 +192,7 @@ return [
         'cannot_join' => 'Sorry, you cannot join this virtual classroom',
         'join' => 'Joining virtual classroom...',
         'no_one_entered' => 'No one entered this virtual classroom',
+        'virtual_hidden' => "This virtual classroom is hidden",
 
         'record' => [
             'list' => 'Virtual classrooms records list',
