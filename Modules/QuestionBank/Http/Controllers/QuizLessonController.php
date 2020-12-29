@@ -21,7 +21,7 @@ use App\Enroll;
 use App\LessonComponent;
 use App\User;
 use Carbon\Carbon;
-
+use App\LastAction;
 use Auth;
 
 class QuizLessonController extends Controller
@@ -59,6 +59,8 @@ class QuizLessonController extends Controller
             //for notification
             $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
             $course = $lesson->courseSegment->course_id;
+            LastAction::lastActionInCourse($course);
+
             $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
             if($request->grade_category_id[$key] != null)
@@ -173,19 +175,19 @@ class QuizLessonController extends Controller
             $start= $request->opening_time;
 
         $quiz = quiz::find($request->quiz_id);
-        $lesson = Lesson::find($request->lesson_id);
+        $lesson_drag = Lesson::find($request->lesson_id);
 
-        //for notification
-        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
-        $course = $lesson->courseSegment->course_id;
-        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $course_drag = $lesson_drag->courseSegment->course_id;
+    
         
-        if($quiz->course_id != $lesson->courseSegment->course_id){
+        if($quiz->course_id != $lesson_drag->courseSegment->course_id){
             return HelperController::api_response_format(500, null, __('messages.quiz.quiz_not_belong'));
         }
+        LastAction::lastActionInCourse($course_drag);
+
         if($request->grade_category_id != null)
         {
-            $gradeCats= $lesson->courseSegment->GradeCategory;
+            $gradeCats= $lesson_drag->courseSegment->GradeCategory;
             $flag= false;
              foreach ($gradeCats as $grade){
                 if($grade->id==$request->grade_category_id){
@@ -197,7 +199,7 @@ class QuizLessonController extends Controller
                 return HelperController::api_response_format(400, null,__('messages.error.data_invalid'));
             }
         }
-
+        $quiz=Quiz::find($request->quiz_id);
         $quizLesson = QuizLesson::where('quiz_id',$request->quiz_id)
                         ->where('lesson_id',$request->lesson_id)->first();
 
@@ -219,8 +221,9 @@ class QuizLessonController extends Controller
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id;
             }
-        $quizLesson->update([
-            'lesson_id' => $request->updated_lesson_id
+        $lesson = Lesson::find($request->updated_lesson_id);
+        $quiz->update([
+            'course_id' => $lesson->courseSegment->course_id
         ]);
         $quizLesson->update([
             'quiz_id' => $request->quiz_id,
@@ -228,7 +231,12 @@ class QuizLessonController extends Controller
             'start_date' => $start,
             'publish_date' => $start,
         ]);
-        $quiz=Quiz::find($request->quiz_id);
+        //for notification
+        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
+        $course = $lesson->courseSegment->course_id;
+        LastAction::lastActionInCourse($course);
+
+        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         if(carbon::parse($start)->isPast())
             $publish_date=Carbon::now();
         $requ = ([
@@ -253,6 +261,8 @@ class QuizLessonController extends Controller
             'course_id' => 'required|integer|exists:courses,id',
             'class_id' => 'required|integer|exists:classes,id',
         ]);
+        LastAction::lastActionInCourse($request->course_id);
+    
         $couse_segment_id= CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id)->id;
         $course_segment = CourseSegment::find($couse_segment_id);
         return HelperController::api_response_format(200, $course_segment->GradeCategory,__('messages.grade.grade_category_list'));

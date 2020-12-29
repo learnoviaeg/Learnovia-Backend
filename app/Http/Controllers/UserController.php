@@ -42,6 +42,7 @@ use App\Exports\ParentChildExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
+use App\LastAction;
 class UserController extends Controller
 {
     /**
@@ -411,6 +412,7 @@ class UserController extends Controller
             $flag=true;
         }if ($request->filled('course')){            
             $enrolled_users=$enrolled_users->where('course',$request->course);
+
             $flag=true;
         }if ($request->filled('year')){            
             $enrolled_users=$enrolled_users->where('year',$request->year);

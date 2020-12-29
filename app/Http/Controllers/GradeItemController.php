@@ -10,6 +10,7 @@ use App\YearLevel;
 use App\GradingMethod;
 use stdClass;
 use  App\Events\UserGradeEvent;
+use App\LastAction;
 
 class GradeItemController extends Controller
 {
@@ -46,6 +47,8 @@ class GradeItemController extends Controller
         ]);
 
         $GradeCat = GradeCategory::find($request->grade_category);
+        LastAction::lastActionInCourse($GradeCat->CourseSegment->course_id);
+
         if($request->type == 0){
             $request->validate([
                 'scale_id' => 'required|integer|exists:scales,id',
@@ -253,6 +256,9 @@ class GradeItemController extends Controller
         ]);
 
         $grade_cat = GradeCategory::find($request->grade_category);
+        LastAction::lastActionInCourse($grade_cat->CourseSegment->course_id);
+
+        
         $segclass = CourseSegment::find($grade_cat->course_segment_id)->segmentClasses;
         $classlevel = $segclass[0]->classLevel;
         $year_level = $classlevel[0]->yearLevels;
@@ -380,6 +386,8 @@ class GradeItemController extends Controller
         ]);
 
         $grade = GradeItems::find($request->id);
+        $grade_cat = GradeCategory::find($grade->grade_category);
+        LastAction::lastActionInCourse($grade_cat->CourseSegment->course_id);
         $grade->delete();
 
         return HelperController::api_response_format(201, null, 'Grade Deleted Successfully');

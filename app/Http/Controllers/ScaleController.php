@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\scale;
 use stdClass;
 use App\GradeItems;
+use App\LastAction;
+
 class ScaleController extends Controller
 {
      /**
@@ -140,6 +142,7 @@ class ScaleController extends Controller
         ]);
 
         $course_segment=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
+        LastAction::lastActionInCourse($request->course);
         if(isset($request->id))
         {
             $scale_id=scale::find($request->id);

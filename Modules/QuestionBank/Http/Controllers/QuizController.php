@@ -21,7 +21,9 @@ use Modules\QuestionBank\Entities\userQuiz;
 use Spatie\Permission\Models\Permission;
 use App\GradeItems;
 use Validator;
+use App\Lesson;
 use App\Classes;
+use App\LastAction;
 
 use Auth;
 use Carbon\Carbon;
@@ -62,6 +64,8 @@ class QuizController extends Controller
             'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
         ]);
           $course=  Course::where('id',$request->course_id)->first();
+          LastAction::lastActionInCourse($request->course_id);
+
         if(isset($request->Question)){
             foreach ($request->Question as $question) {
                 switch ($question['Question_Type_id']) {
@@ -254,6 +258,7 @@ class QuizController extends Controller
         ]);
 
         $quiz = quiz::find($request->quiz_id);
+        LastAction::lastActionInCourse($request->course_id);
 
         if($request->type == 0){
             $newQuestionsIDs = $this->storeWithNewQuestions($request);
@@ -328,6 +333,8 @@ class QuizController extends Controller
         $quiz_shuffle = Quiz::where('id', $request->quiz_id)->pluck('shuffle')->first();
         $qq = Quiz::where('id', $request->quiz_id)->first();
         $quizles=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+        $Lesson = Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($Lesson->courseSegment->courses[0]->id);
         if(!isset($quizles))
             return HelperController::api_response_format(200, __('messages.quiz.quiz_not_belong'));
 
