@@ -43,6 +43,9 @@ use App\Exports\ParentChildExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
+use Laravel\Passport\TokenRepository;
+use Laravel\Passport\RefreshTokenRepository;
+
 class UserController extends Controller
 {
     /**
@@ -255,7 +258,10 @@ class UserController extends Controller
                 if (isset($request->password)){
                     $user->real_password=$request->password;
                     $user->password =   bcrypt($request->password);
-                    // $user->token()->revoke();
+
+                    $tokenRepository = app(TokenRepository::class);
+                    // Revoke an access token...
+                    $tokenRepository->revokeAccessToken($user->id);
                     $user->token=null;
                     $user->save();
                     Parents::where('parent_id',$user->id)->update(['current'=> 0]);
@@ -265,7 +271,10 @@ class UserController extends Controller
             if (Auth::user()->can('user/update-username')) {
                 if (isset($request->username)){
                     $user->username=$request->username;
-                    // $user->token()->revoke();
+                    
+                    $tokenRepository = app(TokenRepository::class);
+                    // Revoke an access token...
+                    $tokenRepository->revokeAccessToken($user->id);
                     $user->token=null;
                     $user->save();
                     Parents::where('parent_id',$user->id)->update(['current'=> 0]);
