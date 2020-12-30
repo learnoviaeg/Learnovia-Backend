@@ -43,8 +43,6 @@ use App\Exports\ParentChildExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
-use Laravel\Passport\TokenRepository;
-use Laravel\Passport\RefreshTokenRepository;
 
 class UserController extends Controller
 {
@@ -259,16 +257,9 @@ class UserController extends Controller
                     $user->real_password=$request->password;
                     $user->password =   bcrypt($request->password);
 
-                    // $tokenRepository = app(TokenRepository::class);
-                    // // Revoke an access token...
-                    // $tokenRepository->revokeAccessToken($user->id);
-                    // $user->token=null;
-                    // $user->save();
                     $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token){
+                    foreach($tokens as $token)
                         $token->revoke();
-                    }
-                
                     unset($user->tokens);
                     Parents::where('parent_id',$user->id)->update(['current'=> 0]);
                 }
@@ -277,18 +268,10 @@ class UserController extends Controller
             if (Auth::user()->can('user/update-username')) {
                 if (isset($request->username)){
                     $user->username=$request->username;
-                    
-                    // $tokenRepository = app(TokenRepository::class);
-                    // // Revoke an access token...
-                    // $tokenRepository->revokeAccessToken($user->id);
-                    // $user->token=null;
-                    // $user->save();
 
                     $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token){
+                    foreach($tokens as $token)
                         $token->revoke();
-                    }
-                
                     unset($user->tokens);
                     Parents::where('parent_id',$user->id)->update(['current'=> 0]);
                 }
