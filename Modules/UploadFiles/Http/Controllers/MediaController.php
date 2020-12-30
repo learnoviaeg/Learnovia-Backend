@@ -116,7 +116,7 @@ class MediaController extends Controller
         $request->validate([
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'required_if:type,==,0|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr',
+            'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'url' => 'required_if:type,==,1|array',
@@ -260,7 +260,7 @@ class MediaController extends Controller
             'id' => 'required|integer|exists:media,id',
             'name' => 'nullable|string|max:190',
             'description' => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr',
+            'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie',
             'url' => 'nullable|active_url',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
