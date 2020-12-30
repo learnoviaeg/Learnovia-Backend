@@ -256,7 +256,7 @@ class UserController extends Controller
                 if (isset($request->password)){
                     $user->real_password=$request->password;
                     $user->password =   bcrypt($request->password);
-                    $user->token()->revoke();
+                    // $user->token()->revoke();
                     $user->token=null;
                     $user->save();
                     Parents::where('parent_id',$user->id)->update(['current'=> 0]);
@@ -266,7 +266,7 @@ class UserController extends Controller
             if (Auth::user()->can('user/update-username')) {
                 if (isset($request->username)){
                     $user->username=$request->username;
-                    $user->token()->revoke();
+                    // $user->token()->revoke();
                     $user->token=null;
                     $user->save();
                     Parents::where('parent_id',$user->id)->update(['current'=> 0]);
