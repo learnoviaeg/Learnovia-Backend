@@ -369,8 +369,8 @@ class BigbluebuttonController extends Controller
         if(isset($request->course)){
             $request['courses']= [$request->course];
         }
-        if(isset($request->course) && count($request->course)==1){
-        LastAction::lastActionInCourse($request->course[0]);
+        if($request->filled('course')){
+            LastAction::lastActionInCourse($request->course);
         }
 
         $sort_in = 'desc';
