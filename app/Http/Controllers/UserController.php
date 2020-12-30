@@ -65,7 +65,7 @@ class UserController extends Controller
             'lastname' => 'required|array',
             'lastname.*' => 'required|string|min:3|max:50',
             'password' => 'required|array',
-            'password.*' => 'required|string|min:6|max:191',
+            'password.*' => 'required|alpha_dash|string|min:6|max:191',
             // 'role' => 'required|array',
             // 'role.*' => 'required|exists:roles,id',
             'role' => 'required|integer|exists:roles,id', /// in all system
@@ -227,7 +227,7 @@ class UserController extends Controller
             'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
-            'password' => 'string|min:6|max:191',
+            'password' => 'alpha_dash|string|min:6|max:191',
             'username' => 'alpha_dash|unique:users,username,'.$request->id,
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
