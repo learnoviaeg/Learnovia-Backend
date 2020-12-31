@@ -15,6 +15,7 @@ use Modules\Assigments\Entities\assignment;
 use Modules\Assigments\Entities\UserAssigment;
 use Modules\Assigments\Entities\assignmentOverride;
 use App\Paginate;
+use App\LastAction;
 use Carbon\Carbon;
 
 class AssignmentController extends Controller
@@ -119,7 +120,8 @@ class AssignmentController extends Controller
         if(!isset($assignment))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
 
-        
+        $lesson_drag = Lesson::find($lesson_id);
+        LastAction::lastActionInCourse($lesson_drag->courseSegment->courses[0]->id);
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
         if (count($userassigments) > 0) {
             $assignment['allow_edit'] = false;

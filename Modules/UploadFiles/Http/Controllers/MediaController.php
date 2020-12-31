@@ -15,6 +15,7 @@ use App\Classes;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
+use  App\LastAction;
 use App\Http\Controllers\HelperController;
 use App\LessonComponent;
 use Auth;
@@ -194,6 +195,7 @@ class MediaController extends Controller
 
                 $mediaLesson->save();
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
+                LastAction::lastActionInCourse($courseID);
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
                 $usersIDs = Enroll::where('course_segment', $tempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
                 User::notify([
@@ -324,6 +326,7 @@ class MediaController extends Controller
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'media')->get();
         $lesson = Lesson::find($request->updated_lesson_id);
         $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($courseID);
         $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         
@@ -387,6 +390,9 @@ class MediaController extends Controller
         $media = media::whereId($request->mediaId)->first();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
         $media->delete();
+        $lesson = Lesson::find($request->lesson_id);
+        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($courseID);
 
         if($media_type != null)
         {
@@ -432,7 +438,9 @@ class MediaController extends Controller
             if (!isset($mediaLesson)) {
                 return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
             }
-
+            $lesson = Lesson::find($request->LessonID);
+            $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+            LastAction::lastActionInCourse($courseID);
             $mediaLesson->visible = ($mediaLesson->visible == 1) ? 0 : 1;
             $mediaLesson->save();
 
