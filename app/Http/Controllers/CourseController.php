@@ -64,7 +64,6 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            // 'short_name' => 'required|unique:courses',
             'category' => 'exists:categories,id',
             'chains.*.year' => 'array',
             'chains.*.year.*' => 'required|exists:academic_years,id',
@@ -84,13 +83,10 @@ class CourseController extends Controller
             'start_date' => 'required_with:year|date',
             'end_date' =>'required_with:year|date|after:start_date'
         ]);
-        // return $request->chains['year'];
-        // Validator::make($request, ['short_name' => ['required',
-        //     Course::where('short_name',$request->short_name)->where(function ($query) use ($request) {
-        //             $query->whereNotIn('id',Enroll::whereIn('year',$request->chain['year'])->pluck('course'));
-        //         }),
-        //     ],
-        // ]);
+        $short_name=Course::whereNotIn('id',Enroll::whereIn('year',$request->chains[0]['year'])->pluck('course'))->pluck('short_name');
+        if(in_array($request->short_name,$short_name->toArray()))
+            return HelperController::api_response_format(201, null, 'short_name must be unique');
+
         $no_of_lessons = 4;
         $course = Course::create([
             'name' => $request->name,
@@ -148,10 +144,6 @@ class CourseController extends Controller
                                     'letter' => 1,
                                     'letter_id' => 1
                                 ]);
-                                // Log::info($request->user()->username.' created course '.$course.' in year '.$year.
-                                //         ' in level '.$level.' in segment '.$segment.' in type '.$type.' in class '.$class.
-                                //         ' start_at '.$request->start_date.' and end_at '.$request->end_date.' created_at '.Carbon::now()->format('Y-m-d H:i:s'));
-
                                 $gradeCat = GradeCategory::firstOrCreate([
                                     'name' => 'Course Total',
                                     'course_segment_id' => $courseSegment->id,
