@@ -13,6 +13,7 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use App\LastAction;
+use App\Http\Controllers\Controller;
 
 class H5PLessonController extends Controller
 {
@@ -38,7 +39,9 @@ class H5PLessonController extends Controller
         
         $student_permissions=['h5p/lesson/get-all'];
         $student = \Spatie\Permission\Models\Role::find(3);
+        $parent = \Spatie\Permission\Models\Role::find(7);
         $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+        $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
 
 
         $role = \Spatie\Permission\Models\Role::find(1);
@@ -125,6 +128,27 @@ class H5PLessonController extends Controller
     }
 
     public function get (Request $request){
+
+        $rules = [
+            'content_id' => 'exists:h5p_contents,id|required_with:lesson_id',
+            'lesson_id' => 'integer|exists:h5p_lessons,lesson_id|required_with:content_id',
+        ];
+
+        $customMessages = [
+            'content_id.exists' => 'This interactive is invalid.'
+        ];
+
+        $this->validate($request, $rules, $customMessages);
+
+        if($request->filled('content_id') && $request->filled('lesson_id')){
+            $h5p_lesson =  h5pLesson::where('lesson_id',$request->lesson_id)->where('content_id',$request->content_id)->first();
+
+            if($request->user()->can('site/course/student')  && $h5p_lesson->visible == 0){
+                return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
+            }
+
+            return HelperController::api_response_format(200, $h5p_lesson, __('messages.interactive.list'));
+        }
 
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5p_lesson =  h5pLesson::get();

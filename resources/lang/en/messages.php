@@ -210,6 +210,7 @@ return [
         'list' => 'Interactive list',
         'count' => 'Interactive count',
         'interactive_not_belong' => 'This interactive content does not belong to this lesson',
+        'hidden' => "This Interactive content is hidden",
     ],
     'auth' => [
         'invalid_username_password' => 'Invalid username or password',
