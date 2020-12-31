@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
 use Carbon\Carbon;
 use App\Course;
-
+use App\LastAction;
 class CoursesController extends Controller
 {
     protected $chain;
@@ -117,11 +117,12 @@ class CoursesController extends Controller
     {
         $course = Course::with('attachment')->find($id);
 
-        if(isset($course))
+        if(isset($course)){
+            LastAction::lastActionInCourse($id);
             return response()->json(['message' => __('messages.course.object'), 'body' => $course], 200);
-
-        return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
-    }
+        }
+    return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
+}
 
     /**
      * Update the specified resource in storage.

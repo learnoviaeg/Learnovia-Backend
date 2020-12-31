@@ -27,7 +27,7 @@ use App\Exports\StudentEnrolls;
 use App\Exports\classeswithstudents;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-
+use App\LastAction;
 class EnrollUserToCourseController extends Controller
 {
     /**
@@ -289,7 +289,7 @@ class EnrollUserToCourseController extends Controller
             'course_id' => 'required|exists:courses,id',
             'search' => 'nullable'
         ]);
-
+        LastAction::lastActionInCourse($request->course_id);
         if ($request->class_id == null) {
             $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
 
