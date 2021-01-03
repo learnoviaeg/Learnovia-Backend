@@ -85,7 +85,7 @@ class CourseController extends Controller
         ]);
         $short_name=Course::whereNotIn('id',Enroll::whereIn('year',$request->chains[0]['year'])->pluck('course'))->pluck('short_name');
         if(in_array($request->short_name,$short_name->toArray()))
-            return HelperController::api_response_format(201, null, 'short_name must be unique');
+            return HelperController::api_response_format(400, null, 'short_name must be unique');
 
         $no_of_lessons = 4;
         $course = Course::create([
