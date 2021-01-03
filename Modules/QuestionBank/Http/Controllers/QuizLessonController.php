@@ -61,7 +61,7 @@ class QuizLessonController extends Controller
             $course = $lesson->courseSegment->course_id;
             $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-            if($request->filled('grade_category_id') && $request->grade_category_id[$key] != null)
+            if(isset($request->grade_category_id) && count($request->grade_category_id) > 0 && $request->grade_category_id[$key] != null)
             {
                 $gradeCats= $lesson->courseSegment->GradeCategory;
                 $flag= false;
