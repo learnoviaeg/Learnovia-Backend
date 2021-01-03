@@ -63,7 +63,7 @@ class QuizLessonController extends Controller
 
             $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-            if($request->grade_category_id[$key] != null)
+            if($request->filled('grade_category_id') && $request->grade_category_id[$key] != null)
             {
                 $gradeCats= $lesson->courseSegment->GradeCategory;
                 $flag= false;
@@ -102,7 +102,7 @@ class QuizLessonController extends Controller
                 'max_attemp' => $request->max_attemp,
                 'grading_method_id' => $request->grading_method_id,
                 'grade' => $request->grade,
-                'grade_category_id' => $request->grade_category_id[$key],
+                'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id[$key] : null,
                 'publish_date' => $request->opening_time,
                 'index' => $Next_index,
                 'visible' => isset($request->visible)?$request->visible:1
