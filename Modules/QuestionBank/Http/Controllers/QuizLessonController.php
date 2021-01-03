@@ -61,18 +61,21 @@ class QuizLessonController extends Controller
             $course = $lesson->courseSegment->course_id;
             $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-            if(isset($request->grade_category_id) && count($request->grade_category_id) > 0 && $request->grade_category_id[$key] != null)
-            {
-                $gradeCats= $lesson->courseSegment->GradeCategory;
-                $flag= false;
-                 foreach ($gradeCats as $grade){
-                    if($grade->id==$request->grade_category_id[$key]){
-                        $flag =true;
+            
+            if(isset($request->grade_category_id) && count($request->grade_category_id) > 0){
+                if($request->grade_category_id[$key] != null)
+                {
+                    $gradeCats= $lesson->courseSegment->GradeCategory;
+                    $flag= false;
+                     foreach ($gradeCats as $grade){
+                        if($grade->id==$request->grade_category_id[$key]){
+                            $flag =true;
+                        }
                     }
-                }
-
-                if($flag==false){
-                    return HelperController::api_response_format(400, $request->grade_category_id[$key],__('messages.error.data_invalid'));
+    
+                    if($flag==false){
+                        return HelperController::api_response_format(400, $request->grade_category_id[$key],__('messages.error.data_invalid'));
+                    }
                 }
             }
 
