@@ -8,6 +8,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
+use Log;
 
 class bigbluebuttonEndMeeting implements ShouldQueue
 {
@@ -31,8 +32,10 @@ class bigbluebuttonEndMeeting implements ShouldQueue
      */
     public function handle()
     {
+        Log::debug('job of bbb -> meeting id is '.$this->bigbb['meeting_id']);
         $meetings = BigbluebuttonModel::where('meeting_id',$this->bigbb['meeting_id'])->where('status','future')->where('started',0)->update([
             'status' => 'past'
         ]);
+        
     }
 }
