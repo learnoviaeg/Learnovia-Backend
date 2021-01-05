@@ -83,9 +83,22 @@ class CourseController extends Controller
             'start_date' => 'required_with:year|date',
             'end_date' =>'required_with:year|date|after:start_date'
         ]);
-        $short_name=Course::whereNotIn('id',Enroll::whereIn('year',$request->chains[0]['year'])->pluck('course'))->pluck('short_name');
-        if(in_array($request->short_name,$short_name->toArray()))
-            return HelperController::api_response_format(400, null, 'short_name must be unique');
+        // $short_name=Course::whereNotIn('id',Enroll::whereIn('year',$request->chains[0]['year'])->pluck('course'))->pluck('short_name');
+        $courses=Course::fromQuery('select * from courses where id in (
+                                    select course_id from course_segments where segment_class_id in (
+                                        select id from segment_classes where class_level_id in (
+                                            select id from class_levels where year_level_id in (
+                                                select id from year_levels where academic_year_type_id in (
+                                                    select id from academic_year_types where academic_year_id =' . $request->chains[0]['year'][0].'
+                                                )
+                                            )
+                                        )
+                                    )
+                                )'
+                            );
+        foreach($courses->toArray() as $course)
+            if($request->short_name == $course['short_name'])
+                return HelperController::api_response_format(400, null, 'short_name must be unique');
 
         $no_of_lessons = 4;
         $course = Course::create([
