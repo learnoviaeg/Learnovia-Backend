@@ -52,14 +52,14 @@ class CalendarsController extends Controller
         if(!$request->user()->can('site/show-all-courses'))//student
         {
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            $user_announcements = userAnnouncement::where('user_id',Auth::id())->pluck('announcement_id');
+            $calendar['announcements'] = userAnnouncement::where('user_id',Auth::id())->pluck('announcement_id');
         }
 
         $calendar['lessons'] = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
         
         $timeline = Timeline::with(['class','course','level'])
                             ->where(function ($query) use ($calendar) {
-                                $query->whereIn('item_id',$calendar['announcements'])->orWhereIn('lesson_id',$calendar['lessons']);
+                                $query->whereIn('item_id',$calendar['announcements'])->where('type','announcement')->orWhereIn('lesson_id',$calendar['lessons']);
                             })
                             ->where('visible',1)
                             ->whereYear('start_date', $request->calendar_year)
