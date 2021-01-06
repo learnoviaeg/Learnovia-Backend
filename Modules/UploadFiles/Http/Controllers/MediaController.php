@@ -258,8 +258,6 @@ class MediaController extends Controller
      */
     public function update(Request $request)
     {
-        $type = $request->Imported_file->getClientMimeType();
-        return $type;
         $request->validate([
             'id' => 'required|integer|exists:media,id',
             'name' => 'nullable|string|max:190',
