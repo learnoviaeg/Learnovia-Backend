@@ -46,13 +46,33 @@ class CalendarsController extends Controller
             'calendar_day' => 'integer',
         ]);
 
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        $calendar['announcements'] = Announcement::pluck('id');
+        $calendar['announcements'] = [];
+        $user_course_segments = $enrolls = $this->chain->getCourseSegmentByChain($request);
 
-        if(!$request->user()->can('site/show-all-courses'))//student
+        if(!$request->user()->can('site/show-all-courses'))//any other user enrolled
         {
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            $calendar['announcements'] = userAnnouncement::where('user_id',Auth::id())->pluck('announcement_id');
+            $user_course_segments = $enrolls = $user_course_segments->where('user_id',Auth::id());
+        }
+
+        $enrolls=$enrolls->get();
+
+        if(count($enrolls) > 0){
+
+            //enrolled user announcements
+            if(!$request->user()->can('site/show-all-courses'))
+            {
+                $calendar['announcements'] = userAnnouncement::where('user_id',Auth::id())->with(['announcements.chainAnnouncement'=> function ($query) use ($enrolls) {
+                    $query->whereIn('year',$enrolls->pluck('year'))->whereIn('segment',$enrolls->pluck('segment'));
+                }])->pluck('announcement_id');
+            }
+
+            if($request->user()->can('site/show-all-courses'))//admin
+            {
+                $calendar['announcements'] = Announcement::with(['chainAnnouncement' => function ($query) use ($enrolls) {
+                    $query->whereIn('year',$enrolls->pluck('year'))->whereIn('segment',$enrolls->pluck('segment'));
+                }])->pluck('id');
+            }
+
         }
 
         $calendar['lessons'] = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
