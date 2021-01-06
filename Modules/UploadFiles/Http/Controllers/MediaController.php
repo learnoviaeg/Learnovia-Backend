@@ -258,6 +258,8 @@ class MediaController extends Controller
      */
     public function update(Request $request)
     {
+        $type = $request->Imported_file->getClientMimeType();
+        return $type;
         $request->validate([
             'id' => 'required|integer|exists:media,id',
             'name' => 'nullable|string|max:190',
@@ -271,6 +273,7 @@ class MediaController extends Controller
             'type' => 'in:0,1',
             'visible' => 'in:0,1',
         ]);
+
 
         $media = media::find($request->id);
         $mediaLesson = MediaLesson::whereIn('lesson_id' , $request->lesson_id)->where('media_id' , $request->id)->first();
