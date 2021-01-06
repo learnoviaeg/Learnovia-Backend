@@ -83,6 +83,7 @@ class CourseController extends Controller
             'start_date' => 'required_with:year|date',
             'end_date' =>'required_with:year|date|after:start_date'
         ]);
+        
         // $short_name=Course::whereNotIn('id',Enroll::whereIn('year',$request->chains[0]['year'])->pluck('course'))->pluck('short_name');
         $courses=Course::fromQuery('select * from courses where id in (
                                     select course_id from course_segments where segment_class_id in (
