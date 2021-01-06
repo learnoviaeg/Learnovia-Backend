@@ -302,7 +302,14 @@ class BigbluebuttonController extends Controller
         $meeting_start = isset($bigbb->actutal_start_date) ? $bigbb->actutal_start_date : $bigbb->start_date;
         $check=Carbon::parse($meeting_start)->addMinutes($bigbb->duration);
 
-        if(($check < Carbon::now()) || (!$request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0))
+        $exist_meeting = 1;
+        $getMeetingInfoParams = new GetMeetingInfoParameters($bigbb->meeting_id, $bigbb->moderator_password);
+        $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+        if ($response->getReturnCode() == 'FAILED') {
+            $exist_meeting = 0;
+        }
+        
+        if(($check < Carbon::now() && $exist_meeting == 0) || (!$request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0))
             return HelperController::api_response_format(200,null ,__('messages.virtual.cannot_join'));
 
         if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0){
