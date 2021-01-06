@@ -29,7 +29,7 @@ class CoursesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$status=null)
     {
         //validate the request
         $request->validate([
@@ -62,18 +62,35 @@ class CoursesController extends Controller
         }
 
         $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);
-
+     
         $user_courses=collect();
         foreach($enrolls as $course){
             $levels=[];
             foreach($course as $level){
-
-                if($level[0]->courseSegment->end_date > Carbon::now() && $level[0]->courseSegment->start_date <= Carbon::now()){
-
-                    $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
-                    $temp_course = $level[0]->courseSegment->courses[0];
-
+                if($status =="ongoing"){ // new route for  onoing courses in ative year api/course/ongoing
+                    if($level[0]->courseSegment->end_date > Carbon::now() && $level[0]->courseSegment->start_date <= Carbon::now()){
+                        $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
+                        $temp_course = $level[0]->courseSegment->courses[0];
+                    }
                 }
+                if($status =="future"){// new route for  future courses in ative year api/course/future
+                    if($level[0]->courseSegment->end_date > Carbon::now() && $level[0]->courseSegment->start_date > Carbon::now()){ 
+                        $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
+                        $temp_course = $level[0]->courseSegment->courses[0];     
+                      }
+                 }
+                 if($status =="past"){ // new route for  past courses in ative year api/course/past
+                    if($level[0]->courseSegment->end_date < Carbon::now() && $level[0]->courseSegment->start_date < Carbon::now()){ 
+                        $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
+                        $temp_course = $level[0]->courseSegment->courses[0];     
+                      }
+                 }
+                 if($status ==null){
+                    $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
+                    $temp_course = $level[0]->courseSegment->courses[0];     
+
+                 }
+
             }
 
             if(!isset($temp_course))
