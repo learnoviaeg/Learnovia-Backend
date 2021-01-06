@@ -184,7 +184,7 @@ class QuizController extends Controller
                 'feedback' => isset($request->feedback) ? $request->feedback : 1,
             ]);
 
-            $quiz->Question()->attach($questionsIDs);
+            $quiz->Question()->attach(array_values(array_unique($questionsIDs->toArray())));
             $quiz->Question;
             foreach ($quiz->Question as $question) {
                 unset($question->pivot);
