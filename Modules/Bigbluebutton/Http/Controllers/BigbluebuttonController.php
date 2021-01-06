@@ -308,8 +308,8 @@ class BigbluebuttonController extends Controller
         if ($response->getReturnCode() == 'FAILED') {
             $exist_meeting = 0;
         }
-
-        if(($exist_meeting == 0) || (!$request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0))
+        
+        if(($check < Carbon::now() && $exist_meeting == 0) || (!$request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0))
             return HelperController::api_response_format(200,null ,__('messages.virtual.cannot_join'));
 
         if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0){
