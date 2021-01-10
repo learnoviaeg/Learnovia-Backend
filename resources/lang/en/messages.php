@@ -66,6 +66,7 @@ return [
         'add' => 'Question added successfully',
         'update' => 'Question updated successfully',
         'delete' => 'Question deleted successfully',
+        'count' => 'Questions count',
         'answer_delete' => 'Question answer deleted successfully',
         'list' => 'Questions List',
         'question_type_error' => 'This Question is not Essay or true and false',
