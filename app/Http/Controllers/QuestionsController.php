@@ -82,6 +82,7 @@ class QuestionsController extends Controller
             $questions->whereIn('question_type_id', $request->question_type);
         }
         
+        //using api quizzes/null/count 
         if($question == 'count'){
             
             $counts = $questions->select(DB::raw
