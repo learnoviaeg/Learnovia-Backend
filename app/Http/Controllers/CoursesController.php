@@ -8,6 +8,8 @@ use App\Repositories\ChainRepositoryInterface;
 use Carbon\Carbon;
 use App\Course;
 use App\LastAction;
+use App\User;
+use App\Enroll;
 class CoursesController extends Controller
 {
     protected $chain;
@@ -60,13 +62,17 @@ class CoursesController extends Controller
         if($request->has('role_id')){
             $enrolls->where('role_id',$request->role_id);
         }
-
         $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);
-     
+
+        
         $user_courses=collect();
         foreach($enrolls as $course){
             $levels=[];
+            $teacher = [];
             foreach($course as $level){
+                $teacher[] = User::whereIn('id',Enroll::where('role_id', '4')->where('course',  $level[0]->course)->where('level',$level[0]->level)
+                                                ->pluck('user_id')
+                            )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
                 if($status =="ongoing"){ // new route for  onoing courses in ative year api/course/ongoing
                     if($level[0]->courseSegment->end_date > Carbon::now() && $level[0]->courseSegment->start_date <= Carbon::now()){
                         $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
@@ -87,8 +93,7 @@ class CoursesController extends Controller
                  }
                  if($status ==null){
                     $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
-                    $temp_course = $level[0]->courseSegment->courses[0];     
-
+                    $temp_course = $level[0]->courseSegment->courses[0];
                  }
 
             }
@@ -103,7 +108,8 @@ class CoursesController extends Controller
                 'image' => isset($temp_course->image) ? $temp_course->attachment->path : null,
                 'description' => $temp_course->description ,
                 'mandatory' => $temp_course->mandatory == 1 ? true : false ,
-                'level' => $levels, 
+                'level' => $levels,
+                'teachers' => collect($teacher)->collapse()->unique()->values(),
             ]);
 
             $temp_course = null;
