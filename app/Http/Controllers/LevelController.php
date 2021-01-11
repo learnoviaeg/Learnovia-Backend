@@ -43,7 +43,7 @@ class LevelController extends Controller
 
         $classes = $enrolls->with('levels')->get()->pluck('levels')->unique()->values();
 
-        return response()->json(['message' => 'Levels List', 'body' => $classes->filter()->values()], 200);
+        return response()->json(['message' => __('messages.level.list'), 'body' => $classes->filter()->values()], 200);
     }
 
     /**

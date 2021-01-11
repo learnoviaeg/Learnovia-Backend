@@ -7,6 +7,7 @@ use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
+use App\Paginate;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\CourseSegment;
 
@@ -42,10 +43,23 @@ class QuestionsController extends Controller
         ]);
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
+            $quiz_shuffle = Quiz::where('id', $quiz_id)->pluck('shuffle')->first();
+            // $quiz = Quiz::find( $quiz_id);
             $questions = quiz_questions::where('quiz_id',$quiz_id)
                     ->with(['Question.question_answer','Question.question_category','Question.question_type'])->get()
                     ->pluck('Question.*')->collapse();
-                return response()->json(['message' => 'questions List ....', 'body' => $questions], 200);
+            if($quiz_shuffle == 'Questions'|| $quiz_shuffle == 'Questions and Answers'){
+                $questions =$questions->shuffle();
+            }
+            if($quiz_shuffle == 'Answers'|| $quiz_shuffle == 'Questions and Answers'){
+                foreach($questions as $question){
+                $answers = $question->question_answer->shuffle();
+                unset($question->question_answer);
+                $question['question_answer'] =$answers;
+                }
+            }
+            
+            return response()->json(['message' => __('messages.question.list'), 'body' => $questions->paginate(Paginate::GetPaginate($request))], 200);
         }
 
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
@@ -55,7 +69,7 @@ class QuestionsController extends Controller
 
         $course_ides = $user_course_segments->with('courseSegment')->get()->pluck('courseSegment.course_id')->unique()->values();
 
-        $questions = Questions::whereIn('course_id',$course_ides)->where('survey',0)->with(['question_answer','question_category','question_type']);
+        $questions = Questions::whereIn('course_id',$course_ides)->where('survey',0)->with(['course','question_answer','question_category','question_type']);
 
         if($request->filled('search'))
         {
@@ -68,8 +82,7 @@ class QuestionsController extends Controller
             $questions->whereIn('question_type_id', $request->question_type);
         }
 
-        return response()->json(['message' => 'questions List ....', 'body' => $questions->get()], 200);
-
+        return response()->json(['message' => __('messages.question.list'), 'body' => $questions->get()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

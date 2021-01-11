@@ -24,13 +24,22 @@ class BigBlueButtonAttendance implements FromCollection, WithHeadings
     {
         $bbb_logs=collect();
         foreach($this->bbb_log as $bbb){
+            
+            $first_login = 'After '.$bbb['first_login']. ' Minute/s';
+            if(!isset($bbb['first_login']))
+                $first_login = '-';
+            
+            $last_logout = 'Before '.$bbb['last_logout']. ' Minute/s';
+            if(!isset($bbb['last_logout']))
+                $last_logout = '-';
+
             $bbb_logs->push([
                 'user name' => $bbb['username'],
                 'full name' => $bbb['fullname'],
-                'attend duration' => $bbb['attend_duration'],
+                'attend duration' => $bbb['attend_duration'] .' Minute/s',
                 'duration percentage' => $bbb['duration_percentage'],
-                'first login' => $bbb['first_login'] == null? '-' : 'After '.$bbb['first_login'],
-                'last logout' => $bbb['last_logout'] == null ? '-' : 'Before '.$bbb['last_logout'],
+                'first login' => $first_login,
+                'last logout' => $last_logout,
                 'enter date' => count($bbb['log_times']) > 0 ? $bbb['log_times'][0]['entered_date'] : '-',
                 'left date' => count($bbb['log_times']) > 0 ? $bbb['log_times'][0]['left_date'] : '-',
                 'Present' => $bbb['status'] == 'Present'? '✔' : '-',

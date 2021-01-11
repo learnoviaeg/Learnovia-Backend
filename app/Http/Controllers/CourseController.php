@@ -45,7 +45,7 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use App\Exports\CoursesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-
+use Modules\QuestionBank\Entities\QuestionsCategory;
 
 
 class CourseController extends Controller
@@ -64,7 +64,6 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'short_name' => 'required|unique:courses',
             'category' => 'exists:categories,id',
             'chains.*.year' => 'array',
             'chains.*.year.*' => 'required|exists:academic_years,id',
@@ -84,6 +83,23 @@ class CourseController extends Controller
             'start_date' => 'required_with:year|date',
             'end_date' =>'required_with:year|date|after:start_date'
         ]);
+        // $short_name=Course::whereNotIn('id',Enroll::whereIn('year',$request->chains[0]['year'])->pluck('course'))->pluck('short_name');
+        $courses=Course::fromQuery('select * from courses where id in (
+                                    select course_id from course_segments where segment_class_id in (
+                                        select id from segment_classes where class_level_id in (
+                                            select id from class_levels where year_level_id in (
+                                                select id from year_levels where academic_year_type_id in (
+                                                    select id from academic_year_types where academic_year_id =' . $request->chains[0]['year'][0].'
+                                                )
+                                            )
+                                        )
+                                    )
+                                )'
+                            );
+        foreach($courses->toArray() as $course)
+            if($request->short_name == $course['short_name'])
+                return HelperController::api_response_format(400, null, 'short_name must be unique');
+
         $no_of_lessons = 4;
         $course = Course::create([
             'name' => $request->name,
@@ -110,6 +126,7 @@ class CourseController extends Controller
             $course->mandatory = $request->mandatory;
             $course->save();
         }
+
         foreach ($request->chains as $chain){
             // dd($chain);
         if(count($chain['year'])>0){
@@ -140,10 +157,6 @@ class CourseController extends Controller
                                     'letter' => 1,
                                     'letter_id' => 1
                                 ]);
-                                // Log::info($request->user()->username.' created course '.$course.' in year '.$year.
-                                //         ' in level '.$level.' in segment '.$segment.' in type '.$type.' in class '.$class.
-                                //         ' start_at '.$request->start_date.' and end_at '.$request->end_date.' created_at '.Carbon::now()->format('Y-m-d H:i:s'));
-
                                 $gradeCat = GradeCategory::firstOrCreate([
                                     'name' => 'Course Total',
                                     'course_segment_id' => $courseSegment->id,
@@ -165,6 +178,17 @@ class CourseController extends Controller
             }
         }
     }
+        $course_segment_id = null;
+        if(count($course->courseSegments) > 0)
+            $course_segment_id = $course->courseSegments[0]->id;
+
+        //Creating defult question category
+        $quest_cat = QuestionsCategory::firstOrCreate([
+            'name' => 'Category one',
+            'course_id' => $course->id,
+            'course_segment_id' => $course_segment_id
+        ]);
+
         $course->attachment;
         $courses =  Course::with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->get();
         foreach($courses as $le){
@@ -227,7 +251,7 @@ class CourseController extends Controller
         $course->save();
         $req = new Request();
 
-          return HelperController::api_response_format(200, $this->get($req,2)->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
+          return HelperController::api_response_format(200, $this->get($req,2)->paginate(HelperController::GetPaginate($request)), __('messages.course.update'));
           // return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
     }
 
@@ -272,12 +296,12 @@ class CourseController extends Controller
         {
             $year = AcademicYear::Get_current();
             if(!$year)
-                return HelperController::api_response_format(200, null, ' No Active year here');
+                return HelperController::api_response_format(200, null, __('messages.error.no_active_year'));
         }
 
         $couresegs = GradeCategoryController::getCourseSegmentWithArray($request);
         if(count($couresegs) == 0)
-            return HelperController::api_response_format(200, null, 'No Courses' );
+            return HelperController::api_response_format(200, null, __('messages.error.no_available_data') );
 
         foreach($couresegs as $one){
             $cc=CourseSegment::find($one);
@@ -330,7 +354,7 @@ class CourseController extends Controller
         $course = Course::find($request->id);
         $enrolls = Enroll::where('course_segment',CourseSegment::where('course_id',$request->id)->pluck('id'))->get();
         if(count($enrolls)>0){
-            return HelperController::api_response_format(400, [], 'This course assigned to users, cannot be deleted');
+            return HelperController::api_response_format(400, [], __('messages.error.cannot_delete'));
 
         }
         CourseSegment::where('course_id',$request->id)->delete();
@@ -363,7 +387,7 @@ class CourseController extends Controller
         $couuures=array();
         $active_year = AcademicYear::where('current',1)->get();
         if(!isset($request->year) && !count($active_year)>0)
-            return HelperController::api_response_format(200, null, 'There is no active year,please send year');
+            return HelperController::api_response_format(200, null, __('messages.error.no_active_year'));
             
         $CS = GradeCategoryController::getCourseSegment($request);
 
@@ -466,7 +490,7 @@ class CourseController extends Controller
         if (isset($all))
             return HelperController::api_response_format(200, (new Collection($all))->paginate(HelperController::GetPaginate($request)));
 
-        return HelperController::api_response_format(200, null, 'there is no courses');
+        return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
     }
 
     /**
@@ -489,7 +513,7 @@ class CourseController extends Controller
         $couuures=array();
                 $active_year = AcademicYear::where('current',1)->get();
         if(!isset($request->year) && !count($active_year)>0)
-            return HelperController::api_response_format(200, null, 'There is no active year,please send year');
+            return HelperController::api_response_format(200, null, __('messages.error.no_active_year'));
         $CS = GradeCategoryController::getCourseSegment($request);
 
         if($request->user()->can('site/show-all-courses'))
@@ -589,7 +613,7 @@ class CourseController extends Controller
         if (isset($all))
             return HelperController::api_response_format(200, (new Collection($all))->paginate(HelperController::GetPaginate($request)));
 
-        return HelperController::api_response_format(200, null, 'there is no courses');
+        return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
     }
 
     /**
@@ -612,7 +636,7 @@ class CourseController extends Controller
         $couuures=array();
         $active_year = AcademicYear::where('current',1)->get();
         if(!isset($request->year) && !count($active_year)>0)
-            return HelperController::api_response_format(200, null, 'There is no active year,please send year');
+            return HelperController::api_response_format(200, null, __('messages.error.no_active_year'));
         $CS = GradeCategoryController::getCourseSegment($request);
 
         if($request->user()->can('site/show-all-courses'))
@@ -708,7 +732,7 @@ class CourseController extends Controller
         if (isset($all))
             return HelperController::api_response_format(200, (new Collection($all))->paginate(HelperController::GetPaginate($request)));
 
-        return HelperController::api_response_format(200, null, 'there is no courses');
+        return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
     }
 
     /**
@@ -1016,7 +1040,7 @@ class CourseController extends Controller
         $test = 0;
         $course_segment = GradeCategoryController::getCourseSegment($request);
         if (!isset($course_segment))
-            return HelperController::api_response_format(404,null,'There is no courses');
+            return HelperController::api_response_format(404,null,__('messages.error.no_available_data'));
         foreach ($course_segment as $cs) {
             $cour_seg=CourseSegment::find($cs);
             if (count($cour_seg->optionalCourses) > 0){
@@ -1027,7 +1051,7 @@ class CourseController extends Controller
         if ($test > 0)
             return HelperController::api_response_format(200, $optional);
 
-        return HelperController::api_response_format(200,null, 'there is no course optional here');
+        return HelperController::api_response_format(200,null, __('messages.error.no_available_data'));
     }
 
     /**
@@ -1066,7 +1090,7 @@ class CourseController extends Controller
                     else {
                         $year = AcademicYear::Get_current();
                         if ($year == null)
-                            return HelperController::api_response_format(404, 'There is no current segment or year');
+                            return HelperController::api_response_format(404, __('messages.error.no_active_year'));
                         else
                             $year = $year->id;
                     }
@@ -1075,7 +1099,7 @@ class CourseController extends Controller
                     else {
                         $segment = Segment::Get_current($request->type[$count])->id;
                         if ($segment == null)
-                            return HelperController::api_response_format(404, 'There is no current segment or year');
+                            return HelperController::api_response_format(404, __('messages.error.no_active_segment'));
                         else
                             $segment = $segment->id;
                     }
@@ -1108,9 +1132,9 @@ class CourseController extends Controller
                 }
             }
         } else {
-            return HelperController::api_response_format(201, 'Please Enter Equal number of array');
+            return HelperController::api_response_format(201, __('messages.error.data_invalid'));
         }
-        return HelperController::api_response_format(201, null ,'Course Assigned Successfully');
+        return HelperController::api_response_format(201, null ,__('messages.course.assign'));
     }
 
     /**
@@ -1194,9 +1218,9 @@ class CourseController extends Controller
                 'letter_id' => $request->letter_id,
             ]);
 
-            return HelperController::api_response_format(201, $course, 'Toggled Success');
+            return HelperController::api_response_format(201, $course, __('messages.success.toggle'));
         } else
-            return HelperController::api_response_format(201, 'There is no Active Course Segment');
+            return HelperController::api_response_format(201, __('messages.error.no_active_segment'));
     }
 
     public function EnrolledCourses(Request $request)
@@ -1215,7 +1239,7 @@ class CourseController extends Controller
         if (isset($all))
             return HelperController::api_response_format(200, $all);
 
-        return HelperController::api_response_format(200, null, 'there is no courses');
+        return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
     }
 
     public function Count_Components(Request $request)
@@ -1230,7 +1254,7 @@ class CourseController extends Controller
             $course_segments = CourseSegment::where('course_id', $request->course)->where('is_active', '1')->pluck('id');
         }
         if (!isset($course_segments)) {
-            return HelperController::api_response_format(400, null, 'doesn\'t have course segment ');
+            return HelperController::api_response_format(400, null, __('messages.error.no_active_segment'));
         }
         $lessons_id = Lesson::whereIn('course_segment_id', $course_segments)->pluck('id');
         $components =  LessonComponent::whereIn('lesson_id', $lessons_id)
@@ -1644,7 +1668,7 @@ class CourseController extends Controller
             return HelperController::api_response_format(200, $validator->errors());
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
         if($courseSegment == null)
-            return HelperController::api_response_format(200, null, 'This Course have no activated to this class');
+            return HelperController::api_response_format(200, null, __('messages.error.no_active_segment'));
         return HelperController::api_response_format(200, $courseSegment->lessons);
     }
     public function get_class_from_course(Request $request){
@@ -1681,7 +1705,7 @@ class CourseController extends Controller
                 }
             }
         }
-        return HelperController::api_response_format(200,$classs,'classes are.....');
+        return HelperController::api_response_format(200,$classs,__('messages.class.list'));
     }
 
     public function get_courses_with_classes(Request $request){
@@ -1716,11 +1740,11 @@ class CourseController extends Controller
                     $final->push($a);
                 }
             }
-            return HelperController::api_response_format(200,$final->unique()->values(),'Here is all courses Linked to provided Classes');
+            return HelperController::api_response_format(200,$final->unique()->values(),__('messages.course.list'));
         }
 
         $courses=Course::get();
-        return HelperController::api_response_format(200,$courses,'Here is all courses');
+        return HelperController::api_response_format(200,$courses,__('messages.course.list'));
     }
 
     public function export(Request $request)
@@ -1729,7 +1753,7 @@ class CourseController extends Controller
         $filename = uniqid();
         $file = Excel::store(new CoursesExport($courses), 'Courses'.$filename.'.xls','public');
         $file = url(Storage::url('Courses'.$filename.'.xls'));
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
     public function Upload(Request $request)
@@ -1743,5 +1767,27 @@ class CourseController extends Controller
         if(isset($request->id))
             $attachment=attachment::where('id',$request->id)->first();
         return HelperController::api_response_format(201,$attachment, 'file');
+    }
+
+    public function AddQuestionCategorytoCourses(Request $request){
+        $existing_courses = QuestionsCategory::pluck('course_id');
+        
+        $courses = Course::whereNotIn('id',$existing_courses->filter()->values())->get();
+        
+        foreach($courses as $course){
+
+            $course_segment_id = null;
+            if(count($course->courseSegments) > 0)
+                $course_segment_id = $course->courseSegments[0]->id;
+    
+            //Creating defult question category
+            $quest_cat = QuestionsCategory::firstOrCreate([
+                'name' => 'Category one',
+                'course_id' => $course->id,
+                'course_segment_id' => $course_segment_id
+            ]);
+        }
+
+        return HelperController::api_response_format(201,null,'done');
     }
 }

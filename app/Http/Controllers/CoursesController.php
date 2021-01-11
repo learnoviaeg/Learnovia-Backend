@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
 use Carbon\Carbon;
 use App\Course;
-
+use App\LastAction;
 class CoursesController extends Controller
 {
     protected $chain;
@@ -33,8 +33,18 @@ class CoursesController extends Controller
     {
         //validate the request
         $request->validate([
-            'class' => 'nullable|integer|exists:classes,id',
-            'paginate' => 'integer'
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'paginate' => 'integer',
+            'role_id' => 'integer|exists:roles,id'
         ]);
 
         $paginate = 12;
@@ -42,9 +52,13 @@ class CoursesController extends Controller
             $paginate = $request->paginate;
         }
 
-        $enrolls = $this->chain->getCourseSegmentByChain($request);
+        $enrolls = $this->chain->getCourseSegmentByManyChain($request);
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
             $enrolls->where('user_id',Auth::id());
+        }
+
+        if($request->has('role_id')){
+            $enrolls->where('role_id',$request->role_id);
         }
 
         $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);
@@ -78,7 +92,7 @@ class CoursesController extends Controller
             $temp_course = null;
         }
 
-        return response()->json(['message' => 'User courses list', 'body' => $user_courses->paginate($paginate)], 200);
+        return response()->json(['message' => __('messages.course.list'), 'body' => $user_courses->paginate($paginate)], 200);
 
     }
 
@@ -103,11 +117,12 @@ class CoursesController extends Controller
     {
         $course = Course::with('attachment')->find($id);
 
-        if(isset($course))
-            return response()->json(['message' => 'course objet', 'body' => $course], 200);
-
-        return response()->json(['message' => 'Course not fount!', 'body' => [] ], 400);
-    }
+        if(isset($course)){
+            LastAction::lastActionInCourse($id);
+            return response()->json(['message' => __('messages.course.object'), 'body' => $course], 200);
+        }
+    return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
+}
 
     /**
      * Update the specified resource in storage.

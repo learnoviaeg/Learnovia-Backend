@@ -151,11 +151,11 @@ class segment_class_Controller extends Controller
             }
             
             if($request->returnmsg == 'delete')
-                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),'Segment deleted successfully');
+                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.delete'));
             if($request->returnmsg == 'add')
-                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),'Segment added successfully');
+                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.add'));
             if($request->returnmsg == 'update')
-                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),'Segment updated successfully');
+                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.update'));
             else
                 return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)));
 
@@ -236,7 +236,7 @@ class segment_class_Controller extends Controller
         $type = AcademicType::find($req->type);
         $current_segment_created = Segment::where('academic_type_id',$req->type)->count();
         if($current_segment_created >= $type->segment_no){
-            return HelperController::api_response_format(200, null,"This type invalid ,It has enough number of segments");
+            return HelperController::api_response_format(200, null,__('messages.segment.type_invalid'));
         }
         $segment = Segment::firstOrCreate([
             'name' => $req->name,
@@ -258,7 +258,7 @@ class segment_class_Controller extends Controller
             }
         }
         if ($segment) {
-            return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), 'segment insertion sucess');
+            return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), __('messages.segment.add'));
         }
         return HelperController::NOTFOUND();
     }
@@ -279,7 +279,7 @@ class segment_class_Controller extends Controller
 
         $course_segments = CourseSegment::whereIn('segment_class_id',SegmentClass::where('segment_id',$req->id)->pluck('id'))->get();
         if (count($course_segments) > 0) 
-             return HelperController::api_response_format(404, [] , 'This Segment assigned to course/s, cannot be deleted.');
+             return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
         
         Segment::whereId($req->id)->first()->delete();
         SegmentClass::where('segment_id',$req->id)->first()->delete();
@@ -341,7 +341,7 @@ class segment_class_Controller extends Controller
                 {
                     $segment = Segment::Get_current($request->type[$count]);
                     if(!isset($segment))
-                        return HelperController::api_response_format(201, 'there is no current segment');
+                        return HelperController::api_response_format(201, __('messages.error.no_active_segment'));
                     else
                     $segment =$segment->id;
                 }
@@ -351,10 +351,10 @@ class segment_class_Controller extends Controller
         }
         else
         {
-            return HelperController::api_response_format(201, 'Please Enter Equal number of array');
+            return HelperController::api_response_format(201, __('messages.error.data_invalid'));
         }
 
-        return HelperController::api_response_format(201, 'Segment Assigned Successfully');
+        return HelperController::api_response_format(201, __('messages.segment.add'));
     }
      /**
      *
@@ -405,10 +405,10 @@ class segment_class_Controller extends Controller
 
             Segment::where('id', '!=', $request->id)->where('academic_type_id', $request->type_id)
                 ->update(['current' => 0]);
-            return HelperController::api_response_format(200, [], ' this Segment is  set to be current ');
+            return HelperController::api_response_format(200, [], __('messages.segment.activate'));
         }
         else{
-            return HelperController::api_response_format(200, [], ' this Segment invalid');
+            return HelperController::api_response_format(200, [], __('messages.error.not_found'));
 
         }
     }
@@ -448,7 +448,7 @@ class segment_class_Controller extends Controller
             }
             // return $year_type;   
             if(!isset($year_type))
-                return HelperController::api_response_format(200,null, 'No active year available, please enter types you want.');
+                return HelperController::api_response_format(200,null, __('messages.error.no_active_year'));
                 
             $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('id');
             // return
@@ -461,9 +461,9 @@ class segment_class_Controller extends Controller
             if(isset($segments))
                 $segments = segment::whereIn('id',$segments)->get();
             if(count($segments) == 0)
-                return HelperController::api_response_format(201,null, 'You haven\'t segments');
+                return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
 
-            return HelperController::api_response_format(200,$segments, 'There are your segments');
+            return HelperController::api_response_format(200,$segments, __('messages.segment.list'));
         }
 
         foreach($user->enroll as $enrolls){
@@ -482,9 +482,9 @@ class segment_class_Controller extends Controller
             }
         } 
         if(isset($segmentt) && count($segmentt) > 0)
-            return HelperController::api_response_format(201,$segmentt, 'Here are your segments');
+            return HelperController::api_response_format(201,$segmentt, __('messages.segment.list'));
         
-        return HelperController::api_response_format(201,null, 'You are not enrolled in any segment');
+        return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
     }
     public function export(Request $request)
     {
@@ -492,7 +492,7 @@ class segment_class_Controller extends Controller
         $filename = uniqid();
         $file = Excel::store(new SegmentsExport($segmentsIDs), 'Segment'.$filename.'.xls','public');
         $file = url(Storage::url('Segment'.$filename.'.xls'));
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
         
     }
 }

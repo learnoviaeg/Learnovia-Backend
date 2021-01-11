@@ -12,6 +12,7 @@ use App\ClassLevel;
 use App\GradeCategory;
 use App\GradeItems;
 use App\Classes;
+use App\Http\Controllers\Controller;
 use App\UserGrade;
 use Spatie\Permission\Models\Permission;
 use URL;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
+// use Illuminate\Routing\Controller;
 use App\Http\Controllers\HelperController;
 use Carbon\Carbon;
 use Modules\Assigments\Entities\assignment;
@@ -36,6 +37,7 @@ use App\Timeline;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
+use App\LastAction;
 
 
 class AssigmentsController extends Controller
@@ -216,7 +218,7 @@ class AssigmentsController extends Controller
             $assignment->content = $request->content;
         $assignment->name = $request->name;
         $assignment->save();
-        return HelperController::api_response_format(200, $body = $assignment, $message = 'Assignment added successfully');
+        return HelperController::api_response_format(200, $body = $assignment, $message = __('messages.assignment.add'));
     }
 
     /*
@@ -235,12 +237,12 @@ class AssigmentsController extends Controller
         $assigmentLessons = AssignmentLesson::where('assignment_id',$request->id)->pluck('id');
         $CheckIfAnswered = UserAssigment::whereIn('assignment_lesson_id', $assigmentLessons)->where('submit_date', '!=', null)->get();
         if (count($CheckIfAnswered) > 0)
-            return HelperController::api_response_format(400, 'Cannot update,Assigment was submitted before!');
+            return HelperController::api_response_format(400, null, __('messages.assignment.cant_update'));
 
         if ($request->hasFile('file')) {
 
             $request->validate([
-                'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif',
+                'file' => 'file|distinct|mimes:pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,xlsx,xls,csv,txt',
             ]);
             // if (isset($request->file_description)) {
                 $description = (isset($request->file_description))? $request->file_description :null;
@@ -254,7 +256,7 @@ class AssigmentsController extends Controller
             $assigment->name = $request->name;
         $assigment->save();
 
-        return HelperController::api_response_format(200, $body = $assigment, $message = 'Assignment edited successfully');
+        return HelperController::api_response_format(200, $body = $assigment, $message = __('messages.assignment.update'));
     }
     
     public function updateAssignmentLesson(Request $request)
@@ -270,58 +272,69 @@ class AssigmentsController extends Controller
             'visible' => 'boolean',
             'publish_date' => 'date |date_format:Y-m-d H:i:s|before:closing_date',
             'grade_category' => 'exists:grade_categories,id',
+            'updated_lesson_id' =>'nullable|exists:lessons,id'
         ]);
-            $AssignmentLesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
-            if (!isset($AssignmentLesson)) {
-                return HelperController::api_response_format(400, $message = 'Assignment lesson not found');
+        $AssignmentLesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
+        if (!isset($AssignmentLesson)) {
+            return HelperController::api_response_format(400,[], $message = __('messages.error.not_found'));
+        }
+        if ($request->filled('is_graded'))
+            $AssignmentLesson->is_graded = $request->is_graded;
+        if ($request->filled('mark'))
+            $AssignmentLesson->mark = $request->mark;
+        if ($request->filled('grade_category'))
+            $AssignmentLesson->grade_category = $request->grade_category;
+        if ($request->filled('visible'))
+            $AssignmentLesson->visible = $request->visible;
+        if ($request->filled('allow_attachment'))
+            $AssignmentLesson->allow_attachment = $request->allow_attachment;
+        if ($request->filled('opening_date'))
+            $AssignmentLesson->start_date = $request->opening_date;
+        if ($request->filled('closing_date'))
+            $AssignmentLesson->due_date = $request->closing_date;
+        if ($request->filled('publish_date'))
+            $AssignmentLesson->publish_date = $request->publish_date;
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        if (!$request->filled('updated_lesson_id')) {
+            $request->updated_lesson_id= $request->lesson_id;
             }
-            if ($request->filled('is_graded'))
-                $AssignmentLesson->is_graded = $request->is_graded;
-            if ($request->filled('mark'))
-                $AssignmentLesson->mark = $request->mark;
-            if ($request->filled('grade_category'))
-                $AssignmentLesson->grade_category = $request->grade_category;
-            if ($request->filled('visible'))
-                $AssignmentLesson->visible = $request->visible;
-            if ($request->filled('allow_attachment'))
-                $AssignmentLesson->allow_attachment = $request->allow_attachment;
-            if ($request->filled('opening_date'))
-                $AssignmentLesson->start_date = $request->opening_date;
-            if ($request->filled('closing_date'))
-                $AssignmentLesson->due_date = $request->closing_date;
-            if ($request->filled('publish_date'))
-                $AssignmentLesson->publish_date = $request->publish_date;
-            $AssignmentLesson->save();
+        $AssignmentLesson->update([
+            'lesson_id' => $request->updated_lesson_id
+        ]);
+        $AssignmentLesson->save();
 
-            $usersIDs = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
-            $lessonId = AssignmentLesson::where('assignment_id', $request->assignment_id)->pluck('lesson_id')->first();
-            $courseSegment = Lesson::where('id', $request->lesson_id)->pluck('course_segment_id')->first();
-            $courseID = CourseSegment::where('id', $courseSegment)->pluck('course_id')->first();
-            $segmentClass = CourseSegment::where('id', $courseSegment)->pluck('segment_class_id')->first();
-            $ClassLevel = SegmentClass::where('id', $segmentClass)->pluck('class_level_id')->first();
-            $classId = ClassLevel::where('id', $ClassLevel)->pluck('class_id')->first();
-            $assignment=Assignment::find($request->assignment_id);
+        $usersIDs = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
+        $lessonId = AssignmentLesson::where('assignment_id', $request->assignment_id)->pluck('lesson_id')->first();
+        $courseSegment = Lesson::where('id', $request->updated_lesson_id)->pluck('course_segment_id')->first();
+        $courseID = CourseSegment::where('id', $courseSegment)->pluck('course_id')->first();
+        $segmentClass = CourseSegment::where('id', $courseSegment)->pluck('segment_class_id')->first();
+        $ClassLevel = SegmentClass::where('id', $segmentClass)->pluck('class_level_id')->first();
+        $classId = ClassLevel::where('id', $ClassLevel)->pluck('class_id')->first();
+        $assignment=Assignment::find($request->assignment_id);
+        LastAction::lastActionInCourse($courseID);
 
-            $publish_date=$AssignmentLesson->publish_date;
-            if(carbon::parse($publish_date)->isPast())
-                $publish_date=Carbon::now();
+
+        $publish_date=$AssignmentLesson->publish_date;
+        if(carbon::parse($publish_date)->isPast())
+            $publish_date=Carbon::now();
                 
-            user::notify([
-                'id' => $request->assignment_id,
-                'message' => $assignment->name .' is updated',
-                'from' => Auth::user()->id,
-                'users' => $usersIDs,
-                'course_id' => $courseID,
-                'class_id' => $classId,
-                'lesson_id' => $lessonId,
-                'type' => 'assignment',
-                'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
-                'publish_date' => $publish_date
-            ]);
+        user::notify([
+            'id' => $request->assignment_id,
+            'message' => $assignment->name .' assignment is updated',
+            'from' => Auth::user()->id,
+            'users' => $usersIDs,
+            'course_id' => $courseID,
+            'class_id' => $classId,
+            'lesson_id' => $lessonId,
+            'type' => 'assignment',
+            'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
+            'publish_date' => Carbon::parse($publish_date)
+        ]);
             // $all[] = Lesson::find($lesson_id)->module('Assigments', 'assignment')->get();
         $all = AssignmentLesson::all();
 
-        return HelperController::api_response_format(200, $all, $message = 'Assignment edited successfully');
+        return HelperController::api_response_format(200, $all, $message = __('messages.assignment.update'));
     }
 
     /*
@@ -329,9 +342,6 @@ class AssigmentsController extends Controller
     */
     public function assignAsstoUsers($request)
     {
-        // $roles = Permission::where('name', 'assignment/submit')->first();
-        // $roles_id = $roles->roles->pluck('id');
-        // $usersIDs = Enroll::where('course_segment', $request['course_segment'])->whereIn('role_id', $roles_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         $usersIDs = Enroll::where('course_segment', $request['course_segment'])->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
@@ -345,9 +355,10 @@ class AssigmentsController extends Controller
         $classId = CourseSegment::find($request['course_segment'])->segmentClasses[0]->classLevel[0]->class_id;
         $lesson_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('lesson_id')->first();
         $assignment_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('assignment_id')->first();
+        LastAction::lastActionInCourse($courseID);
         user::notify([
             'id' => $assignment_id,
-            'message' => 'A new Assignment is added',
+            'message' => $request['assignment_name'].' assignment is added',
             'from' => Auth::user()->id,
             'users' => $usersIDs,
             'course_id' => $courseID,
@@ -364,20 +375,27 @@ class AssigmentsController extends Controller
     */
     public function submitAssigment(Request $request)
     {
-        $request->validate([
+        $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-        ]);
+            'file'=>'file|distinct|mimes:pdf'
+        ];
+        $customMessages = [
+            'file.mimes' => 'please enter a pdf file.'
+        ];
+    
+        $this->validate($request, $rules, $customMessages);
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()))
-            return HelperController::api_response_format(400, null , $message = 'Parents can\'t submit assignments');
+            return HelperController::api_response_format(400, null , $message = __('messages.error.parent_cannot_submit'));
         
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if(!isset($assilesson))
-            return HelperController::api_response_format(200, null , $message = 'This assignment is not assigned to this lesson');
+            return HelperController::api_response_format(200, null , $message = __('messages.assignment.assignment_not_belong'));
 
-        
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assilesson->id)->first();
         /*
             0===================>content
@@ -386,14 +404,14 @@ class AssigmentsController extends Controller
         */
 
         if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) && (!isset($request->file)))) {
-            return HelperController::api_response_format(400, $body = [], $message = 'you must enter the content or the file');
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.assignment.content_or_file'));
         }
         if ((($assilesson->allow_attachment == 0)) && ((!isset($request->content)) || (isset($request->file)))) {
-            return HelperController::api_response_format(400, $body = [], $message = 'you must enter only the content');
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.assignment.content_only'));
         }
 
         if ((($assilesson->allow_attachment == 1)) && ((isset($request->content)) || (!isset($request->file)))) {
-            return HelperController::api_response_format(400, $body = [], $message = 'you must enter only the file');
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.assignment.file_only'));
         }
         // if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) || (!isset($request->file)))) { // both 
         //     return HelperController::api_response_format(400, $body = [], $message = 'you must enter both the content and the file');
@@ -401,16 +419,16 @@ class AssigmentsController extends Controller
         $userassigment = UserAssigment::where('user_id', Auth::user()->id)->where('assignment_lesson_id', $assilesson->id)->first();
 
         if(!isset($userassigment))
-            return HelperController::api_response_format(400, $body = [], $message = 'This user isn\'t assign to this assignment');
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.user_not_assign'));
 
         if (isset($userassigment)) {
             if($override != null){
                 if (((($override->start_date >  Carbon::now()) || (Carbon::now() > $override->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
-                    return HelperController::api_response_format(400, $body = [], $message = 'sorry you are not allowed to submit anymore');
+                    return HelperController::api_response_format(400, $body = [], $message = __('messages.error.submit_limit'));
                 }
             }else{
                 if (((($assilesson->start_date >  Carbon::now()) || (Carbon::now() > $assilesson->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
-                    return HelperController::api_response_format(400, $body = [], $message = 'sorry you are not allowed to submit anymore');
+                    return HelperController::api_response_format(400, $body = [], $message = __('messages.error.submit_limit'));
                 }
             }
         }
@@ -438,7 +456,7 @@ class AssigmentsController extends Controller
 
         $userassigment->submit_date = Carbon::now();
         $userassigment->save();
-        return HelperController::api_response_format(200, $body = $userassigment, $message = 'Answer submitted successfully');
+        return HelperController::api_response_format(200, $body = $userassigment, $message = __('messages.success.submit_success'));
     }
 
     /*
@@ -456,12 +474,15 @@ class AssigmentsController extends Controller
         ]);
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first(); 
         if(!isset($assilesson))
-            return HelperController::api_response_format(200, null, $message = 'This assignment is not assigned to this lesson');
+            return HelperController::api_response_format(200, null, $message = __('messages.assignment.assignment_not_belong'));
             
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
         // $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if ($assilesson->mark < $request->grade) {
-            return HelperController::api_response_format(400, $body = [], $message = 'please put grade less than ' . $assilesson->mark);
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.grade_less_than') . $assilesson->mark);
         }
         if (isset($request->feedback)) {
             $userassigment->feedback = $request->feedback;
@@ -478,7 +499,7 @@ class AssigmentsController extends Controller
 
         $userassigment->status_id = 1;
         $userassigment->save();
-        return HelperController::api_response_format(200, $body = $userassigment, $message = 'Grade submitted successfully');
+        return HelperController::api_response_format(200, $body = $userassigment, $message = __('messages.grade.graded'));
     }
 
     public function editGradeAssignment(Request $request)
@@ -494,7 +515,7 @@ class AssigmentsController extends Controller
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first(); 
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
         if ($assilesson->mark < $request->grade) {
-            return HelperController::api_response_format(400, $body = [], $message = 'please put grade less than ' . $assilesson->mark);
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.grade_less_than') . $assilesson->mark);
         }
         if (isset($request->feedback)) {
             $userassigment->feedback = $request->feedback;
@@ -503,6 +524,8 @@ class AssigmentsController extends Controller
             $userassigment->corrected_file = attachment::upload_attachment($request->corrected_file, 'assignment', null)->id;
         }
         $userassigment->grade = $request->grade;
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
 
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $usergrade=UserGrade::where('user_id',$request->user_id)
@@ -510,7 +533,7 @@ class AssigmentsController extends Controller
                                 ->update(['final_grade' => $request->grade]);
 
         $userassigment->save();
-        return HelperController::api_response_format(200, $body = $userassigment, $message = 'Grade edited successfully');
+        return HelperController::api_response_format(200, $body = $userassigment, $message = __('messages.grade.update'));
     }
 
     /*
@@ -536,6 +559,8 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200, $body =  $userassigment, $message = 'user ' . $request->user_id . ' now can submit');
         }
         if (isset($request->course_segment)) {
+            $course_segment = CourseSegment::find($request->course_segment);
+            LastAction::lastActionInCourse($course_segment->course_id);
             $usersIDs = Enroll::where('course_segment', $request['course_segment'])->pluck('user_id')->toarray();
             foreach ($usersIDs as $userId) {
                 # code...
@@ -561,11 +586,15 @@ class AssigmentsController extends Controller
         ]);
         $assigment = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($assigment))
-            return HelperController::api_response_format(400,null,'This assigment is not assigned to this lesson');
+            return HelperController::api_response_format(400,null,__('messages.assignment.assignment_not_belong'));
+        
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        
         $assigment->delete();
         $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
 
-        return HelperController::api_response_format(200, $all, $message = 'Assignment deleted successfully');
+        return HelperController::api_response_format(200, $all, $message = __('messages.assignment.delete'));
     }
 
     public function deleteAssignment(Request $request)
@@ -574,27 +603,37 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignments,id'
         ]);
         $assign = Assignment::where('id', $request->assignment_id)->first();
+        $grade_item=GradeItems::where('item_Entity',$request->assignment_id)->where('item_type',2)->first();
+        if(isset($grade_item))
+            $grade_item->delete();
         $assign->delete();
 
-        return HelperController::api_response_format(200, Assignment::all(), $message = 'Assignment deleted successfully');
+        return HelperController::api_response_format(200, Assignment::all(), $message = __('messages.assignment.delete'));
     }
 
     public function GetAssignment(Request $request)
     {
-        $request->validate([
-            'assignment_id' => 'required|exists:assignments,id',
-            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'
-        ]);
 
+        $rules = [
+            'assignment_id' => 'required|exists:assignments,id',
+            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'        ];
+        $customMessages = [
+            'assignment_id.exists' => 'This assignment is invalid.' 
+        ];
+
+        $this->validate($request, $rules, $customMessages);
         $user = Auth::user();
         $lesson=Lesson::find($request->lesson_id);
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
 
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();        
         if(!isset($assigLessonID))
-            return HelperController::api_response_format(200, null, 'this assigment doesn\'t belong to this lesson');
+            return HelperController::api_response_format(200, null, __('messages.assignment.assignment_not_belong'));
 
+        if( $request->user()->can('site/course/student') && $assigLessonID->visible==0)
+            return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assigLessonID->id)->first();
         if (count($userassigments) > 0) {
@@ -619,7 +658,7 @@ class AssigmentsController extends Controller
             $due = $assignment_lesson->AssignmentLesson[0]->due_date;
             if ($assignment_lesson->AssignmentLesson[0]->start_date > Carbon::now() || $assignment_lesson->AssignmentLesson[0]->due_date < Carbon::now()) {
                 if (isset($studentassigment->override) && $studentassigment->override == 0) {
-                    return HelperController::api_response_format(400, $body = [], $message = 'you are not allowed to see the assignment at this moment');
+                    return HelperController::api_response_format(400, $body = [], $message = __('messages.error.not_available_now'));
                 }
             }
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
@@ -713,15 +752,17 @@ class AssigmentsController extends Controller
             $assigment = AssignmentLesson::where('assignment_id', $request->assignment_id)
                 ->where('lesson_id', $request->lesson_id)->first();
             if (!isset($assigment)) {
-                return HelperController::api_response_format(400, null, 'Try again , Data invalid');
+                return HelperController::api_response_format(400, null, __('messages.error.not_found'));
             }
 
             $assigment->visible = ($assigment->visible == 1) ? 0 : 1;
             $assigment->save();
+            $lesson=Lesson::find($request->lesson_id);
+            LastAction::lastActionInCourse($lesson->courseSegment->course_id);
 
-            return HelperController::api_response_format(200, $assigment, 'Toggle Successfully');
+            return HelperController::api_response_format(200, $assigment, __('messages.success.toggle'));
         } catch (Exception $ex) {
-            return HelperController::api_response_format(400, null, 'Please Try again');
+            return HelperController::api_response_format(400, null,__('messages.error.try_again'));
         }
     }
 
@@ -757,7 +798,7 @@ class AssigmentsController extends Controller
             $lesson_obj = Lesson::find($lesson);
             $course_segment =  CourseSegment::find($lesson_obj->course_segment_id);
             if( $request->filled('closing_date') && $course_segment->end_date < Carbon::parse($request->closing_date) )
-                return HelperController::api_response_format(400, null , 'Please enter closing date before '.$course_segment->end_date);
+                return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$course_segment->end_date);
             if ($request->filled('closing_date'))
                 $assignment_lesson->due_date = $request->closing_date;
             if ($request->filled('scale'))
@@ -775,7 +816,7 @@ class AssigmentsController extends Controller
                     }
                 }
                 if($flag==false){
-                    return HelperController::api_response_format(400, null,'this grade category invalid');
+                    return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
                 }
                 $assignment_lesson->grade_category = $request->grade_category[$key];
             }
@@ -791,7 +832,8 @@ class AssigmentsController extends Controller
                     'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
                     'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
                     'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
-                    'item_type' => (isset($request->item_type)) ? $request->item_type : null,
+                    'item_type' => 2, // Assignment
+                    'item_Entity' => $request->assignment_id,
                     'name' => $name_assignment,
                     'weight' => 0,
                 ]);
@@ -813,14 +855,16 @@ class AssigmentsController extends Controller
                 "course_segment" => $lesson->course_segment_id,
                 "assignment_lesson_id" => $assignment_lesson->id,
                 "submit_date" => Carbon::now(),
-                "publish_date" => Carbon::parse($request->publish_date)
+                "publish_date" => Carbon::parse($request->publish_date),
+                "assignment_name" => Assignment::find($request->assignment_id)->name
             );
+            LastAction::lastActionInCourse($lesson->courseSegment->course_id);
             $this->assignAsstoUsers($data);
 
         }
         // $all = AssignmentLesson::where('assignment_id','!=', $request->assignment_id)->get();
 
-        return HelperController::api_response_format(200, $assignmentLesson, 'Assignment added successfully');
+        return HelperController::api_response_format(200, $assignmentLesson, __('messages.assignment.add'));
     }
 
     public function overrideAssignment(Request $request)
@@ -836,12 +880,12 @@ class AssigmentsController extends Controller
 
         $assigmentlesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->pluck('id')->first();
         if(!isset($assigmentlesson))
-            return HelperController::api_response_format(200, null , 'This assignment is not assigned to this lesson');
+            return HelperController::api_response_format(200, null , __('messages.assignment.assignment_not_belong'));
         $assignment = AssignmentLesson::find($assigmentlesson);
         $lesson = Lesson::find($assignment->lesson_id);
         $course_segment = $lesson->courseSegment;
         if($course_segment->end_date < Carbon::parse($request->due_date))
-            return HelperController::api_response_format(400, null , 'Please enter due date before '.$course_segment->end_date);
+            return HelperController::api_response_format(400, null , __('messages.date.end_before').$course_segment->end_date);
       
         foreach($request->user_id as $user)
         {
@@ -853,11 +897,12 @@ class AssigmentsController extends Controller
             ]);
         }
         $course = $lesson->courseSegment->course_id;
+        LastAction::lastActionInCourse($course);
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-
+        $assignment_name = Assignment::find($request->assignment_id)->name;
         user::notify([
             'id' => $assignment->assignment_id,
-            'message' => 'You can answer this assignment now',
+            'message' => 'You can answer '.$assignment_name.' assignment now',
             'from' => Auth::user()->id,
             'users' => $request->user_id,
             'course_id' => $course,
@@ -867,7 +912,7 @@ class AssigmentsController extends Controller
             'link' => url(route('getAssignment')) . '?assignment_id=' . $assignment->assignment_id,
             'publish_date' => Carbon::parse($request->start_date),
         ]);
-        return HelperController::api_response_format(200, $assignmentOerride, 'Assignment override successfully');
+        return HelperController::api_response_format(200, $assignmentOerride, __('messages.assignment.override'));
     }
     public function AnnotatePDF(Request $request)
     {

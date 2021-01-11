@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Lesson;
 use App\CourseSegment;
 use App\attachment;
+use App\LastAction;
 
 class LessonController extends Controller
 {
@@ -33,7 +34,7 @@ class LessonController extends Controller
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
         if (!isset($courseSegment))
             return HelperController::api_response_format(200, null,'no courses');
-            
+        LastAction::lastActionInCourse($request->course);
         foreach ($request->name as $key => $name) {
             $lessons_in_CourseSegment = Lesson::where('course_segment_id', $courseSegment->id)->max('index');
             $Next_index = $lessons_in_CourseSegment + 1;
@@ -50,7 +51,7 @@ class LessonController extends Controller
             }
             $lesson->save();
         }
-        return HelperController::api_response_format(200, $courseSegment->lessons,'added sucessfully');
+        return HelperController::api_response_format(200, $courseSegment->lessons,__('messages.lesson.add'));
     }
 
     /**
@@ -82,13 +83,15 @@ class LessonController extends Controller
 
         ]);
         $lesson = Lesson::find($request->id);
+        LastAction::lastActionInCourse($lesson->courseSegment->courses[0]->id);
         $lesson->delete();
         $lessons = Lesson::whereCourse_segment_id($lesson->course_segment_id)->where('index', '>', $lesson->index)->get();
+
         foreach ($lessons as $temp) {
             $temp->index = $temp->index - 1;
             $temp->save();
         }
-        return HelperController::api_response_format(200, null, 'Lesson is deleted Successfully');
+        return HelperController::api_response_format(200, null, __('messages.lesson.delete'));
     }
 
     /**
@@ -108,6 +111,7 @@ class LessonController extends Controller
             'description' => 'string'
         ]);
         $lesson = Lesson::find($request->id);
+        LastAction::lastActionInCourse($lesson->courseSegment->courses[0]->id);
         $lesson->name = $request->name;
         if ($request->hasFile('image')) {
             $lesson->image = attachment::upload_attachment($request->image, 'lesson', '')->path;
@@ -118,7 +122,7 @@ class LessonController extends Controller
         }
         $lesson->save();
 
-        return HelperController::api_response_format(200, $lesson, 'Lesson is updated Successfully');
+        return HelperController::api_response_format(200, $lesson, __('messages.lesson.update'));
     }
 
     /**
@@ -194,7 +198,7 @@ class LessonController extends Controller
         } else {
             $lessons = $this->SortUp($request->lesson_id, $request->index);
         }
-        return HelperController::api_response_format(200, $lessons, 'all Lessons sorted Successfully');
+        return HelperController::api_response_format(200, $lessons, __('messages.lesson.sort'));
     }
 
     public function AddNumberOfLessons(Request $request)
@@ -216,6 +220,6 @@ class LessonController extends Controller
             ]);
         }
 
-        return HelperController::api_response_format(200, $lessons, 'added Successfully');
+        return HelperController::api_response_format(200, $lessons, __('messages.lesson.add'));
     }
 }

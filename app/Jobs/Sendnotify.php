@@ -15,7 +15,7 @@ use App\User;
 use Log;
 use Exception;
 use Carbon\Carbon;
-
+use DB;
 
 class Sendnotify implements ShouldQueue
 {
@@ -39,7 +39,6 @@ class Sendnotify implements ShouldQueue
      */
     public function handle()
     {
-        //  Log::debug('starting  jop ');
         $client = new \Google_Client();
         $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
         $client->setApplicationName("learnovia-notifications");
@@ -51,16 +50,28 @@ class Sendnotify implements ShouldQueue
         $access_token = $client->getAccessToken()['access_token'];
         // Log::debug('access_token is '.$access_token);
         
-        $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token')->pluck('token');
+        $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token')->get();
         // dd($this->request['users']);
-        // Log::debug(' users '. $this->request['users']);
+        // Log::debug(' users are '. $this->request['users']);
 
-        // Log::debug(' num users_token is '. count($user_token));
+        Log::debug('
+        num of users is '. count($user_token));
         $count =0;
         foreach($user_token as $token)
         {
-            // Log::debug('single token is '. $token);
+             Log::debug('user number ' .($count+1).' is  '. $token->id);
 
+            $notification_id = null;
+            $noti = DB::table('notifications')->where('notifiable_id', $token->id)->get();
+            foreach ($noti as $not) {
+                $not->data= json_decode($not->data, true);
+                if($not->data['type'] == $this->request['type'] && $not->data['id'] == $this->request['id'] && $not->data['message'] == $this->request['message'])
+                {
+                    $notification_id = $not->id;
+                }
+            }
+
+            // Log::debug('notifictaion id is' . $notification_id);
             if($this->request['type'] !='announcement'){
                 $fordata = array(
                         "id" => (string)$this->request['id'],
@@ -73,13 +84,13 @@ class Sendnotify implements ShouldQueue
                         "publish_date" => Carbon::parse($this->request['publish_date'])->format('Y-m-d H:i:s'),
                         "read_at" => null,
                         "link" => isset($this->request['link'])?$this->request['link']:null,
-                        'deleted'=> "0"
+                        'deleted'=> "0",
+                        'notification_id' => $notification_id,
+                        "course_name" => (string)$this->request['course_name'],
                     );
-                    // Log::debug('type is not announcement ');
 
             }else{
                 
-                // Log::debug('type is announcement and count is '. $count);
 
                 if($this->request['attached_file'] != null)
                     $att= (string) $this->request['attached_file'];
@@ -96,7 +107,8 @@ class Sendnotify implements ShouldQueue
                         "start_date" => $this->request['start_date'],
                         "due_date" => $this->request['due_date'],
                         "attached_file" => $att,
-                        'deleted'=> '0'
+                        'deleted'=> '0',
+                        'notification_id' => $notification_id
                     );
             }
             $count++;
@@ -109,7 +121,7 @@ class Sendnotify implements ShouldQueue
             }
             $data = json_encode(array(
                 'message' => array(
-                    "token" => $token,
+                    "token" => $token->token,
                     "notification" => array(
                         "body" => $this->request['message'],
                         "title" => 'Learnovia',
@@ -124,7 +136,7 @@ class Sendnotify implements ShouldQueue
                     ) 
                 )
             ));
-            // Log::debug("data is " . $data);
+            Log::debug("data is " . $data);
             $clientt = new Client();
             try {
                 $res = $clientt->request('POST', 'https://fcm.googleapis.com/v1/projects/learnovia-notifications/messages:send', [
@@ -134,7 +146,7 @@ class Sendnotify implements ShouldQueue
                     ], 
                     'body' => $data
                 ]);              
-                // Log::debug('request success');
+                Log::debug('request success');
             } catch (\Exception $e) {
 
                Log::debug( $e->getMessage());

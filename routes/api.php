@@ -46,6 +46,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::get('export', 'SpatieController@Export_Role_with_Permission')->name('exportroleswithper')->middleware('permission:spatie/export');
         Route::post('import', 'SpatieController@Import_Role_with_Permission')->name('importroleswithper')->middleware('permission:spatie/import');
         Route::get('list-permissions-and-roles', 'SpatieController@List_Roles_Permissions')->name('listpermissionandrole')->middleware('permission:spatie/list-permissions-and-roles');
+        Route::get('exports', 'SpatieController@export')->name('exportroleswithper')->middleware('permission:spatie/export');
     });
 
     //permissions routes
@@ -219,6 +220,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api','LastAction']], 
     Route::get('get-class', 'CourseController@get_class_from_course')->middleware('permission:course/get-classes-by-course');
     Route::post('get-courses-by-classes', 'CourseController@get_courses_with_classes')->middleware('permission:course/get-courses-by-classes');
     Route::get('export', 'CourseController@export')->name('exportCourses')->middleware('permission:course/export');
+    Route::get('question_category_for_courses', 'CourseController@AddQuestionCategorytoCourses')->middleware('permission:site/show-all-courses');
 });
 
 //USER CRUD ROUTES
@@ -231,7 +233,9 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], fu
     Route::get('show-hide-real-pass', 'UserController@Show_and_hide_real_password_with_permission')->name('show/hiderealpass')->middleware('permission:user/show-hide-real-pass');
     Route::post('un-suspend', 'UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:user/un-suspend');
     Route::get('parent-child', 'UserController@parent_child')->name('parentchild')->middleware('permission:user/parent-child');
+    Route::get('getParents', 'UserController@getParents')->name('getFamily')->middleware('permission:user/parent-child');
     Route::post('set-parent-child', 'UserController@set_parent_child')->name('setparentchild')->middleware('permission:user/set-parent-child');
+    Route::post('unset-parent-child', 'UserController@unset_parent_child')->name('setparentchild')->middleware('permission:user/set-parent-child');
     Route::get('get-by-id', 'UserController@GetUserById')->name('getbyid')->middleware('permission:user/get-by-id');
     Route::get('get-with-role-cs', 'UserController@get_users_with_filter_role')->name('getbyroleid')->middleware('permission:user/get-with-role-cs');
     Route::get('filter-with-role', 'UserController@allUserFilterRole')->name('filterallbyrole')->middleware('permission:user/filter-with-role');
@@ -244,6 +248,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], fu
     Route::post('get-current-child', 'UserController@getCurrentChild')->name('getcurrentchild')->middleware('permission:user/get-current-child');
     Route::post('get-my-users', 'UserController@get_my_users')->name('getmyusers')->middleware('permission:user/get-my-users');
     Route::get('export', 'UserController@export')->name('exportUsers')->middleware('permission:user/export');
+    Route::get('export-parent-child', 'UserController@exportParentChild')->name('exportParentChild')->middleware('permission:user/export');
     Route::post('language', 'AuthController@changeUserLanguage')->name('changeLanguage')->middleware('permission:user/language');
     Route::post('generate-username-password', 'UserController@generate_username_password')->name('generateusernamepassword')->middleware('permission:user/generate-username-password');
     Route::get('GetAllCountries', 'UserController@GetAllCountries')->name('GetAllCountries')->middleware('permission:user/GetAllCountries');
@@ -411,7 +416,7 @@ Route::group(['prefix' => 'h5p', 'middleware' => ['auth:api','LastAction']], fun
         Route::get('toggle', 'H5PLessonController@toggleVisibility')->name('toggleh5p')->middleware('permission:h5p/lesson/toggle');
         Route::get('get', 'H5PLessonController@get')->name('geth5p')->middleware('permission:h5p/lesson/get-all');
         Route::get('delete', 'H5PLessonController@delete')->name('deleteh5p')->middleware('permission:h5p/lesson/delete');
-        Route::get('update', 'H5PLessonController@edit')->name('edith5p')->middleware('permission:h5p/lesson/update');
+        Route::post('update', 'H5PLessonController@edit')->name('edith5p')->middleware('permission:h5p/lesson/update');
 
     });
 });
@@ -424,19 +429,33 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], fu
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('quizzes', QuizzesController::class);
+    Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
     Route::Resource('materials', MaterialsController::class);
+    Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);;
     Route::Resource('assignments', AssignmentController::class);
+    Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
+    Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
+
     Route::Resource('interactive', InterActiveController::class);
+    Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
     Route::Resource('courses', CoursesController::class);
     Route::Resource('lessons', LessonsController::class);
     Route::Resource('levels', LevelController::class);
     Route::Resource('classes', ClassesController::class);
     Route::Resource('users', UsersController::class);
+    Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::Resource('notify', NotificationsController::class);
+    Route::get('notifications/{types}', 'NotificationsController@index')->middleware('permission:notifications/get-all');
     Route::Resource('announcement', AnnouncementsController::class);
+    Route::post('announcement/update', 'AnnouncementsController@update');
     Route::get('announcements/{created}', 'AnnouncementsController@index')->middleware('permission:announcements/my');
+    Route::Resource('assign/role', AssignRoleController::class);
+    Route::delete('assign/role/', 'AssignRoleController@destroy');
+    Route::delete('enroll/', 'EnrollController@destroy');
+    Route::Resource('enroll', EnrollController::class);
+    Route::Resource('calendars', CalendarsController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {

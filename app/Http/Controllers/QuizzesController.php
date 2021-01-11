@@ -10,9 +10,12 @@ use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
 use App\Classes;
+use App\Course;
+use App\Level;
 use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
-
+use App\LastAction;
+use Carbon\Carbon;
 
 class QuizzesController extends Controller
 {
@@ -29,7 +32,7 @@ class QuizzesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$count = null)
     {
         $request->validate([
             'year' => 'exists:academic_years,id',
@@ -39,38 +42,55 @@ class QuizzesController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
-            'lesson' => 'nullable|integer|exists:lessons,id' 
+            'lesson' => 'nullable|integer|exists:lessons,id',
+            'sort_in' => 'in:asc,desc',
         ]);
-        
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        if(!$request->user()->can('site/show-all-courses'))//student
-            {
-                $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            }
 
-        $user_course_segments = $user_course_segments->with('courseSegment.lessons')->get();
-        $lessons =[];
-        foreach ($user_course_segments as $user_course_segment){
-            $lessons = array_merge($lessons,$user_course_segment->courseSegment->lessons->pluck('id')->toArray());
-        }
-        $lessons =  array_values (array_unique($lessons)) ;
+        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+
+        if(!$request->user()->can('site/show-all-courses'))//student
+            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+
+        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
+
+        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+
         if($request->filled('lesson')){
-            if (!in_array($request->lesson,$lessons)){
-                return response()->json(['message' => 'No active course segment for this lesson ', 'body' => []], 400);
-            }
+            if (!in_array($request->lesson,$lessons->toArray()))
+                return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
+            
             $lessons  = [$request->lesson];
         }
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->get()->sortByDesc('start_date');
+
+        $sort_in = 'desc';
+        if($request->has('sort_in'))
+            $sort_in = $request->sort_in;
+
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+
+        if($request->user()->can('site/course/student')){
+            $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+        }
+
+        if($count == 'count'){
+            return response()->json(['message' => __('messages.quiz.count'), 'body' => $quiz_lessons->count() ], 200);
+        }
+        
+        $quiz_lessons = $quiz_lessons->get();
+
         $quizzes = collect([]);
+
         foreach($quiz_lessons as $quiz_lesson){
             $quiz=quiz::with('course')->where('id',$quiz_lesson->quiz_id)->first();
             $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            $quiz['level'] = Level::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
             unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
-        return response()->json(['message' => 'Quizzes List ....', 'body' => $quizzes->paginate(Paginate::GetPaginate($request))], 200);
+
+        return response()->json(['message' => __('messages.quiz.list'), 'body' => $quizzes->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
@@ -94,10 +114,12 @@ class QuizzesController extends Controller
     {
         $quiz = quiz::find($id);
 
-        if(isset($quiz))
-            return response()->json(['message' => 'quiz objet ..', 'body' => $quiz ], 200);
+        if(isset($quiz)){
+            LastAction::lastActionInCourse($quiz->course_id);
+            return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
+        }
 
-        return response()->json(['message' => 'quiz not fount!', 'body' => [] ], 400);
+        return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
     }
 
     /**

@@ -7,7 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class file extends Model
 {
-    protected $fillable = [];
+    protected $fillable = ['type',
+    'description',
+    'name',
+    'size' ,
+    'attachment_name',
+    'user_id' ,
+    'url' ,
+    'url2' ];
     protected $hidden = ['updated_at','created_at','user_id'];
 
     public function FileCourseSegment()

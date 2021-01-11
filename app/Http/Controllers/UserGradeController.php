@@ -11,7 +11,7 @@ use App\UserGrade;
 use stdClass;
 use App\GradeCategory;
 use App\GradeItems;
-
+use App\LastAction;
 class UserGradeController extends Controller
 {
     /**
@@ -141,6 +141,7 @@ class UserGradeController extends Controller
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if ($courseSegment == null)
             return HelperController::api_response_format(200, null, 'This Course not assigned to this class');
+        LastAction::lastActionInCourse($request->course);
         $users = User::whereIn('id', Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('user_id'));
         if($request->filled('user'))
             $users->whereId($request->user);
@@ -204,6 +205,8 @@ class UserGradeController extends Controller
         $courseSeg = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
         if (!$courseSeg)
             return HelperController::api_response_format(200, 'this course haven\'t course segment');
+        LastAction::lastActionInCourse($request->course);
+        
         $gradeCat_item = GradeCategory::where('course_segment_id', $courseSeg->id)->first();
         if(isset($gradeCat_item))
         {
