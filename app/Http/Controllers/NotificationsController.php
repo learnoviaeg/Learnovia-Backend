@@ -15,7 +15,6 @@ use App\Paginate;
 
 class NotificationsController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('permission:notifications/send', ['only' => ['store']]);
@@ -39,21 +38,16 @@ class NotificationsController extends Controller
             'search' => 'string'
         ]);
 
-     
-
         $notify = DB::table('notifications')->select('data','read_at','id')
             ->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();
                                             
         $notifications = collect();
         $notifications_types =collect();
-        if(isset($decoded_data['course_id'])){
+        if(isset($decoded_data['course_id']))
             LastAction::lastActionInCourse(isset($decoded_data['course_id']));
-        }
 
         foreach($notify as $notify_object) {
-
             $decoded_data= json_decode($notify_object->data, true);
-
             $notifications->push([
                 'id' => $decoded_data['id'],
                 'read_at' => $notify_object->read_at,
@@ -69,6 +63,7 @@ class NotificationsController extends Controller
             ]);
             $notifications_types->push($decoded_data['type']);
         }
+
         // for route api/notifications/{types} 
         if($types=='types')
             return response()->json(['message' => 'notification types list.','body' => $notifications_types->unique()->values()], 200);
@@ -96,9 +91,9 @@ class NotificationsController extends Controller
 
         if($request->filled('search')){
             $notifications = $notifications->filter(function ($item) use ($request) {
-            if(  (($item['message']!=null) && str_contains(strtolower($item['message']), strtolower($request->search)))) 
-                return $item; 
-        });
+                if(  (($item['message']!=null) && str_contains(strtolower($item['message']), strtolower($request->search)))) 
+                    return $item; 
+            });
         }
         return response()->json(['message' => 'User notification list.','body' => $notifications->values()->paginate(Paginate::GetPaginate($request))], 200);
     }
@@ -188,18 +183,31 @@ class NotificationsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request,$id)
     {
-
-        $notify = DB::table('notifications')->where('id', $id)
-                    ->update([
-                        'read_at' => Carbon::now()->toDateTimeString()
-                    ]);
-
+        $notify = DB::table('notifications')->where('id', $id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
         if($notify == 0 )
             return response()->json(['message' => 'This notification not found','body' => null], 404);
+        return response()->json(['message' => 'Notification was read','body' => $notify], 200); 
+    }
 
-        return response()->json(['message' => 'Notification readed','body' => $notify], 200);        
+    public function read(Request $request,$read=null)
+    {
+        $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+        foreach ($noti as $not) {
+            $not->data= json_decode($not->data, true);
+            if($read == 'notify')
+                if($not->data['type'] != 'announcement')
+                    $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+            
+            if($read == 'announce')
+                if($not->data['type'] == 'announcement')
+                    $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+        }
+        if(!isset($noti))
+            return response()->json(['message' => 'You don\'t have any','body' => null], 200);        
+
+        return response()->json(['message' => $read .' was read','body' => $check], 200);        
     }
 
     /**
