@@ -73,6 +73,10 @@ class CoursesController extends Controller
                 $teacher[] = User::whereIn('id',Enroll::where('role_id', '4')->where('course',  $level[0]->course)->where('level',$level[0]->level)
                                                 ->pluck('user_id')
                             )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
+
+                $start_date = $level[0]->courseSegment->start_date;
+                $end_date = $level[0]->courseSegment->end_date;
+
                 if($status =="ongoing"){ // new route for  onoing courses in ative year api/course/ongoing
                     if($level[0]->courseSegment->end_date > Carbon::now() && $level[0]->courseSegment->start_date <= Carbon::now()){
                         $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
@@ -110,6 +114,8 @@ class CoursesController extends Controller
                 'mandatory' => $temp_course->mandatory == 1 ? true : false ,
                 'level' => $levels,
                 'teachers' => collect($teacher)->collapse()->unique()->values(),
+                'start_date' => $start_date,
+                'end_date' => $end_date,
             ]);
 
             $temp_course = null;
