@@ -163,7 +163,7 @@ class QuestionCategoryController extends Controller
         if(isset($course_segment))
             LastAction::lastActionInCourse($course_segment->course_id);        
         if(count($questioncat->questions)>0)
-            return HelperController::api_response_format(200, null,__('messages.error.cannot_delete'));
+            return HelperController::api_response_format(200, null,__('messages.question_category.category_cannot_deleted'));
         $questioncat->delete();
         return HelperController::api_response_format(200, $questioncat, __('messages.question_category.delete'));
 
