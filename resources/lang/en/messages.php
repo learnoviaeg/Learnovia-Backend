@@ -81,6 +81,7 @@ return [
         'update' => 'Questions category updated successfully',
         'delete' => 'Questions category deleted successfully',
         'list' => 'Questions categories List',
+        'category_cannot_deleted' => 'This category has related questions, cannot be deleted',
     ],
     'quiz' => [
         'add' => 'Quiz added successfully',
