@@ -913,7 +913,7 @@ class CourseController extends Controller
                             if(isset($h5p_comp)){
                                 $h5p_content=collect();
                                 $url= substr($request->url(), 0, strpos($request->url(), "/api"));
-                                $h5p_all= $lessonn->H5PLesson;
+                                $h5p_all= $lessonn->H5PLesson->orderBy('created_at','desc');
                                 if ($request->user()->can('site/course/student')) {
                                     $h5p_all= $lessonn->H5PLesson->where('visible', '=', 1)->where('publish_date', '<=', Carbon::now());
                                 }
