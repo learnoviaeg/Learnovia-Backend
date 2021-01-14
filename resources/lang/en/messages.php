@@ -282,4 +282,10 @@ return [
         'already_enrolled' => 'Those users are already enrolled',
         'no_courses_belong_to_class' => 'No courses belong to this class',
     ],
+    'status' => [
+        'submitted' => 'Submitted',
+        'not_submitted' => 'Not submitted',
+        'graded' => 'Graded',
+        'not_graded' => 'Not graded',
+    ],
 ];

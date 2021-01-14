@@ -17,7 +17,7 @@ class Timeline extends Model
         'item_id', 'name','start_date','due_date','publish_date','course_id','class_id','level_id','lesson_id','type','visible','overwrite_user_id'
     ];
 
-    protected $appends = ['started','answered'];
+    protected $appends = ['started','status'];
 
     public function getStartedAttribute(){
         $started = true;
@@ -27,24 +27,55 @@ class Timeline extends Model
         return $started;  
     }
 
-    public function getAnsweredAttribute(){
-        $answered = false;
+    public function getStatusAttribute(){
+
+        //student statuses
         if(Auth::user()->can('site/course/student')){
+            $status = __('messages.status.not_submitted');
+
             if($this->type == 'assignment'){
                 $assigLessonID = AssignmentLesson::where('assignment_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
                 $user_assigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id',Auth::id())->whereNotNull('submit_date')->first();
-                if(isset($user_assigment))
-                    $answered = true;
+                if(isset($user_assigment)){
+                    $status = __('messages.status.submitted');//submitted
+                    if(isset($user_assigment->grade))
+                        $status = __('messages.status.graded');//graded
+                }
             }
 
             if($this->type == 'quiz'){
-                $quiz_lesson = QuizLesson::where('quiz_id', $this->item_id)->where('lesson_id', $this->lesson_id)->with('quiz')->first();
-                $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quiz_lesson->id)->latest('attempt_index')->first();
-                if(isset($user_quiz) && $quiz_lesson->max_attemp == $user_quiz->attempt_index && Carbon::parse($user_quiz->open_time)->addSeconds($quiz_lesson->quiz->duration) <= Carbon::now())
-                    $answered = true;
+                $quiz_lesson = QuizLesson::where('quiz_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
+                $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id');
+                $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->get();
+                if(isset($user_quiz) && $quiz_lesson->max_attemp == count($user_quiz) && !in_array(NULL,$user_quiz_asnwer->pluck('force_submit')->toArray())){
+                    $status = __('messages.status.submitted');//submitted
+                    
+                    if(!in_array(NULL,$user_quiz_asnwer->pluck('user_grade')->toArray(),true))
+                        $status = __('messages.status.graded');//graded 
+                }
             }
         }
-        return $answered;
+
+        if(!Auth::user()->can('site/course/student')){
+            $status = __('messages.status.not_graded');
+
+            if($this->type == 'assignment'){
+                $assigLessonID = AssignmentLesson::where('assignment_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
+                $user_assigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('submit_date')->pluck('grade');
+                if(!in_array(NULL,$user_assigment->toArray(),true))
+                    $status = __('messages.status.graded');//graded
+            }
+
+            if($this->type == 'quiz'){
+                $quiz_lesson = QuizLesson::where('quiz_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
+                $user_quiz = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('id');
+                $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->where('force_submit',1)->pluck('user_grade');
+                if(!in_array(NULL,$user_quiz_asnwer->toArray(),true))
+                    $status = __('messages.status.graded');//graded
+            }
+        }
+
+        return $status;
     }
 
     public function class(){
