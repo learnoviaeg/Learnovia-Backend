@@ -282,4 +282,10 @@ return [
         'already_enrolled' => 'هؤلاء المستخدمون مسجلون بالفعل',
         'no_courses_belong_to_class' => 'لا توجد مواد تنتمي إلى هذا الفصل',
     ],
+    'status' => [
+        'submitted' => 'تم التسليم',
+        'not_submitted' => 'لم يتم التسليم',
+        'graded' => 'مصحح',
+        'not_graded' => 'غير مصحح',
+    ],
 ];
