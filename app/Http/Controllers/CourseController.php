@@ -917,7 +917,7 @@ class CourseController extends Controller
                                 if ($request->user()->can('site/course/student')) {
                                     $h5p_all= $lessonn->H5PLesson->where('visible', '=', 1)->where('publish_date', '<=', Carbon::now());
                                 }
-                                foreach($h5p_all->orderBy('created_at','desc') as $h5p){                                
+                                foreach($h5p_all as $h5p){                                
                                     $content = response()->json(DB::table('h5p_contents')->whereId($h5p->content_id)->first());
                                     $content->original->link =  $url.'/api/h5p/'.$h5p->content_id;
                                     $content->original->item_lesson_id = $h5p->id;
