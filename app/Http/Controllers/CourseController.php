@@ -818,7 +818,7 @@ class CourseController extends Controller
                                         $Component->where('publish_date', '<=', Carbon::now()); 
                                     }
                                 }
-                                $lessonn[$com->name] = $Component->get();
+                                $lessonn[$com->name] = $Component->orderBy('created_at','desc')->get();
                                 foreach($lessonn[$com->name] as $le){
                                     $le['course_id']=(int)$request->course_id;
                                     if($le->pivot->media_id)
