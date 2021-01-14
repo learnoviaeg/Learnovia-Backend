@@ -61,6 +61,90 @@ class NotificationController extends Controller
         $result= $res->getBody();
         return $result;
     }
+
+    public static function createZoomMeeting($meetingConfig = []){
+		$jwtToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Imtoazg4dUQwU2gyQzRxSGp5RTkwLWciLCJleHAiOjE2MTExMzM0MjMsImlhdCI6MTYxMDUyODYyNH0.KOuuA0-mgUZfMZDFIx63XEe4Qrjl8ek6qCB2s2cMZVw';
+		
+		$requestBody = [
+			'topic'			=> $meetingConfig['topic'] 		?? 'PHP General Talk',
+			'type'			=> $meetingConfig['type'] 		?? 2,
+			'start_time'	=> $meetingConfig['start_time']	?? date('Y-m-dTh:i:00').'Z',
+			'duration'		=> $meetingConfig['duration'] 	?? 30,
+			'password'		=> $meetingConfig['password'] 	?? mt_rand(),
+			'timezone'		=> 'Africa/Cairo',
+			'agenda'		=> 'PHP Session',
+			'settings'		=> [
+			  	'host_video'			=> false,
+			  	'participant_video'		=> true,
+			  	'cn_meeting'			=> false,
+			  	'in_meeting'			=> false,
+			  	'join_before_host'		=> true,
+			  	'mute_upon_entry'		=> true,
+			  	'watermark'				=> false,
+			  	'use_pmi'				=> false,
+			  	'approval_type'			=> 1,
+			  	'registration_type'		=> 1,
+			  	'audio'					=> 'voip',
+				'auto_recording'		=> 'none',
+				'waiting_room'			=> false
+			]
+		];
+
+		$zoomUserId = 'RIH-CQlpTj2hdDGJMuq_EA';
+
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0); // Skip SSL Verification
+		curl_setopt_array($curl, array(
+		  CURLOPT_URL => "https://api.zoom.us/v2/users/".$zoomUserId."/meetings",
+		  CURLOPT_RETURNTRANSFER => true,
+		  CURLOPT_ENCODING => "",
+		  CURLOPT_MAXREDIRS => 10,
+		  CURLOPT_SSL_VERIFYHOST => 0,
+		  CURLOPT_SSL_VERIFYPEER => 0,
+		  CURLOPT_TIMEOUT => 30,
+		  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+		  CURLOPT_CUSTOMREQUEST => "POST",
+		  CURLOPT_POSTFIELDS => json_encode($requestBody),
+		  CURLOPT_HTTPHEADER => array(
+		    "Authorization: Bearer ".$jwtToken,
+		    "Content-Type: application/json",
+		    "cache-control: no-cache"
+		  ),
+		));
+
+		$response = curl_exec($curl);
+		$err = curl_error($curl);
+
+		curl_close($curl);
+
+		if ($err) {
+		  return [
+		  	'success' 	=> false, 
+		  	'msg' 		=> 'cURL Error #:' . $err,
+		  	'response' 	=> ''
+		  ];
+		} else {
+		  return [
+		  	'success' 	=> true,
+		  	'msg' 		=> 'success',
+		  	'response' 	=> json_decode($response)
+		  ];
+		}
+    }
+    
+    function generate_signature (){
+
+        $time = time() * 1000 - 30000;//time in milliseconds (or close enough)
+        
+        $data = base64_encode('khk88uD0Sh2C4qHjyE90-g' . 73400764335 . $time . 0);
+        
+        $hash = hash_hmac('sha256', $data, 'WG8y6msZRI4LLZHNiCdzOzzgF9QqlGbnltqC', true);
+        
+        $_sig = 'khk88uD0Sh2C4qHjyE90-g' . "." . 73400764335 . "." . $time . "." . 0 . "." . base64_encode($hash);
+        
+        //return signature, url safe base64 encoded
+        return rtrim(strtr(base64_encode($_sig), '+/', '-'), '=');
+    }
     
    /**
     * @description: get all Notifications From database From Notifcation Table of this user.
