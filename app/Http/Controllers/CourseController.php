@@ -1441,7 +1441,7 @@ class CourseController extends Controller
                                     $item->item_lesson_id=$item->assignment_lesson->id;
                                     $item->status = 'new';
                                     if(isset($studentassigment)){
-                                        if($studentassigment->grade == null)
+                                        if($studentassigment->submit_date == null)
                                             $item->status = 'submitted';
                                         else
                                             $item->status='graded';
