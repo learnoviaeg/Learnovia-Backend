@@ -1441,10 +1441,10 @@ class CourseController extends Controller
                                     $item->item_lesson_id=$item->assignment_lesson->id;
                                     $item->status = 'new';
                                     if(isset($studentassigment)){
-                                        if($studentassigment->submit_date == null)
-                                            $item->status = 'submitted';
-                                        else
-                                            $item->status='graded';
+                                        if($studentassigment->grade != null)
+                                            $item->status = 'graded';
+                                        if($studentassigment->submit_date != null)
+                                            $item->status='submitted';
                                     }
                                 }
                                 // $quickaction =collect([]);
