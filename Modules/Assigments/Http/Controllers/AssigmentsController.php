@@ -305,8 +305,21 @@ class AssigmentsController extends Controller
         $AssignmentLesson->save();
 
         $usersIDs = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
-        $lessonId = AssignmentLesson::where('assignment_id', $request->assignment_id)->pluck('lesson_id')->first();
         $courseSegment = Lesson::where('id', $request->updated_lesson_id)->pluck('course_segment_id')->first();
+        
+        if ($request->filled('updated_lesson_id')) {
+            $old_students = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->delete();
+            $usersIDs = Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('user_id')->toarray();
+            foreach ($usersIDs as $userId) {
+                $userassigment = new UserAssigment;
+                $userassigment->user_id = $userId;
+                $userassigment->assignment_lesson_id = $AssignmentLesson->id;
+                $userassigment->status_id = 2;
+                $userassigment->override = 0;
+                $userassigment->save();
+            }
+        }
+        $lessonId = AssignmentLesson::where('assignment_id', $request->assignment_id)->pluck('lesson_id')->first();
         $courseID = CourseSegment::where('id', $courseSegment)->pluck('course_id')->first();
         $segmentClass = CourseSegment::where('id', $courseSegment)->pluck('segment_class_id')->first();
         $ClassLevel = SegmentClass::where('id', $segmentClass)->pluck('class_level_id')->first();
