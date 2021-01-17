@@ -220,6 +220,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api','LastAction']], 
     Route::get('get-class', 'CourseController@get_class_from_course')->middleware('permission:course/get-classes-by-course');
     Route::post('get-courses-by-classes', 'CourseController@get_courses_with_classes')->middleware('permission:course/get-courses-by-classes');
     Route::get('export', 'CourseController@export')->name('exportCourses')->middleware('permission:course/export');
+    Route::get('question_category_for_courses', 'CourseController@AddQuestionCategorytoCourses')->middleware('permission:site/show-all-courses');
 });
 
 //USER CRUD ROUTES
@@ -438,6 +439,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('interactive', InterActiveController::class);
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
     Route::Resource('courses', CoursesController::class);
+    Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
     Route::Resource('levels', LevelController::class);
     Route::Resource('classes', ClassesController::class);
@@ -446,6 +448,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('questions', QuestionsController::class);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::Resource('notify', NotificationsController::class);
+    Route::get('notification/{read}', 'NotificationsController@read')->middleware('permission:notifications/seen');
     Route::get('notifications/{types}', 'NotificationsController@index')->middleware('permission:notifications/get-all');
     Route::Resource('announcement', AnnouncementsController::class);
     Route::post('announcement/update', 'AnnouncementsController@update');
@@ -454,6 +457,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::delete('assign/role/', 'AssignRoleController@destroy');
     Route::delete('enroll/', 'EnrollController@destroy');
     Route::Resource('enroll', EnrollController::class);
+    Route::Resource('calendars', CalendarsController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {

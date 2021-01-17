@@ -28,6 +28,7 @@ return [
         'toggle' => 'Item toggle successfully',
         'link_to_file' => 'Link to the file',
         'data_imported' => 'Data imported successfully',
+        'user_list_items' => 'User list of items',
     ],
     'lesson' => [
         'add' => 'Lesson added successfully',
@@ -49,6 +50,7 @@ return [
         'content_or_file' => 'Please, enter content or file',
         'override' => 'Assignment date updated to selected students successfully',
         'cant_update' => 'Sorry, students answered this assignment, cannot be updated',
+        'assignment_hidden' => 'This assignment is hidden '
     ],
     'grade' => [
         'graded' => 'Grade submitted successfully',
@@ -64,6 +66,7 @@ return [
         'add' => 'Question added successfully',
         'update' => 'Question updated successfully',
         'delete' => 'Question deleted successfully',
+        'count' => 'Questions count',
         'answer_delete' => 'Question answer deleted successfully',
         'list' => 'Questions List',
         'question_type_error' => 'This Question is not Essay or true and false',
@@ -78,6 +81,7 @@ return [
         'update' => 'Questions category updated successfully',
         'delete' => 'Questions category deleted successfully',
         'list' => 'Questions categories List',
+        'category_cannot_deleted' => 'This category has related questions, cannot be deleted',
     ],
     'quiz' => [
         'add' => 'Quiz added successfully',
@@ -91,6 +95,7 @@ return [
         'continue_quiz' => 'You can continue your last attempt',
         'students_attempts_list' => 'Students attempts list',
         'quiz_object' => 'Quiz details',
+        'quiz_hidden' => 'This quiz is hidden'
     ],
     'permissions' => [
         'no_roles_assigned' => 'There is no roles assigned to this permission',
@@ -123,6 +128,8 @@ return [
         'delete' => 'Page deleted successfully',
         'list' => 'Pages List',
         'page_not_belong' => 'This page does not belong to this lesson',
+        'page_hidden' => 'This page is hidden'
+
     ],
     'file' => [
         'add' => 'File uploaded successfully',
@@ -130,6 +137,7 @@ return [
         'delete' => 'File deleted successfully',
         'list' => 'Files List',
         'file_not_belong' => 'This file does not belong to this lesson',
+        'file_hidden' => 'This file is hidden'
     ],
     'media' => [
         'add' => 'Media uploaded successfully',
@@ -138,6 +146,7 @@ return [
         'list' => 'Medias List',
         'media_not_belong' => 'This media does not belong to this lesson',
         'only_url_or_media' => 'Please, either upload media or add a URL',
+        'media_hidden' => 'This media is hidden',
 
         'image' => [
             'add' => 'Image uploaded successfully',
@@ -185,6 +194,7 @@ return [
         'cannot_join' => 'Sorry, you cannot join this virtual classroom',
         'join' => 'Joining virtual classroom...',
         'no_one_entered' => 'No one entered this virtual classroom',
+        'virtual_hidden' => "This virtual classroom is hidden",
 
         'record' => [
             'list' => 'Virtual classrooms records list',
@@ -202,6 +212,7 @@ return [
         'list' => 'Interactive list',
         'count' => 'Interactive count',
         'interactive_not_belong' => 'This interactive content does not belong to this lesson',
+        'hidden' => "This Interactive content is hidden",
     ],
     'auth' => [
         'invalid_username_password' => 'Invalid username or password',

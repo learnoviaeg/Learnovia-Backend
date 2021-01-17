@@ -257,10 +257,10 @@ class AnnouncementController extends Controller
             $users[] = $de->notifiable_id;
             
             //for log event
-            $logsbefore=DB::table('notifications')->where('id', $de->id)->get();
+            // $logsbefore=DB::table('notifications')->where('id', $de->id)->get();
             $check=DB::table('notifications')->where('id', $de->id)->update(['read_at' => null]);
-            if($check > 0)
-                event(new MassLogsEvent($logsbefore,'updated'));
+            // if($check > 0)
+                // event(new MassLogsEvent($logsbefore,'updated'));
         }
         //Validtaionof updated data
         $request->validate([
@@ -584,13 +584,12 @@ class AnnouncementController extends Controller
                 if($not->data['type'] == 'announcement')
                 {
                     //for log event
-                    $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
 
                     if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message){
                         $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-                
-                        if($check > 0)
-                            event(new MassLogsEvent($logsbefore,'updated'));
+                    // if($check > 0)
+                    //     event(new MassLogsEvent($logsbefore,'updated'));
                     }
                 }
             }
@@ -606,10 +605,10 @@ class AnnouncementController extends Controller
                 if($not->data['type'] == 'announcement')
                 {
                     //for log event
-                    $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
                     $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-                    if($check > 0)
-                        event(new MassLogsEvent($logsbefore,'updated'));
+                    // if($check > 0)
+                    //     event(new MassLogsEvent($logsbefore,'updated'));
                 }
             }
             $print=self::get($request);

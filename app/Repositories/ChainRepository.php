@@ -9,6 +9,7 @@ use App\YearLevel;
 use App\Level;
 use App\Enroll;
 use App\Segment;
+use App\LastAction;
 
 class ChainRepository implements ChainRepositoryInterface
 {
@@ -35,8 +36,12 @@ class ChainRepository implements ChainRepositoryInterface
             $enrolls=$enrolls->where('level', $request->level);
         if ($request->filled('class'))
             $enrolls=$enrolls->where('class', $request->class);
-        if ($request->filled('courses'))
+        if ($request->filled('courses')){
+            foreach($request->courses as $course_id){
+                LastAction::lastActionInCourse($course_id);
+            }
             $enrolls=$enrolls->whereIn('course', $request->courses);
+        }
 
     return $enrolls;
 

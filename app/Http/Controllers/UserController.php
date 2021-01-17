@@ -33,6 +33,7 @@ use Auth;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
+use App\Http\Controllers\AuthController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\attachment;
@@ -42,6 +43,8 @@ use App\Exports\ParentChildExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
+use App\LastAction;
+
 class UserController extends Controller
 {
     /**
@@ -65,7 +68,7 @@ class UserController extends Controller
             'lastname' => 'required|array',
             'lastname.*' => 'required|string|min:3|max:50',
             'password' => 'required|array',
-            'password.*' => 'required|string|min:6|max:191',
+            'password.*' => 'required|alpha_dash|string|min:6|max:191',
             // 'role' => 'required|array',
             // 'role.*' => 'required|exists:roles,id',
             'role' => 'required|integer|exists:roles,id', /// in all system
@@ -88,7 +91,8 @@ class UserController extends Controller
              'username' => 'required|array', 'type' => 'nullable|array',
             'level' => 'nullable|array', 'real_password' => 'nullable|array',
             'suspend.*' => 'boolean',
-            'suspend'=>'array'
+            'suspend'=>'array',
+            'username.*' => 'alpha_dash|unique:users,username'
         ]);
 
         // return User::max('id');
@@ -226,8 +230,8 @@ class UserController extends Controller
             'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
-            'password' => 'string|min:6|max:191',
-            'username' => 'unique:users,username,'.$request->id,
+            'password' => 'alpha_dash|string|min:6|max:191',
+            'username' => 'alpha_dash|unique:users,username,'.$request->id,
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
             'suspend' => 'boolean',
@@ -254,12 +258,25 @@ class UserController extends Controller
                 if (isset($request->password)){
                     $user->real_password=$request->password;
                     $user->password =   bcrypt($request->password);
+
+                    $tokens = $user->tokens->where('revoked',false);
+                    foreach($tokens as $token)
+                        $token->revoke();
+                    unset($user->tokens);
+                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
                 }
             }
 
             if (Auth::user()->can('user/update-username')) {
-                if (isset($request->username))
+                if (isset($request->username)){
                     $user->username=$request->username;
+
+                    $tokens = $user->tokens->where('revoked',false);
+                    foreach($tokens as $token)
+                        $token->revoke();
+                    unset($user->tokens);
+                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+                }
             }
 
         if (isset($request->picture))
@@ -411,6 +428,7 @@ class UserController extends Controller
             $flag=true;
         }if ($request->filled('course')){            
             $enrolled_users=$enrolled_users->where('course',$request->course);
+
             $flag=true;
         }if ($request->filled('year')){            
             $enrolled_users=$enrolled_users->where('year',$request->year);

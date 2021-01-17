@@ -13,13 +13,14 @@ use App\CourseSegment;
 use App\SegmentClass;
 use App\ClassLevel;
 use App\User;
-use Illuminate\Routing\Controller;
+// use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
 use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
 use Illuminate\Support\Carbon;
 use App\Component;
 use App\LessonComponent;
-
+use App\LastAction;
 class PageController extends Controller
 {
     /**
@@ -111,6 +112,7 @@ class PageController extends Controller
                 'index' => LessonComponent::getNextIndex($request->Lesson_id)
             ]);
             $TempLesson = Lesson::find($lesson);
+            LastAction::lastActionInCourse($TempLesson->courseSegment->courses[0]->id);
             $usersIDs = Enroll::where('course_segment', $TempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
             User::notify([
                 'id' => $page->id,
@@ -181,18 +183,22 @@ class PageController extends Controller
         if($request->filled('visible'))
             $page_lesson->update(['visible' => $request->visible]);
 
+        $lesson_drag = Lesson::find($request->lesson_id[0]);
+        LastAction::lastActionInCourse($lesson_drag->courseSegment->courses[0]->id);
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id[0];
             }
             $page_lesson->update([
                 'lesson_id' => $request->updated_lesson_id
             ]);
+        
         $page_lesson->updated_at = Carbon::now();
         $page_lesson->save();
         $pagename = $page->title;
         // $page = Lesson::find($request->updated_lesson_id)->module('Page', 'page')->get();
         $page['lesson'] =  $page->Lesson;
         $lesson = Lesson::find($request->updated_lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->courses[0]->id);
         $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         User::notify([
             'id' => $request->id,
@@ -232,6 +238,8 @@ class PageController extends Controller
             }
 
             $tempReturn = Lesson::find($request->lesson_id)->module('Page', 'page')->get();
+            $TempLesson = Lesson::find($request->lesson_id);
+            LastAction::lastActionInCourse($TempLesson->courseSegment->courses[0]->id);
             return HelperController::api_response_format(200, $tempReturn, __('messages.page.delete'));
         }
         return HelperController::api_response_format(404, [], __('messages.error.not_found'));
@@ -240,10 +248,13 @@ class PageController extends Controller
 
     public function get(Request $request)
     {
-        $request->validate([
+        $rules = [
             'id' => 'required|exists:pages,id',
-            'lesson_id' => 'required|exists:lessons,id'
-        ]);
+            'lesson_id' => 'required|exists:lessons,id'        ];
+        $customMessages = [
+            'exists'   => 'This page is invalid.', //attribute  but bage for user
+        ];
+        $this->validate($request, $rules, $customMessages);
         $page = page::whereId($request->id)->first();
         if ($page == null)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
@@ -254,6 +265,8 @@ class PageController extends Controller
             return HelperController::api_response_format(200, null , __('messages.page.page_not_belong'));
         $page->course_id=$course_id;
         $page->page_lesson = PageLesson::where('page_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
+        if( $request->user()->can('site/course/student') && $page->page_lesson->visible==0)
+            return HelperController::api_response_format(301,null, __('messages.page.page_hidden'));
         unset($page->lesson);
         
         return HelperController::api_response_format(200, $page);
@@ -272,7 +285,8 @@ class PageController extends Controller
             if (!isset($page_lesson)) {
                 return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
             }
-
+            $TempLesson = Lesson::find($request->lesson_id);
+            LastAction::lastActionInCourse($TempLesson->courseSegment->courses[0]->id);
             $page_lesson->visible = ($page_lesson->visible == 1) ? 0 : 1;
             $page_lesson->save();
 

@@ -11,6 +11,7 @@ Route::group(['prefix' => 'quiz', 'middleware' =>[ 'auth:api','LastAction']], fu
     Route::post('add', 'QuizController@store')->middleware('permission:quiz/add');
     Route::post('grading-method', 'QuizController@gradeing_method')->middleware('permission:quiz/grading-method');
     Route::post('update', 'QuizController@update')->middleware('permission:quiz/update');
+    Route::get('script-shuffle', 'QuizController@ScriptShuffle');
 
     //Quiz Routes
     Route::post('delete', 'QuizController@destroy')->middleware('permission:quiz/delete');
