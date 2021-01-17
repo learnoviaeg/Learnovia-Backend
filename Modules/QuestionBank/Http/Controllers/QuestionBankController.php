@@ -944,20 +944,10 @@ class QuestionBankController extends Controller
             'question_id' => 'required|integer|exists:questions,id'
         ]);
 
+        $delete_answers=QuestionAnswer::where('question_id',$request->question_id)->delete();
         $check = Questions::destroy($request->question_id);
 
         return HelperController::api_response_format(200, [], __('messages.question.delete'));
-    }
-
-    public function deleteAnswer(Request $request)
-    {
-        $request->validate([
-            'answer_id' => 'required|integer|exists:questions_answers,id'
-        ]);
-
-        $check = QuestionsAnswer::destroy($request->answer_id);
-
-        return HelperController::api_response_format(200, [], __('messages.answer.delete'));
     }
 
     public function addAnswer(Request $request)
