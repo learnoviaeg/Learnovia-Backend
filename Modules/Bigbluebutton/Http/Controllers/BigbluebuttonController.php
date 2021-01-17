@@ -35,6 +35,7 @@ use App\Course;
 use App\Paginate;
 use App\Http\Controllers\Controller;
 use App\LastAction;
+use App\Exports\BigbluebuttonGeneralReport;
 
 class BigbluebuttonController extends Controller
 {
@@ -948,7 +949,7 @@ class BigbluebuttonController extends Controller
         return HelperController::api_response_format(200 , $present_logs , 'logs edited successfully');
     }
 
-    public function general_report (Request $request){
+    public function general_report (Request $request, $call =0){
 
         $request->validate([
             'year' => 'exists:academic_years,id',
@@ -1006,7 +1007,19 @@ class BigbluebuttonController extends Controller
             ]);
 
         }
+        
+        if($call == 1)
+            return $report;
 
         return HelperController::api_response_format(200 , $report , 'virtual classroom general report');
+    }
+
+    public function export_general_report(Request $request)
+    {        
+        $bbb_object = self::general_report($request,1);
+        $filename = uniqid();
+        $file = Excel::store(new BigbluebuttonGeneralReport($bbb_object), 'bbbgeneral'.$filename.'.xls','public');
+        $file = url(Storage::url('bbbgeneral'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }
