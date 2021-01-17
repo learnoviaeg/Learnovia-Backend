@@ -1422,9 +1422,12 @@ class CourseController extends Controller
                                         if(isset($usr->attachment))
                                             $usr->picture=$usr->attachment->path;
                                         $item->user_submit->User=$usr;
-                                        if (isset($studentassigment->attachment_id)) {
+                                        if (isset($studentassigment->attachment_id)) 
                                             $item->user_submit->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-                                        }
+                                        
+                                        if (isset($studentassigment->corrected_file)) 
+                                            $item->user_submit->corrected_file = attachment::where('id', $studentassigment->corrected_file)->first();
+                                        
                                     }
                                     $item->allow_attachment = $item->assignment_lesson->allow_attachment;
                                     $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$item->assignment_lesson->id)->pluck('start_date')->first();
