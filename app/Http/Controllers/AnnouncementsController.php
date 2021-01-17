@@ -8,6 +8,7 @@ use App\AnnouncementsChain;
 use App\Announcement;
 use App\attachment;
 use Auth;
+use App\user;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use App\Repositories\ChainRepositoryInterface;
@@ -45,6 +46,14 @@ class AnnouncementsController extends Controller
             'paginate' => 'integer'
         ]);
 
+        $roles = Auth::user()->roles->pluck('name');
+        if(in_array("Parent" , $roles->toArray())){
+            if(Auth::user()->currentChild != null)
+            {
+                $currentChild =User::find(Auth::user()->currentChild->child_id);
+                Auth::setUser($currentChild);
+        }
+        }
         $paginate = 12;
         if($request->has('paginate')){
             $paginate = $request->paginate;
