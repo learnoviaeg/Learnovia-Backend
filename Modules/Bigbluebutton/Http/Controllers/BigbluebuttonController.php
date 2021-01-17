@@ -1001,7 +1001,7 @@ class BigbluebuttonController extends Controller
                 'actutal_start_date' => $meeting->actutal_start_date,
                 'start_delay' => round($actutal_start_date->diffInMinutes(Carbon::parse($meeting->start_date)),0),
                 'end_date' => isset($end_date) ? $end_date->format('Y-m-d H:i:s a') : null ,
-                'actual_end_date' => $actual_end_date->format('Y-m-d H:i:s a'),
+                'actual_end_date' => isset($meeting->actutal_start_date) ? $actual_end_date->format('Y-m-d H:i:s a') : null ,
                 'end_delay' => isset($end_date) ? round($end_date->diffInMinutes($actual_end_date),0) : null ,
             ]);
 
