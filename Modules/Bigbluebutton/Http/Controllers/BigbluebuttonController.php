@@ -961,6 +961,7 @@ class BigbluebuttonController extends Controller
         ]); 
 
         $CourseSeg=GradeCategoryController::getCourseSegment($request);
+
         $courses=CourseSegment::whereIn('id',$CourseSeg)->where('end_date','>',Carbon::now())
                                                         ->where('start_date','<',Carbon::now())
                                                         ->pluck('course_id')->unique()->values();
@@ -982,9 +983,9 @@ class BigbluebuttonController extends Controller
             if(isset($meeting->actual_duration))
                 $end_date = Carbon::parse($meeting->start_date)->addMinutes($meeting->actual_duration);
 
-            $actual_start_date = Carbon::parse($meeting->start_date);
-            if(isset($meeting->actual_start_date))
-                $actual_start_date = Carbon::parse($meeting->actual_start_date);
+            $actutal_start_date = Carbon::parse($meeting->start_date);
+            if(isset($meeting->actutal_start_date))
+                $actutal_start_date = Carbon::parse($meeting->actutal_start_date);
 
             $actual_end_date = Carbon::parse($meeting->start_date)->addMinutes($meeting->duration);
 
@@ -997,8 +998,8 @@ class BigbluebuttonController extends Controller
                 'present_students' => $present_student,
                 'absent_students' => $students - $present_student,
                 'start_date' => $meeting->start_date,
-                'actual_start_date' => $meeting->actual_start_date,
-                'start_delay' => $actual_start_date->diffInMinutes(Carbon::parse($meeting->start_date)),
+                'actutal_start_date' => $meeting->actutal_start_date,
+                'start_delay' => $actutal_start_date->diffInMinutes(Carbon::parse($meeting->start_date)),
                 'end_date' => isset($end_date) ? $end_date->format('Y-m-d H:i:s a') : null ,
                 'actual_end_date' => $actual_end_date->format('Y-m-d H:i:s a'),
                 'end_delay' => isset($end_date) ? $end_date->diffInMinutes($actual_end_date) : null ,
