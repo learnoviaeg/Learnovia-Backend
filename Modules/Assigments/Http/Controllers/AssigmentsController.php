@@ -309,7 +309,7 @@ class AssigmentsController extends Controller
         
         if ($request->filled('updated_lesson_id')) {
             $old_students = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->delete();
-            $usersIDs = Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('user_id')->toarray();
+            $usersIDs = Enroll::where('course_segment', $courseSegment)->where('role_id', 3)->pluck('user_id')->toarray();
             foreach ($usersIDs as $userId) {
                 $userassigment = new UserAssigment;
                 $userassigment->user_id = $userId;
