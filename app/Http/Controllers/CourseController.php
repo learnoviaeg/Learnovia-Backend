@@ -851,10 +851,14 @@ class CourseController extends Controller
                                             $usr=User::find($studentassigment->user_id);
                                             if(isset($usr->attachment))
                                                 $usr->picture=$usr->attachment->path;
+                                                
                                             $one['user_submit']->User=$usr;
-                                            if (isset($studentassigment->attachment_id)) {
+                                            if (isset($studentassigment->attachment_id)) 
                                                 $one['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-                                            }
+                                            
+                                            if (isset($studentassigment->corrected_file)) 
+                                                $one['user_submit']->corrected_file = attachment::where('id', $studentassigment->corrected_file)->first();
+                                            
                                         }
 
                                         $one->assignment_lesson=$assignment_lesson;
@@ -1416,10 +1420,10 @@ class CourseController extends Controller
                                     $item->item_lesson_id=$item->assignment_lesson->id;
                                     $item->status = 'new';
                                     if(isset($studentassigment)){
-                                        if($studentassigment->grade == null)
-                                            $item->status = 'submitted';
-                                        else
-                                            $item->status='graded';
+                                        if($studentassigment->grade != null)
+                                            $item->status = 'graded';
+                                        if($studentassigment->submit_date != null)
+                                            $item->status='submitted';
                                     }
                                 }
                                 // $quickaction =collect([]);

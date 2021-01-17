@@ -39,7 +39,6 @@ class Sendnotify implements ShouldQueue
      */
     public function handle()
     {
-        //  Log::debug('starting  jop ');
         $client = new \Google_Client();
         $client->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
         $client->setApplicationName("learnovia-notifications");
@@ -53,13 +52,14 @@ class Sendnotify implements ShouldQueue
         
         $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token')->get();
         // dd($this->request['users']);
-        // Log::debug(' users '. $this->request['users']);
+        // Log::debug(' users are '. $this->request['users']);
 
-        // Log::debug(' num users_token is '. count($user_token));
+        Log::debug('
+        num of users is '. count($user_token));
         $count =0;
         foreach($user_token as $token)
         {
-            // Log::debug('single token is '. $token);
+             Log::debug('user number ' .($count+1).' is  '. $token->id);
 
             $notification_id = null;
             $noti = DB::table('notifications')->where('notifiable_id', $token->id)->get();
@@ -88,11 +88,9 @@ class Sendnotify implements ShouldQueue
                         'notification_id' => $notification_id,
                         "course_name" => (string)$this->request['course_name'],
                     );
-                    // Log::debug('type is not announcement ');
 
             }else{
                 
-                // Log::debug('type is announcement and count is '. $count);
 
                 if($this->request['attached_file'] != null)
                     $att= (string) $this->request['attached_file'];
@@ -138,7 +136,7 @@ class Sendnotify implements ShouldQueue
                     ) 
                 )
             ));
-            // Log::debug("data is " . $data);
+            Log::debug("data is " . $data);
             $clientt = new Client();
             try {
                 $res = $clientt->request('POST', 'https://fcm.googleapis.com/v1/projects/learnovia-notifications/messages:send', [
@@ -148,7 +146,7 @@ class Sendnotify implements ShouldQueue
                     ], 
                     'body' => $data
                 ]);              
-                // Log::debug('request success');
+                Log::debug('request success');
             } catch (\Exception $e) {
 
                Log::debug( $e->getMessage());
