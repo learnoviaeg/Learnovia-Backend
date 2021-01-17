@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\GradeCategoryController;
 use Illuminate\Support\Str;
 use App\Classes;
+use App\Course;
 use App\Paginate;
 use App\Http\Controllers\Controller;
 use App\LastAction;
@@ -157,6 +158,7 @@ class BigbluebuttonController extends Controller
                             $bigbb->attendee_password=$attendee;
                             $bigbb->moderator_password=$request->moderator_password;
                             $bigbb->duration=$duration;
+                            $bigbb->actual_duration = $duration;
                             $bigbb->start_date=$temp_start->format('Y-m-d H:i:s');
                             $bigbb->meeting_id = $i == 0 ? $meeting_id : $meeting_id.'repeat'.$i;
                             $bigbb->user_id = Auth::user()->id;
@@ -944,5 +946,66 @@ class BigbluebuttonController extends Controller
         }
         
         return HelperController::api_response_format(200 , $present_logs , 'logs edited successfully');
+    }
+
+    public function general_report (Request $request){
+
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'class' => 'exists:classes,id',
+            'segment' => 'exists:segments,id',
+            'courses'    => 'array',
+            'courses.*'    => 'exists:courses,id',
+        ]); 
+
+        $CourseSeg=GradeCategoryController::getCourseSegment($request);
+        $courses=CourseSegment::whereIn('id',$CourseSeg)->where('end_date','>',Carbon::now())
+                                                        ->where('start_date','<',Carbon::now())
+                                                        ->pluck('course_id')->unique()->values();
+
+        $meetings = BigbluebuttonModel::whereIn('course_id',$courses)->orderBy('start_date','asc')->get();
+
+        $report=collect();
+        foreach($meetings as $meeting){
+
+            $user = User::find($meeting->user_id);
+            $course = Course::find($meeting->course_id);
+            $class = Classes::find($meeting->class_id);
+            $students = Enroll::where('class',$meeting->class_id)->where('course',$meeting->course_id)->where('role_id',3)->count();
+            $present_student = AttendanceLog::where('session_id',$meeting->id)->where('type','online')
+                                                                              ->whereNotNull('entered_date')
+                                                                              ->select('student_id')->distinct()->count();
+
+            $end_date = null;
+            if(isset($meeting->actual_duration))
+                $end_date = Carbon::parse($meeting->start_date)->addMinutes($meeting->actual_duration);
+
+            $actual_start_date = Carbon::parse($meeting->start_date);
+            if(isset($meeting->actual_start_date))
+                $actual_start_date = Carbon::parse($meeting->actual_start_date);
+
+            $actual_end_date = Carbon::parse($meeting->start_date)->addMinutes($meeting->duration);
+
+            $report->push([
+                'creator_name' => isset($user) ? $user->fullname : null,
+                'course' => isset($course) ? $course->name : null,
+                'class' => isset($class) ? $class->name : null,
+                'session_name' => $meeting->name,
+                'students_number' => $students,
+                'present_students' => $present_student,
+                'absent_students' => $students - $present_student,
+                'start_date' => $meeting->start_date,
+                'actual_start_date' => $meeting->actual_start_date,
+                'start_delay' => $actual_start_date->diffInMinutes(Carbon::parse($meeting->start_date)),
+                'end_date' => isset($end_date) ? $end_date->format('Y-m-d H:i:s a') : null ,
+                'actual_end_date' => $actual_end_date->format('Y-m-d H:i:s a'),
+                'end_delay' => isset($end_date) ? $end_date->diffInMinutes($actual_end_date) : null ,
+            ]);
+
+        }
+
+        return HelperController::api_response_format(200 , $report , 'virtual classroom general report');
     }
 }
