@@ -372,7 +372,7 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api','LastAction']], f
 });
 
 Route::post('createMeeting', 'NotificationController@createZoomMeeting');
-Route::post('createMeeting', 'NotificationController@generate_signature');
+Route::post('join', 'NotificationController@generate_signature');
 
 Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], function () {
     Route::post('add', 'ScaleController@AddScale')->name('addscale')->middleware('permission:scale/add');

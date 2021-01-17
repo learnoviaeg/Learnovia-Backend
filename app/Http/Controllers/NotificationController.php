@@ -63,7 +63,7 @@ class NotificationController extends Controller
     }
 
     public static function createZoomMeeting($meetingConfig = []){
-		$jwtToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Imtoazg4dUQwU2gyQzRxSGp5RTkwLWciLCJleHAiOjE2MTExMzM0MjMsImlhdCI6MTYxMDUyODYyNH0.KOuuA0-mgUZfMZDFIx63XEe4Qrjl8ek6qCB2s2cMZVw';
+		$jwtToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6InZyeTdranJSUkQyUUNtRFppQmg5UFEiLCJleHAiOjE2MTE0Nzg3NzAsImlhdCI6MTYxMDg3Mzk3M30.N4OnPLELOMAAMCmv_U9ndErAuXBU8SMjmDUAbx7qPqc';
 		
 		$requestBody = [
 			'topic'			=> $meetingConfig['topic'] 		?? 'PHP General Talk',
@@ -90,7 +90,8 @@ class NotificationController extends Controller
 			]
 		];
 
-		$zoomUserId = 'RIH-CQlpTj2hdDGJMuq_EA';
+        //must be a function with url https://api.zoom.us/v2/users/hendgenady_97@outlook.com Authrization:token of JWT
+		$zoomUserId = 'tAlMrgAvQ12wj-KvJmtXnw';
 
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0); // Skip SSL Verification
@@ -136,11 +137,11 @@ class NotificationController extends Controller
 
         $time = time() * 1000 - 30000;//time in milliseconds (or close enough)
         
-        $data = base64_encode('khk88uD0Sh2C4qHjyE90-g' . 73400764335 . $time . 0);
+        $data = base64_encode('vry7kjrRRD2QCmDZiBh9PQ' . 79890673824 . $time . 1);
         
-        $hash = hash_hmac('sha256', $data, 'WG8y6msZRI4LLZHNiCdzOzzgF9QqlGbnltqC', true);
+        $hash = hash_hmac('sha256', $data, 'c5NlhsbIKtuwPzINdLWEO9Ct8Tztg8X5fW8q', true);
         
-        $_sig = 'khk88uD0Sh2C4qHjyE90-g' . "." . 73400764335 . "." . $time . "." . 0 . "." . base64_encode($hash);
+        $_sig = 'vry7kjrRRD2QCmDZiBh9PQ' . "." . 79890673824 . "." . $time . "." . 1 . "." . base64_encode($hash);
         
         //return signature, url safe base64 encoded
         return rtrim(strtr(base64_encode($_sig), '+/', '-'), '=');
