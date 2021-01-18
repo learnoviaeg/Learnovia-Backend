@@ -307,7 +307,7 @@ class AssigmentsController extends Controller
         $usersIDs = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
         $courseSegment = Lesson::where('id', $request->updated_lesson_id)->pluck('course_segment_id')->first();
         
-        if ($request->filled('updated_lesson_id')) {
+        if ($request->filled('updated_lesson_id') && $request->updated_lesson_id !=$request->lesson_id ) {
             $old_students = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->delete();
             $usersIDs = Enroll::where('course_segment', $courseSegment)->where('role_id', 3)->pluck('user_id')->toarray();
             foreach ($usersIDs as $userId) {
