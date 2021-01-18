@@ -91,6 +91,7 @@ return [
         'count' => 'Quizzes count',
         'invaled_feedback' => 'Invalid feedback type, feedback can not be After submission',
         'quiz_not_belong' => 'This quiz does not belong to this lesson',
+        'no_attempts' => 'This quiz does not have any atempts',
         'override' => 'Quiz date updated to selected students successfully',
         'continue_quiz' => 'You can continue your last attempt',
         'students_attempts_list' => 'Students attempts list',
