@@ -64,14 +64,10 @@ class ChainRepository implements ChainRepositoryInterface
         if($request->filled('types'))
             $enrolls->whereIn('type', $request->types);
         
-        $active_segments = collect();
-        $request->filled('segments') ? $active_segments = $request->segments : [] ;
-
-        //request didn't has segments
-        if(count($active_segments) == 0){
-
-            $types = $enrolls->pluck('type')->unique()->values();
-            $active_segments = Segment::whereIn('academic_type_id',$types)->where('current',1)->pluck('id');
+        $types = $enrolls->pluck('type')->unique()->values();
+        $active_segments = Segment::whereIn('academic_type_id',$types)->where('current',1)->pluck('id');
+        if($request->filled('segments')){
+              $active_segments = $request->segments ;
         }
 
         if(count($active_segments) == 0)
