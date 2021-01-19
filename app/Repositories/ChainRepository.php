@@ -61,6 +61,9 @@ class ChainRepository implements ChainRepositoryInterface
 
         $enrolls =  Enroll::whereIn('year', $years);
 
+        if(count($enrolls->pluck('year'))==0)
+            throw new \Exception('Please enroll some users in any course of this year');
+
         if($request->filled('types'))
             $enrolls->whereIn('type', $request->types);
         
@@ -69,7 +72,6 @@ class ChainRepository implements ChainRepositoryInterface
         if($request->filled('segments')){
               $active_segments = $request->segments ;
         }
-
         if(count($active_segments) == 0)
             throw new \Exception('There is no active segment in those types'.$request->type);
 
