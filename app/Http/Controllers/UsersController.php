@@ -63,22 +63,34 @@ class UsersController extends Controller
         }
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
+
         if($request->filled('roles'))
            $enrolls->whereIn('role_id',$request->roles);
+
+        //using in participants api new route { api/user/participants}
+        if($my_chain=='participants'){
+            $participants_roles = '';
+        }
         
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
-                if(!$request->user()->can('site/show-all-courses')) //student
-                    $enrolls=$enrolls->where('user_id',Auth::id());
-               $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
-            }
-        if ($request->filled('courses')){
-                $enrolls->with(['user.lastactionincourse'=>function ($query) use($request){
-                        $query->whereIn('course_id',$request->courses);
-                    }]);
+
+            if(!$request->user()->can('site/show-all-courses')) //student
+                $enrolls=$enrolls->where('user_id',Auth::id());
+
+            $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
         }
+
+        if ($request->filled('courses')){
+
+            $enrolls->with(['user.lastactionincourse'=>function ($query) use($request){
+                    $query->whereIn('course_id',$request->courses);
+                }]);
+        }
+
         $enrolls =  $enrolls->select('user_id')->distinct()->with(['user.attachment','user.roles'])->get()->pluck('user')->filter()->values();
-         if($request->filled('search'))
+
+        if($request->filled('search'))
         {
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
                 if((($item->arabicname!=null) && str_contains($item->arabicname, $request->search))||
