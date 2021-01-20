@@ -9,6 +9,7 @@ use App\User;
 use App\Enroll;
 use App\Paginate;
 use App\LAstAction;
+use Spatie\Permission\Models\Permission;
 
 class UsersController extends Controller
 {
@@ -69,7 +70,10 @@ class UsersController extends Controller
 
         //using in participants api new route { api/user/participants}
         if($my_chain=='participants'){
-            $participants_roles = '';
+            // site/show/as-participant
+            $permission = Permission::where('name','site/show/as-participant')->with('roles')->first();
+            $roles_id = $permission->roles->pluck('id');
+            $enrolls->whereIn('role_id',$roles_id);
         }
         
         //using in chat api new route { api/user/my_chain}
