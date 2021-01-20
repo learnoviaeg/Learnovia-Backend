@@ -65,9 +65,6 @@ class UsersController extends Controller
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
 
-        if($request->filled('roles'))
-           $enrolls->whereIn('role_id',$request->roles);
-
         //using in participants api new route { api/user/participants}
         if($my_chain=='participants'){
             // site/show/as-participant
@@ -84,6 +81,9 @@ class UsersController extends Controller
 
             $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
         }
+
+        if($request->filled('roles'))
+            $enrolls->whereIn('role_id',$request->roles);
 
         if ($request->filled('courses')){
 
