@@ -1032,8 +1032,8 @@ class UserController extends Controller
 
         foreach($students as $student){
 
-            if(isset($student)){
-                
+            if(isset($student->user)){
+
                 foreach($student->user->parents as $parent){
 
                     Enroll::firstOrCreate([
