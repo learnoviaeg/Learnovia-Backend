@@ -451,6 +451,10 @@ class UserController extends Controller
             });
             if($call == 1){
                 $students = $users->pluck('id');
+
+                if(isset($request->from) && isset($request->to)){
+                    $students = LastAction::whereBetween('date', [$request->from, $request->to])->whereNull('course_id')->pluck('user_id');
+                }
                 return $students;
             }
     
@@ -933,6 +937,11 @@ class UserController extends Controller
 
     public function export(Request $request)
     {
+        $request->validate([
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
+        ]);
+
         $fields = ['id', 'firstname', 'lastname'];
 
         if (Auth::user()->can('site/show/username')) {
@@ -947,7 +956,7 @@ class UserController extends Controller
         }
 
         $fields = array_merge($fields, [ 'religion', 'created_at',
-        'class_id','level', 'type','second language','role'] );
+        'class_id','level', 'type','second language','role','last_action'] );
 
         $userIDs = self::list($request,1);
         $filename = uniqid();

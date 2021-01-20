@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Auth;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use DB;
+use App\LastAction;
 
 class UsersExport implements FromCollection, WithHeadings
 {
@@ -29,7 +30,11 @@ class UsersExport implements FromCollection, WithHeadings
             if(isset($role_id))
                 $role_name = DB::table('roles')->where('id',$role_id)->first()->name;
             $value['role'] = $role_name;
-            
+            $value['last_action'] = '_';
+            $last = LastAction::where('user_id',$value->id)->whereNull('course_id')->first();
+            if(isset($last))
+                $value['last_action'] = $last->date;
+                
             $value->setHidden([])->setVisible($this->fields);
         }
         
