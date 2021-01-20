@@ -1032,22 +1032,25 @@ class UserController extends Controller
 
         foreach($students as $student){
 
-            foreach($student->user->parents as $parent){
+            if(isset($student->user)){
 
-                Enroll::firstOrCreate([
-                    'course_segment' => $student->course_segment,
-                    'user_id' => $parent->id,
-                    'role_id'=> 7,
-                    'year' => $student->year,
-                    'type' => $student->type,
-                    'level' => $student->level,
-                    'class' => $student->class,
-                    'segment' => $student->segment,
-                    'course' => $student->course
-                ]);
+                foreach($student->user->parents as $parent){
 
+                    Enroll::firstOrCreate([
+                        'course_segment' => $student->course_segment,
+                        'user_id' => $parent->id,
+                        'role_id'=> 7,
+                        'year' => $student->year,
+                        'type' => $student->type,
+                        'level' => $student->level,
+                        'class' => $student->class,
+                        'segment' => $student->segment,
+                        'course' => $student->course
+                    ]);
+    
+                }
             }
-            
+        
         }
 
         return 'done';
