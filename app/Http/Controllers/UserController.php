@@ -396,7 +396,9 @@ class UserController extends Controller
             'year' => 'nullable|integer|exists:academic_years,id',
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
-            'count' => 'in:1,0'
+            'count' => 'in:1,0',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
         ]);
         $users = User::where('id','!=',0)->with('roles');
         if($request->filled('country'))
@@ -411,6 +413,10 @@ class UserController extends Controller
             $users= $users->whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
         });
+        if($request->filled('from') && $request->filled('to')){ //lastaction filter
+            $ids = LastAction::whereBetween('date', [$request->from, $request->to])->whereNull('course_id')->pluck('user_id');
+            $users = $users->whereIn('id',$ids);
+        }
         
         $flag=false;
         $enrolled_users=Enroll::where('id','!=',0);
@@ -451,10 +457,6 @@ class UserController extends Controller
             });
             if($call == 1){
                 $students = $users->pluck('id');
-
-                if(isset($request->from) && isset($request->to)){
-                    $students = LastAction::whereBetween('date', [$request->from, $request->to])->whereNull('course_id')->pluck('user_id');
-                }
                 return $students;
             }
     
@@ -937,11 +939,6 @@ class UserController extends Controller
 
     public function export(Request $request)
     {
-        $request->validate([
-            'from' => 'date|required_with:to',
-            'to' => 'date|required_with:from',
-        ]);
-
         $fields = ['id', 'firstname', 'lastname'];
 
         if (Auth::user()->can('site/show/username')) {
