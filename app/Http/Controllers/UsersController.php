@@ -80,6 +80,9 @@ class UsersController extends Controller
                 $enrolls=$enrolls->where('user_id',Auth::id());
 
             $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
+             
+            if($request->user()->can('site/course/student'))
+                $enrolls->where('role_id','!=',7);
         }
 
         if($request->filled('roles'))
