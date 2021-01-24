@@ -603,6 +603,10 @@ class SpatieController extends Controller
         $request->validate([
             'id' => 'required|exists:roles,id'
         ]);
+
+        if(in_array($request->id,[1,2,3,4,5,6,7,8]))
+            return HelperController::api_response_format(200, null, __('messages.error.cannot_delete'));
+            
         $find = Role::find($request->id);
         if ($find) {
             $find->delete();
