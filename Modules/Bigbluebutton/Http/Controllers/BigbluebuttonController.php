@@ -10,6 +10,7 @@ use App\Component;
 use App\User;
 use App\Events\MassLogsEvent;
 use App\Enroll;
+use App\ZoomAccount;
 use Auth;
 use Log;
 use App\CourseSegment;
@@ -106,14 +107,16 @@ class BigbluebuttonController extends Controller
             'object.*.class_id' => 'required|array',
             'object.*.class_id.*' => 'required|exists:classes,id',
             'object.*.course_id' => 'required|exists:courses,id',
-            'attendee_password' => 'required|string|different:moderator_password',
-            'moderator_password' => 'required|string',
+            'attendee_password' => 'required_if:type,==,BBB|string|different:moderator_password',
+            'moderator_password' => 'required_if:type,==,BBB|string',
             'duration' => 'nullable',
-            'is_recorded' => 'required|bool',
+            'is_recorded' => 'required|in:0,1,2',
             'start_date' => 'required|array',
             'start_date.*' => 'date',
             'last_day' => 'date',
-            'visible' => 'in:0,1'
+            'visible' => 'in:0,1',
+            'type' => 'required|string|in:BBB,Zoom',
+            'host_id' => 'required_if:type,==,Zoom'
         ]);
 
         $attendee= 'learnovia123';
@@ -152,6 +155,7 @@ class BigbluebuttonController extends Controller
                         while(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::parse($last_date)->format('Y-m-d H:i:s')){
                             $bigbb = new BigbluebuttonModel;
                             $bigbb->name=$request->name;
+                            $bigbb->type=$request->type;
                             $bigbb->class_id=$class;
                             $bigbb->course_id=$object['course_id'];
                             $bigbb->attendee_password=$attendee;
@@ -160,6 +164,7 @@ class BigbluebuttonController extends Controller
                             $bigbb->start_date=$temp_start->format('Y-m-d H:i:s');
                             $bigbb->meeting_id = $i == 0 ? $meeting_id : $meeting_id.'repeat'.$i;
                             $bigbb->user_id = Auth::user()->id;
+                            $bigbb->host_id = ($request->host_id) ? $request->host_id : null;
                             $bigbb->is_recorded = $request->is_recorded;
                             $bigbb->started = 0;
                             $bigbb->show = isset($request->visible)?$request->visible:1;
@@ -214,6 +219,93 @@ class BigbluebuttonController extends Controller
         return HelperController::api_response_format(200, $meetings ,__('messages.virtual.list'));
     }
 
+    public function start_meeting_zoom(Request $request)
+    {
+        $request->validate([
+            'id'=>'required|exists:bigbluebutton_models,id',
+        ]);
+
+        $bigbb=BigbluebuttonModel::find($request->id);
+        $user=ZoomAccount::where('user_id',$bigbb->host_id)->first();
+        if(!isset($user))
+            throw new \Exception(__('messages.zoom.zoom_account'));
+        
+        $jwtToken = $user->jwt_token;
+        $zoomUserId = $user->user_zoom_id;
+        switch($bigbb->is_recorded){
+            case 0:
+                $record= 'none';
+            case 1:
+                $record= 'cloud';
+            case 2:
+                $record= 'local';
+        }
+
+        $requestBody = [
+            'topic'	=> $bigbb->name,
+            // 1 >> instance meeting
+            // 2 >> schedualed meeting
+            // 3 >> meeting without fixed time
+            // 8 >> meeting without fixed time
+            'type'			=> 2,
+            'start_time'	=> $bigbb->start_date	,
+            'duration'		=> $bigbb->duration,
+            'password'		=> '123456',
+            'timezone'		=> 'Africa/Cairo',
+            'agenda'		=> 'Learnovia',
+            // 'recurrence'    => [
+            //     'type'=> 2, // 1 >> Daily .. 2 >> Weekly .. 3 >> Monthly
+            //     'repeat_interval'=> 1,
+            //     'weekly_days'=>"3,5",
+            //     'end_date_time'=> "2020-06-02T03:59:00Z",
+            // ],
+            'settings'		=> [
+                    'host_video'			=> false,
+                    'participant_video'		=> false,
+                    'cn_meeting'			=> false,
+                    'in_meeting'			=> false,
+                    'join_before_host'		=> false,
+                    'mute_upon_entry'		=> true,
+                    'watermark'				=> false,
+                    'use_pmi'				=> false,
+                    'approval_type'			=> 1,
+                    'registration_type'		=> 1,
+                    'audio'					=> 'voip',
+                    'auto_recording'		=> $record, //2:local, 1:cloud, 0:none
+                    'waiting_room'			=> false
+            ]
+        ];
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0); // Skip SSL Verification
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://api.zoom.us/v2/users/".$zoomUserId."/meetings",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYPEER => 0,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => json_encode($requestBody),
+            CURLOPT_HTTPHEADER => array(
+            "Authorization: Bearer ".$jwtToken,
+            "Content-Type: application/json",
+            "cache-control: no-cache"
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        $bigbb->join_url=json_decode($response,true)['join_url'];
+        $bigbb->meeting_id=json_decode($response,true)['id'];
+        $bigbb->status = 'current';
+        $bigbb->started = 1;
+        $bigbb->actutal_start_date = Carbon::now();
+        $bigbb->save();
+        return $response;
+    }
+
     public function start_meeting(Request $request)
     {
         $request->validate([
@@ -222,7 +314,6 @@ class BigbluebuttonController extends Controller
 
         $bigbb=BigbluebuttonModel::find($request->id);
         LastAction::lastActionInCourse($bigbb->course_id);
-
 
         $url= config('app.url');
         $url = substr($url, 0, strpos($url, "api"));
@@ -313,25 +404,38 @@ class BigbluebuttonController extends Controller
             return HelperController::api_response_format(200,null ,__('messages.virtual.cannot_join'));
 
         if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0){
-            $start_meeting = self::start_meeting($request);
+            if($bigbb->type == 'Zoom')
+                $start_meeting = self::start_meeting_zoom($request);
+
+            if($bigbb->type == 'BBB')
+                $start_meeting = self::start_meeting($request);
+
             if(!$start_meeting)
                 return HelperController::api_response_format(200, [],__('messages.error.try_again'));
         }
+
         LastAction::lastActionInCourse($bigbb->course_id);
             
-        $user_name = Auth::user()->username;
-        $full_name = Auth::user()->fullname;
-        
-        $password = $bigbb->attendee_password;
-        if($request->user()->can('bigbluebutton/session-moderator'))
-            $password = $bigbb->moderator_password;
-        
-        $joinMeetingParams = new JoinMeetingParameters($bigbb->meeting_id, $full_name, $password);
-        $joinMeetingParams->setRedirect(true);
-        $joinMeetingParams->setJoinViaHtml5(true);
-        $joinMeetingParams->setUserId($user_name);
-        $url = $bbb->getJoinMeetingURL($joinMeetingParams);
+        $url = null;
+        if($bigbb->type == 'BBB'){
+            $user_name = Auth::user()->username;
+            $full_name = Auth::user()->fullname;
+            
+            $password = $bigbb->attendee_password;
+            if($request->user()->can('bigbluebutton/session-moderator'))
+                $password = $bigbb->moderator_password;
+            
+            $joinMeetingParams = new JoinMeetingParameters($bigbb->meeting_id, $full_name, $password);
+            $joinMeetingParams->setRedirect(true);
+            $joinMeetingParams->setJoinViaHtml5(true);
+            $joinMeetingParams->setUserId($user_name);
+            $url = $bbb->getJoinMeetingURL($joinMeetingParams);
+        }
 
+        if($bigbb->type == 'Zoom'){
+            $url= BigbluebuttonModel::find($request->id)->join_url;
+        }
+        
         $output = array(
             'name' => $bigbb->name,
             'duration' => $bigbb->duration,
@@ -944,5 +1048,11 @@ class BigbluebuttonController extends Controller
         }
         
         return HelperController::api_response_format(200 , $present_logs , 'logs edited successfully');
+    }
+
+    public function Script_type()
+    {
+        $allBBB=BigbluebuttonModel::whereNull('type')->update(['type' => 'BBB']);
+        return 'Done';
     }
 }

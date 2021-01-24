@@ -371,9 +371,6 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api','LastAction']], f
     });
 });
 
-Route::post('createMeeting', 'NotificationController@createZoomMeeting');
-Route::post('join', 'NotificationController@generate_signature');
-
 Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], function () {
     Route::post('add', 'ScaleController@AddScale')->name('addscale')->middleware('permission:scale/add');
     Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
@@ -461,6 +458,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::delete('enroll/', 'EnrollController@destroy');
     Route::Resource('enroll', EnrollController::class);
     Route::Resource('calendars', CalendarsController::class);
+    Route::Resource('zoom', ZoomAccountController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
