@@ -465,3 +465,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);
 });
+
+Route::group(['prefix' => 'report', 'middleware' => ['auth:api','LastAction']], function () {
+    Route::get('active_users', 'GeneralReportController@active_users')->name('activeusers');//->middleware('permission:report/active_users');
+});
