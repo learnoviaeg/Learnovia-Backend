@@ -391,7 +391,7 @@ class AssigmentsController extends Controller
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,xls,xlsx,ppt,pptx,docx',
+            'file' => 'file|distinct|mimes:pdf,docs,doc,docx,xls,xlsx,ppt,pptx',
         ];
         // $customMessages = [
         //     'file.mimes' => 'please enter a pdf file.'
