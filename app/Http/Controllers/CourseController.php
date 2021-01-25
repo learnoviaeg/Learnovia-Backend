@@ -887,6 +887,7 @@ class CourseController extends Controller
                                         }
 
                                         $one->assignment_lesson=$assignment_lesson;
+                                        $one->due_date=$assignment_lesson->due_date;
                                         $one['allow_attachment'] = $assignment_lesson->allow_attachment;
                                         $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignment_lesson->id)->pluck('start_date')->first();
                                         $one->start_date = $assignment_lesson->start_date;
