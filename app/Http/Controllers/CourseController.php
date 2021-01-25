@@ -818,7 +818,7 @@ class CourseController extends Controller
                                         $Component->where('publish_date', '<=', Carbon::now()); 
                                     }
                                 }
-                                $lessonn[$com->name] = $Component->get();
+                                $lessonn[$com->name] = $Component->orderBy('created_at','desc')->get();
                                 foreach($lessonn[$com->name] as $le){
                                     $le['course_id']=(int)$request->course_id;
                                     if($le->pivot->media_id)
@@ -1441,10 +1441,10 @@ class CourseController extends Controller
                                     $item->item_lesson_id=$item->assignment_lesson->id;
                                     $item->status = 'new';
                                     if(isset($studentassigment)){
-                                        if($studentassigment->grade == null)
-                                            $item->status = 'submitted';
-                                        else
-                                            $item->status='graded';
+                                        if($studentassigment->grade != null)
+                                            $item->status = 'graded';
+                                        if($studentassigment->submit_date != null)
+                                            $item->status='submitted';
                                     }
                                 }
                                 // $quickaction =collect([]);

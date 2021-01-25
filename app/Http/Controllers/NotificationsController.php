@@ -37,6 +37,14 @@ class NotificationsController extends Controller
             'sort_in' => 'in:asc,desc', 
             'search' => 'string'
         ]);
+        $roles = Auth::user()->roles->pluck('name');
+        if(in_array("Parent" , $roles->toArray())){
+            if(Auth::user()->currentChild != null)
+            {
+                $currentChild =User::find(Auth::user()->currentChild->child_id);
+                Auth::setUser($currentChild);
+        }
+        }
 
         $notify = DB::table('notifications')->select('data','read_at','id')
             ->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();

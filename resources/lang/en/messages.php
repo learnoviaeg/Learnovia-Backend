@@ -81,6 +81,7 @@ return [
         'update' => 'Questions category updated successfully',
         'delete' => 'Questions category deleted successfully',
         'list' => 'Questions categories List',
+        'category_cannot_deleted' => 'This category has related questions, cannot be deleted',
     ],
     'quiz' => [
         'add' => 'Quiz added successfully',
@@ -286,5 +287,11 @@ return [
         'delete' => 'User/s unenrolled successfully',
         'already_enrolled' => 'Those users are already enrolled',
         'no_courses_belong_to_class' => 'No courses belong to this class',
+    ],
+    'status' => [
+        'submitted' => 'Submitted',
+        'not_submitted' => 'Not submitted',
+        'graded' => 'Graded',
+        'not_graded' => 'Not graded',
     ],
 ];

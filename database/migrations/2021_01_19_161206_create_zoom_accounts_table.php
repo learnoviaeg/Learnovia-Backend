@@ -17,7 +17,6 @@ class CreateZoomAccountsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->longText('jwt_token');
             $table->longText('api_key');
             $table->longText('api_secret');
             $table->string('email')->unique()->nullable();
