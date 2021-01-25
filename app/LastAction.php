@@ -45,4 +45,8 @@ class LastAction extends Model
             ,'course_id'=>$course_id
     ]);
     }
+    public function user()
+    {
+        return $this->belongsTo('App\User','user_id','id');
+    }
 }
