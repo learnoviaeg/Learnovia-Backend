@@ -459,6 +459,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::delete('enroll/', 'EnrollController@destroy');
     Route::Resource('enroll', EnrollController::class);
     Route::Resource('calendars', CalendarsController::class);
+    Route::Resource('zoom', ZoomAccountController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {

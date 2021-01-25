@@ -62,6 +62,20 @@ class NotificationController extends Controller
         return $result;
     }
     
+    function generate_signature (){
+
+        $time = time() * 1000 - 30000;//time in milliseconds (or close enough)
+        
+        $data = base64_encode('vry7kjrRRD2QCmDZiBh9PQ' . 79890673824 . $time . 1);
+        
+        $hash = hash_hmac('sha256', $data, 'c5NlhsbIKtuwPzINdLWEO9Ct8Tztg8X5fW8q', true);
+        
+        $_sig = 'vry7kjrRRD2QCmDZiBh9PQ' . "." . 79890673824 . "." . $time . "." . 1 . "." . base64_encode($hash);
+        
+        //return signature, url safe base64 encoded
+        return rtrim(strtr(base64_encode($_sig), '+/', '-'), '=');
+    }
+    
    /**
     * @description: get all Notifications From database From Notifcation Table of this user.
     * @param no required parameters

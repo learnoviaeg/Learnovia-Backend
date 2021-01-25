@@ -283,6 +283,9 @@ return [
         'already_enrolled' => 'Those users are already enrolled',
         'no_courses_belong_to_class' => 'No courses belong to this class',
     ],
+    'zoom' => [
+        'zoom_account' => 'user haven\'t account on zoom',
+    ],
     'status' => [
         'submitted' => 'Submitted',
         'not_submitted' => 'Not submitted',
