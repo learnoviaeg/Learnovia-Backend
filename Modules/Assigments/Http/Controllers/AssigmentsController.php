@@ -391,13 +391,13 @@ class AssigmentsController extends Controller
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
+            'file'=>'file|distinct|mimes:pdf'
         ];
-        // $customMessages = [
-        //     'file.mimes' => 'please enter a pdf file.'
-        // ]
+        $customMessages = [
+            'file.mimes' => 'please enter a pdf file.'
+        ];
     
-        $this->validate($request, $rules);
+        $this->validate($request, $rules,$customMessages);
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()))
             return HelperController::api_response_format(400, null , $message = __('messages.error.parent_cannot_submit'));
