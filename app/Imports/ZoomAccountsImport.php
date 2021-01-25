@@ -45,6 +45,19 @@ class ZoomAccountsImport implements ToModel, WithHeadingRow
 
         $response = curl_exec($curl);
 
+        // $err = curl_error($curl);
+        // curl_close($curl);
+
+        // if ($err) {
+        //     return [
+        //         'success' 	=> false, 
+        //         'msg' 		=> 'cURL Error #:' . $err,
+        //         'response' 	=> ''
+        //     ];
+        // }
+
+        // throw new \Exception(__('messages.zoom.zoom_account'));
+
         $useraccount = ZoomAccount::create([
             'user_id' => $user_id,
             'jwt_token' => $row['jwt_token'],
