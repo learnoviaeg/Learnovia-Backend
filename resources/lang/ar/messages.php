@@ -283,6 +283,9 @@ return [
         'already_enrolled' => 'هؤلاء المستخدمون مسجلون بالفعل',
         'no_courses_belong_to_class' => 'لا توجد مواد تنتمي إلى هذا الفصل',
     ],
+    'zoom' => [
+        'zoom_account' => 'ليس لدى المستخدم حساب على زوم',
+    ],
     'status' => [
         'submitted' => 'تم التسليم',
         'not_submitted' => 'لم يتم التسليم',

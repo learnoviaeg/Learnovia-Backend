@@ -57,13 +57,6 @@
       'Browser' => 'hisorange\\BrowserDetect\\Facade',
     ),
   ),
-  'illuminated/db-profiler' => 
-  array (
-    'providers' => 
-    array (
-      // 0 => 'Illuminated\\Database\\DbProfilerServiceProvider',
-    ),
-  ),
   'laravel/passport' => 
   array (
     'providers' => 
