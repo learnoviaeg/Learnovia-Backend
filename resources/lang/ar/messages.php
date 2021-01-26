@@ -22,6 +22,7 @@ return [
         'already_exist' => 'العنصر موجود بالفعل',
         'no_active_segment' => 'لا يوجد تيرم مفعل لهذا العنصر',
         'no_active_year' => 'لا توجد سنة مفعلة متاحة',
+        'extension_not_supported' => 'هذا الامتداد غير معتمد ',
     ],
     'success' => [
         'submit_success' => 'تم إرسال الإجابة بنجاح',
