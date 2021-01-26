@@ -851,6 +851,7 @@ class CourseController extends Controller
                                     $one['visible'] = $quiz_lesson->visible;
                                     $one['item_lesson_id']=$quiz_lesson->id;
                                     $one->quiz_lesson=$quiz_lesson;
+                                    $one->due_date=$quiz_lesson->due_date;
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
                                     else
