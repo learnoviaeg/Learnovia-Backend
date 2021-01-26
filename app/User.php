@@ -52,7 +52,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ['fullname','lastaction'];
+    protected $appends = ['fullname','lastaction','status'];
 
     private static function getUserCounter($lastid)
     {
@@ -225,5 +225,17 @@ class User extends Authenticatable
        if (isset($last_action))
             return Carbon::Parse($last_action->date);
         
+    }
+
+    public function getStatusAttribute() {
+        $status = 'offline';
+
+        $active_user  = LastAction::where('user_id',$this->id)->where('course_id',null)
+                                                              ->where('date','>=' ,Carbon::now())
+                                                              ->where('date','<=' ,Carbon::now()->addMinutes(1))->first();
+        if(isset($active_user))
+            $status = 'online';
+
+        return $status;
     }
 }
