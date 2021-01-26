@@ -851,6 +851,7 @@ class CourseController extends Controller
                                     $one['visible'] = $quiz_lesson->visible;
                                     $one['item_lesson_id']=$quiz_lesson->id;
                                     $one->quiz_lesson=$quiz_lesson;
+                                    $one->due_date=$quiz_lesson->due_date;
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
                                     else
@@ -876,10 +877,14 @@ class CourseController extends Controller
                                             $usr=User::find($studentassigment->user_id);
                                             if(isset($usr->attachment))
                                                 $usr->picture=$usr->attachment->path;
+                                                
                                             $one['user_submit']->User=$usr;
-                                            if (isset($studentassigment->attachment_id)) {
+                                            if (isset($studentassigment->attachment_id)) 
                                                 $one['user_submit']->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-                                            }
+                                            
+                                            if (isset($studentassigment->corrected_file)) 
+                                                $one['user_submit']->corrected_file = attachment::where('id', $studentassigment->corrected_file)->first();
+                                            
                                         }
 
                                         $one->assignment_lesson=$assignment_lesson;
@@ -1419,9 +1424,12 @@ class CourseController extends Controller
                                         if(isset($usr->attachment))
                                             $usr->picture=$usr->attachment->path;
                                         $item->user_submit->User=$usr;
-                                        if (isset($studentassigment->attachment_id)) {
+                                        if (isset($studentassigment->attachment_id)) 
                                             $item->user_submit->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-                                        }
+                                        
+                                        if (isset($studentassigment->corrected_file)) 
+                                            $item->user_submit->corrected_file = attachment::where('id', $studentassigment->corrected_file)->first();
+                                        
                                     }
                                     $item->allow_attachment = $item->assignment_lesson->allow_attachment;
                                     $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$item->assignment_lesson->id)->pluck('start_date')->first();
