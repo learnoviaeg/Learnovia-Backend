@@ -231,8 +231,8 @@ class User extends Authenticatable
         $status = 'offline';
 
         $active_user  = LastAction::where('user_id',$this->id)->where('course_id',null)
-                                                              ->where('date','>=' ,Carbon::now())
-                                                              ->where('date','<=' ,Carbon::now()->addMinutes(1))->first();
+                                                              ->where('date','>=' ,Carbon::now()->subMinutes(1))
+                                                              ->where('date','<=' ,Carbon::now())->first();
         if(isset($active_user))
             $status = 'online';
 
