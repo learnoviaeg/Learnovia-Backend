@@ -395,11 +395,11 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'file' => 'file|distinct|mimes:pdf,docs,doc,docx,xls,xlsx,ppt,pptx',
         ];
-        // $customMessages = [
-        //     'file.mimes' => 'please enter a pdf file.'
-        // ];
+        $customMessages = [
+            'file.mimes' => __('messages.error.extension_not_supported')
+        ];
     
-        $this->validate($request, $rules);
+        $this->validate($request, $rules,$customMessages);
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()))
             return HelperController::api_response_format(400, null , $message = __('messages.error.parent_cannot_submit'));
