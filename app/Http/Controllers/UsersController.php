@@ -24,7 +24,7 @@ class UsersController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -64,6 +64,10 @@ class UsersController extends Controller
         }
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
+        if(count($request->class) > 1)
+            $enrolls = $this->chain->getCourseSegmentByManyChain($request);
+
+        return $enrolls->get();
 
         //using in participants api new route { api/user/participants}
         if($my_chain=='participants'){
