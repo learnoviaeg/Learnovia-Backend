@@ -20,13 +20,14 @@ class ZoomAccountsImport implements ToModel, WithHeadingRow
     {
         Validator::make($row,[
             'username'=>'required|exists:users,username',
-            'jwt_token' => 'required',
+            // 'jwt_token' => 'required',
             'api_key' => 'required',
             'api_secret' => 'required',
             'email' => 'required|email',
         ])->validate();
 
         $user_id = User::where('username',$row['username'])->pluck('id')->first();
+        $jwt_token=ZoomAccount::generate_jwt_token($row['api_key'],$row['api_secret']);
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
@@ -38,7 +39,7 @@ class ZoomAccountsImport implements ToModel, WithHeadingRow
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => "GET",
         CURLOPT_HTTPHEADER => array(
-            "authorization: Bearer " . $row['jwt_token'],
+            "authorization: Bearer " . $jwt_token,
             "content-type: application/json"
         ),
         ));
@@ -60,7 +61,7 @@ class ZoomAccountsImport implements ToModel, WithHeadingRow
 
         $useraccount = ZoomAccount::create([
             'user_id' => $user_id,
-            'jwt_token' => $row['jwt_token'],
+            'jwt_token' => $jwt_token,
             'api_key' => $row['api_key'],
             'api_secret' => $row['api_secret'],
             'email' => $row['email'],
