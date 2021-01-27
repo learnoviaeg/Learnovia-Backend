@@ -64,7 +64,7 @@ class UsersController extends Controller
         }
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
-        if(count($request->class) > 1)
+        if($request->filled('class') && count($request->class) > 1)
             $enrolls = $this->chain->getCourseSegmentByManyChain($request);
 
         return $enrolls->get();
