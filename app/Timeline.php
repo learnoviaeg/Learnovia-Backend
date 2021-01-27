@@ -57,11 +57,14 @@ class Timeline extends Model
         }
 
         if(!Auth::user()->can('site/course/student')){
-            $status = __('messages.status.not_graded');
+            $status = __('messages.status.no_answers');
 
             if($this->type == 'assignment'){
                 $assigLessonID = AssignmentLesson::where('assignment_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
                 $user_assigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('submit_date')->pluck('grade');
+                if(count($user_assigment) > 0)
+                    $status = __('messages.status.not_graded');//not_graded
+
                 if(!in_array(NULL,$user_assigment->toArray(),true))
                     $status = __('messages.status.graded');//graded
             }
@@ -70,6 +73,9 @@ class Timeline extends Model
                 $quiz_lesson = QuizLesson::where('quiz_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
                 $user_quiz = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('id');
                 $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->where('force_submit',1)->pluck('user_grade');
+                if(count($user_quiz_asnwer) > 0)
+                    $status = __('messages.status.not_graded');//not_graded
+
                 if(!in_array(NULL,$user_quiz_asnwer->toArray(),true))
                     $status = __('messages.status.graded');//graded
             }

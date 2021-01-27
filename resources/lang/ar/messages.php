@@ -292,5 +292,6 @@ return [
         'not_submitted' => 'لم يتم التسليم',
         'graded' => 'مصحح',
         'not_graded' => 'غير مصحح',
+        'no_answers' => 'لا توجد إجابات',
     ],
 ];
