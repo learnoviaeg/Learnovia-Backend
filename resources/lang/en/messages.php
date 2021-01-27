@@ -22,6 +22,7 @@ return [
         'already_exist' => 'Item is already exist',
         'no_active_segment' => 'There is no active segment for this item',
         'no_active_year' => 'There is no active year available',
+        'no_permission' => 'User does not have the right permissions',
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',

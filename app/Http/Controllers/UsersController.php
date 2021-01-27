@@ -44,7 +44,7 @@ class UsersController extends Controller
             'class' => 'exists:classes,id',
             'roles' => 'array',
             'roles.*' => 'exists:roles,id',
-            'search' => 'string'
+            'search' => 'string',
         ]);
 
         //using in chat api new route { api/user/all}
@@ -105,6 +105,35 @@ class UsersController extends Controller
                   str_contains(strtolower($item->fullname),strtolower($request->search))) 
                     return $item; 
             });
+        }
+
+        
+        //using in active user api new route { api/user/active}
+        if($my_chain == 'active'){
+
+            if(!$request->user()->can('report/active_users'))
+                return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+
+            $request->validate([
+                'from' => 'date|required_with:to',
+                'to' => 'date|required_with:from',
+                'report_year' => 'required|integer',
+                'report_month' => 'integer|required_with:report_day',
+                'report_day' => 'integer',
+            ]);
+
+            $users_lastaction = LastAction::whereNull('course_id')->whereYear('date', $request->report_year)->whereIn('user_id',$enrolls->pluck('id'))->with('user');
+            
+            if($request->filled('report_month'))
+                $users_lastaction->whereMonth('date',$request->report_month);
+            
+            if($request->filled('report_day'))
+                $users_lastaction->whereDay('date',$request->report_day);
+
+            if($request->filled('from') && $request->filled('to'))
+                $users_lastaction->whereBetween('date', [$request->from, $request->to]);
+            
+            return response()->json(['message' => 'Active users list ', 'body' => $users_lastaction->get()->pluck('user')], 200);
         }
 
         return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
