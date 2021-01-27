@@ -292,5 +292,6 @@ return [
         'not_submitted' => 'Not submitted',
         'graded' => 'Graded',
         'not_graded' => 'Not graded',
+        'no_answers' => 'No answers',
     ],
 ];
