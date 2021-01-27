@@ -23,6 +23,7 @@ return [
         'no_active_segment' => 'لا يوجد تيرم مفعل لهذا العنصر',
         'no_active_year' => 'لا توجد سنة مفعلة متاحة',
         'extension_not_supported' => 'هذا الامتداد غير معتمد ',
+        'no_permission' => 'المستخدم ليس لديه الإذن',
     ],
     'success' => [
         'submit_success' => 'تم إرسال الإجابة بنجاح',

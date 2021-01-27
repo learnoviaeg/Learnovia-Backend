@@ -23,6 +23,7 @@ return [
         'no_active_segment' => 'There is no active segment for this item',
         'no_active_year' => 'There is no active year available',
         'extension_not_supported' => 'This extension is not supported',
+        'no_permission' => 'User does not have the right permissions',
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
