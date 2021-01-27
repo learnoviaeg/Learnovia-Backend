@@ -67,8 +67,7 @@ class UsersController extends Controller
         if($request->filled('class') && count($request->class) > 1)
             $enrolls = $this->chain->getCourseSegmentByManyChain($request);
 
-        return $enrolls->get();
-
+            
         //using in participants api new route { api/user/participants}
         if($my_chain=='participants'){
             // site/show/as-participant
