@@ -577,8 +577,12 @@ class BigbluebuttonController extends Controller
                 if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
                 ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
                 {
-                    if($m->type == 'BBB')
-                        self::create_hook($request);
+                    try{
+                        $try = self::create_hook($request);    
+                    }
+                    catch(\Exception $e){
+                        //error
+                    }
                     if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
                         $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
                 }
