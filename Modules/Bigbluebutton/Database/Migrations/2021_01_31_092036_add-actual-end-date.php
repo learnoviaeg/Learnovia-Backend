@@ -14,7 +14,7 @@ class AddActualEndDate extends Migration
     public function up()
     {
         Schema::table('bigbluebutton_models', function (Blueprint $table) {
-            $table->string('actual_end_date')->nullable();
+            $table->dateTime('actual_end_date')->nullable();
         });
     }
 
