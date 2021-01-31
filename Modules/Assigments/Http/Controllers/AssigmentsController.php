@@ -40,6 +40,8 @@ use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\LastAction;
 use NcJoes\OfficeConverter\OfficeConverter;
+use Illuminate\Support\Facades\App;
+
 
 
 class AssigmentsController extends Controller
@@ -395,11 +397,11 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'file' => 'file|distinct|mimes:pdf,docs,doc,docx,xls,xlsx,ppt,pptx',
         ];
-        // $customMessages = [
-        //     'file.mimes' => 'please enter a pdf file.'
-        // ];
+        $customMessages = [
+            'file.mimes' => __('messages.error.extension_not_supported')
+        ];
     
-        $this->validate($request, $rules);
+        $this->validate($request, $rules,$customMessages);
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()))
             return HelperController::api_response_format(400, null , $message = __('messages.error.parent_cannot_submit'));
@@ -933,18 +935,33 @@ class AssigmentsController extends Controller
     public function AnnotatePDF(Request $request)
     {
         $request->validate([
-        'attachment_id' => 'integer|required|exists:attachments,id', //because this file may not be assigned to user "corrected_file" 
-        // 'attachment_id' => 'integer|required|exists:user_assigments,attachment_id',
+        'attachment_id' => 'integer|exists:attachments,id', //because this file may not be assigned to user "corrected_file" 
+        'content' => 'string',
         ]);
-      
-
-
         $images_path=collect([]);
+        // $outputFile = Str::substr($attachmnet->name, 0,strpos($attachmnet->name,'.')).'.pdf';
+        if($request->filled('content')){
+            $pdf_of_content = App::make('dompdf.wrapper');
+            $pdf_of_content->loadHTML($request->content);
+            // $path = public_path('pdf_docs/'); // <--- folder to store the pdf documents into the server;
+            $fileName =  time().'_content.'. 'pdf' ; // <--giving the random filename,
+            $pdf_of_content->save("storage/assignment".'/'. $fileName);
+            $pdf_of_content = new Pdf("storage/assignment".'/'.$fileName);
+            foreach (range(1, $pdf_of_content->getNumberOfPages()) as $pageNumber) {
+                $name= uniqid();
+                $pdf_of_content->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+                $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
+                $images_path->push('data:image/png;base64,'.$b64image);
+            }
+
+        }
+       
+        if($request->filled('attachment_id')){
         $attachmnet=attachment::find($request->attachment_id);
         $inputFile=$attachmnet->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
         $converter = new OfficeConverter("storage/".$inputFile);
         $outputFile = Str::substr($attachmnet->name, 0,strpos($attachmnet->name,'.')).'.pdf';
-          $converter->convertTo($outputFile);
+        $converter->convertTo($outputFile);
          //generates pdf file in same directory as test-file.docx
         $pdf = new Pdf("storage/".$attachmnet->type.'/'.$outputFile);
         // return $pdf;
@@ -954,6 +971,7 @@ class AssigmentsController extends Controller
             $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
             $images_path->push('data:image/png;base64,'.$b64image);
         }
+    }
         return HelperController::api_response_format(200, $images_path, 'Here pdf\'s images');
     }
 
