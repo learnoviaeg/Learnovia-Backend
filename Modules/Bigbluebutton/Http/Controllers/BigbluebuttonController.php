@@ -1143,6 +1143,8 @@ class BigbluebuttonController extends Controller
     public function Script_type()
     {
         $allBBB=BigbluebuttonModel::whereNull('type')->update(['type' => 'BBB']);
+        $allBBB=BigbluebuttonModel::whereNull('attendee_password')->update(['attendee_password' => '2468']);
+        $allBBB=BigbluebuttonModel::whereNull('moderator_password')->update(['moderator_password' => '1234']);
         return 'Done';
     }
 }
