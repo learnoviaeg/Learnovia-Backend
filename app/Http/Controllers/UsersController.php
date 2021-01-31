@@ -10,6 +10,7 @@ use App\Enroll;
 use App\Paginate;
 use App\LAstAction;
 use Spatie\Permission\Models\Permission;
+use Carbon\Carbon;
 
 class UsersController extends Controller
 {
@@ -116,11 +117,14 @@ class UsersController extends Controller
         }
 
         
-        //using in active user api new route { api/user/active}
-        if($my_chain == 'active'){
+        //using in active user api new route { api/user/active} && { api/user/in_active}
+        if($my_chain == 'active' || $my_chain == 'in_active'){
 
-            if(!$request->user()->can('report/active_users'))
-                return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            // if($my_chain == 'active' && !$request->user()->can('report/active_users'))
+            //     return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+
+            // if($my_chain == 'in_active' && !$request->user()->can('report/in_active_users'))
+            //     return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
 
             $request->validate([
                 'from' => 'date|required_with:to',
@@ -128,6 +132,7 @@ class UsersController extends Controller
                 'report_year' => 'required|integer',
                 'report_month' => 'integer|required_with:report_day',
                 'report_day' => 'integer',
+                'never' => 'in:1',
             ]);
 
             $users_lastaction = LastAction::whereNull('course_id')->whereYear('date', $request->report_year)->whereIn('user_id',$enrolls->pluck('id'))->with('user');
@@ -141,7 +146,18 @@ class UsersController extends Controller
             if($request->filled('from') && $request->filled('to'))
                 $users_lastaction->whereBetween('date', [$request->from, $request->to]);
             
-            return response()->json(['message' => 'Active users list ', 'body' => $users_lastaction->get()->pluck('user')], 200);
+            if($my_chain == 'in_active'){
+                $users_lastaction->where('date','<=' ,Carbon::now()->subHours(1));
+            }
+
+            $users_lastaction = $users_lastaction->get()->pluck('user');
+            
+            if($request->filled('never')){
+                $users_lastaction = LastAction::whereNull('course_id')->whereNull('date')->whereIn('user_id',$enrolls->pluck('id'))->with('user');
+
+            }
+
+            return response()->json(['message' => $my_chain.' users list ', 'body' => $users_lastaction], 200);
         }
 
         return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
