@@ -468,8 +468,9 @@ class UserController extends Controller
 
             $roles = $roles->get();
             $users= $users->pluck('id');
+            $all_roles = Role::all();
 
-            foreach($roles as $role){
+            foreach($all_roles as $role){
                 $count[Str::slug($role->name, '_')] = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
             }
 
