@@ -561,8 +561,8 @@ class QuestionBankController extends Controller
     {
         $request->validate([
             'course_id' => 'integer|exists:courses,id',
-            'Question' => 'required|array',
-            'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+            'Question' => 'array',
+            'Question.*.Question_Type_id' => 'integer|exists:questions_types,id',
             'Question.*.survey' => 'boolean',
         ]);
 
