@@ -567,31 +567,32 @@ class QuestionBankController extends Controller
         ]);
 
         $re = collect([]);
-        foreach ($request->Question as $question) {
-            switch ($question['Question_Type_id']) {
-                case 1: // True/false
-                    $true_false = $this->TrueFalse($question,null);
-                    $re->push($true_false);
-                    break;
-                case 2: // MCQ
-                    $mcq = $this->MCQ($question,null);
-                    $re->push($mcq);
-                    break;
-                case 3: // Match
-                    $match = $this->Match($question,null);
-                    $re->push($match);
-                    break;
-                case 4: // Essay
-                    $essay = $this->Essay($question,null);
-                    $re->push($essay);
-                    break;
-                case 5: // para
-                    $paragraph = $this->paragraph($question);
-                    $paragraph->childeren;
-                    $re->push($paragraph);
-                    break;
+        if(isset($request->Question))
+            foreach ($request->Question as $question) {
+                switch ($question['Question_Type_id']) {
+                    case 1: // True/false
+                        $true_false = $this->TrueFalse($question,null);
+                        $re->push($true_false);
+                        break;
+                    case 2: // MCQ
+                        $mcq = $this->MCQ($question,null);
+                        $re->push($mcq);
+                        break;
+                    case 3: // Match
+                        $match = $this->Match($question,null);
+                        $re->push($match);
+                        break;
+                    case 4: // Essay
+                        $essay = $this->Essay($question,null);
+                        $re->push($essay);
+                        break;
+                    case 5: // para
+                        $paragraph = $this->paragraph($question);
+                        $paragraph->childeren;
+                        $re->push($paragraph);
+                        break;
+                }
             }
-        }
         if($type == 0){
             return HelperController::api_response_format(200, $re, __('messages.question.add'));
         }
