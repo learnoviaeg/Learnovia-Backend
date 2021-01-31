@@ -191,8 +191,8 @@ class BigbluebuttonController extends Controller
                             if(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($temp_start)
                             ->addMinutes($request->duration)->format('Y-m-d H:i:s'))
                             {
-                                // self::clear();
-                                // self::create_hook($request);     
+                                self::clear();
+                                self::create_hook($request);     
                                 if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0)
                                     $bigbb['join'] = true; //startmeeting has arrived but meeting didn't start yet
                             }
@@ -321,13 +321,6 @@ class BigbluebuttonController extends Controller
 
         curl_close($curl);
 
-        if ($err) {
-            return [
-                'success' 	=> false, 
-                'msg' 		=> 'cURL Error #:' . $err,
-                'response' 	=> ''
-            ];
-        }
         $bigbb->join_url=json_decode($response,true)['join_url'];
         $bigbb->meeting_id=json_decode($response,true)['id'];
         $bigbb->status = 'current';
