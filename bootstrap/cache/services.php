@@ -49,6 +49,7 @@
     45 => 'Spatie\\Permission\\PermissionServiceProvider',
     46 => 'Elibyy\\TCPDF\\ServiceProvider',
     47 => 'hisorange\\BrowserDetect\\ServiceProvider',
+    48 => 'Barryvdh\\DomPDF\\ServiceProvider',
   ),
   'eager' => 
   array (
@@ -85,6 +86,7 @@
     30 => 'Spatie\\Permission\\PermissionServiceProvider',
     31 => 'Elibyy\\TCPDF\\ServiceProvider',
     32 => 'hisorange\\BrowserDetect\\ServiceProvider',
+    33 => 'Barryvdh\\DomPDF\\ServiceProvider',
   ),
   'deferred' => 
   array (

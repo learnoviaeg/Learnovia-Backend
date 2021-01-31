@@ -67,8 +67,8 @@ class AuthController extends Controller
             'remember_me' => 'boolean'
         ]);
 
-        (new BigbluebuttonController)->clear();
-        (new BigbluebuttonController)->create_hook($request);
+        // (new BigbluebuttonController)->clear();
+        // (new BigbluebuttonController)->create_hook($request);
         $credentials = request(['username', 'password']);
         if (!Auth::attempt($credentials))
             return HelperController::api_response_format(401, [], __('messages.auth.invalid_username_password'));
