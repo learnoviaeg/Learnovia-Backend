@@ -133,7 +133,16 @@ class BigbluebuttonController extends Controller
             'visible' => 'in:0,1',
             'host_id' => 'required_if:type,==,Zoom'
         ]);
-
+    
+        if($request->type == 'BBB'){
+            try{
+                $try = self::create_hook($request);    
+            }
+            catch(\Exception $e){
+                return HelperController::api_response_format(400, null ,__('messages.virtual.server_error'));
+            }
+        }
+        
         $attendee= 'learnovia123';
         if(isset($request->attendee_password)){
             $attendee= $request->attendee_password;

@@ -198,6 +198,7 @@ return [
         'join' => 'Joining virtual classroom...',
         'no_one_entered' => 'No one entered this virtual classroom',
         'virtual_hidden' => "This virtual classroom is hidden",
+        'server_error' => 'Virtual classrooms is not available for now',
 
         'record' => [
             'list' => 'Virtual classrooms records list',
