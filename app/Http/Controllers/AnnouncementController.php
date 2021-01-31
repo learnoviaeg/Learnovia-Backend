@@ -182,7 +182,9 @@ class AnnouncementController extends Controller
                                         
                                         $attached=$file_id;
                                         if(isset($attached))
-                                            $attached = attachment::where('id', $file_id)->first();                                        $requ = ([
+                                            $attached = attachment::where('id', $file_id)->first();                                        
+                                            
+                                        $requ = ([
                                             'id' => $ann->id,
                                             'type' => 'announcement',
                                             'publish_date' => Carbon::parse($publishdate),
