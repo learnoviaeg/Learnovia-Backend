@@ -120,11 +120,11 @@ class UsersController extends Controller
         //using in active user api new route { api/user/active} && { api/user/in_active}
         if($my_chain == 'active' || $my_chain == 'in_active'){
 
-            // if($my_chain == 'active' && !$request->user()->can('report/active_users'))
-            //     return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            if($my_chain == 'active' && !$request->user()->can('report/active_users'))
+                return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
 
-            // if($my_chain == 'in_active' && !$request->user()->can('report/in_active_users'))
-            //     return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            if($my_chain == 'in_active' && !$request->user()->can('report/in_active_users'))
+                return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
 
             $request->validate([
                 'from' => 'date|required_with:to',
@@ -153,8 +153,8 @@ class UsersController extends Controller
             $users_lastaction = $users_lastaction->get()->pluck('user');
             
             if($request->filled('never')){
-                $users_lastaction = LastAction::whereNull('course_id')->whereNull('date')->whereIn('user_id',$enrolls->pluck('id'))->with('user');
-
+                $last_actions = LastAction::whereNull('course_id')->pluck('user_id');
+                $users_lastaction  = $enrolls->whereNotIn('id',$last_actions)->values();
             }
 
             return response()->json(['message' => $my_chain.' users list ', 'body' => $users_lastaction], 200);
