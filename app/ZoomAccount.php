@@ -13,7 +13,7 @@ class ZoomAccount extends Model
         return $this->belongsTo('App\User','user_id','id');
     }
     
-    public function generate_jwt_token($key,$secret)
+    public static function generate_jwt_token($key,$secret)
     {
         $header = json_encode([
             'typ' => 'JWT',
@@ -39,5 +39,13 @@ class ZoomAccount extends Model
         $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
 
         return $jwt;
+    }
+
+    public static function refresh_jwt_token($ZoomUser)
+    {
+        $token=self::generate_jwt_token($ZoomUser->api_key,$ZoomUser->api_secret);
+        $ZoomUser->jwt_token=$token;
+        $ZoomUser->save();
+        return $ZoomUser;
     }
 }
