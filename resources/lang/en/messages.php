@@ -288,6 +288,7 @@ return [
     ],
     'zoom' => [
         'zoom_account' => 'user haven\'t account on zoom',
+        'Invalid' => 'Invalid Access Token',
     ],
     'status' => [
         'submitted' => 'Submitted',

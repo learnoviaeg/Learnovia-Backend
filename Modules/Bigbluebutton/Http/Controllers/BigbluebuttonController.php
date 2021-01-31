@@ -254,9 +254,11 @@ class BigbluebuttonController extends Controller
         $user=ZoomAccount::where('user_id',$bigbb->host_id)->first();
         if(!isset($user))
             throw new \Exception(__('messages.zoom.zoom_account'));
-        
-        $jwtToken = $user->jwt_token;
-        $zoomUserId = $user->user_zoom_id;
+
+        $updatedUser=ZoomAccount::refresh_jwt_token($user);
+        $jwtToken = $updatedUser->jwt_token;
+        $zoomUserId = $updatedUser->user_zoom_id;
+
         switch($bigbb->is_recorded){
             case 0:
                 $record= 'none';
@@ -322,6 +324,12 @@ class BigbluebuttonController extends Controller
         ));
 
         $response = curl_exec($curl);
+
+        if (!isset(json_decode($response,true)['join_url'])) 
+            throw new \Exception(__('messages.zoom.Invalid'));
+
+        curl_close($curl);
+
         $bigbb->join_url=json_decode($response,true)['join_url'];
         $bigbb->meeting_id=json_decode($response,true)['id'];
         $bigbb->status = 'current';
@@ -419,10 +427,13 @@ class BigbluebuttonController extends Controller
         $check=Carbon::parse($meeting_start)->addMinutes($bigbb->duration);
 
         $exist_meeting = 1;
-        $getMeetingInfoParams = new GetMeetingInfoParameters($bigbb->meeting_id, $bigbb->moderator_password);
-        $response = $bbb->getMeetingInfo($getMeetingInfoParams);
-        if ($response->getReturnCode() == 'FAILED') {
-            $exist_meeting = 0;
+        if($bigbb->type == 'BBB')
+        {
+            $getMeetingInfoParams = new GetMeetingInfoParameters($bigbb->meeting_id, $bigbb->moderator_password);
+            $response = $bbb->getMeetingInfo($getMeetingInfoParams);
+            if ($response->getReturnCode() == 'FAILED') {
+                $exist_meeting = 0;
+            }
         }
         
         if(($check < Carbon::now() && $exist_meeting == 0) || (!$request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0))
@@ -1157,8 +1168,10 @@ class BigbluebuttonController extends Controller
     public function Script_type()
     {
         $allBBB=BigbluebuttonModel::whereNull('type')->update(['type' => 'BBB']);
-        $allBBB=BigbluebuttonModel::whereNull('attendee_password')->update(['attendee_password' => '2468']);
-        $allBBB=BigbluebuttonModel::whereNull('moderator_password')->update(['moderator_password' => '1234']);
+        $allBBB=BigbluebuttonModel::whereNull('attendee_password')->where('type','BBB')->update([
+            'attendee_password' => '2468',
+            'moderator_password' => '1234'
+            ]);
         return 'Done';
     }
 }

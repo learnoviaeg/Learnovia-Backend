@@ -288,6 +288,7 @@ return [
     ],
     'zoom' => [
         'zoom_account' => 'ليس لدى المستخدم حساب على زوم',
+        'Invalid' => 'الكود غير فعال',
     ],
     'status' => [
         'submitted' => 'تم التسليم',
