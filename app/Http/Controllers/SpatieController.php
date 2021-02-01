@@ -373,9 +373,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'chat/add-room', 'title' => 'add room']);
 
             //report
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'report/active_users', 'title' => 'Active users report', 'dashboard' => 1, 'icon'=> 'report']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'report/in_active_users', 'title' => 'In active users report', 'dashboard' => 1, 'icon'=> 'report']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'report/reports', 'title' => 'Reports','dashboard' => 1 , 'icon'=> 'report']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'report/active_users', 'title' => 'Active users report', 'dashboard' => 1, 'icon'=> 'Report']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'report/in_active_users', 'title' => 'In active users report', 'dashboard' => 1, 'icon'=> 'Report']);
 
             //Add Roles
             $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin' , 'description' => 'System manager that can monitor everything.']);

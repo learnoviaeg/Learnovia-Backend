@@ -11,6 +11,7 @@ use App\Paginate;
 use App\LAstAction;
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
+use App\Log;
 
 class UsersController extends Controller
 {
@@ -135,22 +136,22 @@ class UsersController extends Controller
                 'never' => 'in:1',
             ]);
 
-            $users_lastaction = LastAction::whereNull('course_id')->whereYear('date', $request->report_year)->whereIn('user_id',$enrolls->pluck('id'))->with('user');
+            $users_lastaction = Log::whereYear('created_at', $request->report_year)->whereIn('user',$enrolls->pluck('username'))->with('users');
             
             if($request->filled('report_month'))
-                $users_lastaction->whereMonth('date',$request->report_month);
+                $users_lastaction->whereMonth('created_at',$request->report_month);
             
             if($request->filled('report_day'))
-                $users_lastaction->whereDay('date',$request->report_day);
+                $users_lastaction->whereDay('created_at',$request->report_day);
 
             if($request->filled('from') && $request->filled('to'))
-                $users_lastaction->whereBetween('date', [$request->from, $request->to]);
+                $users_lastaction->whereBetween('created_at', [$request->from, $request->to]);
             
             if($my_chain == 'in_active'){
-                $users_lastaction->where('date','<=' ,Carbon::now()->subHours(1));
+                $users_lastaction->where('created_at','<=' ,Carbon::now()->subHours(1));
             }
 
-            $users_lastaction = $users_lastaction->get()->pluck('user');
+            $users_lastaction = $users_lastaction->get()->pluck('users');
             
             if($request->filled('never')){
                 $last_actions = LastAction::whereNull('course_id')->pluck('user_id');
