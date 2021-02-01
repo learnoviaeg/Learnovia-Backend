@@ -121,10 +121,10 @@ class UsersController extends Controller
         //using in active user api new route { api/user/active} && { api/user/in_active}
         if($my_chain == 'active' || $my_chain == 'in_active'){
 
-            if($my_chain == 'active' && !$request->user()->can('report/active_users'))
+            if($my_chain == 'active' && !$request->user()->can('reports/active_users'))
                 return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
 
-            if($my_chain == 'in_active' && !$request->user()->can('report/in_active_users'))
+            if($my_chain == 'in_active' && !$request->user()->can('reports/in_active_users'))
                 return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
 
             $request->validate([
