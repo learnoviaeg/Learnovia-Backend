@@ -151,7 +151,7 @@ class UsersController extends Controller
                 $users_lastaction->where('created_at','<=' ,Carbon::now()->subHours(1));
             }
 
-            $users_lastaction = $users_lastaction->get()->pluck('users');
+            $users_lastaction = $users_lastaction->select('user')->distinct()->get()->pluck('users');
             
             if($request->filled('never')){
                 $last_actions = LastAction::whereNull('course_id')->pluck('user_id');
