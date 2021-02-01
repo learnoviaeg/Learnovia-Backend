@@ -12,4 +12,9 @@ class Log extends Model
     {
         return $this->belongsTo('App\User','user','username');
     }
+
+    public function users()
+    {
+        return $this->belongsTo('App\User','user','username');
+    }
 }
