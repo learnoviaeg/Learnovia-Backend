@@ -17,6 +17,9 @@ use Modules\Assigments\Entities\assignmentOverride;
 use App\Paginate;
 use App\LastAction;
 use Carbon\Carbon;
+use App\User;
+use App\Log;
+use App\UserSeen;
 
 class AssignmentController extends Controller
 {
@@ -136,8 +139,26 @@ class AssignmentController extends Controller
         if(isset($studentassigment)){
             $assignment['user_submit'] =$studentassigment;}
         }
+
+        Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'viewed',
+            'model' => 'Assignment',
+            'data' => serialize($assignment),
+        ]);
+
+        $user_views = UserSeen::updateOrCreate(['user_id' => Auth::id(),'item_id' => $assignment_id,'type' => 'assignment','lesson_id' => $lesson_id],[
+            'user_id' => Auth::id(),
+            'item_id' => $assignment_id,
+            'lesson_id' => $lesson_id,
+            'type' => 'assignment',
+        ])->increment('count');
+
+        $seen = $assigLessonID->seen_number + 1;
+        $assigLessonID->seen_number = $seen;
+        $assigLessonID->save();
        
-            return response()->json(['message' => __('messages.assignment.assignment_object'), 'body' => $assignment], 200);        
+        return response()->json(['message' => __('messages.assignment.assignment_object'), 'body' => $assignment], 200);        
     }
 
     /**

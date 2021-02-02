@@ -10,6 +10,8 @@ use App\Course;
 use App\LastAction;
 use App\User;
 use App\Enroll;
+use App\Log;
+
 class CoursesController extends Controller
 {
     protected $chain;
@@ -148,10 +150,17 @@ class CoursesController extends Controller
 
         if(isset($course)){
             LastAction::lastActionInCourse($id);
+            Log::create([
+                'user' => User::find(Auth::id())->username,
+                'action' => 'viewed',
+                'model' => 'Course',
+                'data' => serialize($course),
+            ]);
             return response()->json(['message' => __('messages.course.object'), 'body' => $course], 200);
         }
-    return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
-}
+
+        return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
+    }
 
     /**
      * Update the specified resource in storage.

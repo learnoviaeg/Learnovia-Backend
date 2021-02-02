@@ -21,6 +21,9 @@ use Illuminate\Support\Carbon;
 use App\Component;
 use App\LessonComponent;
 use App\LastAction;
+use App\Log;
+use App\UserSeen;
+
 class PageController extends Controller
 {
     /**
@@ -267,7 +270,26 @@ class PageController extends Controller
         $page->page_lesson = PageLesson::where('page_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
         if( $request->user()->can('site/course/student') && $page->page_lesson->visible==0)
             return HelperController::api_response_format(301,null, __('messages.page.page_hidden'));
+
+        $seen = $page->page_lesson->seen_number +1 ;
+        $page->page_lesson->seen_number = $seen;
+        $page->page_lesson->save();
+
         unset($page->lesson);
+        
+        Log::create([
+            'user' => User::find(Auth::id())->username,
+            'action' => 'viewed',
+            'model' => 'Page',
+            'data' => serialize($page),
+        ]);
+
+        $user_views = UserSeen::updateOrCreate(['user_id' => Auth::id(),'item_id' => $request->id,'type' => 'page','lesson_id' => $request->lesson_id],[
+            'user_id' => Auth::id(),
+            'item_id' => $request->id,
+            'lesson_id' => $request->lesson_id,
+            'type' => 'page',
+        ])->increment('count');
         
         return HelperController::api_response_format(200, $page);
     }
