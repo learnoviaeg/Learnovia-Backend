@@ -13,6 +13,9 @@ use App\Classes;
 use App\Paginate;
 use DB;
 use Carbon\Carbon;
+use App\User;
+use App\Log;
+use App\UserSeen;
 
 class MaterialsController extends Controller
 {
@@ -126,7 +129,24 @@ class MaterialsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+        $material = Material::where('id',$id)->first();
+        if(!isset($material))
+            return response()->json(['message' => __('messages.error.data_invalid'), 'body' => null], 400);
+
+        
+        $material->seen_number = $material->seen_number + 1;
+        $material->save();
+
+        $user_views = UserSeen::updateOrCreate(['user_id' => Auth::id(),'item_id' => $material->item_id,'type' => $material->type ,'lesson_id' => $material->lesson_id],[
+            'user_id' => Auth::id(),
+            'item_id' => $material->item_id,
+            'lesson_id' => $material->lesson_id,
+            'type' => $material->type,
+        ])->increment('count');
+
+
+        return response()->json(['message' => 'Material updated successfully', 'body' => $material], 200);
     }
 
     /**

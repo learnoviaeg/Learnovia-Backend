@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddSeenNumberMedia extends Migration
+class AddSeenSumberMaterials extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class AddSeenNumberMedia extends Migration
      */
     public function up()
     {
-        Schema::table('media_lessons', function (Blueprint $table) {
+        Schema::table('materials', function (Blueprint $table) {
             $table->integer('seen_number')->defult(0);
         });
     }
@@ -25,8 +25,6 @@ class AddSeenNumberMedia extends Migration
      */
     public function down()
     {
-        Schema::table('', function (Blueprint $table) {
-
-        });
+        //
     }
 }

@@ -271,10 +271,6 @@ class PageController extends Controller
         if( $request->user()->can('site/course/student') && $page->page_lesson->visible==0)
             return HelperController::api_response_format(301,null, __('messages.page.page_hidden'));
 
-        $seen = $page->page_lesson->seen_number +1 ;
-        $page->page_lesson->seen_number = $seen;
-        $page->page_lesson->save();
-
         unset($page->lesson);
         
         Log::create([
