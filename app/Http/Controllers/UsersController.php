@@ -134,6 +134,7 @@ class UsersController extends Controller
                 'report_month' => 'integer|required_with:report_day',
                 'report_day' => 'integer',
                 'never' => 'in:1',
+                'since' => 'in:1,5,10',
             ]);
 
             $users_lastaction = Log::whereYear('created_at', $request->report_year)->whereIn('user',$enrolls->pluck('username'))->with('users');
@@ -150,6 +151,9 @@ class UsersController extends Controller
             if($my_chain == 'in_active'){
                 $users_lastaction->where('created_at','<=' ,Carbon::now()->subHours(1));
             }
+
+            if($request->filled('since'))
+                $users_lastaction->where('created_at','>=' ,Carbon::now()->subMinutes($request->since))->where('created_at','<=' ,Carbon::now())->first();
 
             $users_lastaction = $users_lastaction->select('user')->distinct()->get()->pluck('users');
             
