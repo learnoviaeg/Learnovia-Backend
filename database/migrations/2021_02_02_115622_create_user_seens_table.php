@@ -18,7 +18,7 @@ class CreateUserSeensTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('item_id');
-            $table->enum('type', ['page', 'file','media','assignment','quiz','meeting','h5p']);
+            $table->enum('type', ['page', 'file','media','assignment','quiz','meeting','h5p','link']);
             $table->unsignedBigInteger('lesson_id');
             $table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('count')->defult(0);
