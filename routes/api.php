@@ -1,6 +1,6 @@
 <?php
 Route::get('/' , 'AuthController@site');
-// Route::get('/materials/{id}', 'MaterialsController@show');
+Route::get('/materials/{id}', 'MaterialsController@show');
 
 //install all permissions and roles of system Route
 Route::get('install', 'SpatieController@install');
