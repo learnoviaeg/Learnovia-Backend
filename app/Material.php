@@ -30,6 +30,10 @@ class Material extends Model
             return media::find($this->item_id)->attachment_name;
     }
 
+    public function getLinkAttribute(){
+        return 'materials/'.$this->id;
+    }
+
     public function course(){
         return $this->belongsTo('App\Course');
     }
