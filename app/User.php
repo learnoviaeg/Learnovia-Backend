@@ -1,7 +1,6 @@
 <?php
 
 namespace App;
-use Log;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 
@@ -16,6 +15,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Modules\Attendance\Entities\AttendanceLog;
 use App\Course;
+use App\Log;
 
 class User extends Authenticatable
 {
@@ -230,9 +230,8 @@ class User extends Authenticatable
     public function getStatusAttribute() {
         $status = 'offline';
 
-        $active_user  = LastAction::where('user_id',$this->id)->where('course_id',null)
-                                                              ->where('date','>=' ,Carbon::now()->subMinutes(1))
-                                                              ->where('date','<=' ,Carbon::now())->first();
+        $active_user  = Log::where('user_id',$this->username)->where('created_at','>=' ,Carbon::now()->subMinutes(1))
+                                                              ->where('created_at','<=' ,Carbon::now())->first();
         if(isset($active_user))
             $status = 'online';
 
