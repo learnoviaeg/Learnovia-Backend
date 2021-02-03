@@ -114,7 +114,7 @@ class MaterialsController extends Controller
      */
     public function show($id)
     {
-        //
+        return redirect('https://docs.google.com/viewer?url=https://stagingapi.learnovia.com/storage/files/5feb14e5b3c72.pdf');
     }
 
     /**
