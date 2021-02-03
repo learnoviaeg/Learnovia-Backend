@@ -21,7 +21,7 @@ class MaterialsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index','show']]);
     }
 
     /**
@@ -113,14 +113,16 @@ class MaterialsController extends Controller
      */
     public function show($id)
     {
-        return redirect('https://stagingapi.learnovia.com/storage/media/601a7d26ab341.wav');
-        // $material = Material::find($id);
+        $material = Material::find($id);
 
-        // if(!isset($material))
-        //     return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        if(!isset($material))
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
 
-        // if($material->type == 'file')
-        //     return redirect($material->link);
+        if(!isset($material->getOriginal()['link']))
+            return response()->json(['message' => 'No redirection link', 'body' => null], 400);
+
+        if(isset($material->getOriginal()['link']))
+            return redirect($material->getOriginal()['link']);
     }
 
     /**
