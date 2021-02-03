@@ -153,7 +153,7 @@ class UsersController extends Controller
             }
 
             if($request->filled('since'))
-                $users_lastaction->where('created_at','>=' ,Carbon::now()->subMinutes($request->since))->where('created_at','<=' ,Carbon::now())->first();
+                $users_lastaction->where('created_at','>=' ,Carbon::now()->subMinutes($request->since + 1))->where('created_at','<=' ,Carbon::now())->first();
 
             $users_lastaction = $users_lastaction->select('user')->distinct()->get()->pluck('users');
             
