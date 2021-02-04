@@ -32,7 +32,7 @@ class Material extends Model
 
     public function getLinkAttribute(){
         $url= config('app.url');
-        return $url.'/materials/'.$this->id;
+        return $url.'api/materials/'.$this->id;
     }
 
     public function course(){
