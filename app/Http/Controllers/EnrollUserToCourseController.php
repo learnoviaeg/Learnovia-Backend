@@ -603,9 +603,9 @@ class EnrollUserToCourseController extends Controller
             if (isset($EnrolledBefore))
                 return HelperController::api_response_format(200, array_values(array_unique($EnrolledBefore)), __('messages.enroll.already_enrolled'));
             else
-                return HelperController::api_response_format(200, __('messages.enroll.add'));
+                return HelperController::api_response_format(200,[], __('messages.enroll.add'));
         }
-        return HelperController::api_response_format(200, __('messages.error.no_active_segment'));
+        return HelperController::api_response_format(200, [],__('messages.error.no_active_segment'));
     }
 
     public function Migration(Request $request)
