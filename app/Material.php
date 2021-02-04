@@ -31,7 +31,9 @@ class Material extends Model
     }
 
     public function getLinkAttribute(){
-        return 'materials/'.$this->id;
+        $url= config('app.url');
+        $url = substr($url, 0, strpos($url, "api"));
+        return $url.'.learnovia.com/materials/'.$this->id;
     }
 
     public function course(){
