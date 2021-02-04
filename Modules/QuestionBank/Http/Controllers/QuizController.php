@@ -25,8 +25,6 @@ use App\Classes;
 use App\LastAction;
 use Auth;
 use Carbon\Carbon;
-use App\Log;
-use App\UserSeen;
 
 class QuizController extends Controller
 {
@@ -801,20 +799,6 @@ class QuizController extends Controller
             $quiz['Started'] = false;
         else
             $quiz['Started'] = true;
-
-        Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'viewed',
-            'model' => 'Quiz',
-            'data' => serialize($quiz),
-        ]);
-
-        $user_views = UserSeen::updateOrCreate(['user_id' => Auth::id(),'item_id' => $request->quiz_id ,'type' => 'quiz','lesson_id' => $request->lesson_id],[
-            'user_id' => Auth::id(),
-            'item_id' => $request->quiz_id,
-            'lesson_id' => $request->lesson_id,
-            'type' => 'quiz',
-        ])->increment('count');
 
         $seen = $quiz_lesson->seen_number + 1;
         $quiz_lesson->seen_number = $seen;

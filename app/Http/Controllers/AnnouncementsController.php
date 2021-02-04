@@ -13,7 +13,6 @@ use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Input;
-use App\Log;
 
 class AnnouncementsController extends Controller
 {
@@ -227,16 +226,8 @@ class AnnouncementsController extends Controller
     {
         $announcement = Announcement::where('id',$id)->with('attachment')->first();
 
-        if(isset($announcement)){
-            Log::create([
-                'user' => User::find(Auth::id())->username,
-                'action' => 'viewed',
-                'model' => 'Announcement',
-                'data' => serialize($announcement),
-            ]);
-
+        if(isset($announcement))
             return response()->json(['message' => __('messages.announcement.object'), 'body' => $announcement], 200);
-        }
 
         return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
     }

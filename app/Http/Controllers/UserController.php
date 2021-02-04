@@ -44,7 +44,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
 use App\LastAction;
-use App\Log;
 
 class UserController extends Controller
 {
@@ -843,14 +842,6 @@ class UserController extends Controller
             Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
             $current_child = User::where('id',$request->child_id)->first();
         }
-
-        Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'updated',
-            'model' => 'Parents',
-            'data' => serialize($current_child),
-        ]);
-
         return HelperController::api_response_format(200,$current_child ,__('messages.users.parent_assign_child'));
     }
 

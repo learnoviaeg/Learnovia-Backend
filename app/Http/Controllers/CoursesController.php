@@ -10,7 +10,6 @@ use App\Course;
 use App\LastAction;
 use App\User;
 use App\Enroll;
-use App\Log;
 
 class CoursesController extends Controller
 {
@@ -150,12 +149,6 @@ class CoursesController extends Controller
 
         if(isset($course)){
             LastAction::lastActionInCourse($id);
-            Log::create([
-                'user' => User::find(Auth::id())->username,
-                'action' => 'viewed',
-                'model' => 'Course',
-                'data' => serialize($course),
-            ]);
             return response()->json(['message' => __('messages.course.object'), 'body' => $course], 200);
         }
 
