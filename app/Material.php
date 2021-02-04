@@ -35,9 +35,10 @@ class Material extends Model
         $url= config('app.url').'api/materials/'.$this->id;
 
         if(isset($this->attributes['link']) && str_contains($this->attributes['link'],'youtube')){
-            if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i',$this->attributes['link'], $match)){
-                $url = 'http://www.youtube.com/embed/'.$match[1];
-            }
+            // if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i',$this->attributes['link'], $match)){
+            //     $url = 'http://www.youtube.com/embed/'.$match[1];
+            // }
+            $url = $this->attributes['link'];
         }
 
         return $url;
