@@ -31,8 +31,16 @@ class Material extends Model
     }
 
     public function getLinkAttribute(){
-        $url= config('app.url');
-        return $url.'api/materials/'.$this->id;
+
+        $url= config('app.url').'api/materials/'.$this->id;
+
+        if(isset($this->attributes['link']) && str_contains($this->attributes['link'],'youtube')){
+            if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i',$this->attributes['link'], $match)){
+                $url = 'http://www.youtube.com/embed/'.$match[1];
+            }
+        }
+
+        return $url;
     }
 
     public function course(){
