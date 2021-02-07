@@ -997,7 +997,7 @@ class QuizController extends Controller
                         $quiz['user_mark']+=$userAnswer->user_grade;
                     }
                 }
-                $quiz['mark_precentage']=($quiz['user_mark']*100)/$quiz_lesson->grade;
+                $quiz['mark_precentage']=(double)($quiz['user_mark']*100)/$quiz_lesson->grade;
             }
             if($show_is_true == 1)
                 $question->question_answer;
