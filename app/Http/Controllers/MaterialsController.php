@@ -113,6 +113,7 @@ class MaterialsController extends Controller
      */
     public function show($id)
     {
+        return Auth::id();
         $material = Material::find($id);
 
         if(!isset($material))

@@ -123,6 +123,7 @@ class AuthController extends Controller
         $job=(new \App\Jobs\MessageDelivered(Auth::User()->id));
         dispatch($job);
         $user->last_login = Carbon::now();
+        $user->api_token = $tokenResult->accessToken;
         $user->save();
        LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
             'user_id' => $request->user()->id 
@@ -186,6 +187,7 @@ class AuthController extends Controller
     {
         $user=$request->user();
         $user->token=null;
+        $user->api_token=null;
         $user->save();
         $request->user()->token()->revoke();
         //for log event

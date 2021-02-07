@@ -68,6 +68,7 @@ class Kernel extends HttpKernel
         'ParentCheck' => \App\Http\Middleware\ParentCheck::class,
         'LastAction' => \App\Http\Middleware\LastActionMiddleWare::class,
         'ContractRestrict' => \App\Http\Middleware\ContractRestrict::class,
+        'getauth' => \App\Http\Middleware\getAuthMiddleware::class,
     ];
     /**
      * The priority-sorted list of middleware.
