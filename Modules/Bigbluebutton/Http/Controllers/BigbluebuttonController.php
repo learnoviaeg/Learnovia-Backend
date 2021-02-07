@@ -421,7 +421,15 @@ class BigbluebuttonController extends Controller
     //Join the meeting
     public function join(Request $request)
     {
-        self::create_hook($request);
+        if($request->type == 'BBB'){
+            try{
+                self::clear();
+                self::create_hook($request);    
+            }
+            catch(\Exception $e){
+                return HelperController::api_response_format(400, null ,__('messages.virtual.server_error'));
+            }
+        }
         $bbb = new BigBlueButton();
 
         //Validating the Input
