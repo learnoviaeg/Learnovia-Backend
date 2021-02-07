@@ -32,7 +32,7 @@ class User extends Authenticatable
     protected $fillable = [
         'firstname', 'email', 'password', 'real_password', 'lastname', 'username','suspend','class_id','picture', 'level',
         'type', 'arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'language',
-        'timezone', 'religion', 'second language', 'token','chat_uid','chat_token','refresh_chat_token','last_login','nickname'
+        'timezone', 'religion', 'second language', 'token','chat_uid','chat_token','refresh_chat_token','last_login','nickname','api_token'
     ];
 
     /**
