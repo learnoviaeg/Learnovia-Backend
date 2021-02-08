@@ -34,6 +34,7 @@ return [
         'api/user/get-all',
         'api/user/getParents',
         'api/page/get',
-        'api/materials/{id}'
+        'api/materials/{id}',
+        'api/quiz/get-all-attempts'
     ],
 ];
