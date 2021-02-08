@@ -35,6 +35,7 @@ return [
         'api/user/getParents',
         'api/page/get',
         'api/materials/{id}',
-        'api/quiz/get-all-attempts'
+        'api/quiz/get-all-attempts',
+        'api/user/set-current-child'
     ],
 ];
