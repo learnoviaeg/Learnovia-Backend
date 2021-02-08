@@ -18,8 +18,10 @@ class getAuthMiddleware
     public function handle($request, Closure $next)
     {
         if ($request->has('api_token')){
-
             $user =User::where('api_token',$request->api_token)->first();
+            if(!isset($user))
+                throw new \Exception('Invalid token supplied');
+                
             Auth::setUser($user);
         }
         return $next($request);
