@@ -9,6 +9,9 @@ use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 use App\Language;
+use  Illuminate\Support\Facades\Config;
+use App\Log;
+use Illuminate\Support\Str;
 
 class LastActionMiddleWare
 {
@@ -49,6 +52,23 @@ class LastActionMiddleWare
                 ,'resource' =>  $request->route()->action['controller']
                 ,'date' => Carbon::now()
         ]);
+        
+        $route_views = Config::get('routes.view');
+
+        if(in_array($request->route()->uri,$route_views) && $request->route()->methods[0] == 'GET'){
+            
+            $Model = explode('api/', $request->route()->uri)[1];
+        
+            if(str_contains($Model, '/'))
+                $Model = substr($Model, 0, strpos($Model, "/"));
+    
+            Log::create([
+                'user' => $request->user()->username,
+                'action' => 'viewed',
+                'model' => ucfirst(Str::singular($Model)),
+                'data' => serialize($request->route()->uri),
+            ]);
+        }
         // \Artisan::call('cache:clear', ['--env' => 'local']);
         // \Artisan::call('config:clear', ['--env' => 'local']);
         return $next($request);
