@@ -36,6 +36,7 @@ return [
         'api/page/get',
         'api/materials/{id}',
         'api/quiz/get-all-attempts',
-        'api/user/set-current-child'
+        'api/user/set-current-child',
+        'api/user/get-my-children'
     ],
 ];
