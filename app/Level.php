@@ -40,6 +40,11 @@ class Level extends Model
         return $ids;
     }
     protected $hidden = [
-        'created_at','updated_at'
+        'created_at','updated_at','deleted_at'
     ];
+
+    public function timeline()
+    {
+        return $this->hasMany('App\Timeline','level_id','id');
+    }
 }

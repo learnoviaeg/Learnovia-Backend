@@ -12,4 +12,13 @@ class Parents extends Model
         'created_at', 'updated_at'
     ];
 
+    public function parent()
+    {
+        return $this->belongsTo('App\User','parent_id' , 'id');
+    }
+
+    public function child()
+    {
+        return $this->belongsTo('App\User','child_id' , 'id');
+    }
 }

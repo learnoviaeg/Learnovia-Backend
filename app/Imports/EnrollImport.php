@@ -30,11 +30,11 @@ class EnrollImport implements ToModel,WithHeadingRow
             'course' => $row['course']
         ]);
 
-        $courseSegment = HelperController::Get_Course_segment_Course($request);
+        $courseSegment = GradeCategoryController::getCourseSegment($request);
 
         return new Enroll([
             'user_id'=>$user_id,
-            'course_segment' => $courseSegment['value']['id'],
+            'course_segment' => $courseSegment[0],
             'role_id'=>$row['role_id'],
             'year' => $row['year'],
             'type' => $row['type'],

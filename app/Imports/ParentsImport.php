@@ -5,6 +5,7 @@ namespace App\Imports;
 use Validator;
 use App\User;
 use App\Parents;
+use App\Enroll;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Spatie\Permission\Models\Role;
@@ -17,33 +18,40 @@ class ParentsImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         Validator::make($row,[
-            'firstname'=>'required',
-            'lastname'=>'required',
-            'fullname'=>'required|exists:users,lastname', //it's not just father >> his/her mother or another member of his/her family
-            'role_id' => 'required|exists:roles,id'
+            'parent'=>'required|exists:users,username',
         ])->validate();
 
-        $password = mt_rand(100000, 999999);
+        $childs = 'child';
+        $i=1;
 
-        $user =User::firstOrCreate([
-            'firstname' => $row['firstname'],
-            'lastname' => $row['lastname'],
-            'username' => User::generateUsername(),
-            'password' => bcrypt($password),
-            'real_password' => $password
-        ]);
-
-        $role = Role::find($row['role_id']);
-        $user->assignRole($role);
-
-        $childs=User::where('lastname',$row['fullname'])->pluck('id');
-
-        foreach($childs as $child)
+        while(isset($row[$childs.$i]))
         {
-            $parent = Parents::firstOrCreate([
-                'parent_id' => $user->id,
+            $parent=User::where('username',$row['parent'])->pluck('id')->first();
+            $child=User::where('username',$row[$childs.$i])->pluck('id')->first();
+            $assign = Parents::firstOrCreate([
+                'parent_id' => $parent,
                 'child_id' => $child,
+                'current' => isset($row['current']) ? $row['current'] : 0
             ]);
+
+            $students = Enroll::where('user_id',$child)->get();
+
+            foreach($students as $student){
+
+                Enroll::firstOrCreate([
+                    'course_segment' => $student->course_segment,
+                    'user_id' => $parent,
+                    'role_id'=> 7,
+                    'year' => $student->year,
+                    'type' => $student->type,
+                    'level' => $student->level,
+                    'class' => $student->class,
+                    'segment' => $student->segment,
+                    'course' => $student->course
+                ]);
+            }
+            
+            $i++;
         }
     }
 }

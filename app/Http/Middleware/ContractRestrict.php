@@ -36,7 +36,7 @@ class ContractRestrict
         $user=User::find(Auth::id());
         $contract = Contract::where('end_date', '>', Carbon::now())->get()->first();
         if(!isset($contract))
-            return HelperController::api_response_format(200, 'you can\'t add users');
+            return HelperController::api_response_format(200, null, 'you can\'t add users');
 
         $today_date=Carbon::now();        
         $payments = Payment::where('contract_id',$contract->id)->orderBy('date','asc')->get();

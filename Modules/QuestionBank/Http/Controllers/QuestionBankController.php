@@ -19,6 +19,7 @@ use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\QuestionsType;
 use App\Component;
+use App\LastAction;
 
 class QuestionBankController extends Controller
 {
@@ -72,7 +73,21 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
 
-        
+        $teacher_permissions=['question/category/add','question/category/delete','question/category/update','question/category/get','question/add','question/update',
+        'question/get','question/delete','question/random','question/add-answer','question/delete-answer','quiz/add','quiz/update','quiz/delete','quiz/get',
+        'quiz/add-quiz-lesson','quiz/grading-method','quiz/update-quiz-lesson','quiz/destroy-quiz-lesson','quiz/get-all-types','quiz/get-all-categories',
+        'quiz/sort','quiz/get-quiz-lesson','quiz/get-all-quizes','quiz/get-student-in-quiz','quiz/get-student-answer-quiz','quiz/get-all-students-answer',
+        'quiz/detailes','quiz/correct-user-quiz','quiz/get-grade-category','quiz/toggle','quiz/get-attempts','site/quiz/getStudentinQuiz','quiz/grade-user-quiz',
+        'quiz/override'];
+        $tecaher = \Spatie\Permission\Models\Role::find(4);
+        $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
+
+        $student_permissions=['quiz/get','quiz/answer','quiz/correct-user-quiz','quiz/get-attempts','site/quiz/store_user_quiz'];
+        $student = \Spatie\Permission\Models\Role::find(3);
+        $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+        $parent = \Spatie\Permission\Models\Role::find(7);
+        $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+
         $role = \Spatie\Permission\Models\Role::find(1);
         $role->givePermissionTo('site/quiz/getStudentinQuiz');
         $role->givePermissionTo('site/quiz/store_user_quiz');
@@ -134,14 +149,14 @@ class QuestionBankController extends Controller
         );
         QuestionsType::insert($QuesTypes);
 
-        $QuesCateg=array(
-            array('name' => 'Lesson One'),
-            array('name' => 'Lesson Two'),
-            array('name' => 'Lesson Three'),
-            array('name' => 'Lesson Four'),
-            array('name' => 'Lesson Five'),
-        );
-        QuestionsCategory::insert($QuesCateg);
+        // $QuesCateg=array(
+        //     array('name' => 'Lesson One'),
+        //     array('name' => 'Lesson Two'),
+        //     array('name' => 'Lesson Three'),
+        //     array('name' => 'Lesson Four'),
+        //     array('name' => 'Lesson Five'),
+        // );
+        // QuestionsCategory::insert($QuesCateg);
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
@@ -170,7 +185,7 @@ class QuestionBankController extends Controller
             $cs = [];
             $couresegs = GradeCategoryController::getCourseSegment($request);
             if(count($couresegs) == 0)
-                return HelperController::api_response_format(200, collect($cs)->paginate(HelperController::GetPaginate($request)), 'No questions found' );
+                return HelperController::api_response_format(200, collect($cs)->paginate(HelperController::GetPaginate($request)), __('messages.error.not_found') );
 
             foreach($couresegs as $one){
                 $cc=CourseSegment::find($one);
@@ -287,7 +302,7 @@ class QuestionBankController extends Controller
             'survey' => 'boolean',
         ]);
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
         }
      
         $arr = array();
@@ -295,8 +310,11 @@ class QuestionBankController extends Controller
             $arr = Questions::where('id', $Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
         }
         if (!isset($arr)) {
-            return HelperController::api_response_format(400, null, 'this is not valid parent');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
+        if(isset($Question['course_id']))
+            LastAction::lastActionInCourse($Question['course_id']);        
+
         $Questions = collect([]);
         $cat = Questions::firstOrCreate([
             'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
@@ -329,7 +347,7 @@ class QuestionBankController extends Controller
         ]);
 
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
         }
 
         $Questions = collect([]);
@@ -339,8 +357,10 @@ class QuestionBankController extends Controller
             $arr = Questions::where('id', $Question['parent'])->where('question_type_id', 5)->pluck('id')->first();
         }
         if (!isset($arr)) {
-            return HelperController::api_response_format(400, null, 'this is not valid parent');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
+        if( isset($Question['course_id']))
+            LastAction::lastActionInCourse($Question['course_id']);        
         $cat = Questions::Create([
             'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
             'mark' => $Question['mark'],
@@ -370,7 +390,7 @@ class QuestionBankController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.try_again'));
         }
 
         $cat = $this::CreateOrFirstQuestion($Question,$parent);
@@ -410,10 +430,10 @@ class QuestionBankController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.try_again'));
         }
         if ($Question['Is_True'] > count($Question['answers']) - 1) {
-            return HelperController::api_response_format(400, null, 'is True invalid');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
         $ansA = QuestionsAnswer::where('question_id', $id)->pluck('content')->toArray();
@@ -457,10 +477,10 @@ class QuestionBankController extends Controller
             'match_B.*' => 'required|distinct',
         ]);
         if ($validator->fails()) {
-            return HelperController::api_response_format(400, $validator->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.try_again'));
         }
         if (count($Question['match_A']) > count($Question['match_B'])) {
-            return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
+            return HelperController::api_response_format(400, null, __('messages.question.questions_answers_count'));
         }
         $id = Questions:: where('text', $Question['text'])->pluck('id')->first();
         $ansA = QuestionsAnswer::where('question_id', $id)->pluck('match_A')->toArray();
@@ -541,39 +561,40 @@ class QuestionBankController extends Controller
     {
         $request->validate([
             'course_id' => 'integer|exists:courses,id',
-            'Question' => 'required|array',
-            'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+            'Question' => 'array',
+            'Question.*.Question_Type_id' => 'integer|exists:questions_types,id',
             'Question.*.survey' => 'boolean',
         ]);
 
         $re = collect([]);
-        foreach ($request->Question as $question) {
-            switch ($question['Question_Type_id']) {
-                case 1: // True/false
-                    $true_false = $this->TrueFalse($question,null);
-                    $re->push($true_false);
-                    break;
-                case 2: // MCQ
-                    $mcq = $this->MCQ($question,null);
-                    $re->push($mcq);
-                    break;
-                case 3: // Match
-                    $match = $this->Match($question,null);
-                    $re->push($match);
-                    break;
-                case 4: // Essay
-                    $essay = $this->Essay($question,null);
-                    $re->push($essay);
-                    break;
-                case 5: // para
-                    $paragraph = $this->paragraph($question);
-                    $paragraph->childeren;
-                    $re->push($paragraph);
-                    break;
+        if(isset($request->Question))
+            foreach ($request->Question as $question) {
+                switch ($question['Question_Type_id']) {
+                    case 1: // True/false
+                        $true_false = $this->TrueFalse($question,null);
+                        $re->push($true_false);
+                        break;
+                    case 2: // MCQ
+                        $mcq = $this->MCQ($question,null);
+                        $re->push($mcq);
+                        break;
+                    case 3: // Match
+                        $match = $this->Match($question,null);
+                        $re->push($match);
+                        break;
+                    case 4: // Essay
+                        $essay = $this->Essay($question,null);
+                        $re->push($essay);
+                        break;
+                    case 5: // para
+                        $paragraph = $this->paragraph($question);
+                        $paragraph->childeren;
+                        $re->push($paragraph);
+                        break;
+                }
             }
-        }
         if($type == 0){
-            return HelperController::api_response_format(200, $re, null);
+            return HelperController::api_response_format(200, $re, __('messages.question.add'));
         }
         else{
             return $re->pluck('id');
@@ -595,7 +616,7 @@ class QuestionBankController extends Controller
             $arr = Questions::where('id', $request->parent)->where('question_type_id', 5)->pluck('id')->first();
         }
         if (!isset($arr)) {
-            return HelperController::api_response_format(400, null, 'this is not valid parent');
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $question = Questions::find($request->question_id);
         //dd($question);
@@ -605,6 +626,8 @@ class QuestionBankController extends Controller
                 'text' => 'required|string|min:1',
             ]);
         }
+        LastAction::lastActionInCourse($question->course_id);        
+
         $question->update([
             'text' => ($request->text == null) ? "Match the correct Answer" : $request->text,
             'mark' => $request->mark,
@@ -638,6 +661,8 @@ class QuestionBankController extends Controller
                 'text' => 'required|string|min:1',
             ]);
         }
+        LastAction::lastActionInCourse($question->course_id);        
+
         $question->update([
             'text' => ($squestion['text'] == null) ? "Match the correct Answer" : $squestion['text'],
             'mark' =>$squestion['mark'],
@@ -773,7 +798,7 @@ class QuestionBankController extends Controller
             'match_B.*' => 'required|distinct'
         ]);
         if (count($request->match_A) > count($request->match_B)) {
-            return HelperController::api_response_format(400, null, '  number of Questions is greater than numbers of answers ');
+            return HelperController::api_response_format(400, null, __('messages.question.questions_answers_count'));
         }
 
         if ($parent==null){
@@ -920,7 +945,7 @@ class QuestionBankController extends Controller
                 break;
 
         }
-        return HelperController::api_response_format(200, $re, 'Question edited successfully');
+        return HelperController::api_response_format(200, $re, __('messages.question.update'));
     }
 
 
@@ -930,20 +955,11 @@ class QuestionBankController extends Controller
             'question_id' => 'required|integer|exists:questions,id'
         ]);
 
-        $check = Questions::destroy($request->question_id);
-
-        return HelperController::api_response_format(200, [], 'Question deleted Successfully');
-    }
-
-    public function deleteAnswer(Request $request)
-    {
-        $request->validate([
-            'answer_id' => 'required|integer|exists:questions_answers,id'
-        ]);
-
-        $check = QuestionsAnswer::destroy($request->answer_id);
-
-        return HelperController::api_response_format(200, [], 'Answer deleted Successfully');
+        $delete_answers=QuestionAnswer::where('question_id',$request->question_id)->delete();
+        $question = Questions::find($request->question_id);
+        LastAction::lastActionInCourse($question->course_id);        
+        $question->delete();
+        return HelperController::api_response_format(200, [], __('messages.question.delete'));
     }
 
     public function addAnswer(Request $request)
@@ -966,7 +982,7 @@ class QuestionBankController extends Controller
             'question_id' => $request->question_id
         ]);
 
-        return HelperController::api_response_format(200, $answer, 'Answer Added Successfully');
+        return HelperController::api_response_format(200, $answer, __('messages.answer.add'));
     }
 
     public function getAllTypes(Request $request){

@@ -27,7 +27,7 @@ class ExcelController extends Controller
         if (in_array($name, $files)) {
             eval('$importer = new App\Imports\\' . $type . '();');
             $check = Excel::import($importer, request()->file('file'));
-            return HelperController::api_response_format(201 , [] , 'Data Imported Successfully');
+            return HelperController::api_response_format(201 , [] , __('messages.success.data_imported'));
         } else {
             return HelperController::NOTFOUND();
         }

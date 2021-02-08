@@ -1,6 +1,8 @@
 <?php
 
 namespace App;
+use Modules\QuestionBank\Entities\userQuizAnswer;
+use Modules\QuestionBank\Entities\userQuiz;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -59,6 +61,39 @@ class UserGrade extends Model
             default:
                 return null;
                 break;
+        }
+    }
+
+    public static function quizUserGrade($user)
+    {
+        $user_quizzes=UserQuiz::where('user_id',$user->id)->pluck('id');
+        foreach($user_quizzes as $user_quiz)
+        {
+            $quiz_lesson=UserQuiz::find($user_quiz)->quiz_lesson;
+            if(isset($quiz_lesson) && $quiz_lesson->quiz->is_graded == 1)
+            {
+                //check if there is an essay not corrected
+                $questions=$quiz_lesson->quiz->Question->where('question_type_id',4)->pluck('id');
+                $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',$user_quiz)->whereIn('question_id',$questions)
+                                            ->whereNull('correct')->count();
+                if($userEssayCheckAnswer != 0)
+                    continue;
+
+                $courseSegmentQuiz=$quiz_lesson->lesson->courseSegment->id;
+                // return $courseSegmentQuiz;
+                $grade_items=GradeItems::where('name',$quiz_lesson->quiz->name)->get();
+                foreach($grade_items as $grade_item)
+                {
+                    $CoSeGgrdItmSameName=$grade_item->GradeCategory->CourseSegment->id;
+                    if($CoSeGgrdItmSameName == $courseSegmentQuiz)
+                    {
+                        $grade= UserQuiz::gradeMethod($quiz_lesson,$user);
+                        $usergrade=UserGrade::where('user_id',$user->id)->where('grade_item_id',$grade_item->id)->first();
+                        $usergrade->final_grade=$grade;
+                        $usergrade->save();
+                    }            
+                }
+            }
         }
     }
 }

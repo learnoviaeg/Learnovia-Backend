@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::group(['prefix' => 'survey', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'survey', 'middleware' => ['auth:api','LastAction']], function () {
     //install survey
     Route::get('install', 'SurveyController@install_survey');
     Route::post('add', 'SurveyController@store')->middleware('permission:survey/add');

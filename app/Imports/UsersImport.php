@@ -24,7 +24,8 @@ use App\ClassLevel;
 use App\Contract;
 use App\SegmentClass;
 use Carbon\Carbon;
-
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 class UsersImport implements ToModel, WithHeadingRow
 {
     /**
@@ -38,9 +39,6 @@ class UsersImport implements ToModel, WithHeadingRow
             'firstname'=>'required',
             'lastname'=>'required',
             'role_id'=>'required|exists:roles,id',
-            'class_id' => 'exists:classes,id',
-            'level' => 'exists:levels,id',
-            'type' => 'exists:academic_types,id',
             'language' => 'exists:languages,id',
             'second language' => 'exists:languages,id',
             'username' => 'unique:users'
@@ -54,8 +52,8 @@ class UsersImport implements ToModel, WithHeadingRow
         }
 
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email',
-                    'language', 'timezone', 'religion', 'second language', 'class_id', 'level', 'type', 'firstname',
-                    'lastname', 'username', 'real_password', 'suspend'];
+                    'language', 'timezone', 'religion', 'second language', 'class_id', 'level', 'type',
+                    'username', 'real_password', 'suspend'];
         $enrollOptional = 'optional'; 
         $teacheroptional='course';
 
@@ -67,13 +65,30 @@ class UsersImport implements ToModel, WithHeadingRow
         // dd((count($users)));
         if(((count($users) + count($row)-1)) > $max_allowed_users)
             die('U Can\'t add users any more');
-
+        $clientt = new Client();
+        $data = json_encode(array(
+            'name' => $row['firstname']. " " .$row['lastname'] ,
+            'meta_data' => array(
+                "image_link" => null,
+                'role'=> Role::find($row['role_id'])->name,
+            ),
+        ));
+        
+        $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+            'headers'   => [
+                'Content-Type' => 'application/json'
+            ], 
+            'body' => $data
+        ]);
         $user = new User([
             'firstname' => $row['firstname'],
             'lastname' => $row['lastname'],
             'username' => User::generateUsername(),
             'password' => bcrypt($password),
-            'real_password' => $password
+            'real_password' => $password,
+            'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+            'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+            'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
         ]);
 
         foreach ($optionals as $optional) {
@@ -92,8 +107,12 @@ class UsersImport implements ToModel, WithHeadingRow
         $role = Role::find($row['role_id']);
         $user->assignRole($role);
 
-        if (isset($row['class_id']))
-        {
+        if (isset($row['class_id'])){
+
+            Validator::make($row,[
+                'class_id' => 'exists:classes,id',
+            ])->validate();
+
             if ($row['role_id'] == 3) {
 
                 $classLevel=ClassLevel::where('class_id',$row['class_id'])->pluck('id')->first();
@@ -104,8 +123,14 @@ class UsersImport implements ToModel, WithHeadingRow
                 //get current segment if there just one in all types of all system 
                 $segment = Segment::where('current',1)->pluck('id')->first();
                 if(isset($row['segment_id']))
+                {
+                    Validator::make($row,[
+                        'segment_id' => 'exists:segments,id',
+                    ])->validate();
+
                     $segment=$row['segment_id'];
-        
+                }
+                
                 $request = new Request([
                     'year' => $year,
                     'type' => $type,
@@ -114,16 +139,17 @@ class UsersImport implements ToModel, WithHeadingRow
                     'segment' => $segment,
                     'users' => [$user->id]
                 ]);
-        
                 EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
         
                 $enrollcounter=1;
-                while($row[$enrollOptional.$enrollcounter]) {
+                while(isset($row[$enrollOptional.$enrollcounter])) {
                     $course_id=Course::where('short_name',$row[$enrollOptional.$enrollcounter])->pluck('id')->first();
+                    if(!isset($course_id))
+                        break;
                     $courseSeg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);
                     if($courseSeg == null)
                         break;
-        
+            
                     Enroll::firstOrCreate([
                         'course_segment' => $courseSeg->id,
                         'user_id' => $user->id,
@@ -143,6 +169,8 @@ class UsersImport implements ToModel, WithHeadingRow
                 $teachercounter=1;
                 while(isset($row[$teacheroptional.$teachercounter])){
                     $course_id=Course::where('short_name',$row[$teacheroptional.$teachercounter])->pluck('id')->first();
+                    if(!isset($course_id))
+                        break;
                     $courseSeg=CourseSegment::getidfromcourse($course_id);
                     if(isset($row['class_id'])){
                         $courseSegg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);

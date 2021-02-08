@@ -7,7 +7,7 @@ use App\Http\Controllers\HelperController;
 use App\User;
 use App\Lesson;
 use Illuminate\Support\Facades\Auth;
-
+use App\Events\MassLogsEvent;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
@@ -23,10 +23,7 @@ use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
 use Modules\UploadFiles\Entities\file;
 use Modules\QuestionBank\Entities\Quiz;
 use Modules\UploadFiles\Entities\media;
-
 use Modules\UploadFiles\Entities\MediaLesson;
-
-
 class NotificationController extends Controller
 {
     public function get_google_token()
@@ -70,7 +67,6 @@ class NotificationController extends Controller
     * @param no required parameters
     * @return all notifications.
     */
-
     public function getallnotifications(Request $request)
     {
         $noti = DB::table('notifications')->select('data','read_at','id')->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();
@@ -120,7 +116,7 @@ class NotificationController extends Controller
 
                     $deleted = 0 ;
                     // if object doesnot deleted or this student not enrolled in this course
-                    if(!isset($data[$i]['item_lesson_id']) || !in_array($item_course_segment,$course_segments_ids->toArray())){
+                    if(!isset($data[$i]['item_lesson_id']) || ($not->data['type'] != 'meeting' && !in_array($item_course_segment,$course_segments_ids->toArray()))){
                         $deleted = 1;
                     }
 
@@ -175,7 +171,11 @@ class NotificationController extends Controller
             $not->data= json_decode($not->data, true);
             if($not->data['type'] != 'announcement')
             {
-                DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                //for log event
+                // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+                $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+                // if($check > 0)
+                //     event(new MassLogsEvent($logsbefore,'updated'));
             }
         }
         return HelperController::api_response_format(200, null, 'Read');
@@ -213,9 +213,15 @@ class NotificationController extends Controller
             'startdate' => 'required|before:enddate|before:' . Carbon::now(),
             'enddate' => 'required'
         ]);
+
+        //for log event
+        $logsbefore=DB::table('notifications')->where('created_at', '>', $request->startdate)
+                        ->where('created_at', '<', $request->enddate)->get();
         $check = DB::table('notifications')->where('created_at', '>', $request->startdate)
-            ->where('created_at', '<', $request->enddate)
-            ->delete();
+                    ->where('created_at', '<', $request->enddate)
+                    ->delete();
+        if($check > 0)
+            event(new MassLogsEvent($logsbefore,'deleted'));
         return HelperController::api_response_format(200, $body = [], $message = 'notifications deleted');
 
     }
@@ -237,22 +243,19 @@ class NotificationController extends Controller
 
         if(isset($request->id))
         {
-            // $note = DB::table('notifications')->where('id', $request->id)->first();
-            // if ($note->notifiable_id == $session_id){
-            //     $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
-                // $print=self::getallnotifications($request);
-                // return $print;
-            // }
-              
             $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
             foreach ($noti as $not) {
                 $not->data= json_decode($not->data, true);
                 if($not->data['type'] != 'announcement')
                 {
+                    //for log event
+                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+
                     if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message)
-                    {
-                        DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
-                    }
+                        $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+                
+                    // if($check > 0)
+                    //     event(new MassLogsEvent($logsbefore,'updated'));
                 }
             }
             $print=self::getallnotifications($request);
@@ -264,14 +267,16 @@ class NotificationController extends Controller
             $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
             foreach ($noti as $not) {
                 $not->data= json_decode($not->data, true);
-                if($not->data['type'] != 'announcement')
-                {
-                    DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                if($not->data['type'] != 'announcement'){
+                    //for log event
+                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+                    $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+                    // if($check > 0)
+                    //     event(new MassLogsEvent($logsbefore,'updated'));
                 }
             }
             $print=self::getallnotifications($request);
             return $print;
-
         }
         return HelperController::api_response_format(400, $body = [], $message = 'you cannot seen this notification');
     }

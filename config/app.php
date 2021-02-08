@@ -81,7 +81,7 @@ return [
     */
 
     'locale' => 'en',
-
+    'locales' => ['en', 'ar'],
     /*
     |--------------------------------------------------------------------------
     | Application Fallback Locale
@@ -180,6 +180,8 @@ return [
         Spatie\Permission\PermissionServiceProvider::class,
         Elibyy\TCPDF\ServiceProvider::class,
         \hisorange\BrowserDetect\ServiceProvider::class,
+        Barryvdh\DomPDF\ServiceProvider::class,
+
 
 
     ],
@@ -237,5 +239,7 @@ return [
         'TXPDF' => Elibyy\TCPDF\Facades\TCPDF::class,
         'checkEnroll' => App\Http\Controllers\checkEnrollController::class,
         'Browser' => \hisorange\BrowserDetect\Facade::class,
+        'PDF' => Barryvdh\DomPDF\Facade::class,
+
     ],
 ];

@@ -26,6 +26,8 @@
                                     'class' => 'form-control',
                                     'placeholder' => trans('laravel-h5p.content.title'),
                                     'id' => 'laravel-h5p-title',
+                                    'required' => 'required',
+
                                 ]) }}
     
                             @if ($errors->has('title'))

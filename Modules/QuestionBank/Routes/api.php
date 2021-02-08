@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 
-Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'quiz', 'middleware' =>[ 'auth:api','LastAction']], function () {
 
     //Install Question Bank
     Route::get('install', 'QuestionBankController@install_question_bank');
@@ -11,6 +11,7 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::post('add', 'QuizController@store')->middleware('permission:quiz/add');
     Route::post('grading-method', 'QuizController@gradeing_method')->middleware('permission:quiz/grading-method');
     Route::post('update', 'QuizController@update')->middleware('permission:quiz/update');
+    Route::get('script-shuffle', 'QuizController@ScriptShuffle');
 
     //Quiz Routes
     Route::post('delete', 'QuizController@destroy')->middleware('permission:quiz/delete');
@@ -36,16 +37,16 @@ Route::group(['prefix' => 'quiz', 'middleware' => 'auth:api'], function () {
     Route::get('get-student-in-quiz', 'QuizController@getStudentinQuiz')->middleware('permission:quiz/get-student-in-quiz');
     Route::get('get-student-answer-quiz', 'QuizController@getStudentAnswerinQuiz')->middleware('permission:quiz/get-student-answer-quiz');
     Route::get('get-all-students-answer', 'QuizController@getAllStudentsAnswerinQuiz')->middleware('permission:quiz/get-all-students-answer');
-    Route::get('get-single-quiz', 'QuizController@getSingleQuiz')->middleware(['permission:quiz/answer|quiz/detailes', 'ParentCheck']);
+    Route::get('get-single-quiz', 'QuizController@getSingleQuiz')->middleware('permission:quiz/answer|quiz/detailes');
     Route::post('toggle', 'QuizController@toggleQuizVisibity')->middleware('permission:quiz/toggle');
     Route::post('correct-user-quiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
-    Route::post('get-attempts', 'QuizController@get_user_quiz')->middleware('permission:quiz/get-attempts');
-    Route::post('grade-user-quiz', 'UserQuizController@gradeUserQuiz')->middleware('permission:quiz/grade-user-quiz');
+    Route::post('get-attempts', 'QuizController@get_user_quiz')->middleware(['permission:quiz/get-attempts', 'ParentCheck']);
+    // Route::post('grade-user-quiz', 'UserQuizController@gradeUserQuiz')->middleware('permission:quiz/grade-user-quiz');
     Route::post('get-all-attempts', 'UserQuizController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
     // Route::post('get-fully-detailed-attempt', 'UserQuizController@get_fully_detailed_attempt')->middleware('permission:quiz/get-fully-detailed-attempt');
 });
 
-Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'question', 'middleware' => ['auth:api','LastAction']], function () {
     //Add/Update Question
     Route::post('add', 'QuestionBankController@store')->middleware('permission:question/add');
     Route::post('update', 'QuestionBankController@update')->middleware('permission:question/update');
@@ -55,6 +56,7 @@ Route::group(['prefix' => 'question', 'middleware' => 'auth:api'], function () {
         Route::get('get', 'QuestionCategoryController@show')->middleware('permission:question/category/get');
         Route::post('update', 'QuestionCategoryController@update')->middleware('permission:question/category/update');
         Route::post('delete', 'QuestionCategoryController@destroy')->middleware('permission:question/category/delete');
+        Route::get('migration', 'QuestionCategoryController@MigrationScript')->middleware('permission:site/show-all-courses');
     });
 
     Route::get('get', 'QuestionBankController@index')->middleware(['permission:question/get' , 'ParentCheck']);

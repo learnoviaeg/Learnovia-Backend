@@ -11,4 +11,9 @@ class page extends Model
     {
         return $this->belongsToMany('App\Lesson', 'page_lessons', 'page_id', 'lesson_id');
     }
+
+    public function pageLesson()
+    {
+        return $this->hasMany('Modules\Page\Entities\pageLesson');
+    }
 }

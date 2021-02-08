@@ -20,8 +20,15 @@ class EventServiceProvider extends ServiceProvider
         ],
         
         // 'App\Events\UserGradeEvent' => [
-        //     'App\Listerners\UserGradeListener',
+        //     'App\Listeners\UserGradeListener',
         // ],
+        // UserGradeEvent::class => [
+        //     UserGradeListener::class,
+        // ],
+
+        'App\Events\MassLogsEvent' => [
+            'App\Listeners\MassLogsListener',
+        ],
     ];
 
     /**

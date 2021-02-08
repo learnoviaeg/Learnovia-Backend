@@ -14,7 +14,7 @@
             <br/>
             <p class='text-center'>
 
-                <a href="{{ url()->previous() }}" class="btn btn-default"><i class="fa fa-reply"></i> {{ trans('laravel-h5p.content.cancel') }}</a>
+                {{-- <a href="{{ url()->previous() }}" class="btn btn-default"><i class="fa fa-reply"></i> {{ trans('laravel-h5p.content.cancel') }}</a> --}}
 
             </p>
         </div>

@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'assignment', 'middleware' =>[ 'auth:api','LastAction']], function () {
 
     //install Assignments Routes
     Route::get('install','AssigmentsController@install_Assignment');
@@ -32,5 +32,7 @@ Route::group(['prefix' => 'assignment', 'middleware' => 'auth:api'], function ()
     Route::get('get','AssigmentsController@GetAssignment')->name('getAssignment')->middleware(['permission:assignment/get' , 'ParentCheck']);
     Route::post('toggle', 'AssigmentsController@toggleAssignmentVisibity')->middleware('permission:assignment/toggle');
     Route::post('assignment-override', 'AssigmentsController@overrideAssignment')->middleware('permission:assignment/assignment-override');
+    Route::get('annotate', 'AssigmentsController@AnnotatePDF')->middleware('permission:assignment/grade');
+    Route::get('overwrite-script', 'AssigmentsController@overwriteScript')->middleware('permission:site/show-all-courses');
     // Route::get('get-all', 'AssigmentsController@getAllAssigment')->middleware('permission:assignment/get-all');
 });

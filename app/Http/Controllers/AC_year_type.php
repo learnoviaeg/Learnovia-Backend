@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use Nwidart\Modules\Collection;
-
+use App\Events\MassLogsEvent;
 use App\AcademicType;
 use App\AcademicYear;
 use App\AcademicYearType;
@@ -17,6 +17,7 @@ use App\Http\Resources\Year_type_resource;
 use Validator;
 use App\Exports\TypesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\YearLevel;
 
 class AC_year_type extends Controller
 {
@@ -69,17 +70,22 @@ class AC_year_type extends Controller
                 $q->whereIn('academic_year_id',$request->years);
             }
         });
-        $all_types = $types->get();
+        $all_types = $types;
         if($call==1){
-            return $all_types;
+            return $all_types->get();
         }
+        $all_types= $all_types->with('yearType.academicyear')->get();//;->pluck(['yearType.*.academicyear.*.name'])->collapse();
+        foreach($all_types as $type){
+            $type->year_type = $type->yearType->pluck('academicyear.*.name')->collapse();
+            unset($type->yearType);
 
+        }
         if($request->returnmsg == 'delete')
-            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),'Type deleted successfully');
+            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),__('messages.type.delete'));
         if($request->returnmsg == 'add')
-            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),'Type added successfully');
+            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),__('messages.type.add'));
         if($request->returnmsg == 'update')
-            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),'Type edited successfully');
+            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),__('messages.type.update'));
 
         else
             return HelperController::api_response_format(200, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)));
@@ -97,15 +103,35 @@ class AC_year_type extends Controller
         $req->validate([
             'id' => 'required|exists:academic_types,id'
         ]);
-        $type = AcademicType::find($req->id);
-        if ($type) {
-            $type->delete();
-            $output= AcademicType::paginate(HelperController::GetPaginate($req));
-            $req['returnmsg'] = 'delete';
-            $print = self::get($req);
-            return $print;
+
+        $segment= Segment::where('academic_type_id',$req->id)->get();
+        $level= YearLevel::whereIn('academic_year_type_id',AcademicYearType::where('academic_type_id',$req->id)->pluck('id'))->get();
+        if(!(count($segment) == 0 && count($level) == 0)){
+            return HelperController::api_response_format(404, [], __('messages.error.cannot_delete'));
         }
-        return HelperController::api_response_format(400, [], 'Type Deleted Fail');
+        $types = AcademicType::whereId($req->id)->first()->delete();
+
+        //for log event
+        $logsbefore=AcademicYearType::where('academic_type_id',$req->id)->get();
+        $returnValue=AcademicYearType::where('academic_type_id',$req->id)->delete();
+        if($returnValue > 0)
+            event(new MassLogsEvent($logsbefore,'deleted'));
+
+        //for log event
+        $logsbefore=User::where('type',$req->id)->get();
+        $returnValue=User::where('type',$req->id)->update(['type' => null]);
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
+
+        //for log event
+        $logsbefore=Enroll::where('type',$req->id)->get();
+        $returnValue=Enroll::where('type',$req->id)->update(['type' => null]);
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
+
+        $req['returnmsg'] = 'delete';
+        $print = self::get($req);
+        return $print;
     }
 
     /**
@@ -127,7 +153,7 @@ class AC_year_type extends Controller
         ]);
 
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
         }
         $Ac = AcademicType::firstOrCreate([
             'name' => $req->name,
@@ -150,7 +176,7 @@ class AC_year_type extends Controller
             return $print;
             // return HelperController::api_response_format(200, $output, 'Type Added Successfully');
         }
-        return HelperController::api_response_format(404, [], 'Type insertion Fail');
+        return HelperController::api_response_format(404, [], __('messages.error.try_again'));
     }
 
     /**
@@ -171,11 +197,11 @@ class AC_year_type extends Controller
         ]);
 
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
         }
         $AC = AcademicType::Find($req->id);
         if (!$AC) {
-            return HelperController::api_response_format(404, [], 'NotFound');
+            return HelperController::api_response_format(404, [], __('messages.error.not_found'));
         }
 
         $AC->update($req->all());
@@ -197,7 +223,7 @@ class AC_year_type extends Controller
             return $print;
             // return HelperController::api_response_format(200, $output, 'Type edited successfully');
         }
-        return HelperController::api_response_format(400, [], 'Something went wrong');
+        return HelperController::api_response_format(400, [], __('messages.error.try_again'));
     }
 
     /**
@@ -215,7 +241,7 @@ class AC_year_type extends Controller
             'id_year.*' => 'required|exists:academic_years,id'
         ]);
         if ($valid->fails()) {
-            return HelperController::api_response_format(400, $valid->errors(), 'Something went wrong');
+            return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
         }
         $counter=0;
         while(isset($req->id_year[$counter]))
@@ -238,12 +264,12 @@ class AC_year_type extends Controller
                 $year = AcademicYear::whereId($request->year)->first();
 
             if(!isset($year))
-                return HelperController::api_response_format(200,null, 'No active year available, please enter one.');
+                return HelperController::api_response_format(200,null, __('messages.error.no_active_year'));
 
             if(count($year->AC_Type) == 0)
-                return HelperController::api_response_format(201,null, 'You haven\'t types');
+                return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
 
-            return HelperController::api_response_format(200,$year->AC_Type, 'There are your types');
+            return HelperController::api_response_format(200,$year->AC_Type, __('messages.type.list'));
         }
 
         $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
@@ -269,9 +295,9 @@ class AC_year_type extends Controller
         }
             
         if(isset($type) && count($type) > 0)
-            return HelperController::api_response_format(201,$type, 'There are your types');
+            return HelperController::api_response_format(201,$type, __('messages.type.list'));
         
-        return HelperController::api_response_format(201,null, 'You haven\'t types');
+        return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
     }
     public function export(Request $request)
     {
@@ -281,6 +307,6 @@ class AC_year_type extends Controller
         $filename = uniqid();
         $file = Excel::store(new TypesExport($typeIDs), 'Type'.$filename.'.xls','public');
         $file = url(Storage::url('Type'.$filename.'.xls'));
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

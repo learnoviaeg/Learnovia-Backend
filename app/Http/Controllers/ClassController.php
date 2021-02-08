@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Facades\Storage;
+use App\Events\MassLogsEvent;
 use App\AcademicYearType;
 use App\YearLevel;
 use App\Level;
-
+use App\SegmentClass;
 use Illuminate\Http\Request;
 use App\Classes;
 use App\CourseSegment;
@@ -19,7 +20,6 @@ use Auth;
 use App\Http\Resources\Classes as Classs;
 use Validator;
 use App\AcademicType;
-
 use App\AcademicYear;
 use App\Exports\ClassesExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -107,7 +107,7 @@ class ClassController extends Controller
         $class = new Classes;
         $class->name = $request->name;
         $class->save();
-        return HelperController::api_response_format(200, new Classs($class), 'Class Created Successfully');
+        return HelperController::api_response_format(200, new Classs($class), __('messages.class.add'));
     }
    /*
     * @Description :creates a new class to a given year, type and level.
@@ -148,7 +148,7 @@ class ClassController extends Controller
             }
 
         }
-        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), 'Class Created Successfully');
+        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.add'));
     }
 
     /**
@@ -166,16 +166,21 @@ class ClassController extends Controller
         ]);
         if($request->id == null)
         {
-            $yeartype = AcademicYearType::checkRelation($request->year , $request->type);
-            $yearlevel = YearLevel::checkRelation($yeartype->id , $request->level);
-            $class =collect([]);
-            foreach ($yearlevel->classLevels as $classLevel){
-                if(count($classLevel->classes) > 0)
-                    $class[] = $classLevel->classes[0]->id;
-            }
-            $Classes = Classes::with('classlevel.yearLevels.levels.years')->whereIn('id',$class);
+            $Classes = Classes::whereNull('deleted_at')
+            ->whereHas('classlevel.yearLevels', function($q)use ($request)
+            { 
+                    if ($request->has('level')) 
+                        $q->where('level_id',$request->level);
+            })
+            ->whereHas('classlevel.yearLevels.yearType' , function($q)use ($request)
+            { 
+                if ($request->has('year'))
+                    $q->where('academic_year_id',$request->year);
+                if ($request->has('type'))
+                    $q->where('academic_type_id',$request->type);
+            })->get();
+
             $all_classes=collect([]);
-            $Classes = $Classes->get();
             foreach ($Classes as $class)
            { 
             $levels_id= $class->classlevel->pluck('yearLevels.*.level_id')->collapse()->unique();
@@ -211,10 +216,10 @@ class ClassController extends Controller
         ]);
 
         if ($valid->fails())
-            return HelperController::api_response_format(400 , $valid->errors() , 'Something went wrong');
+            return HelperController::api_response_format(400 , $valid->errors() , __('messages.error.try_again'));
         $class = Classes::find($request->id);
         $class->update($request->all());
-        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), 'Class edited successfully');
+        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.update'));
     }
 
     /**
@@ -226,8 +231,27 @@ class ClassController extends Controller
     {
         $request->validate(['id' => 'required|exists:classes,id']);
         $class = Classes::find($request->id);
+        $Segment_class = SegmentClass::whereIn("class_level_id",ClassLevel::where('class_id',$request->id)->pluck('id'))->get();
+        
+        if(count($Segment_class)>0)
+            return HelperController::api_response_format(400, [], __('messages.error.cannot_delete'));
+        
+        ClassLevel::where('class_id',$request->id)->first()->delete();
+       
+        //for log event
+        $logsbefore=User::where('class_id',$request->id)->get();
+        $returnValue=User::where('class_id',$request->id)->update(["class_id"=>null]);
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
+       
+        //for log event
+        $logsbefore=Enroll::where('class',$request->id)->get();
+        $returnValue=Enroll::where('class',$request->id)->update(["class"=>null]);
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
+        
         $class->delete();
-        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), 'Class Deleted Successfully');
+        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.delete'));
     }
     /**
      * @Description :assigns a class to certain year, type and level.
@@ -261,7 +285,7 @@ class ClassController extends Controller
                     {
                         $year = AcademicYear::Get_current();
                         if(!isset($year))
-                            return HelperController::api_response_format(201, 'there is no current year');
+                            return HelperController::api_response_format(201, __('messages.error.no_active_year'));
                         else
                             $year=$year->id;
                     }
@@ -272,7 +296,7 @@ class ClassController extends Controller
                 }
         }
         else {
-             return HelperController::api_response_format(201, 'Arrays must have same length');
+             return HelperController::api_response_format(201, __('messages.error.data_invalid'));
         }
         return HelperController::api_response_format(201, 'Class Assigned Successfully');
     }
@@ -282,7 +306,7 @@ class ClassController extends Controller
             'class'    => 'required|integer|exists:classes,id',
         ]);
         $lessons = CourseSegment::GetWithClass($request->class)->lessons;
-        return HelperController::api_response_format(200, $lessons,'Lessons are ....');
+        return HelperController::api_response_format(200, $lessons,__('messages.lesson.list'));
     }
 
     public function GetMyclasses(Request $request)
@@ -319,19 +343,23 @@ class ClassController extends Controller
                 $year_type = AcademicYearType::whereIn('academic_type_id',$request->type)->pluck('id');
 
             if(!isset($year_type))
-                return HelperController::api_response_format(200,null, 'No active year available, please enter types you want.');
-                
-            $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('id');
+                return HelperController::api_response_format(200,null, __('messages.error.no_active_year'));
             
+            $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('id');
+
+            if($request->has('level') && count($request->level)>0)    
+                $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->whereIn('level_id',$request->level)->pluck('id');
+            
+
             if(isset($year_levels))
                 $classes = ClassLevel::whereIn('year_level_id',$year_levels)->pluck('class_id');
 
             if(isset($classes))
                 $classes = Classes::whereIn('id',$classes)->get();
             if(count($classes) == 0)
-                return HelperController::api_response_format(201,null, 'You haven\'t classes');
+                return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
 
-            return HelperController::api_response_format(200,$classes, 'There are your classes');
+            return HelperController::api_response_format(200,$classes, __('messages.class.list'));
         }
 
         foreach($users->enroll as $enrolls){
@@ -349,9 +377,9 @@ class ClassController extends Controller
             }
         }
         if(count($class) > 0)
-            return HelperController::api_response_format(201,$class, 'There are your Classes');
+            return HelperController::api_response_format(201,$class, __('messages.class.list'));
         
-        return HelperController::api_response_format(201, $class,'You haven\'t Classes');
+        return HelperController::api_response_format(201, $class,__('messages.error.no_available_data'));
     }
 
     public function export(Request $request)
@@ -360,6 +388,6 @@ class ClassController extends Controller
         $filename = uniqid();
         $file = Excel::store(new ClassesExport($classesIDs), 'Class'.$filename.'.xls','public');
         $file = url(Storage::url('Class'.$filename.'.xls'));
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

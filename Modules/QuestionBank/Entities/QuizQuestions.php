@@ -6,5 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class quiz_questions extends Model
 {
-    protected $fillable = [];
+    protected $fillable = ['question_id','quiz_id'];
+    protected $hidden = [
+        'created_at','updated_at'
+    ];
+
+    public function Question()
+    {
+        return  $this->hasMany('Modules\QuestionBank\Entities\Questions', 'id', 'question_id');
+    }
 }

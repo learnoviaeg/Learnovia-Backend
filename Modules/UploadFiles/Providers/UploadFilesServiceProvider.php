@@ -5,9 +5,14 @@ namespace Modules\UploadFiles\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\UploadFiles\Entities\FileLesson;
+use Modules\UploadFiles\Entities\File;
+use Modules\UploadFiles\Entities\Media;
 use Modules\UploadFiles\Entities\MediaLesson;
 use Modules\UploadFiles\Observers\FileObserver;
 use Modules\UploadFiles\Observers\MediaObserver;
+use Modules\UploadFiles\Observers\FileLessonObserver;
+use Modules\UploadFiles\Observers\MediaLessonObserver;
+use App\Observers\LogsObserver;
 
 class UploadFilesServiceProvider extends ServiceProvider
 {
@@ -26,6 +31,15 @@ class UploadFilesServiceProvider extends ServiceProvider
 
         MediaLesson::observe(MediaObserver::class);
         FileLesson::observe(FileObserver::class);
+
+        File::observe(LogsObserver::class);
+        FileLesson::observe(LogsObserver::class);
+        
+        Media::observe(LogsObserver::class);
+        MediaLesson::observe(LogsObserver::class);
+
+        FileLesson::observe(FileLessonObserver::class);
+        MediaLesson::observe(MediaLessonObserver::class);
     }
 
     /**

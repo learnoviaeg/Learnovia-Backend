@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\GradeCategoryController;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\File;
 use App\Notifications\Announcment;
+use App\Events\MassLogsEvent;
 use Illuminate\Http\Request;
 use App\Announcement;
 use App\userAnnouncement;
@@ -50,7 +52,7 @@ class AnnouncementController extends Controller
             'description' => 'required',
             //all mimetypes in this link
             // https://github.com/symfony/symfony/blob/d94d837e9ea75d76eeb0a43e0535a5e7a7a01542/src/Symfony/Component/HttpFoundation/File/MimeType/MimeTypeExtensionGuesser.php
-            'attached_file' => 'nullable|file|mimetypes:application/pdf,
+            'attached_file' => 'nullable|file|mimetypes:mp3,application/pdf,
                                                         application/vnd.openxmlformats-officedocument.wordprocessingml.document,
                                                         application/msword,
                                                         application/vnd.ms-excel,
@@ -63,151 +65,169 @@ class AnnouncementController extends Controller
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|after:' . Carbon::now(),
             'role' => 'nullable',
-            'year' => 'nullable|exists:academic_years,id',
-            'type' => 'nullable|exists:academic_types,id',
-            'level' => 'nullable|exists:levels,id',
-            'class' => 'nullable|exists:classes,id',
-            'segment' => 'nullable|exists:segments,id',
-            'course' => 'nullable|exists:courses,id',
+            'chains.*.year' => 'array',
+            'chains.*.year.*' => 'exists:academic_years,id',
+            'chains.*.type' => 'array',
+            'chains.*.type.*' => 'exists:academic_types,id',
+            'chains.*.level' => 'array',
+            'chains.*.level.*' => 'exists:levels,id',
+            'chains.*.class' => 'array',
+            'chains.*.class.*' => 'exists:classes,id',
+            'chains.*.segment' => 'array',
+            'chains.*.segment.*' => 'exists:segments,id',
+            'chains.*.course.*' => 'exists:courses,id',
+            'chains.*.role.*' => 'exists:roles,id',
         ]);
-
-        if (isset($request->publish_date)) {
+        if($request->user()->can('announcements/filter-chain')){
+            $request->validate([
+                'chains.*.year' => 'required|array',
+                'chains.*.year.*' => 'exists:academic_years,id',
+                'chains.*.type' => 'required|array',
+                'chains.*.type.*' => 'exists:academic_types,id',
+                'chains.*.level' => 'required|array',
+                'chains.*.level.*' => 'exists:levels,id',
+                'chains.*.class' => 'required|array',
+                'chains.*.class.*' => 'exists:classes,id',
+                'chains.*.segment' => 'required|array',
+                'chains.*.segment.*' => 'exists:segments,id',
+                'chains.*.course.*' => 'required|exists:courses,id',
+            ]);
+        }
+        $date=Carbon::now();
+        $publishdate = Carbon::parse($date);
+        if (isset($request->publish_date)) 
             $publishdate = $request->publish_date;
-        }else {
-            $date=Carbon::now();
-            $publishdate = Carbon::parse($date);
-        }
-        $start_date = $request->start_date;
-        if($request->start_date < Carbon::now())
-        {
-            $start_date = Carbon::now();
-        }
-
 
         $users = array();
         //Files uploading
-        if (isset($request->attached_file)) {
-            $fileName = attachment::upload_attachment($request->attached_file, 'Announcement');
-            $file_id = $fileName->id;
-        } else {
-            $file_id = null;
-        }
-        // return $courseSegments;
+        $file_id = null;
+        if (isset($request->attached_file))
+            $file_id = attachment::upload_attachment($request->attached_file, 'Announcement')->id;
+
         $userr = Enroll::where('user_id','!=' ,Auth::id());
-        if($request->filled('year'))
-            $userr->where('year',$request->year);
-        if($request->filled('type'))
-            $userr->where('type',$request->type);
-        if($request->filled('level'))
-            $userr->where('level',$request->level);
-        if($request->filled('segment'))
-            $userr->where('segment',$request->segment);
-        if($request->filled('course'))
-            $userr->where('course',$request->course);
-        if($request->filled('class'))
-            $userr->where('class',$request->class);
-             // $users->get();
         $users =  $userr->pluck('user_id')->toArray();
         $users =  array_values(array_unique($users));
-        //  return $users;
-        //Creating announcement in DB
-        $ann = Announcement::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'attached_file' => $file_id,
-            'assign' => $request->assign,
-            'class_id' => $request->class,
-            'course_id' => $request->course,
-            'level_id' => $request->level,
-            'year_id' => $request->year,
-            'type_id' => $request->type,
-            'segment_id' => $request->segment,
-            'publish_date' => Carbon::parse($publishdate),
-            'created_by' => Auth::id(),
-        ]);
-        foreach ($users as $user){
-            userAnnouncement::create([
-                'announcement_id' => $ann->id,
-                'user_id' => $user
-            ]);
-        }
+        $chains[0]['year'][0]=AcademicYear::where('current',1)->pluck('id')->first();
+        if(isset($request->chains))
+            $chains=$request->chains;
+        foreach($chains as $chain){
+            if(!isset($chain['year']))
+                $chain['year']=AcademicYear::where('current',1)->pluck('id');
+            foreach ($chain['year'] as $year) {
+                if(!isset($chain['type']))
+                    $chain['type']=AcademicYearType::where('academic_year_id',$year)->pluck('academic_type_id');
+                foreach ($chain['type'] as $type) {
+                    $yeartype = AcademicYearType::checkRelation($year, $type);
+                    if(!isset($chain['level']))
+                        $chain['level']=YearLevel::where('academic_year_type_id',$yeartype->id)->pluck('level_id');
 
-        $ann->start_date = null ;
-        if ($request->filled('start_date')) {
-            $ann->start_date = $start_date;
-            $ann->save();
-        }
+                    foreach ($chain['level'] as $level) {
+                        $yearlevel = YearLevel::checkRelation($yeartype->id, $level);
+                        if(!isset($chain['class']))
+                            $chain['class'] =  ClassLevel::where('year_level_id',$yearlevel->id)->pluck('class_id');
+    
+                        foreach ($chain['class'] as $class) {
+                            $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
+                            if(!isset($chain['segment']))
+                                $chain['segment']=SegmentClass::where('class_level_id',$classLevel->id)->pluck('segment_id');
 
-        if ($request->filled('due_date')) {
-            $ann->due_date = $request->due_date;
-            $ann->save();
-        }
+                            foreach ($chain['segment'] as $segment) {
+                                $segmentClass = SegmentClass::checkRelation($classLevel->id, $segment);
+                                if(!isset($chain['course']))
+                                    $chain['course'] = CourseSegment::where('segment_class_id',$segmentClass->id)->pluck('course_id');
 
-        if($file_id == null )
-        {
-            $requ = ([
-                'id' => $ann->id,
-                'type' => 'announcement',
-                'publish_date' => Carbon::parse($publishdate),
-                'title' => $request->title,
-                'description' => $request->description,
-                'attached_file' => $file_id,
-                'start_date' => $ann->start_date,
-                'due_date' => $ann->due_date,
-                'message' => $request->title.' announcement is added'
-            ]);
-        }else{
-            $attached = attachment::where('id', $file_id)->first();
-            $requ = ([
-                'id' => $ann->id,
-                'type' => 'announcement',
-                'publish_date' => Carbon::parse($publishdate),
-                'title' => $request->title,
-                'description' => $request->description,
-                'attached_file' => $attached,
-                'start_date' => $ann->start_date,
-                'due_date' => $ann->due_date,
-                'message' => $request->title.' announcement is added'
-            ]);
-
-        }
-            // $user = array_unique($users->toArray());
-            if($request->filled('role'))
-            {
-                foreach($users as $use)
-                {
-                    if($use != Auth::id()){
-
-                        $user_obj=User::where('id',$use)->get()->first();
-                        $role_id=$user_obj->roles->pluck('id')->first();
-                        if($role_id == $request->role)
-                            $requ['users'][] = $use;
-                        else
-                            continue;
+                                foreach($chain['course'] as $course){
+                                    if(!isset($chain['role']))
+                                        $chain['role']=Role::pluck('id');
+                                    foreach($chain['role'] as $role)
+                                    {
+                                        $userr->where('year',$year);
+                                        $userr->where('type',$type);
+                                        $userr->where('level',$level);
+                                        $userr->where('segment',$segment);
+                                        $userr->where('course',$course);
+                                        $userr->where('class',$class);
+                                        $userr->where('role_id',$role);
+                                        // return $userr->get();
+    
+                                        $ann = Announcement::firstOrCreate([
+                                            'title' => $request->title,
+                                            'description' => $request->description,
+                                            'attached_file' => $file_id,
+                                            'class_id' => $class,
+                                            'course_id' => $course,
+                                            'level_id' => $level,
+                                            'year_id' => $year,
+                                            'type_id' => $type,
+                                            'segment_id' => $segment,
+                                            'publish_date' => Carbon::parse($publishdate),
+                                            'created_by' => Auth::id(),
+                                        ]);
+                                        foreach ($userr->get() as $user){
+                                            userAnnouncement::create([
+                                                'announcement_id' => $ann->id,
+                                                'user_id' => $user->user_id
+                                            ]);
+                                        }
+                                    
+                                        $ann->start_date = Carbon::parse(Carbon::now())->format('Y-m-d H:i:s') ;
+                                        if($request->filled('start_date')){
+                                            if($request->start_date < Carbon::now())
+                                                $ann->start_date = Carbon::parse(Carbon::now())->format('Y-m-d H:i:s');
+                                        }
+                                
+                                        if($request->filled('due_date'))
+                                            $ann->due_date = $request->due_date;
+                                        $ann->save();
+                                        
+                                        $attached=$file_id;
+                                        if(isset($attached))
+                                            $attached = attachment::where('id', $file_id)->first();                                        
+                                            
+                                        $requ = ([
+                                            'id' => $ann->id,
+                                            'type' => 'announcement',
+                                            'publish_date' => Carbon::parse($publishdate),
+                                            'title' => $request->title,
+                                            'description' => $request->description,
+                                            'attached_file' => $attached,
+                                            'start_date' => $ann->start_date,
+                                            'due_date' => $ann->due_date,
+                                            'message' => $request->title.' announcement is added'
+                                        ]);
+                                                // $user = array_unique($users->toArray());
+                                        if($request->filled('role'))
+                                        {
+                                            foreach($userr->get() as $use)
+                                            {
+                                                if($use->user_id != Auth::id()){
+                                                    $user_obj=User::where('id',$use->user_id)->get()->first();
+                                                    $role_id=$user_obj->roles->pluck('id')->first();
+                                                    if($role_id == $request->role)
+                                                        $requ['users'][] = $use->user_id;
+                                                    else
+                                                        continue;
+                                                }
+                                            }
+                                            if(!isset($requ['users']))
+                                                return HelperController::api_response_format(201,'No User');
+                                        }
+                                        $requ['users'] = $userr->pluck('user_id')->toArray();
+                                        $notificatin = User::notify($requ);
+                                        // return $notificatin;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-                if(!isset($requ['users']))
-                    return HelperController::api_response_format(201,'No User');
-            }
-            else{
-
-                foreach($users as $use)
-                {
-                    if($use != Auth::id())
-                    {
-                    }
-                }
-            }
-            $requ['users'] = $users;
-            $notificatin = User::notify($requ);
-            // return $notificatin;
-
+            }                
+        }
         $anounce = AnnouncementController::get_announcement($request);
         $myAnnouncements = Announcement::where('created_by',Auth::id())->get();
-        foreach ($myAnnouncements as $ann) {
+        foreach ($myAnnouncements as $ann) 
             $ann->attached_file = attachment::where('id', $ann->attached_file)->first();
-            // $ann->attachment;
-        }
+
         return HelperController::api_response_format(201, ['notify' => $anounce , 'created'=>$myAnnouncements ],'Announcement Sent Successfully');
     }
 
@@ -237,26 +257,34 @@ class AnnouncementController extends Controller
         $users = array();
         foreach ($deleted as $de) {
             $users[] = $de->notifiable_id;
-
-            DB::table('notifications')
-                ->where('id', $de->id)
-                ->update(['read_at' => null]);
+            
+            //for log event
+            // $logsbefore=DB::table('notifications')->where('id', $de->id)->get();
+            $check=DB::table('notifications')->where('id', $de->id)->update(['read_at' => null]);
+            // if($check > 0)
+                // event(new MassLogsEvent($logsbefore,'updated'));
         }
         //Validtaionof updated data
         $request->validate([
             'title' => 'required',
             'description' => 'required',
-            'attached_file' => 'nullable|file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt',
+            'attached_file' => 'nullable|file|mimetypes:mp3,application/pdf,
+                                application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                application/msword,
+                                application/vnd.ms-excel,
+                                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                                application/vnd.ms-powerpoint,
+                                application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                                application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,
+                                video/ogg,jpg,image/jpeg,image/png',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|after:' . Carbon::now()->addMinutes(1),
         ]);
 
-        if (isset($request->publish_date)) {
+        $publishdate = Carbon::now();
+        if (isset($request->publish_date)) 
             $publishdate = $request->publish_date;
-        } else {
-            $publishdate = Carbon::now();
-        }
 
         if($request->start_date < Carbon::now())
         {
@@ -265,12 +293,9 @@ class AnnouncementController extends Controller
             $start_date = $request->start_date;
         }
 
+        $due_date = $announce->due_date;
         if(isset($request->due_date))
-        {
             $due_date = $request->due_date;
-        } else {
-            $due_date = $announce->due_date;
-        }
 
         //Files uploading
         if (Input::hasFile('attached_file')) {
@@ -300,7 +325,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $announce->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate),
                 'title' => $announce->title,
                 'description' => $announce->description,
                 'attached_file' => $announce->attached_file,
@@ -315,7 +340,7 @@ class AnnouncementController extends Controller
             $requ = ([
                 'id' => $announce->id,
                 'type' => 'announcement',
-                'publish_date' => $publishdate,
+                'publish_date' => Carbon::parse($publishdate),
                 'title' => $announce->title,
                 'description' => $announce->description,
                 'attached_file' => $attached,
@@ -353,11 +378,9 @@ class AnnouncementController extends Controller
         $dataencode = json_encode($announcefinal);
         //get data from notifications
         $deleted = DB::table('notifications')->where('data', $dataencode)->get();
-        foreach ($deleted as $de) {
-            DB::table('notifications')
-                ->where('id', $de->id)
-                ->delete();
-        }
+        foreach ($deleted as $de) 
+            DB::table('notifications')->where('id', $de->id)->first()->delete();
+        
         $announce->delete();
         $anounce = AnnouncementController::get_announcement($request);
         $anouncenew = AnnouncementController::new_user_announcements($request);
@@ -443,6 +466,8 @@ class AnnouncementController extends Controller
         return $notif;
     }
 
+
+    
     /**
      *
      * @Description :get all announcements for logged in user.
@@ -560,9 +585,13 @@ class AnnouncementController extends Controller
                 $not->data= json_decode($not->data, true);
                 if($not->data['type'] == 'announcement')
                 {
-                    if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message)
-                    {
-                        DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                    //for log event
+                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+
+                    if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message){
+                        $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+                    // if($check > 0)
+                    //     event(new MassLogsEvent($logsbefore,'updated'));
                     }
                 }
             }
@@ -577,7 +606,11 @@ class AnnouncementController extends Controller
                 $not->data= json_decode($not->data, true);
                 if($not->data['type'] == 'announcement')
                 {
-                    DB::table('notifications')->where('id', $not->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
+                    //for log event
+                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+                    $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+                    // if($check > 0)
+                    //     event(new MassLogsEvent($logsbefore,'updated'));
                 }
             }
             $print=self::get($request);
@@ -588,7 +621,7 @@ class AnnouncementController extends Controller
 
     public function My_announc(Request $request)
     {
-        $my = Announcement::where('created_by',Auth::id());
+        $my = Announcement::where('created_by',Auth::id())->whereHas('UserAnnouncement');
            if($request->filled('search')){
             $my->where(function ($query) use ($request) {
                 $query->where('title', 'LIKE' , "%$request->search%");

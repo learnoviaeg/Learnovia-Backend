@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\YearLevel;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use App\GradeCategory;
 use Validator;
 
 class CoursesImport implements ToModel , WithHeadingRow
@@ -77,7 +78,11 @@ class CoursesImport implements ToModel , WithHeadingRow
                 'start_date' =>  Date::excelToDateTimeObject($row['start_date']),
                 'end_date' =>  Date::excelToDateTimeObject($row['end_date']),
             ]);
-
+            $gradeCat = GradeCategory::firstOrCreate([
+                'name' => 'Course Total',
+                'course_segment_id' => $courseSegment->id,
+                'id_number' => isset($row['level_id']) ? $yearLevel->id : null
+            ]);
             for ($i = 1; $i <= $no_of_lessons; $i++) {
                 $courseSegment->lessons()->firstOrCreate([
                     'name' => 'Lesson ' . $i,

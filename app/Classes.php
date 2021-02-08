@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Modules\Attendance\Entities\AttendanceSession;
 
 class Classes extends Model
 {
@@ -24,7 +24,17 @@ class Classes extends Model
 
     public function Segment_class()
     {
-        return $this->hasMany('App\SegmentClass', 'ClassLevel', 'class_id','id');
+        return $this->hasMany('App\SegmentClass', 'class_level_id','id');
+    }
+
+    public function sessions()
+    {
+        return $this->hasMany('Modules\Attendance\Entities\AttendanceSession','class_id','id');
+    }
+
+    public function timeline()
+    {
+        return $this->hasMany('App\Timeline','class_id','id');
     }
 
     public static function Validate($data)

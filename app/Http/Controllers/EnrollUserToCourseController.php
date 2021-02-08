@@ -10,18 +10,24 @@ use Illuminate\Http\Request;
 use App\User;
 use Auth;
 use App\Enroll;
+use App\Level;
 use App\Segment;
 use App\ClassLevel;
 use App\CourseSegment;
 use App\Course;
 use App\GradeCategory;
 use App\SegmentClass;
-
+use App\Classes;
 use App\Imports\UsersImport;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\ExcelController;
 use App\UserGrade;
-
+use App\Exports\teacherwithcourse;
+use App\Exports\StudentEnrolls;
+use App\Exports\classeswithstudents;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use App\LastAction;
 class EnrollUserToCourseController extends Controller
 {
     /**
@@ -85,11 +91,11 @@ class EnrollUserToCourseController extends Controller
                 $rolecount = 0;
             }
             if ($count != 0) {
-                return HelperController::api_response_format(200, $data, 'those users already enrolled');
+                return HelperController::api_response_format(200, $data, __('messages.enroll.already_enrolled'));
             }
-            return HelperController::api_response_format(200, [], 'added successfully');
+            return HelperController::api_response_format(200, [], __('messages.enroll.add'));
         } else {
-            return HelperController::api_response_format(200, [], 'invalid class data or not active course');
+            return HelperController::api_response_format(200, [], __('messages.error.data_invalid'));
         }
     }
 
@@ -112,23 +118,23 @@ class EnrollUserToCourseController extends Controller
         $request->validate([
             'user_id' => 'required|array|exists:enrolls,user_id',
             'year' => 'exists:academic_years,id',
-            'type' => 'required|exists:academic_types,id',
-            'level' => 'required|exists:levels,id',
-            'class' => 'required|exists:classes,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'class' => 'exists:classes,id',
             'segment' => 'exists:segments,id',
-            'course' => 'exists:courses,id'
+            'courses' => 'array|exists:courses,id'
         ]);
-        $courseSegment = HelperController::Get_Course_segment_Course($request);
+        $courseSegment = GradeCategoryController::getCourseSegment($request);
         if ($courseSegment == null)
-            return HelperController::api_response_format(200, null, 'No current segment or year');
+            return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
 
         foreach ($request->user_id as $users)
-            $course_segment = Enroll::where('course_segment', $courseSegment['value']->id)->where('user_id', $users)->delete();
+            $course_segment = Enroll::whereIn('course_segment', $courseSegment)->where('user_id', $users)->first()->delete();
 
         if ($course_segment > 0)
-            return HelperController::api_response_format(200, $course_segment, 'users UnEnrolled Successfully');
+            return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
 
-        return HelperController::api_response_format(200, $course_segment, 'NOT FOUND USER IN THIS COURSE/invalid data');
+        return HelperController::api_response_format(200, null, __('messages.error.data_invalid'));
     }
 
     /**
@@ -186,7 +192,7 @@ class EnrollUserToCourseController extends Controller
             if ($x != null) {
                 $segments = collect([]);
                 if (count($x->courseSegment) < 1) {
-                    return HelperController::api_response_format(400, [], 'No Courses belong to this class');
+                    return HelperController::api_response_format(400, [], __('messages.enroll.no_courses_belong_to_class'));
                 }
                 foreach ($x->courseSegment as $key => $segment) {
                     $segment->courses;
@@ -199,26 +205,31 @@ class EnrollUserToCourseController extends Controller
                 if ($segments == null)
                     break;
 
-                if (isset($request->course)) {
-                    $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$request->course);
-                    if(isset($courseSegment)){
-                        Enroll::firstOrCreate([
-                            'user_id' => $user,
-                            'course_segment' => $courseSegment->id,
-                            'role_id' => 3,
-                            'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
-                            'type' => $request->type,
-                            'level' => $request->level,
-                            'class' => $request->class,
-                            'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
-                            'course' => $courseSegment->course_id,
-                        ]);
+                if ($request->has('course') && count($request->course) > 0) {
+                    foreach($request->course as $course){
+                        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class,$course);
+                        if(isset($courseSegment)){
+                            Enroll::firstOrCreate([
+                                'user_id' => $user,
+                                'course_segment' => $courseSegment->id,
+                                'role_id' => 3,
+                                'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
+                                'type' => $request->type,
+                                'level' => $request->level,
+                                'class' => $request->class,
+                                'segment' => isset($request->segment) ? $request->segment : Segment::Get_current($request->type)->id,
+                                'course' => $courseSegment->course_id,
+                            ]);
+                        }
                     }
                 }
 
-                $check = Enroll::where('user_id', $user)->whereIn('course_segment', $segments)->pluck('id');
-                if (count($check) == 0) {
+                // $check = Enroll::where('user_id', $user)->whereIn('course_segment', $segments)->pluck('id');
+                // if (count($check) == 0) {
                     foreach ($segments as $segment) {
+                        $check = Enroll::where('user_id', $user)->where('course_segment', $segment)->pluck('id');
+                        if(count($check) > 0)
+                            continue;
                         Enroll::firstOrCreate([
                             'user_id' => $user,
                             'course_segment' => $segment,
@@ -231,18 +242,18 @@ class EnrollUserToCourseController extends Controller
                             'course' => CourseSegment::whereId($segment)->pluck('course_id')->first(),
                         ]);
                     }
-                } else {
-                    $count++;
-                    $exist_user->push(User::find($user));
-                }
+                // } else {
+                //     $count++;
+                    // $exist_user->push(User::find($user));
+                // }
             } else
-                return HelperController::api_response_format(400, [], 'No Current segment or year');
+                return HelperController::api_response_format(400, [], __('messages.error.no_active_year'));
         }
         //($count);
-        if ($count > 0) {
-            return HelperController::api_response_format(200, $exist_user->paginate(HelperController::GetPaginate($request)), 'enrolled and found user added before');
-        }
-        return HelperController::api_response_format(200, [], 'added successfully');
+        // if ($count > 0) {
+        //     return HelperController::api_response_format(200, $exist_user->paginate(HelperController::GetPaginate($request)), 'enrolled and found user added before');
+        // }
+        return HelperController::api_response_format(200, [], __('messages.enroll.add'));
     }
 
     /**
@@ -278,7 +289,7 @@ class EnrollUserToCourseController extends Controller
             'course_id' => 'required|exists:courses,id',
             'search' => 'nullable'
         ]);
-
+        LastAction::lastActionInCourse($request->course_id);
         if ($request->class_id == null) {
             $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
 
@@ -298,7 +309,7 @@ class EnrollUserToCourseController extends Controller
             $users = User::whereIn('id', $users_id)->get();
 
             //return all users that enrolled in this course
-            return HelperController::api_response_format(200, $users, 'students are ... ');
+            return HelperController::api_response_format(200, $users, __('messages.users.students_list'));
         }
         //if was send class_id and course_id
         else {
@@ -327,15 +338,15 @@ class EnrollUserToCourseController extends Controller
             }
 
             if ($usersByClass->isEmpty())
-                return HelperController::api_response_format(200, null, 'There is no student in This class ');
+                return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
 
             foreach ($result as $users)
                 $Usersenrolled[] = User::findOrFail($users);
 
             if (!isset($Usersenrolled))
-                return HelperController::api_response_format(200, null, 'there is no student ');
+                return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
 
-            return HelperController::api_response_format(200, $Usersenrolled, 'students are ... ');
+            return HelperController::api_response_format(200, $Usersenrolled, __('messages.users.students_list'));
         }
     }
 
@@ -382,7 +393,7 @@ class EnrollUserToCourseController extends Controller
             $course_segment[] = CourseSegment::checkRelation($segment_class->id, $c);
 
         if ($course_segment == null)
-            return HelperController::api_response_format(200, null, 'No current segment or year');
+            return HelperController::api_response_format(200, null, __('messages.error.no_active_year'));
 
         $ids = Enroll::whereIn('course_segment', $course_segment->pluck('id'))->pluck('user_id');
         $userUnenrolls = User::where('username', 'LIKE', "%$request->search%")->whereNotIn('id', $ids)->get();
@@ -390,7 +401,7 @@ class EnrollUserToCourseController extends Controller
             if(isset($user->attachment))
                 $user->picture = $user->attachment->path;
 
-        return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'students are ... ');
+        return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), __('messages.users.students_list'));
     }
 
     /**
@@ -482,9 +493,9 @@ class EnrollUserToCourseController extends Controller
                         ->orWhere('username', 'LIKE' ,"%$request->search%" )
                         ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
                     })->with('attachment');
-                return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)),'students are ... ');
+                return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)),__('messages.users.students_list'));
             }
-            return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)), 'students are ... ');
+            return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)), __('messages.users.students_list'));
         }
         else
         {
@@ -521,17 +532,13 @@ class EnrollUserToCourseController extends Controller
         $request->validate([
             'search' => 'nullable'
         ]);
-        $courseSegments = HelperController::Get_Course_segment($request);
-        if ($courseSegments['result'] == false) {
-            return HelperController::api_response_format(400, $courseSegments['value']);
-        }
-        if ($courseSegments['value'] == null) {
-            return HelperController::api_response_format(400, null, 'No Course active in segment');
-        }
+        $course_segment = GradeCategoryController::getCourseSegment($request);
+        if (!isset($course_segment))
+            return HelperController::api_response_format(404, 'There is no courses');
 
-        $ids = Enroll::whereIn('course_segment', $courseSegments['value']->pluck('id'))->pluck('user_id');
+        $ids = Enroll::whereIn('course_segment', $course_segment)->pluck('user_id');
         $userUnenrolls = User::where('username', 'LIKE', "%$request->search%")->whereNotIn('id', $ids)->get();
-        return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'students are ... ');
+        return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'users that unenrolled in this chain  are ... ');
     }
 
     /**
@@ -594,11 +601,11 @@ class EnrollUserToCourseController extends Controller
                 $count++;
             }
             if (isset($EnrolledBefore))
-                return HelperController::api_response_format(200, array_values(array_unique($EnrolledBefore)), 'Success and theses users added before');
+                return HelperController::api_response_format(200, array_values(array_unique($EnrolledBefore)), __('messages.enroll.already_enrolled'));
             else
-                return HelperController::api_response_format(200, 'Enrolled Successfully');
+                return HelperController::api_response_format(200,[], __('messages.enroll.add'));
         }
-        return HelperController::api_response_format(200, 'No Course Segment here');
+        return HelperController::api_response_format(200, [],__('messages.error.no_active_segment'));
     }
 
     public function Migration(Request $request)
@@ -629,7 +636,7 @@ class EnrollUserToCourseController extends Controller
             $newcourseSeg = GradeCategoryController::getCourseSegment($requestenroll);
 
             if (!$newcourseSeg)
-                return HelperController::api_response_format(200, 'No Course Segment here');
+                return HelperController::api_response_format(200, __('messages.error.no_active_segment'));
 
             self::EnrollInAllMandatoryCourses($requestenroll);
             Enroll::whereIn('course_segment', $oldcourseSeg)->whereIn('user_id', $request->users)->delete();
@@ -649,11 +656,106 @@ class EnrollUserToCourseController extends Controller
                                 'raw_grade' => $useGrade[0]->raw_grade
                             ]);
                         }
-                        UserGrade::where('grade_item_id', $oldItems->id)->where('user_id', $user1)->delete();
+                        UserGrade::where('grade_item_id', $oldItems->id)->where('user_id', $user1)->first()->delete();
                     }
                 }
             }
         }
-        return HelperController::api_response_format(200, 'User Migrated to class ' . $request->new_class);
+        return HelperController::api_response_format(200,null, 'User Migrated to class ' . $request->new_class);
+    }
+
+    public function EmptyCourses()
+    {
+        $course=array();
+        $coursesNotEnrolled=CourseSegment::whereNotIn('id',Enroll::where('role_id',3)->pluck('course_segment'))->get();
+        foreach($coursesNotEnrolled as $cor)
+            $course[$cor->segmentClasses[0]->classLevel[0]->classes[0]->name . "_".  $cor->segmentClasses[0]->classLevel[0]->classes[0]->id][]=$cor->courses[0]->short_name;
+
+        return HelperController::api_response_format(200, $course , 'empty courses');
+    }
+
+    public function exportcourseswithteachers(Request $request)
+    {
+        $request->validate([
+            'search' => 'required|string',
+        ]);
+
+        $courses = Course::where('short_name', 'LIKE' ,"%$request->search%")->pluck('id');
+        if(isset($courses))
+            $course_segments = CourseSegment::whereIn('course_id',$courses)->pluck('id');
+        if(isset($course_segments))
+            $enrolls = Enroll::whereIn('course_segment',$course_segments)->where('role_id',4)->with(['user','courseSegment','classes','courses'])->get();
+
+            // return $enrolls;
+        $filename = uniqid();
+        $file = Excel::store(new teacherwithcourse($enrolls), 'tech'.$filename.'.xls','public');
+        $file = url(Storage::url('tech'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+        // return HelperController::api_response_format(201,$enrolls, 'enrolls');
+    }
+
+    public function StudentdInLevels(Request $request)
+    {
+        $allUsers=Enroll::pluck('user_id')->unique();
+
+        $duplicated_users=array();
+        foreach($allUsers as $user)
+        {
+            $usr=User::find($user);
+            if(isset($usr)){
+                $levels=Enroll::where('user_id',$user)->where('role_id',3)->pluck('level')->unique();
+                if(count($levels) > 1){
+                    foreach($levels as $level){
+                        $lvlOBJ=Level::find($level);
+                        if(isset($lvlOBJ))
+                            $lvl[]=$lvlOBJ->name;
+                    }
+                    $duplicated_users[$usr->username]=$lvl;
+                    $lvl=[];
+                }
+            }
+        }
+
+        // $filename = uniqid();
+        // $file = Excel::store(new StudentEnrolls($duplicated_users), 'students'.$filename.'.xlsx','public');
+        // $file = url(Storage::url('students'.$filename.'.xlsx'));
+        // return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return $duplicated_users;
+    }
+
+    public function exportstudentsenrolls(Request $request)
+    {
+
+        $CS_ids=GradeCategoryController::getCourseSegment($request);
+        if(count($CS_ids) == 0)
+            return HelperController::api_response_format(201,[], 'No active course segments');
+            
+        $enrolls = Enroll::whereIn('course_segment',$CS_ids)->where('role_id',3)->with(['user','levels','classes'])->get()->groupBy(['levels.name','classes.name']);
+        $filename = uniqid();
+        $file = Excel::store(new classeswithstudents($enrolls), 'students'.$filename.'.xls','public');
+        $file = url(Storage::url('students'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+        // return HelperController::api_response_format(201,$enrolls, 'enrolls');
+    }
+
+    public function updateenrolls(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'except_courses' => 'array',
+            'except_courses.*' => 'exists:courses,id',
+            'new_role' => 'required|exists:roles,id'
+        ]);
+
+        $enrolls = Enroll::where('user_id',$request->user_id);
+
+        if($request->filled('except_courses'))//courses that thier role shoudn't be changed
+            $enrolls->whereNotIn('course',$request->except_courses);
+
+        $enrolls->update([
+            'role_id' => $request->new_role
+        ]);
+
+        return HelperController::api_response_format(201,$enrolls, 'updated');
     }
 }

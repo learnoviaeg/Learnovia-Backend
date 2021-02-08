@@ -66,6 +66,7 @@ class Kernel extends HttpKernel
         'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
         'Restrict' => \App\Http\Middleware\Restrict::class,
         'ParentCheck' => \App\Http\Middleware\ParentCheck::class,
+        'LastAction' => \App\Http\Middleware\LastActionMiddleWare::class,
         'ContractRestrict' => \App\Http\Middleware\ContractRestrict::class,
     ];
     /**

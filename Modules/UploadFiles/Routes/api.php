@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 
 /* File Routes */
 
-Route::group(['prefix' => 'file', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'file', 'middleware' => ['auth:api','LastAction']], function () {
 
     //install Files permissions
     Route::get('install' ,'FilesController@install_file');
@@ -19,12 +19,13 @@ Route::group(['prefix' => 'file', 'middleware' => 'auth:api'], function () {
     Route::get('get-all','FilesController@getAllFiles')->name('getAllFiles')->middleware('permission:file/get-all');
     Route::get('get','FilesController@GetFileByID')->name('GetFileByID')->middleware(['permission:file/get' , 'ParentCheck']);
     Route::post('assign','FilesController@AssignFileToLesson')->name('assignfiletolesson')->middleware('permission:file/assign');
+    Route::post('assign-in-material','FilesController@AssignFileMediaPAgeLesson');//->name('assignfiletolesson')->middleware('permission:file/assign');
 
 
 });
 
 /* Media Routes */
-Route::group(['prefix' => 'media', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'media', 'middleware' => ['auth:api','LastAction']], function () {
     Route::post('add', 'MediaController@store')->name('uploadMedia')->middleware('permission:media/add');
     Route::post('update', 'MediaController@update')->name('updateMedia')->middleware('permission:media/update');
     Route::post('delete', 'MediaController@destroy')->name('deleteMedia')->middleware('permission:media/delete');

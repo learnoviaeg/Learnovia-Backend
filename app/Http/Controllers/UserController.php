@@ -13,6 +13,9 @@ use App\Language;
 use App\Level;
 use App\Classes;
 use App\Enroll;
+use App\Events\MassLogsEvent;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use stdClass;
 use App\GradeCategory;
 use App\Segment;
@@ -30,12 +33,18 @@ use Auth;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
+use App\Http\Controllers\AuthController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\attachment;
 use App\SegmentClass;
 use App\Exports\UsersExport;
+use App\Exports\ParentChildExport;
 use Maatwebsite\Excel\Facades\Excel;
+use DB;
+use Str;
+use App\LastAction;
+
 class UserController extends Controller
 {
     /**
@@ -52,16 +61,18 @@ class UserController extends Controller
     public function create(Request $request)
     {
         $request->validate([
+            // 'nickname' => 'array',
+            // 'nickname.*' => 'string|min:3|max:50',
             'firstname' => 'required|array',
             'firstname.*' => 'required|string|min:3|max:50',
             'lastname' => 'required|array',
             'lastname.*' => 'required|string|min:3|max:50',
             'password' => 'required|array',
-            'password.*' => 'required|string|min:6|max:191',
+            'password.*' => 'required|alpha_dash|string|min:6|max:191',
             // 'role' => 'required|array',
             // 'role.*' => 'required|exists:roles,id',
-            'role' => 'required|exists:roles,id', /// in all system
-            'role_id' => 'required_with:level|exists:roles,id', /// chain role
+            'role' => 'required|integer|exists:roles,id', /// in all system
+            'role_id' => 'required_with:level|exists:roles,id|integer', /// chain role
             'optional.*' => 'exists:courses,id',
             'optional' => 'array',
             'course.*' => 'exists:courses,id',
@@ -80,13 +91,14 @@ class UserController extends Controller
              'username' => 'required|array', 'type' => 'nullable|array',
             'level' => 'nullable|array', 'real_password' => 'nullable|array',
             'suspend.*' => 'boolean',
-            'suspend'=>'array'
+            'suspend'=>'array',
+            'username.*' => 'alpha_dash|unique:users,username'
         ]);
 
         // return User::max('id');
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email', 'suspend',
-            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id', 'username'
+            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id', 'username','nickname'
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
@@ -98,20 +110,42 @@ class UserController extends Controller
             $count+=1;
 
         if((count($users) + $count) > $max_allowed_users)
-            return HelperController::api_response_format(404 ,$max_allowed_users, 'exceed MAX, U Can\'t add users any more');
+            return HelperController::api_response_format(404 ,$max_allowed_users, __('messages.users.exeed_max_users'));
 
         foreach ($request->firstname as $key => $firstname) {
             $username=User::where('username',$request->username[$key])->pluck('username')->count();
             if($username>0)
-                return HelperController::api_response_format(404 ,$username, 'This username is already  used');
+                return HelperController::api_response_format(404 ,$username, __('messages.users.username_already_used'));
+            if (isset($request->picture[$i]))
+                    $user_picture = attachment::upload_attachment($request->picture[$i], 'User');
+            $clientt = new Client();
+            $data = array(
+                'name' => $firstname. " " .$request->lastname[$key], 
+                'meta_data' => array(
+                    "image_link" => ($request->has('picture'))?$user_picture->path:null,
+                    'role'=> Role::find($request->role)->name,
+                ),
+            );    
+            $data = json_encode($data);
 
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                'headers'   => [
+                    'Content-Type' => 'application/json'
+                ], 
+                'body' => $data
+            ]);
+            
             $user = User::create([
                 'firstname' => $firstname,
                 'lastname' => $request->lastname[$key],
                 'username' => $request->username[$key],
                 'password' => bcrypt($request->password[$key]),
                 'real_password' => $request->password[$key],
-                'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0
+                'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0,
+                'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+                'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+                'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
+
             ]);
 
             foreach ($optionals as $optional){
@@ -119,7 +153,7 @@ class UserController extends Controller
                     $user->optional =$request->optional[$i];
                 }
                 if (isset($request->picture[$i]))
-                    $user->picture = attachment::upload_attachment($request->picture[$i], 'User')->id;
+                    $user->picture = $user_picture->id;
                 if ($request->filled($optional)){
                     if($optional =='birthdate')
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
@@ -135,8 +169,8 @@ class UserController extends Controller
             }
             $role = Role::find($request->role);
             $user->assignRole($role);
-            $Auth_role = Role::find(8);
-            $user->assignRole($Auth_role);
+            // $Auth_role = Role::find(8);
+            // $user->assignRole($Auth_role);
             if ($request->role_id == 3) {
                 $option = new Request([
                     'users' => [$user->id],
@@ -173,7 +207,7 @@ class UserController extends Controller
             }
             $users_is->push($user);
         }
-        return HelperController::api_response_format(201, $users_is, 'User Created Successfully');
+        return HelperController::api_response_format(201, $users_is, __('messages.users.add'));
     }
 
     /**
@@ -191,22 +225,24 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $request->validate([
+            'nickname'=>'nullable|string|min:3|max:50',
             'firstname' => 'required|string|min:3|max:50',
             'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
-            'password' => 'string|min:6|max:191',
-            'username' => 'unique:users,username,'.$request->id,
+            'password' => 'alpha_dash|string|min:6|max:191',
+            'username' => 'alpha_dash|unique:users,username,'.$request->id,
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
             'suspend' => 'boolean',
             'language' => 'integer|exists:languages,id',
             'second language' => 'integer|exists:languages,id',
+            'birthdate' => 'nullable|date'
         ]);
 
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address','nationality', 'notes', 'email', 'suspend',
-            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id',
+            'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id','nickname'
         ];
         $enrollOptional = 'optional';
         $teacheroptional = 'course';
@@ -222,22 +258,52 @@ class UserController extends Controller
                 if (isset($request->password)){
                     $user->real_password=$request->password;
                     $user->password =   bcrypt($request->password);
+
+                    $tokens = $user->tokens->where('revoked',false);
+                    foreach($tokens as $token)
+                        $token->revoke();
+                    unset($user->tokens);
+                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
                 }
             }
 
             if (Auth::user()->can('user/update-username')) {
-                if (isset($request->username))
+                if (isset($request->username)){
                     $user->username=$request->username;
+
+                    $tokens = $user->tokens->where('revoked',false);
+                    foreach($tokens as $token)
+                        $token->revoke();
+                    unset($user->tokens);
+                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+                }
             }
 
         if (isset($request->picture))
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
 
         foreach ($optionals as $optional) {
-            if ($request->filled($optional))
-                if($optional =='birthdate')
-                    $user->$optional = Carbon::parse($request->$optional)->format('Y-m-d');
+            if ($request->has($optional)){
+
                 $user->$optional = $request->$optional;
+
+                if($optional =='birthdate' && isset($request->birthdate))
+                    $user->$optional = Carbon::parse($request->$optional)->format('Y-m-d');
+
+                if($optional == 'suspend' && $request->suspend == 1){
+                    $user->token = null;
+
+                    $tokens = $user->tokens->where('revoked',false);
+                    foreach($tokens as $token){
+                        $token->revoke();
+                    }
+                
+                    unset($user->tokens);
+                }
+
+                if($optional == 'nickname' && $request->$optional == 'null')
+                    $user->$optional = null;
+            }
         }
         $user->save();
 
@@ -282,7 +348,7 @@ class UserController extends Controller
                 $teachercounter++;
             }
         }
-        return HelperController::api_response_format(201, $user, 'User updated Successfully');
+        return HelperController::api_response_format(201, $user, __('messages.users.update'));
     }
 
     /**
@@ -298,10 +364,14 @@ class UserController extends Controller
             'id' => 'required|exists:users,id',
         ]);
 
+        $enrolls=Enroll::where('user_id',$request->id)->get();
+        $all=Enroll::where('user_id',$request->id)->delete();
+        if($all > 0)
+            event(new MassLogsEvent($enrolls,'deleted'));
         $user = User::find($request->id);
         $user->delete();
 
-        return HelperController::api_response_format(201, null, 'User Deleted Successfully');
+        return HelperController::api_response_format(201, null, __('messages.users.delete'));
     }
 
     /**
@@ -326,6 +396,9 @@ class UserController extends Controller
             'year' => 'nullable|integer|exists:academic_years,id',
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
+            'count' => 'in:1,0',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
         ]);
         $users = User::where('id','!=',0)->with('roles');
         if($request->filled('country'))
@@ -340,6 +413,10 @@ class UserController extends Controller
             $users= $users->whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
         });
+        if($request->filled('from') && $request->filled('to')){ //lastaction filter
+            $ids = LastAction::whereBetween('date', [$request->from, $request->to])->whereNull('course_id')->pluck('user_id');
+            $users = $users->whereIn('id',$ids);
+        }
         
         $flag=false;
         $enrolled_users=Enroll::where('id','!=',0);
@@ -357,6 +434,7 @@ class UserController extends Controller
             $flag=true;
         }if ($request->filled('course')){            
             $enrolled_users=$enrolled_users->where('course',$request->course);
+
             $flag=true;
         }if ($request->filled('year')){            
             $enrolled_users=$enrolled_users->where('year',$request->year);
@@ -382,6 +460,23 @@ class UserController extends Controller
                 return $students;
             }
     
+        if($request->has('count') && $request->count == 1){
+            $count = [];
+            $roles = new Role;
+            if($request->filled('roles'))
+                $roles = $roles->whereIn('id',$request->roles);
+
+            $roles = $roles->get();
+            $users= $users->pluck('id');
+            $all_roles = Role::all();
+
+            foreach($all_roles as $role){
+                $count[Str::slug($role->name, '_')] = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
+            }
+
+            return HelperController::api_response_format(200 ,$count,__('messages.users.count'));
+        }
+
         $users = $users->paginate(HelperController::GetPaginate($request));
         foreach($users->items() as $user)
         {
@@ -412,9 +507,19 @@ class UserController extends Controller
 
         $user = User::find($request->id);
         $check = $user->update([
-            'suspend' => 1
+            'suspend' => 1,
+            'token' => null
         ]);
-        return HelperController::api_response_format(201, $user, 'User Blocked Successfully');
+
+        $tokens = $user->tokens->where('revoked',false);
+
+        foreach($tokens as $token){
+            $token->revoke();
+        }
+    
+        unset($user->tokens);
+
+        return HelperController::api_response_format(201, $user, __('messages.users.user_blocked'));
     }
 
     /**
@@ -432,7 +537,7 @@ class UserController extends Controller
         $check = $user->update([
             'suspend' => 0
         ]);
-        return HelperController::api_response_format(201, $user, 'User Un Blocked Successfully');
+        return HelperController::api_response_format(201, $user, __('messages.users.user_un_blocked'));
     }
 
     /**
@@ -458,6 +563,7 @@ class UserController extends Controller
         $i = 0;
         foreach ($user->enroll as $enroll) {
             $all[$i]['role'] = $enroll->roles;
+            $all[$i]['enroll_id'] = $enroll->id;
 
             $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
             $all[$i]['Course'] = Course::where('id', $segment_Class_id->course_id)->first();
@@ -475,8 +581,8 @@ class UserController extends Controller
             $all[$i]['type'] = "";
             $all[$i]['year'] = "";
             if(isset($year_type)){
-                $all[$i]['type'] = AcademicType::find($year_type->academic_year_id);
-                $all[$i]['year'] = AcademicYear::find($year_type->academic_type_id);    
+                $all[$i]['type'] = AcademicType::find($year_type->academic_type_id);
+                $all[$i]['year'] = AcademicYear::find($year_type->academic_year_id);    
             }
             $i++;
         }
@@ -487,7 +593,7 @@ class UserController extends Controller
             return HelperController::api_response_format(201, $user, null);
         }
 
-        return HelperController::api_response_format(200, $user, 'there is no courses');
+        return HelperController::api_response_format(200, $user, __('messages.error.no_available_data'));
     }
 
     /**
@@ -509,7 +615,7 @@ class UserController extends Controller
             'password' => bcrypt($request->password)
         ]);
 
-        return HelperController::api_response_format(201, $user, 'User Updated Successfully');
+        return HelperController::api_response_format(201, $user, __('messages.users.update'));
     }
 
     /**
@@ -550,7 +656,28 @@ class UserController extends Controller
         if(count($parent) > 0)
             return HelperController::api_response_format(201, ['Parent'=>$parent]);
 
-        return HelperController::api_response_format(201,null,'There is no data for you.');
+        return HelperController::api_response_format(201,null,__('messages.error.no_available_data'));
+    }
+
+    public function getParents(Request $request)
+    {
+        $request->validate([
+            'parent_id' => 'exists:parents,parent_id',
+        ]);
+        if(isset($request->parent_id))
+        {
+            $par_chil=Parents::where('parent_id',$request->parent_id)->with('child')->get();
+            return HelperController::api_response_format(201,$par_chil->paginate(HelperController::GetPaginate($request)),__('messages.users.parents_list'));
+        }
+
+        $parents=User::whereHas("roles",function ($q){
+            $q->where('name','Parent');
+        })->where(function($q)use($request){
+                    $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                        ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                        ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+        })->with('attachment')->get();
+        return HelperController::api_response_format(201,$parents->paginate(HelperController::GetPaginate($request)),__('messages.users.parents_list'));
     }
 
     /**
@@ -561,17 +688,62 @@ class UserController extends Controller
     public function set_parent_child(Request $request)
     {
         $request->validate([
-            'parent_id' => 'required|exists:users,id',
+            'parent_id' => 'required|array|exists:users,id',
             'child_id' => 'required|array|exists:users,id'
         ]);
-        foreach($request->child_id as $child)
-        {
-            $parent=Parents::firstOrCreate([
-                'child_id' => $child,
-                'parent_id' => $request->parent_id
-            ]);
+
+        foreach($request->parent_id as $parent){
+
+            foreach($request->child_id as $child){
+                
+                Parents::firstOrCreate([
+                    'child_id' => $child,
+                    'parent_id' => $parent
+                ]);
+
+                $students = Enroll::where('user_id',$child)->get();
+
+                foreach($students as $student){
+
+                    Enroll::firstOrCreate([
+                        'course_segment' => $student->course_segment,
+                        'user_id' => $parent,
+                        'role_id'=> 7,
+                        'year' => $student->year,
+                        'type' => $student->type,
+                        'level' => $student->level,
+                        'class' => $student->class,
+                        'segment' => $student->segment,
+                        'course' => $student->course
+                    ]);
+                }
+
+            }
         }
-        return HelperController::api_response_format(201,null,'Assigned Successfully');
+            
+
+        return HelperController::api_response_format(201,null,__('messages.users.parent_assign_child'));
+    }
+
+        /**
+     * set paresnt's child
+     *
+     * @return unAssigned Successfully
+    */
+    public function unset_parent_child(Request $request)
+    {
+        $request->validate([
+            'parent_id' => 'required|exists:parents,parent_id',
+            'child_id' => 'required|array|exists:parents,child_id'
+        ]);
+
+        foreach($request->child_id as $child){
+            $parent=Parents::where('child_id',$child)->where('parent_id',$request->parent_id)->first();
+            if(isset($parent))
+                $parent->delete();
+        }
+
+        return HelperController::api_response_format(201,null,__('messages.users.parent_unassign_child'));
     }
 
     /**
@@ -637,10 +809,10 @@ class UserController extends Controller
             $course_segments = $user->enroll->pluck('course_segment');
             $users_id = Enroll::whereIn('course_segment', $course_segments)->pluck('user_id');
             $users = $users->whereIn('id', $users_id)->get();
-            return HelperController::api_response_format(200, $users, 'all users in course segment ...');
+            return HelperController::api_response_format(200, $users, __('messages.users.list'));
         }
         $users = $users ->get();
-        return HelperController::api_response_format(200, $users, 'all users are  ...');
+        return HelperController::api_response_format(200, $users, __('messages.users.list'));
     }
 
     Public Function Overview_Report()
@@ -656,11 +828,31 @@ class UserController extends Controller
     Public Function SetCurrentChild(Request $request)
     {
         $request->validate([
-            'child_id' => 'required|exists:parents,child_id'
+            'child_id' => 'exists:parents,child_id'
         ]);
-        Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
-        return HelperController::api_response_format(200, 'Child is choosen successfully');
 
+        //for log event
+        $logsbefore=Parents::where('parent_id',Auth::id())->get();
+        $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
+
+        $current_child=null;
+        if(isset($request->child_id)){
+            Parents::where('child_id',$request->child_id)->where('parent_id',Auth::id())->update(['current'=> 1]);
+            $current_child = User::where('id',$request->child_id)->first();
+        }
+        return HelperController::api_response_format(200,$current_child ,__('messages.users.parent_assign_child'));
+    }
+
+    Public Function getCurrentChild(Request $request)
+    {
+        $current = Auth::user()->currentChild;
+        $currentChild = null;
+        if(isset($current))
+            $currentChild =User::find($current->child_id);
+
+        return HelperController::api_response_format(200,$currentChild, __('messages.users.current_child'));
     }
 
     Public Function getMyChildren(){
@@ -670,7 +862,7 @@ class UserController extends Controller
             if(isset($child->attachment))
                 $child->picture = $child->attachment->path;
 
-        return HelperController::api_response_format(200,$children ,'Children are.......');
+        return HelperController::api_response_format(200,$children ,__('messages.users.childs_list'));
 
     }
 
@@ -680,7 +872,7 @@ class UserController extends Controller
         ]);
         $childrenIDS = Parents::where('parent_id',$request->parent_id)->pluck('child_id');
         $children =  User::whereIn('id',$childrenIDS)->get();
-        return HelperController::api_response_format(200,$children ,'Children are.......');
+        return HelperController::api_response_format(200,$children ,__('messages.users.childs_list'));
 
     }
 
@@ -691,7 +883,7 @@ class UserController extends Controller
         ]);
         $parentID = Parents::where('child_id',$request->child_id)->first('parent_id');
         $parent =  User::find($parentID);
-        return HelperController::api_response_format(200,$parent ,'Your Parent is ...');
+        return HelperController::api_response_format(200,$parent ,__('messages.users.parents_list'));
     }
 
     Public function get_my_users(Request $request){
@@ -703,11 +895,14 @@ class UserController extends Controller
             'levels' => 'array',
             'levels.*' => 'exists:levels,id',
             'roles' => 'array',
-            'roles.*' => 'exists:roles,id'
+            'roles.*' => 'exists:roles,id',
+            'search' => 'string'
         ]);
 
         $Given_courseSegments = GradeCategoryController::getCourseSegmentWithArray($request);
         $course_segments = Enroll::where('user_id',Auth::id())->pluck('course_segment')->unique();
+        if($request->user()->can('site/show-all-courses'))
+            $course_segments=$Given_courseSegments;
         $CS =  array_intersect($course_segments->toArray(),$Given_courseSegments->toArray());
         $users = Enroll::whereIn('course_segment',$CS)->pluck('user_id')->unique();
 
@@ -719,7 +914,28 @@ class UserController extends Controller
             if(isset($student->attachment))
                 $student->picture = $student->attachment->path;
 
-        return HelperController::api_response_format(200,$students ,'Users are.......');
+        if(isset($request->search))
+        {
+            $students = user::whereIn('id',$users->toArray())->where('id','!=',Auth::id())
+                                ->where( function($q)use($request){
+                                            $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                                                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
+                                                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
+                                            })->with('attachment')->get();
+        }
+
+        return HelperController::api_response_format(200,$students ,__('messages.users.list'));
+    }
+
+    public function exportParentChild(Request $request)
+    {
+        $fields = ['username_parent', 'username_child'];
+
+        $filename = uniqid();
+        $file = Excel::store(new ParentChildExport($fields), 'parent_child'.$filename.'.xls','public');
+        $file = url(Storage::url('parent_child'.$filename.'.xls'));
+
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
     public function export(Request $request)
@@ -738,13 +954,13 @@ class UserController extends Controller
         }
 
         $fields = array_merge($fields, [ 'religion', 'created_at',
-        'class_id','level', 'type','second language','role'] );
+        'class_id','level', 'type','second language','role','last_action'] );
 
         $userIDs = self::list($request,1);
         $filename = uniqid();
         $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xls','public');
         $file = url(Storage::url('users'.$filename.'.xls'));
-        return HelperController::api_response_format(201,$file, 'Link to file ....');
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
     public function generate_username_password(Request $request)
@@ -752,7 +968,7 @@ class UserController extends Controller
         $auth = collect([]);
         $auth['username'] = User::generateUsername();
         $auth['password'] =  User::generatePassword()."";
-        return HelperController::api_response_format(200,$auth, 'your username and password is ........');
+        return HelperController::api_response_format(200,$auth, __('messages.users.your_username_pass'));
 
     }
 
@@ -816,5 +1032,34 @@ class UserController extends Controller
             'Zimbabwean'
         );
         return HelperController::api_response_format(200 ,$nationals, 'Nationalities are ...');
+    }
+
+    public function enroll_parents_script(){
+        $students = Enroll::where('role_id',3)->with('user.parents')->get();
+
+        foreach($students as $student){
+
+            if(isset($student->user)){
+
+                foreach($student->user->parents as $parent){
+
+                    Enroll::firstOrCreate([
+                        'course_segment' => $student->course_segment,
+                        'user_id' => $parent->id,
+                        'role_id'=> 7,
+                        'year' => $student->year,
+                        'type' => $student->type,
+                        'level' => $student->level,
+                        'class' => $student->class,
+                        'segment' => $student->segment,
+                        'course' => $student->course
+                    ]);
+    
+                }
+            }
+        
+        }
+
+        return 'done';
     }
 }

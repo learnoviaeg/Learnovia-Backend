@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::group(['prefix' => 'page', 'middleware' => 'auth:api'] , function(){
+Route::group(['prefix' => 'page', 'middleware' => ['auth:api','LastAction']] , function(){
 
     Route::get('install' , 'PageController@install')->name('installPage');
 

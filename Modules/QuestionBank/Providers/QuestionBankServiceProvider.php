@@ -4,10 +4,20 @@ namespace Modules\QuestionBank\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\QuestionsCategory;
+use Modules\QuestionBank\Entities\QuestionsAnswer;
+use Modules\QuestionBank\Entities\QuestionsType;
+use Modules\QuestionBank\Entities\Quiz;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
-use Modules\QuestionBank\Observers\QuizObserver;
+use Modules\QuestionBank\Entities\UserQuiz;
+use App\Observers\LogsObserver;
 use Modules\QuestionBank\Observers\UserQuizAnswerObserver;
+use Modules\QuestionBank\Observers\QuizLessonObserver;
+use Modules\QuestionBank\Entities\QuizOverride;
+use Modules\QuestionBank\Observers\QuizOverwrite;
+
 
 class QuestionBankServiceProvider extends ServiceProvider
 {
@@ -24,8 +34,16 @@ class QuestionBankServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        QuizLesson::observe(QuizObserver::class);
         UserQuizAnswer::observe(UserQuizAnswerObserver::class);
+        Questions::observe(LogsObserver::class);
+        QuestionsAnswer::observe(LogsObserver::class);
+        QuestionsCategory::observe(LogsObserver::class);
+        QuestionsType::observe(LogsObserver::class);
+        Quiz::observe(LogsObserver::class);
+        QuizLesson::observe(QuizLessonObserver::class);
+        UserQuiz::observe(LogsObserver::class);
+        UserQuizAnswer::observe(LogsObserver::class);
+        QuizOverride::observe(QuizOverwrite::class);
     }
 
     /**
