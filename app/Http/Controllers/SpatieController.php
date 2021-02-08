@@ -73,9 +73,9 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'notifications/send', 'title' => 'send notifications']);
 
             //Spatie Permissions
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/add', 'title' => 'Add Role' , 'dashboard' => 1, 'icon' => 'User']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/add', 'title' => 'Add Role' , 'dashboard' => 1, 'icon' => 'Role']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/delete', 'title' => 'delete role']);
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/get', 'title' => 'Roles Management', 'dashboard' => 1,  'icon' => 'User']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/get', 'title' => 'Roles Management', 'dashboard' => 1,  'icon' => 'Role']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/update', 'title' => 'update role']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'roles/assign', 'title' => 'assign role to user']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'permissions/assign-to-role', 'title' => 'assign permission to role']);
@@ -154,7 +154,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'category/get-all', 'title' => 'get all categories']);
 
             //management
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'management/get', 'title' => 'Course Management' , 'dashboard' => 1, 'icon' => 'Course']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'management/get', 'title' => 'Course Management' , 'dashboard' => 1, 'icon' => 'Settings']);
             
             //Course Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/add', 'title' => 'add course' , 'dashboard' => 0, 'icon' => 'Course']);
