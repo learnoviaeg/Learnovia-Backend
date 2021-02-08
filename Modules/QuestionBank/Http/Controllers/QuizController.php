@@ -905,7 +905,7 @@ class QuizController extends Controller
         }
         $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->get();
         if(count($user_quizzes)==0)
-            return HelperController::api_response_format(200, __('messages.quiz.no_attempts'));
+            return HelperController::api_response_format(200,[], __('messages.quiz.no_attempts'));
 
         $all_attemps =  $user_quizzes ;
         $attempts_index=[];
