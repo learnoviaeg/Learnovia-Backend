@@ -37,6 +37,15 @@ return [
         'api/materials/{id}',
         'api/quiz/get-all-attempts',
         'api/user/set-current-child',
-        'api/user/get-my-children'
+        'api/user/get-my-children',
+        'api/interactive/{id}'
+    ],
+
+    'seen_report' => [
+        'api/materials/{id}',
+        'api/quiz/get-single-quiz',
+        'api/assignment/get',
+        'api/page/get',
+        'api/interactive/{id}'
     ],
 ];
