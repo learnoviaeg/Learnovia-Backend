@@ -947,6 +947,7 @@ class AssigmentsController extends Controller
             $inputFile= substr($attachmnet->path,strripos(dirname($attachmnet->path),'/')+1);
             $converter = new OfficeConverter("storage/".$inputFile);
             $outputFile = Str::substr($attachmnet->name, 0,strpos($attachmnet->name,'.')).'.pdf';
+            return $outputFile;
             $converter->convertTo($outputFile);
             //generates pdf file in same directory as test-file.docx
             $pdf = new Pdf("storage/".$attachmnet->type.'/'.$outputFile);
