@@ -1,6 +1,7 @@
 <?php
 Route::get('/' , 'AuthController@site');
 Route::get('/materials/{id}', 'MaterialsController@show')->middleware(['getauth','LastAction']);
+Route::get('/interactive/{id}', 'InterActiveController@show')->middleware(['getauth','LastAction']);
 
 //install all permissions and roles of system Route
 Route::get('install', 'SpatieController@install');
