@@ -935,29 +935,30 @@ class AssigmentsController extends Controller
     public function AnnotatePDF(Request $request)
     {
         $request->validate([
-        'attachment_id' => 'integer|exists:attachments,id', //because this file may not be assigned to user "corrected_file" 
-        'content' => 'string',
+            'attachment_id' => 'integer|exists:attachments,id', //because this file may not be assigned to user "corrected_file" 
+            'content' => 'string',
         ]);
         $images_path=collect([]);
         // $outputFile = Str::substr($attachmnet->name, 0,strpos($attachmnet->name,'.')).'.pdf';
        
-       
         if($request->filled('attachment_id')){
-        $attachmnet=attachment::find($request->attachment_id);
-        $inputFile=$attachmnet->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
-        $converter = new OfficeConverter("storage/".$inputFile);
-        $outputFile = Str::substr($attachmnet->name, 0,strpos($attachmnet->name,'.')).'.pdf';
-        $converter->convertTo($outputFile);
-         //generates pdf file in same directory as test-file.docx
-        $pdf = new Pdf("storage/".$attachmnet->type.'/'.$outputFile);
-        // return $pdf;
-        foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
-            $name= uniqid();
-            $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
-            $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
-            $images_path->push('data:image/png;base64,'.$b64image);
+            $attachmnet=attachment::find($request->attachment_id);
+            // $inputFile=$attachmnet->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
+            $inputFile= substr($attachmnet->path,strripos(dirname($attachmnet->path),'/')+1);
+            $converter = new OfficeConverter("storage/".$inputFile);
+            $outputFile = Str::substr($attachmnet->name, 0,strpos($attachmnet->name,'.')).'.pdf';
+            $converter->convertTo($outputFile);
+            //generates pdf file in same directory as test-file.docx
+            $pdf = new Pdf("storage/".$attachmnet->type.'/'.$outputFile);
+            // return $pdf;
+
+            foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
+                $name= uniqid();
+                $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+                $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
+                $images_path->push('data:image/png;base64,'.$b64image);
+            }
         }
-    }
 
     if($request->filled('content')){
         $pdf_of_content = App::make('dompdf.wrapper');
