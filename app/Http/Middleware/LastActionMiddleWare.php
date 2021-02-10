@@ -78,7 +78,7 @@ class LastActionMiddleWare
         //start seen report
         $route_seen = Config::get('routes.seen_report');
 
-        if(in_array($request->route()->uri,$route_seen)){
+        if(in_array($request->route()->uri,$route_seen) && $request->user()->can('site/show/as-participant')){
 
             if(str_contains($request->route()->uri, 'material') || str_contains($request->route()->uri, 'page')){
 
