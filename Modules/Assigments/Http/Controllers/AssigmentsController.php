@@ -947,7 +947,7 @@ class AssigmentsController extends Controller
             $inputFile= substr($attachmnet->path,strripos(dirname($attachmnet->path),'/')+1);
             $converter = new OfficeConverter("storage/".$inputFile);
             $outputFile = Str::substr($attachmnet->name, 0,strpos($attachmnet->name,'.')).'.pdf';
-            $storage=Storage::copy($outputFile, 'assigment/new_file.pdf');
+            $storage=Storage::copy($inputFile, 'assigment/new_file.pdf');
             // $success = \File::copy(base_path('test.text'),base_path('public/test.text'));
             return $storage;
             $converter->convertTo($outputFile);
