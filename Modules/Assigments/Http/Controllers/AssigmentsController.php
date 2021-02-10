@@ -945,11 +945,11 @@ class AssigmentsController extends Controller
             $attachmnet=attachment::find($request->attachment_id);
             // $inputFile=$attachmnet->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
             $inputFile= substr($attachmnet->path,strripos(dirname($attachmnet->path),'/')+1);
-            $storage=Storage::copy($inputFile, 'assigment/new_file.pdf');
+            // $storage=Storage::copy($inputFile, 'assigment/new_file.pdf');
             $converter = new OfficeConverter("storage/".$inputFile);
             $outputFile = Str::substr($attachmnet->name, 0,strpos($attachmnet->name,'.')).'.pdf';
             // $success = \File::copy(base_path('test.text'),base_path('public/test.text'));
-            return $storage;
+            // return $storage;
             $converter->convertTo($outputFile);
             //generates pdf file in same directory as test-file.docx
             $pdf = new Pdf("storage/".$attachmnet->type.'/'.$outputFile);
