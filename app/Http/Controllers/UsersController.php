@@ -12,6 +12,8 @@ use App\LAstAction;
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
 use App\Log;
+use App\Lesson;
+use App\UserSeen;
 
 class UsersController extends Controller
 {
@@ -76,7 +78,7 @@ class UsersController extends Controller
         }
 
         //using in participants api new route { api/user/participants}
-        if($my_chain=='participants'){
+        if($my_chain=='participants' || $my_chain=='seen_report'){
             // site/show/as-participant
             $permission = Permission::where('name','site/show/as-participant')->with('roles')->first();
             $roles_id = $permission->roles->pluck('id');
@@ -163,6 +165,32 @@ class UsersController extends Controller
             }
 
             return response()->json(['message' => $my_chain.' users list ', 'body' => $users_lastaction], 200);
+        }
+
+        if($my_chain == 'seen_report'){
+
+            $request->validate([
+                'item_type' => 'required|string|in:page,file,media,assignment,quiz,meeting,h5p|required_with:item_id',
+                'lesson_id' => 'required|exists:lessons,id',
+                'view_status' => 'in:yes,no',
+                'item_id' => 'required|integer',
+            ]);
+
+            $seen_users = UserSeen::where('lesson_id',$request->lesson_id)->where('type',$request->item_type)->where('item_id',$request->item_id)->get();
+
+            $enrolls->map(function ($user) use ($seen_users) {
+
+                $user['seen'] = 'no';
+                $user['seen_count'] = 0;
+
+                if(in_array($user->id,$seen_users->pluck('user_id')->toArray())){
+                    $user['seen'] = 'yes';
+                    $user['seen_count'] = $seen_users->where('user_id',$user->id)->pluck('count')->first();
+                }
+                
+                return $user;
+            });
+
         }
 
         return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
