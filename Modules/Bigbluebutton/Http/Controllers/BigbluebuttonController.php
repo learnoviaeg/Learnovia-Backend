@@ -586,8 +586,8 @@ class BigbluebuttonController extends Controller
         foreach($meetings as $m)
             {
                 $m['join'] = $m->started == 1 ? true: false;
-                $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d h:i:s a'): null;
-                $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d h:i:s a');
+                $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d H:i:s'): null;
+                $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d H:i:s');
                 
                 if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
                 ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
