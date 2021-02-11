@@ -1614,7 +1614,7 @@ class CourseController extends Controller
                         $ass = collect($ass)->sortByDesc($request->assort)->values();
                 }
             }
-                $result['Assigments']   = $ass;  
+                $result['Assigments']   = $ass->values();  
         }
         if(isset($result["Quiz"])){
 
