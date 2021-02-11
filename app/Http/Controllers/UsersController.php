@@ -54,6 +54,8 @@ class UsersController extends Controller
             'lesson_id' => ['exists:lessons,id',Rule::requiredIf($my_chain === 'seen_report')],
             'view_status' => 'in:yes,no',
             'item_id' => ['integer',Rule::requiredIf($my_chain === 'seen_report')],
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
         ]);
 
         //using in chat api new route { api/user/all}
@@ -176,6 +178,11 @@ class UsersController extends Controller
 
             $seen_users = UserSeen::where('lesson_id',$request->lesson_id)->where('type',$request->item_type)->where('item_id',$request->item_id)->get();
 
+            if($request->filled('from') && $request->filled('to')){
+                $seen_users = $seen_users->whereBetween('updated_at', [$request->from, $request->to]);
+                $enrolls = $enrolls->whereIn('id',$seen_users->pluck('user_id'))->values();
+            }
+
             $enrolls->map(function ($user) use ($seen_users) {
 
                 $user['seen'] = 'no';
@@ -188,6 +195,10 @@ class UsersController extends Controller
                 
                 return $user;
             });
+
+            if($request->filled('view_status')){
+                $enrolls = $enrolls->where('seen',$request->view_status)->values();
+            }
 
         }
 
