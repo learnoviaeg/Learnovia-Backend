@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Modules\Assigments\Entities\assignmentOverride;
+use App\UserSeen;
+
 class AssignmentLesson extends Model
 {
-    protected $fillable = ['assignment_id','lesson_id','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment'];
+    protected $fillable = ['assignment_id','lesson_id','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment','seen_number'];
 
-    protected $appends = ['started'];
+    protected $appends = ['started','user_seen_number'];
 
     public function getStartedAttribute(){
         $started = true;
@@ -24,6 +26,16 @@ class AssignmentLesson extends Model
 
         return $started;  
     }
+
+    public function getUserSeenNumberAttribute(){
+
+        $user_seen = 0;
+        if($this->seen_number != 0)
+            $user_seen = UserSeen::where('type','assignment')->where('item_id',$this->assignment_id)->where('lesson_id',$this->lesson_id)->count();
+            
+        return $user_seen;  
+    }
+
     public function Assignment()
     {
         return $this->hasMany('Modules\Assigments\Entities\assignment', 'id', 'assignment_id');
