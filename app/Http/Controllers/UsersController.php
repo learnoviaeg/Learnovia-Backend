@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use App\Log;
 use App\Lesson;
 use App\UserSeen;
+use Illuminate\Validation\Rule;
 
 class UsersController extends Controller
 {
@@ -49,6 +50,12 @@ class UsersController extends Controller
             'roles' => 'array',
             'roles.*' => 'exists:roles,id',
             'search' => 'string',
+            'item_type' => ['string','in:page,file,media,assignment,quiz,meeting,h5p','required_with:item_id',Rule::requiredIf($my_chain === 'seen_report')],
+            'lesson_id' => 'exists:lessons,id',
+            'view_status' => 'in:yes,no',
+            'item_id' => ['integer',Rule::requiredIf($my_chain === 'seen_report')],
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
         ]);
 
         //using in chat api new route { api/user/all}
@@ -169,14 +176,17 @@ class UsersController extends Controller
 
         if($my_chain == 'seen_report'){
 
-            $request->validate([
-                'item_type' => 'required|string|in:page,file,media,assignment,quiz,meeting,h5p|required_with:item_id',
-                'lesson_id' => 'required|exists:lessons,id',
-                'view_status' => 'in:yes,no',
-                'item_id' => 'required|integer',
-            ]);
+            $seen_users = UserSeen::where('type',$request->item_type)->where('item_id',$request->item_id);
 
-            $seen_users = UserSeen::where('lesson_id',$request->lesson_id)->where('type',$request->item_type)->where('item_id',$request->item_id)->get();
+            if($request->filled('lesson_id'))
+                $seen_users->where('lesson_id',$request->lesson_id);
+            
+            $seen_users->get();
+
+            if($request->filled('from') && $request->filled('to')){
+                $seen_users = $seen_users->whereBetween('updated_at', [$request->from, $request->to]);
+                $enrolls = $enrolls->whereIn('id',$seen_users->pluck('user_id'))->values();
+            }
 
             $enrolls->map(function ($user) use ($seen_users) {
 
@@ -190,6 +200,10 @@ class UsersController extends Controller
                 
                 return $user;
             });
+
+            if($request->filled('view_status')){
+                $enrolls = $enrolls->where('seen',$request->view_status)->values();
+            }
 
         }
 
