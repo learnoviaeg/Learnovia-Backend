@@ -20,8 +20,12 @@ class h5pLesson extends Model
     public function getUserSeenNumberAttribute(){
 
         $user_seen = 0;
-        if($this->seen_number != 0)
-            $user_seen = UserSeen::where('type','h5p')->where('item_id',$this->content_id)->where('lesson_id',$this->lesson_id)->count();
+        if($this->seen_number != 0){
+            $user_seen = UserSeen::where('type','h5p')->where('item_id',$this->content_id)->where('lesson_id',$this->lesson_id)
+            ->with(['user' => function($q){
+                $q->can('site/course/student');
+            }])->count();
+        }
             
         return $user_seen;  
     }
