@@ -167,6 +167,10 @@ class UsersController extends Controller
             $users_lastaction = $users_lastaction->select('user')->distinct()->get()->pluck('users');
             
             if($request->filled('never')){
+
+                if(!$request->filled('year')){
+                    $enrolls = User::get();
+                }
                 $last_actions = LastAction::whereNull('course_id')->pluck('user_id');
                 $users_lastaction  = $enrolls->whereNotIn('id',$last_actions)->values();
             }
