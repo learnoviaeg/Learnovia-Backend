@@ -196,10 +196,11 @@ class UsersController extends Controller
 
                 $user['seen'] = 'no';
                 $user['seen_count'] = 0;
-
+                $user['seen_at'] = null;
                 if(in_array($user->id,$seen_users->pluck('user_id')->toArray())){
                     $user['seen'] = 'yes';
                     $user['seen_count'] = $seen_users->where('user_id',$user->id)->pluck('count')->first();
+                    $user['seen_at'] = $seen_users->where('user_id',$user->id)->pluck('updated_at')->first();
                 }
                 
                 return $user;
