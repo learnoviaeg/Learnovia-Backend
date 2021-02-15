@@ -19,5 +19,10 @@ class BackendServiceProvider extends ServiceProvider
             'App\Repositories\EnrollmentRepository'
         ); 
 
+        $this->app->bind(
+            'App\Repositories\RepportsRepositoryInterface',
+            'App\Repositories\RepportsRepository'
+        ); 
+
     }
 }
