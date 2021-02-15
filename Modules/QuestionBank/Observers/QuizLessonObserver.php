@@ -2,6 +2,7 @@
 
 namespace Modules\QuestionBank\Observers;
 
+use App\Repositories\RepportsRepositoryInterface;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Events\MassLogsEvent;
@@ -15,6 +16,12 @@ use App\LessonComponent;
 
 class QuizLessonObserver
 {
+    protected $report;
+
+    public function __construct(RepportsRepositoryInterface $report)
+    {
+        $this->report = $report;
+    }
     /**
      * Handle the quiz lesson "created" event.
      *
@@ -68,6 +75,12 @@ class QuizLessonObserver
                 'visible' => $quizLesson->visible
             ]);
         }
+
+        if($quizLesson->isDirty('seen_number')){
+            $lesson = Lesson::find($quizLesson->lesson_id);
+            $course_id = $lesson->courseSegment->course_id;
+            $this->report->calculate_course_progress($course_id);
+        }
     }
 
     /**
@@ -86,6 +99,10 @@ class QuizLessonObserver
 
         LessonComponent::where('comp_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->lesson_id)
         ->where('module','Quiz')->delete();
+
+        $lesson = Lesson::find($quizLesson->lesson_id);
+        $course_id = $lesson->courseSegment->course_id;
+        $this->report->calculate_course_progress($course_id);
     }
 
     /**
