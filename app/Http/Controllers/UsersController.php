@@ -180,6 +180,9 @@ class UsersController extends Controller
 
         if($my_chain == 'seen_report'){
 
+            if(!$request->user()->can('reports/seen_report'))
+                return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+
             $seen_users = UserSeen::where('type',$request->item_type)->where('item_id',$request->item_id);
 
             if($request->filled('lesson_id'))
