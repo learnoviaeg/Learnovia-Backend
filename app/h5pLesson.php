@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\UserSeen;
 
 class h5pLesson extends Model
 {

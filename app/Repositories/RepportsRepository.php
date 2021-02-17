@@ -9,6 +9,7 @@ use Modules\QuestionBank\Entities\QuizLesson;
 use App\h5pLesson;
 use App\Material;
 use App\Course;
+use App\UserSeen;
 
 class RepportsRepository implements RepportsRepositoryInterface
 {
@@ -34,22 +35,22 @@ class RepportsRepository implements RepportsRepositoryInterface
         $lessons = Lesson::whereIn('course_segment_id',$enroll_students->pluck('course_segment'))->pluck('id');
 
         //Assignments
-        $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->get()->pluck('user_seen_number');
+        $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->count();
 
         //quizzes
-        $quizzes = QuizLesson::whereIn('lesson_id',$lessons)->get()->pluck('user_seen_number');
+        $quizzes = QuizLesson::whereIn('lesson_id',$lessons)->count();
 
         //h5p
-        $h5p = h5pLesson::whereIn('lesson_id',$lessons)->get()->pluck('user_seen_number');
+        $h5p = h5pLesson::whereIn('lesson_id',$lessons)->count();
 
         //materials
-        $materials = Material::whereIn('lesson_id',$lessons)->get()->pluck('user_seen_number');
+        $materials = Material::whereIn('lesson_id',$lessons)->count();
 
         //items count 
-        $items_count = count($assignments) + count($quizzes) + count($h5p)  + count($materials);
-
+        $items_count = $assignments + $quizzes + $h5p  + $materials;
+        
         //sum all the seen number for all components
-        $sum_views = array_sum($assignments->toArray()) + array_sum($quizzes->toArray()) + array_sum($h5p->toArray()) + array_sum($materials->toArray());
+        $sum_views = UserSeen::whereIn('user_id',$enroll_students->pluck('user_id'))->whereIn('lesson_id',$lessons)->count();
 
         $percentage = ($sum_views / (count($enroll_students) * $items_count)) * 100;
 
