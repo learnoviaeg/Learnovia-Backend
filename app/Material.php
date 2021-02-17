@@ -7,7 +7,7 @@ use Modules\UploadFiles\Entities\file;
 use  Modules\Page\Entities\page;
 use Modules\UploadFiles\Entities\media;
 use Auth;
-
+use App\UserSeen;
 
 class Material extends Model
 {
