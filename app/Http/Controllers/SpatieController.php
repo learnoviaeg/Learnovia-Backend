@@ -441,7 +441,7 @@ class SpatieController extends Controller
             'grade/user/course-grade','grade/report/user','site/course/student','user/parent-child','user/current-child','user/get-someone-child','user/get-my-child','user/get-current-child',
             'timeline/get','material/get','course/teachers','chat/add-room'];
 
-            $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%user/parent-child%')->where('name','not like','%site/course/student%')->where('name','not like','user/get-my-child')->where('name','not like','%user/get-current-child%')->get());
+            $super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%user/parent-child%')->where('name','not like','%site/course/student%')->where('name','not like','user/get-my-child')->where('name','not like','%user/get-current-child%')->where('name','not like','%site/show/as-participant%')->get());
             $Authenticated->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%bulk%')->where('name', 'like', '%messages%')->get());
             $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
             $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
