@@ -43,7 +43,8 @@ class SeenReportController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'item_type' => 'string|in:page,media,file,quiz,assignment,h5p',
             'class' => 'nullable|integer|exists:classes,id',
-            'lesson' => 'nullable|integer|exists:lessons,id' 
+            'lesson' => 'nullable|integer|exists:lessons,id',
+            'time' => 'integer',
         ]);
 
         
@@ -135,6 +136,9 @@ class SeenReportController extends Controller
                 return $report;
             });
         }
+
+        if($request->filled('times'))
+            $report = $report->where('seen_number',$request->times)->values();
 
         return response()->json(['message' => 'Overall seen report', 'body' => $report->paginate(Paginate::GetPaginate($request))], 200);
     }
