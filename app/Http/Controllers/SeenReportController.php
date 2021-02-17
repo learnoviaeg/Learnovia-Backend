@@ -12,6 +12,7 @@ use DB;
 use App\Paginate;
 use App\Enroll;
 use App\Lesson;
+use App\UserSeen;
 
 class SeenReportController extends Controller
 {
@@ -47,6 +48,8 @@ class SeenReportController extends Controller
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id',
             'times' => 'integer',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
         ]);
 
         
@@ -66,6 +69,7 @@ class SeenReportController extends Controller
             $lessons = [$request->lesson];
         }
 
+        //getting total number of enrolled users for each lesson
         $lessons_enrolls = collect();
 
         $lessons_object = $user_course_segments->pluck('courseSegment.lessons')->collapse();
@@ -83,11 +87,23 @@ class SeenReportController extends Controller
             return $lessons_enrolls;
         });
 
+        //geting the items that has been viwed during this period
+        $items_only = [];
+        if($request->filled('from') && $request->filled('to')){
+            $items_only = UserSeen::whereDate('updated_at', '>=',$request->from)->whereDate('updated_at', '<=', $request->to)->whereIn('lesson_id',$lessons)->get();
+        }
+
         $report = collect();
 
         if(!$request->filled('item_type') || $request->item_type == 'assignment'){
             //get the assignments and map them
-            $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->with('Assignment')->get();
+            $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->with('Assignment');
+            
+            if($request->filled('from') && $request->filled('to'))
+                $assignments->whereIn('assignment_id',$items_only->where('type','assignment')->pluck('item_id'));
+            
+            $assignments = $assignments->get();
+
             $assignments->map(function ($assignment) use ($report,$lessons_enrolls) {
 
                 $total = $lessons_enrolls->where('lesson_id',$assignment->lesson_id);
@@ -109,7 +125,13 @@ class SeenReportController extends Controller
 
         if(!$request->filled('item_type') || $request->item_type == 'quiz'){
             //get the quizzes and map them
-            $quizzes = QuizLesson::whereIn('lesson_id',$lessons)->with('quiz')->get();
+            $quizzes = QuizLesson::whereIn('lesson_id',$lessons)->with('quiz');
+            
+            if($request->filled('from') && $request->filled('to'))
+                $quizzes->whereIn('quiz_id',$items_only->where('type','quiz')->pluck('item_id'));
+            
+            $quizzes = $quizzes->get();
+
             $quizzes->map(function ($quiz) use ($report,$lessons_enrolls) {
 
                 $total = $lessons_enrolls->where('lesson_id',$quiz->lesson_id);
@@ -129,7 +151,13 @@ class SeenReportController extends Controller
 
         if(!$request->filled('item_type') || $request->item_type == 'h5p'){
             //get the h5p and map them
-            $contents = h5pLesson::whereIn('lesson_id',$lessons)->get();
+            $contents = h5pLesson::whereIn('lesson_id',$lessons);
+            
+            if($request->filled('from') && $request->filled('to'))
+                $contents->whereIn('content_id',$items_only->where('type','h5p')->pluck('item_id'));
+
+            $contents = $contents->get();
+
             $contents->map(function ($h5p) use ($report,$lessons_enrolls) {
 
                 $total = $lessons_enrolls->where('lesson_id',$h5p->lesson_id);
@@ -153,6 +181,9 @@ class SeenReportController extends Controller
 
             if($request->filled('item_type'))
                 $materials->where('type',$request->item_type);
+
+            if($request->filled('from') && $request->filled('to'))
+                $materials->whereIn('item_id',$items_only->whereIn('type',['file','media','page'])->pluck('item_id'));
 
             $materials = $materials->get();
 
