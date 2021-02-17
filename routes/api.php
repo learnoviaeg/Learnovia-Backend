@@ -1,5 +1,6 @@
 <?php
 Route::get('/' , 'AuthController@site');
+
 //install all permissions and roles of system Route
 Route::get('install', 'SpatieController@install');
 //Login and Signup
