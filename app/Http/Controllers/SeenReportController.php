@@ -115,7 +115,7 @@ class SeenReportController extends Controller
                     'seen_number' => $assignment->seen_number,
                     'user_seen_number' => $assignment->user_seen_number,
                     'lesson_id' => $assignment->lesson_id,
-                    'percentage' => count($total) > 0 && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
+                    'percentage' => count($total) > 0 && $total[0]['total_enrolls'] != 0 && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
                 ]);
 
                 return $report;
@@ -143,7 +143,7 @@ class SeenReportController extends Controller
                     'seen_number' => $quiz->seen_number,
                     'user_seen_number' => $quiz->user_seen_number,
                     'lesson_id' => $quiz->lesson_id,
-                    'percentage' => count($total) > 0 && $quiz->user_seen_number != 0 ? round(($quiz->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
+                    'percentage' => count($total) > 0 && $total[0]['total_enrolls'] != 0  && $quiz->user_seen_number != 0 ? round(($quiz->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
                 ]);
                 return $report;
             });
@@ -169,7 +169,7 @@ class SeenReportController extends Controller
                     'seen_number' => $h5p->seen_number,
                     'user_seen_number' => $h5p->user_seen_number,
                     'lesson_id' => $h5p->lesson_id,
-                    'percentage' => count($total) > 0 && $h5p->user_seen_number != 0 ? round(($h5p->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
+                    'percentage' => count($total) > 0 && $total[0]['total_enrolls'] != 0  && $h5p->user_seen_number != 0 ? round(($h5p->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
                 ]);
                 return $report;
             });
@@ -198,7 +198,7 @@ class SeenReportController extends Controller
                     'seen_number' => $material->seen_number,
                     'user_seen_number' => $material->user_seen_number,
                     'lesson_id' => $material->lesson_id,
-                    'percentage' => count($total) > 0 && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
+                    'percentage' => count($total) > 0 && $total[0]['total_enrolls'] != 0  && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
                 ]);
                 return $report;
             });
