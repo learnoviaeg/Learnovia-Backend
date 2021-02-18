@@ -52,7 +52,11 @@ class RepportsRepository implements RepportsRepositoryInterface
         //sum all the seen number for all components
         $sum_views = UserSeen::whereIn('user_id',$enroll_students->pluck('user_id'))->whereIn('lesson_id',$lessons)->count();
 
-        $percentage = ($sum_views / (count($enroll_students) * $items_count)) * 100;
+        $divided_by = count($enroll_students) * $items_count;
+
+        $percentage = 0;
+        if($divided_by > 0)
+            $percentage = ($sum_views / $divided_by) * 100;
 
         Course::where('id',$course_id)->update([
             'progress' => round($percentage,2)
