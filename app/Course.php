@@ -8,7 +8,7 @@ use Modules\Attendance\Entities\AttendanceSession;
 
 class Course extends Model
 {
-    protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name'];
+    protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress'];
 
 
     public static function findByName($course_name)
