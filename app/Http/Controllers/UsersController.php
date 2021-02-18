@@ -56,6 +56,7 @@ class UsersController extends Controller
             'item_id' => ['integer',Rule::requiredIf($my_chain === 'seen_report')],
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
+            'times' => 'integer',
         ]);
 
         //using in chat api new route { api/user/all}
@@ -211,6 +212,10 @@ class UsersController extends Controller
 
             if($request->filled('view_status')){
                 $enrolls = $enrolls->where('seen',$request->view_status)->values();
+            }
+
+            if($request->filled('times')){
+                $enrolls = $enrolls->where('seen_count',$request->times)->values();
             }
 
         }
