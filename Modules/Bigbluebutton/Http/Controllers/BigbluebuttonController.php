@@ -122,7 +122,7 @@ class BigbluebuttonController extends Controller
             'object.*.class_id' => 'required|array',
             'object.*.class_id.*' => 'required|exists:classes,id',
             'object.*.course_id' => 'required|exists:courses,id',
-            'type' => 'required|string|in:BBB,Zoom',
+            'type' => 'required|string|in:BBB,Zoom,teams',
             'attendee_password' => 'required_if:type,==,BBB|string|different:moderator_password',
             'moderator_password' => 'required_if:type,==,BBB|string',
             'duration' => 'nullable',
@@ -131,7 +131,8 @@ class BigbluebuttonController extends Controller
             'start_date.*' => 'date',
             'last_day' => 'date',
             'visible' => 'in:0,1',
-            'host_id' => 'required_if:type,==,Zoom'
+            'host_id' => 'required_if:type,==,Zoom',
+            'join_url' => 'required_if:type,==,teams'
         ]);
     
         if($request->type == 'BBB'){
@@ -192,6 +193,7 @@ class BigbluebuttonController extends Controller
                             $bigbb->host_id = ($request->host_id) ? $request->host_id : null;
                             $bigbb->is_recorded = $request->is_recorded;
                             $bigbb->started = 0;
+                            $bigbb->join_url = $request->join_url ? $request->join_url : null;
                             $bigbb->show = isset($request->visible)?$request->visible:1;
                             $bigbb->save();
 
@@ -454,7 +456,7 @@ class BigbluebuttonController extends Controller
         if(($check < Carbon::now() && $exist_meeting == 0) || (!$request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0))
             return HelperController::api_response_format(200,null ,__('messages.virtual.cannot_join'));
 
-        if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0){
+        if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0 && $bigbb->type != 'teams'){
             if($bigbb->type == 'Zoom')
                 $start_meeting = self::start_meeting_zoom($request);
 
@@ -483,7 +485,7 @@ class BigbluebuttonController extends Controller
             $url = $bbb->getJoinMeetingURL($joinMeetingParams);
         }
 
-        if($bigbb->type == 'Zoom'){
+        if($bigbb->type == 'Zoom' || $bigbb->type == 'teams'){
             $url= BigbluebuttonModel::find($request->id)->join_url;
         }
         
