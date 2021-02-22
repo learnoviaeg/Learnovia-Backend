@@ -95,7 +95,7 @@ class CoursesController extends Controller
                         $temp_course = $level[0]->courseSegment->courses[0];     
                       }
                  }
-                 if($status ==null){
+                 if($status ==null || $status == 'all'){
                     $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
                     $temp_course = $level[0]->courseSegment->courses[0];
                  }
@@ -120,6 +120,29 @@ class CoursesController extends Controller
             ]);
 
             $temp_course = null;
+        }
+
+        if($status == 'all'){
+            $courses = Course::whereNotIn('id',$user_courses->pluck('id'))->with(['attachment','courseSegments'])->get();
+            
+            if(count($courses) > 0){
+                foreach($courses as $cou){
+
+                    $user_courses->push([
+                        'id' => $cou->id ,
+                        'name' => $cou->name ,
+                        'short_name' => $cou->short_name ,
+                        'image' => isset($cou->image) ? $cou->attachment->path : null,
+                        'description' => $cou->description ,
+                        'mandatory' => $cou->mandatory == 1 ? true : false ,
+                        'level' => $cou->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values()->pluck('name'),
+                        'teachers' => [],
+                        'start_date' => $cou->courseSegments[0]->start_date,
+                        'end_date' => $cou->courseSegments[0]->end_date,
+                        'progress' => $cou->progress ,
+                    ]);
+                }
+            }
         }
 
         return response()->json(['message' => __('messages.course.list'), 'body' => $user_courses->paginate($paginate)], 200);
