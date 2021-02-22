@@ -558,7 +558,7 @@ class EnrollUserToCourseController extends Controller
      */
     public function enrollWithChain(Request $request)
     {
-        $request->validate([
+        $rules = [
             'users' => 'required|array',
             'users.*' => 'required|string|exists:users,id',
             'role_id' => 'required|exists:roles,id',
@@ -568,7 +568,15 @@ class EnrollUserToCourseController extends Controller
             'classes' => 'array|exists:classes,id',
             'segments' => 'array|exists:segments,id',
             'courses' => 'array|exists:courses,id'
-        ]);
+        ];
+
+        $customMessages = [
+            'users.required'   => 'Users array is required.',
+            'users.exists'   => 'Invalid user supplied!.',
+            'role_id.required'   => __('messages.error.role_required'),
+        ];
+
+        $this->validate($request, $rules, $customMessages);
 
         $courseSeg = GradeCategoryController::getCourseSegmentWithArray($request);
         // return $courseSeg;
