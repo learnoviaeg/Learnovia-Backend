@@ -24,6 +24,7 @@ return [
         'no_active_year' => 'لا توجد سنة مفعلة متاحة',
         'extension_not_supported' => 'هذا الامتداد غير معتمد ',
         'no_permission' => 'المستخدم ليس لديه الإذن',
+        'role_required' => 'من فضلك ، اختر الوظيفة أولا',
     ],
     'success' => [
         'submit_success' => 'تم إرسال الإجابة بنجاح',
