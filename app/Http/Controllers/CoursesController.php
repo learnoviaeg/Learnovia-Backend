@@ -95,7 +95,7 @@ class CoursesController extends Controller
                         $temp_course = $level[0]->courseSegment->courses[0];     
                       }
                  }
-                 if($status ==null || $status == 'all'){
+                 if($status ==null){
                     $levels[] =  isset($level[0]->levels) ? $level[0]->levels->name : null;
                     $temp_course = $level[0]->courseSegment->courses[0];
                  }
@@ -122,7 +122,7 @@ class CoursesController extends Controller
             $temp_course = null;
         }
 
-        if($status == 'all'){
+        if($status == null){
             $courses = Course::whereNotIn('id',$user_courses->pluck('id'))->with(['attachment','courseSegments'])->get();
             
             if(count($courses) > 0){
