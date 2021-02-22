@@ -34,18 +34,11 @@ class LogsController extends Controller
             'type' => 'exists:logs,model',
             'start_date' => 'date',
             'end_date' => 'date',
-            'action' => 'in:updated,deleted,created'
+            'action' => 'in:updated,deleted,created,viewed'
         ]);
 
         $logs=Log::whereNotNull('id');
-        if(isset($request->user))
-        {
-            $logs->with(['user' => function ($query) use ($request) {
-                $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->user%' ")
-                        ->orWhere('arabicname', 'LIKE' ,"%$request->user%" )
-                        ->orWhere('username', 'LIKE', "%$request->user%");
-            }]);
-        }
+
         if(isset($request->type))
             $logs->where('model',$request->type);
         if(isset($request->action))
@@ -55,6 +48,15 @@ class LogsController extends Controller
             if(isset($request->end_date))
                 $end_date=$request->end_date;
             $logs->where('created_at', '>=', $request->start_date)->where('created_at', '<=', $end_date);
+        }
+        if(isset($request->user)){
+            $usernames = User::where(function($q) use($request){
+                $q->where('arabicname', 'LIKE' ,"%$request->user%" )
+                ->orWhere('username', 'LIKE' ,"%$request->user%" )
+                ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->user%' ");
+            })->pluck('username');
+            
+            $logs->whereIn('user',$usernames);
         }
 
         $AllLogs=collect();
@@ -67,6 +69,7 @@ class LogsController extends Controller
         $all_logs['total']=$countLogs;
 
         $loggs=$logs->offset($page*($paginate))->limit($paginate)->get();
+
         foreach($loggs as $log)
         {
             $log->data=unserialize($log->data);
