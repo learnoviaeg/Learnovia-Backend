@@ -10,6 +10,7 @@ use App\Level;
 use App\Enroll;
 use App\Segment;
 use App\LastAction;
+use App\AcademicYearType;
 
 class ChainRepository implements ChainRepositoryInterface
 {
@@ -87,6 +88,57 @@ class ChainRepository implements ChainRepositoryInterface
             $enrolls->whereIn('course', $request->courses);
 
         return $enrolls;    
+    }
+
+    public function getAllByChainRelation($request){
+
+        $year = AcademicYear::Get_current();
+
+        if ($request->filled('year'))
+            $year = AcademicYear::find($request->year);
+
+        if (!isset($year))
+            throw new \Exception('There is no active year');
+
+        $YearTypes = $year->where('id', $year->id)->with(['YearType' => function ($query) use ($request) {
+
+            if ($request->filled('type'))
+                $query->where('academic_type_id', $request->type);
+
+        }, 'YearType.yearLevel' => function ($query) use ($request) {
+
+            if ($request->filled('level'))
+                $query->where('level_id', $request->level);
+
+        }, 'YearType.yearLevel.classLevels' => function ($query) use ($request) {
+
+            if ($request->filled('class'))
+                $query->where('class_id', $request->class);
+
+        }, 'YearType.yearLevel.classLevels.segmentClass' => function ($query) use ($request) {
+
+            if ($request->filled('type')) {
+
+                $segment_id = Segment::Get_current($request->type);
+
+                if(isset($segment_id))
+                    $segment_id = Segment::Get_current($request->type)->id;
+
+                if ($request->filled('segment'))
+                    $segment_id = $request->segment;
+
+                $query->where('segment_id', $segment_id);
+            }
+
+        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment' => function ($query)  use ($request) {
+
+            if ($request->filled('courses'))
+                $query->whereIn('course_id', $request->courses);
+
+        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment.courses.attachment']);
+
+        return $YearTypes;
+
     }
 
 }

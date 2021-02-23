@@ -10,4 +10,6 @@ interface ChainRepositoryInterface
 
     public function getCourseSegmentByManyChain(Request $request);
 
+    public function getAllByChainRelation(Request $request);
+
 }
