@@ -56,20 +56,20 @@ class CoursesController extends Controller
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
-
-        $enrolls = $this->chain->getCourseSegmentByManyChain($request);
-        if(!$request->user()->can('site/show-all-courses')){ //student or teacher
-            $enrolls->where('user_id',Auth::id());
-        }
-
-        if($request->has('role_id')){
-            $enrolls->where('role_id',$request->role_id);
-        }
-        $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);
-
         
         $user_courses=collect();
         if(isset($status)){
+
+            $enrolls = $this->chain->getCourseSegmentByManyChain($request);
+            if(!$request->user()->can('site/show-all-courses')){ //student or teacher
+                $enrolls->where('user_id',Auth::id());
+            }
+    
+            if($request->has('role_id')){
+                $enrolls->where('role_id',$request->role_id);
+            }
+            $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);
+    
             foreach($enrolls as $course){
                 $levels=[];
                 $teacher = [];
@@ -123,6 +123,15 @@ class CoursesController extends Controller
         }
 
         if($status == null){
+
+            $chain_request = new Request ([
+                'year' => $request->filled('years') ? $request->years[0] : null,
+                'type' => $request->filled('types') ? $request->types[0] : null,
+                'level' => $request->filled('levels') ? $request->levels[0] : null,
+                'class' => $request->filled('classes') ? $request->classes[0] : null,
+                'segment' => $request->filled('segments') ? $request->segments[0] : null,
+            ]);
+
             $year_types = $this->chain->getAllByChainRelation($request);
 
             $course_segments =  collect($year_types->get()->pluck('YearType.*.yearLevel.*.classLevels.*.segmentClass.*.courseSegment.*')[0]);
