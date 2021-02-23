@@ -136,24 +136,20 @@ class CoursesController extends Controller
 
                     if(count($user_courses->where('id',$cou->id)) == 0){
 
-                        // if(!$request->filled('search') || ($request->filled('search') && str_contains($cou->name, $request->search))){
-
-                            $user_courses->push([
-                                'id' => $cou->id ,
-                                'name' => $cou->name ,
-                                'short_name' => $cou->short_name ,
-                                'image' => isset($cou->image) ? $cou->attachment->path : null,
-                                'description' => $cou->description ,
-                                'mandatory' => $cou->mandatory == 1 ? true : false ,
-                                'level' => $cou->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values()->pluck('name'),
-                                'teachers' => Enroll::where('course',$cou->id)->where('role_id',4)->with('user.attachment')->get()->pluck('user'),
-                                'start_date' => $cou->courseSegments[0]->start_date,
-                                'end_date' => $cou->courseSegments[0]->end_date,
-                                'progress' => $cou->progress ,
-                            ]);
-                        }
-                    // }
-
+                        $user_courses->push([
+                            'id' => $cou->id ,
+                            'name' => $cou->name ,
+                            'short_name' => $cou->short_name ,
+                            'image' => isset($cou->image) ? $cou->attachment->path : null,
+                            'description' => $cou->description ,
+                            'mandatory' => $cou->mandatory == 1 ? true : false ,
+                            'level' => $cou->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values()->pluck('name'),
+                            'teachers' => Enroll::where('course',$cou->id)->where('role_id',4)->with('user.attachment')->get()->pluck('user'),
+                            'start_date' => $cou->courseSegments[0]->start_date,
+                            'end_date' => $cou->courseSegments[0]->end_date,
+                            'progress' => $cou->progress ,
+                        ]);
+                    }
                 }
 
             });
