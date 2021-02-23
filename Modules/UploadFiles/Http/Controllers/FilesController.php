@@ -63,6 +63,14 @@ class FilesController extends Controller
         'media/toggle','file/media/get','link/add','link/update','file/sort','media/sort','media/get','file/get','site/file/edit','site/media/edit',
         'media/assign'];
 
+        $student_permissions=['page/get','media/get','file/get'];
+
+        $student = \Spatie\Permission\Models\Role::find(3);
+        $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+        $parent = \Spatie\Permission\Models\Role::find(7);
+        $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
+
+
         $tecaher = \Spatie\Permission\Models\Role::find(4);
         $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
 
