@@ -635,7 +635,7 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignments,id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id'        ];
         $customMessages = [
-            'assignment_id.exists' => 'This assignment is invalid.' 
+            'assignment_id.exists' => __('messages.error.item_deleted') 
         ];
 
         $this->validate($request, $rules, $customMessages);

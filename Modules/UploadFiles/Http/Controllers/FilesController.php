@@ -590,7 +590,7 @@ class FilesController extends Controller
             'id' => 'required|integer|exists:files,id',
         ];
         $customMessages = [
-            'exists' => 'This file is invalid.'
+            'exists' => __('messages.error.item_deleted')
         ];
     
         $this->validate($request, $rules, $customMessages);
