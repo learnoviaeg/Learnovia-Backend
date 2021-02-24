@@ -252,7 +252,7 @@ class PageController extends Controller
             'id' => 'required|exists:pages,id',
             'lesson_id' => 'required|exists:lessons,id'        ];
         $customMessages = [
-            'exists'   => 'This page is invalid.', //attribute  but bage for user
+            'exists'   => __('messages.error.item_deleted'), //attribute  but bage for user
         ];
         $this->validate($request, $rules, $customMessages);
         $page = page::whereId($request->id)->first();

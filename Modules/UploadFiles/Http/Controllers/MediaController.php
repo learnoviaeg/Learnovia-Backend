@@ -526,7 +526,7 @@ class MediaController extends Controller
             'id' => 'required|integer|exists:media,id',
         ];
         $customMessages = [
-            'exists' => 'This media is invalid.'
+            'exists' => __('messages.error.item_deleted')
         ];
     
         $this->validate($request, $rules, $customMessages);
