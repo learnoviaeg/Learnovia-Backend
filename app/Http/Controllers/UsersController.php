@@ -15,6 +15,9 @@ use App\Log;
 use App\Lesson;
 use App\UserSeen;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use App\Exports\InactiveUsers;
 
 class UsersController extends Controller
 {
@@ -145,6 +148,7 @@ class UsersController extends Controller
                 'report_day' => 'integer',
                 'never' => 'in:1',
                 'since' => 'in:1,5,10',
+                'export' => 'in:1'
             ]);
 
             $users_lastaction = Log::whereYear('created_at', $request->report_year)->whereIn('user',$enrolls->pluck('username'))->with('users');
@@ -174,6 +178,15 @@ class UsersController extends Controller
                 }
                 $last_actions = LastAction::whereNull('course_id')->pluck('user_id');
                 $users_lastaction  = $enrolls->whereNotIn('id',$last_actions)->values();
+            }
+
+            if($request->filled('export')){
+
+                $filename = uniqid();
+                $file = Excel::store(new InactiveUsers($users_lastaction), 'reports'.$filename.'.xls','public');
+                $file = url(Storage::url('reports'.$filename.'.xls'));
+                return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
+
             }
 
             return response()->json(['message' => $my_chain.' users list ', 'body' => $users_lastaction], 200);
