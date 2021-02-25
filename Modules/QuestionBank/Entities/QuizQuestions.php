@@ -13,6 +13,6 @@ class quiz_questions extends Model
 
     public function Question()
     {
-        return  $this->hasMany('Modules\QuestionBank\Entities\Questions', 'id', 'question_id');
+        return  $this->hasMany('App\Questions', 'id', 'question_id');
     }
 }

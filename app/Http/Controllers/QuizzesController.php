@@ -101,7 +101,82 @@ class QuizzesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|min:3',
+            'course_id' => 'required|integer|exists:courses,id',
+            'type' => 'required|in:0,1,2',
+            /**
+             * type 0 => Old Question
+             * type 1 => New Questions
+             * type 2 => New & Old Questions
+             */
+            'is_graded' => 'required|boolean',
+            'duration' => 'required|integer',
+            'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
+            'feedback' => 'integer| in:1,2,3',
+            /**
+             * feedback 1 => After submission
+             * feedback 2 =>After due date,
+             * feedback 3 => No feedback
+            */
+        ]);
+        if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
+            return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
+
+        $course=  Course::where('id',$request->course_id)->first();
+        LastAction::lastActionInCourse($request->course_id);
+
+        $newQuestionsIDs=array();
+        $oldQuestionsIDs=array();
+        if ($request->type == 1 || $request->type == 2) { // New
+            $request->validate([
+                'q_cat_id' => 'required|integer|exists:questions_categories,id',
+                //for request of creation multi type questions
+                'Question' => 'required|array',
+                'Question.*.type' => 'required|in:MCQ,Essay,T_F,Match,Comprehension', 
+                'Question.*.text' => 'required|string', //need in every type_question
+                'Question.*.is_true' => 'required_if:Question.*.question_type,==,T_F|boolean', //for true-false
+                'Question.*.and_why' => 'boolean', //if question t-f and have and_why question
+                //MCQ validation
+                'Question.*.MCQ_Choices' => 'array',
+                'Question.*.MCQ_Choices.*.is_true' => 'boolean',
+                'Question.*.MCQ_Choices.*.content' => 'string'
+            ]);
+            $newQuestionsIDs=app('App\Http\Controllers\QuestionsController')->store($request,1);
+        }
+        if ($request->type == 0 ||$request->type == 2) { // old
+            $request->validate([
+                'oldQuestion' => 'required|array',
+                'oldQuestion.*' => 'required|integer|exists:questions,id',
+            ]);
+            $oldQuestionsIDs=($request->oldQuestion);
+            // return gettype($questionsIDs);
+        }
+        // return $newQuestionsIDs;
+        $questionsIDs = array_merge($newQuestionsIDs,$oldQuestionsIDs);
+
+        if ($questionsIDs != null) {
+            $quiz = quiz::create([
+                'name' => $request->name,
+                'course_id' => $request->course_id,
+                'is_graded' => $request->is_graded,
+                'duration' => $request->duration,
+                'created_by' => Auth::user()->id,
+                'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
+                'feedback' => isset($request->feedback) ? $request->feedback : 1,
+            ]);
+
+            $quiz->Question()->attach($questionsIDs);
+            // $quiz->Question;
+            foreach ($quiz->Question as $question) {
+                $question->with($question['type'].'_question');
+
+                if($question['type'] == 'MCQ')
+                    $question->with($question['type'].'_question.MCQ_Choices');
+            }
+            return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
+        }
+        return HelperController::api_response_format(200, null, __('messages.error.not_found'));
     }
 
     /**
