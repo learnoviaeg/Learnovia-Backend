@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class InactiveUsers implements FromCollection, WithHeadings
 {
     use Exportable;
-    protected $fields = ['fullname','username','lastaction','status'];
+    protected $fields = ['fullname','username','since','status'];
 
     function __construct($report) {
         $this->report = $report;
@@ -26,7 +26,7 @@ class InactiveUsers implements FromCollection, WithHeadings
             $reports->push([
                 'fullname' => $user->fullname,
                 'username' => $user->username,
-                'lastaction' => Carbon::parse($user->lastaction)->diffForHumans(),
+                'since' => Carbon::parse($user->lastaction)->diffForHumans(),
                 'status' => $user->status
             ]);
         }
