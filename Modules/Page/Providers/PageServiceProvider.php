@@ -4,8 +4,8 @@ namespace Modules\Page\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
-use Modules\Page\Entities\pageLesson;
-use Modules\Page\Entities\page;
+use Modules\Page\Entities\PageLesson;
+use Modules\Page\Entities\Page;
 use Modules\Page\Observers\PageObserver;
 use App\Observers\LogsObserver;
 use Modules\Page\Observers\PageLessonObserver;

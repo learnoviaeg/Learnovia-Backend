@@ -9,7 +9,7 @@ use App\Course;
 class BigbluebuttonModel extends Model
 {
     protected $fillable = ['name','class_id','course_id','attendee_password','moderator_password','duration','meeting_id','started','is_recorded'
-    ,'actutal_start_date','status'];
+    ,'actutal_start_date','status','actual_duration','join_url','type','host_id'];
 
     protected $appends = ['class','course'];
 

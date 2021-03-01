@@ -1,7 +1,6 @@
 <?php
 
 namespace App;
-use Log;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 
@@ -16,6 +15,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Modules\Attendance\Entities\AttendanceLog;
 use App\Course;
+use App\Log;
 
 class User extends Authenticatable
 {
@@ -32,7 +32,7 @@ class User extends Authenticatable
     protected $fillable = [
         'firstname', 'email', 'password', 'real_password', 'lastname', 'username','suspend','class_id','picture', 'level',
         'type', 'arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'language',
-        'timezone', 'religion', 'second language', 'token','chat_uid','chat_token','refresh_chat_token','last_login','nickname'
+        'timezone', 'religion', 'second language', 'token','chat_uid','chat_token','refresh_chat_token','last_login','nickname','api_token'
     ];
 
     /**
@@ -52,7 +52,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ['fullname','lastaction'];
+    protected $appends = ['fullname','lastaction','status'];
 
     private static function getUserCounter($lastid)
     {
@@ -186,6 +186,10 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\CourseSegment');
     }
+    public function lastactionincourse()
+    {
+        return $this->hasMany('App\LastAction');
+    }
     public function enroll(){
        return $this->hasMany('App\Enroll' , 'user_id');
     }
@@ -217,9 +221,20 @@ class User extends Authenticatable
     }
 
     public function getLastActionAttribute() {
-       $last_action  = LastAction :: where('user_id',$this->id)->first();
+       $last_action  = LastAction :: where('user_id',$this->id)->where('course_id',null)->first();
        if (isset($last_action))
             return Carbon::Parse($last_action->date);
         
+    }
+
+    public function getStatusAttribute() {
+        $status = 'offline';
+
+        $active_user  = Log::where('user',$this->username)->where('created_at','>=' ,Carbon::now()->subMinutes(2))
+                                                              ->where('created_at','<=' ,Carbon::now())->first();
+        if(isset($active_user))
+            $status = 'online';
+
+        return $status;
     }
 }

@@ -1,5 +1,8 @@
 <?php
 Route::get('/' , 'AuthController@site');
+Route::get('/materials/{id}', 'MaterialsController@show')->middleware(['getauth','LastAction']);
+Route::get('/interactive/{id}', 'InterActiveController@show')->middleware(['getauth','LastAction']);
+
 //install all permissions and roles of system Route
 Route::get('install', 'SpatieController@install');
 //Login and Signup
@@ -220,6 +223,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api','LastAction']], 
     Route::get('get-class', 'CourseController@get_class_from_course')->middleware('permission:course/get-classes-by-course');
     Route::post('get-courses-by-classes', 'CourseController@get_courses_with_classes')->middleware('permission:course/get-courses-by-classes');
     Route::get('export', 'CourseController@export')->name('exportCourses')->middleware('permission:course/export');
+    Route::get('question_category_for_courses', 'CourseController@AddQuestionCategorytoCourses')->middleware('permission:site/show-all-courses');
 });
 
 //USER CRUD ROUTES
@@ -252,6 +256,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], fu
     Route::post('generate-username-password', 'UserController@generate_username_password')->name('generateusernamepassword')->middleware('permission:user/generate-username-password');
     Route::get('GetAllCountries', 'UserController@GetAllCountries')->name('GetAllCountries')->middleware('permission:user/GetAllCountries');
     Route::get('GetAllNationalities', 'UserController@GetAllNationalities')->name('GetAllNationalities')->middleware('permission:user/GetAllNationalities');
+    Route::get('enroll_parent_script', 'UserController@enroll_parents_script')->middleware('permission:site/show-all-courses');
 });
 
 //Enroll Routes
@@ -430,7 +435,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('quizzes', QuizzesController::class);
     Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
     Route::Resource('materials', MaterialsController::class);
-    Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);;
+    Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
     Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
@@ -438,6 +443,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('interactive', InterActiveController::class);
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
     Route::Resource('courses', CoursesController::class);
+    Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
     Route::Resource('levels', LevelController::class);
     Route::Resource('classes', ClassesController::class);
@@ -446,6 +452,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('questions', QuestionsController::class);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::Resource('notify', NotificationsController::class);
+    Route::get('notification/{read}', 'NotificationsController@read')->middleware('permission:notifications/seen');
     Route::get('notifications/{types}', 'NotificationsController@index')->middleware('permission:notifications/get-all');
     Route::Resource('announcement', AnnouncementsController::class);
     Route::post('announcement/update', 'AnnouncementsController@update');
@@ -454,9 +461,12 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::delete('assign/role/', 'AssignRoleController@destroy');
     Route::delete('enroll/', 'EnrollController@destroy');
     Route::Resource('enroll', EnrollController::class);
+    Route::Resource('calendars', CalendarsController::class);
+    Route::Resource('overall_seen', SeenReportController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);
 });
+

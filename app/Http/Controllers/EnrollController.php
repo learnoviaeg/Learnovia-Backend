@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Enroll;
 use App\Events\MassLogsEvent;
+use App\Parents;
 
 class EnrollController extends Controller
 {
@@ -81,6 +82,11 @@ class EnrollController extends Controller
         //for logs
         $logsbefore=$chains->get();
         event(new MassLogsEvent($logsbefore,'deleted'));
+
+        foreach($logsbefore as $enroll){
+            $parent = Parents::where('child_id',$enroll->user_id)->pluck('parent_id');
+            Enroll::whereIn('user_id',$parent)->where('role_id',7)->where('course_segment',$enroll->course_segment)->delete();
+        }
 
         $chains->delete();
         return response()->json(['message' => __('messages.enroll.delete'), 'body' => null], 200);

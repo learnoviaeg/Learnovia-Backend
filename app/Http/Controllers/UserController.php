@@ -33,6 +33,7 @@ use Auth;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
+use App\Http\Controllers\AuthController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\ClassLevel;
 use App\attachment;
@@ -42,6 +43,8 @@ use App\Exports\ParentChildExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
+use App\LastAction;
+
 class UserController extends Controller
 {
     /**
@@ -65,7 +68,7 @@ class UserController extends Controller
             'lastname' => 'required|array',
             'lastname.*' => 'required|string|min:3|max:50',
             'password' => 'required|array',
-            'password.*' => 'required|string|min:6|max:191',
+            'password.*' => 'required|alpha_dash|string|min:6|max:191',
             // 'role' => 'required|array',
             // 'role.*' => 'required|exists:roles,id',
             'role' => 'required|integer|exists:roles,id', /// in all system
@@ -88,7 +91,8 @@ class UserController extends Controller
              'username' => 'required|array', 'type' => 'nullable|array',
             'level' => 'nullable|array', 'real_password' => 'nullable|array',
             'suspend.*' => 'boolean',
-            'suspend'=>'array'
+            'suspend'=>'array',
+            'username.*' => 'alpha_dash|unique:users,username'
         ]);
 
         // return User::max('id');
@@ -226,8 +230,8 @@ class UserController extends Controller
             'lastname' => 'required|string|min:3|max:50',
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
-            'password' => 'string|min:6|max:191',
-            'username' => 'unique:users,username,'.$request->id,
+            'password' => 'alpha_dash|string|min:6|max:191',
+            'username' => 'alpha_dash|unique:users,username,'.$request->id,
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
             'suspend' => 'boolean',
@@ -254,12 +258,25 @@ class UserController extends Controller
                 if (isset($request->password)){
                     $user->real_password=$request->password;
                     $user->password =   bcrypt($request->password);
+
+                    $tokens = $user->tokens->where('revoked',false);
+                    foreach($tokens as $token)
+                        $token->revoke();
+                    unset($user->tokens);
+                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
                 }
             }
 
             if (Auth::user()->can('user/update-username')) {
-                if (isset($request->username))
+                if (isset($request->username)){
                     $user->username=$request->username;
+
+                    $tokens = $user->tokens->where('revoked',false);
+                    foreach($tokens as $token)
+                        $token->revoke();
+                    unset($user->tokens);
+                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+                }
             }
 
         if (isset($request->picture))
@@ -379,7 +396,9 @@ class UserController extends Controller
             'year' => 'nullable|integer|exists:academic_years,id',
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
-            'count' => 'in:1,0'
+            'count' => 'in:1,0',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
         ]);
         $users = User::where('id','!=',0)->with('roles');
         if($request->filled('country'))
@@ -394,6 +413,10 @@ class UserController extends Controller
             $users= $users->whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
         });
+        if($request->filled('from') && $request->filled('to')){ //lastaction filter
+            $ids = LastAction::whereBetween('date', [$request->from, $request->to])->whereNull('course_id')->pluck('user_id');
+            $users = $users->whereIn('id',$ids);
+        }
         
         $flag=false;
         $enrolled_users=Enroll::where('id','!=',0);
@@ -411,6 +434,7 @@ class UserController extends Controller
             $flag=true;
         }if ($request->filled('course')){            
             $enrolled_users=$enrolled_users->where('course',$request->course);
+
             $flag=true;
         }if ($request->filled('year')){            
             $enrolled_users=$enrolled_users->where('year',$request->year);
@@ -444,8 +468,9 @@ class UserController extends Controller
 
             $roles = $roles->get();
             $users= $users->pluck('id');
+            $all_roles = Role::all();
 
-            foreach($roles as $role){
+            foreach($all_roles as $role){
                 $count[Str::slug($role->name, '_')] = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
             }
 
@@ -667,12 +692,35 @@ class UserController extends Controller
             'child_id' => 'required|array|exists:users,id'
         ]);
 
-        foreach($request->parent_id as $parent)
-            foreach($request->child_id as $child)
+        foreach($request->parent_id as $parent){
+
+            foreach($request->child_id as $child){
+                
                 Parents::firstOrCreate([
                     'child_id' => $child,
                     'parent_id' => $parent
                 ]);
+
+                $students = Enroll::where('user_id',$child)->get();
+
+                foreach($students as $student){
+
+                    Enroll::firstOrCreate([
+                        'course_segment' => $student->course_segment,
+                        'user_id' => $parent,
+                        'role_id'=> 7,
+                        'year' => $student->year,
+                        'type' => $student->type,
+                        'level' => $student->level,
+                        'class' => $student->class,
+                        'segment' => $student->segment,
+                        'course' => $student->course
+                    ]);
+                }
+
+            }
+        }
+            
 
         return HelperController::api_response_format(201,null,__('messages.users.parent_assign_child'));
     }
@@ -906,7 +954,7 @@ class UserController extends Controller
         }
 
         $fields = array_merge($fields, [ 'religion', 'created_at',
-        'class_id','level', 'type','second language','role'] );
+        'class_id','level', 'type','second language','role','last_action'] );
 
         $userIDs = self::list($request,1);
         $filename = uniqid();
@@ -984,5 +1032,34 @@ class UserController extends Controller
             'Zimbabwean'
         );
         return HelperController::api_response_format(200 ,$nationals, 'Nationalities are ...');
+    }
+
+    public function enroll_parents_script(){
+        $students = Enroll::where('role_id',3)->with('user.parents')->get();
+
+        foreach($students as $student){
+
+            if(isset($student->user)){
+
+                foreach($student->user->parents as $parent){
+
+                    Enroll::firstOrCreate([
+                        'course_segment' => $student->course_segment,
+                        'user_id' => $parent->id,
+                        'role_id'=> 7,
+                        'year' => $student->year,
+                        'type' => $student->type,
+                        'level' => $student->level,
+                        'class' => $student->class,
+                        'segment' => $student->segment,
+                        'course' => $student->course
+                    ]);
+    
+                }
+            }
+        
+        }
+
+        return 'done';
     }
 }

@@ -4,7 +4,8 @@ namespace Modules\UploadFiles\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
+// use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\MediaLesson;
@@ -14,6 +15,7 @@ use App\Classes;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
+use  App\LastAction;
 use App\Http\Controllers\HelperController;
 use App\LessonComponent;
 use Auth;
@@ -115,7 +117,7 @@ class MediaController extends Controller
         $request->validate([
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'required_if:type,==,0|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr',
+            'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'url' => 'required_if:type,==,1|array',
@@ -193,6 +195,7 @@ class MediaController extends Controller
 
                 $mediaLesson->save();
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
+                LastAction::lastActionInCourse($courseID);
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
                 $usersIDs = Enroll::where('course_segment', $tempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
                 User::notify([
@@ -259,7 +262,7 @@ class MediaController extends Controller
             'id' => 'required|integer|exists:media,id',
             'name' => 'nullable|string|max:190',
             'description' => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr',
+            'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie',
             'url' => 'nullable|active_url',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
@@ -268,6 +271,7 @@ class MediaController extends Controller
             'type' => 'in:0,1',
             'visible' => 'in:0,1',
         ]);
+
 
         $media = media::find($request->id);
         $mediaLesson = MediaLesson::whereIn('lesson_id' , $request->lesson_id)->where('media_id' , $request->id)->first();
@@ -323,6 +327,7 @@ class MediaController extends Controller
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'media')->get();
         $lesson = Lesson::find($request->updated_lesson_id);
         $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($courseID);
         $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
         
@@ -386,6 +391,9 @@ class MediaController extends Controller
         $media = media::whereId($request->mediaId)->first();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
         $media->delete();
+        $lesson = Lesson::find($request->lesson_id);
+        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($courseID);
 
         if($media_type != null)
         {
@@ -431,7 +439,9 @@ class MediaController extends Controller
             if (!isset($mediaLesson)) {
                 return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
             }
-
+            $lesson = Lesson::find($request->LessonID);
+            $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+            LastAction::lastActionInCourse($courseID);
             $mediaLesson->visible = ($mediaLesson->visible == 1) ? 0 : 1;
             $mediaLesson->save();
 
@@ -511,10 +521,19 @@ class MediaController extends Controller
     }
     public function GetMediaByID(Request $request)
     {
-        $request->validate([
+
+        $rules = [
             'id' => 'required|integer|exists:media,id',
-        ]);
+        ];
+        $customMessages = [
+            'exists' => __('messages.error.item_deleted')
+        ];
+    
+        $this->validate($request, $rules, $customMessages);
         $Media = media::with('MediaLesson')->find($request->id);
+        if( $request->user()->can('site/course/student') && $Media->MediaLesson->visible==0)
+            return HelperController::api_response_format(301,null, __('messages.media.media_hidden'));
+
         return HelperController::api_response_format(200, $Media);
     }
     public function AssignMediaToLesson(Request $request)

@@ -45,7 +45,7 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use App\Exports\CoursesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-
+use Modules\QuestionBank\Entities\QuestionsCategory;
 
 
 class CourseController extends Controller
@@ -64,7 +64,6 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'short_name' => 'required|unique:courses',
             'category' => 'exists:categories,id',
             'chains.*.year' => 'array',
             'chains.*.year.*' => 'required|exists:academic_years,id',
@@ -84,6 +83,24 @@ class CourseController extends Controller
             'start_date' => 'required_with:year|date',
             'end_date' =>'required_with:year|date|after:start_date'
         ]);
+        
+        // $short_name=Course::whereNotIn('id',Enroll::whereIn('year',$request->chains[0]['year'])->pluck('course'))->pluck('short_name');
+        $courses=Course::fromQuery('select * from courses where id in (
+                                    select course_id from course_segments where segment_class_id in (
+                                        select id from segment_classes where class_level_id in (
+                                            select id from class_levels where year_level_id in (
+                                                select id from year_levels where academic_year_type_id in (
+                                                    select id from academic_year_types where academic_year_id =' . $request->chains[0]['year'][0].'
+                                                )
+                                            )
+                                        )
+                                    )
+                                )'
+                            );
+        foreach($courses->toArray() as $course)
+            if($request->short_name == $course['short_name'])
+                return HelperController::api_response_format(400, null, 'short_name must be unique');
+
         $no_of_lessons = 4;
         $course = Course::create([
             'name' => $request->name,
@@ -110,6 +127,7 @@ class CourseController extends Controller
             $course->mandatory = $request->mandatory;
             $course->save();
         }
+
         foreach ($request->chains as $chain){
             // dd($chain);
         if(count($chain['year'])>0){
@@ -140,10 +158,6 @@ class CourseController extends Controller
                                     'letter' => 1,
                                     'letter_id' => 1
                                 ]);
-                                // Log::info($request->user()->username.' created course '.$course.' in year '.$year.
-                                //         ' in level '.$level.' in segment '.$segment.' in type '.$type.' in class '.$class.
-                                //         ' start_at '.$request->start_date.' and end_at '.$request->end_date.' created_at '.Carbon::now()->format('Y-m-d H:i:s'));
-
                                 $gradeCat = GradeCategory::firstOrCreate([
                                     'name' => 'Course Total',
                                     'course_segment_id' => $courseSegment->id,
@@ -165,6 +179,17 @@ class CourseController extends Controller
             }
         }
     }
+        $course_segment_id = null;
+        if(count($course->courseSegments) > 0)
+            $course_segment_id = $course->courseSegments[0]->id;
+
+        //Creating defult question category
+        $quest_cat = QuestionsCategory::firstOrCreate([
+            'name' => 'Category one',
+            'course_id' => $course->id,
+            'course_segment_id' => $course_segment_id
+        ]);
+
         $course->attachment;
         $courses =  Course::with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])->get();
         foreach($courses as $le){
@@ -793,7 +818,7 @@ class CourseController extends Controller
                                         $Component->where('publish_date', '<=', Carbon::now()); 
                                     }
                                 }
-                                $lessonn[$com->name] = $Component->get();
+                                $lessonn[$com->name] = $Component->orderBy('created_at','desc')->get();
                                 foreach($lessonn[$com->name] as $le){
                                     $le['course_id']=(int)$request->course_id;
                                     if($le->pivot->media_id)
@@ -826,6 +851,7 @@ class CourseController extends Controller
                                     $one['visible'] = $quiz_lesson->visible;
                                     $one['item_lesson_id']=$quiz_lesson->id;
                                     $one->quiz_lesson=$quiz_lesson;
+                                    $one->due_date=$quiz_lesson->due_date;
                                     if($one->pivot->publish_date > Carbon::now() &&  $request->user()->can('site/course/student'))
                                         $one->Started = false;
                                     else
@@ -862,6 +888,7 @@ class CourseController extends Controller
                                         }
 
                                         $one->assignment_lesson=$assignment_lesson;
+                                        $one->due_date=$assignment_lesson->due_date;
                                         $one['allow_attachment'] = $assignment_lesson->allow_attachment;
                                         $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assignment_lesson->id)->pluck('start_date')->first();
                                         $one->start_date = $assignment_lesson->start_date;
@@ -1397,9 +1424,12 @@ class CourseController extends Controller
                                         if(isset($usr->attachment))
                                             $usr->picture=$usr->attachment->path;
                                         $item->user_submit->User=$usr;
-                                        if (isset($studentassigment->attachment_id)) {
+                                        if (isset($studentassigment->attachment_id)) 
                                             $item->user_submit->attachment_id = attachment::where('id', $studentassigment->attachment_id)->first();
-                                        }
+                                        
+                                        if (isset($studentassigment->corrected_file)) 
+                                            $item->user_submit->corrected_file = attachment::where('id', $studentassigment->corrected_file)->first();
+                                        
                                     }
                                     $item->allow_attachment = $item->assignment_lesson->allow_attachment;
                                     $override_satrtdate = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$item->assignment_lesson->id)->pluck('start_date')->first();
@@ -1584,7 +1614,7 @@ class CourseController extends Controller
                         $ass = collect($ass)->sortByDesc($request->assort)->values();
                 }
             }
-                $result['Assigments']   = $ass;  
+                $result['Assigments']   = $ass->values();  
         }
         if(isset($result["Quiz"])){
 
@@ -1747,5 +1777,27 @@ class CourseController extends Controller
         if(isset($request->id))
             $attachment=attachment::where('id',$request->id)->first();
         return HelperController::api_response_format(201,$attachment, 'file');
+    }
+
+    public function AddQuestionCategorytoCourses(Request $request){
+        $existing_courses = QuestionsCategory::pluck('course_id');
+        
+        $courses = Course::whereNotIn('id',$existing_courses->filter()->values())->get();
+        
+        foreach($courses as $course){
+
+            $course_segment_id = null;
+            if(count($course->courseSegments) > 0)
+                $course_segment_id = $course->courseSegments[0]->id;
+    
+            //Creating defult question category
+            $quest_cat = QuestionsCategory::firstOrCreate([
+                'name' => 'Category one',
+                'course_id' => $course->id,
+                'course_segment_id' => $course_segment_id
+            ]);
+        }
+
+        return HelperController::api_response_format(201,null,'done');
     }
 }

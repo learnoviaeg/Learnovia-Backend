@@ -2,6 +2,7 @@
 
 namespace Modules\Assigments\Observers;
 
+use App\Repositories\RepportsRepositoryInterface;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\Assignment;
 use App\Timeline;
@@ -15,6 +16,12 @@ use Illuminate\Support\Facades\Auth;
 
 class AssignmentLessonObserver
 {
+    protected $report;
+
+    public function __construct(RepportsRepositoryInterface $report)
+    {
+        $this->report = $report;
+    }
     /**
      * Handle the assignment lesson "created" event.
      *
@@ -68,6 +75,12 @@ class AssignmentLessonObserver
                 'visible' => $assignmentLesson->visible
             ]);
         }
+
+        if($assignmentLesson->isDirty('seen_number')){
+            $lesson = Lesson::find($assignmentLesson->lesson_id);
+            $course_id = $lesson->courseSegment->course_id;
+            $this->report->calculate_course_progress($course_id);
+        }
     }
 
     /**
@@ -87,6 +100,10 @@ class AssignmentLessonObserver
 
         LessonComponent::where('lesson_id',$assignmentLesson->lesson_id)->where('comp_id',$assignmentLesson->assignment_id)
         ->where('module','Assignment')->delete();
+
+        $lesson = Lesson::find($assignmentLesson->lesson_id);
+        $course_id = $lesson->courseSegment->course_id;
+        $this->report->calculate_course_progress($course_id);
     }
 
     /**

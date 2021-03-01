@@ -21,7 +21,6 @@ class MaterialsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware('auth');
         $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
 
@@ -114,7 +113,26 @@ class MaterialsController extends Controller
      */
     public function show($id)
     {
-        //
+        $material = Material::find($id);
+
+        if(!isset($material))
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+
+        if(!isset($material->getOriginal()['link']))
+            return response()->json(['message' => 'No redirection link', 'body' => null], 400);
+
+        if(isset($material->getOriginal()['link'])){
+
+            $url = $material->getOriginal()['link'];
+
+            if(str_contains($material->getOriginal()['link'],'youtube') && $material->media_type != 'Link'){
+                if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i',$material->getOriginal()['link'], $match)){
+                    $url = 'https://www.youtube.com/embed/'.$match[1];
+                }
+            }
+            return redirect($url);
+        }
+        
     }
 
     /**

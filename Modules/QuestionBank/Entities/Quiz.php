@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class quiz extends Model
 {
-    protected $fillable = ['name','course_id','is_graded','duration','created_by' , 'Shuffle','feedback'];
+    protected $fillable = ['name','course_id','is_graded','duration','created_by' , 'shuffle','feedback'];
     protected $hidden = [
         'created_at', 'updated_at'
     ];
