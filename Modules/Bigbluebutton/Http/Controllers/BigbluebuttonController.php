@@ -485,8 +485,12 @@ class BigbluebuttonController extends Controller
             $url = $bbb->getJoinMeetingURL($joinMeetingParams);
         }
 
-        if($bigbb->type == 'Zoom' || $bigbb->type == 'teams'){
+        if($bigbb->type == 'Zoom' || $bigbb->type == 'teams')
             $url= BigbluebuttonModel::find($request->id)->join_url;
+
+        if($bigbb->type=='teams'){
+            $bigbb->started=1;
+            $bigbb->save();
         }
         
         $output = array(
