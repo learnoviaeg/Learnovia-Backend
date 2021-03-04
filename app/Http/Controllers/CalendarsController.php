@@ -82,16 +82,16 @@ class CalendarsController extends Controller
                                 $query->whereIn('item_id',$calendar['announcements'])->where('type','announcement')->orWhereIn('lesson_id',$calendar['lessons']);
                             })
                             ->where('visible',1)
-                            ->whereYear('start_date', $request->calendar_year)
+                            ->whereYear('publish_date', $request->calendar_year)
                             ->where(function ($query) {
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });
         
         if(isset($request->calendar_month))
-            $timeline->whereMonth('start_date', $request->calendar_month);
+            $timeline->whereMonth('publish_date', $request->calendar_month);
 
         if(isset($request->calendar_day))
-            $timeline->whereDay('start_date', $request->calendar_day);
+            $timeline->whereDay('publish_date', $request->calendar_day);
 
         return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->get()], 200);
     }
