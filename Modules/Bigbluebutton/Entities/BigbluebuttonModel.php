@@ -22,4 +22,17 @@ class BigbluebuttonModel extends Model
         $course = Course::find($this->course_id);
         return  isset($course)?$course->name:null;
     }
+
+    public function getStatusAttribute(){
+
+        if($this->attributes['status'] == 'past')
+            return __('messages.virtual.past');
+
+        if($this->attributes['status'] == 'current')
+            return __('messages.virtual.current');
+
+        if($this->attributes['status'] == 'future')
+            return __('messages.virtual.future');
+
+    }
 }
