@@ -68,7 +68,7 @@ class TimelineController extends Controller
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$lessons)
                             ->where('visible',1)
-                            ->where('start_date','<=',Carbon::now())
+                            ->where('publish_date','<=',Carbon::now())
                             ->where('due_date','>=',Carbon::now())
                             ->whereIn('type', ['quiz','assignment'])
                             ->where(function ($query) {
