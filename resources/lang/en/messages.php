@@ -200,6 +200,9 @@ return [
         'no_one_entered' => 'No one entered this virtual classroom',
         'virtual_hidden' => "This virtual classroom is hidden",
         'server_error' => 'Virtual classrooms is not available for now',
+        'current' => 'Current',
+        'past' => 'Past',
+        'future' => 'Future',
 
         'record' => [
             'list' => 'Virtual classrooms records list',
