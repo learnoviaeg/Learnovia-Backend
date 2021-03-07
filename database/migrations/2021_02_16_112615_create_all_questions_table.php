@@ -23,8 +23,6 @@ class CreateAllQuestionsTable extends Migration
             $table->foreign('q_cat_id')->references('id')->on('questions_categories')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->unsignedBigInteger('parent')->nullable();
-            $table->foreign('parent')->references('id')->on('questions')->onDelete('cascade')->onUpdate('cascade');
             $table->longText('text');
             $table->enum('type',['MCQ','Essay','T_F','Match','Comprehension']);
             $table->timestamps();
