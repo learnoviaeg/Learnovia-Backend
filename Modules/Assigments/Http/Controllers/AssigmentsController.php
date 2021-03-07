@@ -531,7 +531,7 @@ class AssigmentsController extends Controller
         ]);
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first(); 
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
-        if ($assilesson->mark < $request->grade) {
+        if ($assilesson->mark < round($request->grade,0)) {
             return HelperController::api_response_format(400, $body = [], $message = __('messages.error.grade_less_than') . $assilesson->mark);
         }
         if (isset($request->feedback)) {
