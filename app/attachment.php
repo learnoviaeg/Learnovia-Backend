@@ -23,7 +23,7 @@ class attachment extends Model
     {
         $attachment = new attachment;
         $singlefile = $file;
-        $extension = $singlefile->getClientOriginalExtension();
+        $extension = $singlefile->extension();
 
         $fileName = uniqid() . $singlefile->getClientOriginalName();
         $Name = $singlefile->getClientOriginalName();
