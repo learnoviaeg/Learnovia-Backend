@@ -485,7 +485,7 @@ class AssigmentsController extends Controller
             'user_id' => 'required|exists:user_assigments,user_id',
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'grade' => 'required|integer',
+            'grade' => 'required|number',
             'feedback' => 'string',
             'corrected_file' => 'file|distinct|mimes:pdf',
         ]);
@@ -498,7 +498,7 @@ class AssigmentsController extends Controller
 
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
         // $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
-        if ($assilesson->mark < $request->grade) {
+        if ($assilesson->mark < round($request->grade,0)) {
             return HelperController::api_response_format(400, $body = [], $message = __('messages.error.grade_less_than') . $assilesson->mark);
         }
         if (isset($request->feedback)) {
