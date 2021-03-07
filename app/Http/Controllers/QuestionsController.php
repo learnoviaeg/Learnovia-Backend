@@ -114,7 +114,8 @@ class QuestionsController extends Controller
 
         $questions=Questions::whereNotNull('id');
         foreach($questions->get() as $one){
-            $questions->with($one['type'].'_question');
+            if($one['type'] != 'Comprehension')
+                $questions->with($one['type'].'_question');
 
             if($one['type'] == 'MCQ')
                 $questions->with($one['type'].'_question.MCQ_Choices');
@@ -190,12 +191,21 @@ class QuestionsController extends Controller
             'Question' => 'required|array',
             'Question.*.type' => 'required|in:MCQ,Essay,T_F,Match,Comprehension', 
             'Question.*.text' => 'required|string', //need in every type_question
-            'Question.*.is_true' => 'required_if:Question.*.question_type,==,T_F|boolean', //for true-false
+            'Question.*.is_true' => 'required_if:Question.*.type,==,T_F|boolean', //for true-false
             'Question.*.and_why' => 'boolean', //if question t-f and have and_why question
             //MCQ validation
-            'Question.*.MCQ_Choices' => 'array',
-            'Question.*.MCQ_Choices.*.is_true' => 'boolean',
-            'Question.*.MCQ_Choices.*.content' => 'string'
+            'Question.*.MCQ_Choices' => 'required_if:Question.*.type,==,MCQ|array',
+            'Question.*.MCQ_Choices.*.is_true' => 'required_if:Question.*.type,==,MCQ|boolean',
+            'Question.*.MCQ_Choices.*.content' => 'required_if:Question.*.type,==,MCQ|string',
+            //Comprehension 
+            'Question.*.subQuestion' => 'array|required_if:Question.*.type,==,Comprehension',
+            'Question.*.subQuestion.*.type' => 'required_if:Question.*.type,==,Comprehension||in:MCQ,Essay,T_F,Match',
+            'Question.*.subQuestion.*.text' => 'required_if:Question.*.type,==,Comprehension||string',
+            'Question.*.subQuestion.*.is_true' => 'required_if:Question.*.subQuestion.*.type,==,T_F|boolean', //for true-false
+            'Question.*.subQuestion.*.and_why' => 'boolean', //if question t-f and have and_why question
+            'Question.*.subQuestion.*.MCQ_Choices' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|array',
+            'Question.*.subQuestion.*.MCQ_Choices.*.is_true' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|boolean',
+            'Question.*.subQuestion.*.MCQ_Choices.*.content' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|string',
         ]);
 
         foreach ($request->Question as $question) {
@@ -207,7 +217,14 @@ class QuestionsController extends Controller
                 'type' => $question['type']
             ]);
             $quests[]=$quest->id;
-            $q= $quest->{$question['type'].'_question'}()->create($question); //firstOrNew //insertOrIgnore
+            if($question['type'] == 'Comprehension'){
+                // return $question['subQuestion'];
+                foreach($question['subQuestion'] as $sub){
+                    $q= $quest->{$sub['type'].'_question'}()->create($sub); 
+                }
+            }
+            else
+                $q= $quest->{$question['type'].'_question'}()->create($question); //firstOrNew //insertOrIgnore doen't work
 
             if($question['type'] == 'MCQ')
                 foreach($question['MCQ_Choices'] as $choice)

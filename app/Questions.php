@@ -10,16 +10,21 @@ class Questions extends Model
 
     public function T_F_question()
     {
-        return $this->hasOne('App\Q_T_F','question_id','id');
+        return $this->hasMany('App\Q_T_F','question_id','id');
     }
 
     public function MCQ_question()
     {
-        return $this->hasOne('App\Q_MCQ','question_id','id');
+        return $this->hasMany('App\Q_MCQ','question_id','id');
     }
 
     public function Essay_question()
     {
-        return $this->hasOne('App\Q_Essay','question_id','id');
+        return $this->hasMany('App\Q_Essay','question_id','id');
     }
+
+    // public function Comprehension_question()
+    // {
+    //     return $this->hasMany('App\Questions', 'parent', 'id');
+    // }
 }
