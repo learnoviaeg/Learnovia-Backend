@@ -485,7 +485,7 @@ class AssigmentsController extends Controller
             'user_id' => 'required|exists:user_assigments,user_id',
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'grade' => 'required|number',
+            'grade' => 'required|numeric',
             'feedback' => 'string',
             'corrected_file' => 'file|distinct|mimes:pdf',
         ]);
