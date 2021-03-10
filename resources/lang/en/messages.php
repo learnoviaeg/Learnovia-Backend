@@ -85,6 +85,7 @@ return [
         'delete' => 'Questions category deleted successfully',
         'list' => 'Questions categories List',
         'category_cannot_deleted' => 'This category has related questions, cannot be deleted',
+        'cannot_deleted' => 'you can\'t delete this category',
     ],
     'quiz' => [
         'add' => 'Quiz added successfully',
