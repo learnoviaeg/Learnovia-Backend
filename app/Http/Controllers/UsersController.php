@@ -163,6 +163,9 @@ class UsersController extends Controller
                 $users_lastaction->whereBetween('created_at', [$request->from, $request->to]);
             
             $since = 10;
+            if($my_chain == 'in_active')
+                $since = 59;
+
             if($request->filled('since'))
                 $since = $request->since;
 
