@@ -23,8 +23,8 @@ class Questions extends Model
         return $this->hasMany('App\Q_Essay','question_id','id');
     }
 
-    public function Comprehension_question()
-    {
-        return $this->hasMany('App\Questions', 'id');
-    }
+    // public function Comprehension_question()
+    // {
+    //     return $this->hasMany('App\Questions', 'id');
+    // }
 }

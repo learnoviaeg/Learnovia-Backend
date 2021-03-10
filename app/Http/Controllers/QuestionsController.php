@@ -53,12 +53,13 @@ class QuestionsController extends Controller
 
         $types=['MCQ','Essay','T_F'];
         // foreach($types as $one){
+            return $questions->get();
         foreach($questions->get() as $one){
-            // if($one['type'] != 'Comprehension')
+            if($one['type'] != 'Comprehension')
                 $questions->with($one['type'].'_question');
             // $questions->whereHas($one.'_question')->with($one.'_question');
-            // if($one == 'MCQ')
-            //     $questions->with($one['type'].'_question.MCQ_Choices');
+            if($one == 'MCQ')
+                $questions->with($one['type'].'_question.MCQ_Choices');
         }
         // return $questions->get();
 
