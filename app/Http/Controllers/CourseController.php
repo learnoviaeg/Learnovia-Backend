@@ -1120,14 +1120,14 @@ class CourseController extends Controller
                         'end_date' => $request->end_date,
                     ]);
 
-                    if ($request->filled('no_of_lessons')) {
+                    if ($request->filled('no_of_lessons')) 
                         $no_of_lessons = $request->no_of_lessons;
-                    }
+                    
                     for ($i = 1; $i <= $no_of_lessons; $i++) {
-                        $courseSegment = CourseSegment::find($course_Segment->id);
-                        $courseSegment->lessons()->create([
+                        Lesson::firstOrCreate([
                             'name' => 'Lesson ' . $i,
                             'index' => $i,
+                            'course_segment_id' => $course_Segment->id,
                         ]);
                     }
                     $gradeCat = GradeCategory::firstOrCreate([
