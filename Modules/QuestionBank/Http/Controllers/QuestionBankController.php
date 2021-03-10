@@ -294,7 +294,7 @@ class QuestionBankController extends Controller
         $valid = Validator::make($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             'Question_Category_id' => 'exists:questions_categories,id',
             // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'exists:courses,id',
@@ -338,7 +338,7 @@ class QuestionBankController extends Controller
         $valid = Validator::make($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             'Question_Category_id' => 'exists:questions_categories,id',
             // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'exists:courses,id',
@@ -384,7 +384,7 @@ class QuestionBankController extends Controller
             'text' => 'required|string',
             'answers.*' => 'required|boolean|distinct',
             'And_why' => 'integer|required',
-            'And_why_mark' => 'integer|min:0|required_if:And_why,==,1',
+            'And_why_mark' => 'min:0|required_if:And_why,==,1',
             'Is_True' => 'required|boolean',
             'survey' => 'boolean'
         ]);
@@ -606,7 +606,7 @@ class QuestionBankController extends Controller
     {
         $request->validate([
             'question_id' => 'required|integer|exists:questions,id',
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'integer|exists:questions_categories,id',
             'parent' => 'integer|exists:questions,id',
@@ -644,7 +644,7 @@ class QuestionBankController extends Controller
     public function updatesubQuestion($squestion, $parent=null,$Question_Type_id=null)
     {
         $validator = Validator::make($squestion->all(), [
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'integer|exists:questions_categories,id',
         ]);
@@ -683,7 +683,7 @@ class QuestionBankController extends Controller
             'answers.*' => 'required|boolean|distinct',
             'Is_True' => 'required|boolean',
             'And_why' => 'integer|required',
-            'And_why_mark' => 'integer|min:0|required_if:And_why,==,1'
+            'And_why_mark' => 'min:0|required_if:And_why,==,1'
         ]);
 
         if ($parent==null){
