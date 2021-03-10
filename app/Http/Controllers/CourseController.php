@@ -1130,8 +1130,9 @@ class CourseController extends Controller
                             'course_segment_id' => $course_Segment->id,
                         ]);
                     }
+                    $course=Course::find($request->course);
                     $gradeCat = GradeCategory::firstOrCreate([
-                        'name' => 'Course Total',
+                        'name' => $course->name . ' Total',
                         'course_segment_id' => $course_Segment->id,
                         'id_number' => $year_level->id
                     ]);
