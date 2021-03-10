@@ -230,7 +230,7 @@ class User extends Authenticatable
     public function getStatusAttribute() {
         $status = 'offline';
 
-        $active_user  = Log::where('user',$this->username)->where('created_at','>=' ,Carbon::now()->subMinutes(2))
+        $active_user  = Log::where('user',$this->username)->where('created_at','>=' ,Carbon::now()->subMinutes(1))
                                                               ->where('created_at','<=' ,Carbon::now())->first();
         if(isset($active_user))
             $status = 'online';
