@@ -162,12 +162,19 @@ class UsersController extends Controller
             if($request->filled('from') && $request->filled('to'))
                 $users_lastaction->whereBetween('created_at', [$request->from, $request->to]);
             
-            if($my_chain == 'in_active'){
-                $users_lastaction->where('created_at','<=' ,Carbon::now()->subHours(1));
-            }
-
+            $since = 10;
             if($request->filled('since'))
-                $users_lastaction->where('created_at','>=' ,Carbon::now()->subMinutes($request->since))->where('created_at','<=' ,Carbon::now());
+                $since = $request->since;
+
+            $users_lastaction->where('created_at','>=' ,Carbon::now()->subMinutes($since))->where('created_at','<=' ,Carbon::now());
+
+            if($my_chain == 'in_active'){
+                $active = $users_lastaction->pluck('user');  
+                $users_lastaction =Log::whereYear('created_at', $request->report_year)
+                                        ->whereIn('user',$enrolls->pluck('username'))->with('users')
+                                        ->where('created_at','<=' ,Carbon::now()->subHours(1))
+                                        ->whereNotIn('user',$active);
+            }    
 
             $users_lastaction = $users_lastaction->select('user')->distinct()->get()->pluck('users');
             
