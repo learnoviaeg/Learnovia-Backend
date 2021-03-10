@@ -85,6 +85,7 @@ return [
         'delete' => 'تم حذف قسم الأسئلة بنجاح',
         'list' => 'قائمة اقسام الأسئلة',
         'category_cannot_deleted' => 'هذا القسم لديه أسئلة ذات صلة ، لا يمكن حذفه',
+        // 'cannot_deleted' => 'you can\'t delete this category',
     ],
     'quiz' => [
         'add' => 'تم اضافة الاختبار بنجاح',

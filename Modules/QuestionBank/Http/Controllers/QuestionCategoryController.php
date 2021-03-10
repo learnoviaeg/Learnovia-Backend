@@ -168,7 +168,7 @@ class QuestionCategoryController extends Controller
         
         $check=$course_segment->courses[0]->name;
         if($check . ' Total' == $questioncat->name);
-            return HelperController::api_response_format(200, $questioncat, __('messages.question_category.category_cannot_deleted'));
+            return HelperController::api_response_format(200, $questioncat, __('messages.question_category.cannot_deleted'));
             
         $questioncat->delete();
         return HelperController::api_response_format(200, $questioncat, __('messages.question_category.delete'));
