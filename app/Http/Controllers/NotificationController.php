@@ -293,4 +293,17 @@ class NotificationController extends Controller
         
         return HelperController::api_response_format(200, 'token added Done');
     }
+
+    public function change_page()
+    {
+
+        $notify = DB::table('notifications')->get();
+
+        foreach($notify as $notify_object) {
+            $decoded_data= json_decode($notify_object->data, true);
+            if($decoded_data['type'] == 'Page')
+                $decoded_data['type']='page';
+        }
+        return 'done';
+    }
 }

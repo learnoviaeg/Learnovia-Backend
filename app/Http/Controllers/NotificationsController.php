@@ -43,7 +43,7 @@ class NotificationsController extends Controller
             {
                 $currentChild =User::find(Auth::user()->currentChild->child_id);
                 Auth::setUser($currentChild);
-        }
+            }
         }
 
         $notify = DB::table('notifications')->select('data','read_at','id')
