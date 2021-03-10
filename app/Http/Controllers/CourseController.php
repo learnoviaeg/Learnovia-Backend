@@ -159,7 +159,7 @@ class CourseController extends Controller
                                     'letter_id' => 1
                                 ]);
                                 $gradeCat = GradeCategory::firstOrCreate([
-                                    'name' => 'Course Total',
+                                    'name' => $request->name . ' Total',
                                     'course_segment_id' => $courseSegment->id,
                                     'id_number' => $yearlevel->id
                                 ]);
@@ -185,7 +185,7 @@ class CourseController extends Controller
 
         //Creating defult question category
         $quest_cat = QuestionsCategory::firstOrCreate([
-            'name' => 'Category one',
+            'name' => $request->name . ' Category',
             'course_id' => $course->id,
             'course_segment_id' => $course_segment_id
         ]);
