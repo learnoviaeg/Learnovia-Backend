@@ -80,6 +80,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::get('delete-duration', 'NotificationController@DeletewithTime')->name('readnotification')->middleware('permission:notifications/delete-duration');
         Route::post('seen', 'NotificationController@SeenNotifications')->name('seennotification')->middleware('permission:notifications/seen');
         Route::post('token', 'NotificationController@Notification_token')->name('tokennotification');
+        Route::post('change-page', 'NotificationController@change_page');
     });
 
     //Announcements Routes
