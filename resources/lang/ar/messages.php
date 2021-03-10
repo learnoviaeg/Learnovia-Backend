@@ -294,11 +294,11 @@ return [
         'zoom_account' => 'ليس لدى المستخدم حساب على زوم',
         'Invalid' => 'الكود غير فعال',
     ],
-    'status' => [
-        'submitted' => 'تم التسليم',
-        'not_submitted' => 'لم يتم التسليم',
-        'graded' => 'مصحح',
-        'not_graded' => 'غير مصحح',
-        'no_answers' => 'لا توجد إجابات',
-    ],
+    // 'status' => [
+    //     // 'submitted' => 'تم التسليم',
+    //     // 'not_submitted' => 'لم يتم التسليم',
+    //     // 'graded' => 'مصحح',
+    //     // 'not_graded' => 'غير مصحح',
+    //     // 'no_answers' => 'لا توجد إجابات',
+    // ],
 ];
