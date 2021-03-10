@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
+use App\Questions;
 use App\Classes;
 use App\Course;
 use App\Level;
@@ -86,6 +87,17 @@ class QuizzesController extends Controller
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
             $quiz['level'] = Level::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            $questions=Questions::whereIn('id',$quiz->Question->pluck('id'));
+            foreach($questions->get() as $one){
+                if($one['type'] != 'Comprehension')
+                    $questions->with($one['type'].'_question');
+    
+                if($one['type'] == 'MCQ')
+                    $questions->with($one['type'].'_question.MCQ_Choices');
+                
+                // $quiz['Questions']=$one->get();
+            }
+            $quiz['Question']=$questions->get();
             unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
@@ -105,6 +117,7 @@ class QuizzesController extends Controller
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
             'type' => 'required|in:0,1,2',
+            // 'lesson_id' => 'exists:lessons,id',
             /**
              * type 0 => Old Question
              * type 1 => New Questions
@@ -190,7 +203,16 @@ class QuizzesController extends Controller
         $quiz = quiz::find($id);
 
         if(isset($quiz)){
+            $quiz_lesson=QuizLesson::where('quiz_id',$quiz->id)->first();
+            $quiz->with('course');
+            $quiz->quizlesson = $quiz_lesson;
+            $quiz->lesson= Lesson::find($quiz_lesson->lesson_id);
+            $quiz->class = Classes::find($quiz->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
+            $quiz->level = Level::find($quiz->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
+            unset($quiz->lesson->courseSegment);
+            
             LastAction::lastActionInCourse($quiz->course_id);
+            
             return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
         }
 

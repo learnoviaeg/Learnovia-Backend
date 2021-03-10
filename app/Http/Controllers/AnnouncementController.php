@@ -622,7 +622,8 @@ class AnnouncementController extends Controller
     public function My_announc(Request $request)
     {
         $my = Announcement::where('created_by',Auth::id())->whereHas('UserAnnouncement');
-           if($request->filled('search')){
+        
+        if($request->filled('search')){
             $my->where(function ($query) use ($request) {
                 $query->where('title', 'LIKE' , "%$request->search%");
             });

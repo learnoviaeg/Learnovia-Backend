@@ -13,7 +13,7 @@ class quiz extends Model
 
     public function Question()
     {
-        return $this->belongsToMany('Modules\QuestionBank\Entities\Questions', 'quiz_questions', 'quiz_id', 'question_id');
+        return $this->belongsToMany('App\Questions', 'quiz_questions', 'quiz_id', 'question_id');
     }
     public function Lesson()
     {
