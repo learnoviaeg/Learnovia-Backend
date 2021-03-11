@@ -358,6 +358,7 @@ class UserQuizController extends Controller
             }
             
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
+            $user_quiz->save();
         }
 
         return HelperController::api_response_format(200, $allData, __('messages.success.submit_success'));
