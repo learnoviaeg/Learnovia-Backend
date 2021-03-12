@@ -14,10 +14,16 @@ use Illuminate\Http\Request;
 Route::get('h5p_protect', function(Request $request)
 {   
     $data = explode('/',request()->data);
-     $video_name = $data[count($data) - 1];
-     $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
-     $stream =  new \App\VideoStream($filePath);
-     $stream->start();
+    $video_name = $data[count($data) - 1];
+
+    if(str_contains($data,'images'))
+        $filePath =ltrim( Storage::url('images/'.$video_name), '/');
+        
+    if(!str_contains($data,'images'))
+        $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
+        
+    $stream =  new \App\VideoStream($filePath);
+    $stream->start();
 
 })->name('h5p_protect');
 Route::resource('h5p', "H5pController");
