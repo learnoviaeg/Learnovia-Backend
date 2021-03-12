@@ -16,12 +16,11 @@ Route::get('h5p_protect', function(Request $request)
     $data = explode('/',request()->data);
     $video_name = $data[count($data) - 1];
 
-    if(str_contains($data,'images'))
+    if(str_contains($video_name,'jpg') || str_contains($video_name,'jpeg') || str_contains($video_name,'png'))
         $filePath =ltrim( Storage::url('images/'.$video_name), '/');
-        
-    if(!str_contains($data,'images'))
+    else
         $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
-        
+
     $stream =  new \App\VideoStream($filePath);
     $stream->start();
 
