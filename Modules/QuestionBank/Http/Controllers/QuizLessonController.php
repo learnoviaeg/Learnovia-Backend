@@ -40,7 +40,7 @@ class QuizLessonController extends Controller
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
-            'grade' => 'required|integer|min:1',
+            'grade' => 'required|numeric|min:1',
             'graded' => 'required|boolean',
             'grade_category_id' => 'array|required_if:graded,==,1',
             'grade_category_id.*' => 'exists:grade_categories,id',
@@ -163,7 +163,7 @@ class QuizLessonController extends Controller
             'closing_time' => 'date|after:opening_time',
             'max_attemp' => 'integer|min:1',
             'grading_method_id' => 'integer',
-            'grade' => 'integer',
+            'grade' => 'numeric',
             // 'grade_category_id' => 'required|integer|exists:grade_categories,id'
             'updated_lesson_id' =>'nullable|exists:lessons,id',
             'visible'=>'in:0,1'
