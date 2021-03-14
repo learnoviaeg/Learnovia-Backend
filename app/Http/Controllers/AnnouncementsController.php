@@ -113,7 +113,7 @@ class AnnouncementsController extends Controller
             'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
-            'publish_date' => 'nullable|date|before_or_equal:start_date',
+            'publish_date' => 'nullable|date',
             'chains' => 'required|array',
             'chains.*.roles' => 'array',
             'chains.*.roles.*' => 'exists:roles,id',
@@ -124,6 +124,12 @@ class AnnouncementsController extends Controller
             'chains.*.segment' => ['exists:segments,id',Rule::requiredIf($chain_filter === 1)],
             'chains.*.course' => ['exists:courses,id',Rule::requiredIf($chain_filter === 1)]
         ]);
+
+        if($request->has('start_date') && $request->has('publish_date')){
+            $request->validate([
+                'publish_date' => 'before_or_equal:start_date',
+            ]);
+        }
 
         $publish_date = Carbon::now()->format('Y-m-d H:i:s');
         if($request->has('publish_date') && $request->publish_date >= Carbon::now()){
