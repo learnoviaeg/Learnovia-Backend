@@ -47,8 +47,12 @@ class QuizLessonController extends Controller
             'grade_min' => 'integer',
             'grade_max' => 'integer',
             'grade_to_pass' => 'integer',
-            'visible'=>"in:1,0"
+            'visible'=>"in:1,0",
+            'publish_date' => 'date|before_or_equal:opening_time'
         ]);
+
+        if(!$request->has('publish_date'))
+            $request['publish_date'] = $request->opening_time;
 
         $quiz = quiz::find($request->quiz_id);
         // $users=Enroll::where('course_segment',$quiz->course_id)->where('role_id',3)->pluck('user_id')->toArray();
@@ -103,7 +107,7 @@ class QuizLessonController extends Controller
                 'grading_method_id' => $request->grading_method_id,
                 'grade' => $request->grade,
                 'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id[$key] : null,
-                'publish_date' => $request->opening_time,
+                'publish_date' => $request->publish_date,
                 'index' => $Next_index,
                 'visible' => isset($request->visible)?$request->visible:1
             ]);
@@ -113,7 +117,7 @@ class QuizLessonController extends Controller
                 'id' => $request->quiz_id,
                 'users' => $users,
                 'type' =>'quiz',
-                'publish_date'=> Carbon::parse($request->opening_time),
+                'publish_date'=> Carbon::parse($request->publish_date),
                 'course_id' => $course,
                 'class_id'=> $class,
                 'lesson_id'=> $lessons,
@@ -166,13 +170,17 @@ class QuizLessonController extends Controller
             'grade' => 'numeric',
             // 'grade_category_id' => 'required|integer|exists:grade_categories,id'
             'updated_lesson_id' =>'nullable|exists:lessons,id',
-            'visible'=>'in:0,1'
-
+            'visible'=>'in:0,1',
+            'publish_date' => 'date|before_or_equal:opening_time'
         ]);
 
-        $start=Carbon::now();
-        if($request->filled('opening_time'))
+        if($request->filled('opening_time')){
             $start= $request->opening_time;
+        }
+
+        if($request->filled('publish_date')){
+            $publish = $request->publish_date;
+        }
 
         $quiz = quiz::find($request->quiz_id);
         $lesson_drag = Lesson::find($request->lesson_id);
@@ -228,16 +236,21 @@ class QuizLessonController extends Controller
         $quizLesson->update([
             'quiz_id' => $request->quiz_id,
             'lesson_id' => $request->updated_lesson_id,
-            'start_date' => $start,
-            'publish_date' => $start,
         ]);
+
+        if(isset($start))
+            $quizLesson->update(['start_date' => $start]);
+
+        if(isset($publish))
+            $quizLesson->update(['publish_date' => $publish]);
+
         //for notification
         $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
         $course = $lesson->courseSegment->course_id;
         LastAction::lastActionInCourse($course);
 
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        if(carbon::parse($start)->isPast())
+        if(carbon::parse($quizLesson->publish_date)->isPast())
             $publish_date=Carbon::now();
         $requ = ([
             'message' => $quiz->name . ' quiz is updated',
