@@ -107,7 +107,8 @@ class NotificationController extends Controller
                         $data[$i]['item_lesson_id'] = FileLesson::where('file_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
                     if($not->data['type'] == 'media')
                         $data[$i]['item_lesson_id'] = MediaLesson::where('media_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
-                    if($not->data['type'] == 'Page')
+                    //page is new from notification >>> Page is old if there is old database for any school
+                    if($not->data['type'] == 'page' || $not->data['type'] == 'Page') 
                         $data[$i]['item_lesson_id'] = pageLesson::where('page_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
                     if($not->data['type'] == 'meeting')
                         $data[$i]['item_lesson_id'] = BigbluebuttonModel::where('id', $not->data['id'])->pluck('id')->first();
@@ -292,18 +293,5 @@ class NotificationController extends Controller
         $user->save();
         
         return HelperController::api_response_format(200, 'token added Done');
-    }
-
-    public function change_page()
-    {
-
-        $notify = DB::table('notifications')->get();
-
-        foreach($notify as $notify_object) {
-            $decoded_data= json_decode($notify_object->data, true);
-            if($decoded_data['type'] == 'Page')
-                $decoded_data['type']='page';
-        }
-        return 'done';
     }
 }
