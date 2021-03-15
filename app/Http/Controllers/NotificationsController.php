@@ -62,15 +62,14 @@ class NotificationsController extends Controller
                 'notification_id' => $notify_object->id,
                 'message' => $decoded_data['message'],
                 'publish_date' => Carbon::parse($decoded_data['publish_date'])->format('Y-m-d H:i:s'),
-                'type' => ($decoded_data['type']=='Page') ? 'page' : $decoded_data['type'],
+                'type' => $decoded_data['type'],
                 'course_id' => isset($decoded_data['course_id']) ? $decoded_data['course_id'] : null ,
                 'class_id' => isset($decoded_data['class_id']) ? $decoded_data['class_id'] : null,
                 'lesson_id'  => isset($decoded_data['lesson_id']) ? $decoded_data['lesson_id'] : null,
                 'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
                 'course_name' => isset($decoded_data['course_name'])?$decoded_data['course_name']:null,
             ]);
-            //page is new from notification >>> Page is old if there is old database for any school
-            if($decoded_data['type']=='Page' || $decoded_data['type']=='page') 
+            if($decoded_data['type']=='Page') 
                 $notifications_types->push('page');
             else
                 $notifications_types->push($decoded_data['type']);

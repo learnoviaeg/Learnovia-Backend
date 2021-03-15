@@ -107,8 +107,7 @@ class NotificationController extends Controller
                         $data[$i]['item_lesson_id'] = FileLesson::where('file_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
                     if($not->data['type'] == 'media')
                         $data[$i]['item_lesson_id'] = MediaLesson::where('media_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
-                    //page is new from notification >>> Page is old if there is old database for any school
-                    if($not->data['type'] == 'page' || $not->data['type'] == 'Page') 
+                    if($not->data['type'] == 'Page') 
                         $data[$i]['item_lesson_id'] = pageLesson::where('page_id',$not->data['id'])->where('lesson_id',$not->data['lesson_id'])->pluck('id')->first();
                     if($not->data['type'] == 'meeting')
                         $data[$i]['item_lesson_id'] = BigbluebuttonModel::where('id', $not->data['id'])->pluck('id')->first();

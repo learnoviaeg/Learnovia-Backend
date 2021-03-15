@@ -122,7 +122,7 @@ class PageController extends Controller
                 'course_id' => $TempLesson->courseSegment->courses[0]->id,
                 'class_id' => $TempLesson->courseSegment->segmentClasses[0]->classLevel[0]->classes[0]->id,
                 'lesson_id' => $lesson,
-                'type' => 'page',
+                'type' => 'Page',
                 'link' => url(route('getPage')) . '?id=' . $page->id,
                 'publish_date' => $publishdate,
             ]);
@@ -208,7 +208,7 @@ class PageController extends Controller
             'course_id' => $lesson->courseSegment->courses[0]->id,
             'class_id' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->classes[0]->id,
             'lesson_id' => $request->updated_lesson_id,
-            'type' => 'page',
+            'type' => 'Page',
             'link' => url(route('getPage')) . '?id=' . $request->id,
             'publish_date' => Carbon::now()
         ]);
