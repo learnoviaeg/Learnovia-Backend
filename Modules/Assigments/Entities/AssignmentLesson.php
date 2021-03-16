@@ -12,7 +12,7 @@ class AssignmentLesson extends Model
 {
     protected $fillable = ['assignment_id','lesson_id','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment','seen_number'];
 
-    protected $appends = ['started','user_seen_number'];
+    protected $appends = ['started','user_seen_number','Status'];
 
     public function getStartedAttribute(){
         $started = true;
