@@ -36,6 +36,34 @@ class AssignmentLesson extends Model
         return $user_seen;  
     }
 
+    public function getStatusAttribute(){
+
+        //student statuses
+        if(Auth::user()->can('site/course/student')){
+            $status = __('messages.status.not_submitted');
+
+            $user_assigment = UserAssigment::where('assignment_lesson_id', $this->id)->where('user_id',Auth::id())->whereNotNull('submit_date')->first();
+            if(isset($user_assigment)){
+                $status = __('messages.status.submitted');//submitted
+                if(isset($user_assigment->grade))
+                    $status = __('messages.status.graded');//graded
+            }
+        }
+
+        if(!Auth::user()->can('site/course/student')){
+            $status = __('messages.status.no_answers');
+
+            $user_assigment = UserAssigment::where('assignment_lesson_id', $this->id)->whereNotNull('submit_date')->pluck('grade');
+            if(count($user_assigment) > 0)
+                $status = __('messages.status.not_graded');//not_graded
+
+            if(count($user_assigment) > 0 && !in_array(NULL,$user_assigment->toArray(),true))
+                $status = __('messages.status.graded');//graded
+        }
+
+        return $status;
+    }
+
     public function Assignment()
     {
         return $this->hasMany('Modules\Assigments\Entities\assignment', 'id', 'assignment_id');
