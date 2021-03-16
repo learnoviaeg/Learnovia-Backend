@@ -10,6 +10,7 @@ use Modules\QuestionBank\Entities\QuizLesson;
 use App\Repositories\ChainRepositoryInterface;
 use DB;
 use App\Paginate;
+use Auth;
 use App\Enroll;
 use App\Lesson;
 use App\UserSeen;
