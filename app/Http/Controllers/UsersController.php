@@ -98,12 +98,10 @@ class UsersController extends Controller
         
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
-
             if(!$request->user()->can('site/show-all-courses')) //student
                 $enrolls=$enrolls->where('user_id',Auth::id());
 
             $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
-            // return $enrolls->get();
             if($request->user()->can('site/course/student'))
                 $enrolls->where('role_id','!=',7);
         }
@@ -130,7 +128,6 @@ class UsersController extends Controller
             });
         }
 
-        
         //using in active user api new route { api/user/active} && { api/user/in_active}
         if($my_chain == 'active' || $my_chain == 'in_active'){
 

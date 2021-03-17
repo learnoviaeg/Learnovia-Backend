@@ -44,6 +44,7 @@ class SeenReportController extends Controller
             'level' => 'exists:levels,id',
             'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
+            'role'    => 'array|exists:roles,id',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'item_type' => 'string|in:page,media,file,quiz,assignment,h5p',
             'class' => 'nullable|integer|exists:classes,id',
@@ -55,6 +56,9 @@ class SeenReportController extends Controller
 
         
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+
+        if($request->filled('role'))
+            $user_course_segments->whereIn('role',$request->role);
 
         if(!$request->user()->can('site/show-all-courses'))//student
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
