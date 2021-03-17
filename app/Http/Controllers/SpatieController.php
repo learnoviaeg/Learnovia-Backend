@@ -182,6 +182,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/export', 'title' => 'export courses']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/teachers', 'title' => 'view course teachers']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/participants', 'title' => 'view course participants']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/progress-bar', 'title' => 'view course progress bar']);
 
             //Enroll Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/user', 'title' => 'Staff Enrollment' , 'dashboard' => 1, 'icon' => 'Star']);
@@ -424,7 +425,7 @@ class SpatieController extends Controller
                 'grade/category/get-gradecategories','grade/item/add','grade/item/get','grade/item/delete','grade/item/update','grade/user/add','grade/user/get','grade/user/update',
                 'grade/user/delete','grade/report/grader','grade/report/user','grade/report/over-all','scale/add','scale/update','scale/delete','scale/get','scale/get-with-course',
                 'letter/add','letter/update','letter/delete','letter/get','letter/assign','site/user/search-all-users','site/course/teacher','chat/add-room','timeline/get','material/get',
-                'course/teachers','course/participants','notifications/send','site/show/as-participant'
+                'course/teachers','course/participants','notifications/send','site/show/as-participant','course/progress-bar'
             ];
             $student_permissions=['notifications/get-all','notifications/get-unread','notifications/mark-as-read','notifications/seen','year/get-all','year/get-my-years',
             'type/get-all','type/get-my-types','level/get-my-levels','class/get-all','class/get-my-classes','class/get','class/get-lessons','segment/get-all','segment/get',
