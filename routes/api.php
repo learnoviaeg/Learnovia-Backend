@@ -468,6 +468,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('enroll', EnrollController::class);
     Route::Resource('calendars', CalendarsController::class);
     Route::Resource('overall_seen', SeenReportController::class);
+    Route::get('seen/{my_chain}', 'SeenReportController@index')->middleware('permission:reports/overall_seen_report');
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
