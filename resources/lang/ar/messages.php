@@ -302,4 +302,8 @@ return [
     //     // 'not_graded' => 'غير مصحح',
     //     // 'no_answers' => 'لا توجد إجابات',
     // ],
+
+    // 'chat' => [
+    //     'chat_error' => 'there is no chat token for this user'
+    // ]
 ];

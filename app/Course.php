@@ -28,6 +28,7 @@ class Course extends Model
     protected $hidden = [
         'created_at', 'updated_at',
     ];
+
     public function category(){
         return $this->belongsTo('App\Category');
     }
@@ -54,4 +55,9 @@ class Course extends Model
     {
         return $this->hasMany('App\Timeline','course_id','id');
     }
+
+    // public function classes()
+    // {
+    //     $this->courseSegments
+    // }
 }

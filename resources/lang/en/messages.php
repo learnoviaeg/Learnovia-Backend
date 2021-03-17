@@ -302,4 +302,7 @@ return [
         'not_graded' => 'Not graded',
         'no_answers' => 'No answers',
     ],
+    'chat' => [
+        'chat_error' => 'there is no chat token for this user'
+    ]
 ];

@@ -193,14 +193,12 @@ class CoursesController extends Controller
      */
     public function show($id)
     {
-        $course = Course::with('attachment')->find($id);
-
-        if(isset($course)){
-            LastAction::lastActionInCourse($id);
-            return response()->json(['message' => __('messages.course.object'), 'body' => $course], 200);
-        }
-    return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
-}
+        $course = Course::with('attachment')->findOrFail($id);
+        // $course->class=$course->courseSegments[0]->segmentClasses;
+        
+        LastAction::lastActionInCourse($id);
+        return response()->json(['message' => __('messages.course.object'), 'body' => $course], 200);        
+    }
 
     /**
      * Update the specified resource in storage.

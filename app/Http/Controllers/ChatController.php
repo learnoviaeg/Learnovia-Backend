@@ -21,8 +21,10 @@ class ChatController extends Controller
         $participants_chat_id = collect();
         foreach($request->participants as $participant){
             $chat_uid = User::whereId($participant)->pluck('chat_uid')->first();
-            if(isset($chat_uid))
-                $participants_chat_id->push($chat_uid);
+            if(!isset($chat_uid))
+                return response()->json(['message' => __('messages.chat.chat_error'), 'body' => $participant], 200);
+
+            $participants_chat_id->push($chat_uid);
         }
 
         $clientt = new Client();
