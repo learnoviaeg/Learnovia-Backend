@@ -44,7 +44,7 @@ class SeenReportController extends Controller
             'level' => 'exists:levels,id',
             'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
-            'role'    => 'array|exists:roles',
+            'role'    => 'array|exists:roles,id',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'item_type' => 'string|in:page,media,file,quiz,assignment,h5p',
             'class' => 'nullable|integer|exists:classes,id',
