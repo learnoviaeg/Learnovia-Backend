@@ -36,7 +36,7 @@ class SeenReportController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$option = null)
     {
         $request->validate([
             'year' => 'exists:academic_years,id',
@@ -211,6 +211,14 @@ class SeenReportController extends Controller
 
         if($request->filled('times'))
             $report = $report->where('seen_number',$request->times)->values();
+
+        if($option == 'chart'){
+            $total = count($report);
+            $sum_percentage = array_sum($report->pluck('percentage')->toArray());
+            $final_percentage = round($sum_percentage/$total,1);
+
+            return response()->json(['message' => 'Total Percentage', 'body' => $final_percentage], 200);
+        }
 
         return response()->json(['message' => 'Overall seen report', 'body' => $report->paginate(Paginate::GetPaginate($request))], 200);
     }
