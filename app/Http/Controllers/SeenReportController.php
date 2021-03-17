@@ -58,7 +58,7 @@ class SeenReportController extends Controller
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
 
         if($request->filled('role'))
-            $user_course_segments->whereIn('role',$request->role);
+            $user_course_segments->whereIn('role_id',$request->role);
 
         if(!$request->user()->can('site/show-all-courses'))//student
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
