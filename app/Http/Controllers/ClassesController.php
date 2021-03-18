@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
-use App\Enroll;
+use App\SegmentClass;
 
 class ClassesController extends Controller
 {
@@ -38,13 +38,15 @@ class ClassesController extends Controller
 
         if($option == 'all'){
             $year_types = $this->chain->getAllByChainRelation($request);
+
             $course_segments =  collect($year_types->get()->pluck('YearType.*.yearLevel.*.classLevels.*.segmentClass.*.courseSegment.*')[0]);
-            $enrolls = Enroll::whereIn('course_segment',$course_segments->pluck('id'));
+           
+            $classes = SegmentClass::with('classLevel.classes')->whereIn('id',$course_segments->pluck('segment_class_id'))->get()->pluck('classLevel.*.classes.*')->collapse();
+
+            return response()->json(['message' => __('messages.class.list'), 'body' => $classes], 200);
         }
 
-        if($option == null){
-            $enrolls = $this->chain->getCourseSegmentByChain($request);
-        }
+        $enrolls = $this->chain->getCourseSegmentByChain($request);
 
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
             $enrolls->where('user_id',Auth::id());
