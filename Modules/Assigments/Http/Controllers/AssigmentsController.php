@@ -267,7 +267,7 @@ class AssigmentsController extends Controller
     {
         $request->validate([
             'is_graded' => 'boolean',
-            'mark' => 'numeric',
+            'mark' => 'numeric|min:0',
             'lesson_id' => 'required|integer|exists:lessons,id',
             'assignment_id' => 'required|exists:assignments,id',
             'allow_attachment' => 'integer|min:0|max:3',
@@ -789,7 +789,7 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'is_graded' => 'required|boolean',
-            'mark' => 'required|numeric',
+            'mark' => 'required|numeric|min:0',
             'allow_attachment' => 'required|integer|min:0|max:3',
             'publish_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
