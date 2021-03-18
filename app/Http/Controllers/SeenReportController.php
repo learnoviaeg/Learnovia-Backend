@@ -47,7 +47,8 @@ class SeenReportController extends Controller
             'courses'    => 'nullable|array',
             'role'    => 'array|exists:roles,id',
             'courses.*'  => 'nullable|integer|exists:courses,id',
-            'item_type' => 'string|in:page,media,file,quiz,assignment,h5p',
+            'item_type' => 'array',
+            'item_type.*' => 'string|in:page,media,file,quiz,assignment,h5p',
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id',
             'times' => 'integer',
@@ -102,7 +103,7 @@ class SeenReportController extends Controller
 
         $report = collect();
 
-        if(!$request->filled('item_type') || $request->item_type == 'assignment'){
+        if(!$request->filled('item_type') || in_array('assignment',$request->item_type)){
             //get the assignments and map them
             $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->with('Assignment');
             
@@ -131,7 +132,7 @@ class SeenReportController extends Controller
         }
 
 
-        if(!$request->filled('item_type') || $request->item_type == 'quiz'){
+        if(!$request->filled('item_type') || in_array('quiz',$request->item_type)){
             //get the quizzes and map them
             $quizzes = QuizLesson::whereIn('lesson_id',$lessons)->with('quiz');
             
@@ -158,7 +159,7 @@ class SeenReportController extends Controller
             });
         }
 
-        if(!$request->filled('item_type') || $request->item_type == 'h5p'){
+        if(!$request->filled('item_type') || in_array('h5p',$request->item_type)){
             //get the h5p and map them
             $contents = h5pLesson::whereIn('lesson_id',$lessons);
             
@@ -185,12 +186,12 @@ class SeenReportController extends Controller
             });
         }
 
-        if(!$request->filled('item_type') || in_array($request->item_type,['file','media','page'])){
+        if(!$request->filled('item_type') || in_array('file',$request->item_type) || in_array('media',$request->item_type) || in_array('page',$request->item_type)){
             //get the materials and map them
             $materials = Material::whereIn('lesson_id',$lessons);
 
             if($request->filled('item_type'))
-                $materials->where('type',$request->item_type);
+                $materials->whereIn('type',$request->item_type);
 
             if($request->filled('from') && $request->filled('to'))
                 $materials->whereIn('item_id',$items_only->whereIn('type',['file','media','page'])->pluck('item_id'));
