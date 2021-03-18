@@ -199,7 +199,7 @@ class UsersController extends Controller
             return response()->json(['message' => $my_chain.' users list ', 'body' => $users_lastaction], 200);
         }
 
-        if($my_chain == 'seen_report'){
+        if($my_chain == 'seen_report' || $my_chain == 'seen_report_chart'){
 
             if(!$request->user()->can('reports/seen_report'))
                 return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
@@ -238,6 +238,14 @@ class UsersController extends Controller
                 $enrolls = $enrolls->where('seen_count',$request->times)->values();
             }
 
+            if($my_chain == 'seen_report_chart'){
+
+                $seen_users = count($enrolls->where('status','yes'));
+                $total = count($enrolls);
+                $percentage = round($seen_users/$total,1);
+                return response()->json(['message' => 'Seen percentage', 'body' => $percentage  ], 200);
+                
+            }
         }
 
         return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
