@@ -20,6 +20,7 @@ use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\QuestionsType;
 use App\Component;
 use App\LastAction;
+use Modules\QuestionBank\Entities\QuestionAnswer;
 
 class QuestionBankController extends Controller
 {
