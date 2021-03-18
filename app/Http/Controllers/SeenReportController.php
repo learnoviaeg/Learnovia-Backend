@@ -85,7 +85,7 @@ class SeenReportController extends Controller
 
         $lessons_object->map(function ($lesson) use ($lessons_enrolls) {
 
-            $total = count(Enroll::where('course_segment',$lesson->course_segment_id)->select('user_id')->distinct()->get());
+            $total = count(Enroll::where('course_segment',$lesson->course_segment_id)->where('role_id',3)->select('user_id')->distinct()->get());
 
             $lessons_enrolls->push([
                 'lesson_id' => $lesson->id,
