@@ -47,16 +47,16 @@ class UsersController extends Controller
             'type' => 'exists:academic_types,id',
             'level' => 'exists:levels,id',
             'segment' => 'exists:segments,id',
-            'courses' => 'array',
+            'courses' => ['array',Rule::requiredIf($my_chain === 'seen_report' || $my_chain === 'seen_report_chart')],
             'courses.*' => 'exists:courses,id',
-            'class' => 'exists:classes,id',
+            'class' => ['exists:classes,id',Rule::requiredIf($my_chain === 'seen_report' || $my_chain === 'seen_report_chart')],
             'roles' => 'array',
             'roles.*' => 'exists:roles,id',
             'search' => 'string',
-            'item_type' => ['string','in:page,file,media,assignment,quiz,meeting,h5p','required_with:item_id',Rule::requiredIf($my_chain === 'seen_report')],
-            'lesson_id' => 'exists:lessons,id',
+            'item_type' => ['string','in:page,file,media,assignment,quiz,meeting,h5p','required_with:item_id',Rule::requiredIf($my_chain === 'seen_report' || $my_chain === 'seen_report_chart')],
+            'lesson_id' => ['exists:lessons,id',Rule::requiredIf($my_chain === 'seen_report' || $my_chain === 'seen_report_chart')],
             'view_status' => 'in:yes,no',
-            'item_id' => ['integer',Rule::requiredIf($my_chain === 'seen_report')],
+            'item_id' => ['integer',Rule::requiredIf($my_chain === 'seen_report' || $my_chain === 'seen_report_chart')],
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
             'times' => 'integer',
@@ -240,9 +240,9 @@ class UsersController extends Controller
 
             if($my_chain == 'seen_report_chart'){
 
-                $seen_users = count($enrolls->where('status','yes'));
+                $seen_users = count($enrolls->where('seen','yes'));
                 $total = count($enrolls);
-                $percentage = round($seen_users/$total,1);
+                $percentage = round(($seen_users/$total)*100,1);
                 return response()->json(['message' => 'Seen percentage', 'body' => $percentage  ], 200);
                 
             }
