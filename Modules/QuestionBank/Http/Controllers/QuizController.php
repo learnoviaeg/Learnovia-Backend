@@ -943,10 +943,10 @@ class QuizController extends Controller
                 $user_Quiz  =  $request->attempt_index;
         }
 
-        $quiz['status']='graded';
+        $quiz['status_grade']='true';
         $usr_grd=UserQuizAnswer::where('user_quiz_id',$user_Quiz)->whereNull('user_grade')->first();
         if(isset($usr_grd))
-            $quiz['status']='not_graded';
+            $quiz['status_grade']='false';
 
         $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz)->get();
         if(count($user_answer)>0)
