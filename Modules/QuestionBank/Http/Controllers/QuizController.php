@@ -937,15 +937,20 @@ class QuizController extends Controller
             default : //last attemp when method average
                 $user_Quiz= max($user_quizzes);
         }
-        if($request->filled('attempt_index'))
-            {
+        if($request->filled('attempt_index')){
             $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->pluck('id');
             if(isset($user_quizzes))
                 $user_Quiz  =  $request->attempt_index;
-            }
+        }
+
+        $quiz['status']='graded';
+        $usr_grd=UserQuizAnswer::where('user_quiz_id',$user_Quiz)->whereNull('user_grade')->first();
+        if(isset($usr_grd))
+            $quiz['status']='not_graded';
+
         $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz)->get();
-            if(count($user_answer)>0)
-                $userAnswers=$user_answer;
+        if(count($user_answer)>0)
+            $userAnswers=$user_answer;
         
         // return $userAnswers;
         // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
