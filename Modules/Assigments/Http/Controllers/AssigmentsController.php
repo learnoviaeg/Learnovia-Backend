@@ -961,20 +961,28 @@ class AssigmentsController extends Controller
         }
 
         if($request->filled('content')){
-            // return $request->content;
-            $url = substr($request->content, 0, strpos($request->content, "<img"));
-            return str_replace('alt=""', '<img style="padding-bottom:50%;padding-top:50%;', $request->content );
-            // if(str_contains($request->content , '<img'))
-            //     return 'yes';
+            
+            $chars = preg_split('/<[^img>]*[^\/]>/i', $request->content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+            // return $chars[0];
+            $contents= collect();
+            $rest = null;
+            
+            foreach($chars as $key => $char){
+                if(str_contains($char , '<img')){
+                    $contents->push($char);
+                    $i = $key;
+                }
+                else{
+                    if($key-1 == $i)
+                        $contents->push($char);
+                    else{
+                        $count = count($contents);
+                        $contents[$count-1] == $contents[$count-1].$char;
+                    }
+                }
+            }
+            return $contents;
 
-            // return 'no';
-
-            $str = 'before-str-after';
-        if (preg_match('/<img-(.*?)->/', $request->content, $match) == 1) {
-            return $match[1];
-        }
-
-            return $h;
             $pdf_of_content = App::make('dompdf.wrapper');
             $pdf_of_content->loadHTML($request->content);
             // $path = public_path('pdf_docs/'); // <--- folder to store the pdf documents into the server;
