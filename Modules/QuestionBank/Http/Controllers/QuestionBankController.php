@@ -956,7 +956,7 @@ class QuestionBankController extends Controller
             'question_id' => 'required|integer|exists:questions,id'
         ]);
 
-        $delete_answers=QuestionAnswer::where('question_id',$request->question_id)->delete();
+        $delete_answers=QuestionsAnswer::where('question_id',$request->question_id)->delete();
         $question = Questions::find($request->question_id);
         LastAction::lastActionInCourse($question->course_id);        
         $question->delete();
