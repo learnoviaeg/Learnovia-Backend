@@ -251,13 +251,13 @@ class QuizLessonController extends Controller
 
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         if(carbon::parse($quizLesson->publish_date)->isPast())
-            $publish_date=Carbon::now();
+            $publish=Carbon::now();
         $requ = ([
             'message' => $quiz->name . ' quiz is updated',
             'id' => $request->quiz_id,
             'users' => $users,
             'type' =>'quiz',
-            'publish_date'=> Carbon::parse($publish_date),
+            'publish_date'=> Carbon::parse($publish),
             'course_id' => $course,
             'class_id'=> $class,
             'lesson_id'=> $request->updated_lesson_id,
