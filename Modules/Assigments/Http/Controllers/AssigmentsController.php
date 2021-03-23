@@ -235,7 +235,6 @@ class AssigmentsController extends Controller
             'name' => 'string',
             'file_description' => 'string',
             'content'  => 'string',
-
         ]);
         
         $assigment = assignment::find($request->id);
@@ -245,7 +244,7 @@ class AssigmentsController extends Controller
         if (count($CheckIfAnswered) > 0)
             return HelperController::api_response_format(400, null, __('messages.assignment.cant_update'));
 
-        if($request->file == null)
+        if($request->file == " ")
             $assigment->attachment_id=null;
 
         if ($request->hasFile('file')) {
