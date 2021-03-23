@@ -965,12 +965,12 @@ class AssigmentsController extends Controller
             $contents= collect();
             $contents->push($request->content);
 
-            if(str_contains($request->content , '<img') || str_contains($request->content , '<video')){
+            if(str_contains($request->content , '<img')){
                 $contents= collect();
                 $chars = preg_split('/<[^img>]*[^\/]>/i', $request->content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
                 $i = null;
                 foreach($chars as $key => $char){
-                    if(str_contains($char , '<img') || str_contains($char , '<video')){
+                    if(str_contains($char , '<img')){
                         $contents->push($char);
                         $i = $key;
                     }
