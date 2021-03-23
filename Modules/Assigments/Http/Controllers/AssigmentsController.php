@@ -237,27 +237,32 @@ class AssigmentsController extends Controller
             'content'  => 'string',
 
         ]);
+        
         $assigment = assignment::find($request->id);
         $assigmentLessons = AssignmentLesson::where('assignment_id',$request->id)->pluck('id');
         $CheckIfAnswered = UserAssigment::whereIn('assignment_lesson_id', $assigmentLessons)->where('submit_date', '!=', null)->get();
+        
         if (count($CheckIfAnswered) > 0)
             return HelperController::api_response_format(400, null, __('messages.assignment.cant_update'));
 
-        if ($request->hasFile('file')) {
+        if($request->file == null)
+            $assigment->attachment_id=null;
 
+        if ($request->hasFile('file')) {
             $request->validate([
                 'file' => 'file|distinct|mimes:pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,xlsx,xls,csv,txt',
             ]);
-            // if (isset($request->file_description)) {
-                $description = (isset($request->file_description))? $request->file_description :null;
 
-                $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
-            // }
+            $description = (isset($request->file_description))? $request->file_description :null;
+            $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
+
         if ($request->filled('content'))
             $assigment->content = $request->content;
+
         if ($request->filled('name'))
             $assigment->name = $request->name;
+
         $assigment->save();
 
         return HelperController::api_response_format(200, $body = $assigment, $message = __('messages.assignment.update'));
