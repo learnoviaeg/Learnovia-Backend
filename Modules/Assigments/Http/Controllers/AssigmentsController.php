@@ -961,25 +961,32 @@ class AssigmentsController extends Controller
         }
 
         if($request->filled('content')){
-            
-            $chars = preg_split('/<[^img>]*[^\/]>/i', $request->content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+
             $contents= collect();
-            $i = null;
-            
-            foreach($chars as $key => $char){
-                if(str_contains($char , '<img') || str_contains($char , '<video')){
-                    $contents->push($char);
-                    $i = $key;
-                }
-                else{
-                    if(isset($i) && $key-1 == $i)
+            $contents->push($request->content);
+
+            if(str_contains($request->content , '<img') || str_contains($request->content , '<video')){
+                $contents= collect();
+                $chars = preg_split('/<[^img>]*[^\/]>/i', $request->content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+                $i = null;
+                foreach($chars as $key => $char){
+                    if(str_contains($char , '<img') || str_contains($char , '<video')){
                         $contents->push($char);
+                        $i = $key;
+                    }
                     else{
-                        $count = count($contents)-1;
-                        $contents[$count] = $contents[$count].$char;
+                        if(isset($i) && $key-1 == $i){
+                            $contents->push($char);
+                        }else if(count($contents) == 0){
+                            $contents->push($char);
+                        }else{
+                            $count = count($contents)-1;
+                            $contents[$count] = $contents[$count].$char;
+                        }
                     }
                 }
             }
+
             foreach($contents as $content){
                 $pdf_of_content = App::make('dompdf.wrapper');
                 $pdf_of_content->loadHTML($content);
