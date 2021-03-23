@@ -242,7 +242,9 @@ class UsersController extends Controller
 
                 $seen_users = count($enrolls->where('seen','yes'));
                 $total = count($enrolls);
-                $percentage = round(($seen_users/$total)*100,1);
+                $percentage = 0;
+                if($total != 0)
+                    $percentage = round(($seen_users/$total)*100,1);
                 return response()->json(['message' => 'Seen percentage', 'body' => $percentage  ], 200);
                 
             }
