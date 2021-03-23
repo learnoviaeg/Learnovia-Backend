@@ -961,17 +961,38 @@ class AssigmentsController extends Controller
         }
 
         if($request->filled('content')){
-            $pdf_of_content = App::make('dompdf.wrapper');
-            $pdf_of_content->loadHTML($request->content);
-            // $path = public_path('pdf_docs/'); // <--- folder to store the pdf documents into the server;
-            $fileName =  time().'_content.'. 'pdf' ; // <--giving the random filename,
-            $pdf_of_content->save("storage/assignment".'/'. $fileName);
-            $pdf_of_content = new Pdf("storage/assignment".'/'.$fileName);
-            foreach (range(1, $pdf_of_content->getNumberOfPages()) as $pageNumber) {
-                $name= uniqid();
-                $pdf_of_content->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
-                $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
-                $images_path->push('data:image/png;base64,'.$b64image);
+            
+            $chars = preg_split('/<[^img>]*[^\/]>/i', $request->content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+            $contents= collect();
+            $rest = null;
+            
+            foreach($chars as $key => $char){
+                if(str_contains($char , '<img') || str_contains($char , '<video')){
+                    $contents->push($char);
+                    $i = $key;
+                }
+                else{
+                    if($key-1 == $i)
+                        $contents->push($char);
+                    else{
+                        $count = count($contents)-1;
+                        $contents[$count] = $contents[$count].$char;
+                    }
+                }
+            }
+            foreach($contents as $content){
+                $pdf_of_content = App::make('dompdf.wrapper');
+                $pdf_of_content->loadHTML($content);
+                // $path = public_path('pdf_docs/'); // <--- folder to store the pdf documents into the server;
+                $fileName =  time().'_content.'. 'pdf' ; // <--giving the random filename,
+                $pdf_of_content->save("storage/assignment".'/'. $fileName);
+                $pdf_of_content = new Pdf("storage/assignment".'/'.$fileName);
+                foreach (range(1, $pdf_of_content->getNumberOfPages()) as $pageNumber) {
+                    $name= uniqid();
+                    $pdf_of_content->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+                    $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
+                    $images_path->push('data:image/png;base64,'.$b64image);
+                }
             }
         }
         return HelperController::api_response_format(200, $images_path, 'Here pdf\'s images');
