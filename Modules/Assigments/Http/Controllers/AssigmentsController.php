@@ -964,7 +964,7 @@ class AssigmentsController extends Controller
             
             $chars = preg_split('/<[^img>]*[^\/]>/i', $request->content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
             $contents= collect();
-            $rest = null;
+            $i = null;
             
             foreach($chars as $key => $char){
                 if(str_contains($char , '<img') || str_contains($char , '<video')){
@@ -972,7 +972,7 @@ class AssigmentsController extends Controller
                     $i = $key;
                 }
                 else{
-                    if($key-1 == $i)
+                    if(isset($i) && $key-1 == $i)
                         $contents->push($char);
                     else{
                         $count = count($contents)-1;
