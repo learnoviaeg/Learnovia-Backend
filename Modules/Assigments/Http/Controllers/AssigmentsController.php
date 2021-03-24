@@ -249,7 +249,6 @@ class AssigmentsController extends Controller
             $assigment->attachment_id=null;
             $assigment->save();
         }
-            $assigment->attachment_id=null;
 
         if ($request->hasFile('file')) {
             $request->validate([
