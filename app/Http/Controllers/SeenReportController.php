@@ -224,8 +224,13 @@ class SeenReportController extends Controller
         if($request->filled('times'))
             $report = $report->where('seen_number',$request->times)->values();
 
-        if($request->filled('search'))
-            $report = $report->where('item_name', 'LIKE' ,"%$request->search%")->values();
+        if($request->filled('search')){
+
+            $report = collect($report)->filter(function ($item) use ($request) {
+                if(str_contains(strtolower($item['item_name']), strtolower($request->search))) 
+                    return $item; 
+            });
+        }
         
         if($option == 'chart'){
             $total = count($report);
