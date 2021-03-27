@@ -36,7 +36,7 @@ class ClassesController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
         ]);
 
-        if($option == 'all'){
+        if($option == 'all' || $request->user()->can('site/show-all-courses')){
             $course_segments = collect($this->chain->getAllByChainRelation($request));           
             $classes = SegmentClass::with('classLevel.classes')->whereIn('id',$course_segments->pluck('segment_class_id'))->get()->pluck('classLevel.*.classes.*')->collapse();
 
