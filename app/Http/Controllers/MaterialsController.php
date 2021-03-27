@@ -45,14 +45,18 @@ class MaterialsController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
 
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+        if($request->user()->can('site/show-all-courses')){//admin
+            $course_segments = collect($this->chain->getAllByChainRelation($request));
+            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+        }
 
-        if(!$request->user()->can('site/show-all-courses'))//student
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
+
+            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-
-        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-
-        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+            $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
+            $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+        }
       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
