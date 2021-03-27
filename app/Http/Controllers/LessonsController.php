@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Lesson;
 
 class LessonsController extends Controller
 {
@@ -40,18 +41,15 @@ class LessonsController extends Controller
         if($request->user()->can('site/show-all-courses')){//admin
             $course_segments = collect($this->chain->getAllByChainRelation($request));
             $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->get();
-
-            return response()->json(['message' => __('messages.lesson.list'), 'body' => $lessons], 200);
         }
 
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
             $enrolls = $this->chain->getCourseSegmentByChain($request);
             $enrolls->where('user_id',Auth::id());
+            $lessons = $enrolls->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons')->collapse()->filter()->values();
         }
 
-        $lessons = $enrolls->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons')->collapse();
-
-        return response()->json(['message' => __('messages.lesson.list'), 'body' => $lessons->filter()->values()], 200);
+        return response()->json(['message' => __('messages.lesson.list'), 'body' => $lessons], 200);
     }
 
     /**
