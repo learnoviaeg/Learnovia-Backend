@@ -132,9 +132,7 @@ class CoursesController extends Controller
                 'segment' => $request->filled('segments') ? $request->segments[0] : null,
             ]);
 
-            $year_types = $this->chain->getAllByChainRelation($request);
-
-            $course_segments =  collect($year_types->get()->pluck('YearType.*.yearLevel.*.classLevels.*.segmentClass.*.courseSegment.*')[0]);
+            $course_segments = collect($this->chain->getAllByChainRelation($request));
 
             if($request->for == 'enroll')
                 $course_segments = $course_segments->where('start_date','<=',Carbon::now())->where('end_date','>=',Carbon::now());

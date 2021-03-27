@@ -135,7 +135,7 @@ class ChainRepository implements ChainRepositoryInterface
             if ($request->filled('courses'))
                 $query->whereIn('course_id', $request->courses);
 
-        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment.courses.attachment']);
+        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment.courses.attachment'])->get()->pluck('YearType.*.yearLevel.*.classLevels.*.segmentClass.*.courseSegment.*')[0];
 
         return $YearTypes;
 

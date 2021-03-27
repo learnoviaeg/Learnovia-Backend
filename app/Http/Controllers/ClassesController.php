@@ -37,10 +37,7 @@ class ClassesController extends Controller
         ]);
 
         if($option == 'all'){
-            $year_types = $this->chain->getAllByChainRelation($request);
-
-            $course_segments =  collect($year_types->get()->pluck('YearType.*.yearLevel.*.classLevels.*.segmentClass.*.courseSegment.*')[0]);
-           
+            $course_segments = collect($this->chain->getAllByChainRelation($request));           
             $classes = SegmentClass::with('classLevel.classes')->whereIn('id',$course_segments->pluck('segment_class_id'))->get()->pluck('classLevel.*.classes.*')->collapse();
 
             return response()->json(['message' => __('messages.class.list'), 'body' => $classes], 200);
