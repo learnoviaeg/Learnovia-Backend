@@ -37,9 +37,15 @@ class LessonsController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
         ]);
 
-        $enrolls = $this->chain->getCourseSegmentByChain($request);
+        if($request->user()->can('site/show-all-courses')){//admin
+            $course_segments = collect($this->chain->getAllByChainRelation($request));
+            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->get();
+
+            return response()->json(['message' => __('messages.lesson.list'), 'body' => $lessons], 200);
+        }
 
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
+            $enrolls = $this->chain->getCourseSegmentByChain($request);
             $enrolls->where('user_id',Auth::id());
         }
 
