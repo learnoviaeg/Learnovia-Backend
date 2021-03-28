@@ -216,15 +216,18 @@ class UsersController extends Controller
                 $enrolls = $enrolls->whereIn('id',$seen_users->pluck('user_id'))->values();
             }
 
-            $enrolls->map(function ($user) use ($seen_users) {
+            $enrolls->map(function ($user) use ($seen_users,$request) {
 
                 $user['seen'] = 'no';
                 $user['seen_count'] = 0;
                 $user['seen_at'] = null;
                 if(in_array($user->id,$seen_users->pluck('user_id')->toArray())){
+                    
+                    $seen = UserSeen::where('type',$request->item_type)->where('item_id',$request->item_id)->where('user_id',$user->id)->first();
+
                     $user['seen'] = 'yes';
-                    $user['seen_count'] = $seen_users->where('user_id',$user->id)->pluck('count')->first();
-                    $user['seen_at'] = $seen_users->where('user_id',$user->id)->pluck('updated_at')->first();
+                    $user['seen_count'] = $seen->count;
+                    $user['seen_at'] = $seen->updated_at;
                 }
                 
                 return $user;
