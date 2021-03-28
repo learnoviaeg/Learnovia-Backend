@@ -694,7 +694,7 @@ class QuizController extends Controller
         if( $request->user()->can('site/course/student') && $quiz_lesson->visible==0)
             return HelperController::api_response_format(301,null, __('messages.quiz.quiz_hidden'));
 
-        if( $request->user()->can('site/course/student') && $quiz_lesson->start_date > Carbon::now())
+        if($quiz_lesson->start_date > Carbon::now())
             return HelperController::api_response_format(404,null, __('messages.quiz.quiz_not_started'));
         
         $grade_category_id= $qq->quizLessson[0]->grade_category_id;
