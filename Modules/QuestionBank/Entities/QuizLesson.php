@@ -29,11 +29,11 @@ class QuizLesson extends Model
         $started = true;
         $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$this->id)->first();
         if($override != null){
-            // $this->start_date = $override->start_date;
-            // $this->due_date = $override->due_date;
+            $this->start_date = $override->start_date;
+            $this->due_date = $override->due_date;
         }
-        if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now()))
-            $started = false;
+        // if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now()))
+        //     $started = false;
         return $started;  
     }
 
