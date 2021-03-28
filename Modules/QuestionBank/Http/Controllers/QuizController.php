@@ -714,9 +714,9 @@ class QuizController extends Controller
         $quiz['due_date']=$quiz_lesson->due_date;
         $quiz['publish_date']=$quiz_lesson->publish_date;
         if(isset($override_user)){
-            // $quiz['start_date']=$override_user->start_date;
-            // $quiz['due_date']=$override_user->due_date;
-            // $quiz['publish_date']=$quiz_lesson->publish_date;
+            $quiz['start_date']=$override_user->start_date;
+            $quiz['due_date']=$override_user->due_date;
+            $quiz['publish_date']=$quiz_lesson->publish_date;
         }
         $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->get();
         $quiz['allow_edit'] = true;
