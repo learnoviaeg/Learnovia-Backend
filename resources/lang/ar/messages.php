@@ -100,7 +100,8 @@ return [
         'continue_quiz' => 'يمكنك متابعة محاولتك الأخيرة',
         'students_attempts_list' => 'قائمة محاولات الطلاب',
         'quiz_object' => 'تفاصيل الاختبار',
-        'quiz_hidden' => 'هذا الاختبار قد تم إخفاءه'
+        'quiz_hidden' => 'هذا الاختبار قد تم إخفاءه',
+        'quiz_not_started' => 'هذا الاختبار لم يبدأ بعد',
     ],
     'permissions' => [
         'no_roles_assigned' => 'لا توجد وظائف معينة لهذا الإذن',
