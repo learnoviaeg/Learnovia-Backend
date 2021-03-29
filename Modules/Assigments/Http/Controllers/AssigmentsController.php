@@ -41,8 +41,7 @@ use Modules\QuestionBank\Entities\Quiz;
 use App\LastAction;
 use NcJoes\OfficeConverter\OfficeConverter;
 use Illuminate\Support\Facades\App;
-
-
+use App\Settings;
 
 class AssigmentsController extends Controller
 {
@@ -208,10 +207,12 @@ class AssigmentsController extends Controller
     //Create assignment
     public function createAssigment(Request $request)
     {
+        $settings = Settings::where('key','create_assignment_extensions')->pluck('value')->first();
+
         $request->validate([
             'name' => 'required|string',
             'content' => 'string|required_without:file',
-            'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,csv,doc,docx,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls,|required_without:content',
+            'file' => 'file|distinct|required_without:content|mimes:'.$settings,
         ]);
        
         $assignment = new assignment;
@@ -251,8 +252,11 @@ class AssigmentsController extends Controller
         }
 
         if ($request->hasFile('file')) {
+
+            $settings = Settings::where('key','create_assignment_extensions')->pluck('value')->first();
+
             $request->validate([
-                'file' => 'file|distinct|mimes:pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,xlsx,xls,csv,txt',
+                'file' => 'file|distinct|mimes:'.$settings,
             ]);
 
             $description = (isset($request->file_description))? $request->file_description :null;
@@ -399,10 +403,13 @@ class AssigmentsController extends Controller
     */
     public function submitAssigment(Request $request)
     {
+        //to get the allowed extensions for submission
+        $settings = Settings::where('key','submit_assignment_extensions')->pluck('value')->first();
+
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'file' => 'file|distinct|mimes:pdf,docs,doc,docx,xls,xlsx,ppt,pptx',
+            'file' => 'file|distinct|mimes:'.$settings,
         ];
         $customMessages = [
             'file.mimes' => __('messages.error.extension_not_supported')

@@ -30,6 +30,7 @@ use App\Http\Controllers\H5PLessonController;
 use Modules\Assigments\Http\Controllers\AssigmentsController;
 use App\Exports\ExportRoleWithPermissions;
 use Illuminate\Support\Facades\Storage;
+use App\Settings;
 
 class SpatieController extends Controller
 {
@@ -411,6 +412,13 @@ class SpatieController extends Controller
             //logs
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/logs', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'User']);
 
+            //system settings
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'settings/general', 'title' => 'General Settings', 'dashboard' => 1 , 'icon'=> 'Settings']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'settings/create_assignment_extensions', 'title' => 'Manage create assignment extensions']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'settings/submit_assignment_extensions', 'title' => 'Manage submit assignment extensions']);
+
+
+
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
             $teacher_permissions = [
                 'site/restrict','notifications/get-all','notifications/get-unread','notifications/mark-as-read','notifications/seen','year/get','year/get-all',
@@ -519,6 +527,20 @@ class SpatieController extends Controller
             (new PageController)->install();
             (new BigbluebuttonController)->install();
             (new H5PLessonController)->install();
+
+            Settings::create([
+                'key' => 'create_assignment_extensions',
+                'title' => 'Create Assignment Supported Extensions',
+                'value' => 'txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,csv,doc,docx,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls',
+                'type' => 'file'
+            ]);
+
+            Settings::create([
+                'key' => 'submit_assignment_extensions',
+                'title' => 'Submit Assignment Supported Extensions',
+                'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx',
+                'type' => 'file'
+            ]);
 
             return "System Installed Your User is $user->email and Password is Learnovia123.";
 
