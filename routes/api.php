@@ -470,6 +470,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('calendars', CalendarsController::class);
     Route::Resource('overall_seen', SeenReportController::class);
     Route::get('seen/{my_chain}', 'SeenReportController@index')->middleware('permission:reports/overall_seen_report');
+    Route::Resource('settings', SettingsController::class);
+    Route::post('settings/update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions');
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
