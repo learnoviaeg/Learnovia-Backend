@@ -361,15 +361,15 @@ class UserController extends Controller
     public function delete(Request $request)
     {
         $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'required|exists:users,id',
+            'users_id' => 'required|array',
+            'users_id.*' => 'required|exists:users,id',
         ]);
 
-        $enrolls=Enroll::whereIn('user_id',$request->ids)->get();
-        $all=Enroll::whereIn('user_id',$request->ids)->delete();
+        $enrolls=Enroll::whereIn('user_id',$request->users_id)->get();
+        $all=Enroll::whereIn('user_id',$request->users_id)->delete();
         if($all > 0)
             event(new MassLogsEvent($enrolls,'deleted'));
-        $user = User::whereIn('id',$request->ids)->delete();
+        $user = User::whereIn('id',$request->users_id)->delete();
 
         return HelperController::api_response_format(201, null, __('messages.users.delete'));
     }
