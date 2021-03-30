@@ -816,7 +816,7 @@ class AssigmentsController extends Controller
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
             'grade_category' => 'array|required_if:is_graded,==,1',
-            'allow_edit_answer' => 'required|boolean',
+            'allow_edit_answer' => 'boolean',
             'grade_category.*' => 'exists:grade_categories,id',
             'scale' => 'exists:scales,id',
             'visible' => 'boolean',
