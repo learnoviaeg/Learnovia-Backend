@@ -452,6 +452,13 @@ class AssigmentsController extends Controller
         if(!isset($userassigment))
             return HelperController::api_response_format(400, $body = [], $message = __('messages.error.user_not_assign'));
 
+        if($userassigment->grade != null && $assilesson->allow_edit_answer=1)
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.cannot_edit'));
+
+        $gradedusers=UserAssigment::where('assignment_lesson_id', $assilesson->id)->whereNotNull('grade')->first();
+        if(isset($gradedusers) && $assilesson->allow_edit_answer=1)
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.cannot_edit'));
+
         if (isset($userassigment)) {
             if($override != null){
                 if (((($override->start_date >  Carbon::now()) || (Carbon::now() > $override->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
@@ -809,6 +816,7 @@ class AssigmentsController extends Controller
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
             'grade_category' => 'array|required_if:is_graded,==,1',
+            'allow_edit_answer' => 'required|boolean',
             'grade_category.*' => 'exists:grade_categories,id',
             'scale' => 'exists:scales,id',
             'visible' => 'boolean',
@@ -821,6 +829,7 @@ class AssigmentsController extends Controller
             $assignment_lesson->lesson_id = $lesson;
             $assignment_lesson->assignment_id = $request->assignment_id;
             $assignment_lesson->publish_date = $request->publish_date;
+            $assignment_lesson->allow_edit_answer = $request->allow_edit_answer;
             $assignment_lesson->start_date = $request->opening_date;
             $assignment_lesson->mark = $request->mark;
             $assignment_lesson->is_graded = $request->is_graded;

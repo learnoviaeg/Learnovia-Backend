@@ -7,6 +7,7 @@ return [
         'not_found' => 'Item is not found!',
         'parent_cannot_submit' => 'Parents can not submit answers',
         'user_not_assign' => 'This user is not assigned to this item',
+        'cannot_edit' => 'you can\'t adit you submittion',
         'submit_limit' => 'Sorry, you are not allowed to submit anymore',
         'not_available_now' => 'Sorry, This item is not available for you at this moment',
         'try_again' => 'Something went wrong, please try again',

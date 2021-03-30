@@ -24,6 +24,7 @@ Route::group(['prefix' => 'assignment', 'middleware' =>[ 'auth:api','LastAction'
     Route::post('update', 'AssigmentsController@updateAssigment')->middleware('permission:assignment/update');
     Route::post('update-assignemnt-lesson', 'AssigmentsController@updateAssignmentLesson')->middleware('permission:assignment/update-assignemnt-lesson');
     Route::post('submit', 'AssigmentsController@submitAssigment')->middleware('permission:assignment/submit');
+    Route::post('edit-submit', 'AssigmentsController@editSubmitAssigment')->middleware('permission:assignment/submit');
     Route::post('grade', 'AssigmentsController@gradeAssigment')->middleware('permission:assignment/grade');
     Route::post('editgrade', 'AssigmentsController@editGradeAssignment')->middleware('permission:assignment/editgrade');
     Route::post('override', 'AssigmentsController@override')->middleware('permission:assignment/override');
