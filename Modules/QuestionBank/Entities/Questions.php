@@ -61,6 +61,4 @@ class Questions extends Model
         return $this->hasOne('Modules\QuestionBank\Entities\userQuizAnswer', 'question_id', 'id')
             ->where('user_quiz_id',$id)->first();
     }
-
-
 }

@@ -69,17 +69,16 @@ class QuizzesController extends Controller
 
         $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
 
-        if($request->user()->can('site/course/student')){
+        if($request->user()->can('site/course/student'))
             $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
-        }
 
-        if($count == 'count'){
+        if($count == 'count')
             return response()->json(['message' => __('messages.quiz.count'), 'body' => $quiz_lessons->count() ], 200);
-        }
         
         $quiz_lessons = $quiz_lessons->get();
 
         $quizzes = collect([]);
+        $quest= collect([]);
 
         foreach($quiz_lessons as $quiz_lesson){
             $quiz=quiz::with('course')->where('id',$quiz_lesson->quiz_id)->first();
@@ -87,17 +86,14 @@ class QuizzesController extends Controller
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
             $quiz['level'] = Level::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-            $questions=Questions::whereIn('id',$quiz->Question->pluck('id'));
-            foreach($questions->get() as $one){
-                if($one['type'] != 'Comprehension')
-                    $questions->with($one['type'].'_question');
-    
-                if($one['type'] == 'MCQ')
-                    $questions->with($one['type'].'_question.MCQ_Choices');
-                
-                // $quiz['Questions']=$one->get();
-            }
-            $quiz['Question']=$questions->get();
+            
+            $quest=$quest->merge(Questions::where('type','T_F')->with('T_F_question')->get());
+            $quest=$quest->merge(Questions::where('type','Essay')->with('Essay_question')->get());
+            $quest=$quest->merge(Questions::where('type','Match')->with('Match_question')->get());
+            $quest=$quest->merge(Questions::where('type','MCQ')->with('MCQ_question.MCQ_Choices')->get());
+            $quest=$quest->merge(Questions::where('type','comprehension')->with('T_F_question','Essay_question','MCQ_question.MCQ_Choices')->get());
+            $quiz['Question']=$quest;
+
             unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
@@ -117,7 +113,7 @@ class QuizzesController extends Controller
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
             'type' => 'required|in:0,1,2',
-            // 'lesson_id' => 'exists:lessons,id',
+            'lesson_id' => 'required|exists:lessons,id',
             /**
              * type 0 => Old Question
              * type 1 => New Questions
@@ -153,7 +149,20 @@ class QuizzesController extends Controller
                 //MCQ validation
                 'Question.*.MCQ_Choices' => 'array',
                 'Question.*.MCQ_Choices.*.is_true' => 'boolean',
-                'Question.*.MCQ_Choices.*.content' => 'string'
+                'Question.*.MCQ_Choices.*.content' => 'string',
+                //Comprehension 
+                'Question.*.subQuestion' => 'array|required_if:Question.*.type,==,Comprehension',
+                'Question.*.subQuestion.*.type' => 'required_if:Question.*.type,==,Comprehension|in:MCQ,Essay,T_F,Match',
+                'Question.*.subQuestion.*.text' => 'required_if:Question.*.type,==,Comprehension|string',
+                'Question.*.subQuestion.*.is_true' => 'required_if:Question.*.subQuestion.*.type,==,T_F|boolean', //for true-false
+                'Question.*.subQuestion.*.and_why' => 'boolean', //if question t-f and have and_why question
+                'Question.*.subQuestion.*.MCQ_Choices' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|array',
+                'Question.*.subQuestion.*.MCQ_Choices.*.is_true' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|boolean',
+                'Question.*.subQuestion.*.MCQ_Choices.*.content' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|string',
+                //Match
+                // 'Question.*.matches' => 'required_if:Question.*.type,==,Match|array',
+                'Question.*.match_a' => 'required_if:Question.*.type,==,Match|array',
+                'Question.*.match_b' => 'required_if:Question.*.type,==,Match|array'
             ]);
             $newQuestionsIDs=app('App\Http\Controllers\QuestionsController')->store($request,1);
         }
@@ -163,7 +172,6 @@ class QuizzesController extends Controller
                 'oldQuestion.*' => 'required|integer|exists:questions,id',
             ]);
             $oldQuestionsIDs=($request->oldQuestion);
-            // return gettype($questionsIDs);
         }
         // return $newQuestionsIDs;
         $questionsIDs = array_merge($newQuestionsIDs,$oldQuestionsIDs);
@@ -178,15 +186,26 @@ class QuizzesController extends Controller
                 'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
                 'feedback' => isset($request->feedback) ? $request->feedback : 1,
             ]);
-
+            $index = QuizLesson::where('lesson_id',$request->lesson_id)->get()->max('index');
+            $Next_index = $index + 1;
+            $quizLesson = QuizLesson::create([
+                'quiz_id' => $quiz->id,
+                'lesson_id' => $request->lesson_id,
+                'start_date' => $request->opening_time,
+                'due_date' => $request->closing_time,
+                'max_attemp' => $request->max_attemp,
+                'grading_method_id' => $request->grading_method_id,
+                'grade' => $request->grade,
+                'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id[$key] : null,
+                'publish_date' => $request->opening_time,
+                'index' => $Next_index,
+                'visible' => isset($request->visible)?$request->visible:1
+            ]);
             $quiz->Question()->attach($questionsIDs);
-            // $quiz->Question;
-            foreach ($quiz->Question as $question) {
+            $quiz->Question;
+            foreach ($quiz->Question as $question)
                 $question->with($question['type'].'_question');
-
-                if($question['type'] == 'MCQ')
-                    $question->with($question['type'].'_question.MCQ_Choices');
-            }
+            
             return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
         }
         return HelperController::api_response_format(200, null, __('messages.error.not_found'));

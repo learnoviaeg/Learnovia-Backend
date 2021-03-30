@@ -8,10 +8,10 @@ use Modules\QuestionBank\Entities\quiz;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use App\Paginate;
-// use App\Q_T_F;
-// use App\Q_Essay;
+use App\Q_MCQ;
+use App\Q_Match;
 use App\Questions;
-use Modules\QuestionBank\Entities\quiz_questions;
+use Modules\QuestionBank\Entities\QuizQuestions;
 use App\CourseSegment;
 use Illuminate\Support\Facades\Auth;
 use DB;
@@ -22,8 +22,7 @@ class QuestionsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
-        
+        $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);        
     }
     
     /**
@@ -39,82 +38,74 @@ class QuestionsController extends Controller
             'Question_Category_id' => 'array',
             'Question_Category_id.*' => 'integer|exists:questions_categories,id',
             'type' => 'array',
-            'type.*' => 'strng|in:MCQ,Essay,T_F,Match,Comprehension',
+            'type.*' => 'string|in:MCQ,Essay,T_F,Match,Comprehension',
             'search' => 'nullable|string',
+            'quiz_id' => 'nullable|exists:quizzes,id',
         ]);
+        $questtion=collect();
+        $types=['MCQ','Essay','Comprehension','T_F','Match'];
+        $shuffle=null;
 
-        $questions=Questions::query();
-        // foreach($questions->get() as $one){
-        //     // if($one['type'] != 'Comprehension')
-        //         $questions->with($one['type'].'_question');
-        //     if($one['type'] == 'MCQ')
-        //         $questions->with($one['type'].'_question.MCQ_Choices');
-        // }
-
-        $types=['MCQ','Essay','T_F'];
-        // foreach($types as $one){
-            return $questions->get();
-        foreach($questions->get() as $one){
-            if($one['type'] != 'Comprehension')
-                $questions->with($one['type'].'_question');
-            // $questions->whereHas($one.'_question')->with($one.'_question');
-            if($one == 'MCQ')
-                $questions->with($one['type'].'_question.MCQ_Choices');
-        }
-        // return $questions->get();
+        $quest=Questions::query();
 
         if($request->filled('courses'))
-            $questions->whereIn('course_id',$request->courses);
+            $quest->whereIn('course_id',$request->courses);
 
         if($request->filled('Question_Category_id'))
-            $questions->whereIn('q_cat_id',$request->Question_Category_id);
+            $quest->whereIn('q_cat_id',$request->Question_Category_id);
             
         if($request->filled('search'))
-            $questions->where('text', 'LIKE' , "%$request->search%");
-    
-        if($request->filled('type'))
-            $questions->whereIn('type', 'LIKE' ,$request->type);
+            $quest->where('text', 'LIKE' , "%$request->search%");
 
-        //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
-        if($question=='questions'){
-            $quiz_shuffle = Quiz::where('id', $quiz_id)->pluck('shuffle')->first();
-            // $quiz = Quiz::find( $quiz_id);
-            $questions = quiz_questions::where('quiz_id',$quiz_id)
-                    ->with(['Question.T_F_question','Question.MCQ_question.MCQ_Choices','Question.Essay_question'])->get()
-                    ->pluck('Question.*')->collapse();
-            if($quiz_shuffle == 'Questions'|| $quiz_shuffle == 'Questions and Answers')
-                $questions =$questions->shuffle();
-            
-            if($quiz_shuffle == 'Answers'|| $quiz_shuffle == 'Questions and Answers')
-                foreach($questions as $question)                    
-                    if($question['type'] == 'MCQ')
-                        $questions->MCQ_question->MCQ_Choices->shuffle();
-            
-            
-            return response()->json(['message' => __('messages.question.list'), 'body' => $questions->paginate(Paginate::GetPaginate($request))], 200);
+        if($request->filled('type'))
+            $quest->whereIn('type' ,$request->type);
+
+        if($request->filled('quiz_id')){    
+            $shuffle = Quiz::where('id', $request->quiz_id)->pluck('shuffle')->first();
+
+            $question_in_quiz= QuizQuestions::where('quiz_id',$request->quiz_id)->pluck('question_id');
+            $quest->whereIn('id',$question_in_quiz);
         }
 
+        foreach($types as $type){
+            $current=clone $quest;
+
+            if($type == 'Comprehension')
+                $questtion=$questtion->merge($current->where('type',$type)->with('T_F_question','Essay_question','MCQ_question')->get());
+
+            else
+                $questtion=$questtion->merge($current->where('type',$type)->with($type.'_question')->get());
+        }
+
+        // quizzes/null/count
         if($question == 'count'){
-            // return 'hi';
-            $counts = collect();
+            $counts = collect([]);
             $counts['essay'] = 0;
             $counts['tf'] = 0;
             $counts['mcq'] = 0;
-            // return $questions->get();
-            foreach($questions->get() as $one)
-            {
-                if($one['type'] == 'MCQ')
-                    $counts['mcq'] =+1;
-                if($one['type'] == 'T_F')
-                    $counts['tf'] =+1;
-                if($one['type'] == 'Essay')
-                    $counts['essay'] = +1;
-            }
+            $counts['comprehension'] = 0;
+            $counts['match'] = 0;
+
+            $counts['tf'] = $questtion->where('type','T_F')->count();
+            $counts['mcq'] = $questtion->where('type','MCQ')->count();
+            $counts['essay'] = $questtion->where('type','Essay')->count();
+            $counts['comprehension'] = $questtion->where('type','Comprehension')->count();
+            $counts['match'] = $questtion->where('type','Match')->count();
 
             return response()->json(['message' => __('messages.question.count'), 'body' => $counts], 200);
         }
 
-        return response()->json(['message' => __('messages.question.list'), 'body' => $questions->get()->paginate(Paginate::GetPaginate($request))], 200);
+        if($shuffle == 'Questions'|| $shuffle == 'Questions and Answers')
+            $questtion= $questtion->shuffle();
+            
+        // if($shuffle == 'Answers'|| $shuffle == 'Questions and Answers')
+            foreach($questtion as $question)
+                if($question->type == 'MCQ'){
+                    $qq=$question->MCQ_question[0]->mcq_choices->toArray();
+                    $question->MCQ_question[0]->mcq_choices = shuffle($qq);
+                }
+
+        return response()->json(['message' => __('messages.question.list'), 'body' => $questtion->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
@@ -141,13 +132,17 @@ class QuestionsController extends Controller
             'Question.*.MCQ_Choices.*.content' => 'required_if:Question.*.type,==,MCQ|string',
             //Comprehension 
             'Question.*.subQuestion' => 'array|required_if:Question.*.type,==,Comprehension',
-            'Question.*.subQuestion.*.type' => 'required_if:Question.*.type,==,Comprehension||in:MCQ,Essay,T_F,Match',
-            'Question.*.subQuestion.*.text' => 'required_if:Question.*.type,==,Comprehension||string',
+            'Question.*.subQuestion.*.type' => 'required_if:Question.*.type,==,Comprehension|in:MCQ,Essay,T_F,Match',
+            'Question.*.subQuestion.*.text' => 'required_if:Question.*.type,==,Comprehension|string',
             'Question.*.subQuestion.*.is_true' => 'required_if:Question.*.subQuestion.*.type,==,T_F|boolean', //for true-false
             'Question.*.subQuestion.*.and_why' => 'boolean', //if question t-f and have and_why question
             'Question.*.subQuestion.*.MCQ_Choices' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|array',
             'Question.*.subQuestion.*.MCQ_Choices.*.is_true' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|boolean',
             'Question.*.subQuestion.*.MCQ_Choices.*.content' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|string',
+            //Match
+            // 'Question.*.matches' => 'required_if:Question.*.type,==,Match|array',
+            'Question.*.match_a' => 'required_if:Question.*.type,==,Match|array',
+            'Question.*.match_b' => 'required_if:Question.*.type,==,Match|array'
         ]);
 
         foreach ($request->Question as $question) {
@@ -159,18 +154,37 @@ class QuestionsController extends Controller
                 'type' => $question['type']
             ]);
             $quests[]=$quest->id;
-            if($question['type'] == 'Comprehension'){
-                // return $question['subQuestion'];
+            $matches=collect();
+            if($question['type'] == 'Comprehension')
                 foreach($question['subQuestion'] as $sub){
-                    $q= $quest->{$sub['type'].'_question'}()->create($sub); 
+                    if($sub['type'] == 'MCQ')
+                        Q_MCQ::firstOrCreate([
+                            'question_id' => $quest->id,
+                            'text' => $sub['text'],
+                            'choices' => json_encode($sub['MCQ_Choices']),
+                        ]);
+                    else
+                        $q= $quest->{$sub['type'].'_question'}()->create($sub); //firstOrNew //insertOrIgnore //createOrFirst doen't work
                 }
+
+            elseif($question['type'] == 'MCQ')
+                Q_MCQ::firstOrCreate([
+                    'question_id' => $quest->id,
+                    'text' => $question['text'],
+                    'choices' => json_encode($question['MCQ_Choices']),
+                ]);
+
+            elseif($question['type'] == 'Match'){
+                $matches['match_a']=$question['match_a'];
+                $matches['match_b'] =$question['match_b'];
+                Q_Match::firstOrCreate([
+                    'question_id' => $quest->id,
+                    'text' => $question['text'],
+                    'matches' => json_encode($matches),
+                ]);
             }
             else
-                $q= $quest->{$question['type'].'_question'}()->create($question); //firstOrNew //insertOrIgnore doen't work
-
-            if($question['type'] == 'MCQ')
-                foreach($question['MCQ_Choices'] as $choice)
-                    $test=$q->MCQ_Choices()->create($choice);
+                $q= $quest->{$question['type'].'_question'}()->create($question);
         }
         if($type == 1)  
             return $quests;

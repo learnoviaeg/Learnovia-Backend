@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class userQuizAnswer extends Model
 {
     protected $fillable = [
-        'user_quiz_id','question_id','answer_id',
-        'and_why','mcq_answers_array','choices_array','content','user_grade','feedback','answered','force_submit','right'
+        'user_quiz_id','question_id','answer_id','user_answer',
+        'and_why','mcq_answers_array','choices_array','content','feedback','answered','force_submit','right'
     ];
 
     public function Question()

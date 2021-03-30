@@ -28,7 +28,6 @@ class Timeline extends Model
     }
 
     public function getStatusAttribute(){
-
         //student statuses
         if(Auth::user()->can('site/course/student')){
             $status = __('messages.status.not_submitted');

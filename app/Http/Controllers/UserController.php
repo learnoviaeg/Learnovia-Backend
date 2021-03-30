@@ -145,15 +145,15 @@ class UserController extends Controller
                 'chat_uid' => json_decode($res->getBody(),true)['user_id'],
                 'chat_token' => json_decode($res->getBody(),true)['custom_token'],
                 'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
-
             ]);
 
             foreach ($optionals as $optional){
-                if($request->filled($optional[$i])){
+                if($request->filled($optional[$i]))
                     $user->optional =$request->optional[$i];
-                }
+                
                 if (isset($request->picture[$i]))
                     $user->picture = $user_picture->id;
+
                 if ($request->filled($optional)){
                     if($optional =='birthdate')
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
@@ -254,35 +254,35 @@ class UserController extends Controller
             'lastname' => $request->lastname,
         ]);
 
-            if (Auth::user()->can('user/update-password')) {
-                if (isset($request->password)){
-                    $user->real_password=$request->password;
-                    $user->password =   bcrypt($request->password);
+        if (Auth::user()->can('user/update-password'))
+            if (isset($request->password)){
+                $user->real_password=$request->password;
+                $user->password =   bcrypt($request->password);
 
-                    $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token)
-                        $token->revoke();
-                    unset($user->tokens);
-                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
-                }
+                $tokens = $user->tokens->where('revoked',false);
+                foreach($tokens as $token)
+                    $token->revoke();
+                    
+                unset($user->tokens);
+                Parents::where('parent_id',$user->id)->update(['current'=> 0]);
             }
 
-            if (Auth::user()->can('user/update-username')) {
-                if (isset($request->username)){
-                    $user->username=$request->username;
+        if (Auth::user()->can('user/update-username'))
+            if (isset($request->username)){
+                $user->username=$request->username;
 
-                    $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token)
-                        $token->revoke();
-                    unset($user->tokens);
-                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
-                }
+                $tokens = $user->tokens->where('revoked',false);
+                foreach($tokens as $token)
+                    $token->revoke();
+
+                unset($user->tokens);
+                Parents::where('parent_id',$user->id)->update(['current'=> 0]);
             }
 
         if (isset($request->picture))
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
 
-        foreach ($optionals as $optional) {
+        foreach ($optionals as $optional) 
             if ($request->has($optional)){
 
                 $user->$optional = $request->$optional;
@@ -304,7 +304,7 @@ class UserController extends Controller
                 if($optional == 'nickname' && $request->$optional == 'null')
                     $user->$optional = null;
             }
-        }
+
         $user->save();
 
         // role is in all system

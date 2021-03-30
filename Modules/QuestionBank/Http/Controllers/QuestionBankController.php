@@ -149,15 +149,6 @@ class QuestionBankController extends Controller
         );
         QuestionsType::insert($QuesTypes);
 
-        // $QuesCateg=array(
-        //     array('name' => 'Lesson One'),
-        //     array('name' => 'Lesson Two'),
-        //     array('name' => 'Lesson Three'),
-        //     array('name' => 'Lesson Four'),
-        //     array('name' => 'Lesson Five'),
-        // );
-        // QuestionsCategory::insert($QuesCateg);
-
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
 
@@ -420,7 +411,6 @@ class QuestionBankController extends Controller
 
     public function MCQ($Question,$parent)
     {
-
         $validator = Validator::make($Question, [
             'answers' => 'required|array|distinct|min:2',
             'answers.*' => 'required|string|distinct',
@@ -544,7 +534,6 @@ class QuestionBankController extends Controller
                         $re->push($mcq);
                         break;
                     case 3: // Match
-//                        dd($subQuestion);
                         $match = $this->Match($subQuestion, $cat->id);
                         $re->push($match);
                         break;
@@ -652,7 +641,6 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, $validator->errors());
         }
 
-
         $question_id = Questions::where('parent', $parent)->where('question_type_id', $Question_Type_id)->pluck('id')->first();
         $question = Questions::find($question_id);
 
@@ -709,7 +697,6 @@ class QuestionBankController extends Controller
             ]);
             $is_true += 1;
         }
-        // $question = $this->updateQuestion($request,$parent);
 
         return "success";
     }
@@ -808,9 +795,7 @@ class QuestionBankController extends Controller
         }
         else {
             $question = $this->updatesubQuestion($request,$parent,$Question_Type_id);
-            // dd($question);
             $answers = QuestionsAnswer::where('question_id', $question->id)->get();
-
         }
 
         $question = $this->updateQuestion($request);
@@ -921,6 +906,7 @@ class QuestionBankController extends Controller
         }
         return "updated sucess";
     }
+
     public function update(Request $request)
     {
         $request->validate([
@@ -947,7 +933,6 @@ class QuestionBankController extends Controller
         }
         return HelperController::api_response_format(200, $re, __('messages.question.update'));
     }
-
 
     public function destroy(Request $request)
     {

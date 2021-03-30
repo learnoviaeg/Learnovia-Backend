@@ -13,7 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
-use Modules\QuestionBank\Entities\Questions;
+use Appyy\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use Modules\QuestionBank\Entities\userQuiz;
@@ -699,16 +699,12 @@ class QuizController extends Controller
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date > Carbon::now() )
             return HelperController::api_response_format(400, null , $message = __('messages.error.parent_cannot_submit'));
-        if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date < Carbon::now() )
-                {
-                if(Auth::user()->currentChild == null)
-                    return HelperController::api_response_format(400,null, __('messages.users.parent_choose_child'));
-                $currentChild =User::find(Auth::user()->currentChild->child_id);
-                Auth::setUser($currentChild);
-            }
-        /** to */
-        // if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
-        //     return HelperController::api_response_format(400, null, 'Time is out');
+        if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date < Carbon::now() ){
+            if(Auth::user()->currentChild == null)
+                return HelperController::api_response_format(400,null, __('messages.users.parent_choose_child'));
+            $currentChild =User::find(Auth::user()->currentChild->child_id);
+            Auth::setUser($currentChild);
+        }
         $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where("user_id",Auth::id())->first();
         $quiz['start_date']=$quiz_lesson->start_date;
         $quiz['due_date']=$quiz_lesson->due_date;
@@ -767,24 +763,11 @@ class QuizController extends Controller
             unset($quiz->Question);
         }
         foreach($quiz['question'] as $question){
-            if(count($question->childeren) > 0){
-                foreach($question->childeren as $single){
-                    $single->question_type;
-                    $single->question_answer;
-                    $question->question_category;
-                    unset($single->pivot);
-                }
-            }
-            else {
-                unset($question->childeren);
-            }
-            if($user_answer)
-            {
+            if($user_answer){
                 foreach($user_answer as $U_Ans)
                     if($U_Ans->question_id == $question->id)
                         $question->User_Answer=$U_Ans;
             }
-           $question['question_answer']=$question->question_answer;
 
         if($quiz_shuffle == 'Answers'|| $quiz_shuffle == 'Questions and Answers'){
             $answers = $question->question_answer->shuffle();
@@ -947,63 +930,16 @@ class QuizController extends Controller
             if(count($user_answer)>0)
                 $userAnswers=$user_answer;
         
-        // return $userAnswers;
-        // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
         $quiz['attempts_index'] = $attempts_index;
 
-        $quiz['right']=0;
-        $quiz['wrong']=0;
-        $quiz['not_graded']=0;
-        $quiz['not_answered']=0;
-        $quiz['partially']=0;
-        $quiz['user_mark']=0;
-        $quiz['mark_precentage']=0;
         foreach($quiz->Question as $question){
-            if(count($question->childeren) > 0){
-                foreach($question->childeren as $single){
-                    // foreach($userAnswerss as $userAnswers)
-                        foreach($userAnswers as $userAnswer){
-                            if($userAnswer->question_id == $question->id)
-                                $question->User_Answer=$userAnswer;
-                        }
-
-                        $single->question_type;
-                        if($show_is_true == 1)
-                            $single->question_answer;
-
-                        $question->question_category;
-                        unset($single->pivot);
-                }
-            }
-            else
-                unset($question->childeren);
-
             if(isset($userAnswers))
             {
-                foreach($userAnswers as $userAnswer){
-                    if($userAnswer->question_id == $question->id){
+                foreach($userAnswers as $userAnswer)
+                    if($userAnswer->question_id == $question->id)
                         $question->User_Answer=$userAnswer;
-                        if($userAnswer->user_grade == $question->mark)
-                            $quiz['right']+=1;
-                        if($userAnswer->user_grade == 0 && gettype($userAnswer->user_grade) != null)
-                            $quiz['wrong']+=1;
-                            // return $userAnswer->user_grade;
-                        if($userAnswer->user_grade != 0 && gettype($userAnswer->user_grade) != null && $userAnswer->user_grade < $question->mark)
-                            $quiz['partially']+=1;
-                        if(gettype($userAnswer->user_grade) == null && $userAnswer->content != null)
-                            $quiz['not_graded']+=1;
-                        if(gettype($userAnswer->user_grade) == null && $userAnswer->content == null)
-                            $quiz['not_answered']+=1;
-                        $quiz['user_mark']+=$userAnswer->user_grade;
-                    }
-                }
-                $quiz['mark_precentage']=sprintf("%.2f",($quiz['user_mark']*100)/$quiz_lesson->grade);
             }
-            if($show_is_true == 1)
-                $question->question_answer;
-
             $question->question_category;
-            $question->question_type;
             unset($question->pivot);
         }
 
@@ -1012,14 +948,12 @@ class QuizController extends Controller
 
     public function ScriptShuffle(){
         $all_quizzes = Quiz::all();
-        foreach ($all_quizzes as  $quiz){
+        foreach ($all_quizzes as  $quiz)
             if($quiz->shuffle==''){
                 $quiz->shuffle = 'No Shuffle';
                 $quiz->save();
-        }
             }
-            return HelperController::api_response_format(200,$all_quizzes);
-
-
+            
+        return HelperController::api_response_format(200,$all_quizzes);
     }
 }

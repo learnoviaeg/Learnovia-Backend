@@ -4,7 +4,7 @@ namespace Modules\QuestionBank\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 
-class quiz_questions extends Model
+class QuizQuestions extends Model
 {
     protected $fillable = ['question_id','quiz_id'];
     protected $hidden = [
@@ -14,5 +14,10 @@ class quiz_questions extends Model
     public function Question()
     {
         return  $this->hasMany('App\Questions', 'id', 'question_id');
+    }
+
+    public function Quiz()
+    {
+        return  $this->hasMany('App\Quiz', 'id', 'quiz_id');
     }
 }

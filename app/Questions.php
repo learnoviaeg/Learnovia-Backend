@@ -23,8 +23,18 @@ class Questions extends Model
         return $this->hasMany('App\Q_Essay','question_id','id');
     }
 
-    // public function Comprehension_question()
-    // {
-    //     return $this->hasMany('App\Questions', 'id');
-    // }
+    public function Match_question()
+    {
+        return $this->hasMany('App\Q_Match','question_id','id');
+    }
+    
+    public function question_category()
+    {
+        return $this->belongsTo('Modules\QuestionBank\Entities\QuestionsCategory', 'q_cat_id', 'id');
+    }
+
+    public function question_course()
+    {
+        return $this->belongsTo('App\Course', 'course_id', 'id');
+    }
 }

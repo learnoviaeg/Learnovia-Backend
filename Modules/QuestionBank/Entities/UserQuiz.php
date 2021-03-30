@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
-use Modules\QuestionBank\Entities\quiz_questions;
+use Modules\QuestionBank\Entities\QuizQuestions;
 
 class userQuiz extends Model
 {
@@ -57,7 +57,7 @@ class userQuiz extends Model
 
     public function getUserGradeAttribute() {
         $quiz_lesson = QuizLesson::where('id', $this->quiz_lesson_id)->first();
-        $quiz_questions = quiz_questions::where('quiz_id',$quiz_lesson->quiz_id)->pluck('question_id');
+        $quiz_questions = QuizQuestions::where('quiz_id',$quiz_lesson->quiz_id)->pluck('question_id');
         $quiz_questions_total = Questions::whereIn('id',$quiz_questions)->pluck('mark');
         $quiz_questions_sum= array_sum($quiz_questions_total->toArray());
         if($this->grade == $quiz_questions_sum)

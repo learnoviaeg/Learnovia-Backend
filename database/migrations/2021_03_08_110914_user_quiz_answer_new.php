@@ -21,7 +21,7 @@ class UserQuizAnswerNew extends Migration
             $table->dropColumn('choices_array');
             $table->dropColumn('user_grade');
             $table->dropColumn('content');
-            $table->longText('user_answer');
+            $table->longText('user_answer')->nullable();
         });
     }
 
