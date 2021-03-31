@@ -131,12 +131,9 @@ class EnrollUserToCourseController extends Controller
         foreach ($request->user_id as $users){
             $course_segment = Enroll::whereIn('course_segment', $courseSegment)->where('user_id', $users)->first();
             if(isset($course_segment))
-                $course_segment->delete();
+                if ($course_segment->delete())
+                    return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
         }
-
-        if ($course_segment > 0)
-            return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
-
         return HelperController::api_response_format(200, null, __('messages.error.data_invalid'));
     }
 
