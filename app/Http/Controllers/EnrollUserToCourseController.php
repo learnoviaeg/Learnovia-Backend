@@ -128,8 +128,11 @@ class EnrollUserToCourseController extends Controller
         if ($courseSegment == null)
             return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
 
-        foreach ($request->user_id as $users)
-            $course_segment = Enroll::whereIn('course_segment', $courseSegment)->where('user_id', $users)->first()->delete();
+        foreach ($request->user_id as $users){
+            $course_segment = Enroll::whereIn('course_segment', $courseSegment)->where('user_id', $users)->first();
+            if(isset($course_segment))
+                $users->delete();
+        }
 
         if ($course_segment > 0)
             return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
