@@ -829,7 +829,7 @@ class AssigmentsController extends Controller
             $assignment_lesson->lesson_id = $lesson;
             $assignment_lesson->assignment_id = $request->assignment_id;
             $assignment_lesson->publish_date = $request->publish_date;
-            $assignment_lesson->allow_edit_answer = $request->allow_edit_answer;
+            $assignment_lesson->allow_edit_answer = isset($request->allow_edit_answer) ? $request->allow_edit_answer : 0;
             $assignment_lesson->start_date = $request->opening_date;
             $assignment_lesson->mark = $request->mark;
             $assignment_lesson->is_graded = $request->is_graded;
