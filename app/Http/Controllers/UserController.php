@@ -361,15 +361,15 @@ class UserController extends Controller
     public function delete(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+            'users_id' => 'required|array',
+            'users_id.*' => 'required|exists:users,id',
         ]);
 
-        $enrolls=Enroll::where('user_id',$request->id)->get();
-        $all=Enroll::where('user_id',$request->id)->delete();
+        $enrolls=Enroll::whereIn('user_id',$request->users_id)->get();
+        $all=Enroll::whereIn('user_id',$request->users_id)->delete();
         if($all > 0)
             event(new MassLogsEvent($enrolls,'deleted'));
-        $user = User::find($request->id);
-        $user->delete();
+        $user = User::whereIn('id',$request->users_id)->delete();
 
         return HelperController::api_response_format(201, null, __('messages.users.delete'));
     }
@@ -502,24 +502,27 @@ class UserController extends Controller
     public function suspend_user(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+            'users_id' => 'required|array',
+            'users_id.*' => 'required|exists:users,id',
         ]);
 
-        $user = User::find($request->id);
-        $check = $user->update([
-            'suspend' => 1,
-            'token' => null
-        ]);
-
-        $tokens = $user->tokens->where('revoked',false);
-
-        foreach($tokens as $token){
-            $token->revoke();
-        }
+        foreach($request->users_id as $user)
+        {
+            $user = User::find($user);
+            $user->update([
+                'suspend' => 1,
+                'token' => null
+            ]);
     
-        unset($user->tokens);
+            $tokens = $user->tokens->where('revoked',false);
+    
+            foreach($tokens as $token)
+                $token->revoke();
+        
+            unset($user->tokens);
+        }
 
-        return HelperController::api_response_format(201, $user, __('messages.users.user_blocked'));
+        return HelperController::api_response_format(201, null , __('messages.users.user_blocked'));
     }
 
     /**
@@ -531,13 +534,14 @@ class UserController extends Controller
     public function unsuspend_user(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+            'users_id' => 'required|array',
+            'users_id.*' => 'required|exists:users,id',
         ]);
-        $user = User::find($request->id);
-        $check = $user->update([
+
+        $user = User::whereIn('id',$request->users_id)->update([
             'suspend' => 0
         ]);
-        return HelperController::api_response_format(201, $user, __('messages.users.user_un_blocked'));
+        return HelperController::api_response_format(201, null, __('messages.users.user_un_blocked'));
     }
 
     /**
