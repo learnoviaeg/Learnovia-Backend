@@ -704,7 +704,7 @@ class AssigmentsController extends Controller
             $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
             if(isset($studentassigment)){
                 $assignment['user_submit'] =$studentassigment;
-                $assignment['allow_edit_answer'] =  $assigLessonID->allow_edit_answer;
+                $assignment['user_submit']['allow_edit_answer'] =  $assigLessonID->allow_edit_answer;
 
                 $usr=User::find($studentassigment->user_id);
                 if(isset($usr->attachment))
