@@ -146,7 +146,7 @@ class QuestionsController extends Controller
         ]);
 
         foreach ($request->Question as $question) {
-            $quest=Questions::firstOrCreate([
+            $quest=Questions::create([
                 'course_id' => $request->course_id,
                 'q_cat_id' => $request->q_cat_id,
                 'created_by' => Auth::id(),
@@ -158,7 +158,7 @@ class QuestionsController extends Controller
             if($question['type'] == 'Comprehension')
                 foreach($question['subQuestion'] as $sub){
                     if($sub['type'] == 'MCQ')
-                        Q_MCQ::firstOrCreate([
+                        Q_MCQ::create([
                             'question_id' => $quest->id,
                             'text' => $sub['text'],
                             'choices' => json_encode($sub['MCQ_Choices']),
@@ -168,7 +168,7 @@ class QuestionsController extends Controller
                 }
 
             elseif($question['type'] == 'MCQ')
-                Q_MCQ::firstOrCreate([
+                Q_MCQ::create([
                     'question_id' => $quest->id,
                     'text' => $question['text'],
                     'choices' => json_encode($question['MCQ_Choices']),
@@ -177,7 +177,7 @@ class QuestionsController extends Controller
             elseif($question['type'] == 'Match'){
                 $matches['match_a']=$question['match_a'];
                 $matches['match_b'] =$question['match_b'];
-                Q_Match::firstOrCreate([
+                Q_Match::create([
                     'question_id' => $quest->id,
                     'text' => $question['text'],
                     'matches' => json_encode($matches),

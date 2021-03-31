@@ -217,8 +217,7 @@ class UserQuizController extends Controller
                 $data = [
                     'user_quiz_id' => $request->user_quiz_id,
                     'question_id' => $question['id'],
-                    'answered' => 1,
-                    // 'force_submit' => 1,
+                    'answered' => 1
                 ];
 
                 switch ($question_type) {
@@ -293,14 +292,14 @@ class UserQuizController extends Controller
                         foreach($question['question'] as $one)
                         {
                             if($one['type'] == 'Essay')
-                                $data['user_answer'] = json_encode($question['content']);
+                                $data['user_answer'] = json_encode($one['content']);
 
                             if($one['type'] == 'MCQ')
-                                $data['user_answer'] = json_encode($question['MCQ_Choices']);
+                                $data['user_answer'] = json_encode($one['MCQ_Choices']);
 
                             if($one['type'] == 'T_F'){
                                 $t_f = [
-                                    'is_true' => $question['is_true'],
+                                    'is_true' => $one['is_true'],
                                 ];
                                 if (isset($one['and_why']))
                                     $t_f['and_why'] = $one['and_why'];

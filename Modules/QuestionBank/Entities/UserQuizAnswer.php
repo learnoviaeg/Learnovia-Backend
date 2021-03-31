@@ -13,7 +13,7 @@ class userQuizAnswer extends Model
 
     public function Question()
     {
-        return $this->belongsTo('Modules\QuestionBank\Entities\Questions', 'question_id', 'id');
+        return $this->belongsTo('App\Questions', 'question_id', 'id');
     }
 
     public function getMcqAnswersArrayAttribute()
