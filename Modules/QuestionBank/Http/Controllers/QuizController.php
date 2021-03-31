@@ -46,7 +46,7 @@ class QuizController extends Controller
              * type 2 => Without Question
              */
             'is_graded' => 'required|boolean',
-            'duration' => 'required|integer',
+            'duration' => 'required|integer|min:60', // by sec
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'feedback' => 'integer| in:1,2,3',
             /**

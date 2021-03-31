@@ -699,10 +699,13 @@ class AssigmentsController extends Controller
                 }
             }
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
+            
             $assignment['user_submit']=null;
             $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
             if(isset($studentassigment)){
                 $assignment['user_submit'] =$studentassigment;
+                $assignment['user_submit'] =  $assigLessonID->allow_edit_answer;
+
                 $usr=User::find($studentassigment->user_id);
                 if(isset($usr->attachment))
                     $usr->picture=$usr->attachment->path;
