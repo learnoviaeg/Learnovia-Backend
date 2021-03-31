@@ -362,7 +362,7 @@ class UserController extends Controller
     {
         $request->validate([
             'users_id' => 'required|array',
-            'users_id.*' => 'required|exists:users,id',
+            'users_id.*' => 'exists:users,id',
         ]);
 
         $enrolls=Enroll::whereIn('user_id',$request->users_id)->get();
@@ -503,7 +503,7 @@ class UserController extends Controller
     {
         $request->validate([
             'users_id' => 'required|array',
-            'users_id.*' => 'required|exists:users,id',
+            'users_id.*' => 'exists:users,id',
         ]);
 
         foreach($request->users_id as $user)
@@ -535,7 +535,7 @@ class UserController extends Controller
     {
         $request->validate([
             'users_id' => 'required|array',
-            'users_id.*' => 'required|exists:users,id',
+            'users_id.*' => 'exists:users,id',
         ]);
 
         $user = User::whereIn('id',$request->users_id)->update([
