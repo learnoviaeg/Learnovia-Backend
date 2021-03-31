@@ -114,7 +114,7 @@ return [
         'parent_choose_child'=> 'Please, choose your child first',
         'add' => 'User added successfully',
         'update' => 'User updated successfully',
-        'delete' => 'User deleted successfully',
+        'delete' => 'User/s deleted successfully',
         'list' => 'Users list',
         'all_list' => 'All users list',
         'count' => 'Users roles count',
