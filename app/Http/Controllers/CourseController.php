@@ -233,26 +233,24 @@ class CourseController extends Controller
         $editable = ['name', 'category_id', 'description', 'mandatory','short_name'];
         $course = Course::find($request->id);
         // if course has an image
-        if ($request->hasFile('image')) {
+        if ($request->hasFile('image')) 
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
-        }
-        foreach ($editable as $key) {
-            if ($request->filled($key)) {
+        
+        foreach ($editable as $key) 
+            if ($request->filled($key)) 
                 $course->$key = $request->$key;
-            }
-        }
+
         $course_segment = CourseSegment::where("course_id",$request->id);
-        if ($request->filled('start_date')) {
+        if ($request->filled('start_date')) 
              $course_segment->update(['start_date'=>$request->start_date]); 
-        }
-        if ($request->filled('end_date')) {
+        
+        if ($request->filled('end_date')) 
             $course_segment->update(['end_date' => $request->end_date]);
-        }
          
         $course->save();
         $req = new Request();
 
-          return HelperController::api_response_format(200, $this->get($req,2)->paginate(HelperController::GetPaginate($request)), __('messages.course.update'));
+        return HelperController::api_response_format(200, $this->get($req,2)->paginate(HelperController::GetPaginate($request)), __('messages.course.update'));
           // return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
     }
 
