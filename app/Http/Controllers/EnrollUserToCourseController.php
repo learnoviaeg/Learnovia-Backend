@@ -130,8 +130,9 @@ class EnrollUserToCourseController extends Controller
 
         $enroll = Enroll::whereIn('course_segment', $courseSegment)->whereIn('user_id', $request->user_id)->first();
         if(isset($enroll))
-            if ($enroll->delete())
-                return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
+            $enroll->delete();
+                
+        return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
     }
 
     /**
