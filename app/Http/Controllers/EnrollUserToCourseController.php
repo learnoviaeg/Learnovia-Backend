@@ -131,7 +131,7 @@ class EnrollUserToCourseController extends Controller
         foreach ($request->user_id as $users){
             $course_segment = Enroll::whereIn('course_segment', $courseSegment)->where('user_id', $users)->first();
             if(isset($course_segment))
-                $users->delete();
+                $course_segment->delete();
         }
 
         if ($course_segment > 0)
