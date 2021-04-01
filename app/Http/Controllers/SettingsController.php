@@ -60,12 +60,12 @@ class SettingsController extends Controller
 
         //validate the request
         $request->validate([
-            'key' => 'required|in:'.$settings,
+            'key' => 'required|in:'.implode(',',$settings->toArray()),
             'value' => 'required'
         ]);
 
         if(!$request->user()->can('settings/'.$request->key))
-            return response()->json(['message' => 'you dont have the permission to update that content.','body' => $new_timeline], 400);
+            return response()->json(['message' => 'you dont have the permission to update that content.','body' => null], 400);
 
         $setting = Settings::where('key',$request->key)->update([
             'value' => $request->value

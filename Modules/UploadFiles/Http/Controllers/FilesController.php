@@ -27,10 +27,22 @@ use  Modules\Page\Entities\pageLesson;
 use  Modules\Page\Entities\page;
 use App\Material;
 use  App\LastAction;
-
+use App\Repositories\SettingsReposiotryInterface;
 
 class FilesController extends Controller
 {
+
+    protected $setting;
+
+    /**
+     *constructor.
+     *
+     * @param SettingsReposiotryInterface $setting
+     */
+    public function __construct(SettingsReposiotryInterface $setting)
+    {
+        $this->setting = $setting;        
+    }
 
     public function install_file()
     {
@@ -202,10 +214,12 @@ class FilesController extends Controller
      */
     public function store(Request $request)
     {
+        $settings = $this->setting->get_value('upload_file_extensions');
+
         $request->validate([
             'name' => 'string|min:1',
             'Imported_file' => 'required|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss',
+            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
@@ -375,11 +389,13 @@ class FilesController extends Controller
      */
     public function update(Request $request)
     {
+        $settings = $this->setting->get_value('upload_file_extensions');
+
         $request->validate([
             'id'            => 'required|exists:files,id',
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss',
+            'Imported_file' => 'nullable|file|distinct|mimes:'.$settings,
             'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
