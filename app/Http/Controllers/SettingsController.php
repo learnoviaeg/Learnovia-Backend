@@ -23,7 +23,121 @@ class SettingsController extends Controller
         $settings = Settings::get();
 
         $settings->map(function ($setting){
-            $setting->value = explode(',',$setting->value);
+
+            if($setting->key == 'create_assignment_extensions'){
+
+                //all the extensions that our system support for the assignment
+                $all_create_extensions = collect(explode(',','txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,csv,doc,docx,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls'));
+                
+                //the extensions that the admin choose to use
+                $values = explode(',',$setting->value);
+
+                $new_values=collect();
+
+                //map every extension to see if it's choosen or not
+                $all_create_extensions->map(function ($value) use ($new_values,$values){
+                
+                    $index = false;
+                    if(in_array($value,$values)){
+                       $index = true;
+                    }
+
+                    $new_values->push([
+                        'name' => $value,
+                        'index' => $index
+                    ]);
+
+                });
+
+                $setting->value = $new_values;
+            }
+
+            if($setting->key == 'submit_assignment_extensions'){
+
+                //all the extensions that our system support for the assignment submission
+                $all_create_extensions = collect(explode(',','pdf,docs,doc,docx,xls,xlsx,ppt,pptx'));
+
+                //the extensions that the admin choose to use
+                $values = explode(',',$setting->value);
+
+                $new_values=collect();
+
+                //map every extension to see if it's choosen or not
+                $all_create_extensions->map(function ($value) use ($new_values,$values){
+                
+                    $index = false;
+                    if(in_array($value,$values)){
+                       $index = true;
+                    }
+
+                    $new_values->push([
+                        'name' => $value,
+                        'index' => $index
+                    ]);
+
+                });
+                
+                $setting->value = $new_values;
+            }
+
+            if($setting->key == 'upload_file_extensions'){
+
+                //all the extensions that our system support for the file upload
+                $all_create_extensions = collect(explode(',','pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss'));
+                
+                //the extensions that the admin choose to use
+                $values = explode(',',$setting->value);
+
+                $new_values=collect();
+
+                //map every extension to see if it's choosen or not
+                $all_create_extensions->map(function ($value) use ($new_values,$values){
+                
+                    $index = false;
+                    if(in_array($value,$values)){
+                       $index = true;
+                    }
+
+                    $new_values->push([
+                        'name' => $value,
+                        'index' => $index
+                    ]);
+
+                });
+                
+                $setting->value = $new_values;
+            }
+
+            if($setting->key == 'upload_media_extensions'){
+
+                //all the extensions that our system support for the media upload
+                $all_create_extensions = collect(explode(',','mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie,aac,au,flac,m3u,m4a,wma,ai,bmp,gdraw,ico,jpe,pct,pic,pict,svg,svgz,tif,tiff,3gp,dv,dif,f4v,m4v,mpg,rmvb,swf,swfl,webm,wmv,asf'));
+                
+                //the extensions that the admin choose to use
+                $values = explode(',',$setting->value);
+
+                $new_values=collect();
+
+                //map every extension to see if it's choosen or not
+                $all_create_extensions->map(function ($value) use ($new_values,$values){
+                
+                    $index = false;
+                    if(in_array($value,$values)){
+                       $index = true;
+                    }
+
+                    $new_values->push([
+                        'name' => $value,
+                        'index' => $index
+                    ]);
+
+                });
+                
+                $setting->value = $new_values;
+            }
+
+
+
             return $setting;
         });
         
@@ -66,14 +180,15 @@ class SettingsController extends Controller
         //validate the request
         $request->validate([
             'key' => 'required|in:'.implode(',',$settings->toArray()),
-            'value' => 'required'
+            'values' => 'array',
+            'values.*' => 'required'
         ]);
 
         if(!$request->user()->can('settings/'.$request->key))
             return response()->json(['message' => 'you dont have the permission to update that content.','body' => null], 400);
 
         $setting = Settings::where('key',$request->key)->update([
-            'value' => $request->value
+            'value' => implode(',',$request->values)
         ]);
 
         return response()->json(['message' => 'setting updated.','body' => $setting], 200);
