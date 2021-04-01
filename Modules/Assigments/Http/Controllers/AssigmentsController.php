@@ -41,10 +41,22 @@ use Modules\QuestionBank\Entities\Quiz;
 use App\LastAction;
 use NcJoes\OfficeConverter\OfficeConverter;
 use Illuminate\Support\Facades\App;
-use App\Settings;
+use App\Repositories\SettingsReposiotryInterface;
 
 class AssigmentsController extends Controller
 {
+    protected $setting;
+
+    /**
+     *constructor.
+     *
+     * @param SettingsReposiotryInterface $setting
+     */
+    public function __construct(SettingsReposiotryInterface $setting)
+    {
+        $this->setting = $setting;        
+    }
+
     public function install_Assignment()
     {
         if (\Spatie\Permission\Models\Permission::whereName('assignment/add')->first() != null) {
@@ -207,7 +219,7 @@ class AssigmentsController extends Controller
     //Create assignment
     public function createAssigment(Request $request)
     {
-        $settings = Settings::where('key','create_assignment_extensions')->pluck('value')->first();
+        $settings = $this->setting->get_value('create_assignment_extensions');
 
         $request->validate([
             'name' => 'required|string',
@@ -253,7 +265,7 @@ class AssigmentsController extends Controller
 
         if ($request->hasFile('file')) {
 
-            $settings = Settings::where('key','create_assignment_extensions')->pluck('value')->first();
+            $settings = $this->setting->get_value('create_assignment_extensions');
 
             $request->validate([
                 'file' => 'file|distinct|mimes:'.$settings,
@@ -404,7 +416,7 @@ class AssigmentsController extends Controller
     public function submitAssigment(Request $request)
     {
         //to get the allowed extensions for submission
-        $settings = Settings::where('key','submit_assignment_extensions')->pluck('value')->first();
+        $settings = $this->setting->get_value('submit_assignment_extensions');
 
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
