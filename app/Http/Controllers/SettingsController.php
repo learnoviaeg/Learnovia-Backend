@@ -136,8 +136,6 @@ class SettingsController extends Controller
                 $setting->value = $new_values;
             }
 
-
-
             return $setting;
         });
         
@@ -179,19 +177,23 @@ class SettingsController extends Controller
 
         //validate the request
         $request->validate([
-            'key' => 'required|in:'.implode(',',$settings->toArray()),
-            'values' => 'array',
-            'values.*' => 'required'
+            'object' => 'array|required',
+            'object.*.key' => 'required|in:'.implode(',',$settings->toArray()),
+            'object.*.values' => 'array',
+            'object.*.values.*' => 'required',
         ]);
 
-        if(!$request->user()->can('settings/'.$request->key))
-            return response()->json(['message' => 'you dont have the permission to update that content.','body' => null], 400);
+        foreach($request->object as $object){
 
-        $setting = Settings::where('key',$request->key)->update([
-            'value' => implode(',',$request->values)
-        ]);
+            if(!$request->user()->can('settings/'.$object['key']))
+                return response()->json(['message' => 'you dont have the permission to update that content.','body' => null], 400);
 
-        return response()->json(['message' => 'setting updated.','body' => $setting], 200);
+            $setting = Settings::where('key',$object['key'])->update([
+                'value' => implode(',',$object['values'])
+            ]);
+        }
+
+        return response()->json(['message' => 'setting updated.','body' => null], 200);
     }
 
     /**
