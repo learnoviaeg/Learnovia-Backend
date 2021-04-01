@@ -532,30 +532,30 @@ class SpatieController extends Controller
 
             Settings::create([
                 'key' => 'create_assignment_extensions',
-                'title' => 'Create Assignment Supported Extensions',
+                'title' => 'Create/Edit Assignment Supported Extensions',
                 'value' => 'txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,csv,doc,docx,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls',
-                'type' => 'file'
+                'type' => 'extensions'
             ]);
 
             Settings::create([
                 'key' => 'submit_assignment_extensions',
                 'title' => 'Submit Assignment Supported Extensions',
                 'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx',
-                'type' => 'file'
+                'type' => 'extensions'
             ]);
 
             Settings::create([
                 'key' => 'upload_file_extensions',
                 'title' => 'Upload File Supported Extensions',
                 'value' => 'pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss',
-                'type' => 'file'
+                'type' => 'extensions'
             ]);
 
             Settings::create([
                 'key' => 'upload_media_extensions',
                 'title' => 'Upload Media Supported Extensions',
                 'value' => 'mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie,aac,au,flac,m3u,m4a,wma,ai,bmp,gdraw,ico,jpe,pct,pic,pict,svg,svgz,tif,tiff,3gp,dv,dif,f4v,m4v,mpg,rmvb,swf,swfl,webm,wmv,asf',
-                'type' => 'file'
+                'type' => 'extensions'
             ]);
 
             return "System Installed Your User is $user->email and Password is Learnovia123.";
