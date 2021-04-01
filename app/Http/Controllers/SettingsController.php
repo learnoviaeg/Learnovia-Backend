@@ -22,6 +22,11 @@ class SettingsController extends Controller
     {
         $settings = Settings::get();
 
+        $settings->map(function ($setting){
+            $setting->value = explode(',',$setting->value);
+            return $setting;
+        });
+        
         return response()->json(['message' => 'settings List.','body' => $settings], 200);
     }
 
