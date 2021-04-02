@@ -1003,7 +1003,7 @@ class AssigmentsController extends Controller
             $contents= collect();
             $contents->push($request->content);
 
-            if(str_contains($request->content , '<img') || str_contains($char , '<video') || str_contains($char , '<audio')){
+            if(str_contains($request->content , '<img') || str_contains($request->content , '<video') || str_contains($request->content , '<audio')){
                 $contents= collect();
                 $chars = preg_split('/<[^img>]*[^\/]>/i', $request->content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
                 $i = null;
