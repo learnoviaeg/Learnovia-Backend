@@ -32,7 +32,7 @@ Route::group(['prefix' => 'assignment', 'middleware' =>[ 'auth:api','LastAction'
     Route::get('get','AssigmentsController@GetAssignment')->name('getAssignment')->middleware(['permission:assignment/get' , 'ParentCheck']);
     Route::post('toggle', 'AssigmentsController@toggleAssignmentVisibity')->middleware('permission:assignment/toggle');
     Route::post('assignment-override', 'AssigmentsController@overrideAssignment')->middleware('permission:assignment/assignment-override');
-    Route::get('annotate', 'AssigmentsController@AnnotatePDF')->middleware('permission:assignment/grade');
+    Route::post('annotate', 'AssigmentsController@AnnotatePDF')->middleware('permission:assignment/grade');
     Route::get('overwrite-script', 'AssigmentsController@overwriteScript')->middleware('permission:site/show-all-courses');
     // Route::get('get-all', 'AssigmentsController@getAllAssigment')->middleware('permission:assignment/get-all');
 });
