@@ -51,7 +51,6 @@ class CoursesController extends Controller
             'search' => 'nullable',
         ]);
 
-
         $paginate = 12;
         if($request->has('paginate')){
             $paginate = $request->paginate;

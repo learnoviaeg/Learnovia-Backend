@@ -485,8 +485,8 @@ class AssigmentsController extends Controller
         
         if($request->file == "No_file")
         {
-            $assigment->attachment_id=null;
-            $assigment->save();
+            $userassigment->attachment_id=null;
+            $userassigment->save();
         }
 
         if ($request->hasFile('file')) {
