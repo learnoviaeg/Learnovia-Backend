@@ -200,7 +200,10 @@ class QuestionsController extends Controller
      */
     public function show($id)
     {
-        //
+        $question = Questions::find($id);
+        $q=$question->where('type',$question->type)->with($question->type.'_question')->get();
+
+        return HelperController::api_response_format(200, $q, __('messages.question.show'));
     }
 
     /**
@@ -212,7 +215,26 @@ class QuestionsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $question = Questions::findOrFail($id);
+        $request->validate([
+            //for interface model
+            'course_id' => 'integer|exists:courses,id',
+            'q_cat_id' => 'integer|exists:questions_categories,id',
+            //for request of creation multi type questions
+            'text' => 'string', //need in every type_question
+        ]);
+
+        $quest=Questions::where('id',$id)->update([
+            'course_id' => isset($request->course_id) ? $request->course_id : $question->course_id,
+            'q_cat_id' => isset($request->q_cat_id) ? $request->q_cat_id : $question->q_cat_id,
+            'created_by' => Auth::id(),
+            'text' => isset($request->text) ? $request->text : $question->text,
+        ]);
+
+        // if($question->type != 'Comprehension')
+        //     $q= $question->{$question->type.'_question'}()->update($request->toArray());
+
+        return HelperController::api_response_format(200, [], __('messages.question.update'));
     }
 
     /**
@@ -223,6 +245,14 @@ class QuestionsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $question = Questions::find($id);
+        if(!isset($question))
+            return HelperController::api_response_format(200, [], __('messages.question.error'));
+
+        $question = Questions::where('id',$id)->delete();
+        $question = QuizQuestions::where('question_id',$id)->delete();
+        $question = UserQuizAnswer::where('question_id',$id)->delete();
+
+        return HelperController::api_response_format(200, [], __('messages.question.delete'));
     }
 }

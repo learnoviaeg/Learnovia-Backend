@@ -71,6 +71,8 @@ return [
         'count' => 'Questions count',
         'answer_delete' => 'Question answer deleted successfully',
         'list' => 'Questions List',
+        'show' => 'Question is',
+        'error' => 'not found',
         'question_type_error' => 'This Question is not Essay or true and false',
     ],
     'answer' => [
