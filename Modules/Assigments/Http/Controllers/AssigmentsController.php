@@ -482,8 +482,14 @@ class AssigmentsController extends Controller
                 }
             }
         }
+        
+        if($request->file == "No_file")
+        {
+            $assigment->attachment_id=null;
+            $assigment->save();
+        }
 
-        if (isset($request->file)) {
+        if ($request->hasFile('file')) {
             $request->validate([
                 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
             ]);
