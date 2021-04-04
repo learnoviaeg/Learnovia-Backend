@@ -421,7 +421,7 @@ class AssigmentsController extends Controller
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'file' => 'file|distinct|mimes:'.$settings,
+            // 'file' => 'file|distinct|mimes:'.$settings,
         ];
         $customMessages = [
             'file.mimes' => __('messages.error.extension_not_supported')
@@ -491,8 +491,9 @@ class AssigmentsController extends Controller
 
         if ($request->hasFile('file')) {
             $request->validate([
-                'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
-            ]);
+                // 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
+                'file' => 'file|distinct|mimes:'.$settings,
+                ]);
             if (isset($request->file_description)) {
                 $description = $request->file_description;
             } else {
