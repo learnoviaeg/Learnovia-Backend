@@ -179,8 +179,8 @@ class SettingsController extends Controller
         $request->validate([
             'object' => 'array|required',
             'object.*.key' => 'required|in:'.implode(',',$settings->toArray()),
-            'object.*.values' => 'array',
-            'object.*.values.*' => 'required',
+            'object.*.values' => 'array|required',
+            'object.*.values.*' => 'string',
         ]);
 
         foreach($request->object as $object){
