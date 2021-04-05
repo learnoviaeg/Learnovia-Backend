@@ -27,7 +27,6 @@ class AC_year_type extends Controller
      * @return : response of all Years with its Typs
      *
      */
-
     public function List_Years_with_types(Request $request)
     {
         $request->validate([
@@ -50,7 +49,6 @@ class AC_year_type extends Controller
                 return HelperController::api_response_format(200, $types->get());
             else
                 return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)));
-
         }
     }
 
