@@ -15,6 +15,7 @@ use App\Classes;
 use Illuminate\Support\Facades\Storage;
 use URL;
 use Auth;
+use App;
 use checkEnroll;
 use Carbon\Carbon;
 use App\CourseSegment;
