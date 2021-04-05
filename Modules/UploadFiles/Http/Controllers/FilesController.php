@@ -291,6 +291,9 @@ class FilesController extends Controller
                         $singlefile,
                         $name
                     );
+                    Log::debug('file daaaaata '. $singlefile,
+                    $name);
+
                 }
             }
         }
