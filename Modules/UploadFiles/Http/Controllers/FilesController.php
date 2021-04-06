@@ -32,18 +32,17 @@ use App\Repositories\SettingsReposiotryInterface;
 
 class FilesController extends Controller
 {
-
-    protected $setting;
+    // protected $setting;
 
     /**
      *constructor.
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
-    {
-        $this->setting = $setting;        
-    }
+    // public function __construct(SettingsReposiotryInterface $setting)
+    // {
+    //     $this->setting = $setting;        
+    // }
 
     public function install_file()
     {
@@ -215,12 +214,12 @@ class FilesController extends Controller
      */
     public function store(Request $request)
     {
-        $settings = $this->setting->get_value('upload_file_extensions');
+        // $settings = $this->setting->get_value('upload_file_extensions');
 
         $request->validate([
             'name' => 'string|min:1',
             'Imported_file' => 'required|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
+            // 'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
@@ -252,7 +251,7 @@ class FilesController extends Controller
                 $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
                 $file->url2 = 'files/' . $name;
                 $check = $file->save();
-                Log::debug('file heeeeeeeeeeeere '. $file);
+                // Log::debug('file heeeeeeeeeeeere '. $file);
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
                 $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $tempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
@@ -291,8 +290,7 @@ class FilesController extends Controller
                         $singlefile,
                         $name
                     );
-                    Log::debug('file daaaaata '. $singlefile,
-                    $name);
+                    // Log::debug('file daaaaata '. $singlefile,$name);
 
                 }
             }
@@ -394,13 +392,13 @@ class FilesController extends Controller
      */
     public function update(Request $request)
     {
-        $settings = $this->setting->get_value('upload_file_extensions');
+        // $settings = $this->setting->get_value('upload_file_extensions');
 
         $request->validate([
             'id'            => 'required|exists:files,id',
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|distinct|mimes:'.$settings,
+            // 'Imported_file' => 'nullable|file|distinct|mimes:'.$settings,
             'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
