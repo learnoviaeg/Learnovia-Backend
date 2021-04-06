@@ -263,7 +263,7 @@ class AssigmentsController extends Controller
             $assigment->save();
         }
 
-        if ($request->hasFile('file')) {
+        else if ($request->hasFile('file')) {
 
             $settings = $this->setting->get_value('create_assignment_extensions');
 
