@@ -45,17 +45,17 @@ use App\Repositories\SettingsReposiotryInterface;
 
 class AssigmentsController extends Controller
 {
-    protected $setting;
+    // protected $setting;
 
     /**
      *constructor.
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
-    {
-        $this->setting = $setting;        
-    }
+    // public function __construct(SettingsReposiotryInterface $setting)
+    // {
+    //     $this->setting = $setting;        
+    // }
 
     public function install_Assignment()
     {
@@ -219,12 +219,12 @@ class AssigmentsController extends Controller
     //Create assignment
     public function createAssigment(Request $request)
     {
-        $settings = $this->setting->get_value('create_assignment_extensions');
+        // $settings = $this->setting->get_value('create_assignment_extensions');
 
         $request->validate([
             'name' => 'required|string',
             'content' => 'string|required_without:file',
-            'file' => 'file|distinct|required_without:content|mimes:'.$settings,
+            // 'file' => 'file|distinct|required_without:content|mimes:'.$settings,
         ]);
        
         $assignment = new assignment;
@@ -265,11 +265,11 @@ class AssigmentsController extends Controller
 
         if ($request->hasFile('file')) {
 
-            $settings = $this->setting->get_value('create_assignment_extensions');
+            // $settings = $this->setting->get_value('create_assignment_extensions');
 
-            $request->validate([
-                'file' => 'file|distinct|mimes:'.$settings,
-            ]);
+            // $request->validate([
+            //     'file' => 'file|distinct|mimes:'.$settings,
+            // ]);
 
             $description = (isset($request->file_description))? $request->file_description :null;
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
@@ -416,7 +416,7 @@ class AssigmentsController extends Controller
     public function submitAssigment(Request $request)
     {
         //to get the allowed extensions for submission
-        $settings = $this->setting->get_value('submit_assignment_extensions');
+        // $settings = $this->setting->get_value('submit_assignment_extensions');
 
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
@@ -492,7 +492,7 @@ class AssigmentsController extends Controller
         if ($request->hasFile('file')) {
             $request->validate([
                 // 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
-                'file' => 'file|distinct|mimes:'.$settings,
+                // 'file' => 'file|distinct|mimes:'.$settings,
                 ]);
             if (isset($request->file_description)) {
                 $description = $request->file_description;

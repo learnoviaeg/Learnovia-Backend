@@ -32,18 +32,17 @@ use App\Repositories\SettingsReposiotryInterface;
 
 class FilesController extends Controller
 {
-
-    protected $setting;
+    // protected $setting;
 
     /**
      *constructor.
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
-    {
-        $this->setting = $setting;        
-    }
+    // public function __construct(SettingsReposiotryInterface $setting)
+    // {
+    //     $this->setting = $setting;        
+    // }
 
     public function install_file()
     {
@@ -215,12 +214,12 @@ class FilesController extends Controller
      */
     public function store(Request $request)
     {
-        $settings = $this->setting->get_value('upload_file_extensions');
+        // $settings = $this->setting->get_value('upload_file_extensions');
 
         $request->validate([
             'name' => 'string|min:1',
             'Imported_file' => 'required|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
+            // 'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
@@ -394,13 +393,13 @@ class FilesController extends Controller
      */
     public function update(Request $request)
     {
-        $settings = $this->setting->get_value('upload_file_extensions');
+        // $settings = $this->setting->get_value('upload_file_extensions');
 
         $request->validate([
             'id'            => 'required|exists:files,id',
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|distinct|mimes:'.$settings,
+            // 'Imported_file' => 'nullable|file|distinct|mimes:'.$settings,
             'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
