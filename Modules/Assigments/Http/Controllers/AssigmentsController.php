@@ -257,13 +257,7 @@ class AssigmentsController extends Controller
         if (count($CheckIfAnswered) > 0)
             return HelperController::api_response_format(400, null, __('messages.assignment.cant_update'));
 
-        if($request->file == "No_file")
-        {
-            $assigment->attachment_id=null;
-            $assigment->save();
-        }
-
-        else if ($request->hasFile('file')) {
+        if ($request->hasFile('file')) {
 
             $settings = $this->setting->get_value('create_assignment_extensions');
 
@@ -274,6 +268,8 @@ class AssigmentsController extends Controller
             $description = (isset($request->file_description))? $request->file_description :null;
             $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
+        if($request->file == 'No_file')
+            $assigment->attachment_id=null;
 
         if ($request->filled('content'))
             $assigment->content = $request->content;
@@ -421,7 +417,6 @@ class AssigmentsController extends Controller
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'file' => 'file|distinct|mimes:'.$settings,
         ];
         $customMessages = [
             'file.mimes' => __('messages.error.extension_not_supported')
@@ -482,14 +477,8 @@ class AssigmentsController extends Controller
                 }
             }
         }
-        
-        if($request->file == "No_file")
-        {
-            $userassigment->attachment_id=null;
-            $userassigment->save();
-        }
 
-        else if ($request->hasFile('file')) {
+        if ($request->hasFile('file')) {
             $request->validate([
                 // 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
                 'file' => 'file|distinct|mimes:'.$settings,
@@ -501,9 +490,8 @@ class AssigmentsController extends Controller
             }
             $userassigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         } 
-        // else {
-        //     $userassigment->attachment_id = null;
-        // }
+        if($request->file == 'No_file')
+            $userassigment->attachment_id=null;
         
         if (isset($request->content)) {
             $userassigment->content = $request->content;

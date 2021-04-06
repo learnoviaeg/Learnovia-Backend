@@ -25,9 +25,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Enroll;
 
 class segment_class_Controller extends Controller
-
 {
-
     /**
      * @Description: Get all Classes with its Segments
      * @param: no take parameters
@@ -173,51 +171,6 @@ class segment_class_Controller extends Controller
      *
      * ``
      */
-    // public function Add_Segment_with_class(Request $req)
-    // {
-    //     $valid = Validator::make($req->all(), [
-    //         'name' => 'required',
-    //         'year' => 'required|exists:academic_years,id',
-    //         'type' => 'required|exists:academic_types,id',
-    //         'level' => 'required|exists:levels,id',
-    //         'class' => 'required|exists:classes,id',
-    //     ]);
-
-    //     if ($valid->fails()) {
-    //         return HelperController::api_response_format(400, $valid->errors());
-    //     }
-
-    //     $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
-    //     $yearlevel = YearLevel::checkRelation($yeartype->id, $req->level);
-    //     $classLevel = ClassLevel::checkRelation($req->class, $yearlevel->id);
-    //     $type = AcademicType::find($req->type);
-    //     $count = SegmentClass::whereClass_level_id($classLevel->id)->count();
-    //     if ($count >= $type->segment_no) {
-    //         return HelperController::api_response_format(200, null, 'This class has its all segments before');
-    //     }
-    //     $segment = Segment::firstOrCreate([
-    //         'name' => $req->name,
-    //         'academic_type_id'=>$req->type
-    //     ]);
-
-    //     SegmentClass::firstOrCreate([
-    //         'class_level_id' => $classLevel->id,
-    //         'segment_id' => $segment->id,
-    //     ]);
-
-    //     if ($segment) {
-    //         $req['id'] = null;
-    //         unset($req['year']);
-    //         $req['returnmsg'] = 'add';
-    //         $print = self::get($req);
-    //         return $print;
-    //         // return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), 'segment insertion sucess');
-    //     }
-    //     return HelperController::NOTFOUND();
-
-    // }
-
-
     public function Add_Segment_with_class(Request $req)
     {
         $valid = Validator::make($req->all(), [
