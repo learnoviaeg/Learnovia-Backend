@@ -52,10 +52,10 @@ class AssigmentsController extends Controller
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
-    {
-        $this->setting = $setting;        
-    }
+    // public function __construct(SettingsReposiotryInterface $setting)
+    // {
+    //     $this->setting = $setting;        
+    // }
 
     public function install_Assignment()
     {
@@ -263,7 +263,7 @@ class AssigmentsController extends Controller
             $assigment->save();
         }
 
-        if ($request->hasFile('file')) {
+        else if ($request->hasFile('file')) {
 
             $settings = $this->setting->get_value('create_assignment_extensions');
 
@@ -421,7 +421,7 @@ class AssigmentsController extends Controller
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'file' => 'file|distinct|mimes:'.$settings,
+            // 'file' => 'file|distinct|mimes:'.$settings,
         ];
         $customMessages = [
             'file.mimes' => __('messages.error.extension_not_supported')
