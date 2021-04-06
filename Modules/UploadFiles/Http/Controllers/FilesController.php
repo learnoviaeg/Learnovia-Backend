@@ -39,10 +39,10 @@ class FilesController extends Controller
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
-    {
-        $this->setting = $setting;        
-    }
+    // public function __construct(SettingsReposiotryInterface $setting)
+    // {
+    //     $this->setting = $setting;        
+    // }
 
     public function install_file()
     {

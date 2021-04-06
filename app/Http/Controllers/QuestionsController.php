@@ -103,9 +103,192 @@ class QuestionsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request,$type=null)
     {
-        //
+        $request->validate([
+            //for interface model
+            'course_id' => 'required|integer|exists:courses,id',
+            'question_category_id' => 'required|integer|exists:questions_categories,id',
+            //for request of creation multi type questions
+            'Question' => 'required|array',
+            'Question.*.question_type_id' => 'required|exists:questions_types,id', 
+            'Question.*.text' => 'required|string', //need in every type_question
+            'Question.*.is_true' => 'required_if:Question.*.type,==,T_F|boolean', //for true-false
+            'Question.*.and_why' => 'boolean', //if question t-f and have and_why question
+            //MCQ validation
+            'Question.*.MCQ_Choices' => 'required_if:Question.*.type,==,MCQ|array',
+            'Question.*.MCQ_Choices.*.is_true' => 'required_if:Question.*.type,==,MCQ|boolean',
+            'Question.*.MCQ_Choices.*.content' => 'required_if:Question.*.type,==,MCQ|string',
+            //Comprehension 
+            'Question.*.subQuestion' => 'array|required_if:Question.*.type,==,Comprehension',
+            'Question.*.subQuestion.*.type' => 'required_if:Question.*.type,==,Comprehension|in:MCQ,Essay,T_F,Match',
+            'Question.*.subQuestion.*.text' => 'required_if:Question.*.type,==,Comprehension|string',
+            'Question.*.subQuestion.*.is_true' => 'required_if:Question.*.subQuestion.*.type,==,T_F|boolean', //for true-false
+            'Question.*.subQuestion.*.and_why' => 'boolean', //if question t-f and have and_why question
+            'Question.*.subQuestion.*.MCQ_Choices' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|array',
+            'Question.*.subQuestion.*.MCQ_Choices.*.is_true' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|boolean',
+            'Question.*.subQuestion.*.MCQ_Choices.*.content' => 'required_if:Question.*.subQuestion.*.type,==,MCQ|string',
+            //Match
+            // 'Question.*.matches' => 'required_if:Question.*.type,==,Match|array',
+            'Question.*.match_a' => 'required_if:Question.*.type,==,Match|array',
+            'Question.*.match_b' => 'required_if:Question.*.type,==,Match|array'
+        ]);
+
+        foreach ($request->Questions as $index => $question) {
+            if(isset($question['id'])){
+                $currentQuestion = Questions::find($question['id']);
+                $question_type = $currentQuestion->type;
+
+                $data = [
+                    'user_quiz_id' => $request->user_quiz_id,
+                    'question_id' => $question['id'],
+                    'answered' => 1
+                ];
+
+                switch ($question_type) {
+                    case 'T_F': // True_false
+                        # code...
+                        $request->validate([
+                            'Questions.' . $index . '.is_true' => 'required|boolean',
+                            'Questions.' . $index . '.and_why' => 'nullable|string',
+                        ]);
+
+                        $t_f = [
+                            'is_true' => $question['is_true'],
+                        ];
+                        // $data['user_grade'] = ($answer->is_true == 1) ? $currentQuestion->mark : 0;
+                        if (isset($question['and_why']))
+                            $t_f['and_why'] = $question['and_why'];
+                        
+                        $data['user_answer'] = json_encode($t_f);
+                        break;
+
+                    case 'MCQ': // MCQ
+                        # code...
+                        $request->validate([
+                            'Questions.' . $index . '.MCQ_Choices' => 'required|array',
+                        ]);
+                        // $data['user_grade'] = ($flag == 1) ? $currentQuestion->mark : 0;
+
+                        $data['user_answer'] = json_encode($question['MCQ_Choices']);
+                        break;
+
+                    case 'Match': // Match
+                        $answers=collect();
+                        # code...
+                        $request->validate([
+                            'Questions.' . $index . '.match_a' => 'required|array',
+                            'Questions.' . $index . '.match_b' => 'required|array',
+                        ]);
+                        $answers['match_a']=$question['match_a'];
+                        $answers['match_b'] =$question['match_b'];
+
+                        $data['user_answer'] = json_encode($answers);
+                        // $data['user_grade'] = $grade;
+
+                        break;
+
+                    case 'Essay': // Essay
+                        # code...
+                        $request->validate([
+                            'Questions.' . $index . '.content' => 'required|string',
+                        ]);
+                        $data['user_answer'] = json_encode($question['content']);
+                        break;
+
+                    case 'Comprehension': // Paragraph
+                        # code...
+                        $request->validate([
+                            'Questions.*.question' => 'required|array',
+                            'Questions.*.question.*.id' => 'required',
+                            'Questions.*.question.*.type' => 'required|in:MCQ,Essay,T_F,Match',
+                            // if essay
+                            'Questions.*.question.*.content' => 'required_if:Questions.*.question.*.type,==,Essay|string',
+                            // if match
+                            'Questions.*.question.*.match_a' => 'required_if:Questions.*.question.*.type,==,Match|array',
+                            'Questions.*.question.*.match_b' => 'required_if:Questions.*.question.*.type,==,Match|array',
+                            // if mcq
+                            'Questions.*.question.*.MCQ_Choices' => 'required_if:Questions.*.question.*.type,==,MCQ|array',
+                            //if t/f
+                            'Questions.*.question.*.is_true' => 'required_if:Questions.*.question.*.type,==,T_F|boolean',
+                            'Questions.*.question.*.and_why' => 'nullable|string',              
+                        ]);
+
+                        foreach($question['question'] as $one)
+                        {
+                            if($one['type'] == 'Essay')
+                                $data['user_answer'] = json_encode($one['content']);
+
+                            if($one['type'] == 'MCQ')
+                                $data['user_answer'] = json_encode($one['MCQ_Choices']);
+
+                            if($one['type'] == 'T_F'){
+                                $t_f = [
+                                    'is_true' => $one['is_true'],
+                                ];
+                                if (isset($one['and_why']))
+                                    $t_f['and_why'] = $one['and_why'];
+                                
+                                $data['user_answer'] = json_encode($t_f);
+                            }
+                            if($one['type'] == 'Match'){
+                                $answers['match_a']=$one['match_a'];
+                                $answers['match_b'] =$one['match_b'];
+        
+                                $data['user_answer'] = json_encode($answers);
+                            }
+                        }
+
+                        break;
+                }
+                $allData->push($data);
+
+            }
+        }foreach ($request->Question as $question) {
+            $quest=Questions::create([
+                'course_id' => $request->course_id,
+                'question_category_id' => $request->question_category_id,
+                'created_by' => Auth::id(),
+                'text' => $question['text'],
+                'question_type_id' => $$question['question_type_id']
+            ]);
+            $quests[]=$quest->id;
+            $matches=collect();
+            if($question['type'] == 'Comprehension')
+                foreach($question['subQuestion'] as $sub){
+                    if($sub['type'] == 'MCQ')
+                        Q_MCQ::create([
+                            'question_id' => $quest->id,
+                            'text' => $sub['text'],
+                            'choices' => json_encode($sub['MCQ_Choices']),
+                        ]);
+                    else
+                        $q= $quest->{$sub['type'].'_question'}()->create($sub); //firstOrNew //insertOrIgnore //createOrFirst doen't work
+                }
+
+            elseif($question['type'] == 'MCQ')
+                $data=[
+                    'question_id' => $quest->id,
+                    'text' => $question['text'],
+                    'choices' => json_encode($question['MCQ_Choices']),
+                ];
+
+            elseif($question['type'] == 'Match'){
+                $matches['match_a']=$question['match_a'];
+                $matches['match_b'] =$question['match_b'];
+                Q_Match::create([
+                    'question_id' => $quest->id,
+                    'text' => $question['text'],
+                    'matches' => json_encode($matches),
+                ]);
+            }
+            else
+                $q= $quest->{$question['type'].'_question'}()->create($question);
+        }
+        if($type == 1)  
+            return $quests;
+
+        return HelperController::api_response_format(200, [], __('messages.question.add'));
     }
 
     /**
