@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\QuestionsType;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use App\Paginate;
@@ -134,116 +135,100 @@ class QuestionsController extends Controller
             'Question.*.match_b' => 'required_if:Question.*.type,==,Match|array'
         ]);
 
-        foreach ($request->Questions as $index => $question) {
-            if(isset($question['id'])){
-                $currentQuestion = Questions::find($question['id']);
-                $question_type = $currentQuestion->type;
+        $data=array();
+        $t_f=array();
+        foreach ($request->Question as $index => $question) {
+            switch ($question['question_type_id']) {
+                case 1: // True_false
+                    # code...
+                    $t_f = [
+                        'is_true' => $question['is_true'],
+                    ];
+                    if (isset($question['and_why']))
+                        $t_f['and_why'] = $question['and_why'];
+                    
+                    $data['content'] = json_encode($t_f);
+                    break;
 
-                $data = [
-                    'user_quiz_id' => $request->user_quiz_id,
-                    'question_id' => $question['id'],
-                    'answered' => 1
-                ];
+                case 2: // MCQ
+                    # code...
+                    $request->validate([
+                        'Questions.' . $index . '.MCQ_Choices' => 'required|array',
+                    ]);
+                    // $data['user_grade'] = ($flag == 1) ? $currentQuestion->mark : 0;
 
-                switch ($question_type) {
-                    case 'T_F': // True_false
-                        # code...
-                        $request->validate([
-                            'Questions.' . $index . '.is_true' => 'required|boolean',
-                            'Questions.' . $index . '.and_why' => 'nullable|string',
-                        ]);
+                    $data['content'] = json_encode($question['MCQ_Choices']);
+                    break;
 
-                        $t_f = [
-                            'is_true' => $question['is_true'],
-                        ];
-                        // $data['user_grade'] = ($answer->is_true == 1) ? $currentQuestion->mark : 0;
-                        if (isset($question['and_why']))
-                            $t_f['and_why'] = $question['and_why'];
-                        
-                        $data['user_answer'] = json_encode($t_f);
-                        break;
+                case 3: // Match
+                    $answers=collect();
+                    # code...
+                    $request->validate([
+                        'Questions.' . $index . '.match_a' => 'required|array',
+                        'Questions.' . $index . '.match_b' => 'required|array',
+                    ]);
+                    $answers['match_a']=$question['match_a'];
+                    $answers['match_b'] =$question['match_b'];
 
-                    case 'MCQ': // MCQ
-                        # code...
-                        $request->validate([
-                            'Questions.' . $index . '.MCQ_Choices' => 'required|array',
-                        ]);
-                        // $data['user_grade'] = ($flag == 1) ? $currentQuestion->mark : 0;
+                    $data['user_answer'] = json_encode($answers);
+                    // $data['user_grade'] = $grade;
 
-                        $data['user_answer'] = json_encode($question['MCQ_Choices']);
-                        break;
+                    break;
 
-                    case 'Match': // Match
-                        $answers=collect();
-                        # code...
-                        $request->validate([
-                            'Questions.' . $index . '.match_a' => 'required|array',
-                            'Questions.' . $index . '.match_b' => 'required|array',
-                        ]);
-                        $answers['match_a']=$question['match_a'];
-                        $answers['match_b'] =$question['match_b'];
+                case 'Essay': // Essay
+                    # code...
+                    $request->validate([
+                        'Questions.' . $index . '.content' => 'required|string',
+                    ]);
+                    $data['user_answer'] = json_encode($question['content']);
+                    break;
 
-                        $data['user_answer'] = json_encode($answers);
-                        // $data['user_grade'] = $grade;
+                case 'Comprehension': // Paragraph
+                    # code...
+                    $request->validate([
+                        'Questions.*.question' => 'required|array',
+                        'Questions.*.question.*.id' => 'required',
+                        'Questions.*.question.*.type' => 'required|in:MCQ,Essay,T_F,Match',
+                        // if essay
+                        'Questions.*.question.*.content' => 'required_if:Questions.*.question.*.type,==,Essay|string',
+                        // if match
+                        'Questions.*.question.*.match_a' => 'required_if:Questions.*.question.*.type,==,Match|array',
+                        'Questions.*.question.*.match_b' => 'required_if:Questions.*.question.*.type,==,Match|array',
+                        // if mcq
+                        'Questions.*.question.*.MCQ_Choices' => 'required_if:Questions.*.question.*.type,==,MCQ|array',
+                        //if t/f
+                        'Questions.*.question.*.is_true' => 'required_if:Questions.*.question.*.type,==,T_F|boolean',
+                        'Questions.*.question.*.and_why' => 'nullable|string',              
+                    ]);
 
-                        break;
+                    foreach($question['question'] as $one)
+                    {
+                        if($one['type'] == 'Essay')
+                            $data['user_answer'] = json_encode($one['content']);
 
-                    case 'Essay': // Essay
-                        # code...
-                        $request->validate([
-                            'Questions.' . $index . '.content' => 'required|string',
-                        ]);
-                        $data['user_answer'] = json_encode($question['content']);
-                        break;
+                        if($one['type'] == 'MCQ')
+                            $data['user_answer'] = json_encode($one['MCQ_Choices']);
 
-                    case 'Comprehension': // Paragraph
-                        # code...
-                        $request->validate([
-                            'Questions.*.question' => 'required|array',
-                            'Questions.*.question.*.id' => 'required',
-                            'Questions.*.question.*.type' => 'required|in:MCQ,Essay,T_F,Match',
-                            // if essay
-                            'Questions.*.question.*.content' => 'required_if:Questions.*.question.*.type,==,Essay|string',
-                            // if match
-                            'Questions.*.question.*.match_a' => 'required_if:Questions.*.question.*.type,==,Match|array',
-                            'Questions.*.question.*.match_b' => 'required_if:Questions.*.question.*.type,==,Match|array',
-                            // if mcq
-                            'Questions.*.question.*.MCQ_Choices' => 'required_if:Questions.*.question.*.type,==,MCQ|array',
-                            //if t/f
-                            'Questions.*.question.*.is_true' => 'required_if:Questions.*.question.*.type,==,T_F|boolean',
-                            'Questions.*.question.*.and_why' => 'nullable|string',              
-                        ]);
-
-                        foreach($question['question'] as $one)
-                        {
-                            if($one['type'] == 'Essay')
-                                $data['user_answer'] = json_encode($one['content']);
-
-                            if($one['type'] == 'MCQ')
-                                $data['user_answer'] = json_encode($one['MCQ_Choices']);
-
-                            if($one['type'] == 'T_F'){
-                                $t_f = [
-                                    'is_true' => $one['is_true'],
-                                ];
-                                if (isset($one['and_why']))
-                                    $t_f['and_why'] = $one['and_why'];
-                                
-                                $data['user_answer'] = json_encode($t_f);
-                            }
-                            if($one['type'] == 'Match'){
-                                $answers['match_a']=$one['match_a'];
-                                $answers['match_b'] =$one['match_b'];
-        
-                                $data['user_answer'] = json_encode($answers);
-                            }
+                        if($one['type'] == 'T_F'){
+                            $t_f = [
+                                'is_true' => $one['is_true'],
+                            ];
+                            if (isset($one['and_why']))
+                                $t_f['and_why'] = $one['and_why'];
+                            
+                            $data['user_answer'] = json_encode($t_f);
                         }
+                        if($one['type'] == 'Match'){
+                            $answers['match_a']=$one['match_a'];
+                            $answers['match_b'] =$one['match_b'];
+    
+                            $data['user_answer'] = json_encode($answers);
+                        }
+                    }
 
-                        break;
-                }
-                $allData->push($data);
-
+                    break;
             }
+            $allData->push($data);
         }foreach ($request->Question as $question) {
             $quest=Questions::create([
                 'course_id' => $request->course_id,
