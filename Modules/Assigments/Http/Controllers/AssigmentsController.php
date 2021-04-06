@@ -489,7 +489,7 @@ class AssigmentsController extends Controller
             $userassigment->save();
         }
 
-        if ($request->hasFile('file')) {
+        else if ($request->hasFile('file')) {
             $request->validate([
                 // 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
                 'file' => 'file|distinct|mimes:'.$settings,
