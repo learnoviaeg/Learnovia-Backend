@@ -21,7 +21,6 @@ class MaterialsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware('auth');
         $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
 
@@ -46,14 +45,18 @@ class MaterialsController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
 
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+        if($request->user()->can('site/show-all-courses')){//admin
+            $course_segments = collect($this->chain->getAllByChainRelation($request));
+            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+        }
 
-        if(!$request->user()->can('site/show-all-courses'))//student
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
+
+            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-
-        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-
-        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+            $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
+            $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+        }
       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
@@ -114,7 +117,26 @@ class MaterialsController extends Controller
      */
     public function show($id)
     {
-        //
+        $material = Material::find($id);
+
+        if(!isset($material))
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+
+        if(!isset($material->getOriginal()['link']))
+            return response()->json(['message' => 'No redirection link', 'body' => null], 400);
+
+        if(isset($material->getOriginal()['link'])){
+
+            $url = $material->getOriginal()['link'];
+
+            if(str_contains($material->getOriginal()['link'],'youtube') && $material->media_type != 'Link'){
+                if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i',$material->getOriginal()['link'], $match)){
+                    $url = 'https://www.youtube.com/embed/'.$match[1];
+                }
+            }
+            return redirect($url);
+        }
+        
     }
 
     /**

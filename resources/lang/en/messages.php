@@ -7,6 +7,7 @@ return [
         'not_found' => 'Item is not found!',
         'parent_cannot_submit' => 'Parents can not submit answers',
         'user_not_assign' => 'This user is not assigned to this item',
+        'cannot_edit' => 'you can\'t adit you submittion',
         'submit_limit' => 'Sorry, you are not allowed to submit anymore',
         'not_available_now' => 'Sorry, This item is not available for you at this moment',
         'try_again' => 'Something went wrong, please try again',
@@ -22,12 +23,16 @@ return [
         'already_exist' => 'Item is already exist',
         'no_active_segment' => 'There is no active segment for this item',
         'no_active_year' => 'There is no active year available',
+        'extension_not_supported' => 'This extension is not supported',
+        'no_permission' => 'User does not have the right permissions',
+        'role_required' => 'Please, choose role first',
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
         'toggle' => 'Item toggle successfully',
         'link_to_file' => 'Link to the file',
         'data_imported' => 'Data imported successfully',
+        'user_list_items' => 'User list of items',
     ],
     'lesson' => [
         'add' => 'Lesson added successfully',
@@ -49,6 +54,7 @@ return [
         'content_or_file' => 'Please, enter content or file',
         'override' => 'Assignment date updated to selected students successfully',
         'cant_update' => 'Sorry, students answered this assignment, cannot be updated',
+        'assignment_hidden' => 'This assignment is hidden '
     ],
     'grade' => [
         'graded' => 'Grade submitted successfully',
@@ -64,6 +70,7 @@ return [
         'add' => 'Question added successfully',
         'update' => 'Question updated successfully',
         'delete' => 'Question deleted successfully',
+        'count' => 'Questions count',
         'answer_delete' => 'Question answer deleted successfully',
         'list' => 'Questions List',
         'question_type_error' => 'This Question is not Essay or true and false',
@@ -78,6 +85,8 @@ return [
         'update' => 'Questions category updated successfully',
         'delete' => 'Questions category deleted successfully',
         'list' => 'Questions categories List',
+        'category_cannot_deleted' => 'This category has related questions, cannot be deleted',
+        'cannot_deleted' => 'you can\'t delete this category',
     ],
     'quiz' => [
         'add' => 'Quiz added successfully',
@@ -87,10 +96,13 @@ return [
         'count' => 'Quizzes count',
         'invaled_feedback' => 'Invalid feedback type, feedback can not be After submission',
         'quiz_not_belong' => 'This quiz does not belong to this lesson',
+        'no_attempts' => 'This user_quiz does not have any atempts',
         'override' => 'Quiz date updated to selected students successfully',
         'continue_quiz' => 'You can continue your last attempt',
         'students_attempts_list' => 'Students attempts list',
         'quiz_object' => 'Quiz details',
+        'quiz_hidden' => 'This quiz is hidden',
+        'quiz_not_started' => 'This quiz didnt start yet',
     ],
     'permissions' => [
         'no_roles_assigned' => 'There is no roles assigned to this permission',
@@ -103,14 +115,14 @@ return [
         'parent_choose_child'=> 'Please, choose your child first',
         'add' => 'User added successfully',
         'update' => 'User updated successfully',
-        'delete' => 'User deleted successfully',
+        'delete' => 'User/s deleted successfully',
         'list' => 'Users list',
         'all_list' => 'All users list',
         'count' => 'Users roles count',
         'exeed_max_users' => 'Sorry, you have reached the maximum. you cannot add anymore users',
         'username_already_used' => 'Username is used already',
-        'user_blocked' => 'User blocked successfully',
-        'user_un_blocked' => 'User unblocked successfully',
+        'user_blocked' => 'Users blocked successfully',
+        'user_un_blocked' => 'Users unblocked successfully',
         'parent_assign_child' => 'Parent assigned to child successfully',
         'parent_unassign_child' => 'Parent un assigned to child successfully',
         'current_child' => 'Your current child is...',
@@ -123,6 +135,8 @@ return [
         'delete' => 'Page deleted successfully',
         'list' => 'Pages List',
         'page_not_belong' => 'This page does not belong to this lesson',
+        'page_hidden' => 'This page is hidden'
+
     ],
     'file' => [
         'add' => 'File uploaded successfully',
@@ -130,6 +144,7 @@ return [
         'delete' => 'File deleted successfully',
         'list' => 'Files List',
         'file_not_belong' => 'This file does not belong to this lesson',
+        'file_hidden' => 'This file is hidden'
     ],
     'media' => [
         'add' => 'Media uploaded successfully',
@@ -138,6 +153,7 @@ return [
         'list' => 'Medias List',
         'media_not_belong' => 'This media does not belong to this lesson',
         'only_url_or_media' => 'Please, either upload media or add a URL',
+        'media_hidden' => 'This media is hidden',
 
         'image' => [
             'add' => 'Image uploaded successfully',
@@ -185,6 +201,11 @@ return [
         'cannot_join' => 'Sorry, you cannot join this virtual classroom',
         'join' => 'Joining virtual classroom...',
         'no_one_entered' => 'No one entered this virtual classroom',
+        'virtual_hidden' => "This virtual classroom is hidden",
+        'server_error' => 'Virtual classrooms is not available for now',
+        'current' => 'Current',
+        'past' => 'Past',
+        'future' => 'Future',
 
         'record' => [
             'list' => 'Virtual classrooms records list',
@@ -202,6 +223,7 @@ return [
         'list' => 'Interactive list',
         'count' => 'Interactive count',
         'interactive_not_belong' => 'This interactive content does not belong to this lesson',
+        'hidden' => "This Interactive content is hidden",
     ],
     'auth' => [
         'invalid_username_password' => 'Invalid username or password',
@@ -270,5 +292,16 @@ return [
         'delete' => 'User/s unenrolled successfully',
         'already_enrolled' => 'Those users are already enrolled',
         'no_courses_belong_to_class' => 'No courses belong to this class',
+    ],
+    'zoom' => [
+        'zoom_account' => 'user haven\'t account on zoom',
+        'Invalid' => 'Invalid Access Token',
+    ],
+    'status' => [
+        'submitted' => 'Submitted',
+        'not_submitted' => 'Not submitted',
+        'graded' => 'Graded',
+        'not_graded' => 'Not graded',
+        'no_answers' => 'No answers',
     ],
 ];

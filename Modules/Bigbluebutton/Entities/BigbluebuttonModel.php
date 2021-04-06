@@ -9,7 +9,7 @@ use App\Course;
 class BigbluebuttonModel extends Model
 {
     protected $fillable = ['name','class_id','course_id','attendee_password','moderator_password','duration','meeting_id','started','is_recorded'
-    ,'actutal_start_date','status'];
+    ,'actutal_start_date','status','actual_duration','join_url','type','host_id'];
 
     protected $appends = ['class','course'];
 
@@ -21,5 +21,18 @@ class BigbluebuttonModel extends Model
     public function getCourseAttribute(){
         $course = Course::find($this->course_id);
         return  isset($course)?$course->name:null;
+    }
+
+    public function getStatusAttribute(){
+
+        if($this->attributes['status'] == 'past')
+            return __('messages.virtual.past');
+
+        if($this->attributes['status'] == 'current')
+            return __('messages.virtual.current');
+
+        if($this->attributes['status'] == 'future')
+            return __('messages.virtual.future');
+
     }
 }

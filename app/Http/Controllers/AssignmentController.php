@@ -15,6 +15,7 @@ use Modules\Assigments\Entities\assignment;
 use Modules\Assigments\Entities\UserAssigment;
 use Modules\Assigments\Entities\assignmentOverride;
 use App\Paginate;
+use App\LastAction;
 use Carbon\Carbon;
 
 class AssignmentController extends Controller
@@ -44,11 +45,18 @@ class AssignmentController extends Controller
             'sort_in' => 'in:asc,desc', 
         ]);
 
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        if(!$request->user()->can('site/show-all-courses'))//student
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+        if($request->user()->can('site/show-all-courses')){//admin
 
-        $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+            $course_segments = collect($this->chain->getAllByChainRelation($request));
+            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+        }
+
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
+
+            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+            $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+        }
        
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
@@ -119,7 +127,8 @@ class AssignmentController extends Controller
         if(!isset($assignment))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
 
-        
+        $lesson_drag = Lesson::find($lesson_id);
+        LastAction::lastActionInCourse($lesson_drag->courseSegment->courses[0]->id);
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
         if (count($userassigments) > 0) {
             $assignment['allow_edit'] = false;

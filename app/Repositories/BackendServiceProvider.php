@@ -11,7 +11,7 @@ class BackendServiceProvider extends ServiceProvider
     {
         $this->app->bind(
             'App\Repositories\ChainRepositoryInterface',
-            'App\Repositories\ChainRepository',
+            'App\Repositories\ChainRepository'
         );            
 
         $this->app->bind(
@@ -19,5 +19,14 @@ class BackendServiceProvider extends ServiceProvider
             'App\Repositories\EnrollmentRepository'
         ); 
 
+        $this->app->bind(
+            'App\Repositories\RepportsRepositoryInterface',
+            'App\Repositories\RepportsRepository'
+        );
+
+        $this->app->bind(
+            'App\Repositories\SettingsReposiotryInterface',
+            'App\Repositories\SettingsReposiotry'
+        ); 
     }
 }

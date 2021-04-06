@@ -22,7 +22,6 @@ class InterActiveController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware('auth');
         $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
     }
     /**
@@ -43,12 +42,18 @@ class InterActiveController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id',
             'sort_in' => 'in:asc,desc', 
         ]);
-        
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        if(!$request->user()->can('site/show-all-courses'))//student
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
+        if($request->user()->can('site/show-all-courses')){//admin
+            $course_segments = collect($this->chain->getAllByChainRelation($request));
+            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+        }
+        
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
+
+            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
             $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+        }
       
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
@@ -79,7 +84,7 @@ class InterActiveController extends Controller
 
         foreach($h5p_lessons as $h5p){                                
             $content = response()->json(DB::table('h5p_contents')->whereId($h5p->content_id)->first());
-            $content->original->link =  $url.'/api/h5p/'.$h5p->content_id;
+            $content->original->link = config('app.url').'api/interactive/'.$h5p->content_id.'/?api_token='.Auth::user()->api_token;
             $content->original->item_lesson_id = $h5p->id;
             $content->original->visible = $h5p->visible;
             $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit'.'?editting_done=false';
@@ -118,7 +123,7 @@ class InterActiveController extends Controller
      */
     public function show($id)
     {
-        //
+        return redirect(config('app.url').'/api/h5p/'.$id);
     }
 
     /**

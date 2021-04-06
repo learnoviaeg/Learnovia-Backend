@@ -58,7 +58,7 @@ class TimelineController extends Controller
             'due_date' => 'date',
         ]);
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        if(!$request->user()->can('site/show-all-courses'))//student
+        if(!$request->user()->can('site/show-all-courses'))//student and teacher
         {
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
         }
@@ -70,6 +70,7 @@ class TimelineController extends Controller
                             ->where('visible',1)
                             ->where('start_date','<=',Carbon::now())
                             ->where('due_date','>=',Carbon::now())
+                            ->whereIn('type', ['quiz','assignment'])
                             ->where(function ($query) {
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });

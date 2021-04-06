@@ -19,6 +19,8 @@ use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\QuestionsType;
 use App\Component;
+use App\LastAction;
+use Modules\QuestionBank\Entities\QuestionAnswer;
 
 class QuestionBankController extends Controller
 {
@@ -293,7 +295,7 @@ class QuestionBankController extends Controller
         $valid = Validator::make($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             'Question_Category_id' => 'exists:questions_categories,id',
             // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'exists:courses,id',
@@ -311,6 +313,9 @@ class QuestionBankController extends Controller
         if (!isset($arr)) {
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
+        if(isset($Question['course_id']))
+            LastAction::lastActionInCourse($Question['course_id']);        
+
         $Questions = collect([]);
         $cat = Questions::firstOrCreate([
             'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
@@ -334,7 +339,7 @@ class QuestionBankController extends Controller
         $valid = Validator::make($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             'Question_Category_id' => 'exists:questions_categories,id',
             // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'exists:courses,id',
@@ -355,6 +360,8 @@ class QuestionBankController extends Controller
         if (!isset($arr)) {
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
+        if( isset($Question['course_id']))
+            LastAction::lastActionInCourse($Question['course_id']);        
         $cat = Questions::Create([
             'text' => ($Question['text'] == null) ? "Match the correct Answer" : $Question['text'],
             'mark' => $Question['mark'],
@@ -378,7 +385,7 @@ class QuestionBankController extends Controller
             'text' => 'required|string',
             'answers.*' => 'required|boolean|distinct',
             'And_why' => 'integer|required',
-            'And_why_mark' => 'integer|min:0|required_if:And_why,==,1',
+            'And_why_mark' => 'min:0|required_if:And_why,==,1',
             'Is_True' => 'required|boolean',
             'survey' => 'boolean'
         ]);
@@ -555,37 +562,38 @@ class QuestionBankController extends Controller
     {
         $request->validate([
             'course_id' => 'integer|exists:courses,id',
-            'Question' => 'required|array',
-            'Question.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+            'Question' => 'array',
+            'Question.*.Question_Type_id' => 'integer|exists:questions_types,id',
             'Question.*.survey' => 'boolean',
         ]);
 
         $re = collect([]);
-        foreach ($request->Question as $question) {
-            switch ($question['Question_Type_id']) {
-                case 1: // True/false
-                    $true_false = $this->TrueFalse($question,null);
-                    $re->push($true_false);
-                    break;
-                case 2: // MCQ
-                    $mcq = $this->MCQ($question,null);
-                    $re->push($mcq);
-                    break;
-                case 3: // Match
-                    $match = $this->Match($question,null);
-                    $re->push($match);
-                    break;
-                case 4: // Essay
-                    $essay = $this->Essay($question,null);
-                    $re->push($essay);
-                    break;
-                case 5: // para
-                    $paragraph = $this->paragraph($question);
-                    $paragraph->childeren;
-                    $re->push($paragraph);
-                    break;
+        if(isset($request->Question))
+            foreach ($request->Question as $question) {
+                switch ($question['Question_Type_id']) {
+                    case 1: // True/false
+                        $true_false = $this->TrueFalse($question,null);
+                        $re->push($true_false);
+                        break;
+                    case 2: // MCQ
+                        $mcq = $this->MCQ($question,null);
+                        $re->push($mcq);
+                        break;
+                    case 3: // Match
+                        $match = $this->Match($question,null);
+                        $re->push($match);
+                        break;
+                    case 4: // Essay
+                        $essay = $this->Essay($question,null);
+                        $re->push($essay);
+                        break;
+                    case 5: // para
+                        $paragraph = $this->paragraph($question);
+                        $paragraph->childeren;
+                        $re->push($paragraph);
+                        break;
+                }
             }
-        }
         if($type == 0){
             return HelperController::api_response_format(200, $re, __('messages.question.add'));
         }
@@ -599,7 +607,7 @@ class QuestionBankController extends Controller
     {
         $request->validate([
             'question_id' => 'required|integer|exists:questions,id',
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'integer|exists:questions_categories,id',
             'parent' => 'integer|exists:questions,id',
@@ -619,6 +627,8 @@ class QuestionBankController extends Controller
                 'text' => 'required|string|min:1',
             ]);
         }
+        LastAction::lastActionInCourse($question->course_id);        
+
         $question->update([
             'text' => ($request->text == null) ? "Match the correct Answer" : $request->text,
             'mark' => $request->mark,
@@ -635,7 +645,7 @@ class QuestionBankController extends Controller
     public function updatesubQuestion($squestion, $parent=null,$Question_Type_id=null)
     {
         $validator = Validator::make($squestion->all(), [
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'integer|exists:questions_categories,id',
         ]);
@@ -652,6 +662,8 @@ class QuestionBankController extends Controller
                 'text' => 'required|string|min:1',
             ]);
         }
+        LastAction::lastActionInCourse($question->course_id);        
+
         $question->update([
             'text' => ($squestion['text'] == null) ? "Match the correct Answer" : $squestion['text'],
             'mark' =>$squestion['mark'],
@@ -672,7 +684,7 @@ class QuestionBankController extends Controller
             'answers.*' => 'required|boolean|distinct',
             'Is_True' => 'required|boolean',
             'And_why' => 'integer|required',
-            'And_why_mark' => 'integer|min:0|required_if:And_why,==,1'
+            'And_why_mark' => 'min:0|required_if:And_why,==,1'
         ]);
 
         if ($parent==null){
@@ -944,20 +956,11 @@ class QuestionBankController extends Controller
             'question_id' => 'required|integer|exists:questions,id'
         ]);
 
-        $check = Questions::destroy($request->question_id);
-
+        $delete_answers=QuestionsAnswer::where('question_id',$request->question_id)->delete();
+        $question = Questions::find($request->question_id);
+        LastAction::lastActionInCourse($question->course_id);        
+        $question->delete();
         return HelperController::api_response_format(200, [], __('messages.question.delete'));
-    }
-
-    public function deleteAnswer(Request $request)
-    {
-        $request->validate([
-            'answer_id' => 'required|integer|exists:questions_answers,id'
-        ]);
-
-        $check = QuestionsAnswer::destroy($request->answer_id);
-
-        return HelperController::api_response_format(200, [], __('messages.answer.delete'));
     }
 
     public function addAnswer(Request $request)

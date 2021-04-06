@@ -19,4 +19,8 @@ class Announcement extends Model
     {
         return $this->hasMany('App\userAnnouncement', 'announcement_id', 'id');
     }
+
+    public  function chainAnnouncement(){
+        return $this->hasMany('App\AnnouncementsChain','announcement_id', 'id');
+    }
 }

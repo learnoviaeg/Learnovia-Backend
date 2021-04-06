@@ -8,6 +8,7 @@ use App\AnnouncementsChain;
 use App\Announcement;
 use App\attachment;
 use Auth;
+use App\user;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use App\Repositories\ChainRepositoryInterface;
@@ -45,6 +46,14 @@ class AnnouncementsController extends Controller
             'paginate' => 'integer'
         ]);
 
+        $roles = Auth::user()->roles->pluck('name');
+        if(in_array("Parent" , $roles->toArray())){
+            if(Auth::user()->currentChild != null)
+            {
+                $currentChild =User::find(Auth::user()->currentChild->child_id);
+                Auth::setUser($currentChild);
+        }
+        }
         $paginate = 12;
         if($request->has('paginate')){
             $paginate = $request->paginate;
@@ -115,6 +124,12 @@ class AnnouncementsController extends Controller
             'chains.*.segment' => ['exists:segments,id',Rule::requiredIf($chain_filter === 1)],
             'chains.*.course' => ['exists:courses,id',Rule::requiredIf($chain_filter === 1)]
         ]);
+
+        if($request->has('start_date') && $request->has('publish_date')){
+            $request->validate([
+                'publish_date' => 'before_or_equal:start_date',
+            ]);
+        }
 
         $publish_date = Carbon::now()->format('Y-m-d H:i:s');
         if($request->has('publish_date') && $request->publish_date >= Carbon::now()){
@@ -234,8 +249,6 @@ class AnnouncementsController extends Controller
     {
         $request->validate([
             'id' => 'required|integer|exists:announcements,id',
-            'title' => 'required',
-            'description' => 'required',
             'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),

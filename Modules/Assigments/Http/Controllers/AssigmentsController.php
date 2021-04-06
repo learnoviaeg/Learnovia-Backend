@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use App\UserGrade;
 use Spatie\Permission\Models\Permission;
 use URL;
+use Str;
 use Spatie\PdfToImage\Pdf;
 use Org_Heigl\Ghostscript\Ghostscript;
 use Illuminate\Support\Facades\Storage;
@@ -37,10 +38,25 @@ use App\Timeline;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
-
+use App\LastAction;
+use NcJoes\OfficeConverter\OfficeConverter;
+use Illuminate\Support\Facades\App;
+use App\Repositories\SettingsReposiotryInterface;
 
 class AssigmentsController extends Controller
 {
+    protected $setting;
+
+    /**
+     *constructor.
+     *
+     * @param SettingsReposiotryInterface $setting
+     */
+    public function __construct(SettingsReposiotryInterface $setting)
+    {
+        $this->setting = $setting;        
+    }
+
     public function install_Assignment()
     {
         if (\Spatie\Permission\Models\Permission::whereName('assignment/add')->first() != null) {
@@ -203,10 +219,12 @@ class AssigmentsController extends Controller
     //Create assignment
     public function createAssigment(Request $request)
     {
+        $settings = $this->setting->get_value('create_assignment_extensions');
+
         $request->validate([
             'name' => 'required|string',
             'content' => 'string|required_without:file',
-            'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,csv,doc,docx,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls,|required_without:content',
+            'file' => 'file|distinct|required_without:content|mimes:'.$settings,
         ]);
        
         $assignment = new assignment;
@@ -230,29 +248,35 @@ class AssigmentsController extends Controller
             'name' => 'string',
             'file_description' => 'string',
             'content'  => 'string',
-
         ]);
+        
         $assigment = assignment::find($request->id);
         $assigmentLessons = AssignmentLesson::where('assignment_id',$request->id)->pluck('id');
         $CheckIfAnswered = UserAssigment::whereIn('assignment_lesson_id', $assigmentLessons)->where('submit_date', '!=', null)->get();
+        
         if (count($CheckIfAnswered) > 0)
             return HelperController::api_response_format(400, null, __('messages.assignment.cant_update'));
 
         if ($request->hasFile('file')) {
 
-            $request->validate([
-                'file' => 'file|distinct|mimes:pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,xlsx,xls,csv,txt',
-            ]);
-            // if (isset($request->file_description)) {
-                $description = (isset($request->file_description))? $request->file_description :null;
+            $settings = $this->setting->get_value('create_assignment_extensions');
 
-                $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
-            // }
+            $request->validate([
+                'file' => 'file|distinct|mimes:'.$settings,
+            ]);
+
+            $description = (isset($request->file_description))? $request->file_description :null;
+            $assigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         }
+        if($request->file == 'No_file')
+            $assigment->attachment_id=null;
+
         if ($request->filled('content'))
             $assigment->content = $request->content;
+
         if ($request->filled('name'))
             $assigment->name = $request->name;
+
         $assigment->save();
 
         return HelperController::api_response_format(200, $body = $assigment, $message = __('messages.assignment.update'));
@@ -262,7 +286,7 @@ class AssigmentsController extends Controller
     {
         $request->validate([
             'is_graded' => 'boolean',
-            'mark' => 'integer',
+            'mark' => 'numeric|min:0',
             'lesson_id' => 'required|integer|exists:lessons,id',
             'assignment_id' => 'required|exists:assignments,id',
             'allow_attachment' => 'integer|min:0|max:3',
@@ -273,11 +297,10 @@ class AssigmentsController extends Controller
             'grade_category' => 'exists:grade_categories,id',
             'updated_lesson_id' =>'nullable|exists:lessons,id'
         ]);
-
         $AssignmentLesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
-        if (!isset($AssignmentLesson)) 
+        if (!isset($AssignmentLesson)) {
             return HelperController::api_response_format(400,[], $message = __('messages.error.not_found'));
-            
+        }
         if ($request->filled('is_graded'))
             $AssignmentLesson->is_graded = $request->is_graded;
         if ($request->filled('mark'))
@@ -293,25 +316,44 @@ class AssigmentsController extends Controller
         if ($request->filled('closing_date'))
             $AssignmentLesson->due_date = $request->closing_date;
         if ($request->filled('publish_date'))
-        $AssignmentLesson->publish_date = $request->publish_date;
-        if (!$request->filled('updated_lesson_id')) 
+            $AssignmentLesson->publish_date = $request->publish_date;
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id;
-                
+            }
         $AssignmentLesson->update([
             'lesson_id' => $request->updated_lesson_id
         ]);
         $AssignmentLesson->save();
 
         $usersIDs = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
-        $lessonId = AssignmentLesson::where('assignment_id', $request->assignment_id)->pluck('lesson_id')->first();
         $courseSegment = Lesson::where('id', $request->updated_lesson_id)->pluck('course_segment_id')->first();
+        
+        if ($request->filled('updated_lesson_id') && $request->updated_lesson_id !=$request->lesson_id ) {
+            $old_students = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->delete();
+            $usersIDs = Enroll::where('course_segment', $courseSegment)->where('role_id', 3)->pluck('user_id')->toarray();
+            foreach ($usersIDs as $userId) {
+                $userassigment = new UserAssigment;
+                $userassigment->user_id = $userId;
+                $userassigment->assignment_lesson_id = $AssignmentLesson->id;
+                $userassigment->status_id = 2;
+                $userassigment->override = 0;
+                $userassigment->save();
+            }
+        }
+        $lessonId = AssignmentLesson::where('assignment_id', $request->assignment_id)->pluck('lesson_id')->first();
         $courseID = CourseSegment::where('id', $courseSegment)->pluck('course_id')->first();
         $segmentClass = CourseSegment::where('id', $courseSegment)->pluck('segment_class_id')->first();
         $ClassLevel = SegmentClass::where('id', $segmentClass)->pluck('class_level_id')->first();
         $classId = ClassLevel::where('id', $ClassLevel)->pluck('class_id')->first();
         $assignment=Assignment::find($request->assignment_id);
+        LastAction::lastActionInCourse($courseID);
+
 
         $publish_date=$AssignmentLesson->publish_date;
+        if(carbon::parse($publish_date)->isPast())
+            $publish_date=Carbon::now();
                 
         user::notify([
             'id' => $request->assignment_id,
@@ -336,7 +378,7 @@ class AssigmentsController extends Controller
     */
     public function assignAsstoUsers($request)
     {
-        $usersIDs = Enroll::where('course_segment', $request['course_segment'])->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
+        $usersIDs = Enroll::where('course_segment', $request['course_segment'])->where('role_id',3)->pluck('user_id')->toarray();
         foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
             $userassigment->user_id = $userId;
@@ -349,6 +391,7 @@ class AssigmentsController extends Controller
         $classId = CourseSegment::find($request['course_segment'])->segmentClasses[0]->classLevel[0]->class_id;
         $lesson_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('lesson_id')->first();
         $assignment_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('assignment_id')->first();
+        LastAction::lastActionInCourse($courseID);
         user::notify([
             'id' => $assignment_id,
             'message' => $request['assignment_name'].' assignment is added',
@@ -368,20 +411,24 @@ class AssigmentsController extends Controller
     */
     public function submitAssigment(Request $request)
     {
+        //to get the allowed extensions for submission
+        $settings = $this->setting->get_value('submit_assignment_extensions');
+
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'file'=>'file|distinct|mimes:pdf'
         ];
         $customMessages = [
-            'file.mimes' => 'please enter a pdf file.'
+            'file.mimes' => __('messages.error.extension_not_supported')
         ];
     
-        $this->validate($request, $rules, $customMessages);
+        $this->validate($request, $rules,$customMessages);
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()))
             return HelperController::api_response_format(400, null , $message = __('messages.error.parent_cannot_submit'));
         
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if(!isset($assilesson))
@@ -412,6 +459,13 @@ class AssigmentsController extends Controller
         if(!isset($userassigment))
             return HelperController::api_response_format(400, $body = [], $message = __('messages.error.user_not_assign'));
 
+        if($userassigment->grade != null && $assilesson->allow_edit_answer=1)
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.cannot_edit'));
+
+        $gradedusers=UserAssigment::where('assignment_lesson_id', $assilesson->id)->whereNotNull('grade')->first();
+        if(isset($gradedusers) && $assilesson->allow_edit_answer=1)
+            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.cannot_edit'));
+
         if (isset($userassigment)) {
             if($override != null){
                 if (((($override->start_date >  Carbon::now()) || (Carbon::now() > $override->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
@@ -424,10 +478,11 @@ class AssigmentsController extends Controller
             }
         }
 
-        if (isset($request->file)) {
+        if ($request->hasFile('file')) {
             $request->validate([
-                'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
-            ]);
+                // 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
+                'file' => 'file|distinct|mimes:'.$settings,
+                ]);
             if (isset($request->file_description)) {
                 $description = $request->file_description;
             } else {
@@ -435,9 +490,8 @@ class AssigmentsController extends Controller
             }
             $userassigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
         } 
-        // else {
-        //     $userassigment->attachment_id = null;
-        // }
+        if($request->file == 'No_file')
+            $userassigment->attachment_id=null;
         
         if (isset($request->content)) {
             $userassigment->content = $request->content;
@@ -459,7 +513,7 @@ class AssigmentsController extends Controller
             'user_id' => 'required|exists:user_assigments,user_id',
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'grade' => 'required|integer',
+            'grade' => 'required|numeric',
             'feedback' => 'string',
             'corrected_file' => 'file|distinct|mimes:pdf',
         ]);
@@ -467,8 +521,10 @@ class AssigmentsController extends Controller
         if(!isset($assilesson))
             return HelperController::api_response_format(200, null, $message = __('messages.assignment.assignment_not_belong'));
             
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
-        // $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if ($assilesson->mark < $request->grade) {
             return HelperController::api_response_format(400, $body = [], $message = __('messages.error.grade_less_than') . $assilesson->mark);
         }
@@ -496,7 +552,7 @@ class AssigmentsController extends Controller
             'user_id' => 'required|exists:user_assigments,user_id',
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'grade' => 'required|integer',
+            'grade' => 'required|numeric',
             'feedback' => 'string',
             'corrected_file' => 'file|distinct|mimes:pdf',
         ]);
@@ -512,6 +568,8 @@ class AssigmentsController extends Controller
             $userassigment->corrected_file = attachment::upload_attachment($request->corrected_file, 'assignment', null)->id;
         }
         $userassigment->grade = $request->grade;
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
 
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $usergrade=UserGrade::where('user_id',$request->user_id)
@@ -545,6 +603,8 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200, $body =  $userassigment, $message = 'user ' . $request->user_id . ' now can submit');
         }
         if (isset($request->course_segment)) {
+            $course_segment = CourseSegment::find($request->course_segment);
+            LastAction::lastActionInCourse($course_segment->course_id);
             $usersIDs = Enroll::where('course_segment', $request['course_segment'])->pluck('user_id')->toarray();
             foreach ($usersIDs as $userId) {
                 # code...
@@ -571,6 +631,10 @@ class AssigmentsController extends Controller
         $assigment = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($assigment))
             return HelperController::api_response_format(400,null,__('messages.assignment.assignment_not_belong'));
+        
+        $lesson=Lesson::find($request->lesson_id);
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        
         $assigment->delete();
         $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
 
@@ -593,20 +657,27 @@ class AssigmentsController extends Controller
 
     public function GetAssignment(Request $request)
     {
-        $request->validate([
-            'assignment_id' => 'required|exists:assignments,id',
-            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'
-        ]);
 
+        $rules = [
+            'assignment_id' => 'required|exists:assignments,id',
+            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'        ];
+        $customMessages = [
+            'assignment_id.exists' => __('messages.error.item_deleted') 
+        ];
+
+        $this->validate($request, $rules, $customMessages);
         $user = Auth::user();
         $lesson=Lesson::find($request->lesson_id);
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
 
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();        
         if(!isset($assigLessonID))
             return HelperController::api_response_format(200, null, __('messages.assignment.assignment_not_belong'));
 
+        if( $request->user()->can('site/course/student') && $assigLessonID->visible==0)
+            return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assigLessonID->id)->first();
         if (count($userassigments) > 0) {
@@ -635,10 +706,13 @@ class AssigmentsController extends Controller
                 }
             }
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
+            
             $assignment['user_submit']=null;
             $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
             if(isset($studentassigment)){
                 $assignment['user_submit'] =$studentassigment;
+                $assignment['user_submit']['allow_edit_answer'] =  $assigLessonID->allow_edit_answer;
+
                 $usr=User::find($studentassigment->user_id);
                 if(isset($usr->attachment))
                     $usr->picture=$usr->attachment->path;
@@ -730,6 +804,8 @@ class AssigmentsController extends Controller
 
             $assigment->visible = ($assigment->visible == 1) ? 0 : 1;
             $assigment->save();
+            $lesson=Lesson::find($request->lesson_id);
+            LastAction::lastActionInCourse($lesson->courseSegment->course_id);
 
             return HelperController::api_response_format(200, $assigment, __('messages.success.toggle'));
         } catch (Exception $ex) {
@@ -744,12 +820,13 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'is_graded' => 'required|boolean',
-            'mark' => 'required|integer',
+            'mark' => 'required|numeric|min:0',
             'allow_attachment' => 'required|integer|min:0|max:3',
             'publish_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
             'grade_category' => 'array|required_if:is_graded,==,1',
+            'allow_edit_answer' => 'boolean',
             'grade_category.*' => 'exists:grade_categories,id',
             'scale' => 'exists:scales,id',
             'visible' => 'boolean',
@@ -762,6 +839,7 @@ class AssigmentsController extends Controller
             $assignment_lesson->lesson_id = $lesson;
             $assignment_lesson->assignment_id = $request->assignment_id;
             $assignment_lesson->publish_date = $request->publish_date;
+            $assignment_lesson->allow_edit_answer = isset($request->allow_edit_answer) ? $request->allow_edit_answer : 0;
             $assignment_lesson->start_date = $request->opening_date;
             $assignment_lesson->mark = $request->mark;
             $assignment_lesson->is_graded = $request->is_graded;
@@ -829,6 +907,7 @@ class AssigmentsController extends Controller
                 "publish_date" => Carbon::parse($request->publish_date),
                 "assignment_name" => Assignment::find($request->assignment_id)->name
             );
+            LastAction::lastActionInCourse($lesson->courseSegment->course_id);
             $this->assignAsstoUsers($data);
 
         }
@@ -867,6 +946,7 @@ class AssigmentsController extends Controller
             ]);
         }
         $course = $lesson->courseSegment->course_id;
+        LastAction::lastActionInCourse($course);
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $assignment_name = Assignment::find($request->assignment_id)->name;
         user::notify([
@@ -883,26 +963,87 @@ class AssigmentsController extends Controller
         ]);
         return HelperController::api_response_format(200, $assignmentOerride, __('messages.assignment.override'));
     }
+
     public function AnnotatePDF(Request $request)
     {
         $request->validate([
-            'attachment_id' => 'integer|required|exists:attachments,id', //because this file may not be assigned to user "corrected_file" 
-            // 'attachment_id' => 'integer|required|exists:user_assigments,attachment_id',
-            ]);
+            'attachment_id' => 'integer|exists:attachments,id', //because this file may not be assigned to user "corrected_file" 
+            'content' => 'string',
+        ]);
         $images_path=collect([]);
-        $attachmnet=attachment::find($request->attachment_id);
-        $inputFile=$attachmnet->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
-        // Ghostscript::setGsPath("/usr/bin/gs");
-        $pdf = new Pdf("storage/".$inputFile);
-        // return $pdf;
-        foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
-            $name= uniqid();
-            $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
-            $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
-            $images_path->push('data:image/png;base64,'.$b64image);
+        // $outputFile = Str::substr($attachmnet->name, 0,strpos($attachmnet->name,'.')).'.pdf';
+       
+        if($request->filled('attachment_id')){
+            $attachmnet=attachment::find($request->attachment_id);
+            // $inputFile=$attachmnet->getOriginal('path');//storage_path() . str_replace('/', '/', $studentassigment->attachment_id->getOriginal('path'));
+            $inputFile= substr($attachmnet->path,strripos(dirname($attachmnet->path),'/')+1);
+            $converter = new OfficeConverter("storage/".$inputFile);
+            $outputFile = Str::substr(basename($attachmnet->path), 0,strpos(basename($attachmnet->path),'.')).'.pdf';
+            $converter->convertTo($outputFile);
+
+            //generates pdf file in same directory as test-file.docx
+            $pdf = new Pdf("storage/".$attachmnet->type.'/'.$outputFile);
+            // return $pdf;
+
+            foreach (range(1, $pdf->getNumberOfPages()) as $pageNumber) {
+                $name= uniqid();
+                $pdf->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+                $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
+                $images_path->push('data:image/png;base64,'.$b64image);
+            }
+        }
+
+        if($request->filled('content')){
+
+            $contents= collect();
+            $contents->push($request->content);
+
+            if(str_contains($request->content , '<img') || str_contains($request->content , '<video') || str_contains($request->content , '<audio')){
+                $contents= collect();
+                $chars = preg_split('/<[^img>]*[^\/]>/i', $request->content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+                $i = null;
+                $y=null;
+                foreach($chars as $key => $char){
+
+                    if(str_contains($char , '<video') || str_contains($char , '<audio')){
+                        $y = $key;
+                        continue;
+                    }
+
+                    if(str_contains($char , '<img')){
+                        $contents->push($char);
+                        $i = $key;
+                    }
+
+                    if(!str_contains($char , '<img')){
+                        if((isset($i) && $key-1 == $i) || (count($contents) == 0) || (isset($i) && isset($y) && $key-2 == $i && $key-1 == $y)){
+                            $contents->push($char);
+                        }else{
+                            $count = count($contents)-1;
+                            $contents[$count] = $contents[$count].$char;
+                        }
+                    }
+                }
+            }
+
+            foreach($contents as $content){
+                $pdf_of_content = App::make('dompdf.wrapper');
+                $pdf_of_content->loadHTML($content);
+                // $path = public_path('pdf_docs/'); // <--- folder to store the pdf documents into the server;
+                $fileName =  time().'_content.'. 'pdf' ; // <--giving the random filename,
+                $pdf_of_content->save("storage/assignment".'/'. $fileName);
+                $pdf_of_content = new Pdf("storage/assignment".'/'.$fileName);
+                foreach (range(1, $pdf_of_content->getNumberOfPages()) as $pageNumber) {
+                    $name= uniqid();
+                    $pdf_of_content->setOutputFormat('png')->setPage($pageNumber)->saveImage('storage/assignment/'.$name);
+                    $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
+                    $images_path->push('data:image/png;base64,'.$b64image);
+                }
+            }
         }
         return HelperController::api_response_format(200, $images_path, 'Here pdf\'s images');
     }
+
 
     public function overwriteScript(){
 

@@ -27,7 +27,7 @@ use App\Exports\StudentEnrolls;
 use App\Exports\classeswithstudents;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-
+use App\LastAction;
 class EnrollUserToCourseController extends Controller
 {
     /**
@@ -116,7 +116,7 @@ class EnrollUserToCourseController extends Controller
     public function UnEnroll(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|array|exists:enrolls,user_id',
+            'user_id' => 'required|array|exists:users,id',
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id',
             'level' => 'exists:levels,id',
@@ -128,13 +128,11 @@ class EnrollUserToCourseController extends Controller
         if ($courseSegment == null)
             return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
 
-        foreach ($request->user_id as $users)
-            $course_segment = Enroll::whereIn('course_segment', $courseSegment)->where('user_id', $users)->first()->delete();
-
-        if ($course_segment > 0)
-            return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
-
-        return HelperController::api_response_format(200, null, __('messages.error.data_invalid'));
+        $enroll = Enroll::whereIn('course_segment', $courseSegment)->whereIn('user_id', $request->user_id)->first();
+        if(isset($enroll))
+            $enroll->delete();
+                
+        return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
     }
 
     /**
@@ -289,7 +287,7 @@ class EnrollUserToCourseController extends Controller
             'course_id' => 'required|exists:courses,id',
             'search' => 'nullable'
         ]);
-
+        LastAction::lastActionInCourse($request->course_id);
         if ($request->class_id == null) {
             $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
 
@@ -558,7 +556,7 @@ class EnrollUserToCourseController extends Controller
      */
     public function enrollWithChain(Request $request)
     {
-        $request->validate([
+        $rules = [
             'users' => 'required|array',
             'users.*' => 'required|string|exists:users,id',
             'role_id' => 'required|exists:roles,id',
@@ -568,7 +566,15 @@ class EnrollUserToCourseController extends Controller
             'classes' => 'array|exists:classes,id',
             'segments' => 'array|exists:segments,id',
             'courses' => 'array|exists:courses,id'
-        ]);
+        ];
+
+        $customMessages = [
+            'users.required'   => 'Users array is required.',
+            'users.exists'   => 'Invalid user supplied!.',
+            'role_id.required'   => __('messages.error.role_required'),
+        ];
+
+        $this->validate($request, $rules, $customMessages);
 
         $courseSeg = GradeCategoryController::getCourseSegmentWithArray($request);
         // return $courseSeg;
@@ -603,9 +609,9 @@ class EnrollUserToCourseController extends Controller
             if (isset($EnrolledBefore))
                 return HelperController::api_response_format(200, array_values(array_unique($EnrolledBefore)), __('messages.enroll.already_enrolled'));
             else
-                return HelperController::api_response_format(200, __('messages.enroll.add'));
+                return HelperController::api_response_format(200,[], __('messages.enroll.add'));
         }
-        return HelperController::api_response_format(200, __('messages.error.no_active_segment'));
+        return HelperController::api_response_format(200, [],__('messages.error.no_active_segment'));
     }
 
     public function Migration(Request $request)

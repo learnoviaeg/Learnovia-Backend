@@ -14,6 +14,7 @@ use App\Course;
 use App\Level;
 use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
+use App\LastAction;
 use Carbon\Carbon;
 
 class QuizzesController extends Controller
@@ -45,14 +46,18 @@ class QuizzesController extends Controller
             'sort_in' => 'in:asc,desc',
         ]);
 
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+        if($request->user()->can('site/show-all-courses')){//admin
+            $course_segments = collect($this->chain->getAllByChainRelation($request));
+            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+        }
 
-        if(!$request->user()->can('site/show-all-courses'))//student
+        if(!$request->user()->can('site/show-all-courses')){// any one who is enrolled
+
+            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-
-        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-
-        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+            $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
+            $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');    
+        }
 
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
@@ -113,8 +118,10 @@ class QuizzesController extends Controller
     {
         $quiz = quiz::find($id);
 
-        if(isset($quiz))
+        if(isset($quiz)){
+            LastAction::lastActionInCourse($quiz->course_id);
             return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
+        }
 
         return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
     }
