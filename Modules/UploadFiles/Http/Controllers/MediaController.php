@@ -26,17 +26,17 @@ use App\Repositories\SettingsReposiotryInterface;
 
 class MediaController extends Controller
 {
-    // protected $setting;
+    protected $setting;
 
     /**
      *constructor.
      *
      * @param SettingsReposiotryInterface $setting
      */
-    // public function __construct(SettingsReposiotryInterface $setting)
-    // {
-    //     $this->setting = $setting;        
-    // }
+    public function __construct(SettingsReposiotryInterface $setting)
+    {
+        $this->setting = $setting;        
+    }
 
     public function getAllMedia(Request $request)
     {
@@ -126,12 +126,12 @@ class MediaController extends Controller
      */
     public function store(Request $request)
     {
-        // $settings = $this->setting->get_value('upload_media_extensions');
+        $settings = $this->setting->get_value('upload_media_extensions');
 
         $request->validate([
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'required_if:type,==,0|array',
-            // 'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
+            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'url' => 'required_if:type,==,1|array',
@@ -273,13 +273,13 @@ class MediaController extends Controller
     public function update(Request $request)
     {
 
-        // $settings = $this->setting->get_value('upload_media_extensions');
+        $settings = $this->setting->get_value('upload_media_extensions');
 
         $request->validate([
             'id' => 'required|integer|exists:media,id',
             'name' => 'nullable|string|max:190',
             'description' => 'nullable|string|min:1',
-            // 'Imported_file' => 'nullable|file|mimes:'.$settings,
+            'Imported_file' => 'nullable|file|mimes:'.$settings,
             'url' => 'nullable|active_url',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
