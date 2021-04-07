@@ -1005,33 +1005,18 @@ class AssigmentsController extends Controller
                 $y=null;
                 foreach($chars as $key => $char){
 
-                    // if(str_contains($char , '<video') || str_contains($char , '<audio')){
-                    //     $y = $key;
-                    //     continue;
-                    // }
-
-                    // if(str_contains($char , '<img')){
-                    //     $contents->push($char);
-                    //     $i = $key;
-                    // }
-
-                    // if(!str_contains($char , '<img')){
-                    //     if((isset($i) && $key-1 == $i) || (count($contents) == 0) || (isset($i) && isset($y) && $key-2 == $i && $key-1 == $y)){
-                    //         $contents->push($char);
-                    //     }else{
-                    //         $count = count($contents)-1;
-                    //         $contents[$count] = $contents[$count].$char;
-                    //     }
-                    // }
+                    if(str_contains($char , '<video') || str_contains($char , '<audio')){
+                        $y = $key;
+                        continue;
+                    }
 
                     if(str_contains($char , '<img')){
                         $contents->push($char);
                         $i = $key;
                     }
-                    else{
-                        if(isset($i) && $key-1 == $i){
-                            $contents->push($char);
-                        }else if(count($contents) == 0){
+
+                    if(!str_contains($char , '<img')){
+                        if((isset($i) && $key-1 == $i) || (count($contents) == 0) || (isset($i) && isset($y) && $key-2 == $i && $key-1 == $y)){
                             $contents->push($char);
                         }else{
                             $count = count($contents)-1;
