@@ -36,6 +36,7 @@ class SpatieController extends Controller
 {
     public function install()
     {
+        ini_set('max_execution_time', '3600'); //300 seconds = 60 minutes
 
         (new BigbluebuttonController)->clear();
         $user = User::whereEmail('admin@learnovia.com')->first();
@@ -522,13 +523,14 @@ class SpatieController extends Controller
             $check1 = Excel::import($importer, public_path('translation/ArabTranslate.xlsx'));
             
             //install components
-            (new FilesController)->install_file();
-            (new QuestionBankController)->install_question_bank();
-            (new AttendanceSessionController)->install();
-            (new AssigmentsController)->install_Assignment();
-            (new PageController)->install();
-            (new BigbluebuttonController)->install();
-            (new H5PLessonController)->install();
+            \App::call('Modules\UploadFiles\Http\Controllers\FilesController@install_file');
+            \App::call('Modules\QuestionBank\Http\Controllers\QuestionBankController@install_question_bank');
+            \App::call('Modules\Attendance\Http\Controllers\AttendanceSessionController@install');
+            \App::call('Modules\Assigments\Http\Controllers\AssigmentsController@install_Assignment');
+            \App::call('Modules\Page\Http\Controllers\PageController@install');
+            \App::call('Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController@install');
+            \App::call('App\Http\Controllers\H5PLessonController@install');
+
 
             Settings::create([
                 'key' => 'create_assignment_extensions',
