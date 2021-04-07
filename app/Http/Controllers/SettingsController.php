@@ -20,7 +20,17 @@ class SettingsController extends Controller
      */
     public function index(Request $request)
     {
-        $settings = Settings::get();
+        //validate the request
+        $request->validate([
+            'key' => 'string',
+        ]);
+        
+        $settings = new Settings;
+
+        if($request->filled('key'))
+            $settings = $settings->where('key',$request->key);
+
+        $settings = $settings->get();
 
         $settings->map(function ($setting){
 
