@@ -653,7 +653,6 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, $validator->errors());
         }
 
-
         $question_id = Questions::where('parent', $parent)->where('question_type_id', $Question_Type_id)->pluck('id')->first();
         $question = Questions::find($question_id);
 

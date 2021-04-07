@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Questions extends Model
 {
-    protected $fillable = ['text','mark','parent','And_why','And_why_mark','category_id','survey','question_type_id','question_category_id','course_id'];
+    protected $fillable = ['text','mark','parent','content','category_id','survey','question_type_id','question_category_id','course_id'];
     protected $hidden = [
         'created_at', 'updated_at','course_segment_id','category_id','question_type_id','question_category_id'
     ];
+    protected $appends = ['decode_content'];
 
     public function question_type()
     {
@@ -62,5 +63,8 @@ class Questions extends Model
             ->where('user_quiz_id',$id)->first();
     }
 
-
+    public function getDecodeContentAttribute()
+    {
+        return collect(json_decode($this->content));
+    }
 }

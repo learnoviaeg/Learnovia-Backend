@@ -17,6 +17,8 @@ class ChangeQuestion extends Migration
             $table->dropColumn(['And_why_mark','And_why']);
             $table->float('mark')->nullable()->change();
             $table->longText('content')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
