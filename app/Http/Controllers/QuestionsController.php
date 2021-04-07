@@ -150,11 +150,8 @@ class QuestionsController extends Controller
             switch ($question['question_type_id']) {
                 case 1: // True_false
                     # code...
-                    $t_f = [
-                        'is_true' => $question['is_true'],
-                    ];
+                    $t_f['is_true'] = $question['is_true'];
                     $t_f['and_why'] = isset($question['and_why']) ? $question['and_why'] : null;
-                    
                     $data['content'] = json_encode($t_f);
                     break;
 
@@ -165,7 +162,6 @@ class QuestionsController extends Controller
                 case 3: // Match
                     $match['match_a']=$question['match_a'];
                     $match['match_b'] =$question['match_b'];
-
                     $data['content'] = json_encode($match);
                     break;
 
