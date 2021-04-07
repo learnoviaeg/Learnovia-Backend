@@ -22,13 +22,14 @@ class SettingsController extends Controller
     {
         //validate the request
         $request->validate([
-            'key' => 'string',
+            'key' => 'array',
+            'key.*' => 'string',
         ]);
         
         $settings = new Settings;
 
         if($request->filled('key'))
-            $settings = $settings->where('key',$request->key);
+            $settings = $settings->whereIn('key',$request->key);
 
         $settings = $settings->get();
 
