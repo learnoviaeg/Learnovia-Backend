@@ -38,7 +38,7 @@ class SettingsController extends Controller
             if($setting->key == 'create_assignment_extensions'){
 
                 //all the extensions that our system support for the assignment
-                $all_create_extensions = collect(explode(',','txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,csv,doc,docx,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls'));
+                $all_create_extensions = collect(explode(',','txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpeg,png,gif,csv,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls'));
                 
                 //the extensions that the admin choose to use
                 $values = explode(',',$setting->value);
