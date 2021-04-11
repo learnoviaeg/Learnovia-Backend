@@ -22,7 +22,9 @@ class H5pObserver
      */
     public function created(h5pLesson $h5pLesson)
     {
-        //
+        $lesson = Lesson::find($h5pLesson->lesson_id);
+        $course_id = $lesson->courseSegment->course_id;
+        $this->report->calculate_course_progress($course_id);
     }
 
     /**
