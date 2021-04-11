@@ -209,7 +209,7 @@ class UsersController extends Controller
             if($request->filled('lesson_id'))
                 $seen_users->where('lesson_id',$request->lesson_id);
             
-            $seen_users->get();
+            $seen_users = $seen_users->get();
 
             if($request->filled('from') && $request->filled('to')){
                 $seen_users = $seen_users->whereBetween('updated_at', [$request->from, $request->to]);
