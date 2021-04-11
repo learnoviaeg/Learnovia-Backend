@@ -21,7 +21,7 @@ class MaterialsObserver
      */
     public function created(Material $material)
     {
-        //
+        $this->report->calculate_course_progress($material->course_id);
     }
 
     /**

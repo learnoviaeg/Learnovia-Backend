@@ -50,6 +50,8 @@ class QuizLessonObserver
                 'visible' => $quizLesson->visible
 
             ]);
+            
+            $this->report->calculate_course_progress($course_id);
         }
     }
 
