@@ -243,8 +243,8 @@ class UsersController extends Controller
 
             if($my_chain == 'seen_report_chart'){
 
-                $seen_users = count($enrolls->where('seen','yes'));
                 $total = count($enrolls);
+                $seen_users = count($enrolls->where('seen','yes'));
                 $percentage = 0;
                 if($total != 0)
                     $percentage = round(($seen_users/$total)*100,1);
