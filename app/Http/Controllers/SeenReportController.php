@@ -107,7 +107,7 @@ class SeenReportController extends Controller
         if(!$request->filled('item_type') || in_array('assignment',$request->item_type)){
             //get the assignments and map them
             $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->with('Assignment');
-            
+
             if($request->filled('from') && $request->filled('to'))
                 $assignments->whereIn('assignment_id',$items_only->where('type','assignment')->pluck('item_id'));
             
@@ -115,7 +115,7 @@ class SeenReportController extends Controller
 
             $assignments->map(function ($assignment) use ($report,$lessons_enrolls) {
 
-                $total = $lessons_enrolls->where('lesson_id',$assignment->lesson_id);
+                $total = collect($lessons_enrolls->where('lesson_id',$assignment->lesson_id))->collapse();
                 $lesson = Lesson::whereId($assignment->lesson_id)->first();
                 $report->push([
                     'item_id' => $assignment->assignment_id,
@@ -124,7 +124,7 @@ class SeenReportController extends Controller
                     'seen_number' => $assignment->seen_number,
                     'user_seen_number' => $assignment->user_seen_number,
                     'lesson_id' => $assignment->lesson_id,
-                    'percentage' => count($total) > 0 && isset($total[0]) && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
+                    'percentage' => isset($total) && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total['total_enrolls'])*100,2) : 0,
                     'course' => $lesson->courseSegment->courses[0],
                     'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
                 ]);
@@ -145,7 +145,7 @@ class SeenReportController extends Controller
 
             $quizzes->map(function ($quiz) use ($report,$lessons_enrolls) {
 
-                $total = $lessons_enrolls->where('lesson_id',$quiz->lesson_id);
+                $total = collect($lessons_enrolls->where('lesson_id',$quiz->lesson_id))->collapse();
                 $lesson = Lesson::whereId($quiz->lesson_id)->first();
                 $report->push([
                     'item_id' => $quiz->quiz_id,
@@ -154,7 +154,7 @@ class SeenReportController extends Controller
                     'seen_number' => $quiz->seen_number,
                     'user_seen_number' => $quiz->user_seen_number,
                     'lesson_id' => $quiz->lesson_id,
-                    'percentage' => count($total) > 0 && isset($total[0]) && $quiz->user_seen_number != 0 ? round(($quiz->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
+                    'percentage' => isset($total) && $quiz->user_seen_number != 0 ? round(($quiz->user_seen_number/$total['total_enrolls'])*100,2) : 0,
                     'course' => $lesson->courseSegment->courses[0],
                     'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
                 ]);
@@ -173,7 +173,7 @@ class SeenReportController extends Controller
 
             $contents->map(function ($h5p) use ($report,$lessons_enrolls) {
 
-                $total = $lessons_enrolls->where('lesson_id',$h5p->lesson_id);
+                $total = collect($lessons_enrolls->where('lesson_id',$h5p->lesson_id))->collapse();
                 $lesson = Lesson::whereId($h5p->lesson_id)->first();
                 $report->push([
                     'item_id' => $h5p->content_id,
@@ -182,7 +182,7 @@ class SeenReportController extends Controller
                     'seen_number' => $h5p->seen_number,
                     'user_seen_number' => $h5p->user_seen_number,
                     'lesson_id' => $h5p->lesson_id,
-                    'percentage' => count($total) > 0 && isset($total[0]) && $h5p->user_seen_number != 0 ? round(($h5p->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
+                    'percentage' => isset($total) && $h5p->user_seen_number != 0 ? round(($h5p->user_seen_number/$total['total_enrolls'])*100,2) : 0,
                     'course' => $lesson->courseSegment->courses[0],
                     'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
                 ]);
@@ -204,7 +204,7 @@ class SeenReportController extends Controller
 
             $materials->map(function ($material) use ($report,$lessons_enrolls) {
 
-                $total = $lessons_enrolls->where('lesson_id',$material->lesson_id);
+                $total = collect($lessons_enrolls->where('lesson_id',$material->lesson_id))->collapse();
                 $lesson = Lesson::whereId($material->lesson_id)->first();
                 $report->push([
                     'item_id' => $material->item_id,
@@ -213,7 +213,7 @@ class SeenReportController extends Controller
                     'seen_number' => $material->seen_number,
                     'user_seen_number' => $material->user_seen_number,
                     'lesson_id' => $material->lesson_id,
-                    'percentage' => count($total) > 0 && isset($total[0]) && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total[0]['total_enrolls'])*100,2) : 0,
+                    'percentage' => isset($total) && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total['total_enrolls'])*100,2) : 0,
                     'course' => $lesson->courseSegment->courses[0],
                     'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
                 ]);
@@ -233,6 +233,7 @@ class SeenReportController extends Controller
         }
         
         if($option == 'chart'){
+            
             $total = count($report);
             $sum_percentage = array_sum($report->pluck('percentage')->toArray());
             $final_percentage = round($sum_percentage/$total,1);
