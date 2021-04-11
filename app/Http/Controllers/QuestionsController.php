@@ -251,6 +251,9 @@ class QuestionsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $question = Questions::whereId($id)->delete();
+        $question = quiz_questions::where('question_id',$id)->delete();
+        $question = UserQuizAnswer::where('question_id',$id)->delete();
+        return HelperController::api_response_format(200, $question, __('messages.question.delete'));
     }
 }

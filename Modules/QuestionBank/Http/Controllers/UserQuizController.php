@@ -30,46 +30,38 @@ class UserQuizController extends Controller
 {
     public function store_user_quiz(Request $request)
     {
-        $user = Auth::User();
-
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
 
+        $user = Auth::User();
+
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)
             ->where('lesson_id', $request->lesson_id)->first();
         
-        $quiz =Quiz::find($request->quiz_id);
-        $quiz_duration=$quiz->duration;
+        $duration = $quiz_lesson->quiz->duration;
         
         // return $quiz_lesson->due_date;
-        if (!isset($quiz_lesson)) {
+        if (!isset($quiz_lesson)) 
             return HelperController::api_response_format(400, null, __('messages.quiz.quiz_not_belong'));
-        }
-        // if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
-        //     return HelperController::api_response_format(400, null, 'Time is out');
-        $lesson = Lesson::find($request->lesson_id);
-        LastAction::lastActionInCourse( $lesson->courseSegment->course_id);
-        $max_attempt_index = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
-            ->where('user_id', Auth::user()->id)
-            ->get()->max('attempt_index');
 
-        $max_id = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)
-            ->where('user_id', Auth::user()->id)
-            ->get()->max('id');
-        $userQuiz=userQuiz::find($max_id);
+        LastAction::lastActionInCourse($quiz_lesson->lesson->courseSegment->course_id);
+        
+        $user_quizz=userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', $user->id);
+        $max_attempt_index = $user_quizz->get()->max('attempt_index');
+        $max_id = $user_quizz->get()->max('id');
+
+        $userQuiz=$user_quizz->first();
         $override_flag = false;
         $attempt_index = 0;
-        $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quiz_lesson->id)->first();
+        $override = QuizOverride::where('user_id',$user->id)->where('quiz_lesson_id',$quiz_lesson->id)->first();
         if(isset($override)){
             $override_flag = true;
             if($override->attemps <= $quiz_lesson->max_attemp &&  $override->attemps >= 0  ){
                 $max_attempt_index  =  $quiz_lesson->max_attemp - $override->attemps ; 
                 if($max_attempt_index==0)
-                {    
                     $max_attempt_index=null;
-                }                    
             }
         }
         //first attempt
@@ -85,7 +77,7 @@ class UserQuizController extends Controller
         } else if (isset($userQuiz)) {
             if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp  || $override_flag ) {
                 //When Time finish, he can't enter on same attempt
-                if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
+                if(Carbon::parse($userQuiz->open_time)->addSeconds($duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
                 {  
                     // $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get();
                     $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->get();
@@ -136,11 +128,11 @@ class UserQuizController extends Controller
                     else
                         return HelperController::api_response_format(200, $userQuiz, __('messages.quiz.continue_quiz'));
                 }
-            } else {  
+            }else {  
                 $answ=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
-                if($answ > 0){
+                if($answ > 0)
                     return HelperController::api_response_format(200, $userQuiz, __('messages.quiz.continue_quiz'));
-                }
+
                 return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
             }
         }
@@ -168,7 +160,7 @@ class UserQuizController extends Controller
 
         // return $browserData;
         $userQuiz = userQuiz::create([
-            'user_id' => Auth::user()->id,
+            'user_id' => $user->id,
             'quiz_lesson_id' => $quiz_lesson->id,
             'status_id' => 2,
             'feedback' => null,
@@ -181,18 +173,17 @@ class UserQuizController extends Controller
             'submit_time'=> null,
         ]);
         
-        $end_date = Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration);
+        $end_date = Carbon::parse($userQuiz->open_time)->addSeconds($duration);
         $seconds = $end_date->diffInSeconds(Carbon::now());
-        if($seconds < 0) {
+        if($seconds < 0) 
             $seconds = 0;
-        }
+        
         $job = (new \App\Jobs\CloseQuizAttempt($userQuiz))->delay($seconds);
         dispatch($job);
 
-        foreach($quiz_lesson->quiz->Question as $question){
+        foreach($quiz_lesson->quiz->Question as $question)
             userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
-        }
-
+        
         return HelperController::api_response_format(200, $userQuiz);
     }
 
@@ -204,155 +195,64 @@ class UserQuizController extends Controller
             'Questions.*.id' => 'required|integer|exists:questions,id',
             'forced' => 'boolean',
         ]);
-        $Q_IDS= array();
+
         // check that question exist in the Quiz
         $user_quiz = userQuiz::find($request->user_quiz_id);
-        $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
-        // if(count($request->Questions)<0){
-        //     $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereIn('question_id',$questions_ids)->get();
-
-        // foreach($answer2 as $ans)
-        //     $ans->update(['answered'=>'1']);
-
-        // return HelperController::api_response_format(200, $answer2, 'Quiz Answers are Registered Successfully(forced)');
-        // }
         
-        //to last action in course
-        $Quizlesson = QuizLesson::find($user_quiz->quiz_lesson_id);
-        $lesson = Lesson :: find($Quizlesson->lesson_id);
-        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->courseSegment->course_id);
+
         $allData = collect([]);
         foreach ($request->Questions as $index => $question) {
             if(isset($question['id'])){
-            // if (!$questions_ids->contains($question['id'])) {
+                $currentQuestion = Questions::find($question['id']);
+                $question_type_id = $currentQuestion->question_type->id;
 
-            //     $check_question = Questions::find($question['id']);
-
-                // if (isset($check_question->parent)) {
-                //     if (!$questions_ids->contains($check_question->parent)) {
-                //         return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
-                //     }
-                // } else {
-                //     return HelperController::api_response_format(400, null, 'This Question didn\'t exists in the quiz');
-                // }
-            // }
-
-            $currentQuestion = Questions::find($question['id']);
-            $question_type_id = $currentQuestion->question_type->id;
-            $question_answers = $currentQuestion->question_answer->pluck('id');
-
-            $data = [
-                'user_quiz_id' => $request->user_quiz_id,
-                'question_id' => $question['id'],
-                'answered' => 1,
-                // 'force_submit' => 1,
-            ];
-            array_push($Q_IDS, $question['id']);
-            if (isset($question_type_id)) {
+                $data = [
+                    'user_quiz_id' => $request->user_quiz_id,
+                    'question_id' => $question['id'],
+                    'answered' => 1
+                ];
+                $data = [
+                    'user_quiz_id' => $request->user_quiz_id,
+                    'question_id' => $question['id'],
+                    'answered' => 1,
+                    'parent' => isset($question['parent_id']) ? $question['parent_id'] : null,
+                    // 'created_by' => Auth::id(),
+                ];
                 switch ($question_type_id) {
                     case 1: // True_false
                         # code...
-                        $request->validate([
-                            'Questions.' . $index . '.answer_id' => 'required|integer|exists:questions_answers,id',
-                            'Questions.' . $index . '.and_why' => 'nullable|string',
-                        ]);
-
-                        if (!$question_answers->contains($question['answer_id'])) {
-                            return HelperController::api_response_format(400, $question['answer_id'], __('messages.answer.not_belong_to_question'));
-                        }
-
-                        $answer = QuestionsAnswer::find($question['answer_id']);
-                        $data['answer_id'] = $question['answer_id'];
-                        $data['user_grade'] = ($answer->is_true == 1) ? $currentQuestion->mark : 0;
-                        if (isset($question['and_why']))
-                            $data['and_why'] = $question['and_why'];
+                        $t_f['is_true'] = isset($request->is_true) ? $request->is_true : $question->is_true;
+                        $t_f['and_why'] = isset($rquest->and_why) ? $request->and_why : $question->and_why;
+                        $data['user_answer'] = json_encode($t_f);
                         break;
-
+        
                     case 2: // MCQ
-                        # code...
-                        $request->validate([
-                            'Questions.' . $index . '.mcq_answers_array' => 'required|array',
-                            'Questions.' . $index . '.mcq_answers_array.*' => 'required|integer|exists:questions_answers,id'
-                        ]);
-
-                        $flag = 1;
-                        foreach ($question['mcq_answers_array'] as $mcq_answer) {
-                            if (!$question_answers->contains($mcq_answer)) {
-                                return HelperController::api_response_format(400, null, __('messages.answer.not_belong_to_question'));
-                            }
-                            $answer = QuestionsAnswer::find($mcq_answer);
-                            if ($answer->is_true == 0) {
-                                $flag = 0;
-                            }
-                        }
-                        $data['user_grade'] = ($flag == 1) ? $currentQuestion->mark : 0;
-
-                        $data['mcq_answers_array'] = serialize($question['mcq_answers_array']);
+                        $data['user_answer'] = isset($request->MCQ_Choices) ? json_encode($request->MCQ_Choices) : $question->MCQ_Choices;
                         break;
-
+        
                     case 3: // Match
-                        # code...
-                        $request->validate([
-                            'Questions.' . $index . '.choices_array' => 'required|array',
-                            'Questions.' . $index . '.choices_array.*' => 'required|integer|exists:questions_answers,id',
-                        ]);
-
-                        $trueAnswer = $currentQuestion->question_answer->where('is_true', 1)->pluck('id');
-
-                        if (count($question['choices_array']) != count($trueAnswer)) {//must submit all choices
-                            return HelperController::api_response_format(400, null, __('messages.error.incomplete_data'));
-                        }
-                        $true_counter = 0;
-                        $false_counter = 0;
-                        foreach ($question['choices_array'] as $choice) {
-                            if (!$question_answers->contains($choice)) {
-                                return HelperController::api_response_format(400, null,__('messages.answer.not_belong_to_question'));
-                            }
-                            $answer = QuestionsAnswer::find($choice);
-                            if ($answer->is_true == 0) {
-                                $false_counter++;
-                            } else {
-                                $true_counter++;
-                            }
-                        }
-                        $question_mark = (float)$currentQuestion->mark;
-                        $multiple = (float)$true_counter * (float)$question_mark;
-                        $grade = (float)$multiple / (float)count($trueAnswer);
-                        $data['user_grade'] = $grade;
-
-                        $data['choices_array'] = serialize($question['choices_array']);
+                        $match['match_a']=isset($request->match_a) ? $request->match_a : $question->match_a;
+                        $match['match_b']=isset($qrequest->match_b) ? $request->match_b : $question->match_b;
+                        $data['user_answer'] = json_encode($match);
                         break;
-
+        
                     case 4: // Essay
-                        # code...
-                        $request->validate([
-                            'Questions.' . $index . '.content' => 'required|string',
-                        ]);
-                        $data['content'] = $question['content'];
-                        break;
-
-                    case 5: // Paragraph
-                        # code...
+                        $data['user_answer'] = null; //essay not have special answer
                         break;
                 }
-
                 $allData->push($data);
-            } else {//must enter question type
-                return HelperController::api_response_format(400, null, __('messages.error.incomplete_data'));
             }
-        }
-        $answer1= userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->where('question_id',$question['id'])->first();
-        if(isset($answer1))
-            $answer1->update($data);
+            $answer1= userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->where('question_id',$question['id'])->first();
+            if(isset($answer1))
+                $answer1->update($data);
         }
 
         if($request->forced)
         {
-            // $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->whereNotIn('question_id',$Q_IDS)->get();
             $answer2=userQuizAnswer::where('user_quiz_id',$request->user_quiz_id)->get();
 
-            foreach($answer2 as $ans)
-            {
+            foreach($answer2 as $ans){
                 $ans->update(['answered'=>'1']);
                 $ans->update(['force_submit'=>'1']);
             }

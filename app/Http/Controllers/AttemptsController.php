@@ -36,20 +36,19 @@ class AttemptsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request,$submit=null)
     {
-        $user = Auth::User();
-
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
 
+        $user = Auth::User();
+
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)
             ->where('lesson_id', $request->lesson_id)->first();
         
-        $quiz = Quiz::find($request->quiz_id);
-        $quiz_duration=$quiz->duration;
+        $duration = $quiz_lesson->quiz->duration;
         
         // return $quiz_lesson->due_date;
         if (!isset($quiz_lesson)) 
@@ -57,14 +56,14 @@ class AttemptsController extends Controller
 
         LastAction::lastActionInCourse($quiz_lesson->lesson->courseSegment->course_id);
         
-        $user_quizz=userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', Auth::user()->id);
+        $user_quizz=userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id', $user->id);
         $max_attempt_index = $user_quizz->get()->max('attempt_index');
         $max_id = $user_quizz->get()->max('id');
 
         $userQuiz=$user_quizz->first();
         $override_flag = false;
         $attempt_index = 0;
-        $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$quiz_lesson->id)->first();
+        $override = QuizOverride::where('user_id',$user->id)->where('quiz_lesson_id',$quiz_lesson->id)->first();
         if(isset($override)){
             $override_flag = true;
             if($override->attemps <= $quiz_lesson->max_attemp &&  $override->attemps >= 0  ){
@@ -86,7 +85,7 @@ class AttemptsController extends Controller
         } else if (isset($userQuiz)) {
             if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp  || $override_flag ) {
                 //When Time finish, he can't enter on same attempt
-                if(Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
+                if(Carbon::parse($userQuiz->open_time)->addSeconds($duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
                 {  
                     // $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get();
                     $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->get();
@@ -137,11 +136,11 @@ class AttemptsController extends Controller
                     else
                         return HelperController::api_response_format(200, $userQuiz, __('messages.quiz.continue_quiz'));
                 }
-            } else {  
+            }else {  
                 $answ=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('force_submit')->get()->count();
-                if($answ > 0){
+                if($answ > 0)
                     return HelperController::api_response_format(200, $userQuiz, __('messages.quiz.continue_quiz'));
-                }
+
                 return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
             }
         }
@@ -169,7 +168,7 @@ class AttemptsController extends Controller
 
         // return $browserData;
         $userQuiz = userQuiz::create([
-            'user_id' => Auth::user()->id,
+            'user_id' => $user->id,
             'quiz_lesson_id' => $quiz_lesson->id,
             'status_id' => 2,
             'feedback' => null,
@@ -182,7 +181,7 @@ class AttemptsController extends Controller
             'submit_time'=> null,
         ]);
         
-        $end_date = Carbon::parse($userQuiz->open_time)->addSeconds($quiz_duration);
+        $end_date = Carbon::parse($userQuiz->open_time)->addSeconds($duration);
         $seconds = $end_date->diffInSeconds(Carbon::now());
         if($seconds < 0) 
             $seconds = 0;

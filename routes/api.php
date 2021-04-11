@@ -458,7 +458,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('questions', QuestionsController::class);
     Route::post('questions/{id}/{type}', 'QuestionsController@update');
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
-    Route::Resource('attempt', AttemptsController::class);
     Route::Resource('notify', NotificationsController::class);
     Route::get('notification/{read}', 'NotificationsController@read')->middleware('permission:notifications/seen');
     Route::get('notifications/{types}', 'NotificationsController@index')->middleware('permission:notifications/get-all');
