@@ -15,4 +15,9 @@ class quiz_questions extends Model
     {
         return  $this->hasMany('Modules\QuestionBank\Entities\Questions', 'id', 'question_id');
     }
+
+    public function Quiz()
+    {
+        return  $this->hasMany('Modules\QuestionBank\Entities\Quiz', 'id', 'quiz_id');
+    }
 }

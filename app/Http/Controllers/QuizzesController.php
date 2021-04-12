@@ -282,10 +282,7 @@ class QuizzesController extends Controller
      */
     public function destroy($id)
     {
-        $quiz=Quiz::find($id);
-        QuizLesson::whereId($quiz->id)->delete();
-        $quiz->delete();
-
+        $quiz=Quiz::where('id',$id)->delete();
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.delete'));
     }
 }

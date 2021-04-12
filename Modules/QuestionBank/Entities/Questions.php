@@ -8,9 +8,8 @@ class Questions extends Model
 {
     protected $fillable = ['text','mark','parent','content','category_id','survey','question_type_id','question_category_id','course_id'];
     protected $hidden = [
-        'created_at', 'updated_at','course_segment_id','category_id','question_type_id','question_category_id'
+        'created_at', 'updated_at','course_segment_id','category_id','question_category_id'
     ];
-    protected $appends = ['decode_content'];
 
     public function question_type()
     {
@@ -32,15 +31,15 @@ class Questions extends Model
         return $this->belongsTo('App\Course', 'course_id', 'id');
     }
 
-    public function question_answer()
-    {
-        return $this->hasMany('Modules\QuestionBank\Entities\QuestionsAnswer', 'question_id', 'id');
-    }
+    // public function question_answer()
+    // {
+    //     return $this->hasMany('Modules\QuestionBank\Entities\QuestionsAnswer', 'question_id', 'id');
+    // }
 
-    public function childeren()
-    {
-        return $this->hasMany('Modules\QuestionBank\Entities\Questions', 'parent', 'id');
-    }
+    // public function childeren()
+    // {
+    //     return $this->hasMany('Modules\QuestionBank\Entities\Questions', 'parent', 'id');
+    // }
 
     public function course()
     {
@@ -49,11 +48,9 @@ class Questions extends Model
 
     public static function CheckAndWhy($squestion){
         if(isset($squestion->And_why))
-        {
-            if($squestion->And_why == 1){
+            if($squestion->And_why == 1)
                 return $squestion->And_why_mark;
-            }
-        }
+
         return null ;
     }
 
@@ -63,8 +60,8 @@ class Questions extends Model
             ->where('user_quiz_id',$id)->first();
     }
 
-    public function getDecodeContentAttribute()
+    public function getContentAttribute()
     {
-        return collect(json_decode($this->content));
+        return json_decode($this->attributes['content']);
     }
 }
