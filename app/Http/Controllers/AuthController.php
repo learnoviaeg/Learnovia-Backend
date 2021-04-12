@@ -187,7 +187,6 @@ class AuthController extends Controller
     {
         $user=$request->user();
         $user->token=null;
-        $user->api_token=null;
         $user->save();
         $request->user()->token()->revoke();
         //for log event

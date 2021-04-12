@@ -50,6 +50,8 @@ class AssignmentLessonObserver
                 'visible' => isset($assignmentLesson->visible)?$assignmentLesson->visible:1
 
             ]);
+
+            $this->report->calculate_course_progress($course_id);
         }
     }
 

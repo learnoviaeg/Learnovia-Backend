@@ -209,7 +209,7 @@ class UsersController extends Controller
             if($request->filled('lesson_id'))
                 $seen_users->where('lesson_id',$request->lesson_id);
             
-            $seen_users->get();
+            $seen_users = $seen_users->get();
 
             if($request->filled('from') && $request->filled('to')){
                 $seen_users = $seen_users->whereBetween('updated_at', [$request->from, $request->to]);
@@ -243,8 +243,8 @@ class UsersController extends Controller
 
             if($my_chain == 'seen_report_chart'){
 
-                $seen_users = count($enrolls->where('seen','yes'));
                 $total = count($enrolls);
+                $seen_users = count($enrolls->where('seen','yes'));
                 $percentage = 0;
                 if($total != 0)
                     $percentage = round(($seen_users/$total)*100,1);

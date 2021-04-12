@@ -31,11 +31,13 @@ use Modules\Assigments\Http\Controllers\AssigmentsController;
 use App\Exports\ExportRoleWithPermissions;
 use Illuminate\Support\Facades\Storage;
 use App\Settings;
+use GuzzleHttp\Client;
 
 class SpatieController extends Controller
 {
     public function install()
     {
+        ini_set('max_execution_time', '3600'); //300 seconds = 60 minutes
 
         (new BigbluebuttonController)->clear();
         $user = User::whereEmail('admin@learnovia.com')->first();
@@ -155,7 +157,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'category/get-all', 'title' => 'get all categories']);
 
             //management
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'management/get', 'title' => 'Course Management' , 'dashboard' => 1, 'icon' => 'Settings']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'management/get', 'title' => 'Course Management' , 'dashboard' => 1, 'icon' => 'university']);
             
             //Course Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/add', 'title' => 'add course' , 'dashboard' => 0, 'icon' => 'Course']);
@@ -458,13 +460,34 @@ class SpatieController extends Controller
             $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
             $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $parent_permissions)->get());
 
+            $clientt = new Client();
+            $data = array(
+                'name' => 'Learnovia Company', 
+                'meta_data' => array(
+                    "image_link" => null,
+                    'role'=> 'Super Admin'
+                ),
+            );
+
+            $data = json_encode($data);
+
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                'headers'   => [
+                    'Content-Type' => 'application/json'
+                ], 
+                'body' => $data
+            ]);
+
             $user = new User([
                 'firstname' => 'Learnovia',
                 'lastname' => 'Company',
                 'username' => 'Admin',
                 'email' => 'admin@learnovia.com',
                 'password' => bcrypt('Learnovia123'),
-                'real_password' => 'Learnovia123'
+                'real_password' => 'Learnovia123',
+                'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+                'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+                'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
             ]);
             $user->save();
             $user->assignRole($super);
@@ -522,18 +545,19 @@ class SpatieController extends Controller
             $check1 = Excel::import($importer, public_path('translation/ArabTranslate.xlsx'));
             
             //install components
-            (new FilesController)->install_file();
-            (new QuestionBankController)->install_question_bank();
-            (new AttendanceSessionController)->install();
-            (new AssigmentsController)->install_Assignment();
-            (new PageController)->install();
-            (new BigbluebuttonController)->install();
-            (new H5PLessonController)->install();
+            \App::call('Modules\UploadFiles\Http\Controllers\FilesController@install_file');
+            \App::call('Modules\QuestionBank\Http\Controllers\QuestionBankController@install_question_bank');
+            \App::call('Modules\Attendance\Http\Controllers\AttendanceSessionController@install');
+            \App::call('Modules\Assigments\Http\Controllers\AssigmentsController@install_Assignment');
+            \App::call('Modules\Page\Http\Controllers\PageController@install');
+            \App::call('Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController@install');
+            \App::call('App\Http\Controllers\H5PLessonController@install');
+
 
             Settings::create([
                 'key' => 'create_assignment_extensions',
                 'title' => 'Create/Edit Assignment Supported Extensions',
-                'value' => 'txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,csv,doc,docx,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls',
+                'value' => 'txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpeg,png,gif,csv,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls',
                 'type' => 'extensions'
             ]);
 
