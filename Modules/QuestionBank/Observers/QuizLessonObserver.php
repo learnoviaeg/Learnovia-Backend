@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use App\Log;
 use App\User;
 use App\LessonComponent;
+use App\UserSeen;
 
 class QuizLessonObserver
 {
@@ -78,7 +79,7 @@ class QuizLessonObserver
             ]);
         }
 
-        if($quizLesson->isDirty('seen_number')){
+        if($quizLesson->isDirty('lesson_id')){
             $lesson = Lesson::find($quizLesson->lesson_id);
             $course_id = $lesson->courseSegment->course_id;
             $this->report->calculate_course_progress($course_id);
@@ -104,6 +105,8 @@ class QuizLessonObserver
 
         $lesson = Lesson::find($quizLesson->lesson_id);
         $course_id = $lesson->courseSegment->course_id;
+
+        UserSeen::where('lesson_id',$quizLesson->lesson_id)->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
         $this->report->calculate_course_progress($course_id);
     }
 
