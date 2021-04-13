@@ -582,6 +582,8 @@ class SpatieController extends Controller
                 'type' => 'extensions'
             ]);
 
+            \Artisan::call('storage:link', ['--env' => 'local']);
+
             return "System Installed Your User is $user->email and Password is Learnovia123.";
 
         }
