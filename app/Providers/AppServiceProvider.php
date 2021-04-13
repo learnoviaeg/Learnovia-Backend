@@ -18,7 +18,8 @@ use App\Observers\MaterialsObserver;
 use App\h5pLesson;
 use App\Observers\LogsObserver;
 use Modules\Attendance\Entities\AttendanceSession;
-
+use App\Observers\UserSeenObserver;
+use App\UserSeen;
 use App\User;
 use App\Parents;
 use App\AcademicType;
@@ -93,5 +94,6 @@ class AppServiceProvider extends ServiceProvider
         AttendanceSession::observe(LogsObserver::class);
         Announcement::observe(Announcements::class);
         Material::observe(MaterialsObserver::class);
+        UserSeen::observe(UserSeenObserver::class);
     }
 }

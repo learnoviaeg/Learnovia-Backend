@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Material;
 use App\Repositories\RepportsRepositoryInterface;
+use App\UserSeen;
 
 class MaterialsObserver
 {
@@ -32,7 +33,7 @@ class MaterialsObserver
      */
     public function updated(Material $material)
     {
-        if($material->isDirty('seen_number')){
+        if($material->isDirty('lesson_id')){
             $this->report->calculate_course_progress($material->course_id);
         }
     }
@@ -45,6 +46,7 @@ class MaterialsObserver
      */
     public function deleted(Material $material)
     {
+        UserSeen::where('lesson_id',$material->lesson_id)->where('item_id',$material->item_id)->where('type',$material->type)->delete();
         $this->report->calculate_course_progress($material->course_id);
     }
 
