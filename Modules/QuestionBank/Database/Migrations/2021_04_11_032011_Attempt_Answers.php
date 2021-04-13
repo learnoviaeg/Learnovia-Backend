@@ -13,7 +13,7 @@ class AttemptAnswers extends Migration
      */
     public function up()
     {
-        Schema::table('user_quiz_answers', function (Blueprint $table) {
+        Schema::table('user_quiz_answers', function (Blueprint $table) { 
             $table->dropForeign(['answer_id']);
             $table->dropColumn(['answer_id','and_why','mcq_answers_array','choices_array','content']);
             $table->longText('user_answers')->after('question_id');
