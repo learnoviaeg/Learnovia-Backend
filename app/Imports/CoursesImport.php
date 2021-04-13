@@ -80,7 +80,7 @@ class CoursesImport implements ToModel , WithHeadingRow
                 'end_date' =>  Date::excelToDateTimeObject($row['end_date']),
             ]);
             $gradeCat = GradeCategory::firstOrCreate([
-                'name' => 'Course Total',
+                'name' => $course->name . ' Total',
                 'course_segment_id' => $courseSegment->id,
                 'id_number' => isset($row['level_id']) ? $yearLevel->id : null
             ]);
