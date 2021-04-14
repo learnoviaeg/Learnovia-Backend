@@ -66,7 +66,7 @@ class SettingsController extends Controller
             if($setting->key == 'submit_assignment_extensions'){
 
                 //all the extensions that our system support for the assignment submission
-                $all_create_extensions = collect(explode(',','pdf,docs,doc,docx,xls,xlsx,ppt,pptx'));
+                $all_create_extensions = collect(explode(',','pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,mp3,wav,amr'));
 
                 //the extensions that the admin choose to use
                 $values = explode(',',$setting->value);
