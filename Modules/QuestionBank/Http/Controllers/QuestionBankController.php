@@ -653,7 +653,6 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, $validator->errors());
         }
 
-
         $question_id = Questions::where('parent', $parent)->where('question_type_id', $Question_Type_id)->pluck('id')->first();
         $question = Questions::find($question_id);
 
@@ -961,29 +960,6 @@ class QuestionBankController extends Controller
         LastAction::lastActionInCourse($question->course_id);        
         $question->delete();
         return HelperController::api_response_format(200, [], __('messages.question.delete'));
-    }
-
-    public function addAnswer(Request $request)
-    {
-        $request->validate([
-            'question_id' => 'required|integer|exists:questions,id',
-            'contents' => 'required|string|min:1',
-            'true_false' => 'nullable|boolean',
-            'match_a' => 'nullable|string|max:10',
-            'match_b' => 'nullable|string|max:10',
-            'is_true' => 'required|boolean',
-        ]);
-
-        $answer = QuestionsAnswer::create([
-            'content'    => $request->contents,
-            'true_false' => $request->true_false,
-            'match_a' => $request->match_a,
-            'match_b' => $request->match_b,
-            'is_true' => $request->is_true,
-            'question_id' => $request->question_id
-        ]);
-
-        return HelperController::api_response_format(200, $answer, __('messages.answer.add'));
     }
 
     public function getAllTypes(Request $request){

@@ -27,6 +27,7 @@ class QuizzesController extends Controller
         $this->middleware(['permission:quiz/detailes' , 'ParentCheck'],   ['only' => ['show']]);
 
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -105,7 +106,104 @@ class QuizzesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|min:3',
+            'course_id' => 'required|integer|exists:courses,id',
+            'type' => 'required|in:0,1,2',
+            'lesson_id' => 'required|exists:lessons,id',
+            /**
+             * type 0 => Old Question
+             * type 1 => New Questions
+             * type 2 => New & Old Questions
+             */
+            'is_graded' => 'required|boolean',
+            'duration' => 'required|integer',
+            'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
+            'feedback' => 'integer| in:1,2,3',
+            /**
+             * feedback 1 => After submission
+             * feedback 2 =>After due date,
+             * feedback 3 => No feedback
+            */
+        ]);
+        if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
+            return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
+
+        $course=  Course::where('id',$request->course_id)->first();
+        LastAction::lastActionInCourse($request->course_id);
+
+        $newQuestionsIDs=array();
+        $oldQuestionsIDs=array();
+        if ($request->type == 1 || $request->type == 2) { // New
+            $request->validate([
+                //for interface model
+                'course_id' => 'required|integer|exists:courses,id',
+                'question_category_id' => 'required|integer|exists:questions_categories,id',
+    
+                //for request of creation multi type questions
+                'Question' => 'required|array',
+                'Question.*.is_comp' => 'required|in:0,1', 
+                // 0 if this question not comprehension  
+                // 1 if this question belong to comprehension_question
+                'Question.*.question_type_id' => 'required_if:Question.*.question_type_id,==,2|exists:questions_types,id', 
+                'Question.*.text' => 'required|string', //need in every type_question
+                'Question.*.is_true' => 'required_if:Question.*.question_type_id,==,1|boolean', //for true-false
+                'Question.*.and_why' => 'boolean', //if question t-f and have and_why question
+    
+                //MCQ validation
+                'Question.*.MCQ_Choices' => 'required_if:Question.*.question_type_id,==,2|array',
+                'Question.*.MCQ_Choices.*.is_true' => 'required_if:Question.*.question_type_id,==,2|boolean',
+                'Question.*.MCQ_Choices.*.content' => 'required_if:Question.*.question_type_id,==,2|string',
+    
+                //Comprehension 
+                'Question.*.parent_id' => 'required_if:Question.*.is_comp,==,1|exists:questions,id',
+    
+                //Match
+                'Question.*.match_a' => 'required_if:Question.*.question_type_id,==,3|array',
+                'Question.*.match_b' => 'required_if:Question.*.question_type_id,==,3|array'
+            ]);
+            $newQuestionsIDs=app('App\Http\Controllers\QuestionsController')->store($request,1);
+        }
+        if ($request->type == 0 ||$request->type == 2) { // old
+            $request->validate([
+                'oldQuestion' => 'required|array',
+                'oldQuestion.*' => 'required|integer|exists:questions,id',
+            ]);
+            $oldQuestionsIDs=($request->oldQuestion);
+        }
+        $questionsIDs = array_merge($newQuestionsIDs,$oldQuestionsIDs);
+
+        if ($questionsIDs != null) {
+            $quiz = quiz::create([
+                'name' => $request->name,
+                'course_id' => $request->course_id,
+                'is_graded' => $request->is_graded,
+                'duration' => $request->duration,
+                'created_by' => Auth::user()->id,
+                'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
+                'feedback' => isset($request->feedback) ? $request->feedback : 1,
+            ]);
+            $index = QuizLesson::where('lesson_id',$request->lesson_id)->get()->max('index');
+            $Next_index = $index + 1;
+            $quizLesson = QuizLesson::create([
+                'quiz_id' => $quiz->id,
+                'lesson_id' => $request->lesson_id,
+                'start_date' => $request->opening_time,
+                'due_date' => $request->closing_time,
+                'max_attemp' => $request->max_attemp,
+                'grading_method_id' => $request->grading_method_id,
+                'grade' => $request->grade,
+                'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id[$key] : null,
+                'publish_date' => $request->opening_time,
+                'index' => $Next_index,
+                'visible' => isset($request->visible)?$request->visible:1
+            ]);
+            $quiz->Question()->attach($questionsIDs);
+            $quiz->Question;
+            
+            return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
+        }
+        return HelperController::api_response_format(200, null, __('messages.error.not_found'));
     }
 
     /**
@@ -135,7 +233,45 @@ class QuizzesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|min:3',
+            'course_id' => 'required|integer|exists:courses,id',
+            'type' => 'required|in:0,1,2',
+            'lesson_id' => 'required|exists:lessons,id',
+            /**
+             * type 0 => Old Question
+             * type 1 => New Questions
+             * type 2 => New & Old Questions
+             */
+            'is_graded' => 'required|boolean',
+            'duration' => 'required|integer',
+            'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
+            'feedback' => 'integer| in:1,2,3',
+            /**
+             * feedback 1 => After submission
+             * feedback 2 =>After due date,
+             * feedback 3 => No feedback
+            */
+        ]);
+        if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
+            return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
+
+        $course=  Course::where('id',$request->course_id)->first();
+        LastAction::lastActionInCourse($request->course_id);
+
+        $quiz=Quiz::find($id);
+        $quiz->update([
+            'name' => isset($request->name) ? $request->name : $quiz->name,
+            'course_id' => isset($request->course_id) ? $request->course_id : $quiz->course_id,
+            'is_graded' => isset($request->is_graded) ? $request->is_graded : $quiz->is_graded,
+            'is_graded' => isset($request->duration) ? $request->duration : $quiz->duration,
+            'created_by' => Auth::user()->id,
+            'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
+            'feedback' => isset($request->feedback) ? $request->feedback : 1,
+        ]);
+         $quiz->save();
+            
+        return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
     }
 
     /**
@@ -146,6 +282,7 @@ class QuizzesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $quiz=Quiz::where('id',$id)->delete();
+        return HelperController::api_response_format(200, $quiz,__('messages.quiz.delete'));
     }
 }
