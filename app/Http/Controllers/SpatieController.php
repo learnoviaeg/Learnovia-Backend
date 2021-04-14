@@ -564,7 +564,7 @@ class SpatieController extends Controller
             Settings::create([
                 'key' => 'submit_assignment_extensions',
                 'title' => 'Submit Assignment Supported Extensions',
-                'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx',
+                'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,mp3,wav,amr',
                 'type' => 'extensions'
             ]);
 
