@@ -179,7 +179,7 @@ class H5PLessonController extends Controller
             return HelperController::api_response_format(400, null, __('messages.permissions.user_doesnot_has_permission'));
         }
 
-        h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first()->delete();
+        $h5pLesson->delete();
         DB::table('h5p_contents')->where('id', $request->content_id)->delete();
 
         return HelperController::api_response_format(200, null, __('messages.interactive.delete'));
