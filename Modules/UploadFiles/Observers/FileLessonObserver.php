@@ -7,7 +7,6 @@ use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\File;
 use App\Lesson;
 use App\Material;
-use App\UserSeen;
 
 class FileLessonObserver
 {
@@ -72,7 +71,6 @@ class FileLessonObserver
     public function deleted(FileLesson $fileLesson)
     {
         //for log event
-        UserSeen::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->delete();
         $logsbefore=Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->get();
         $all = Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->delete();
         if($all > 0)
