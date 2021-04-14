@@ -72,7 +72,7 @@ class FileLessonObserver
     {
         //for log event
         $logsbefore=Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->get();
-        $all = Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->delete();
+        $all = Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->first()->delete();
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
     }
