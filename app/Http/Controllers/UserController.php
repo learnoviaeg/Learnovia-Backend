@@ -401,6 +401,9 @@ class UserController extends Controller
             'to' => 'date|required_with:from',
         ]);
         $users = User::where('id','!=',0)->with('roles');
+        if(Auth::id() != 1)
+            $users = $users->where('id','!=',1);
+            
         if($request->filled('country'))
             $users = $users->where('country','LIKE',"%$request->country%");
         if($request->filled('nationality'))
