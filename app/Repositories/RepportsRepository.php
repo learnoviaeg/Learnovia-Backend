@@ -60,9 +60,10 @@ class RepportsRepository implements RepportsRepositoryInterface
             if($divided_by > 0)
                 $percentage = ($sum_views / $divided_by) * 100;
 
-            $all_percentages[$i]= $percentage;
-
-            $i++;
+            if($percentage != 0){
+                $all_percentages[$i]= $percentage;
+                $i++;    
+            }
         }
         
         $final = (array_sum($all_percentages) / count($all_percentages));
