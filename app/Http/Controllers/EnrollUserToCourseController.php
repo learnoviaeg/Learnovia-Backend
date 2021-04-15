@@ -764,4 +764,15 @@ class EnrollUserToCourseController extends Controller
 
         return HelperController::api_response_format(201,$enrolls, 'updated');
     }
+
+    public function reset_enrollment(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|array|exists:users,id'
+        ]);
+
+        $enroll=Enroll::whereIn('user_id',$request->user_id)->delete();
+
+        return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
+    }
 }

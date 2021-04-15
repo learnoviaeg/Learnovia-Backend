@@ -564,7 +564,7 @@ class SpatieController extends Controller
             Settings::create([
                 'key' => 'submit_assignment_extensions',
                 'title' => 'Submit Assignment Supported Extensions',
-                'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx',
+                'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,mp3,wav,amr',
                 'type' => 'extensions'
             ]);
 
@@ -581,6 +581,8 @@ class SpatieController extends Controller
                 'value' => 'mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie,aac,au,flac,m3u,m4a,wma,ai,bmp,gdraw,ico,jpe,pct,pic,pict,svg,svgz,tif,tiff,3gp,dv,dif,f4v,m4v,mpg,rmvb,swf,swfl,webm,wmv,asf',
                 'type' => 'extensions'
             ]);
+
+            \Artisan::call('storage:link', ['--env' => 'local']);
 
             return "System Installed Your User is $user->email and Password is Learnovia123.";
 
