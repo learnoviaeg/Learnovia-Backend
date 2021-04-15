@@ -29,7 +29,7 @@ class RepportsRepository implements RepportsRepositoryInterface
         //0.75x100 = 75%
         // so the progress will be 75%
 
-        $enroll_students = Enroll::where('course',1)->where('role_id',3)->get()->groupBy('class');
+        $enroll_students = Enroll::where('course',$course_id)->where('role_id',3)->get()->groupBy('class');
         $all_percentages = [];
         $i=0;
 
