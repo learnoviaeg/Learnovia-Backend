@@ -77,12 +77,6 @@ class QuestionsController extends Controller
         
         //using api quizzes/null/count 
         if($question == 'count'){
-            if(isset($quiz_id))
-                $counts = $questions->whereselect(DB::raw
-                (  "COUNT(case `question_type_id` when 4 then 1 else null end) as essay ,
-                    COUNT(case `question_type_id` when 1 then 1 else null end) as tf ,
-                    COUNT(case `question_type_id` when 2 then 1 else null end) as mcq" 
-                ))->first()->only(['essay','tf','mcq']);
             $counts = $questions->select(DB::raw
                 (  "COUNT(case `question_type_id` when 4 then 1 else null end) as essay ,
                     COUNT(case `question_type_id` when 1 then 1 else null end) as tf ,
@@ -131,10 +125,10 @@ class QuestionsController extends Controller
             'Question.*.match_b' => 'required_if:Question.*.question_type_id,==,3|array'
         ]);
 
-        $allData=collect();
         $data=array();
         $t_f=array();
         $match=array();
+        $question=array();
         foreach ($request->Question as $index => $question) {
             $data = [
                 'course_id' => $request->course_id,
@@ -163,6 +157,7 @@ class QuestionsController extends Controller
                     break;
 
                 case 4: // Essay
+                    $question['content']=null;
                     $data['content'] = json_encode($question['content']); //essay not have special answer
                     break;
             }
@@ -170,9 +165,9 @@ class QuestionsController extends Controller
             $ids[]=$question[0]->id;
         }
         if($type == 1)
-            return $ids;
+            return $question;
 
-        return HelperController::api_response_format(200, $allData, __('messages.question.add'));
+        return HelperController::api_response_format(200, null , __('messages.question.add'));
     }
 
     /**
@@ -183,7 +178,8 @@ class QuestionsController extends Controller
      */
     public function show($id)
     {
-        //
+        $َquestion=Questions::find($id);
+        return HelperController::api_response_format(200, $question,null);
     }
 
     /**
@@ -193,7 +189,7 @@ class QuestionsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id, $type)
+    public function update(Request $request, $id)
     {
         $request->validate([
             //for interface model
@@ -204,7 +200,7 @@ class QuestionsController extends Controller
         ]);
         
         $data=array();
-        $question = Questions::findOrFail($id);
+        $question = Questions::find($id);
 
         $quest=$question->update([
             'course_id' => isset($request->course_id) ? $request->course_id : $question->course_id,
@@ -212,7 +208,7 @@ class QuestionsController extends Controller
             'created_by' => Auth::id(),
             'text' => isset($request->text) ? $request->text : $question->text,
         ]);
-        switch ($type) {
+        switch ($question->question_type_id) {
             case 1: // True_false
                 # code...
                 $t_f['is_true'] = isset($request->is_true) ? $request->is_true : $question->is_true;
@@ -231,7 +227,7 @@ class QuestionsController extends Controller
                 break;
 
             case 4: // Essay
-                $data['content'] = isset($request->content) ? $request->content : $question->content; //essay not have special answer
+                $data['content'] = $question->content; //essay not have special answer
                 break;
         }
         $question->content=$data['content'];

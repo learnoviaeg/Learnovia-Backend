@@ -14,6 +14,7 @@ use App\Course;
 use App\Level;
 use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\Questions;
 use App\LastAction;
 use Carbon\Carbon;
 
@@ -164,6 +165,7 @@ class QuizzesController extends Controller
             ]);
             $newQuestionsIDs=app('App\Http\Controllers\QuestionsController')->store($request,1);
         }
+        return $newQuestionsIDs;
         if ($request->type == 0 ||$request->type == 2) { // old
             $request->validate([
                 'oldQuestion' => 'required|array',
@@ -215,6 +217,8 @@ class QuizzesController extends Controller
     public function show($id)
     {
         $quiz = quiz::find($id);
+        $quiz->Question;
+        $quiz->quizLesson;
 
         if(isset($quiz)){
             LastAction::lastActionInCourse($quiz->course_id);
@@ -234,17 +238,17 @@ class QuizzesController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|min:3',
-            'course_id' => 'required|integer|exists:courses,id',
-            'type' => 'required|in:0,1,2',
-            'lesson_id' => 'required|exists:lessons,id',
+            'name' => 'string|min:3',
+            'course_id' => 'integer|exists:courses,id',
+            'question_id' => 'exists:questions,id',
             /**
              * type 0 => Old Question
              * type 1 => New Questions
              * type 2 => New & Old Questions
              */
-            'is_graded' => 'required|boolean',
-            'duration' => 'required|integer',
+            'lesson_id' => 'exists:lessons,id',
+            'is_graded' => 'boolean',
+            'duration' => 'integer',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'feedback' => 'integer| in:1,2,3',
             /**
@@ -256,7 +260,6 @@ class QuizzesController extends Controller
         if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
             return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
 
-        $course=  Course::where('id',$request->course_id)->first();
         LastAction::lastActionInCourse($request->course_id);
 
         $quiz=Quiz::find($id);
@@ -264,14 +267,24 @@ class QuizzesController extends Controller
             'name' => isset($request->name) ? $request->name : $quiz->name,
             'course_id' => isset($request->course_id) ? $request->course_id : $quiz->course_id,
             'is_graded' => isset($request->is_graded) ? $request->is_graded : $quiz->is_graded,
-            'is_graded' => isset($request->duration) ? $request->duration : $quiz->duration,
+            'duration' => isset($request->duration) ? $request->duration : $quiz->duration,
             'created_by' => Auth::user()->id,
             'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
             'feedback' => isset($request->feedback) ? $request->feedback : 1,
         ]);
-         $quiz->save();
+        $quiz->save();
+        $quiz->Question;
+        $quiz->quizLesson;
+
+        if(isset($request->lesson_id))
+            $quiz->quizLessson()->update(['lesson_id' => $request->lesson_id]);
+
+        if(isset($request->question_id)){
+            $quest=Questions::find($request->question_id);
+            $udatedQuestion=app('App\Http\Controllers\QuestionsController')->update($request,$request->question_id);
+        }
             
-        return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
+        return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
 
     /**
