@@ -15,7 +15,6 @@ use App\Classes;
 use Illuminate\Support\Facades\Storage;
 use URL;
 use Auth;
-use Log;
 use checkEnroll;
 use Carbon\Carbon;
 use App\CourseSegment;
@@ -32,6 +31,7 @@ use App\Repositories\SettingsReposiotryInterface;
 
 class FilesController extends Controller
 {
+
     protected $setting;
 
     /**
@@ -39,10 +39,10 @@ class FilesController extends Controller
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
-    {
-        $this->setting = $setting;        
-    }
+    // public function __construct(SettingsReposiotryInterface $setting)
+    // {
+    //     $this->setting = $setting;        
+    // }
 
     public function install_file()
     {
@@ -251,7 +251,6 @@ class FilesController extends Controller
                 $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
                 $file->url2 = 'files/' . $name;
                 $check = $file->save();
-                // Log::debug('file heeeeeeeeeeeere '. $file);
                 $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
                 $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
                 $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $tempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
@@ -290,8 +289,6 @@ class FilesController extends Controller
                         $singlefile,
                         $name
                     );
-                    // Log::debug('file daaaaata '. $singlefile,$name);
-
                 }
             }
         }
