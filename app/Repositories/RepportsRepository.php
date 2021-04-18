@@ -60,12 +60,15 @@ class RepportsRepository implements RepportsRepositoryInterface
             if($divided_by > 0)
                 $percentage = ($sum_views / $divided_by) * 100;
 
-            $all_percentages[$i]= $percentage;
-
-            $i++;
+            if($divided_by > 0){
+                $all_percentages[$i]= $percentage;
+                $i++;    
+            }
         }
-        
-        $final = (array_sum($all_percentages) / count($all_percentages));
+
+        $final=0;
+        if(count($all_percentages) > 0)
+            $final = (array_sum($all_percentages) / count($all_percentages));
 
         Course::where('id',$course_id)->update([
             'progress' => round($final,2)

@@ -34,6 +34,7 @@ class MaterialsObserver
     public function updated(Material $material)
     {
         if($material->isDirty('lesson_id')){
+            UserSeen::where('lesson_id',$material->getOriginal('lesson_id'))->where('item_id',$material->item_id)->where('type',$material->type)->delete();
             $this->report->calculate_course_progress($material->course_id);
         }
     }
