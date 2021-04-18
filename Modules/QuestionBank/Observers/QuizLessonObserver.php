@@ -82,6 +82,7 @@ class QuizLessonObserver
         if($quizLesson->isDirty('lesson_id')){
             $lesson = Lesson::find($quizLesson->lesson_id);
             $course_id = $lesson->courseSegment->course_id;
+            UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
             $this->report->calculate_course_progress($course_id);
         }
     }
