@@ -80,8 +80,17 @@ class AssignmentLessonObserver
         }
 
         if($assignmentLesson->isDirty('lesson_id')){
+
             $lesson = Lesson::find($assignmentLesson->lesson_id);
             $course_id = $lesson->courseSegment->course_id;
+            $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+
+            $old_lesson = Lesson::find($assignmentLesson->getOriginal('lesson_id'));
+            $old_class_id = $old_lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            
+            if($old_class_id != $class_id)
+                UserSeen::where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
+            
             $this->report->calculate_course_progress($course_id);
         }
     }

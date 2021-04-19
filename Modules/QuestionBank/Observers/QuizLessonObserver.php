@@ -80,8 +80,17 @@ class QuizLessonObserver
         }
 
         if($quizLesson->isDirty('lesson_id')){
+            
             $lesson = Lesson::find($quizLesson->lesson_id);
             $course_id = $lesson->courseSegment->course_id;
+            $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+
+            $old_lesson = Lesson::find($quizLesson->getOriginal('lesson_id'));
+            $old_class_id = $old_lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            
+            if($old_class_id != $class_id)
+                UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
+
             $this->report->calculate_course_progress($course_id);
         }
     }
