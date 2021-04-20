@@ -445,10 +445,9 @@ class FilesController extends Controller
         if (!$request->filled('updated_lesson_id')) {
           $request->updated_lesson_id= $request->lesson_id;
         }
-        $fileLesson->update([
-            'lesson_id' => $request->updated_lesson_id
-        ]);
+        $fileLesson->lesson_id = $request->updated_lesson_id;
         $fileLesson->updated_at = Carbon::now();
+        $fileLesson->save();
         $file->save();
         $course_seg_drag = Lesson::where('id',$request->lesson_id)->pluck('course_segment_id')->first();
         $courseID_drag = CourseSegment::where('id', $course_seg_drag)->pluck('course_id')->first();
