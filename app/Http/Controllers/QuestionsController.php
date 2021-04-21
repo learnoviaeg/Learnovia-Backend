@@ -8,6 +8,7 @@ use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuestionsType;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
+use Validator;
 use App\Paginate;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\CourseSegment;
@@ -95,79 +96,245 @@ class QuestionsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request,$type=null)
+    public function store(Request $request,$type=0)
     {
-        $request->validate([
-            //for interface model
-            'course_id' => 'required|integer|exists:courses,id',
-            'question_category_id' => 'required|integer|exists:questions_categories,id',
+        // $request->validate([
+        //     'course_id' => 'integer|exists:courses,id',
+        //     'Question' => 'array',
+        //     'Question.*.Question_Type_id' => 'integer|exists:questions_types,id',
+        // ]);
 
+        // $re = collect([]);
+        // if(isset($request->Question))
+        //     foreach ($request->Question as $question) {
+        //         switch ($question['Question_Type_id']) {
+        //             case 1: // True/false
+        //                 $true_false = $this->T_F($question,null);
+        //                 $re->push($true_false);
+        //                 break;
+        //             case 2: // MCQ
+        //                 $mcq = $this->MCQ($question,null);
+        //                 $re->push($mcq);
+        //                 break;
+        //             case 3: // Match
+        //                 $match = $this->Match($question,null);
+        //                 $re->push($match);
+        //                 break;
+        //             case 4: // Essay
+        //                 $essay = $this->Essay($question,null);
+        //                 $re->push($essay);
+        //                 break;
+        //             case 5: // para
+        //                 $comprehension = $this->Comprehension($question);
+        //                 $comprehension->children;
+        //                 $re->push($comprehension);
+        //                 break;
+        //         }
+        //     }
+        // if($type == 1)
+        //     return $re->pluck('id');
+
+        // return HelperController::api_response_format(200, $re, __('messages.question.add'));
+
+        $request->validate([
             //for request of creation multi type questions
             'Question' => 'required|array',
-            'Question.*.is_comp' => 'required|in:0,1', 
+            'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
+            // 'Question.*.is_comp' => 'required|in:0,1', 
             // 0 if this question not comprehension  
             // 1 if this question belong to comprehension_question
-            'Question.*.question_type_id' => 'required_if:Question.*.question_type_id,==,2|exists:questions_types,id', 
+            'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
+            'Question.*.question_type_id' => 'required|exists:questions_types,id', 
             'Question.*.text' => 'required|string', //need in every type_question
-            'Question.*.is_true' => 'required_if:Question.*.question_type_id,==,1|boolean', //for true-false
-            'Question.*.and_why' => 'boolean', //if question t-f and have and_why question
 
-            //MCQ validation
-            'Question.*.MCQ_Choices' => 'required_if:Question.*.question_type_id,==,2|array',
-            'Question.*.MCQ_Choices.*.is_true' => 'required_if:Question.*.question_type_id,==,2|boolean',
-            'Question.*.MCQ_Choices.*.content' => 'required_if:Question.*.question_type_id,==,2|string',
-
-            //Comprehension 
-            'Question.*.parent_id' => 'required_if:Question.*.is_comp,==,1|exists:questions,id',
-
-            //Match
-            'Question.*.match_a' => 'required_if:Question.*.question_type_id,==,3|array',
-            'Question.*.match_b' => 'required_if:Question.*.question_type_id,==,3|array'
+            // //Comprehension 
+            // 'Question.*.parent_id' => 'required_if:Question.*.is_comp,==,1|exists:questions,id',
+            // 'Question.*.subQuestions' => 'required|array|distinct'/*|min:2*/,
+            // 'Question.*.subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
         ]);
 
         $data=array();
-        $t_f=array();
-        $match=array();
         $question=array();
+        $all=collect([]);
         foreach ($request->Question as $index => $question) {
-            $data = [
-                'course_id' => $request->course_id,
-                'question_category_id' => $request->question_category_id,
-                'question_type_id' => $question['question_type_id'],
-                'text' => $question['text'],
-                'parent' => isset($question['parent_id']) ? $question['parent_id'] : null,
-                'created_by' => Auth::id(),
-            ];
+
             switch ($question['question_type_id']) {
-                case 1: // True_false
-                    # code...
-                    $t_f['is_true'] = $question['is_true'];
-                    $t_f['and_why'] = isset($question['and_why']) ? $question['and_why'] : null;
-                    $data['content'] = json_encode($t_f);
+                case 1: // True/false
+                    $true_false = $this->T_F($question,null);
+                    $all->push($true_false);
                     break;
 
                 case 2: // MCQ
-                    $data['content'] = json_encode(array_values($question['MCQ_Choices']));
+                    $mcq = $this->MCQ($question,null);
+                    $all->push($mcq);
                     break;
 
                 case 3: // Match
-                    $match['match_a']=$question['match_a'];
-                    $match['match_b'] =$question['match_b'];
-                    $data['content'] = json_encode($match);
+                    $match = $this->Match($question,null);
+                    $all->push($match);
                     break;
 
                 case 4: // Essay
-                    $question['content']=null;
-                    $data['content'] = json_encode($question['content']); //essay not have special answer
+                    $essay = $this->Essay($question,null);
+                    $all->push($essay); //essay not have special answer
+                    break;
+
+                case 5: // Comprehension
+                    $comprehension=$this->Comprehension($question);
+                    $comprehension->children;
+                    $all->push($comprehension);
                     break;
             }
-            $question[]=Questions::firstOrCreate($data);
-            $ids[]=$question[0]->id;
         }
-        if($type == 1)
-            return $question;
 
-        return HelperController::api_response_format(200, null , __('messages.question.add'));
+        if($type == 1)
+            return $all->pluck('id');
+
+        return HelperController::api_response_format(200, $all , __('messages.question.add'));
+    }
+
+    public function T_F($question,$parent)
+    {
+        $validator = Validator::make($question, [
+            'and_why' => 'required|in:0,1|integer',
+            'is_true' => 'required|in:0,1|boolean',
+        ]);
+
+        if ($validator->fails())
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
+        
+        $t_f=array();
+        $data = [
+            'course_id' => $question['course_id'],
+            'question_category_id' => $question['question_category_id'],
+            'question_type_id' => $question['question_type_id'],
+            'text' => $question['text'],
+            'parent' => isset($parent) ? $parent : null,
+            'created_by' => Auth::id(),
+        ];
+        $t_f['is_true'] = $question['is_true'];
+        $t_f['and_why'] = $question['and_why'];
+        $data['content'] = json_encode($t_f);
+
+        $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
+
+        return $added;
+    }
+
+    public function MCQ($question,$parent)
+    {
+        $validator = Validator::make($question, [
+            'MCQ_Choices' => 'required|array',
+            'MCQ_Choices.*.is_true' => 'required|boolean',
+            'MCQ_Choices.*.content' => 'required|string',
+        ]);
+
+        if ($validator->fails())
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
+        
+        $data = [
+            'course_id' => $question['course_id'],
+            'question_category_id' => $question['question_category_id'],
+            'question_type_id' => $question['question_type_id'],
+            'text' => $question['text'],
+            'parent' => isset($parent) ? $parent : null,
+            'created_by' => Auth::id(),
+            'content' => json_encode(array_values($question['MCQ_Choices'])),
+        ];
+
+        $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
+
+        return $added;
+    }
+
+    public function Match($question,$parent)
+    {
+        $validator = Validator::make($question, [
+            'match_a' => 'required|array|min:2|distinct',
+            'match_b' => 'required|array|distinct',
+        ]);
+
+        if ($validator->fails())
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
+        
+        $match=array();
+        $data = [
+            'course_id' => $question['course_id'],
+            'question_category_id' => $question['question_category_id'],
+            'question_type_id' => $question['question_type_id'],
+            'text' => $question['text'],
+            'parent' => isset($parent) ? $parent : null,
+            'created_by' => Auth::id(),
+        ];
+        $match['match_a']=$question['match_a'];
+        $match['match_b'] =$question['match_b'];
+        $data['content'] = json_encode($match);
+
+        $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
+
+        return $added;
+    }
+
+    public function Essay($question,$parent)
+    {
+        $data = [
+            'course_id' => $question['course_id'],
+            'question_category_id' => $question['question_category_id'],
+            'question_type_id' => $question['question_type_id'],
+            'text' => $question['text'],
+            'parent' => isset($parent) ? $parent : null,
+            'created_by' => Auth::id(),
+            'content' => null //not have specific|model answer
+        ];
+
+        $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
+
+        return $added;
+    }
+
+    public function Comprehension($question)
+    {
+        $validator = Validator::make($question, [
+            'subQuestions' => 'required|array|distinct'/*|min:2*/,
+            'subQuestions.*.Question_Type_id' => 'required|integer|exists:questions_types,id',
+        ]);
+        if ($validator->fails()) 
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
+        
+        $data = [
+            'course_id' => $question['course_id'],
+            'question_category_id' => $question['question_category_id'],
+            'question_type_id' => $question['question_type_id'],
+            'text' => $question['text'],
+            'parent' => null,
+            'created_by' => Auth::id(),
+            'content' => null //not have specific|model answer
+        ];
+
+        $added=Questions::create($data); //firstOrCreate doesn't work because it has json_encode
+
+        $quest = collect([]);
+        foreach ($Question['subQuestions'] as $subQuestion) {
+            switch ($subQuestion['Question_Type_id']) {
+                case 1: // True/false
+                    $true_false = $this->T_F($subQuestion, $added->id);
+                    $quest->push($true_false);
+                    break;
+                case 2: // MCQ
+                    $mcq = $this->MCQ($subQuestion, $added->id);
+                    $quest->push($mcq);
+                    break;
+                case 3: // Match
+                    $match = $this->Match($subQuestion, $added->id);
+                    $quest->push($match);
+                    break;
+                case 4: // Essay
+                    $essay = $this->Essay($subQuestion, $added->id);
+                    $quest->push($essay);
+                    break;
+            }
+        }
+        return $added;
     }
 
     /**
