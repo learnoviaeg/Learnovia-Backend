@@ -48,6 +48,12 @@ class H5pObserver
             if($old_class_id != $class_id)
                 UserSeen::where('lesson_id',$h5pLesson->getOriginal('lesson_id'))->where('item_id',$h5pLesson->content_id)->where('type','h5p')->delete();
 
+            if($old_class_id == $class_id){
+                UserSeen::where('lesson_id',$h5pLesson->getOriginal('lesson_id'))->where('item_id',$h5pLesson->content_id)->where('type','h5p')->update([
+                    'lesson_id' => $h5pLesson->lesson_id
+                ]);
+            }
+
             $this->report->calculate_course_progress($course_id);
         }
     }
