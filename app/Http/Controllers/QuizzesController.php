@@ -78,16 +78,15 @@ class QuizzesController extends Controller
             $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
         }
 
-        if($count == 'count'){
+        if($count == 'count')
             return response()->json(['message' => __('messages.quiz.count'), 'body' => $quiz_lessons->count() ], 200);
-        }
         
         $quiz_lessons = $quiz_lessons->get();
 
         $quizzes = collect([]);
 
         foreach($quiz_lessons as $quiz_lesson){
-            $quiz=quiz::with('course')->where('id',$quiz_lesson->quiz_id)->first();
+            $quiz=quiz::with('course','Question.children')->where('id',$quiz_lesson->quiz_id)->first();
             $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
@@ -111,7 +110,7 @@ class QuizzesController extends Controller
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
             'type' => 'required|in:0,1,2',
-            'lesson_id' => 'required|exists:lessons,id',
+            'lesson_id' => 'required|array|exists:lessons,id',
             /**
              * type 0 => Old Question
              * type 1 => New Questions
@@ -133,39 +132,19 @@ class QuizzesController extends Controller
         $course=  Course::where('id',$request->course_id)->first();
         LastAction::lastActionInCourse($request->course_id);
 
-        $newQuestionsIDs=array();
+        $newQuestionsIDs=[];
         $oldQuestionsIDs=array();
         if ($request->type == 1 || $request->type == 2) { // New
             $request->validate([
-                //for interface model
-                'course_id' => 'required|integer|exists:courses,id',
-                'question_category_id' => 'required|integer|exists:questions_categories,id',
-    
-                //for request of creation multi type questions
-                'Question' => 'required|array',
-                'Question.*.is_comp' => 'required|in:0,1', 
-                // 0 if this question not comprehension  
-                // 1 if this question belong to comprehension_question
-                'Question.*.question_type_id' => 'required_if:Question.*.question_type_id,==,2|exists:questions_types,id', 
-                'Question.*.text' => 'required|string', //need in every type_question
-                'Question.*.is_true' => 'required_if:Question.*.question_type_id,==,1|boolean', //for true-false
-                'Question.*.and_why' => 'boolean', //if question t-f and have and_why question
-    
-                //MCQ validation
-                'Question.*.MCQ_Choices' => 'required_if:Question.*.question_type_id,==,2|array',
-                'Question.*.MCQ_Choices.*.is_true' => 'required_if:Question.*.question_type_id,==,2|boolean',
-                'Question.*.MCQ_Choices.*.content' => 'required_if:Question.*.question_type_id,==,2|string',
-    
-                //Comprehension 
-                'Question.*.parent_id' => 'required_if:Question.*.is_comp,==,1|exists:questions,id',
-    
-                //Match
-                'Question.*.match_a' => 'required_if:Question.*.question_type_id,==,3|array',
-                'Question.*.match_b' => 'required_if:Question.*.question_type_id,==,3|array'
+            //for request of creation multi type questions
+            'Question' => 'required|array',
+            'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
+            'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
+            'Question.*.question_type_id' => 'required|exists:questions_types,id', 
+            'Question.*.text' => 'required|string', //need in every type_question
             ]);
             $newQuestionsIDs=app('App\Http\Controllers\QuestionsController')->store($request,1);
         }
-        return $newQuestionsIDs;
         if ($request->type == 0 ||$request->type == 2) { // old
             $request->validate([
                 'oldQuestion' => 'required|array',
@@ -173,6 +152,8 @@ class QuizzesController extends Controller
             ]);
             $oldQuestionsIDs=($request->oldQuestion);
         }
+        if(isset($newQuestionsIDs))
+            $newQuestionsIDs=$newQuestionsIDs->toArray();
         $questionsIDs = array_merge($newQuestionsIDs,$oldQuestionsIDs);
 
         if ($questionsIDs != null) {
@@ -185,23 +166,27 @@ class QuizzesController extends Controller
                 'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
                 'feedback' => isset($request->feedback) ? $request->feedback : 1,
             ]);
-            $index = QuizLesson::where('lesson_id',$request->lesson_id)->get()->max('index');
-            $Next_index = $index + 1;
-            $quizLesson = QuizLesson::create([
-                'quiz_id' => $quiz->id,
-                'lesson_id' => $request->lesson_id,
-                'start_date' => $request->opening_time,
-                'due_date' => $request->closing_time,
-                'max_attemp' => $request->max_attemp,
-                'grading_method_id' => $request->grading_method_id,
-                'grade' => $request->grade,
-                'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id[$key] : null,
-                'publish_date' => $request->opening_time,
-                'index' => $Next_index,
-                'visible' => isset($request->visible)?$request->visible:1
-            ]);
+            foreach($request->lesson_id as $lesson)
+            {
+                $index = QuizLesson::where('lesson_id',$request->lesson_id)->get()->max('index');
+                $Next_index = $index + 1;
+                $quizLesson = QuizLesson::create([
+                    'quiz_id' => $quiz->id,
+                    'lesson_id' => $lesson,
+                    'start_date' => $request->opening_time,
+                    'due_date' => $request->closing_time,
+                    'max_attemp' => $request->max_attemp,
+                    'grading_method_id' => $request->grading_method_id,
+                    'grade' => $request->grade,
+                    'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id[$key] : null,
+                    'publish_date' => $request->opening_time,
+                    'index' => $Next_index,
+                    'visible' => isset($request->visible)?$request->visible:1
+                ]);
+            }
+
             $quiz->Question()->attach($questionsIDs);
-            $quiz->Question;
+            $quiz=Quiz::whereId($quiz->id)->with('Question.children')->get();
             
             return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
         }
