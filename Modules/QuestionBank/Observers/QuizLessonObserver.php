@@ -91,6 +91,12 @@ class QuizLessonObserver
             if($old_class_id != $class_id)
                 UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
 
+            if($old_class_id == $class_id){
+                UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->update([
+                    'lesson_id' => $quizLesson->lesson_id
+                ]);
+            }
+
             $this->report->calculate_course_progress($course_id);
         }
     }
