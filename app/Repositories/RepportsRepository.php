@@ -39,16 +39,28 @@ class RepportsRepository implements RepportsRepositoryInterface
             
             //Assignments
             $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->count();
+            $assignments_ids = AssignmentLesson::whereIn('lesson_id',$lessons)->pluck('assignment_id');
+            UserSeen::whereNotIn('user_id',$enroll->pluck('user_id'))->whereIn('item_id',$assignments_ids)->where('type','assignment')->delete();
             
             //quizzes
             $quizzes = QuizLesson::whereIn('lesson_id',$lessons)->count();
+            $quizzes_ids = QuizLesson::whereIn('lesson_id',$lessons)->pluck('quiz_id');
+            UserSeen::whereNotIn('user_id',$enroll->pluck('user_id'))->whereIn('item_id',$quizzes_ids)->where('type','quiz')->delete();
 
             //h5p
             $h5p = h5pLesson::whereIn('lesson_id',$lessons)->count();
+            $h5p_ids = h5pLesson::whereIn('lesson_id',$lessons)->pluck('content_id');
+            UserSeen::whereNotIn('user_id',$enroll->pluck('user_id'))->whereIn('item_id',$h5p_ids)->where('type','h5p')->delete();
     
             //materials
             $materials = Material::whereIn('lesson_id',$lessons)->count();
-    
+            $files_ids = Material::whereIn('lesson_id',$lessons)->where('type','file')->pluck('item_id');
+            $media_ids = Material::whereIn('lesson_id',$lessons)->where('type','media')->pluck('item_id');
+            $page_ids = Material::whereIn('lesson_id',$lessons)->where('type','page')->pluck('item_id');
+            UserSeen::whereNotIn('user_id',$enroll->pluck('user_id'))->whereIn('item_id',$files_ids)->where('type','file')->delete();
+            UserSeen::whereNotIn('user_id',$enroll->pluck('user_id'))->whereIn('item_id',$media_ids)->where('type','media')->delete();
+            UserSeen::whereNotIn('user_id',$enroll->pluck('user_id'))->whereIn('item_id',$page_ids)->where('type','page')->delete();
+
             //items count 
             $items_count = $assignments + $quizzes + $h5p  + $materials;
             
