@@ -36,8 +36,7 @@ class UserQuizController extends Controller
 
         $user = Auth::User();
 
-        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)
-            ->where('lesson_id', $request->lesson_id)->first();
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         
         $duration = $quiz_lesson->quiz->duration;
         

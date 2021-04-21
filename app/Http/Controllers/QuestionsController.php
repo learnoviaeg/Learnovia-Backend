@@ -267,7 +267,7 @@ class QuestionsController extends Controller
             'content' => null //not have specific|model answer
         ];
 
-        $added=Questions::create($data); //firstOrCreate doesn't work because it has json_encode
+        $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
 
         $quest = collect([]);
         foreach ($question['subQuestions'] as $subQuestion) {
