@@ -8,6 +8,7 @@ use App\Enroll;
 use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
+use Modules\QuestionBank\Entities\quiz_questions;
 use App\Lesson;
 use App\Classes;
 use App\Course;
@@ -26,7 +27,9 @@ class QuizzesController extends Controller
         $this->middleware('auth');
         $this->middleware(['permission:quiz/get' , 'ParentCheck'],   ['only' => ['index']]);
         $this->middleware(['permission:quiz/detailes' , 'ParentCheck'],   ['only' => ['show']]);
-
+        $this->middleware(['permission:quiz/add'],   ['only' => ['store']]);
+        $this->middleware(['permission:quiz/view-draft'],   ['only' => ['update']]);
+        $this->middleware(['permission:quiz/delete'],   ['only' => ['destroy']]);
     }
 
     /**
@@ -54,7 +57,6 @@ class QuizzesController extends Controller
         }
 
         if(!$request->user()->can('site/show-all-courses')){// any one who is enrolled
-
             $user_course_segments = $this->chain->getCourseSegmentByChain($request);
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
             $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
@@ -74,8 +76,13 @@ class QuizzesController extends Controller
 
         $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
 
-        if($request->user()->can('site/course/student')){
+        if($request->user()->can('site/course/student'))
             $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+
+        if(!$request->user()->can('quiz/view-drafts')){
+            $quiz_lessons->whereHas('quiz', function ($q){
+                $q->where('draft', 0);
+            });
         }
 
         if($count == 'count')
@@ -109,8 +116,8 @@ class QuizzesController extends Controller
         $request->validate([
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
-            'type' => 'required|in:0,1,2',
             'lesson_id' => 'required|array|exists:lessons,id',
+            // 'type' => 'required|in:0,1,2',
             /**
              * type 0 => Old Question
              * type 1 => New Questions
@@ -134,29 +141,29 @@ class QuizzesController extends Controller
 
         $newQuestionsIDs=[];
         $oldQuestionsIDs=array();
-        if ($request->type == 1 || $request->type == 2) { // New
-            $request->validate([
-            //for request of creation multi type questions
-            'Question' => 'required|array',
-            'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
-            'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
-            'Question.*.question_type_id' => 'required|exists:questions_types,id', 
-            'Question.*.text' => 'required|string', //need in every type_question
-            ]);
-            $newQuestionsIDs=app('App\Http\Controllers\QuestionsController')->store($request,1);
-        }
-        if ($request->type == 0 ||$request->type == 2) { // old
-            $request->validate([
-                'oldQuestion' => 'required|array',
-                'oldQuestion.*' => 'required|integer|exists:questions,id',
-            ]);
-            $oldQuestionsIDs=($request->oldQuestion);
-        }
-        if(isset($newQuestionsIDs))
-            $newQuestionsIDs=$newQuestionsIDs->toArray();
-        $questionsIDs = array_merge($newQuestionsIDs,$oldQuestionsIDs);
+        // if ($request->type == 1 || $request->type == 2) { // New
+        //     $request->validate([
+        //     //for request of creation multi type questions
+        //     'Question' => 'required|array',
+        //     'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
+        //     'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
+        //     'Question.*.question_type_id' => 'required|exists:questions_types,id', 
+        //     'Question.*.text' => 'required|string', //need in every type_question
+        //     ]);
+        //     $newQuestionsIDs=app('App\Http\Controllers\QuestionsController')->store($request,1);
+        // }
+        // if ($request->type == 0 ||$request->type == 2) { // old
+        //     $request->validate([
+        //         'oldQuestion' => 'required|array',
+        //         'oldQuestion.*' => 'required|integer|exists:questions,id',
+        //     ]);
+        //     $oldQuestionsIDs=($request->oldQuestion);
+        // }
+        // if(isset($newQuestionsIDs))
+        //     $newQuestionsIDs=$newQuestionsIDs->toArray();
+        // $questionsIDs = array_merge($newQuestionsIDs,$oldQuestionsIDs);
 
-        if ($questionsIDs != null) {
+        // if ($questionsIDs != null) {
             $quiz = quiz::create([
                 'name' => $request->name,
                 'course_id' => $request->course_id,
@@ -185,11 +192,11 @@ class QuizzesController extends Controller
                 ]);
             }
 
-            $quiz->Question()->attach($questionsIDs);
-            $quiz=Quiz::whereId($quiz->id)->with('Question.children')->get();
+            // $quiz->Question()->attach($questionsIDs);
+            // $quiz=Quiz::whereId($quiz->id)->with('Question.children')->get();
             
             return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
-        }
+        // }
         return HelperController::api_response_format(200, null, __('messages.error.not_found'));
     }
 
@@ -226,11 +233,6 @@ class QuizzesController extends Controller
             'name' => 'string|min:3',
             'course_id' => 'integer|exists:courses,id',
             'question_id' => 'exists:questions,id',
-            /**
-             * type 0 => Old Question
-             * type 1 => New Questions
-             * type 2 => New & Old Questions
-             */
             'lesson_id' => 'exists:lessons,id',
             'is_graded' => 'boolean',
             'duration' => 'integer',
@@ -248,6 +250,10 @@ class QuizzesController extends Controller
         LastAction::lastActionInCourse($request->course_id);
 
         $quiz=Quiz::find($id);
+        if(isset($request->course_id))
+            if($quiz->course_id != $request->course_id)
+                quiz_questions::where('quiz_id',$request->quiz_id)->delete();
+        
         $quiz->update([
             'name' => isset($request->name) ? $request->name : $quiz->name,
             'course_id' => isset($request->course_id) ? $request->course_id : $quiz->course_id,
@@ -264,10 +270,10 @@ class QuizzesController extends Controller
         if(isset($request->lesson_id))
             $quiz->quizLessson()->update(['lesson_id' => $request->lesson_id]);
 
-        if(isset($request->question_id)){
-            $quest=Questions::find($request->question_id);
-            $udatedQuestion=app('App\Http\Controllers\QuestionsController')->update($request,$request->question_id);
-        }
+        // if(isset($request->question_id)){
+        //     $quest=Questions::find($request->question_id);
+        //     $udatedQuestion=app('App\Http\Controllers\QuestionsController')->update($request,$request->question_id);
+        // }
             
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }

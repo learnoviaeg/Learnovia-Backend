@@ -22,6 +22,9 @@ class QuestionsController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
+        $this->middleware(['permission:question/delete'],   ['only' => ['destroy']]);
+        $this->middleware(['permission:question/update'],   ['only' => ['update']]);
     }
     /**
      * Display a listing of the resource.
@@ -254,8 +257,7 @@ class QuestionsController extends Controller
             'subQuestions.*.question_category_id' => 'required',
         ]);
         if ($validator->fails()) 
-        dd($validator->errors());
-            // return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
         
         $data = [
             'course_id' => $question['course_id'],
@@ -291,6 +293,27 @@ class QuestionsController extends Controller
             }
         }
         return $added;
+    }
+
+    public function Assign(Request $request)
+    {
+        $request->validate([
+            'questions' => 'required|array',
+            'questions.*' => 'exists:questions,id',
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+        ]);
+        $quiz=Quiz::find($request->quiz_id);
+        // $quiz->Question()->attach($request->questions); //attach repeat the raw
+        foreach($request->questions as $question)
+            quiz_questions::firstOrCreate([
+                'question_id'=>$question,
+                'quiz_id' => $request->quiz_id,
+            ]);
+        // $quiz->Question;
+        $quiz->draft=0;
+        $quiz->save();
+
+        return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
     }
 
     /**
