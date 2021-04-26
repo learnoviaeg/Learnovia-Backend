@@ -287,8 +287,8 @@ class QuizzesController extends Controller
         $quiz->Question;
         $quiz->quizLesson;
 
-        if(isset($request->lesson_id))
-            $quiz->quizLesson()->update(['lesson_id' => $request->lesson_id]);
+        // if(isset($request->lesson_id))
+        //     $quiz->quizLesson()->update(['lesson_id' => $request->lesson_id]);
 
         // if(isset($request->question_id)){
         //     $quest=Questions::find($request->question_id);
