@@ -27,7 +27,7 @@ class QuizzesController extends Controller
         $this->middleware('auth');
         $this->middleware(['permission:quiz/get' , 'ParentCheck'],   ['only' => ['index','show']]);
         $this->middleware(['permission:quiz/add'],   ['only' => ['store']]);
-        $this->middleware(['permission:quiz/view-draft'],   ['only' => ['update']]);
+        $this->middleware(['permission:quiz/view-drafts'],   ['only' => ['update']]);
         $this->middleware(['permission:quiz/delete'],   ['only' => ['destroy']]);
     }
 
