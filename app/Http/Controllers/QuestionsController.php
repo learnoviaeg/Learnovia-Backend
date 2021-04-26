@@ -115,7 +115,7 @@ class QuestionsController extends Controller
                 'questions' => 'required|array',
                 'questions.*' => 'exists:questions,id'
             ]);
-            $quiz=Quiz::find($request->quiz_id);
+            $quiz=Quiz::find($quiz_id);
             // $quiz->Question()->attach($request->questions); //attach repeat the raw
             foreach($request->questions as $question)
                 quiz_questions::firstOrCreate([
