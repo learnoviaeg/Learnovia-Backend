@@ -99,7 +99,7 @@ class QuestionsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request,$type=0)
+    public function store(Request $request, $quiz_id=null, $question=null)
     {
         $request->validate([
             //for request of creation multi type questions
@@ -110,6 +110,26 @@ class QuestionsController extends Controller
             'Question.*.text' => 'required|string', //need in every type_question
         ]);
 
+        //to assign questions in quiz id //quizzes/{quiz_id}/{questions}'
+        if($question=='questions'){
+            $request->validate([
+                'questions' => 'required|array',
+                'questions.*' => 'exists:questions,id'
+            ]);
+            $quiz=Quiz::find($request->quiz_id);
+            // $quiz->Question()->attach($request->questions); //attach repeat the raw
+            foreach($request->questions as $question)
+                quiz_questions::firstOrCreate([
+                    'question_id'=>$question,
+                    'quiz_id' => $request->quiz_id,
+                ]);
+                
+            $quiz->draft=0;
+            $quiz->save();
+    
+            return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
+        }
+        
         $all=collect([]);
         foreach ($request->Question as $index => $question) {
 
@@ -141,9 +161,6 @@ class QuestionsController extends Controller
                     break;
             }
         }
-
-        if($type == 1)
-            return $all->pluck('id');
 
         return HelperController::api_response_format(200, $all , __('messages.question.add'));
     }

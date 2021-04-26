@@ -141,6 +141,9 @@ class QuizzesController extends Controller
 
         $newQuestionsIDs=[];
         $oldQuestionsIDs=array();
+        
+        /** if i return these comments to work again i must add type params in store of questions resource */
+
         // if ($request->type == 1 || $request->type == 2) { // New
         //     $request->validate([
         //     //for request of creation multi type questions
@@ -250,9 +253,10 @@ class QuizzesController extends Controller
         LastAction::lastActionInCourse($request->course_id);
 
         $quiz=Quiz::find($id);
+        // $quiz_lesson=QuizLesson::where('id',$id)->where('lesson_id',$request->lesson_id);
         if(isset($request->course_id))
             if($quiz->course_id != $request->course_id)
-                quiz_questions::where('quiz_id',$request->quiz_id)->delete();
+                quiz_questions::where('quiz_id',$request->quiz_id)->delete(); //delete assigned questions
         
         $quiz->update([
             'name' => isset($request->name) ? $request->name : $quiz->name,
@@ -263,6 +267,19 @@ class QuizzesController extends Controller
             'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
             'feedback' => isset($request->feedback) ? $request->feedback : 1,
         ]);
+        // $quizLesson->update([
+        //     'quiz_id' => $quiz->id,
+        //     'lesson_id' => $lesson,
+        //     'start_date' => $request->opening_time,
+        //     'due_date' => $request->closing_time,
+        //     'max_attemp' => $request->max_attemp,
+        //     'grading_method_id' => $request->grading_method_id,
+        //     'grade' => $request->grade,
+        //     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id[$key] : null,
+        //     'publish_date' => $request->opening_time,
+        //     'index' => $Next_index,
+        //     'visible' => isset($request->visible)?$request->visible:1
+        // ]);
         $quiz->save();
         $quiz->Question;
         $quiz->quizLesson;
