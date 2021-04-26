@@ -120,7 +120,7 @@ class QuestionsController extends Controller
             foreach($request->questions as $question)
                 quiz_questions::firstOrCreate([
                     'question_id'=>$question,
-                    'quiz_id' => $request->quiz_id,
+                    'quiz_id' => $quiz_id,
                 ]);
                 
             $quiz->draft=0;
