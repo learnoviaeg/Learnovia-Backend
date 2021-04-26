@@ -141,7 +141,7 @@ class QuizzesController extends Controller
 
         $newQuestionsIDs=[];
         $oldQuestionsIDs=array();
-        
+
         /** if i return these comments to work again i must add type params in store of questions resource */
 
         // if ($request->type == 1 || $request->type == 2) { // New
@@ -285,7 +285,7 @@ class QuizzesController extends Controller
         $quiz->quizLesson;
 
         if(isset($request->lesson_id))
-            $quiz->quizLessson()->update(['lesson_id' => $request->lesson_id]);
+            $quiz->quizLesson()->update(['lesson_id' => $request->lesson_id]);
 
         // if(isset($request->question_id)){
         //     $quest=Questions::find($request->question_id);
