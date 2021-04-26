@@ -30,7 +30,7 @@ class quiz extends Model
     //     return $this->belongsTo('App\CourseSegment', 'course_id', 'course_segment_id');
     // }
 
-    public function quizLessson()
+    public function quizLesson()
     {
         return $this->hasMany('Modules\QuestionBank\Entities\QuizLesson', 'quiz_id', 'id');
     }

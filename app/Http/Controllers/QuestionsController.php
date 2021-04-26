@@ -36,7 +36,6 @@ class QuestionsController extends Controller
         $request->validate([
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
-            'class' => 'nullable|integer|exists:classes,id',
             'Question_Category_id' => 'array',
             'Question_Category_id.*' => 'integer|exists:questions_categories,id',
             'question_type' => 'array',

@@ -337,8 +337,8 @@ class QuizController extends Controller
         if(!isset($quizles))
             return HelperController::api_response_format(200, __('messages.quiz.quiz_not_belong'));
 
-        $max_attemp= $qq->quizLessson[0]->max_attemp;
-        $grade_category_id= $qq->quizLessson[0]->grade_category_id;
+        $max_attemp= $qq->quizLesson[0]->max_attemp;
+        $grade_category_id= $qq->quizLesson[0]->grade_category_id;
 
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
         //return $quizLesson;
@@ -694,7 +694,7 @@ class QuizController extends Controller
         if( $request->user()->can('site/course/student') && $quiz_lesson->visible==0)
             return HelperController::api_response_format(301,null, __('messages.quiz.quiz_hidden'));
         
-        $grade_category_id= $qq->quizLessson[0]->grade_category_id;
+        $grade_category_id= $qq->quizLesson[0]->grade_category_id;
         /**delete from */
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date > Carbon::now() )
@@ -865,9 +865,9 @@ class QuizController extends Controller
         $user_id = ($request->filled('user_id'))? $request->user_id : Auth::id();
         $quiz = Quiz::find($request->quiz_id);
         $qq = Quiz::where('id', $request->quiz_id)->first();
-        if(!isset($qq->quizLessson[0]))
+        if(!isset($qq->quizLesson[0]))
             return HelperController::api_response_format(200,__('messages.quiz.quiz_not_belong'));
-        $grade_category_id= $qq->quizLessson[0]->grade_category_id;
+        $grade_category_id= $qq->quizLesson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
         // return $quiz_lesson->due_date;
         if(!isset($quiz_lesson))
