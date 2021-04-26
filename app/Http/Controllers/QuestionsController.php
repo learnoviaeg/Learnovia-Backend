@@ -22,6 +22,9 @@ class QuestionsController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
+        $this->middleware(['permission:question/delete'],   ['only' => ['destroy']]);
+        $this->middleware(['permission:question/update'],   ['only' => ['update']]);
     }
     /**
      * Display a listing of the resource.
@@ -96,7 +99,7 @@ class QuestionsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request,$type=0)
+    public function store(Request $request, $quiz_id=null, $question=null)
     {
         $request->validate([
             //for request of creation multi type questions
@@ -107,6 +110,26 @@ class QuestionsController extends Controller
             'Question.*.text' => 'required|string', //need in every type_question
         ]);
 
+        //to assign questions in quiz id //quizzes/{quiz_id}/{questions}'
+        if($question=='questions'){
+            $request->validate([
+                'questions' => 'required|array',
+                'questions.*' => 'exists:questions,id'
+            ]);
+            $quiz=Quiz::find($request->quiz_id);
+            // $quiz->Question()->attach($request->questions); //attach repeat the raw
+            foreach($request->questions as $question)
+                quiz_questions::firstOrCreate([
+                    'question_id'=>$question,
+                    'quiz_id' => $request->quiz_id,
+                ]);
+                
+            $quiz->draft=0;
+            $quiz->save();
+    
+            return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
+        }
+        
         $all=collect([]);
         foreach ($request->Question as $index => $question) {
 
@@ -138,9 +161,6 @@ class QuestionsController extends Controller
                     break;
             }
         }
-
-        if($type == 1)
-            return $all->pluck('id');
 
         return HelperController::api_response_format(200, $all , __('messages.question.add'));
     }
@@ -254,8 +274,7 @@ class QuestionsController extends Controller
             'subQuestions.*.question_category_id' => 'required',
         ]);
         if ($validator->fails()) 
-        dd($validator->errors());
-            // return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
+            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
         
         $data = [
             'course_id' => $question['course_id'],
@@ -267,7 +286,7 @@ class QuestionsController extends Controller
             'content' => null //not have specific|model answer
         ];
 
-        $added=Questions::create($data); //firstOrCreate doesn't work because it has json_encode
+        $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
 
         $quest = collect([]);
         foreach ($question['subQuestions'] as $subQuestion) {
@@ -291,6 +310,27 @@ class QuestionsController extends Controller
             }
         }
         return $added;
+    }
+
+    public function Assign(Request $request)
+    {
+        $request->validate([
+            'questions' => 'required|array',
+            'questions.*' => 'exists:questions,id',
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+        ]);
+        $quiz=Quiz::find($request->quiz_id);
+        // $quiz->Question()->attach($request->questions); //attach repeat the raw
+        foreach($request->questions as $question)
+            quiz_questions::firstOrCreate([
+                'question_id'=>$question,
+                'quiz_id' => $request->quiz_id,
+            ]);
+        // $quiz->Question;
+        $quiz->draft=0;
+        $quiz->save();
+
+        return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
     }
 
     /**
