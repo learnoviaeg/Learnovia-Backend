@@ -100,15 +100,6 @@ class QuestionsController extends Controller
      */
     public function store(Request $request, $quiz_id=null, $question=null)
     {
-        $request->validate([
-            //for request of creation multi type questions
-            'Question' => 'required|array',
-            'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
-            'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
-            'Question.*.question_type_id' => 'required|exists:questions_types,id', 
-            'Question.*.text' => 'required|string', //need in every type_question
-        ]);
-
         //to assign questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
             $request->validate([
@@ -128,6 +119,14 @@ class QuestionsController extends Controller
     
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
+        $request->validate([
+            //for request of creation multi type questions
+            'Question' => 'required|array',
+            'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
+            'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
+            'Question.*.question_type_id' => 'required|exists:questions_types,id', 
+            'Question.*.text' => 'required|string', //need in every type_question
+        ]);
         
         $all=collect([]);
         foreach ($request->Question as $index => $question) {
