@@ -213,7 +213,7 @@ class QuizzesController extends Controller
         $request->validate([
             'lesson_id' => 'required|exists:lessons,id',
         ]);
-        $quiz = quiz::where('id',$id)->with('Question.children')->first();
+        $quiz = quiz::where('id',$id)->whereNull('parent')->with('Question.children')->first();
 
         // $quiz->quizLesson->where('id',$request->lesson_id)->first(); //return array
         $quiz->quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
