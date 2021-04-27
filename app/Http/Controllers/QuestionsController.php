@@ -44,7 +44,7 @@ class QuestionsController extends Controller
         ]);
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
-            $quiz = Quiz::where('id',$id)->with('Question.children')->first();
+            $quiz = Quiz::where('id',$quiz_id)->with('Question.children')->first();
             $questions = $quiz->Question;
             if($quiz->shuffle == 'Questions'|| $quiz->shuffle == 'Questions and Answers')
                 $questions =$questions->shuffle();
