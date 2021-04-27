@@ -125,36 +125,40 @@ class QuestionsController extends Controller
             'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
             'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
             'Question.*.question_type_id' => 'required|exists:questions_types,id', 
+            'Question.*.parent_id' => 'exists:questions,id', 
             'Question.*.text' => 'required|string', //need in every type_question
         ]);
         
         $all=collect([]);
         foreach ($request->Question as $index => $question) {
+            $parent = null;
+            if(isset($question['parent_id']))
+                $parent = $question['parent_id'];
 
             switch ($question['question_type_id']) {
                 case 1: // True/false
-                    $true_false = $this->T_F($question,null);
+                    $true_false = $this->T_F($question,$parent);
                     $all->push($true_false);
                     break;
 
                 case 2: // MCQ
-                    $mcq = $this->MCQ($question,null);
+                    $mcq = $this->MCQ($question,$parent);
                     $all->push($mcq);
                     break;
 
                 case 3: // Match
-                    $match = $this->Match($question,null);
+                    $match = $this->Match($question,$parent);
                     $all->push($match);
                     break;
 
                 case 4: // Essay
-                    $essay = $this->Essay($question,null);
+                    $essay = $this->Essay($question,$parent);
                     $all->push($essay); //essay not have special answer
                     break;
 
                 case 5: // Comprehension
                     $comprehension=$this->Comprehension($question);
-                    $comprehension->children;
+                    // $comprehension->children;
                     $all->push($comprehension);
                     break;
             }
@@ -264,15 +268,15 @@ class QuestionsController extends Controller
 
     public function Comprehension($question)
     {
-        $validator = Validator::make($question, [
-            'subQuestions' => 'required|array|distinct'/*|min:2*/,
-            'subQuestions.*.question_type_id' => 'required|integer|exists:questions_types,id',
-            'subQuestions.*.text' => 'required',
-            'subQuestions.*.course_id' => 'required',
-            'subQuestions.*.question_category_id' => 'required',
-        ]);
-        if ($validator->fails()) 
-            return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
+        // $validator = Validator::make($question, [
+        //     'subQuestions' => 'required|array|distinct'/*|min:2*/,
+        //     'subQuestions.*.question_type_id' => 'required|integer|exists:questions_types,id',
+        //     'subQuestions.*.text' => 'required',
+        //     'subQuestions.*.course_id' => 'required',
+        //     'subQuestions.*.question_category_id' => 'required',
+        // ]);
+        // if ($validator->fails()) 
+        //     return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
         
         $data = [
             'course_id' => $question['course_id'],
@@ -286,27 +290,27 @@ class QuestionsController extends Controller
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
 
-        $quest = collect([]);
-        foreach ($question['subQuestions'] as $subQuestion) {
-            switch ($subQuestion['question_type_id']) {
-                case 1: // True/false
-                    $true_false = $this->T_F($subQuestion, $added->id);
-                    $quest->push($true_false);
-                    break;
-                case 2: // MCQ
-                    $mcq = $this->MCQ($subQuestion, $added->id);
-                    $quest->push($mcq);
-                    break;
-                case 3: // Match
-                    $match = $this->Match($subQuestion, $added->id);
-                    $quest->push($match);
-                    break;
-                case 4: // Essay
-                    $essay = $this->Essay($subQuestion, $added->id);
-                    $quest->push($essay);
-                    break;
-            }
-        }
+        // $quest = collect([]);
+        // foreach ($question['subQuestions'] as $subQuestion) {
+        //     switch ($subQuestion['question_type_id']) {
+        //         case 1: // True/false
+        //             $true_false = $this->T_F($subQuestion, $added->id);
+        //             $quest->push($true_false);
+        //             break;
+        //         case 2: // MCQ
+        //             $mcq = $this->MCQ($subQuestion, $added->id);
+        //             $quest->push($mcq);
+        //             break;
+        //         case 3: // Match
+        //             $match = $this->Match($subQuestion, $added->id);
+        //             $quest->push($match);
+        //             break;
+        //         case 4: // Essay
+        //             $essay = $this->Essay($subQuestion, $added->id);
+        //             $quest->push($essay);
+        //             break;
+        //     }
+        // }
         return $added;
     }
 

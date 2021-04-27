@@ -62,6 +62,23 @@ class Questions extends Model
 
     public function getContentAttribute()
     {
-        return json_decode($this->attributes['content']);
+        $content= json_decode($this->attributes['content']);
+        if($this->attributes['question_type_id'] == 2){
+            foreach($content as $con)
+            {
+                if($con->is_true == 1){
+                    $con->is_true=True;
+                    continue;
+                }
+                $con->is_true=False;
+            }
+        }
+        if($this->attributes['question_type_id'] == 1){
+            if($con->is_true == 1)
+                $con->is_true=True;
+            else
+                $con->is_true=False;
+        }
+        return $content;
     }
 }
