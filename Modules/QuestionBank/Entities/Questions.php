@@ -73,12 +73,6 @@ class Questions extends Model
                 $con->is_true=False;
             }
         }
-        if($this->attributes['question_type_id'] == 1){
-            if($con->is_true == 1)
-                $con->is_true=True;
-            else
-                $con->is_true=False;
-        }
         return $content;
     }
 }
