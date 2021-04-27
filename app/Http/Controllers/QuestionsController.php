@@ -170,8 +170,8 @@ class QuestionsController extends Controller
     public function T_F($question,$parent)
     {
         $validator = Validator::make($question, [
-            'and_why' => 'required|in:0,1|integer',
-            'is_true' => 'required|in:0,1|boolean',
+            'and_why' => 'required|boolean',
+            'is_true' => 'required|boolean',
         ]);
 
         if ($validator->fails())
@@ -186,8 +186,8 @@ class QuestionsController extends Controller
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
-        $t_f['is_true'] = $question['is_true'];
-        $t_f['and_why'] = $question['and_why'];
+        $t_f['is_true'] = ($question['is_true']==0) ? False : True;
+        $t_f['and_why'] = ($question['and_why']==0) ? False : True;
         $data['content'] = json_encode($t_f);
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
@@ -376,8 +376,8 @@ class QuestionsController extends Controller
         switch ($question->question_type_id) {
             case 1: // True_false
                 # code...
-                $t_f['is_true'] = isset($request->is_true) ? $request->is_true : $question->is_true;
-                $t_f['and_why'] = isset($rquest->and_why) ? $request->and_why : $question->and_why;
+                $t_f['is_true'] = ($request->is_true==0) ? False : True;
+                $t_f['and_why'] = ($rquest->and_why==0) ? False : True;
                 $data['content'] = json_encode($t_f);
                 break;
 
