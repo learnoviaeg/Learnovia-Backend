@@ -360,6 +360,7 @@ class QuestionsController extends Controller
             //for interface model
             'course_id' => 'integer|exists:courses,id',
             'question_category_id' => 'integer|exists:questions_categories,id',
+            'question_type_id' => 'integer|exists:questions_types,id',
             //for request of creation multi type questions
             'text' => 'string', //need in every type_question
         ]);
@@ -370,9 +371,11 @@ class QuestionsController extends Controller
         $quest=$question->update([
             'course_id' => isset($request->course_id) ? $request->course_id : $question->course_id,
             'question_category_id' => isset($request->question_category_id) ? $request->question_category_id : $question->question_category_id,
+            'question_type_id' => isset($request->question_type_id) ? $request->question_type_id : $question->question_type_id,
             'created_by' => Auth::id(),
             'text' => isset($request->text) ? $request->text : $question->text,
         ]);
+        $question->save();
         switch ($question->question_type_id) {
             case 1: // True_false
                 # code...
