@@ -178,7 +178,15 @@ class UserQuizController extends Controller
         dispatch($job);
 
         foreach($quiz_lesson->quiz->Question as $question)
+        {
+            if($question->question_type_id == 5)
+            {
+                $quest=$question->children->pluck('id');
+                foreach($quest as $child)
+                    userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$child]);
+            }
             userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
+        }
         
         return HelperController::api_response_format(200, $userQuiz);
     }
