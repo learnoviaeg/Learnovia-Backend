@@ -314,26 +314,26 @@ class QuestionsController extends Controller
         return $added;
     }
 
-    public function Assign(Request $request)
-    {
-        $request->validate([
-            'questions' => 'required|array',
-            'questions.*' => 'exists:questions,id',
-            'quiz_id' => 'required|integer|exists:quizzes,id',
-        ]);
-        $quiz=Quiz::find($request->quiz_id);
-        // $quiz->Question()->attach($request->questions); //attach repeat the raw
-        foreach($request->questions as $question)
-            quiz_questions::firstOrCreate([
-                'question_id'=>$question,
-                'quiz_id' => $request->quiz_id,
-            ]);
-        // $quiz->Question;
-        $quiz->draft=0;
-        $quiz->save();
+    // public function Assign(Request $request)
+    // {
+    //     $request->validate([
+    //         'questions' => 'required|array',
+    //         'questions.*' => 'exists:questions,id',
+    //         'quiz_id' => 'required|integer|exists:quizzes,id',
+    //     ]);
+    //     $quiz=Quiz::find($request->quiz_id);
+    //     // $quiz->Question()->attach($request->questions); //attach repeat the raw
+    //     foreach($request->questions as $question)
+    //         quiz_questions::firstOrCreate([
+    //             'question_id'=>$question,
+    //             'quiz_id' => $request->quiz_id,
+    //         ]);
+    //     // $quiz->Question;
+    //     $quiz->draft=0;
+    //     $quiz->save();
 
-        return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
-    }
+    //     return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
+    // }
 
     /**
      * Display the specified resource.
@@ -360,6 +360,7 @@ class QuestionsController extends Controller
             //for interface model
             'course_id' => 'integer|exists:courses,id',
             'question_category_id' => 'integer|exists:questions_categories,id',
+            'question_type_id' => 'integer|exists:questions_types,id',
             //for request of creation multi type questions
             'text' => 'string', //need in every type_question
         ]);
@@ -370,14 +371,16 @@ class QuestionsController extends Controller
         $quest=$question->update([
             'course_id' => isset($request->course_id) ? $request->course_id : $question->course_id,
             'question_category_id' => isset($request->question_category_id) ? $request->question_category_id : $question->question_category_id,
+            'question_type_id' => isset($request->question_type_id) ? $request->question_type_id : $question->question_type_id,
             'created_by' => Auth::id(),
             'text' => isset($request->text) ? $request->text : $question->text,
         ]);
+        $question->save();
         switch ($question->question_type_id) {
             case 1: // True_false
                 # code...
                 $t_f['is_true'] = ($request->is_true==0) ? False : True;
-                $t_f['and_why'] = ($rquest->and_why==0) ? False : True;
+                $t_f['and_why'] = ($request->and_why==0) ? False : True;
                 $data['content'] = json_encode($t_f);
                 break;
 
@@ -387,7 +390,7 @@ class QuestionsController extends Controller
 
             case 3: // Match
                 $match['match_a']=isset($request->match_a) ? $request->match_a : $question->match_a;
-                $match['match_b']=isset($qrequest->match_b) ? $request->match_b : $question->match_b;
+                $match['match_b']=isset($request->match_b) ? $request->match_b : $question->match_b;
                 $data['content'] = json_encode($match);
                 break;
 
