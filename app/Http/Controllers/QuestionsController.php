@@ -268,72 +268,9 @@ class QuestionsController extends Controller
 
     public function Comprehension($question)
     {
-        // $validator = Validator::make($question, [
-        //     'subQuestions' => 'required|array|distinct'/*|min:2*/,
-        //     'subQuestions.*.question_type_id' => 'required|integer|exists:questions_types,id',
-        //     'subQuestions.*.text' => 'required',
-        //     'subQuestions.*.course_id' => 'required',
-        //     'subQuestions.*.question_category_id' => 'required',
-        // ]);
-        // if ($validator->fails()) 
-        //     return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
-        
-        $data = [
-            'course_id' => $question['course_id'],
-            'question_category_id' => $question['question_category_id'],
-            'question_type_id' => $question['question_type_id'],
-            'text' => $question['text'],
-            'parent' => null,
-            'created_by' => Auth::id(),
-            'content' => null //not have specific|model answer
-        ];
-
-        $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
-
-        // $quest = collect([]);
-        // foreach ($question['subQuestions'] as $subQuestion) {
-        //     switch ($subQuestion['question_type_id']) {
-        //         case 1: // True/false
-        //             $true_false = $this->T_F($subQuestion, $added->id);
-        //             $quest->push($true_false);
-        //             break;
-        //         case 2: // MCQ
-        //             $mcq = $this->MCQ($subQuestion, $added->id);
-        //             $quest->push($mcq);
-        //             break;
-        //         case 3: // Match
-        //             $match = $this->Match($subQuestion, $added->id);
-        //             $quest->push($match);
-        //             break;
-        //         case 4: // Essay
-        //             $essay = $this->Essay($subQuestion, $added->id);
-        //             $quest->push($essay);
-        //             break;
-        //     }
-        // }
+        $added=self::Essay($question,null); //same data saved of Essay Question
         return $added;
     }
-
-    // public function Assign(Request $request)
-    // {
-    //     $request->validate([
-    //         'questions' => 'required|array',
-    //         'questions.*' => 'exists:questions,id',
-    //         'quiz_id' => 'required|integer|exists:quizzes,id',
-    //     ]);
-    //     $quiz=Quiz::find($request->quiz_id);
-    //     // $quiz->Question()->attach($request->questions); //attach repeat the raw
-    //     foreach($request->questions as $question)
-    //         quiz_questions::firstOrCreate([
-    //             'question_id'=>$question,
-    //             'quiz_id' => $request->quiz_id,
-    //         ]);
-    //     // $quiz->Question;
-    //     $quiz->draft=0;
-    //     $quiz->save();
-
-    //     return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
-    // }
 
     /**
      * Display the specified resource.
@@ -389,8 +326,8 @@ class QuestionsController extends Controller
                 break;
 
             case 3: // Match
-                $match['match_a']=isset($request->match_a) ? $request->match_a : $question->match_a;
-                $match['match_b']=isset($request->match_b) ? $request->match_b : $question->match_b;
+                $match['match_a']=isset($request->match_a) ? $request->match_a : $question->content->match_a;
+                $match['match_b']=isset($request->match_b) ? $request->match_b : $question->content->match_b;
                 $data['content'] = json_encode($match);
                 break;
 

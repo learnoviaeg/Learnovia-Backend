@@ -8,7 +8,7 @@ class Questions extends Model
 {
     protected $fillable = ['text','mark','parent','content','category_id','survey','question_type_id','question_category_id','course_id'];
     protected $hidden = [
-        'created_at', 'updated_at','course_segment_id','category_id','question_category_id'
+        'created_at', 'updated_at','course_segment_id','category_id'
     ];
 
     public function question_type()
