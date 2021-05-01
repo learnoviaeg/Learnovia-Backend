@@ -40,7 +40,8 @@ class CalendarsController extends Controller
             'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
-            'item_type' => 'in:quiz,assignment,announcement',
+            'item_type'    => 'array',
+            'item_type.*' => 'in:quiz,assignment,announcement',
             'calendar_year' => 'required|integer',
             'calendar_month' => 'integer|required_with:calendar_day',
             'calendar_day' => 'integer',
@@ -92,6 +93,9 @@ class CalendarsController extends Controller
 
         if(isset($request->calendar_day))
             $timeline->whereDay('publish_date', $request->calendar_day);
+
+        if($request->filled('item_type'))
+            $timeline->whereIn('type', $request->item_type);
 
         return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->get()], 200);
     }
