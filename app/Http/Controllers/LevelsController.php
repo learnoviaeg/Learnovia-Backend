@@ -82,17 +82,8 @@ class LevelsController extends Controller
             $yearLevel->delete();
         Level::whereId($request->id)->first()->delete();
 
-        //for log event
-        // $logsbefore=User::where('level',$request->id)->get();
-        $returnValue=User::where('level',$request->id)->update(["level"=>null]);
-        // if($returnValue > 0)
-        //     event(new MassLogsEvent($logsbefore,'updated'));
-               
-        //for log event
-        // $logsbefore=Enroll::where('level',$request->id)->get();
-        $returnValue=Enroll::where('level',$request->id)->update(["level"=>null]);
-        // if($returnValue > 0)
-        //     event(new MassLogsEvent($logsbefore,'updated'));
+        User::where('level',$request->id)->update(["level"=>null]);
+        Enroll::where('level',$request->id)->update(["level"=>null]);
 
         $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(203, $levels, __('messages.level.delete'));
@@ -109,16 +100,26 @@ class LevelsController extends Controller
     {
         $valid = Validator::make($request->all(), [
             'name' => 'required',
-            'id' => 'required|exists:levels,id'
+            'id' => 'required|exists:levels,id',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
         ]);
 
         if ($valid->fails())
             return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
+            
         $level = Level::find($request->id);
         $level->name = $request->name;
+
+        if ($request->filled('year'))
+        {
+            $year_type= AcademicYearType::where('academic_year_id',$request->year)->where('academic_type_id',$request->type)->first();
+            $level->academic_year_type_id=$year_type->id;
+        }
+        
         $level->save();
-        $levels=Level::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(200, $levels, __('messages.level.update'));
+        
+        return HelperController::api_response_format(200, Level::paginate(HelperController::GetPaginate($request)), __('messages.level.update'));
     }
 
     /**

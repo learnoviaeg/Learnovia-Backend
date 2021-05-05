@@ -104,29 +104,13 @@ class AC_year_type extends Controller
 
         $segment= Segment::where('academic_type_id',$req->id)->get();
         $level= YearLevel::whereIn('academic_year_type_id',AcademicYearType::where('academic_type_id',$req->id)->pluck('id'))->get();
-        if(!(count($segment) == 0 && count($level) == 0)){
+        if(!(count($segment) == 0 && count($level) == 0))
             return HelperController::api_response_format(404, [], __('messages.error.cannot_delete'));
-        }
-        $types = AcademicType::whereId($req->id)->first()->delete();
-
-        //for log event
-        $logsbefore=AcademicYearType::where('academic_type_id',$req->id)->get();
-        $returnValue=AcademicYearType::where('academic_type_id',$req->id)->delete();
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'deleted'));
-
-        //for log event
-        $logsbefore=User::where('type',$req->id)->get();
-        $returnValue=User::where('type',$req->id)->update(['type' => null]);
-        // if($returnValue > 0)
-        //     event(new MassLogsEvent($logsbefore,'updated'));
-
-        //for log event
-        $logsbefore=Enroll::where('type',$req->id)->get();
-        $returnValue=Enroll::where('type',$req->id)->update(['type' => null]);
-        // if($returnValue > 0)
-        //     event(new MassLogsEvent($logsbefore,'updated'));
-
+        
+        AcademicType::whereId($req->id)->first()->delete();
+        AcademicYearType::where('academic_type_id',$req->id)->delete();
+        User::where('type',$req->id)->update(['type' => null]);
+        Enroll::where('type',$req->id)->update(['type' => null]);
         $req['returnmsg'] = 'delete';
         $print = self::get($req);
         return $print;
@@ -194,25 +178,18 @@ class AC_year_type extends Controller
             'year' => 'exists:academic_years,id',
         ]);
 
-        if ($valid->fails()) {
+        if ($valid->fails()) 
             return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
-        }
+        
         $AC = AcademicType::Find($req->id);
-        if (!$AC) {
+        if (!$AC) 
             return HelperController::api_response_format(404, [], __('messages.error.not_found'));
-        }
 
         $AC->update($req->all());
-        if ($req->filled('year')) {
-            if(count($AC->AC_year) > 0){
-                $yearType = AcademicYearType::checkRelation($AC->AC_year[0]->id, $req->id);
-                $yearType->delete();
-            }
-            AcademicYearType::create([
-                'academic_year_id' => $req->year,
-                'academic_type_id' => $req->id
-            ]);
-        }
+        if ($req->filled('year'))
+            $yearType = AcademicYearType::where('academic_type_id', $AC->id)->update(['academic_year_id' => $req->year]);
+        
+        $AC->save();
         if ($AC) {
             $AC->AC_year;
             $output= AcademicType::paginate(HelperController::GetPaginate($req));
