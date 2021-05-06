@@ -44,7 +44,7 @@ class PageLessonObserver
     {
         $page = Page::where('id',$pageLesson->page_id)->first();
         if(isset($page)){
-            Material::where('item_id',$pageLesson->page_id)->where('lesson_id',$pageLesson->getOriginal('lesson_id'))->where('type' , 'page')
+            Material::where('item_id',$pageLesson->page_id)->where('lesson_id',$pageLesson->getOriginal('lesson_id'))->where('type' , 'page')->first()
             ->update([
                 'item_id' => $pageLesson->page_id,
                 'name' => $page->title,

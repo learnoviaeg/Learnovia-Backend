@@ -48,7 +48,7 @@ class RepportsRepository implements RepportsRepositoryInterface
     
             //materials
             $materials = Material::whereIn('lesson_id',$lessons)->count();
-    
+
             //items count 
             $items_count = $assignments + $quizzes + $h5p  + $materials;
             

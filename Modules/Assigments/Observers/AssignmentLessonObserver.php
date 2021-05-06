@@ -91,6 +91,12 @@ class AssignmentLessonObserver
             if($old_class_id != $class_id)
                 UserSeen::where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
             
+            if($old_class_id == $class_id){
+                UserSeen::where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->update([
+                    'lesson_id' => $assignmentLesson->lesson_id
+                ]);
+            }
+
             $this->report->calculate_course_progress($course_id);
         }
     }

@@ -45,6 +45,13 @@ class MaterialsObserver
             if($old_class_id != $class_id)
                 UserSeen::where('lesson_id',$material->getOriginal('lesson_id'))->where('item_id',$material->item_id)->where('type',$material->type)->delete();
 
+                        
+            if($old_class_id == $class_id){
+                UserSeen::where('lesson_id',$material->getOriginal('lesson_id'))->where('item_id',$material->item_id)->where('type',$material->type)->update([
+                    'lesson_id' => $material->lesson_id
+                ]);
+            }
+
             $this->report->calculate_course_progress($material->course_id);
         }
     }

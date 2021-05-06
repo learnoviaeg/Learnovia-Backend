@@ -114,7 +114,7 @@ class CoursesController extends Controller
                     'teachers' => collect($teacher)->collapse()->unique()->values(),
                     'start_date' => $start_date,
                     'end_date' => $end_date,
-                    'progress' => $temp_course->progress ,
+                    'progress' => round($temp_course->progress,2) ,
                 ]);
 
                 $temp_course = null;
