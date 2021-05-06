@@ -136,16 +136,14 @@ class segment_class_Controller extends Controller
                 $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
                 $academic_type_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse();
                 $segment['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-                if(isset($segment->segment_class/*->class_id*/))
-               { 
-                    
-                $class_id = $segment->segment_class->pluck('class_id');;
-                $segment['class']=Classes::whereIn('id',$class_id)->pluck('name');}
+                if(isset($segment->segment_class/*->class_id*/)){
+                    $class_id = $segment->segment_class->pluck('class_id');
+                    $segment['class']=Classes::whereIn('id',$class_id)->pluck('name');
+                }
                 $level_id = $segment->Segment_class->pluck('yearLevels.*.level_id')->collapse();
                 $segment['level'] = Level::whereIn('id',$level_id)->pluck('name');
                 unset($segment->segment_class);
                 $all_segments->push($segment);
-        
             }
             
             if($request->returnmsg == 'delete')
@@ -156,9 +154,6 @@ class segment_class_Controller extends Controller
                 return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.update'));
             else
                 return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)));
-
-
-
         }
     }
 
@@ -223,7 +218,6 @@ class segment_class_Controller extends Controller
      *          if not : return 'NotFound Error'
      *
      **/
-
     public function deleteSegment(Request $req)
     {
         $req->validate([
@@ -320,7 +314,9 @@ class segment_class_Controller extends Controller
         $valid = Validator::make($request->all(), [
             'id' => 'required|exists:segments,id',
             'name' => 'required',
-           
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
+            'level' => 'exists:levels,id|required_with:year',
         ]);
 
         if ($valid->fails())
@@ -329,6 +325,14 @@ class segment_class_Controller extends Controller
         $segment = Segment::find($request->id);
         $segment->name = $request->name;
         $segment->save();
+
+        if ($request->filled('year'))
+        {
+            $year_type= AcademicYearType::where('academic_year_id',$request->year)->where('academic_type_id',$request->type)->first();
+            $year_level=YearLevel::where('level_id',$request->level)->where('academic_year_type_id',$year_type->id)->first();
+            $class_level=ClassLevel::where('class_id',$request->class)->where('year_level_id', $year_level->id)->first();
+            SegmentClass::where('segment_id',$request->id)->update(['class_level_id' => $class_level->id]);
+        }
 
         $request['id'] = null;
         $request['returnmsg'] = 'update';

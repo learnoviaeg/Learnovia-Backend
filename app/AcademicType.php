@@ -15,7 +15,8 @@ class AcademicType extends Model
         return $this->belongsToMany('App\AcademicYear', 'academic_year_types', 'academic_year_id', 'academic_type_id');
     }
 
-    public function yearType(){
+    public function yearType() // this is wrong but it used so, i cann't delete it (same type in 2 years no way)
+    { 
         return $this->hasMany('App\AcademicYearType','academic_type_id','id');
     }
 
@@ -23,7 +24,7 @@ class AcademicType extends Model
         'created_at','updated_at','pivot'
     ];
 
-    public function Actypeyear()
+    public function Actypeyear() // this is right
     {
         return $this->belongsTo('App\AcademicYearType', 'id', 'academic_type_id');
     }
