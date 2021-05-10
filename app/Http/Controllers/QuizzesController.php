@@ -15,6 +15,8 @@ use App\Course;
 use App\Level;
 use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\UserQuiz;
+use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\Questions;
 use App\LastAction;
 use Carbon\Carbon;
@@ -217,6 +219,17 @@ class QuizzesController extends Controller
 
         // $quiz->quizLesson->where('id',$request->lesson_id)->first(); //return array
         $quiz->quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
+        $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz->quizLesson->id);
+        if(count($user_quiz->get())>0){
+            $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$user_quiz->pluck('id'))->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
+            $quiz->token_attempts = $count_answered;
+            $user_answers=UserQuizAnswer::where('user_quiz_id',$user_quiz->latest()->first()->id)->get();
+            foreach($quiz->Question as $question){
+                foreach($user_answers as $userAnswer)
+                    if($userAnswer->question_id == $question->id)
+                        $question->User_Answer=$userAnswer;
+            }
+        }
 
         if(isset($quiz)){
             LastAction::lastActionInCourse($quiz->course_id);

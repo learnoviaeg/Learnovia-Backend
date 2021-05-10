@@ -76,18 +76,9 @@ class UserQuizController extends Controller
             if ($max_attempt_index < $userQuiz->quiz_lesson->max_attemp  || $override_flag ) {
                 //When Time finish, he can't enter on same attempt
                 if(Carbon::parse($userQuiz->open_time)->addSeconds($duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
-                {  
-                    // $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->whereNull('answered')->get();
-                    $user_quiz_answer=UserQuizAnswer::where('user_quiz_id',$max_id)->get();
-                    foreach($user_quiz_answer as $user_ans)
-                    {
-                        if(isset($user_ans)){
-                            $user_ans->update([
-                                'answered' => 1,
-                                'force_submit' => 1,
-                            ]);
-                        }
-                    }
+                {
+                    userQuizAnswer::where('user_quiz_id',$max_id)->update(['force_submit'=>'1']);
+
                     //create one more then continue api
                     $attempt_index = ++$max_attempt_index;
                     

@@ -439,6 +439,7 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], fu
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('quizzes', QuizzesController::class);
+    Route::Resource('attempts', AttemptsController::class);
     // Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
     // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
