@@ -31,45 +31,20 @@ class AttemptsController extends Controller
      */
     public function index(Request $request)
     {
-        // $request->validate([
-        //     'quiz_id' => 'required|integer|exists:quizzes,id',
-        //     'lesson_id' => 'required|integer|exists:lessons,id',
-        //     'attempt_index'=>'integer|exists:user_quizzes,id',
-        //     'user_id' => 'integer|exists:users,id',
-        // ]);
-        // $user_id=($request->user_id) ? $request->user_id : Auth::id();
-        // $quiz=Quiz::find($request->quiz_id);
-        // $attempts=UserQuiz::where('user_id',$user_id)->where('quiz_lesson_id',$quiz->quizLesson[0]->id);
-        // $quiz['attempts_index']=$attempts->pluck('id');
-        // // $quiz['quiz_less']=$attempts->pluck('id');
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'attempt_index'=>'integer|exists:user_quizzes,id',
+            'user_id' => 'integer|exists:users,id',
+        ]);
+        $user_id=($request->user_id) ? $request->user_id : Auth::id();
+        $quiz=Quiz::find($request->quiz_id);
+        $attempts=UserQuiz::where('user_id',$user_id)->where('quiz_lesson_id',$quiz->quizLesson[0]->id);
 
-        // if(isset($request->attempt_index))
-        //     $attempts->whereId($request->attempt_index);
+        if(isset($request->attempt_index))
+            $attempts->whereId($request->attempt_index);
 
-        // $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz)->get();
-            
-        // foreach($quiz->Question as $question){
-        //     if($question->question_type_id == 5){
-        //         foreach($question->children as $single){
-        //             foreach($userAnswers as $userAnswer)
-        //                 if($userAnswer->question_id == $question->id)
-        //                     $question->User_Answer=$userAnswer;
-
-        //             $single->question_type;
-
-        //             $question->question_category;
-        //             unset($single->pivot);
-        //         }
-        //     }
-        //     else
-        //         unset($question->children);
-
-        //     $question->question_category;
-        //     $question->question_type;
-        //     unset($question->pivot);
-        // }
-
-        // return HelperController::api_response_format(200, $quiz);
+        return HelperController::api_response_format(200, $attempts->get());
     }
 
     /**
@@ -173,44 +148,45 @@ class AttemptsController extends Controller
         LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->courseSegment->course_id);
 
         $allData = collect([]);
-        foreach ($request->Questions as $index => $question) {
-            if(isset($question['id'])){
-                $currentQuestion = Questions::find($question['id']);
-                $question_type_id = $currentQuestion->question_type->id;
+        if(isset($request->Questions))
+            foreach ($request->Questions as $index => $question) {
+                if(isset($question['id'])){
+                    $currentQuestion = Questions::find($question['id']);
+                    $question_type_id = $currentQuestion->question_type->id;
 
-                $data = [
-                    'user_quiz_id' => $id,
-                    'question_id' => $question['id'],
-                    'answered' => $question['answered'],
-                ];
-                switch ($question_type_id) {
-                    case 1: // True_false
-                        # code...
-                        $t_f['is_true'] = isset($question['is_true']) ? $question['is_true']: null;
-                        $t_f['and_why'] = isset($question['and_why']) ? $question['and_why']: null;
-                        $data['user_answers'] = json_encode($t_f);
-                        break;
-        
-                    case 2: // MCQ
-                        $data['user_answers'] = isset($question['MCQ_Choices']) ? json_encode($question['MCQ_Choices']) : null;
-                        break;
-        
-                    case 3: // Match
-                        $match['match_a']=isset($question['match_a']) ? $question['match_a'] : null;
-                        $match['match_b']=isset($question['match_b']) ? $question['match_b'] : null;
-                        $data['user_answers'] = json_encode($match);
-                        break;
-        
-                    case 4: // Essay
-                        $data['user_answers'] = isset($question['content']) ? $question['content'] : null; //essay not have special answer
-                        break;
+                    $data = [
+                        'user_quiz_id' => $id,
+                        'question_id' => $question['id'],
+                        'answered' => $question['answered'],
+                    ];
+                    switch ($question_type_id) {
+                        case 1: // True_false
+                            # code...
+                            $t_f['is_true'] = isset($question['is_true']) ? $question['is_true']: null;
+                            $t_f['and_why'] = isset($question['and_why']) ? $question['and_why']: null;
+                            $data['user_answers'] = json_encode($t_f);
+                            break;
+            
+                        case 2: // MCQ
+                            $data['user_answers'] = isset($question['MCQ_Choices']) ? json_encode($question['MCQ_Choices']) : null;
+                            break;
+            
+                        case 3: // Match
+                            $match['match_a']=isset($question['match_a']) ? $question['match_a'] : null;
+                            $match['match_b']=isset($question['match_b']) ? $question['match_b'] : null;
+                            $data['user_answers'] = json_encode($match);
+                            break;
+            
+                        case 4: // Essay
+                            $data['user_answers'] = isset($question['content']) ? $question['content'] : null; //essay not have special answer
+                            break;
+                    }
+                    $allData->push($data);
                 }
-                $allData->push($data);
+                $answer1= userQuizAnswer::where('user_quiz_id',$id)->where('question_id',$question['id'])->first();
+                if(isset($answer1))
+                    $answer1->update($data);
             }
-            $answer1= userQuizAnswer::where('user_quiz_id',$id)->where('question_id',$question['id'])->first();
-            if(isset($answer1))
-                $answer1->update($data);
-        }
 
         if($request->forced){
             $answer2=userQuizAnswer::where('user_quiz_id',$id)->update(['force_submit'=>'1']);
@@ -219,7 +195,7 @@ class AttemptsController extends Controller
             $user_quiz->save();
         }
 
-        return HelperController::api_response_format(200, $allData, __('messages.success.submit_success'));
+        return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
 
     /**
