@@ -55,6 +55,8 @@ class SeenReportController extends Controller
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
             'search' => 'string',
+            'sort_in' => 'in:asc,desc|required_with:sort_by',
+            'sort_by' => 'in:item_name,item_type,course.name,user_seen_number,percentage|required_with:sort_in'
         ]);
 
         
@@ -240,6 +242,14 @@ class SeenReportController extends Controller
 
             return response()->json(['message' => 'Total Percentage', 'body' => $final_percentage], 200);
         }
+
+        //sorting by any column
+        if($request->filled('sort_in') && $request->filled('sort_by') && $request->sort_in == 'desc')
+            $report = $report->sortByDesc($request->sort_by)->values();
+
+        if($request->filled('sort_in') && $request->filled('sort_by') && $request->sort_in == 'asc')
+            $report = $report->sortBy($request->sort_by)->values();
+
 
         return response()->json(['message' => 'Overall seen report', 'body' => $report->paginate(Paginate::GetPaginate($request))], 200);
     }

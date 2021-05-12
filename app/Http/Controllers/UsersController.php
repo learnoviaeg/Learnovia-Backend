@@ -145,7 +145,9 @@ class UsersController extends Controller
                 'report_day' => 'integer',
                 'never' => 'in:1',
                 'since' => 'in:1,5,10',
-                'export' => 'in:1'
+                'export' => 'in:1',
+                'sort_in' => 'in:asc,desc|required_with:sort_by',
+                'sort_by' => 'in:lastaction,fullname,status|required_with:sort_in'
             ]);
 
             $users_lastaction = Log::whereYear('created_at', $request->report_year)->whereIn('user',$enrolls->pluck('username'))->with('users');
@@ -195,6 +197,13 @@ class UsersController extends Controller
                 return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
 
             }
+
+            if($request->filled('sort_in') && $request->filled('sort_by') && $request->sort_in == 'desc')
+                $users_lastaction = $users_lastaction->sortByDesc($request->sort_by)->values();
+
+            if($request->filled('sort_in') && $request->filled('sort_by') && $request->sort_in == 'asc')
+                $users_lastaction = $users_lastaction->sortBy($request->sort_by)->values();
+
 
             return response()->json(['message' => $my_chain.' users list ', 'body' => $users_lastaction], 200);
         }
