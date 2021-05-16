@@ -178,7 +178,7 @@ class AttemptsController extends Controller
                             break;
             
                         case 4: // Essay
-                            $data['user_answers'] = isset($question['content']) ? $question['content'] : null; //essay not have special answer
+                            $data['user_answers'] = isset($question['content']) ? json_encode($question['content']) : null; //essay not have special answer
                             break;
                     }
                     $allData->push($data);
