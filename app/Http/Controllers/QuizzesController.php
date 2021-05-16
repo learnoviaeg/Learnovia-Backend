@@ -238,9 +238,14 @@ class QuizzesController extends Controller
             $quiz->token_attempts = $count_answered;
             $user_answers=UserQuizAnswer::where('user_quiz_id',$user_quiz->latest()->first()->id)->get();
             foreach($quiz->Question as $question){
-                foreach($user_answers as $userAnswer)
+                foreach($user_answers as $userAnswer){
+                    if($question->question_type_id == 5)
+                        foreach($question->children as $child)
+                            if($userAnswer->question_id == $child->id)
+                                $child->User_Answer=$userAnswer;
                     if($userAnswer->question_id == $question->id)
                         $question->User_Answer=$userAnswer;
+                }
             }
         }
 
