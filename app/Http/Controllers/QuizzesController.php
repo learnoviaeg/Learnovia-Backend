@@ -220,23 +220,29 @@ class QuizzesController extends Controller
         // $quiz->quizLesson->where('id',$request->lesson_id)->first(); //return array
         $quiz->quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
         $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz->quizLesson->id);
-        $last_attempt=$user_quiz->latest()->first();
-        $duration_time = $quiz->duration;
+        $query=clone $user_quiz;
+
+        $last_attempt=$query->latest()->first();
+        $remain_time = $quiz->duration;
         if(isset($last_attempt)){
-            $check_time = ($duration_time) - (strtotime(Carbon::now()) - strtotime(Carbon::parse($last_attempt->open_time)));
+            if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz->quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
+                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
+
+            $check_time = ($remain_time) - (strtotime(Carbon::now())- strtotime(Carbon::parse($last_attempt->open_time)));
+            // dd($check_time);
             if($check_time < 0)
                 $check_time= 0;
 
-            $quiz->duration_time = $check_time;
+            $quiz->remain_time = $check_time;
             //case-->user_answer in new attempt
-            $answered=UserQuizAnswer::where('user_quiz_id',$last_attempt)->whereNull('force_submit')->get()->count();
+            $answered=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->get()->count();
             if($answered < 1)
-                $quiz->duration_time = $quiz->duration;
+                $quiz->remain_time = $quiz->duration;
         }
         if(count($user_quiz->get())>0){
             $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$user_quiz->pluck('id'))->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
             $quiz->token_attempts = $count_answered;
-            $user_answers=UserQuizAnswer::where('user_quiz_id',$user_quiz->latest()->first()->id)->get();
+            $user_answers=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->get();
             foreach($quiz->Question as $question){
                 foreach($user_answers as $userAnswer){
                     if($question->question_type_id == 5)
