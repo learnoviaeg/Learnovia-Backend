@@ -44,7 +44,7 @@ class AttemptsController extends Controller
         if(isset($request->attempt_index))
             $attempts->whereId($request->attempt_index);
 
-        return HelperController::api_response_format(200, $attempts->get());
+        return HelperController::api_response_format(200, $attempts->with('UserQuizAnswer','user','quiz_lesson')->get());
     }
 
     /**
@@ -118,7 +118,7 @@ class AttemptsController extends Controller
      */
     public function show($id)
     {
-        $attempt=UserQuiz::find($id);
+        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer','user','quiz_lesson')->get();
         return HelperController::api_response_format(200, $attempt);
     }
 

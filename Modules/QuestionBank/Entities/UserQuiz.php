@@ -27,6 +27,11 @@ class userQuiz extends Model
         return $this->hasMany('Modules\QuestionBank\Entities\userQuizAnswer', 'user_quiz_id', 'id');
     }
 
+    public function user()
+    {
+        return $this->belongsTo('App\User','user_id','id');
+    }
+
     public static function calculate_grade_of_attempts_with_method($quiz_lesson){
         $grading_method_id=  QuizLesson::find($quiz_lesson)->pluck('grading_method_id');
         $user_id=Auth::User()->id;
