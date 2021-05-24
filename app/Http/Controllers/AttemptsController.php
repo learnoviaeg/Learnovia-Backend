@@ -129,7 +129,7 @@ class AttemptsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id) //it's answer_api because we do make update really ^_^ >>>>> array in params in postman
+    public function update(Request $request, $id) //it's answer_api because we do make update really ^_^ 
     {
         $request->validate([
             // 'user_quiz_id' => 'required|integer|exists:user_quizzes,id',

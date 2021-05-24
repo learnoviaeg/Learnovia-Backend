@@ -7,6 +7,7 @@ use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\Assignment;
 use App\Timeline;
 use App\Lesson;
+use App\GradeCategory;
 use App\User;
 use App\Events\MassLogsEvent;
 use App\Log;
@@ -36,23 +37,30 @@ class AssignmentLessonObserver
         $course_id = $lesson->courseSegment->course_id;
         $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        if(isset($assignment)){
-            Timeline::firstOrCreate([
-                'item_id' => $assignmentLesson->assignment_id,
+        Timeline::firstOrCreate([
+            'item_id' => $assignmentLesson->assignment_id,
+            'name' => $assignment->name,
+            'start_date' => $assignmentLesson->start_date,
+            'due_date' => $assignmentLesson->due_date,
+            'publish_date' => isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
+            'course_id' => $course_id,
+            'class_id' => $class_id,
+            'lesson_id' => $assignmentLesson->lesson_id,
+            'level_id' => $level_id,
+            'type' => 'assignment',  
+            'visible' => isset($assignmentLesson->visible)?$assignmentLesson->visible:1
+
+        ]);
+
+        $this->report->calculate_course_progress($course_id);
+
+        if($assignmentLesson->is_graded == 1){
+            $grade_category=GradeCategory::find($assignmentLesson->grade_category);
+            $grade_category->GradeItems()->create([
+                'type' => 'Assignment',
+                'item_id' => $assignment->id,
                 'name' => $assignment->name,
-                'start_date' => $assignmentLesson->start_date,
-                'due_date' => $assignmentLesson->due_date,
-                'publish_date' => isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
-                'course_id' => $course_id,
-                'class_id' => $class_id,
-                'lesson_id' => $assignmentLesson->lesson_id,
-                'level_id' => $level_id,
-                'type' => 'assignment',  
-                'visible' => isset($assignmentLesson->visible)?$assignmentLesson->visible:1
-
             ]);
-
-            $this->report->calculate_course_progress($course_id);
         }
     }
 
