@@ -240,6 +240,7 @@ class QuizzesController extends Controller
                 $quiz->remain_time = $quiz->duration;
         }
         if(count($user_quiz->get())>0){
+            $quiz->attempt_index=$user_quiz->pluck('id');
             $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$user_quiz->pluck('id'))->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
             $quiz->token_attempts = $count_answered;
             $user_answers=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->get();
