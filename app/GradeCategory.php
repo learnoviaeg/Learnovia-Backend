@@ -7,8 +7,7 @@ use stdClass;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name', 'course_segment_id', 'parent', 'aggregation', 'locked',
-                'aggregatedOnlyGraded', 'hidden', 'id_number' , 'weight','type','grademin','exclude_flag','grademax'];
+    protected $fillable = ['name', 'course_segment_id', 'parent', 'hidden'];
     public function Child()
     {
         return $this->hasMany('App\GradeCategory', 'parent', 'id');
@@ -23,7 +22,7 @@ class GradeCategory extends Model
     }
     public function GradeItems()
     {
-        return $this->hasMany('App\GradeItems', 'grade_category', 'id');
+        return $this->hasMany('App\GradeItems', 'grade_category_id', 'id');
     }
     public function Children()
     {

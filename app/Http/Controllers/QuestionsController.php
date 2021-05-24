@@ -10,6 +10,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use Validator;
 use App\Paginate;
+use App\Events\GradeItemEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\CourseSegment;
 use Illuminate\Support\Facades\Auth;
@@ -116,6 +117,8 @@ class QuestionsController extends Controller
                 
             $quiz->draft=0;
             $quiz->save();
+            event(new GradeItemEvent($quiz,'Quiz'));
+
     
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
@@ -125,7 +128,8 @@ class QuestionsController extends Controller
             'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
             'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
             'Question.*.question_type_id' => 'required|exists:questions_types,id', 
-            'Question.*.parent_id' => 'exists:questions,id', 
+            'Question.*.parent_id' => 'exists:questions,id',
+            'Question.*.mark' => 'required|float',
             'Question.*.text' => 'required|string', //need in every type_question
         ]);
         
@@ -183,6 +187,7 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
+            'mark' => $question['mark'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
@@ -211,6 +216,7 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
+            'mark' => $question['mark'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
             'content' => json_encode(array_values($question['MCQ_Choices'])),
@@ -237,6 +243,7 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
+            'mark' => $question['mark'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
@@ -256,6 +263,7 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
+            'mark' => $question['mark'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
             'content' => null //not have specific|model answer
