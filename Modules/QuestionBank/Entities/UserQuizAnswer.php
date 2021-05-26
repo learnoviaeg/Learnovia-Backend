@@ -3,6 +3,7 @@
 namespace Modules\QuestionBank\Entities;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\QuestionBank\Entities\Questions;
 
 class userQuizAnswer extends Model
 {
@@ -17,6 +18,19 @@ class userQuizAnswer extends Model
 
     public function getUserAnswersAttribute()
     {
-        return json_decode($this->attributes['user_answers']);
+        $user_answers=json_decode($this->attributes['user_answers']);
+        $question=Questions::find($this->attributes['question_id']);
+        if(isset($user_answers))
+            if($question->question_type_id == 2){
+                foreach($user_answers as $con)
+                {
+                    if($con->is_true == 1){
+                        $con->is_true=True;
+                        continue;
+                    }
+                    $con->is_true=False;
+                }
+            }
+        return $user_answers;
     }
 }
