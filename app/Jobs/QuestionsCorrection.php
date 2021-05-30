@@ -19,7 +19,7 @@ class QuestionsCorrection implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($UserQuizAnswers)
     {
         $this->UserQuizAnswers= $UserQuizAnswers;
     }
@@ -31,6 +31,26 @@ class QuestionsCorrection implements ShouldQueue
      */
     public function handle()
     {
-        
+        foreach($UserQuizAnswers as $oneAnswer)
+        {
+            $question=Question::find($oneAnswer->question_id);
+            switch ($question->question_type_id) {
+                // case 1: // True_false
+                //     # code...
+                //     $t_f['is_true'] = isset($question['is_true']) ? $question['is_true']: null;
+                //     $data['right'] = json_encode($t_f);
+                //     break;
+    
+                case 2: // MCQ
+                    $data['user_answers'] = isset($question['MCQ_Choices']) ? json_encode($question['MCQ_Choices']) : null;
+                    break;
+    
+                case 3: // Match
+                    $match['match_a']=isset($question['match_a']) ? $question['match_a'] : null;
+                    $match['match_b']=isset($question['match_b']) ? $question['match_b'] : null;
+                    $data['user_answers'] = json_encode($match);
+                    break;
+            }
+        }
     }
 }

@@ -195,6 +195,8 @@ class AttemptsController extends Controller
             $user_quiz->save();
         }
 
+        // $jop = (new \App\Jobs\QuestionsCorrection($this->getCourseSegment($request), $request->grades));
+
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
 

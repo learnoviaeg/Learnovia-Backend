@@ -35,7 +35,7 @@ class ItemDetailslistener
                     'type' => 'Question',
                     'item_id' => $question->id,
                     'parent_item_id' => $grade_item->id,
-                    // 'weight_details' => '45454',
+                    // 'weight_details' => $question['mark'],
                 ]);
 
         elseif($event->type == 'Assignment')
