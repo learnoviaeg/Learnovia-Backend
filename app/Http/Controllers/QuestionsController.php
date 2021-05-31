@@ -248,14 +248,14 @@ class QuestionsController extends Controller
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
-        foreach($question['match_a'] as $key => $match_a )
-            $match['match_a']=$key.":".$match_a;
+        // foreach($question['match_a'] as $key => $match_a )
+        //     $match['match_a']=$key.":".$match_a;
 
-        foreach($question['match_b'] as  $key => $match_b )
-            $match['match_b']=$key.":".$match_b;
+        // foreach($question['match_b'] as  $key => $match_b )
+        //     $match['match_b']=$key.":".$match_b;
 
-        // $match['match_a']=$question['match_a'];
-        // $match['match_b']=$question['match_b'];
+        $match['match_a']=$question['match_a'];
+        $match['match_b']=$question['match_b'];
 
         $data['content'] = json_encode($match);
 
