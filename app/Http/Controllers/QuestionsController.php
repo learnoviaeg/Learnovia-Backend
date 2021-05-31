@@ -44,10 +44,18 @@ class QuestionsController extends Controller
         ]);
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
+            $quset=array();
             $quiz = Quiz::where('id',$quiz_id)->with('Question.children')->first();
             $questions = $quiz->Question;
             if($quiz->shuffle == 'Questions'|| $quiz->shuffle == 'Questions and Answers')
                 $questions =$questions->shuffle();
+            
+            foreach($questions as $question)
+                if($question['question_type_id'] == 3){
+                    $quest['match_a']=collect($question['content']->match_a)->shuffle();
+                    $quest['match_b']=collect($question['content']->match_b)->shuffle();
+                    $question['shuffle']= ($quest);
+                }
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
                 foreach($questions as $question){
@@ -233,15 +241,22 @@ class QuestionsController extends Controller
         
         $match=array();
         $data = [
-            'course_id' => $question['course_id'],
+            'course_id' => $question['course_id'], 
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
+        // foreach($question['match_a'] as $key => $match_a )
+        //     $match['match_a']=$key.":".$match_a;
+
+        // foreach($question['match_b'] as  $key => $match_b )
+        //     $match['match_b']=$key.":".$match_b;
+
         $match['match_a']=$question['match_a'];
-        $match['match_b'] =$question['match_b'];
+        $match['match_b']=$question['match_b'];
+
         $data['content'] = json_encode($match);
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
@@ -280,7 +295,7 @@ class QuestionsController extends Controller
      */
     public function show($id)
     {
-        $َquestion=Questions::find($id);
+        $question=Questions::find($id);
         return HelperController::api_response_format(200, $question,null);
     }
 
