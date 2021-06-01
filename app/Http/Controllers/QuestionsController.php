@@ -45,10 +45,27 @@ class QuestionsController extends Controller
         ]);
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
+            $quset=array();
             $quiz = Quiz::where('id',$quiz_id)->with('Question.children')->first();
             $questions = $quiz->Question;
             if($quiz->shuffle == 'Questions'|| $quiz->shuffle == 'Questions and Answers')
                 $questions =$questions->shuffle();
+            
+                foreach($questions as $question)
+                    if($question['question_type_id'] == 3){
+                        $keys_a=array_keys($question['content']['match_a']);
+                        $keys_b=array_keys($question['content']['match_b']);
+
+                        shuffle($keys_a);
+                        shuffle($keys_b);
+                        foreach($keys_a as $key)
+                            $quest['match_a'][$key]=$question['content']['match_a'][$key];
+
+                        foreach($keys_b as $key)
+                            $quest['match_b'][$key]=$question['content']['match_b'][$key];
+                        
+                        $question['content']= json_encode($quest, JSON_FORCE_OBJECT);
+                    }
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
                 foreach($questions as $question){
@@ -129,7 +146,6 @@ class QuestionsController extends Controller
             'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
             'Question.*.question_type_id' => 'required|exists:questions_types,id', 
             'Question.*.parent_id' => 'exists:questions,id',
-            'Question.*.mark' => 'required|float',
             'Question.*.text' => 'required|string', //need in every type_question
         ]);
         
@@ -187,7 +203,6 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
-            'mark' => $question['mark'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
@@ -216,7 +231,6 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
-            'mark' => $question['mark'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
             'content' => json_encode(array_values($question['MCQ_Choices'])),
@@ -243,13 +257,12 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
-            'mark' => $question['mark'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
-        $match['match_a']=$question['match_a'];
-        $match['match_b'] =$question['match_b'];
-        $data['content'] = json_encode($match);
+        $match['match_a']=array_combine((array_keys($question['match_a'])),array_values($question['match_a']));
+        $match['match_b'] =array_combine((array_keys($question['match_b'])),array_values($question['match_b']));
+        $data['content'] = json_encode($match, JSON_FORCE_OBJECT );
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
 
@@ -263,7 +276,6 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
-            'mark' => $question['mark'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
             'content' => null //not have specific|model answer
