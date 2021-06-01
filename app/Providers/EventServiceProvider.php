@@ -29,6 +29,10 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\MassLogsEvent' => [
             'App\Listeners\MassLogsListener',
         ],
+
+        'App\Events\GradeItemEvent' => [
+            'App\Listeners\ItemDetailslistener',
+        ],
     ];
 
     /**

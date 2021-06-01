@@ -125,6 +125,7 @@ class QuizzesController extends Controller
              * type 2 => New & Old Questions
              */
             'is_graded' => 'required|boolean',
+            'grade_category_id' => 'required_if:is_graded,==,1',
             'duration' => 'required|integer',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'feedback' => 'integer| in:1,2,3',
@@ -189,7 +190,7 @@ class QuizzesController extends Controller
                     'max_attemp' => $request->max_attemp,
                     'grading_method_id' => $request->grading_method_id,
                     'grade' => $request->grade,
-                    'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id[$key] : null,
+                    'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : null,
                     'publish_date' => $request->opening_time,
                     'index' => $Next_index,
                     'visible' => isset($request->visible)?$request->visible:1

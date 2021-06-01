@@ -129,7 +129,7 @@ class AttemptsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id) //it's answer_api because we do make update really ^_^ >>>>> array in params in postman
+    public function update(Request $request, $id) //it's answer_api because we do make update really ^_^ 
     {
         $request->validate([
             // 'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
@@ -194,6 +194,8 @@ class AttemptsController extends Controller
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
             $user_quiz->save();
         }
+
+        // $jop = (new \App\Jobs\QuestionsCorrection($this->getCourseSegment($request), $request->grades));
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
