@@ -437,19 +437,22 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], fu
 });
 
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
-    Route::Resource('timeline', TimelineController::class);
     Route::Resource('quizzes', QuizzesController::class);
+    Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
+    Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@store')->middleware(['permission:quiz/add' , 'ParentCheck']);
     Route::Resource('attempts', AttemptsController::class);
     Route::post('attempts/{id}', 'AttemptsController@update');
     // Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
     // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);
-    Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
-    Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@store')->middleware(['permission:quiz/add' , 'ParentCheck']);
-    Route::Resource('materials', MaterialsController::class);
-    Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
+
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
     Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
+    
+    Route::Resource('timeline', TimelineController::class);
+    Route::Resource('materials', MaterialsController::class);
+    Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
+
 
     Route::Resource('interactive', InterActiveController::class);
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);

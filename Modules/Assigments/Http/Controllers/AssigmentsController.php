@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use App\UserGrade;
 use Spatie\Permission\Models\Permission;
 use URL;
+use App\Events\GradeItemEvent;
 use Str;
 use Spatie\PdfToImage\Pdf;
 use Org_Heigl\Ghostscript\Ghostscript;
@@ -23,7 +24,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-// use Illuminate\Routing\Controller;
 use App\Http\Controllers\HelperController;
 use Carbon\Carbon;
 use Modules\Assigments\Entities\assignment;
@@ -404,6 +404,7 @@ class AssigmentsController extends Controller
             'link' => url(route('getAssignment')) . '?assignment_id=' . $request["assignment_lesson_id"],
             'publish_date' => $request['publish_date'],
         ]);
+        event(new GradeItemEvent(Assignment::find($assignment_id),'Assignment'));
     }
 
     /*

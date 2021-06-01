@@ -8,6 +8,7 @@ use Modules\QuestionBank\Entities\Quiz;
 use App\Events\MassLogsEvent;
 use App\Lesson;
 use App\Timeline;
+use App\GradeCategory;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Log;
@@ -36,24 +37,31 @@ class QuizLessonObserver
         $course_id = $lesson->courseSegment->course_id;
         $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        if(isset($quiz)){
-            Timeline::firstOrCreate([
-                'item_id' => $quizLesson->quiz_id,
-                'name' => $quiz->name,
-                'start_date' => $quizLesson->start_date,
-                'due_date' => $quizLesson->due_date,
-                'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
-                'course_id' => $course_id,
-                'class_id' => $class_id,
-                'lesson_id' => $quizLesson->lesson_id,
-                'level_id' => $level_id,
-                'type' => 'quiz',
-                'visible' => $quizLesson->visible
+        Timeline::firstOrCreate([
+            'item_id' => $quizLesson->quiz_id,
+            'name' => $quiz->name,
+            'start_date' => $quizLesson->start_date,
+            'due_date' => $quizLesson->due_date,
+            'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
+            'course_id' => $course_id,
+            'class_id' => $class_id,
+            'lesson_id' => $quizLesson->lesson_id,
+            'level_id' => $level_id,
+            'type' => 'quiz',
+            'visible' => $quizLesson->visible
 
+        ]);
+        
+        $this->report->calculate_course_progress($course_id);
+
+        if($quiz->is_graded == 1){
+            $grade_category=GradeCategory::find($quizLesson->grade_category_id);
+            $grade_category->GradeItems()->create([
+                'type' => 'Quiz',
+                'item_id' => $quiz->id,
+                'name' => $quiz->name,
             ]);
-            
-            $this->report->calculate_course_progress($course_id);
-        }
+        }        
     }
 
     /**

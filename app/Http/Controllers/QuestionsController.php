@@ -10,6 +10,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use Validator;
 use App\Paginate;
+use App\Events\GradeItemEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\CourseSegment;
 use Illuminate\Support\Facades\Auth;
@@ -52,9 +53,18 @@ class QuestionsController extends Controller
             
             foreach($questions as $question)
                 if($question['question_type_id'] == 3){
-                    $quest['match_a']=collect($question['content']->match_a)->shuffle();
-                    $quest['match_b']=collect($question['content']->match_b)->shuffle();
-                    $question['shuffle']= ($quest);
+                    $keys_a=array_keys($question['content']['match_a']);
+                    $keys_b=array_keys($question['content']['match_b']);
+
+                    shuffle($keys_a);
+                    shuffle($keys_b);
+                    foreach($keys_a as $key)
+                        $quest['match_a'][$key]=$question['content']['match_a'][$key];
+
+                    foreach($keys_b as $key)
+                        $quest['match_b'][$key]=$question['content']['match_b'][$key];
+                    
+                    $question['content']= json_encode($quest, JSON_FORCE_OBJECT);
                 }
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
@@ -124,6 +134,8 @@ class QuestionsController extends Controller
                 
             $quiz->draft=0;
             $quiz->save();
+            event(new GradeItemEvent($quiz,'Quiz'));
+
     
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
@@ -133,7 +145,7 @@ class QuestionsController extends Controller
             'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
             'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
             'Question.*.question_type_id' => 'required|exists:questions_types,id', 
-            'Question.*.parent_id' => 'exists:questions,id', 
+            'Question.*.parent_id' => 'exists:questions,id',
             'Question.*.text' => 'required|string', //need in every type_question
         ]);
         
@@ -248,16 +260,9 @@ class QuestionsController extends Controller
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
-        // foreach($question['match_a'] as $key => $match_a )
-        //     $match['match_a']=$key.":".$match_a;
-
-        // foreach($question['match_b'] as  $key => $match_b )
-        //     $match['match_b']=$key.":".$match_b;
-
-        $match['match_a']=$question['match_a'];
-        $match['match_b']=$question['match_b'];
-
-        $data['content'] = json_encode($match);
+        $match['match_a']=array_combine((array_keys($question['match_a'])),array_values($question['match_a']));
+        $match['match_b'] =array_combine((array_keys($question['match_b'])),array_values($question['match_b']));
+        $data['content'] = json_encode($match, JSON_FORCE_OBJECT );
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
 
