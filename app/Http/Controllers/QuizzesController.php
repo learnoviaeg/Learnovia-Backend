@@ -244,17 +244,7 @@ class QuizzesController extends Controller
             $quiz->attempt_index=$user_quiz->pluck('id');
             $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$user_quiz->pluck('id'))->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
             $quiz->token_attempts = $count_answered;
-            $user_answers=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->get();
-            foreach($quiz->Question as $question){
-                foreach($user_answers as $userAnswer){
-                    if($question->question_type_id == 5)
-                        foreach($question->children as $child)
-                            if($userAnswer->question_id == $child->id)
-                                $child->User_Answer=$userAnswer;
-                    if($userAnswer->question_id == $question->id)
-                        $question->User_Answer=$userAnswer;
-                }
-            }
+            $quiz->Question;
         }
 
         if(isset($quiz)){

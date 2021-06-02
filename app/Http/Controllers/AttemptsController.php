@@ -78,6 +78,8 @@ class AttemptsController extends Controller
                  && UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->count() > 0)
             {
                 $last_attempt->left_time=(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration))->diffInSeconds(Carbon::now());
+                foreach($last_attempt->UserQuizAnswer as $answers)
+                    $answers->Question;
                 return HelperController::api_response_format(200, $last_attempt, __('messages.quiz.continue_quiz'));
             }
             userQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
@@ -106,8 +108,10 @@ class AttemptsController extends Controller
             else // because parent question(comprehension) not have answer
                 userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
         }
-        
-        return HelperController::api_response_format(200, $userQuiz);
+        foreach($userQuiz->UserQuizAnswer as $answers)
+            $answers->Question;
+            
+        return HelperController::api_response_format(200, $userQuiz->UserQuizAnswer);
     }
 
     /**
