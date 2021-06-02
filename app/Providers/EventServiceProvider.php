@@ -22,9 +22,10 @@ class EventServiceProvider extends ServiceProvider
         // 'App\Events\UserGradeEvent' => [
         //     'App\Listeners\UserGradeListener',
         // ],
-        // UserGradeEvent::class => [
-        //     UserGradeListener::class,
-        // ],
+
+        'App\Events\UserItemDetailsEvent' => [
+            'App\Listeners\CreateUserItemDetailsListener',
+        ],
 
         'App\Events\MassLogsEvent' => [
             'App\Listeners\MassLogsListener',

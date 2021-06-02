@@ -15,7 +15,7 @@
     ),
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
-    'key' => 'base64:/VeGvsiYdfCIcoiG4IXUZzHY6GuDAmbP5lGW5nDEoTQ=',
+    'key' => 'base64:XE+A9n2rG9tF+U67gB59598AozMtOVw6cFihjWfLcRU=',
     'cipher' => 'AES-256-CBC',
     'providers' => 
     array (
@@ -196,7 +196,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\framework/cache/data',
+        'path' => '/home/hend/Desktop/learnovia-backend/storage/framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -289,7 +289,7 @@
       array (
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'develop',
+        'database' => 'learnovia',
         'prefix' => '',
         'foreign_key_constraints' => true,
       ),
@@ -297,11 +297,11 @@
       array (
         'driver' => 'mysql',
         'url' => NULL,
-        'host' => 'localhost',
+        'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'develop',
-        'username' => 'root',
-        'password' => '',
+        'database' => 'learnovia',
+        'username' => 'hend',
+        'password' => '12345',
         'unix_socket' => '',
         'charset' => 'utf8',
         'collation' => 'utf8_unicode_ci',
@@ -317,11 +317,11 @@
       array (
         'driver' => 'pgsql',
         'url' => NULL,
-        'host' => 'localhost',
+        'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'develop',
-        'username' => 'root',
-        'password' => '',
+        'database' => 'learnovia',
+        'username' => 'hend',
+        'password' => '12345',
         'charset' => 'utf8',
         'prefix' => '',
         'prefix_indexes' => true,
@@ -332,11 +332,11 @@
       array (
         'driver' => 'sqlsrv',
         'url' => NULL,
-        'host' => 'localhost',
+        'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'develop',
-        'username' => 'root',
-        'password' => '',
+        'database' => 'learnovia',
+        'username' => 'hend',
+        'password' => '12345',
         'charset' => 'utf8',
         'prefix' => '',
         'prefix_indexes' => true,
@@ -447,7 +447,7 @@
     ),
     'temporary_files' => 
     array (
-      'local_path' => 'C:\\Users\\lenovo\\AppData\\Local\\Temp',
+      'local_path' => '/tmp',
       'remote_disk' => NULL,
     ),
   ),
@@ -460,24 +460,24 @@
       'components' => 
       array (
         'driver' => 'local',
-        'root' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\public\\components/',
+        'root' => '/home/hend/Desktop/learnovia-backend/public/components/',
       ),
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\app',
+        'root' => '/home/hend/Desktop/learnovia-backend/storage/app',
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\app/public',
+        'root' => '/home/hend/Desktop/learnovia-backend/storage/app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
       ),
       'h5p' => 
       array (
         'driver' => 'local',
-        'root' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\app/public/h5p',
+        'root' => '/home/hend/Desktop/learnovia-backend/storage/app/public/h5p',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
       ),
@@ -600,13 +600,13 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\logs/laravel.log',
+        'path' => '/home/hend/Desktop/learnovia-backend/storage/logs/laravel.log',
         'level' => 'debug',
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\logs/laravel.log',
+        'path' => '/home/hend/Desktop/learnovia-backend/storage/logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
       ),
@@ -642,7 +642,7 @@
       'syslog' => 
       array (
         'driver' => 'syslog',
-        'path' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\logs/laravel.log',
+        'path' => '/home/hend/Desktop/learnovia-backend/storage/logs/laravel.log',
         'level' => 'debug',
       ),
       'errorlog' => 
@@ -671,7 +671,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'D:\\Learnovia\\learnovia\\learnovia-backend\\resources\\views/vendor/mail',
+        0 => '/home/hend/Desktop/learnovia-backend/resources/views/vendor/mail',
       ),
     ),
     'log_channel' => NULL,
@@ -682,7 +682,7 @@
     'stubs' => 
     array (
       'enabled' => false,
-      'path' => 'D:\\Learnovia\\learnovia\\learnovia-backend/vendor/nwidart/laravel-modules/src/Commands/stubs',
+      'path' => '/home/hend/Desktop/learnovia-backend/vendor/nwidart/laravel-modules/src/Commands/stubs',
       'files' => 
       array (
         'routes/web' => 'Routes/web.php',
@@ -744,9 +744,9 @@
     ),
     'paths' => 
     array (
-      'modules' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\Modules',
-      'assets' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\public\\modules',
-      'migration' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\database/migrations',
+      'modules' => '/home/hend/Desktop/learnovia-backend/Modules',
+      'assets' => '/home/hend/Desktop/learnovia-backend/public/modules',
+      'migration' => '/home/hend/Desktop/learnovia-backend/database/migrations',
       'generator' => 
       array (
         'config' => 
@@ -876,7 +876,7 @@
       'enabled' => false,
       'paths' => 
       array (
-        0 => 'D:\\Learnovia\\learnovia\\learnovia-backend\\vendor/*/*',
+        0 => '/home/hend/Desktop/learnovia-backend/vendor/*/*',
       ),
     ),
     'composer' => 
@@ -904,7 +904,7 @@
       'file' => 
       array (
         'class' => 'Nwidart\\Modules\\Activators\\FileActivator',
-        'statuses-file' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\modules_statuses.json',
+        'statuses-file' => '/home/hend/Desktop/learnovia-backend/modules_statuses.json',
         'cache-key' => 'activator.installed',
         'cache-lifetime' => 604800,
       ),
@@ -1105,7 +1105,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\framework/sessions',
+    'files' => '/home/hend/Desktop/learnovia-backend/storage/framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -1158,9 +1158,9 @@
   array (
     'paths' => 
     array (
-      0 => 'D:\\Learnovia\\learnovia\\learnovia-backend\\resources\\views',
+      0 => '/home/hend/Desktop/learnovia-backend/resources/views',
     ),
-    'compiled' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\framework\\views',
+    'compiled' => '/home/hend/Desktop/learnovia-backend/storage/framework/views',
   ),
   'dompdf' => 
   array (
@@ -1168,10 +1168,10 @@
     'orientation' => 'portrait',
     'defines' => 
     array (
-      'font_dir' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\fonts/',
-      'font_cache' => 'D:\\Learnovia\\learnovia\\learnovia-backend\\storage\\fonts/',
-      'temp_dir' => 'C:\\Users\\lenovo\\AppData\\Local\\Temp',
-      'chroot' => 'D:\\Learnovia\\learnovia\\learnovia-backend',
+      'font_dir' => '/home/hend/Desktop/learnovia-backend/storage/fonts/',
+      'font_cache' => '/home/hend/Desktop/learnovia-backend/storage/fonts/',
+      'temp_dir' => '/tmp',
+      'chroot' => '/home/hend/Desktop/learnovia-backend',
       'enable_font_subsetting' => false,
       'pdf_backend' => 'CPDF',
       'default_media_type' => 'screen',

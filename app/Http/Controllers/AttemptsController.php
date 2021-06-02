@@ -165,6 +165,7 @@ class AttemptsController extends Controller
                             $t_f['is_true'] = isset($question['is_true']) ? $question['is_true']: null;
                             $t_f['and_why'] = isset($question['and_why']) ? $question['and_why']: null;
                             $data['user_answers'] = json_encode($t_f);
+                            // if()
                             break;
             
                         case 2: // MCQ
