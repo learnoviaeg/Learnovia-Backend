@@ -20,6 +20,7 @@ use Modules\QuestionBank\Entities\QuizOverride;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
+use App\Events\QuizAttemptEvent;
 use App\LastAction;
 
 class AttemptsController extends Controller
@@ -97,6 +98,7 @@ class AttemptsController extends Controller
         ]);
         $userQuiz->left_time=$quiz_lesson->quiz->duration;
 
+        event(new QuizAttemptEvent($userQuiz));
         foreach($quiz_lesson->quiz->Question as $question)
         {
             if($question->question_type_id == 5)

@@ -33,6 +33,10 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\GradeItemEvent' => [
             'App\Listeners\ItemDetailslistener',
         ],
+
+        'App\Events\QuizAttemptEvent' => [
+            'App\Listeners\AttemptItemlistener',
+        ],
     ];
 
     /**
