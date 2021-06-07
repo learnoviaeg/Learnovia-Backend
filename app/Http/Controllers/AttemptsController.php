@@ -161,7 +161,7 @@ class AttemptsController extends Controller
                     $data = [
                         'user_quiz_id' => $id,
                         'question_id' => $question['id'],
-                        'answered' => $question['answered'],
+                        'answered' => isset($question['answered']) ? $question['answered'] : 0,
                     ];
                     switch ($question_type_id) {
                         case 1: // True_false
@@ -176,8 +176,9 @@ class AttemptsController extends Controller
                             break;
             
                         case 3: // Match
-                            $match['match_a']=isset($question['match_a']) ? $question['match_a'] : null;
-                            $match['match_b']=isset($question['match_b']) ? $question['match_b'] : null;
+                            foreach($question['match_a'] as $key => $matchA)
+                                $match[$matchA]= $question['match_b'][$key];
+                            
                             $data['user_answers'] = json_encode($match);
                             break;
             

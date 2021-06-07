@@ -63,8 +63,27 @@ class Questions extends Model
     public function getContentAttribute()
     {
         $content= json_decode($this->attributes['content']);
-        if($this->attributes['question_type_id'] == 3)
+        if($this->attributes['question_type_id'] == 3){
             $content= json_decode($this->attributes['content'],true);
+            // dd($content);
+
+            // $keys_a=array_keys($content['match_a']);
+            // $keys_b=array_keys($content['match_b']);
+
+            // // shuffle($keys_a);
+            // // shuffle($keys_b);
+            // foreach($keys_a as $key)
+            //     $quest['match_a'][$key]=$content['match_a'][$key];
+
+            // foreach($keys_b as $key)
+            //     $quest['match_b'][$key]=$content['match_b'][$key];
+            
+            //     // $content=$quest;
+            // $content = json_encode($quest, JSON_FORCE_OBJECT);
+            // $content= json_decode($content,true);
+
+        }
+        
         if($this->attributes['question_type_id'] == 2){
             foreach($content as $con)
             {

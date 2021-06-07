@@ -27,6 +27,19 @@ class QuestionsController extends Controller
         $this->middleware(['permission:question/delete'],   ['only' => ['destroy']]);
         $this->middleware(['permission:question/update'],   ['only' => ['update']]);
     }
+
+    function shuffle_assoc($list) {
+        if (!is_array($list)) return $list;
+      
+        $keys = array_keys($list);
+        shuffle($keys);
+        $random = array();
+        foreach ($keys as $key)
+          $random[$key] = $list[$key];
+      
+        return $random;
+      }
+
     /**
      * Display a listing of the resource.
      *
@@ -53,18 +66,13 @@ class QuestionsController extends Controller
             
             foreach($questions as $question)
                 if($question['question_type_id'] == 3){
-                    $keys_a=array_keys($question['content']['match_a']);
-                    $keys_b=array_keys($question['content']['match_b']);
+                    $keys_a['match_a']=shuffle_assoc($question['content']['match_a']);
+                    $keys_a['match_b']=shuffle_assoc($question['content']['match_b']);
+                    $content=$keys_a;
 
-                    shuffle($keys_a);
-                    shuffle($keys_b);
-                    foreach($keys_a as $key)
-                        $quest['match_a'][$key]=$question['content']['match_a'][$key];
-
-                    foreach($keys_b as $key)
-                        $quest['match_b'][$key]=$question['content']['match_b'][$key];
+                    // dd($keys_a);
                     
-                    $question['content']= json_encode($quest, JSON_FORCE_OBJECT);
+                    // $question['content']= json_encode($quest, JSON_FORCE_OBJECT);
                 }
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
@@ -260,9 +268,11 @@ class QuestionsController extends Controller
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
-        $match['match_a']=array_combine((array_keys($question['match_a'])),array_values($question['match_a']));
-        $match['match_b'] =array_combine((array_keys($question['match_b'])),array_values($question['match_b']));
-        $data['content'] = json_encode($match, JSON_FORCE_OBJECT );
+        $match['match_a']=$question['match_a'];
+        $match['match_b'] =$question['match_b'];
+        $data['content'] = json_encode($match );
+        // dd($match,$data);
+
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
 
