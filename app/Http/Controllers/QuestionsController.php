@@ -64,38 +64,19 @@ class QuestionsController extends Controller
             if($quiz->shuffle == 'Questions'|| $quiz->shuffle == 'Questions and Answers')
                 $questions =$questions->shuffle();
             
-            foreach($questions->toArray() as $question)
+            foreach($questions as $question)
                 if($question['question_type_id'] == 3){
-                    // $questi['match_a']=self::shuffle_assoc($question['content']['match_a']);
-                    // $questi['match_b']=self::shuffle_assoc($question['content']['match_b']);
+                    $questi['match_a']=self::shuffle_assoc($question['content']['match_a']);
+                    $questi['match_b']=self::shuffle_assoc($question['content']['match_b']);
 
-                    // dd($questi);
-                    
-                    // $question['content']= json_encode($questi, JSON_FORCE_OBJECT);
-
-
-
-                    $keys_a=array_keys($question['content']['match_a']);
-                    $keys_b=array_keys($question['content']['match_b']);
-
-                    shuffle($keys_a);
-                    shuffle($keys_b);
-                    foreach($keys_a as $key)
-                        $quest['match_a'][$key]=$question['content']['match_a'][$key];
-
-                    foreach($keys_b as $key)
-                        $quest['match_b'][$key]=$question['content']['match_b'][$key];
-                    
-                    $question['content']= json_encode($quest, JSON_FORCE_OBJECT);
-
-
+                    $question['content']= json_encode($questi, JSON_FORCE_OBJECT);
                 }
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
                 foreach($questions as $question){
                     if($question['question_type_id'] == 2){ // MCQ
-                        $re=collect($question['content']);
-                        $question['content']=$re->shuffle();
+                        $re=self::shuffle_assoc($question['content']);
+                        $question['content']= json_encode($re, JSON_FORCE_OBJECT);
                     }
                 }
             }
