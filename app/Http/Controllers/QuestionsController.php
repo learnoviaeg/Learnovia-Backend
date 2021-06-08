@@ -81,7 +81,7 @@ class QuestionsController extends Controller
                 }
             }
             
-            return response()->json(['message' => __('messages.question.list'), 'body' => $questions->paginate(Paginate::GetPaginate($request))], 200);
+            return response()->json(['message' => __('messages.question.list'), 'body' => $questions], 200);
         }
 
         $user_course_segments = $this->chain->getCourseSegmentByChain($request);
