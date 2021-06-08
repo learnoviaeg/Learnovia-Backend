@@ -36,7 +36,7 @@ class AttemptItemlistener
         $GradeCategory = GradeCategory::where('instance_id' , $QuizID)->first();
         $gradeItem = GradeItems::create([
             'type' => 'Attempts',
-            'item_id' => $QuizID,
+            'item_id' => $event->attempt->id,
             'name' => 'Attempt number ' .$event->attempt->attempt_index,
             'grade_category_id' => $GradeCategory->id,
         ]);
