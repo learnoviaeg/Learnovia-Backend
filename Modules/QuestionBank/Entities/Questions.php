@@ -60,12 +60,27 @@ class Questions extends Model
             ->where('user_quiz_id',$id)->first();
     }
 
+    // function shuffle_assoc($list) {
+    //     if (!is_array($list)) return $list;
+      
+    //     $keys = array_keys($list);
+    //     // shuffle($keys);
+    //     $random = array();
+    //     foreach ($keys as $key)
+    //       $random[$key] = $list[$key];
+      
+    //     return $random;
+    //   }
+
     public function getContentAttribute()
     {
         $content= json_decode($this->attributes['content']);
         
         if($this->attributes['question_type_id'] == 3){
             $content= json_decode($this->attributes['content'],true);
+            // $contt['match_a']=array_combine(array_keys($content['match_a']),array_values($content['match_a']));
+            // $contt['match_b']=array_combine(array_keys($content['match_b']),array_values($content['match_b']));
+            // $content=$contt;
         }
         
         if($this->attributes['question_type_id'] == 2){
