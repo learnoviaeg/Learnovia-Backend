@@ -182,6 +182,7 @@ class QuizzesController extends Controller
             {
                 $index = QuizLesson::where('lesson_id',$request->lesson_id)->get()->max('index');
                 $Next_index = $index + 1;
+                //add validations for all the feilds
                 $quizLesson = QuizLesson::create([
                     'quiz_id' => $quiz->id,
                     'lesson_id' => $lesson,
