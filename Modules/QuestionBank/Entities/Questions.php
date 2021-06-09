@@ -45,32 +45,12 @@ class Questions extends Model
     {
         return $this->belongsTo('App\Course', 'course_id', 'id');
     }
-
-    // public static function CheckAndWhy($squestion){
-    //     if(isset($squestion->And_why))
-    //         if($squestion->And_why == 1)
-    //             return $squestion->And_why_mark;
-
-    //     return null ;
-    // }
-
+    
     public function userAnswer($id)
     {
         return $this->hasOne('Modules\QuestionBank\Entities\userQuizAnswer', 'question_id', 'id')
             ->where('user_quiz_id',$id)->first();
     }
-
-    // function shuffle_assoc($list) {
-    //     if (!is_array($list)) return $list;
-      
-    //     $keys = array_keys($list);
-    //     // shuffle($keys);
-    //     $random = array();
-    //     foreach ($keys as $key)
-    //       $random[$key] = $list[$key];
-      
-    //     return $random;
-    //   }
 
     public function getContentAttribute()
     {
@@ -78,9 +58,6 @@ class Questions extends Model
         
         if($this->attributes['question_type_id'] == 3){
             $content= json_decode($this->attributes['content'],true);
-            // $contt['match_a']=array_combine(array_keys($content['match_a']),array_values($content['match_a']));
-            // $contt['match_b']=array_combine(array_keys($content['match_b']),array_values($content['match_b']));
-            // $content=$contt;
         }
         
         if($this->attributes['question_type_id'] == 2){
