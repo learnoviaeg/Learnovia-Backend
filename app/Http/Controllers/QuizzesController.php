@@ -134,6 +134,18 @@ class QuizzesController extends Controller
              * feedback 2 =>After due date,
              * feedback 3 => No feedback
             */
+            'opening_time' => 'required|date',
+            'closing_time' => 'required|date|after:opening_time',
+            'max_attemp' => 'required|integer|min:1',
+            'grading_method_id' => 'required',
+            'grade' => 'required|numeric|min:1',
+            'graded' => 'required|boolean',
+            'grade_category_id.*' => 'required_if:graded,==,1|exists:grade_categories,id',
+            'grade_min' => 'integer',
+            'grade_max' => 'integer',
+            'grade_to_pass' => 'integer',
+            'visible'=>"in:1,0",
+            'publish_date' => 'date|before_or_equal:opening_time'
         ]);
         if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
             return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
