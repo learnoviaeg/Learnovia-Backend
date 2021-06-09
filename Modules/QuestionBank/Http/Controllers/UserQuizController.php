@@ -469,9 +469,10 @@ class UserQuizController extends Controller
                     $user_Attemp["feedback"] =$attem->feedback;
                 }
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
-                if( $useranswerSubmitted>0)
+                if($useranswerSubmitted < 0){
                     if($quiz_duration_ended)
                         continue;
+                }
                 
                 else{
                     array_push($All_attemp, $user_Attemp);
