@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\GradeItemEvent;
+use Modules\QuestionBank\Entities\quiz;
 use App\GradeItems;
 use App\ItemDetail;
 use Illuminate\Queue\InteractsWithQueue;
