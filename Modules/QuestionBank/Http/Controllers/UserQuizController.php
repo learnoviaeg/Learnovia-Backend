@@ -250,6 +250,7 @@ class UserQuizController extends Controller
         return HelperController::api_response_format(200, $allData, __('messages.success.submit_success'));
     }
 
+
     public function estimateEssayandAndWhy(Request $request)
     {
         $request->validate([
@@ -258,26 +259,13 @@ class UserQuizController extends Controller
             'Questions.*.id' => 'required|integer|exists:questions,id',
             'Questions.*.mark' => 'required|numeric',
             'Questions.*.feedback' => 'nullable|string',
-            'Questions.*.answer' => 'boolean',
             'Questions.*.right' => 'boolean',
         ]);
 
-        // check that question exist in the Quiz
         $user_quiz = userQuiz::find($request->user_quiz_id);
-        $questions_ids = $user_quiz->quiz_lesson->quiz->Question->pluck('id');
-
         $allData = collect([]);
+        $Corrected_answers = collect([]);
         foreach ($request->Questions as $question) {
-            if (!$questions_ids->contains($question['id'])) {
-                $check_question = Questions::find($question['id']);
-
-                if (isset($check_question->parent)) {
-                    if (!$questions_ids->contains($check_question->parent))
-                        return HelperController::api_response_format(400, null, __('messages.error.not_found'));
-                } else
-                    return HelperController::api_response_format(400, null, __('messages.error.not_found'));
-            }
-
             $currentQuestion = Questions::find($question['id']);
             $question_type_id = $currentQuestion->question_type->id;
 
@@ -287,69 +275,61 @@ class UserQuizController extends Controller
 
             $userQuizAnswer = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
                 ->where('question_id', $question['id'])->first();
-
             if (!isset($userQuizAnswer))
                 return HelperController::api_response_format(400, null, __('messages.error.not_found'));
 
             if (isset($question_type_id)) {
                 switch ($question_type_id) {
                     case 1: // True_false
-                        # code...
 
-                        if (isset($currentQuestion->And_why)) {
-                            if ($currentQuestion->And_why_mark < $question['mark'])
-                                return HelperController::api_response_format(400, null, __('messages.error.grade_less_than').$question['mark']);
+                        if ($currentQuestion->content->and_why == true) {
+                            // if ($currentQuestion->mark < $question['mark'])
+                            //     return response()->json(['message' => __('messages.error.grade_less_than').$question['mark'], 'body' => null ], 400);
+                            $correction = $userQuizAnswer['correction'];
 
-                            $user_grade = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
-                                ->where('question_id', $question['id'])->pluck('user_grade')->first();
+                            $correction->and_why_right = isset($question['right']) ? $question['right'] : null;
+                            $correction->and_why_mark = isset($question['mark']) ? $question['mark'] : null;
+                            $correction->feedback = isset($question['feedback']) ? $question['feedback'] : null;
+                            $data['correction'] =  json_encode($correction);
 
-                            $data['user_grade'] = (float)$user_grade + (float)$question['mark'];
-                            $data['feedback'] = isset($question['feedback']) ? $question['feedback'] : 'and_why question was corrected';
                         } else
                             $data = null;
                         break;
 
 
                     case 4: // Essay
-                        # code...
-                        if ($currentQuestion->mark < $question['mark'])
-                            return HelperController::api_response_format(400, null, __('messages.error.grade_less_than').$question['mark']);
+                        // if ($currentQuestion->mark < $question['mark'])
+                        //     return response()->json(['message' => __('messages.error.grade_less_than').$question['mark'], 'body' => null ], 400);
 
-                        $data['user_grade'] = $question['mark'];
-                        $data['correct'] = isset($question['right']) ? 1 : null;//isset($question['answer']) ? $question['answer'] : null;
-                        $data['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
-                        //to know if teacher refers to that answer as right or wrong
-                        $data['right'] = isset($question['right']) ? $question['right'] : null;
-
+                        $correction['right'] = isset($question['right']) ? $question['right'] : null;
+                        $correction['grade'] = isset($question['mark']) ? $question['mark'] : null;
+                        $correction['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
+                        $data['correction'] =  json_encode($correction);
                         break;
 
                     default:
-                        return HelperController::api_response_format(400, null, __('messages.question.question_type_error'));
+                        return response()->json(['message' =>__('messages.question.question_type_error'), 'body' => null ], 400);
+
                         break;
                 }
 
                 if ($data != null)
                     $allData->push($data);
             } else
-                return HelperController::api_response_format(400, null, __('messages.error.incomplete_data'));
+                return response()->json(['message' =>__('messages.error.incomplete_data'), 'body' => null ], 400);
         }
         foreach ($allData as $data) {
             $userAnswer = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
                 ->where('question_id', $data['question_id'])->first();
+                $Corrected_answers->push($userAnswer);
 
-            $userAnswer->user_grade = $data['user_grade'];
-            if(isset($data['feedback']))
-                $userAnswer->feedback = $data['feedback'];
-            if(isset($data['correct']))
-                $userAnswer->correct = $data['correct'];
-            if(isset($data['right']))
-                $userAnswer->right = $data['right'];
-
+            if(isset($data['correction']))
+                $userAnswer->correction = $data['correction'];
             $userAnswer->save();
         }
-
-        return HelperController::api_response_format(200, $allData, __('messages.grade.graded'));
+        return response()->json(['message' =>__('messages.grade.graded'), 'body' => $Corrected_answers ], 200);
     }
+
 
     public function gradeUserQuiz(Request $request)
     {

@@ -8,7 +8,7 @@ use Modules\QuestionBank\Entities\Questions;
 class userQuizAnswer extends Model
 {
     protected $fillable = [
-        'user_quiz_id','question_id','user_answers','content','user_grade','feedback','answered','force_submit','right'
+        'user_quiz_id','question_id','user_answers','correction','answered','force_submit'
     ];
 
     public function Question()
@@ -43,5 +43,9 @@ class userQuizAnswer extends Model
             }
         }
         return $user_answers;
+    }
+    public function getCorrectionAttribute()
+    {
+        return json_decode($this->attributes['correction']);
     }
 }
