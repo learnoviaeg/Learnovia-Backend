@@ -249,7 +249,6 @@ class AnnouncementsController extends Controller
     {
         $request->validate([
             'id' => 'required|integer|exists:announcements,id',
-            'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
         ]);
@@ -270,9 +269,14 @@ class AnnouncementsController extends Controller
 
         $file = $announcement->attachment;
         if(Input::hasFile('attached_file')){
+            $request->validate([
+            'attached_file' => 'nullable|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3',
+            ]);
             $file = attachment::upload_attachment($request->attached_file, 'Announcement');
             $announcement->attached_file = $file->id;
         }
+        if($request->attached_file == 'No_file')
+            $announcement->attached_file = null;
 
         $announcement->save();
 
