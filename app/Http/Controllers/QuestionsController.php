@@ -28,33 +28,6 @@ class QuestionsController extends Controller
         $this->middleware(['permission:question/update'],   ['only' => ['update']]);
     }
 
-    function shuffle_assoc($list){
-        if (!is_array($list))
-            return $list;
-      
-        $keys = array_keys($list);
-        shuffle($keys);
-        $random = array();
-        foreach ($keys as $key)
-            $random[$key] = $list[$key];
-
-        
-      
-        return $random;
-    }
-
-    function out_shuffle_assoc($list){
-        if (!is_array($list))
-            return $list;
-      
-        $keys = array_keys($list);
-        $random = array();
-        foreach ($keys as $key)
-            $random[$key] = $list[$key];
-      
-        return $random;
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -81,21 +54,17 @@ class QuestionsController extends Controller
             
             foreach($questions as $question){
                 if($question['question_type_id'] == 3){
-                    $questi['match_a']=self::shuffle_assoc($question['content']['match_a']);
-                    $questi['match_b']=self::shuffle_assoc($question['content']['match_b']);
+                    $questi['match_a']=collect($question['content']['match_a'])->shuffle();
+                    $questi['match_b']=collect($question['content']['match_b'])->shuffle();
 
                     $question['content']= json_encode($questi, JSON_FORCE_OBJECT);
-                }
-                if($question['question_type_id'] == 2){ // MCQ
-                    $re=self::out_shuffle_assoc($question['content']);
-                    $question['content']= json_encode($re, JSON_FORCE_OBJECT);
                 }
             }
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
                 foreach($questions as $question){
                     if($question['question_type_id'] == 2){ // MCQ
-                        $re=self::shuffle_assoc($question['content']);
+                        $re=collect($question['content'])->shuffle();
                         $question['content']= json_encode($re, JSON_FORCE_OBJECT);
                     }
                 }
@@ -277,6 +246,8 @@ class QuestionsController extends Controller
             return HelperController::api_response_format(400, $validator->errors(), __('messages.error.data_invalid'));
         
         $match=array();
+        $matA=array();
+        $matB=array();
         $data = [
             'course_id' => $question['course_id'], 
             'question_category_id' => $question['question_category_id'],
@@ -285,15 +256,19 @@ class QuestionsController extends Controller
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
-        // foreach($question['match_a'] as $key=>$mat_a){
-        //     $mat['key']=$key;
-        //     $mat['value']=$value;
-        // }
-        $match['match_a']=$question['match_a'];
-        $match['match_b'] =$question['match_b'];
-        $data['content'] = json_encode($match );
-        // dd($match,$data);
+        foreach($question['match_a'] as $key=>$mat_a){
+            $matA['key']=$key;
+            $matA['value']=$mat_a;
 
+            $match['match_a'][]=$matA;
+        }
+        foreach($question['match_b'] as $key=>$mat_b){
+            $matB['key']=$key;
+            $matB['value']=$mat_b;
+
+            $match['match_b'][]=$matB;
+        }
+        $data['content'] = json_encode($match);
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
 
