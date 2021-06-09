@@ -128,7 +128,8 @@ class QuestionsController extends Controller
                 
             $quiz->draft=0;
             $quiz->save();
-            event(new GradeItemEvent($quiz,'Quiz'));
+            // if($quiz->is_graded == 1)
+                event(new GradeItemEvent($quiz,'Quiz'));
 
     
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
@@ -227,8 +228,13 @@ class QuestionsController extends Controller
             'text' => $question['text'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
-            'content' => json_encode(array_values($question['MCQ_Choices'])),
+            // 'content' => json_encode(($question['MCQ_Choices'])),
         ];
+
+        foreach($question['MCQ_Choices'] as $key=>$mcq)
+            $mcq['key']=++$key;
+            
+        $data['content'] = json_encode($question['MCQ_Choices'],JSON_FORCE_OBJECT);
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
 
@@ -257,16 +263,12 @@ class QuestionsController extends Controller
             'created_by' => Auth::id(),
         ];
         foreach($question['match_a'] as $key=>$mat_a){
-            $matA['key']=$key;
-            $matA['value']=$mat_a;
-
-            $match['match_a'][]=$matA;
+            $matA[]=[++$key=>$mat_a];
+            $match['match_a']=$matA;
         }
         foreach($question['match_b'] as $key=>$mat_b){
-            $matB['key']=$key;
-            $matB['value']=$mat_b;
-
-            $match['match_b'][]=$matB;
+            $matB[]=[++$key=>$mat_b];
+            $match['match_b']=$matB;
         }
         $data['content'] = json_encode($match);
 
