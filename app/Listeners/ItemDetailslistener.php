@@ -28,6 +28,7 @@ class ItemDetailslistener
      */
     public function handle(GradeItemEvent $event)
     {
+        // $event->grade_item is quiz (type=>quiz)
         $grade_item=GradeItems::where('item_id',$event->grade_item->id)->where('type',$event->type)->first();
         if($event->type == 'Quiz')
             foreach($event->grade_item->Question as $question)
