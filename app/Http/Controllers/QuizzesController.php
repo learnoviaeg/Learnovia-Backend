@@ -229,15 +229,16 @@ class QuizzesController extends Controller
         $request->validate([
             'lesson_id' => 'required|exists:lessons,id',
         ]);
-        $quiz = quiz::where('id',$id)->with('Question.children')->first();
 
-        // $quiz->quizLesson->where('id',$request->lesson_id)->first(); //return array
+        $quiz = quiz::where('id',$id)->with('Question.children')->first();
         $quiz->quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
         $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz->quizLesson->id);
-        $query=clone $user_quiz;
 
+        $query=clone $user_quiz;
         $last_attempt=$query->latest()->first();
+        $allow_edit=false;
         $remain_time = $quiz->duration;
+
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz->quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
                 UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
@@ -259,6 +260,10 @@ class QuizzesController extends Controller
             $quiz->token_attempts = $count_answered;
             $quiz->Question;
         }
+        else
+            $allow_edit=true;
+        
+        $quiz->allow_edit=$allow_edit;
 
         if(isset($quiz)){
             LastAction::lastActionInCourse($quiz->course_id);
