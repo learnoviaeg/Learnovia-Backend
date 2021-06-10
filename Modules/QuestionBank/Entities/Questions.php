@@ -60,18 +60,16 @@ class Questions extends Model
             $content= json_decode($this->attributes['content'],true);
         }
         
-        // if($this->attributes['question_type_id'] == 2){
-        //     // foreach($content as $key => $con)
-        //     // {
-        //     //     // dd($con);
-        //     //     // dd($con[++$key]['is_true']);
-        //     //     if($con->is_true == 1){
-        //     //         $con->is_true=True;
-        //     //         continue;
-        //     //     }
-        //     //     $con->is_true=False;
-        //     }
-        // }
+        if($this->attributes['question_type_id'] == 2){
+            foreach($content as $key => $con)
+            {
+                if($con->is_true == 1){
+                    $con->is_true=True;
+                    continue;
+                }
+                $con->is_true=False;
+            }
+        }
         return $content;
     }
 }

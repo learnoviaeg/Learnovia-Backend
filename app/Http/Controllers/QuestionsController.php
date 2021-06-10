@@ -232,9 +232,11 @@ class QuestionsController extends Controller
         ];
 
         foreach($question['MCQ_Choices'] as $key=>$mcq)
+        {
             $mcq['key']=++$key;
-            
-        $data['content'] = json_encode($question['MCQ_Choices'],JSON_FORCE_OBJECT);
+            $arr[]=$mcq;
+        }
+        $data['content'] = json_encode($arr);
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
 
