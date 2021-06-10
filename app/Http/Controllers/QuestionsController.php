@@ -57,7 +57,7 @@ class QuestionsController extends Controller
                     $questi['match_a']=collect($question['content']['match_a'])->shuffle();
                     $questi['match_b']=collect($question['content']['match_b'])->shuffle();
 
-                    $question['content']= json_encode($questi, JSON_FORCE_OBJECT);
+                    $question['content']= json_encode($questi);
                 }
             }
             
@@ -65,7 +65,7 @@ class QuestionsController extends Controller
                 foreach($questions as $question){
                     if($question['question_type_id'] == 2){ // MCQ
                         $re=collect($question['content'])->shuffle();
-                        $question['content']= json_encode($re, JSON_FORCE_OBJECT);
+                        $question['content']= json_encode($re);
                     }
                 }
             }
@@ -131,7 +131,6 @@ class QuestionsController extends Controller
             // if($quiz->is_graded == 1)
                 event(new GradeItemEvent($quiz,'Quiz'));
 
-    
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
         $request->validate([
