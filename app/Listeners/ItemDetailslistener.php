@@ -38,7 +38,7 @@ class ItemDetailslistener
                     ItemDetail::firstOrCreate([
                         'type' => 'Question',
                         'item_id' => $question->id,
-                        // 'parent_item_id' => $grade_item->id,
+                        'parent_item_id' => $grade_item,
                         // 'weight_details' => $question['mark'],
                     ]);
             // }
