@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Settings;
+use App\Repositories\SettingsReposiotry;
 
 class SettingsController extends Controller
 {
+    protected $set;
 
-    public function __construct()
+    public function __construct(SettingsReposiotry $set)
     {
+        $this->set = $set;
+
         $this->middleware(['permission:settings/general'],   ['only' => ['index']]);
     }
 
@@ -55,10 +59,14 @@ class SettingsController extends Controller
 
                     $new_values->push([
                         'name' => $value,
-                        'index' => $index
+                        'index' => $index,
+                        'type'=>$this->set->get_type($value)
+
+
                     ]);
 
                 });
+                $new_values = $new_values->groupBy('type');
 
                 $setting->value = $new_values;
             }
@@ -83,11 +91,13 @@ class SettingsController extends Controller
 
                     $new_values->push([
                         'name' => $value,
-                        'index' => $index
+                        'index' => $index,
+                        'type'=>$this->set->get_type($value)
                     ]);
 
                 });
-                
+                $new_values = $new_values->groupBy('type');
+
                 $setting->value = $new_values;
             }
 
@@ -111,11 +121,14 @@ class SettingsController extends Controller
 
                     $new_values->push([
                         'name' => $value,
-                        'index' => $index
+                        'index' => $index,
+                        'type'=>$this->set->get_type($value)
+
                     ]);
 
                 });
-                
+                $new_values = $new_values->groupBy('type');
+
                 $setting->value = $new_values;
             }
 
@@ -139,11 +152,14 @@ class SettingsController extends Controller
 
                     $new_values->push([
                         'name' => $value,
-                        'index' => $index
+                        'index' => $index,
+                        'type'=>$this->set->get_type($value)
+
                     ]);
 
                 });
-                
+                $new_values = $new_values->groupBy('type');
+
                 $setting->value = $new_values;
             }
 
