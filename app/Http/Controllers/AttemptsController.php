@@ -98,7 +98,6 @@ class AttemptsController extends Controller
         ]);
         $userQuiz->left_time=$quiz_lesson->quiz->duration;
 
-        event(new QuizAttemptEvent($userQuiz));
         foreach($quiz_lesson->quiz->Question as $question)
         {
             if($question->question_type_id == 5)
@@ -113,6 +112,8 @@ class AttemptsController extends Controller
         foreach($userQuiz->UserQuizAnswer as $answers)
             $answers->Question;
             
+        event(new QuizAttemptEvent($userQuiz));
+        
         return HelperController::api_response_format(200, $userQuiz->UserQuizAnswer);
     }
 
