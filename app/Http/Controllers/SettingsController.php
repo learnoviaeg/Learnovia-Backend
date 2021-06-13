@@ -48,6 +48,7 @@ class SettingsController extends Controller
                 $values = explode(',',$setting->value);
 
                 $new_values=collect();
+                $setting['main_index']=true;
 
                 //map every extension to see if it's choosen or not
                 $all_create_extensions->map(function ($value) use ($new_values,$values){
@@ -66,6 +67,8 @@ class SettingsController extends Controller
                     ]);
 
                 });
+                if(in_array(false,$new_values->pluck('index')->toArray()))
+                    $setting['main_index']=false;
                 $new_values = $new_values->groupBy('type');
 
                 $setting->value = $new_values;
@@ -80,6 +83,7 @@ class SettingsController extends Controller
                 $values = explode(',',$setting->value);
 
                 $new_values=collect();
+                $setting['main_index']=true;
 
                 //map every extension to see if it's choosen or not
                 $all_create_extensions->map(function ($value) use ($new_values,$values){
@@ -96,6 +100,8 @@ class SettingsController extends Controller
                     ]);
 
                 });
+                if(in_array(false,$new_values->pluck('index')->toArray()))
+                    $setting['main_index']=false;
                 $new_values = $new_values->groupBy('type');
 
                 $setting->value = $new_values;
@@ -110,6 +116,7 @@ class SettingsController extends Controller
                 $values = explode(',',$setting->value);
 
                 $new_values=collect();
+                $setting['main_index']=true;
 
                 //map every extension to see if it's choosen or not
                 $all_create_extensions->map(function ($value) use ($new_values,$values){
@@ -127,10 +134,15 @@ class SettingsController extends Controller
                     ]);
 
                 });
+                if(in_array(false,$new_values->pluck('index')->toArray()))
+                    $setting['main_index']=false;
                 $new_values = $new_values->groupBy('type');
+                
 
                 $setting->value = $new_values;
             }
+            
+
 
             if($setting->key == 'upload_media_extensions'){
 
@@ -141,6 +153,7 @@ class SettingsController extends Controller
                 $values = explode(',',$setting->value);
 
                 $new_values=collect();
+                $setting['main_index']=true;
 
                 //map every extension to see if it's choosen or not
                 $all_create_extensions->map(function ($value) use ($new_values,$values){
@@ -158,6 +171,8 @@ class SettingsController extends Controller
                     ]);
 
                 });
+                if(in_array(false,$new_values->pluck('index')->toArray()))
+                    $setting['main_index']=false;
                 $new_values = $new_values->groupBy('type');
 
                 $setting->value = $new_values;
