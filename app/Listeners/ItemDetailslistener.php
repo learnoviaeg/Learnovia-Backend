@@ -31,7 +31,6 @@ class ItemDetailslistener
     public function handle(GradeItemEvent $event)
     {
         // $event->grade_item is attempt of quiz (type=>attempt)
-        // dd($event->grade_item);
         $questions=UserQuizAnswer::where('user_quiz_id',$event->grade_item->item_id)->pluck('question_id');
 
         if($event->type == 'Attempt'){
