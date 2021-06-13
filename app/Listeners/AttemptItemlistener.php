@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\QuizAttemptEvent;
+use App\Events\GradeItemEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\GradeCategory;
@@ -40,5 +41,7 @@ class AttemptItemlistener
             'name' => 'Attempt number ' .$event->attempt->attempt_index,
             'grade_category_id' => $GradeCategory->id,
         ]);
+
+        event(new GradeItemEvent($gradeItem,'Attempt'));
     }
 }

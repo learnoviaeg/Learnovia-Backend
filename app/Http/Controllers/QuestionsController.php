@@ -128,9 +128,7 @@ class QuestionsController extends Controller
                 
             $quiz->draft=0;
             $quiz->save();
-            // if($quiz->is_graded == 1)
-                event(new GradeItemEvent($quiz,'Quiz'));
-
+            
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
         $request->validate([
