@@ -53,6 +53,9 @@ class QuestionsController extends Controller
                 $questions =$questions->shuffle();
             
             foreach($questions as $question){
+                $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
+
+                $question['grade_details']=$quiz_question->grade_details;
                 if($question['question_type_id'] == 3){
                     $questi['match_a']=collect($question['content']['match_a'])->shuffle();
                     $questi['match_b']=collect($question['content']['match_b'])->shuffle();
@@ -105,12 +108,12 @@ class QuestionsController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * assign a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, $quiz_id=null, $question=null)
+    public function assign(Request $request, $quiz_id=null, $question=null)
     {
         //to assign questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
@@ -177,23 +180,30 @@ class QuestionsController extends Controller
                     $request->validate([
                         'questions.*.mark' => 'required|between:0,99.99',
                     ]);
-                $mark_details['mark']  = $question['mark'];
-
+                    $mark_details['mark']  = $question['mark'];
                 }
 
                 quiz_questions::updateOrCreate(
                     ['question_id'=>$question['id'], 'quiz_id' => $quiz_id,],
-                    ['grade_details' => json_encode($mark_details)]
+                    ['grade_details' => ($mark_details)]
                 );
-
             }
-               
                 
             $quiz->draft=0;
             $quiz->save();
             
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request, $quiz_id=null, $question=null)
+    {
         $request->validate([
             //for request of creation multi type questions
             'Question' => 'required|array',

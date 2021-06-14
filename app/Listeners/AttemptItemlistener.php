@@ -36,7 +36,7 @@ class AttemptItemlistener
     {
         // $event->item ---> Attempt
         $user_quiz=UserQuiz::where('quiz_lesson_id',$event->attempt->quiz_lesson_id)->get();
-        if(count($user_quiz) == 1 ){
+        // if(count($user_quiz) == 1 ){
             $QuizLesson = QuizLesson::find($event->attempt->quiz_lesson_id);
             $QuizID=$QuizLesson->quiz->id;
             $max_attempt=$QuizLesson->max_attemp;
@@ -50,6 +50,6 @@ class AttemptItemlistener
                 ]);
                 event(new GradeItemEvent($gradeItem));
             }
-        }
+        // }
     }
 }

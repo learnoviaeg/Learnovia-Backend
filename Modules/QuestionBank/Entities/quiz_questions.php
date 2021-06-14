@@ -16,7 +16,7 @@ class quiz_questions extends Model
         return  $this->hasMany('Modules\QuestionBank\Entities\Questions', 'id', 'question_id');
     }
 
-    public function getGrade_DetailsAttribute()
+    public function getGradeDetailsAttribute()
     {
         return json_decode($this->attributes['grade_details']);
     }
