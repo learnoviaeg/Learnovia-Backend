@@ -111,7 +111,7 @@ class AttemptsController extends Controller
         }
         foreach($userQuiz->UserQuizAnswer as $answers)
             $answers->Question;
-            
+                    
         event(new QuizAttemptEvent($userQuiz));
         
         return HelperController::api_response_format(200, $userQuiz);
