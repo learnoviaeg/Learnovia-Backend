@@ -22,8 +22,8 @@ class QuestionsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
-        $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
+        // $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
+        // $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
         $this->middleware(['permission:question/delete'],   ['only' => ['destroy']]);
         $this->middleware(['permission:question/update'],   ['only' => ['update']]);
     }
@@ -116,15 +116,78 @@ class QuestionsController extends Controller
         if($question=='questions'){
             $request->validate([
                 'questions' => 'required|array',
-                'questions.*' => 'exists:questions,id'
+                'questions.*.id' => 'exists:questions,id',
             ]);
             $quiz=Quiz::find($quiz_id);
             // $quiz->Question()->attach($request->questions); //attach repeat the raw
-            foreach($request->questions as $question)
-                quiz_questions::firstOrCreate([
-                    'question_id'=>$question,
-                    'quiz_id' => $quiz_id,
-                ]);
+            foreach($request->questions as $question){
+                $type = Questions::find($question['id'])->question_type_id;
+
+ 
+                if($type == 1){//True/False
+                    $request->validate([
+                        'questions.*.is_ture' => 'required|boolean',
+                        'questions.*.mark' => 'required|between:0,99.99',
+                        'questions.*.and_why' => 'required|boolean',
+                        'questions.*.and_why_mark' => 'required|between:0,99.99',
+
+                    ]);
+
+                $mark_details['is_ture']  = $question['is_ture'];
+                $mark_details['mark']  = $question['mark'];
+                $mark_details['and_why']  = $question['and_why'];
+                $mark_details['and_why_mark']  = $question['and_why_mark'];
+
+                }
+                if($type == 2){//MCQ
+                    $request->validate([
+                        'questions.*.MCQ_Choices' => 'required|array',
+                        'questions.*.MCQ_Choices.*.is_true' => 'required|boolean',
+                        'questions.*.MCQ_Choices.*.content' => 'required|string',
+                        'questions.*.MCQ_Choices.*.mark' => 'required|between:0,99.99',
+                    ]);
+
+                    foreach($question['MCQ_Choices'] as $key=>$mcq)
+                    {
+                        $mcq['key']=++$key;
+                        $mark_details[]=$mcq;
+                    }
+                }
+                if($type == 3){//Match
+                    $request->validate([
+                        'questions.*.match_a' => 'required|array|min:2|distinct',
+                        'questions.*.match_b' => 'required|array|distinct',
+                        'questions.*.mark' => 'required|array',
+                    ]);
+
+                    foreach($question['mark'] as $key=>$mark){
+                        $collection = collect([
+                            'key' => $key+1,
+                            'mark' => $question['mark'][$key],
+                            'match_a' => $question['match_a'][$key],
+                            'match_b' => $question['match_b'][$key],
+                            ]);
+
+                        $mark_details[]=$collection;
+                    }
+                    $mark_details = json_encode($mark_details);
+                }
+               
+                if($type == 4){//essay
+                    $request->validate([
+                        'questions.*.mark' => 'required|between:0,99.99',
+                    ]);
+                $mark_details['mark']  = $question['mark'];
+
+                }
+
+                quiz_questions::updateOrCreate(
+                    ['question_id'=>$question['id'], 'quiz_id' => $quiz_id,],
+                    ['grade_details' => json_encode($mark_details)]
+                );
+
+            }
+               
                 
             $quiz->draft=0;
             $quiz->save();
