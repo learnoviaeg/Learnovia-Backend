@@ -22,11 +22,12 @@ class GradeItemEvent
      *
      * @return void
      */
-    public function __construct($grade_item,$type)
+    // public function __construct($grade_item,$type)
+    public function __construct($grade_item)
     {
         // dd($grade_item);
         $this->grade_item=$grade_item;
-        $this->type=$type;
+        // $this->type=$type;
     }
 
     /**
