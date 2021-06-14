@@ -72,7 +72,8 @@ class QuizLessonObserver
                 'name' => $quiz->name,
                 'hidden' => 1,
                 'instance_type' => 'Quiz',
-                'instance_id' => $quiz->id
+                'instance_id' => $quiz->id,
+                'lesson_id' => $lesson->id
             ]);
             //update quiz lesson with the id of grade categoey created for quiz
             $quizLesson->grade_category_id = $categoryOfQuiz->id;
