@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class quiz_questions extends Model
 {
-    protected $fillable = ['question_id','quiz_id'];
+    protected $fillable = ['question_id','quiz_id','grade_details'];
     protected $hidden = [
         'created_at','updated_at'
     ];
@@ -14,5 +14,10 @@ class quiz_questions extends Model
     public function Question()
     {
         return  $this->hasMany('Modules\QuestionBank\Entities\Questions', 'id', 'question_id');
+    }
+
+    public function getGrade_DetailsAttribute()
+    {
+        return json_decode($this->attributes['grade_details']);
     }
 }
