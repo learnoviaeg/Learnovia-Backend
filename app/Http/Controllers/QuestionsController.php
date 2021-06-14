@@ -108,12 +108,12 @@ class QuestionsController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * assign a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, $quiz_id=null, $question=null)
+    public function assign(Request $request, $quiz_id=null, $question=null)
     {
         //to assign questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
@@ -194,6 +194,16 @@ class QuestionsController extends Controller
             
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request, $quiz_id=null, $question=null)
+    {
         $request->validate([
             //for request of creation multi type questions
             'Question' => 'required|array',

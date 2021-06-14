@@ -439,7 +439,7 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], fu
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('quizzes', QuizzesController::class);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
-    Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@store');//->middleware(['permission:quiz/add' , 'ParentCheck']);
+    Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@assign');//->middleware(['permission:quiz/add' , 'ParentCheck']);
     Route::Resource('attempts', AttemptsController::class);
     Route::post('attempts/{id}', 'AttemptsController@update');
     // Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
