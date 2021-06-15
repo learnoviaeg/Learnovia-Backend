@@ -15,6 +15,7 @@ use Auth;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\quiz;
+use App\Grader\QuizGrader;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\QuizOverride;
 use App\Http\Controllers\HelperController;
@@ -206,7 +207,8 @@ class AttemptsController extends Controller
             $user_quiz->save();
         }
 
-        // $jop = (new \App\Jobs\QuestionsCorrection($this->getCourseSegment($request), $request->grades));
+        $tt=new QuizGrader($user_quiz);
+        dd($tt->grade());
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }

@@ -8,7 +8,6 @@ use App\CourseSegment;
 use App\GradeCategory;
 use Auth;
 use App\YearLevel;
-use App\Grader\QuizGrader;
 use App\GradingMethod;
 use stdClass;
 use  App\Events\UserGradeEvent;
@@ -406,9 +405,6 @@ class GradeItemController extends Controller
          ]);
 
         $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale'])->first();
-
-        $tt=new QuizGrader($grade);
-        dd($tt->grade(Auth::user()));
 
         if($request->filled('id'))
             $grade = GradeItems::where('id', $request->id)->with(['GradeCategory', 'ItemType', 'scale'])->get();
