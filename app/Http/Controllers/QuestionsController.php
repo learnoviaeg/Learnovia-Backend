@@ -135,7 +135,6 @@ class QuestionsController extends Controller
                         'questions.*.and_why_mark' => 'required|between:0,99.99',
 
                     ]);
-
                 $mark_details['is_true']  = $question['is_true'];
                 $mark_details['mark']  = $question['mark_tf'];
                 $mark_details['and_why']  = $question['and_why'];
@@ -159,7 +158,7 @@ class QuestionsController extends Controller
                     {
                         $mcq['key']=++$key;
                         $mark_details['type']=$question['mcq_type'];
-                        $mark_details['details']=$mcq;
+                        $mark_details['details'][]=$mcq;
                     }
                 }
                 if($type == 3){//Match
