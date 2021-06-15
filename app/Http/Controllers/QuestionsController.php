@@ -130,14 +130,14 @@ class QuestionsController extends Controller
                 if($type == 1){//True/False
                     $request->validate([
                         'questions.*.is_ture' => 'required|boolean',
-                        'questions.*.mark' => 'required|between:0,99.99',
+                        'questions.*.mark_tf' => 'required|between:0,99.99',
                         'questions.*.and_why' => 'required|boolean',
                         'questions.*.and_why_mark' => 'required|between:0,99.99',
 
                     ]);
 
                 $mark_details['is_ture']  = $question['is_ture'];
-                $mark_details['mark']  = $question['mark'];
+                $mark_details['mark']  = $question['mark_tf'];
                 $mark_details['and_why']  = $question['and_why'];
                 $mark_details['and_why_mark']  = $question['and_why_mark'];
 
@@ -147,7 +147,7 @@ class QuestionsController extends Controller
                         'questions.*.MCQ_Choices' => 'required|array',
                         'questions.*.MCQ_Choices.*.is_true' => 'required|boolean',
                         'questions.*.MCQ_Choices.*.content' => 'required|string',
-                        'questions.*.MCQ_Choices.*.mark' => 'required|between:0,99.99',
+                        'questions.*.MCQ_Choices.*.mark_mcq' => 'required|between:0,99.99',
                     ]);
 
                     foreach($question['MCQ_Choices'] as $key=>$mcq)
@@ -160,13 +160,13 @@ class QuestionsController extends Controller
                     $request->validate([
                         'questions.*.match_a' => 'required|array|min:2|distinct',
                         'questions.*.match_b' => 'required|array|distinct',
-                        'questions.*.mark' => 'required|array',
+                        'questions.*.mark_match' => 'required|array',
                     ]);
 
                     foreach($question['mark'] as $key=>$mark){
                         $collection = collect([
                             'key' => $key+1,
-                            'mark' => $question['mark'][$key],
+                            'mark' => $question['mark_match'][$key],
                             'match_a' => $question['match_a'][$key],
                             'match_b' => $question['match_b'][$key],
                             ]);
@@ -178,9 +178,9 @@ class QuestionsController extends Controller
                
                 if($type == 4){//essay
                     $request->validate([
-                        'questions.*.mark' => 'required|between:0,99.99',
+                        'questions.*.mark_essay' => 'required|between:0,99.99',
                     ]);
-                    $mark_details['mark']  = $question['mark'];
+                    $mark_details['mark']  = $question['mark_essay'];
                 }
 
                 quiz_questions::updateOrCreate(
