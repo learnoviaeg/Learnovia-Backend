@@ -27,7 +27,7 @@ class GradeItemEvent
     {
         // dd($grade_item);
         $this->grade_item=$grade_item;
-        // $this->type=$type;
+        // dd($this->grade_item);
     }
 
     /**
