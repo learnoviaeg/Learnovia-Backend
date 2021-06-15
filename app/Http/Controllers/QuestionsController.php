@@ -129,14 +129,14 @@ class QuestionsController extends Controller
  
                 if($type == 1){//True/False
                     $request->validate([
-                        'questions.*.is_ture' => 'required|boolean',
+                        'questions.*.is_true' => 'required|boolean',
                         'questions.*.mark_tf' => 'required|between:0,99.99',
                         'questions.*.and_why' => 'required|boolean',
                         'questions.*.and_why_mark' => 'required|between:0,99.99',
 
                     ]);
 
-                $mark_details['is_ture']  = $question['is_ture'];
+                $mark_details['is_true']  = $question['is_true'];
                 $mark_details['mark']  = $question['mark_tf'];
                 $mark_details['and_why']  = $question['and_why'];
                 $mark_details['and_why_mark']  = $question['and_why_mark'];
