@@ -159,17 +159,17 @@ class QuestionsController extends Controller
                     {
                         $mcq['key']=++$key;
                         $mark_details['type']=$question['type'];
-                        $mark_details[]=$mcq;
+                        $mark_details['details']=$mcq;
                     }
                 }
                 if($type == 3){//Match
                     $request->validate([
                         'questions.*.match_a' => 'required|array|min:2|distinct',
                         'questions.*.match_b' => 'required|array|distinct',
-                        'questions.*.mark' => 'required|array',
+                        'questions.*.mark_match' => 'required|array',
                     ]);
 
-                    foreach($question['mark'] as $key=>$mark){
+                    foreach($question['mark_match'] as $key=>$mark){
                         $collection = collect([
                             'key' => $key+1,
                             'mark' => $question['mark_match'][$key],
