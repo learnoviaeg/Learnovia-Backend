@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class GradeItems extends Model
 {
     protected $fillable = [
-        'grade_category_id','item_id', 'name', 'type',
+        'grade_category_id','item_id', 'name', 'type', 'index'
     ];
 
     protected $appends = ['parent_aggregation'];

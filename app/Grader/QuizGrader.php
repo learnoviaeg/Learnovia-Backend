@@ -4,16 +4,14 @@ namespace App\Grader;
 
 use App\Grader\ItemGraderInterface;
 use App\GradeItems;
+use App\GradeCategory;
 use App\ItemDetail;
 use Modules\QuestionBank\Entities\Quiz;
+use Modules\QuestionBank\Entities\UserQuiz;
+use Modules\QuestionBank\Entities\UserQuizAnswer;
 
 class QuizGrader implements ItemGraderInterface
 {
-    // $array['main']['answers']=1;
-    // $array['main']['grade']=10;
-    // $array['why']['grade']=5;
-    // ItemDetail::where('parent_item_id',$this->item->id)->update(['weight_details' => json_encode($array)]);
-
     // get all grade items details (with) question relation
     // loop over item details
         // exrac the grads json
@@ -25,18 +23,23 @@ class QuizGrader implements ItemGraderInterface
          * }
          */
     
-    public function __construct(GradeItems $item)
+    public function __construct(UserQuiz $item) //attempt
     {
-        $this->item=$item;
+        $this->item=$item; //attempt
     }
 
-    public function grade($user){
+    public function grade(){
         $grade=0;
-        $quiz=Quiz::find($this->item->item_id);
-        foreach($quiz->Question as $quest)
+        $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$this->item->id)->get();
+        $grade_cat=GradeCategory::where('instance_id',$this->item->quiz_lesson->quiz_id)->where('lesson_id',$this->item->quiz_lesson->lesson_id)->first();
+        //grade item ( attempt_item )
+        $gradeitem=GradeItems::where('index',$this->item->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
+
+
+        $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->get();
+        foreach($item_details as $item_detail)
         {
-            $item_details=ItemDetail::where('parent_item_id',$this->item->id)->first();
-            dd($item_details->weight_details);
+            dd($item_detail);
         }
     }
 
