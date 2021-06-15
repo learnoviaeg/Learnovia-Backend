@@ -158,6 +158,7 @@ class QuestionsController extends Controller
                     foreach($question['MCQ_Choices'] as $key=>$mcq)
                     {
                         $mcq['key']=++$key;
+                        $mark_details['type']=$question['type'];
                         $mark_details[]=$mcq;
                     }
                 }
