@@ -148,7 +148,7 @@ class QuestionsController extends Controller
                     // 2 multi
                     // 3 partial
                     $request->validate([
-                        'questions.*.type' => 'required|in:1,2,3',
+                        'questions.*.mcq_type' => 'required|in:1,2,3',
                         'questions.*.MCQ_Choices' => 'required|array',
                         'questions.*.MCQ_Choices.*.is_true' => 'required|boolean',
                         'questions.*.MCQ_Choices.*.content' => 'required|string',
