@@ -129,21 +129,26 @@ class QuestionsController extends Controller
  
                 if($type == 1){//True/False
                     $request->validate([
-                        'questions.*.is_ture' => 'required|boolean',
+                        'questions.*.is_true' => 'required|boolean',
                         'questions.*.mark_tf' => 'required|between:0,99.99',
                         'questions.*.and_why' => 'required|boolean',
                         'questions.*.and_why_mark' => 'required|between:0,99.99',
 
                     ]);
 
-                $mark_details['is_ture']  = $question['is_ture'];
+                $mark_details['is_true']  = $question['is_true'];
                 $mark_details['mark']  = $question['mark_tf'];
                 $mark_details['and_why']  = $question['and_why'];
                 $mark_details['and_why_mark']  = $question['and_why_mark'];
 
                 }
                 if($type == 2){//MCQ
+                    // types of mcq
+                    // 1 single
+                    // 2 multi
+                    // 3 partial
                     $request->validate([
+                        'questions.*.type' => 'required|in:1,2,3',
                         'questions.*.MCQ_Choices' => 'required|array',
                         'questions.*.MCQ_Choices.*.is_true' => 'required|boolean',
                         'questions.*.MCQ_Choices.*.content' => 'required|string',
