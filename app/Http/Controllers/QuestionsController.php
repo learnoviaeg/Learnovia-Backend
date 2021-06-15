@@ -171,7 +171,7 @@ class QuestionsController extends Controller
 
                     foreach($question['mark_match'] as $key=>$mark){
                         $collection = collect([
-                            'key' => $key+1,
+                            // 'key' => $key+1,
                             'mark' => $question['mark_match'][$key],
                             'match_a' => $question['match_a'][$key],
                             'match_b' => $question['match_b'][$key],
