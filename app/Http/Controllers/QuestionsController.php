@@ -152,7 +152,7 @@ class QuestionsController extends Controller
                         'questions.*.MCQ_Choices' => 'required|array',
                         'questions.*.MCQ_Choices.*.is_true' => 'required|boolean',
                         'questions.*.MCQ_Choices.*.content' => 'required|string',
-                        'questions.*.MCQ_Choices.*.mark_mcq' => 'required|between:0,99.99',
+                        'questions.*.MCQ_Choices.*.mark' => 'required|between:0,99.99',
                     ]);
 
                     foreach($question['MCQ_Choices'] as $key=>$mcq)
@@ -165,7 +165,7 @@ class QuestionsController extends Controller
                     $request->validate([
                         'questions.*.match_a' => 'required|array|min:2|distinct',
                         'questions.*.match_b' => 'required|array|distinct',
-                        'questions.*.mark_match' => 'required|array',
+                        'questions.*.mark' => 'required|array',
                     ]);
 
                     foreach($question['mark'] as $key=>$mark){
