@@ -173,7 +173,7 @@ class QuestionsController extends Controller
 
                         $mark_details[]=$collection;
                     }
-                    $mark_details = json_encode($mark_details);
+                    $mark_details = ($mark_details);
                 }
                
                 if($type == 4){//essay
@@ -185,7 +185,7 @@ class QuestionsController extends Controller
 
                 quiz_questions::updateOrCreate(
                     ['question_id'=>$question['id'], 'quiz_id' => $quiz_id,],
-                    ['grade_details' => ($mark_details)]
+                    ['grade_details' => json_encode($mark_details)]
                 );
             }
                 
