@@ -2,8 +2,8 @@
   'app' => 
   array (
     'name' => 'Laravel',
-    'env' => 'production',
-    'debug' => false,
+    'env' => 'local',
+    'debug' => true,
     'url' => 'http://localhost',
     'asset_url' => NULL,
     'timezone' => 'Africa/Cairo',
@@ -15,7 +15,7 @@
     ),
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
-    'key' => NULL,
+    'key' => 'base64:fZmL4YEdc6zPafNpwYW3HMrgT4RrbpeN19VoKXJtSBM=',
     'cipher' => 'AES-256-CBC',
     'providers' => 
     array (
@@ -144,18 +144,18 @@
   ),
   'broadcasting' => 
   array (
-    'default' => 'null',
+    'default' => 'log',
     'connections' => 
     array (
       'pusher' => 
       array (
         'driver' => 'pusher',
-        'key' => NULL,
-        'secret' => NULL,
-        'app_id' => NULL,
+        'key' => '',
+        'secret' => '',
+        'app_id' => '',
         'options' => 
         array (
-          'cluster' => NULL,
+          'cluster' => 'mt1',
           'useTLS' => true,
         ),
       ),
@@ -228,8 +228,8 @@
       'dynamodb' => 
       array (
         'driver' => 'dynamodb',
-        'key' => NULL,
-        'secret' => NULL,
+        'key' => '',
+        'secret' => '',
         'region' => 'us-east-1',
         'table' => 'cache',
       ),
@@ -289,7 +289,7 @@
       array (
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'D:\\Learnovia\\learnovia-backend\\database\\database.sqlite',
+        'database' => 'develop',
         'prefix' => '',
         'foreign_key_constraints' => true,
       ),
@@ -299,9 +299,9 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => NULL,
-        'username' => NULL,
-        'password' => NULL,
+        'database' => 'develop',
+        'username' => '',
+        'password' => '',
         'unix_socket' => '',
         'charset' => 'utf8',
         'collation' => 'utf8_unicode_ci',
@@ -318,9 +318,9 @@
         'driver' => 'pgsql',
         'url' => NULL,
         'host' => '127.0.0.1',
-        'port' => '5432',
-        'database' => 'forge',
-        'username' => 'forge',
+        'port' => '3306',
+        'database' => 'develop',
+        'username' => '',
         'password' => '',
         'charset' => 'utf8',
         'prefix' => '',
@@ -332,10 +332,10 @@
       array (
         'driver' => 'sqlsrv',
         'url' => NULL,
-        'host' => 'localhost',
-        'port' => '1433',
-        'database' => 'forge',
-        'username' => 'forge',
+        'host' => '127.0.0.1',
+        'port' => '3306',
+        'database' => 'develop',
+        'username' => '',
         'password' => '',
         'charset' => 'utf8',
         'prefix' => '',
@@ -355,14 +355,14 @@
       array (
         'host' => '127.0.0.1',
         'password' => NULL,
-        'port' => 6379,
+        'port' => '6379',
         'database' => 0,
       ),
       'cache' => 
       array (
         'host' => '127.0.0.1',
         'password' => NULL,
-        'port' => 6379,
+        'port' => '6379',
         'database' => 1,
       ),
     ),
@@ -471,23 +471,23 @@
       array (
         'driver' => 'local',
         'root' => 'D:\\Learnovia\\learnovia-backend\\storage\\app/public',
-        'url' => '/storage',
+        'url' => 'http://localhost/storage',
         'visibility' => 'public',
       ),
       'h5p' => 
       array (
         'driver' => 'local',
         'root' => 'D:\\Learnovia\\learnovia-backend\\storage\\app/public/h5p',
-        'url' => '/storage',
+        'url' => 'http://localhost/storage',
         'visibility' => 'public',
       ),
       's3' => 
       array (
         'driver' => 's3',
-        'key' => NULL,
-        'secret' => NULL,
-        'region' => NULL,
-        'bucket' => NULL,
+        'key' => '',
+        'secret' => '',
+        'region' => 'us-east-1',
+        'bucket' => '',
         'url' => NULL,
       ),
     ),
@@ -655,14 +655,14 @@
   'mail' => 
   array (
     'driver' => 'smtp',
-    'host' => 'smtp.mailgun.org',
-    'port' => 587,
+    'host' => 'smtp.mailtrap.io',
+    'port' => '2525',
     'from' => 
     array (
       'address' => 'hello@example.com',
       'name' => 'Example',
     ),
-    'encryption' => 'tls',
+    'encryption' => NULL,
     'username' => NULL,
     'password' => NULL,
     'sendmail' => '/usr/sbin/sendmail -bs',
@@ -993,8 +993,8 @@
       'sqs' => 
       array (
         'driver' => 'sqs',
-        'key' => NULL,
-        'secret' => NULL,
+        'key' => '',
+        'secret' => '',
         'prefix' => 'https://sqs.us-east-1.amazonaws.com/your-account-id',
         'queue' => 'your-queue-name',
         'region' => 'us-east-1',
@@ -1079,8 +1079,8 @@
     ),
     'ses' => 
     array (
-      'key' => NULL,
-      'secret' => NULL,
+      'key' => '',
+      'secret' => '',
       'region' => 'us-east-1',
     ),
     'sparkpost' => 
@@ -1102,7 +1102,7 @@
   'session' => 
   array (
     'driver' => 'file',
-    'lifetime' => 120,
+    'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
     'files' => 'D:\\Learnovia\\learnovia-backend\\storage\\framework/sessions',
