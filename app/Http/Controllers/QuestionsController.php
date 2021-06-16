@@ -138,21 +138,20 @@ class QuestionsController extends Controller
             foreach($request->questions as $question){
                 $type = Questions::find($question['id'])->question_type_id;
 
- 
                 if($type == 1){//True/False
                     $request->validate([
-                        'questions.*.is_true' => 'required|boolean',
-                        'questions.*.mark_tf' => 'required|between:0,99.99',
-                        'questions.*.and_why' => 'required|boolean',
-                        'questions.*.and_why_mark' => 'required|between:0,99.99',
+                        'questions.*.is_true' => 'boolean',
+                        'questions.*.mark_tf' => 'between:0,99.99',
+                        'questions.*.and_why' => 'boolean',
+                        'questions.*.and_why_mark' => 'between:0,99.99',
                     ]);
                 $mark_details['total_mark']  =$question['mark_tf'] + $question['and_why_mark'];
                 $mark_details['is_true']  = $question['is_true'];
                 $mark_details['mark']  = $question['mark_tf'];
                 $mark_details['and_why']  = $question['and_why'];
                 $mark_details['and_why_mark']  = $question['and_why_mark'];
-
                 }
+
                 if($type == 2){//MCQ
                     // types of mcq
                     // 1 single
@@ -160,10 +159,10 @@ class QuestionsController extends Controller
                     // 3 partial
                     $total_mark = 0;
                     $request->validate([
-                        'questions.*.mcq_type' => 'required|in:1,2,3',
-                        'questions.*.MCQ_Choices' => 'required|array',
-                        'questions.*.MCQ_Choices.*.is_true' => 'required|boolean',
-                        'questions.*.MCQ_Choices.*.mark' => 'required|between:0,99.99',
+                        'questions.*.mcq_type' => 'in:1,2,3',
+                        'questions.*.MCQ_Choices' => 'array',
+                        'questions.*.MCQ_Choices.*.is_true' => 'boolean',
+                        'questions.*.MCQ_Choices.*.mark' => 'between:0,99.99',
                     ]);
 
                     foreach($question['MCQ_Choices'] as $key=>$mcq)
@@ -177,9 +176,9 @@ class QuestionsController extends Controller
                 }
                 if($type == 3){//Match
                     $request->validate([
-                        'questions.*.match_a' => 'required|array|min:2|distinct',
-                        'questions.*.match_b' => 'required|array|distinct',
-                        'questions.*.mark_match' => 'required|array',
+                        'questions.*.match_a' => 'array|min:2|distinct',
+                        'questions.*.match_b' => 'array|distinct',
+                        'questions.*.mark_match' => 'array',
                     ]);
 
                     foreach($question['mark_match'] as $key=>$mark){
@@ -197,7 +196,7 @@ class QuestionsController extends Controller
                
                 if($type == 4){//essay
                     $request->validate([
-                        'questions.*.mark_essay' => 'required|between:0,99.99',
+                        'questions.*.mark_essay' => 'between:0,99.99',
                     ]);
                     $mark_details['total_mark']  = $question['mark_essay'];
                 }
