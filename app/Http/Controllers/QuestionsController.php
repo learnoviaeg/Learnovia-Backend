@@ -62,6 +62,8 @@ class QuestionsController extends Controller
                     $question['content']= json_encode($questi);
                 }
                 if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
+                    if(isset($quiz_question->grade_details->total_mark))
+                        $question->mark = $quiz_question->grade_details->total_mark;
                     $combined_content =(object) array_merge((array) $question->grade_details, (array) $question->content);
                     $question['content']= json_encode($combined_content);
                 }
@@ -162,7 +164,6 @@ class QuestionsController extends Controller
                         'questions.*.mcq_type' => 'required|in:1,2,3',
                         'questions.*.MCQ_Choices' => 'required|array',
                         'questions.*.MCQ_Choices.*.is_true' => 'required|boolean',
-                        // 'questions.*.MCQ_Choices.*.key' => 'required|string',
                         'questions.*.MCQ_Choices.*.mark' => 'required|between:0,99.99',
                     ]);
 
@@ -199,7 +200,7 @@ class QuestionsController extends Controller
                     $request->validate([
                         'questions.*.mark_essay' => 'required|between:0,99.99',
                     ]);
-                    $mark_details['mark']  = $question['mark_essay'];
+                    $mark_details['total_mark']  = $question['mark_essay'];
                 }
 
                 quiz_questions::updateOrCreate(
