@@ -63,11 +63,13 @@ class Questions extends Model
         if($this->attributes['question_type_id'] == 2){
             foreach($content as $key => $con)
             {
-                if($con->is_true == 1){
-                    $con->is_true=True;
-                    continue;
+                if(isset($con->is_true)){
+                    if($con->is_true == 1){
+                        $con->is_true=True;
+                        continue;
+                    }
+                    $con->is_true=False;
                 }
-                $con->is_true=False;
             }
         }
         return $content;

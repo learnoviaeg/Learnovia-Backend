@@ -54,14 +54,25 @@ class QuestionsController extends Controller
             
             foreach($questions as $question){
                 $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
-
-                $question['grade_details']=$quiz_question->grade_details;
+                // $question['grade_details']=$quiz_question->grade_details;
                 if($question['question_type_id'] == 3){
                     $questi['match_a']=collect($question['content']['match_a'])->shuffle();
                     $questi['match_b']=collect($question['content']['match_b'])->shuffle();
 
                     $question['content']= json_encode($questi);
                 }
+                if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
+                    $combined_content =(object) array_merge((array) $question->grade_details, (array) $question->content);
+                    $question['content']= json_encode($combined_content);
+                }
+                if($question['question_type_id'] == 2 ){
+                        if(($quiz_question->grade_details != null)){
+                            $question->content = json_encode($quiz_question->grade_details->details);
+                            $question->mark = $quiz_question->grade_details->total_mark;
+                            $question->mcq_type = $quiz_question->grade_details->type;
+                    }
+                }
+
             }
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
@@ -133,8 +144,8 @@ class QuestionsController extends Controller
                         'questions.*.mark_tf' => 'required|between:0,99.99',
                         'questions.*.and_why' => 'required|boolean',
                         'questions.*.and_why_mark' => 'required|between:0,99.99',
-
                     ]);
+                $mark_details['total_mark']  =$question['mark_tf'] + $question['and_why_mark'];
                 $mark_details['is_true']  = $question['is_true'];
                 $mark_details['mark']  = $question['mark_tf'];
                 $mark_details['and_why']  = $question['and_why'];
@@ -146,11 +157,12 @@ class QuestionsController extends Controller
                     // 1 single
                     // 2 multi
                     // 3 partial
+                    $total_mark = 0;
                     $request->validate([
                         'questions.*.mcq_type' => 'required|in:1,2,3',
                         'questions.*.MCQ_Choices' => 'required|array',
                         'questions.*.MCQ_Choices.*.is_true' => 'required|boolean',
-                        'questions.*.MCQ_Choices.*.content' => 'required|string',
+                        // 'questions.*.MCQ_Choices.*.key' => 'required|string',
                         'questions.*.MCQ_Choices.*.mark' => 'required|between:0,99.99',
                     ]);
 
@@ -159,7 +171,9 @@ class QuestionsController extends Controller
                         $mcq['key']=++$key;
                         $mark_details['type']=$question['mcq_type'];
                         $mark_details['details'][]=$mcq;
+                        $total_mark += $mcq['mark'];
                     }
+                    $mark_details['total_mark'] = $total_mark;
                 }
                 if($type == 3){//Match
                     $request->validate([
@@ -305,12 +319,13 @@ class QuestionsController extends Controller
             'created_by' => Auth::id(),
             // 'content' => json_encode(($question['MCQ_Choices'])),
         ];
-
         foreach($question['MCQ_Choices'] as $key=>$mcq)
         {
             $mcq['key']=++$key;
+            unset($mcq['mark']);
             $arr[]=$mcq;
         }
+
         $data['content'] = json_encode($arr);
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
