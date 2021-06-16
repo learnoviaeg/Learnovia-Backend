@@ -64,7 +64,7 @@ class QuestionsController extends Controller
                 if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
                     if(isset($quiz_question->grade_details->total_mark))
                         $question->mark = $quiz_question->grade_details->total_mark;
-                    $combined_content =(object) array_merge((array) $question->grade_details, (array) $question->content);
+                    $combined_content =(object) array_merge((array) $quiz_question->grade_details, (array) $question->content);
                     $question['content']= json_encode($combined_content);
                 }
                 if($question['question_type_id'] == 2 ){
@@ -74,7 +74,6 @@ class QuestionsController extends Controller
                             $question->mcq_type = $quiz_question->grade_details->type;
                     }
                 }
-
             }
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
@@ -193,7 +192,7 @@ class QuestionsController extends Controller
 
                         $mark_details[]=$collection;
                     }
-                    $mark_details = ($mark_details);
+                    $mark_details = $mark_details;
                 }
                
                 if($type == 4){//essay
