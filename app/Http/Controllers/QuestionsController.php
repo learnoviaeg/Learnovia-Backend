@@ -54,7 +54,7 @@ class QuestionsController extends Controller
             
             foreach($questions as $question){
                 $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
-                // $question['grade_details']=$quiz_question->grade_details;
+                $question['grade_details']=$quiz_question->grade_details;
                 if($question['question_type_id'] == 3){
                     $questi['match_a']=collect($question['content']['match_a'])->shuffle();
                     $questi['match_b']=collect($question['content']['match_b'])->shuffle();
@@ -137,7 +137,6 @@ class QuestionsController extends Controller
             // $quiz->Question()->attach($request->questions); //attach repeat the raw
             foreach($request->questions as $question){
                 $type = Questions::find($question['id'])->question_type_id;
-
                 if($type == 1){//True/False
                     $request->validate([
                         'questions.*.is_true' => 'boolean',
@@ -180,18 +179,20 @@ class QuestionsController extends Controller
                         'questions.*.match_b' => 'array|distinct',
                         'questions.*.mark_match' => 'array',
                     ]);
-
-                    foreach($question['mark_match'] as $key=>$mark){
-                        $collection = collect([
-                            // 'key' => $key+1,
-                            'mark' => $question['mark_match'][$key],
-                            'match_a' => $question['match_a'][$key],
-                            'match_b' => $question['match_b'][$key],
-                            ]);
-
-                        $mark_details[]=$collection;
+                   
+                    foreach($question['match_a'] as $key=>$mat_a){
+                        $matA[]=[++$key=>$mat_a];
+                        $match['match_a']=$matA;
                     }
-                    $mark_details = $mark_details;
+                    foreach($question['match_b'] as $key=>$mat_b){
+                        $matB[]=[++$key=>$mat_b];
+                        $match['match_b']=$matB;
+                    }
+                    foreach($question['mark_match'] as $key=>$mark_match){
+                        $marks_matchh[]=[++$key=>$mark_match];
+                        $match['mark']=$marks;
+                    }
+                    $mark_details = $marks_matchh;
                 }
                
                 if($type == 4){//essay
