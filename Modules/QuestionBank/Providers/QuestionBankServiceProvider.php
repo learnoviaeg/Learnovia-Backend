@@ -34,7 +34,7 @@ class QuestionBankServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        UserQuizAnswer::observe(UserQuizAnswerObserver::class);
+        // UserQuizAnswer::observe(UserQuizAnswerObserver::class);
         Questions::observe(LogsObserver::class);
         QuestionsAnswer::observe(LogsObserver::class);
         QuestionsCategory::observe(LogsObserver::class);

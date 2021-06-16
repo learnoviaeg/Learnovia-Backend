@@ -63,6 +63,7 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-students-answer','title' => 'get all students answer']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/answer','title' => 'Answer quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/detailes','title' => 'Quiz Details']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/view-drafts','title' => 'Quiz Drafts']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/correct-user-quiz','title' => 'correct user quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-grade-category','title' => 'get quiz grade category']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/toggle','title' => 'toggle quiz']);
@@ -74,7 +75,7 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
 
-        $teacher_permissions=['question/category/add','question/category/delete','question/category/update','question/category/get','question/add','question/update',
+        $teacher_permissions=['question/category/add','quiz/view-drafts','question/category/delete','question/category/update','question/category/get','question/add','question/update',
         'question/get','question/delete','question/random','question/add-answer','question/delete-answer','quiz/add','quiz/update','quiz/delete','quiz/get',
         'quiz/add-quiz-lesson','quiz/grading-method','quiz/update-quiz-lesson','quiz/destroy-quiz-lesson','quiz/get-all-types','quiz/get-all-categories',
         'quiz/sort','quiz/get-quiz-lesson','quiz/get-all-quizes','quiz/get-student-in-quiz','quiz/get-student-answer-quiz','quiz/get-all-students-answer',
@@ -90,6 +91,7 @@ class QuestionBankController extends Controller
         $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
 
         $role = \Spatie\Permission\Models\Role::find(1);
+        $role->givePermissionTo('quiz/view-drafts');
         $role->givePermissionTo('site/quiz/getStudentinQuiz');
         $role->givePermissionTo('site/quiz/store_user_quiz');
         $role->givePermissionTo('question/add');
@@ -653,7 +655,6 @@ class QuestionBankController extends Controller
             return HelperController::api_response_format(400, $validator->errors());
         }
 
-
         $question_id = Questions::where('parent', $parent)->where('question_type_id', $Question_Type_id)->pluck('id')->first();
         $question = Questions::find($question_id);
 
@@ -961,29 +962,6 @@ class QuestionBankController extends Controller
         LastAction::lastActionInCourse($question->course_id);        
         $question->delete();
         return HelperController::api_response_format(200, [], __('messages.question.delete'));
-    }
-
-    public function addAnswer(Request $request)
-    {
-        $request->validate([
-            'question_id' => 'required|integer|exists:questions,id',
-            'contents' => 'required|string|min:1',
-            'true_false' => 'nullable|boolean',
-            'match_a' => 'nullable|string|max:10',
-            'match_b' => 'nullable|string|max:10',
-            'is_true' => 'required|boolean',
-        ]);
-
-        $answer = QuestionsAnswer::create([
-            'content'    => $request->contents,
-            'true_false' => $request->true_false,
-            'match_a' => $request->match_a,
-            'match_b' => $request->match_b,
-            'is_true' => $request->is_true,
-            'question_id' => $request->question_id
-        ]);
-
-        return HelperController::api_response_format(200, $answer, __('messages.answer.add'));
     }
 
     public function getAllTypes(Request $request){

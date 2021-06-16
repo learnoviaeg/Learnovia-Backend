@@ -29,6 +29,15 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\MassLogsEvent' => [
             'App\Listeners\MassLogsListener',
         ],
+
+        'App\Events\GradeItemEvent' => [
+            // 'App\Listeners\AttemptItemlistener',
+            'App\Listeners\ItemDetailslistener',
+        ],
+
+        'App\Events\QuizAttemptEvent' => [
+            'App\Listeners\AttemptItemlistener',
+        ],
     ];
 
     /**

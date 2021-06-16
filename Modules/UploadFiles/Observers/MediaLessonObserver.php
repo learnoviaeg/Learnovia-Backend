@@ -71,7 +71,7 @@ class MediaLessonObserver
     {
         //for log event
         $logsbefore=Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->get();
-        $all = Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->delete();
+        $all = Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->first()->delete();
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
     }

@@ -16,6 +16,7 @@ use App\UserGrade;
 use App\Observers\UserGradeObserver;
 use App\Observers\MaterialsObserver;
 use App\h5pLesson;
+use App\Observers\H5pObserver;
 use App\Observers\LogsObserver;
 use Modules\Attendance\Entities\AttendanceSession;
 use App\Observers\UserSeenObserver;
@@ -95,5 +96,6 @@ class AppServiceProvider extends ServiceProvider
         Announcement::observe(Announcements::class);
         Material::observe(MaterialsObserver::class);
         UserSeen::observe(UserSeenObserver::class);
+        h5pLesson::observe(H5pObserver::class);
     }
 }
