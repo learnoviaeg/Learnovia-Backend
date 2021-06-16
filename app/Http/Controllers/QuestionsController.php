@@ -190,7 +190,7 @@ class QuestionsController extends Controller
                     }
                     foreach($question['mark_match'] as $key=>$mark_match){
                         $marks_matchh[]=[++$key=>$mark_match];
-                        $match['mark']=$marks;
+                        $match['mark']=$marks_matchh;
                     }
                     $mark_details = $marks_matchh;
                 }
