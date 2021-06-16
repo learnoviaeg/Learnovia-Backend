@@ -192,7 +192,7 @@ class QuestionsController extends Controller
                         $marks_matchh[]=[++$key=>$mark_match];
                         $match['mark']=$marks_matchh;
                     }
-                    $mark_details = $marks_matchh;
+                    $mark_details = $match;
                 }
                
                 if($type == 4){//essay
