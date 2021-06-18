@@ -56,7 +56,6 @@ class QuestionsController extends Controller
                 $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
                 $question['grade_details']=$quiz_question->grade_details;
                 if($question['question_type_id'] == 3){
-                    $sum_marks = 0;
                     $questi['match_a']=collect($question['content']['match_a'])->shuffle();
                     $questi['match_b']=collect($question['content']['match_b'])->shuffle();
                     $question['content']= json_encode($questi);
