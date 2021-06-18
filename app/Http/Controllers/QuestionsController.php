@@ -56,10 +56,11 @@ class QuestionsController extends Controller
                 $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
                 $question['grade_details']=$quiz_question->grade_details;
                 if($question['question_type_id'] == 3){
+                    $sum_marks = 0;
                     $questi['match_a']=collect($question['content']['match_a'])->shuffle();
                     $questi['match_b']=collect($question['content']['match_b'])->shuffle();
-
                     $question['content']= json_encode($questi);
+                    $question->mark = $quiz_question->grade_details->total_mark;
                 }
                 if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
                     if(isset($quiz_question->grade_details->total_mark))
@@ -192,6 +193,7 @@ class QuestionsController extends Controller
                         $marks_matchh[]=[++$key=>$mark_match];
                         $match['mark']=$marks_matchh;
                     }
+                    $match['total_mark']=array_sum($question['mark_match']);
                     $mark_details = $match;
                 }
                
