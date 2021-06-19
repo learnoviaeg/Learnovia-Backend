@@ -206,6 +206,13 @@ class QuestionsController extends Controller
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
             ['grade_details' => json_encode($mark_details)]
         );
+
+        if(isset((Questions::find($question['id'])->parent)))
+            quiz_questions::updateOrCreate(
+                ['question_id'=>Questions::find($question['id'])->parent, 'quiz_id' => $quiz->id,],
+                ['grade_details' => null]
+            );
+    
     }
 
     public function Assign_MCQ($question , $quiz){
@@ -236,6 +243,11 @@ class QuestionsController extends Controller
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
             ['grade_details' => json_encode($mark_details)]
         );
+        if(isset((Questions::find($question['id'])->parent)))
+            quiz_questions::updateOrCreate(
+                ['question_id'=>Questions::find($question['id'])->parent, 'quiz_id' => $quiz->id,],
+                ['grade_details' => null]
+            );
     }
 
     public function Assign_Match($question , $quiz){
@@ -266,7 +278,11 @@ class QuestionsController extends Controller
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
             ['grade_details' => json_encode($mark_details)]
         );
-      
+        if(isset((Questions::find($question['id'])->parent)))
+            quiz_questions::updateOrCreate(
+                ['question_id'=>Questions::find($question['id'])->parent, 'quiz_id' => $quiz->id,],
+                ['grade_details' => null]
+            );
     }
 
     public function Assign_Essay($question , $quiz){
@@ -282,6 +298,11 @@ class QuestionsController extends Controller
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
             ['grade_details' => json_encode($mark_details)]
         );
+        if(isset((Questions::find($question['id'])->parent)))
+            quiz_questions::updateOrCreate(
+                ['question_id'=>Questions::find($question['id'])->parent, 'quiz_id' => $quiz->id,],
+                ['grade_details' => null]
+            );
     }
 
     public function Assign_Paragraph($question , $quiz){
