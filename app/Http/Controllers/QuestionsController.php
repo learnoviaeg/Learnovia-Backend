@@ -53,26 +53,14 @@ class QuestionsController extends Controller
                 $questions =$questions->shuffle();
             
             foreach($questions as $question){
-                $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
-                $question['grade_details']=$quiz_question->grade_details;
-                if($question['question_type_id'] == 3){
-                    $questi['match_a']=collect($question['content']['match_a'])->shuffle();
-                    $questi['match_b']=collect($question['content']['match_b'])->shuffle();
-                    $question['content']= json_encode($questi);
-                    $question->mark = $quiz_question->grade_details->total_mark;
-                }
-                if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
-                    if(isset($quiz_question->grade_details->total_mark))
-                        $question->mark = $quiz_question->grade_details->total_mark;
-                    $combined_content =(object) array_merge((array) $quiz_question->grade_details, (array) $question->content);
-                    $question['content']= json_encode($combined_content);
-                }
-                if($question['question_type_id'] == 2 ){
-                        if(($quiz_question->grade_details != null)){
-                            $question->content = json_encode($quiz_question->grade_details->details);
-                            $question->mark = $quiz_question->grade_details->total_mark;
-                            $question->mcq_type = $quiz_question->grade_details->type;
+                $children_mark = 0;
+                self::mark_details_of_question_in_quiz($question ,$quiz);
+                if(isset($question->children)){
+                    foreach($question->children as $child){
+                        $childd = self::mark_details_of_question_in_quiz($child ,$quiz);
+                        $children_mark += $childd->mark;
                     }
+                    $question->mark += $children_mark;
                 }
             }
             
@@ -117,6 +105,36 @@ class QuestionsController extends Controller
         }
 
         return response()->json(['message' => __('messages.question.list'), 'body' => $questions->get()->paginate(Paginate::GetPaginate($request))], 200);
+    }
+
+     /**
+     * View mark details of questions while listing them in a quiz
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public static function mark_details_of_question_in_quiz($question ,$quiz){
+        $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
+        $question['grade_details']=$quiz_question->grade_details;
+        if($question['question_type_id'] == 3){
+            $questi['match_a']=collect($question['content']['match_a'])->shuffle();
+            $questi['match_b']=collect($question['content']['match_b'])->shuffle();
+            $question['content']= json_encode($questi);
+            $question->mark = $quiz_question->grade_details->total_mark;
+        }
+        if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
+            if(isset($quiz_question->grade_details->total_mark))
+                $question->mark = $quiz_question->grade_details->total_mark;
+            $combined_content =(object) array_merge((array) $quiz_question->grade_details, (array) $question->content);
+            $question['content']= json_encode($combined_content);
+        }
+        if($question['question_type_id'] == 2 ){
+                if(($quiz_question->grade_details != null)){
+                    $question->content = json_encode($quiz_question->grade_details->details);
+                    $question->mark = $quiz_question->grade_details->total_mark;
+                    $question->mcq_type = $quiz_question->grade_details->type;
+            }
+        }
+        return $question;
     }
 
     /**
