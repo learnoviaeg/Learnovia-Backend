@@ -7,6 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use App\Repositories\BackendServiceProvider;
+use App\Grader\GraderServiceProvider;
 use App\Enroll;
 use App\Observers\EnrollObserver;
 use App\GradeItems;
@@ -50,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->register(BackendServiceProvider::class);
+        $this->app->register(GraderServiceProvider::class);
     }
 
     public function boot()

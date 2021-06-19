@@ -457,6 +457,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
+    Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@assign');
     Route::Resource('notify', NotificationsController::class);
     Route::get('notification/{read}', 'NotificationsController@read')->middleware('permission:notifications/seen');
     Route::get('notifications/{types}', 'NotificationsController@index')->middleware('permission:notifications/get-all');
