@@ -172,7 +172,10 @@ class QuestionsController extends Controller
                     case 4: // Essay
                         $essay = $this->Assign_Essay($question,$quiz);
                         break;
-    
+                    
+                    case 5: // Paragraph
+                        $comprehension=$this->Assign_Paragraph($question,$quiz);
+                        break;    
                 }
             }
             $quiz->draft=0;
@@ -279,6 +282,12 @@ class QuestionsController extends Controller
         );
     }
 
+    public function Assign_Paragraph($question , $quiz){
+        quiz_questions::updateOrCreate(
+            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
+            ['grade_details' => null]
+        );
+    }
 
     /**
      * Store a newly created resource in storage.
