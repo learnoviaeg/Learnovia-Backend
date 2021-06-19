@@ -173,7 +173,7 @@ class QuestionsController extends Controller
                         $essay = $this->Assign_Essay($question,$quiz);
                         break;
                     
-                    case 5: // Comprehension
+                    case 5: // Paragraph
                         $comprehension=$this->Assign_Paragraph($question,$quiz);
                         break;    
                 }
