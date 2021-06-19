@@ -114,6 +114,7 @@ class QuestionsController extends Controller
      */
     public static function mark_details_of_question_in_quiz($question ,$quiz){
         $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
+        if(isset($quiz_question->grade_details)){
         $question['grade_details']=$quiz_question->grade_details;
         if($question['question_type_id'] == 3){
             $questi['match_a']=collect($question['content']['match_a'])->shuffle();
@@ -134,6 +135,7 @@ class QuestionsController extends Controller
                     $question->mcq_type = $quiz_question->grade_details->type;
             }
         }
+    }
         return $question;
     }
 
