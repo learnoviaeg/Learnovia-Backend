@@ -40,7 +40,7 @@ class QuizGrader implements ItemGraderInterface
         // dd($gradeitem);
         foreach($item_details as $item_detail)
         {
-            dd($item_detail);
+           // dd($item_detail);
         }
     }
 
