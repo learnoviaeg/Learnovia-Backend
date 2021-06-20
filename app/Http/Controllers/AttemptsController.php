@@ -6,6 +6,7 @@ use App\GradeCategory;
 use App\GradeItems;
 use App\User;
 use App\Enroll;
+use App\Grader\GraderInterface;
 use App\Lesson;
 use App\UserGrade;
 use Illuminate\Http\Request;
@@ -26,6 +27,12 @@ use App\LastAction;
 
 class AttemptsController extends Controller
 {
+    // protected $gradeInterface;
+
+    public function __construct(GraderInterface $gradeInterface)
+    {
+        $this->gradeInterface = $gradeInterface;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -208,8 +215,12 @@ class AttemptsController extends Controller
             $user_quiz->save();
         }
 
-        $tt=new QuizGrader($user_quiz);
+        $tt=new QuizGrader($user_quiz,$this->gradeInterface);
         dd($tt->grade());
+
+        // return $this->gradeInterface->MCQ();
+
+        // $this->app->when('GraderInterface')->needs('True_False')->give('True_False');
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
