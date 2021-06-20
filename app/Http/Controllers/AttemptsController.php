@@ -216,7 +216,7 @@ class AttemptsController extends Controller
         }
 
         $tt=new QuizGrader($user_quiz,$this->gradeInterface);
-        dd($tt->grade());
+        $tt->grade();
 
         // return $this->gradeInterface->MCQ();
 
