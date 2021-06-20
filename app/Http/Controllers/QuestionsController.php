@@ -53,14 +53,14 @@ class QuestionsController extends Controller
                 $questions =$questions->shuffle();
             
             foreach($questions as $question){
-                $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
-
-                $question['grade_details']=$quiz_question->grade_details;
-                if($question['question_type_id'] == 3){
-                    $questi['match_a']=collect($question['content']['match_a'])->shuffle();
-                    $questi['match_b']=collect($question['content']['match_b'])->shuffle();
-
-                    $question['content']= json_encode($questi);
+                $children_mark = 0;
+                self::mark_details_of_question_in_quiz($question ,$quiz);
+                if(isset($question->children)){
+                    foreach($question->children as $child){
+                        $childd = self::mark_details_of_question_in_quiz($child ,$quiz);
+                        $children_mark += $childd->mark;
+                    }
+                    $question->mark += $children_mark;
                 }
             }
             
@@ -107,6 +107,38 @@ class QuestionsController extends Controller
         return response()->json(['message' => __('messages.question.list'), 'body' => $questions->get()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
+     /**
+     * View mark details of questions while listing them in a quiz
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public static function mark_details_of_question_in_quiz($question ,$quiz){
+        $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
+        if(isset($quiz_question->grade_details)){
+        $question['grade_details']=$quiz_question->grade_details;
+        if($question['question_type_id'] == 3){
+            $questi['match_a']=collect($question['content']['match_a'])->shuffle();
+            $questi['match_b']=collect($question['content']['match_b'])->shuffle();
+            $question['content']= json_encode($questi);
+            $question->mark = $quiz_question->grade_details->total_mark;
+        }
+        if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
+            if(isset($quiz_question->grade_details->total_mark))
+                $question->mark = $quiz_question->grade_details->total_mark;
+            $combined_content =(object) array_merge((array) $quiz_question->grade_details, (array) $question->content);
+            $question['content']= json_encode($combined_content);
+        }
+        if($question['question_type_id'] == 2 ){
+                if(($quiz_question->grade_details != null)){
+                    $question->content = json_encode($quiz_question->grade_details->details);
+                    $question->mark = $quiz_question->grade_details->total_mark;
+                    $question->mcq_type = $quiz_question->grade_details->type;
+            }
+        }
+    }
+        return $question;
+    }
+
     /**
      * assign a newly created resource in storage.
      *
@@ -125,81 +157,138 @@ class QuestionsController extends Controller
             // $quiz->Question()->attach($request->questions); //attach repeat the raw
             foreach($request->questions as $question){
                 $type = Questions::find($question['id'])->question_type_id;
-
- 
-                if($type == 1){//True/False
-                    $request->validate([
-                        'questions.*.is_true' => 'required|boolean',
-                        'questions.*.mark_tf' => 'required|between:0,99.99',
-                        'questions.*.and_why' => 'required|boolean',
-                        'questions.*.and_why_mark' => 'required|between:0,99.99',
-
-                    ]);
-
-                $mark_details['is_true']  = $question['is_true'];
-                $mark_details['mark']  = $question['mark_tf'];
-                $mark_details['and_why']  = $question['and_why'];
-                $mark_details['and_why_mark']  = $question['and_why_mark'];
-
-                }
-                if($type == 2){//MCQ
-                    // types of mcq
-                    // 1 single
-                    // 2 multi
-                    // 3 partial
-                    $request->validate([
-                        'questions.*.mcq_type' => 'required|in:1,2,3',
-                        'questions.*.MCQ_Choices' => 'required|array',
-                        'questions.*.MCQ_Choices.*.is_true' => 'required|boolean',
-                        'questions.*.MCQ_Choices.*.content' => 'required|string',
-                        'questions.*.MCQ_Choices.*.mark' => 'required|between:0,99.99',
-                    ]);
-
-                    foreach($question['MCQ_Choices'] as $key=>$mcq)
-                    {
-                        $mcq['key']=++$key;
-                        $mark_details['type']=$question['type'];
-                        $mark_details['details']=$mcq;
-                    }
-                }
-                if($type == 3){//Match
-                    $request->validate([
-                        'questions.*.match_a' => 'required|array|min:2|distinct',
-                        'questions.*.match_b' => 'required|array|distinct',
-                        'questions.*.mark_match' => 'required|array',
-                    ]);
-
-                    foreach($question['mark_match'] as $key=>$mark){
-                        $collection = collect([
-                            'key' => $key+1,
-                            'mark' => $question['mark_match'][$key],
-                            'match_a' => $question['match_a'][$key],
-                            'match_b' => $question['match_b'][$key],
-                            ]);
-
-                        $mark_details[]=$collection;
-                    }
-                    $mark_details = ($mark_details);
-                }
-               
-                if($type == 4){//essay
-                    $request->validate([
-                        'questions.*.mark_essay' => 'required|between:0,99.99',
-                    ]);
-                    $mark_details['mark']  = $question['mark_essay'];
-                }
-
-                quiz_questions::updateOrCreate(
-                    ['question_id'=>$question['id'], 'quiz_id' => $quiz_id,],
-                    ['grade_details' => json_encode($mark_details)]
-                );
-            }
                 
+                switch ($type) {
+                    case 1: // True/false
+                        $true_false = $this->Assign_TF($question,$quiz);
+                        break;
+    
+                    case 2: // MCQ
+                        $mcq = $this->Assign_MCQ($question,$quiz);
+                        break;
+    
+                    case 3: // Match
+                        $match = $this->Assign_Match($question,$quiz);
+                        break;
+    
+                    case 4: // Essay
+                        $essay = $this->Assign_Essay($question,$quiz);
+                        break;
+                    
+                    case 5: // Paragraph
+                        $comprehension=$this->Assign_Paragraph($question,$quiz);
+                        break;    
+                }
+            }
             $quiz->draft=0;
             $quiz->save();
-            
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
+    }
+
+    public function Assign_TF($question , $quiz){
+        $validator = Validator::make($question, [
+            'is_true' => 'required|boolean',
+            'mark_tf' => 'required|between:0,99.99',
+            'and_why' => 'required|boolean',
+            'and_why_mark' => 'required|between:0,99.99',
+        ]);
+        if ($validator->fails())
+            throw new \Exception(__('messages.error.data_invalid'));
+
+        $mark_details['total_mark']  =$question['mark_tf'] + $question['and_why_mark'];
+        $mark_details['is_true']  = $question['is_true'];
+        $mark_details['mark']  = $question['mark_tf'];
+        $mark_details['and_why']  = $question['and_why'];
+        $mark_details['and_why_mark']  = $question['and_why_mark'];
+
+        quiz_questions::updateOrCreate(
+            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
+            ['grade_details' => json_encode($mark_details)]
+        );
+    }
+
+    public function Assign_MCQ($question , $quiz){
+        $validator = Validator::make($question, [
+            'mcq_type' => 'required|in:1,2,3',
+            'MCQ_Choices' => 'required|array',
+            'MCQ_Choices.*.is_true' => 'required|boolean',
+            'MCQ_Choices.*.mark' => 'required|between:0,99.99',
+        ]);
+        if ($validator->fails())
+            throw new \Exception(__('messages.error.data_invalid'));
+
+       // types of mcq
+        // 1 single
+        // 2 multi
+        // 3 partial
+        $total_mark = 0;
+        foreach($question['MCQ_Choices'] as $key=>$mcq)
+        {
+            $mcq['key']=++$key;
+            $mark_details['type']=$question['mcq_type'];
+            $mark_details['details'][]=$mcq;
+            $total_mark += $mcq['mark'];
+        }
+        $mark_details['total_mark'] = $total_mark;
+
+        quiz_questions::updateOrCreate(
+            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
+            ['grade_details' => json_encode($mark_details)]
+        );
+    }
+
+    public function Assign_Match($question , $quiz){
+        $validator = Validator::make($question, [
+            'match_a' => 'required|array|min:2|distinct',
+            'match_b' => 'required|array|distinct',
+            'mark_match' => 'required|array',
+        ]);
+        if ($validator->fails())
+            throw new \Exception(__('messages.error.data_invalid'));
+
+            foreach($question['match_a'] as $key=>$mat_a){
+                $matA[]=[++$key=>$mat_a];
+                $match['match_a']=$matA;
+            }
+            foreach($question['match_b'] as $key=>$mat_b){
+                $matB[]=[++$key=>$mat_b];
+                $match['match_b']=$matB;
+            }
+            foreach($question['mark_match'] as $key=>$mark_match){
+                $marks_matchh[]=[++$key=>$mark_match];
+                $match['mark']=$marks_matchh;
+            }
+            $match['total_mark']=array_sum($question['mark_match']);
+            $mark_details = $match;
+
+        quiz_questions::updateOrCreate(
+            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
+            ['grade_details' => json_encode($mark_details)]
+        );
+      
+    }
+
+    public function Assign_Essay($question , $quiz){
+        $validator = Validator::make($question, [
+            'mark_essay' => 'required|between:0,99.99',
+        ]);
+        if ($validator->fails())
+            throw new \Exception(__('messages.error.data_invalid'));
+
+        $mark_details['total_mark']  = $question['mark_essay'];
+
+        quiz_questions::updateOrCreate(
+            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
+            ['grade_details' => json_encode($mark_details)]
+        );
+    }
+
+    public function Assign_Paragraph($question , $quiz){
+        quiz_questions::updateOrCreate(
+            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
+            ['grade_details' => null]
+        );
     }
 
     /**
@@ -306,12 +395,13 @@ class QuestionsController extends Controller
             'created_by' => Auth::id(),
             // 'content' => json_encode(($question['MCQ_Choices'])),
         ];
-
         foreach($question['MCQ_Choices'] as $key=>$mcq)
         {
             $mcq['key']=++$key;
+            unset($mcq['mark']);
             $arr[]=$mcq;
         }
+
         $data['content'] = json_encode($arr);
 
         $added=Questions::firstOrCreate($data); //firstOrCreate doesn't work because it has json_encode
