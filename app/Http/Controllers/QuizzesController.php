@@ -265,6 +265,17 @@ class QuizzesController extends Controller
         $quiz->allow_edit=$allow_edit;
 
         if(isset($quiz)){
+            foreach($quiz->Question as $question){
+                $children_mark = 0;
+                QuestionsController::mark_details_of_question_in_quiz($question ,$quiz);
+                if(isset($question->children)){
+                    foreach($question->children as $child){
+                        $childd = QuestionsController::mark_details_of_question_in_quiz($child ,$quiz);
+                        $children_mark += $childd->mark;
+                    }
+                    $question->mark += $children_mark;
+                }
+            }
             LastAction::lastActionInCourse($quiz->course_id);
             return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
         }
