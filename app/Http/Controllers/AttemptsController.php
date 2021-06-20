@@ -209,7 +209,7 @@ class AttemptsController extends Controller
         }
 
         $tt=new QuizGrader($user_quiz);
-        dd($tt->grade());
+        //dd($tt->grade());
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
