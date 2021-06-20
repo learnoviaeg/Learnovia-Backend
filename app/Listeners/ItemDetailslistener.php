@@ -36,15 +36,16 @@ class ItemDetailslistener
         $gradeCat=GradeCategory::find($event->grade_item->grade_category_id);
         $quiz=Quiz::find($gradeCat->instance_id);
         $questions=$quiz->Question;
-        if($event->grade_item->type == 'Attempts'){
+        if($event->grade_item->type == 'Attempt'){
             foreach($questions as $question)
             {
                 $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
+                // dd($quiz_question->grade_details);
                 ItemDetail::firstOrCreate([
                     'type' => 'Question',
                     'item_id' => $question->id,
                     'parent_item_id' => $event->grade_item->id,
-                    'weight_details' => ($quiz_question->grade_details),
+                    'weight_details' => json_encode($quiz_question->grade_details),
                 ]);
             }
         }
