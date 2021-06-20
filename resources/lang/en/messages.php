@@ -92,6 +92,7 @@ return [
         'add' => 'Quiz added successfully',
         'update' => 'Quiz updated successfully',
         'delete' => 'Quiz deleted successfully',
+        'assign' => 'Quiz assigned successfully',
         'list' => 'Quizzes List',
         'count' => 'Quizzes count',
         'invaled_feedback' => 'Invalid feedback type, feedback can not be After submission',
