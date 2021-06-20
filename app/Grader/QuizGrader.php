@@ -5,8 +5,11 @@ namespace App\Grader;
 use App\Grader\ItemGraderInterface;
 use App\GradeItems;
 use App\GradeCategory;
+use Auth;
 use App\ItemDetail;
+use App\ItemDetailsUser;
 use Modules\QuestionBank\Entities\Quiz;
+use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\UserQuiz;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
 
@@ -23,13 +26,13 @@ class QuizGrader implements ItemGraderInterface
          * }
          */
     
-    public function __construct(UserQuiz $item) //attempt
+    public function __construct(UserQuiz $item,GraderInterface $gradeinterface) //attempt
     {
         $this->item=$item; //attempt
+        $this->gradeinterface=$gradeinterface; // for calculation
     }
 
     public function grade(){
-        $grade=0;
         $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$this->item->id)->get();
         // dd($user_quiz_answers);
         $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$this->item->quiz_lesson->quiz_id)->where('lesson_id',$this->item->quiz_lesson->lesson_id)->first();
@@ -40,8 +43,31 @@ class QuizGrader implements ItemGraderInterface
         // dd($gradeitem);
         foreach($item_details as $item_detail)
         {
-           // dd($item_detail);
+            foreach($user_quiz_answers as $stud_quest_ans)
+            {
+                $grade=0;
+                if($item_detail->item_id == $stud_quest_ans->question_id){
+                    $correction_answer['student_answer']=$stud_quest_ans->user_answers;
+                    $correction_answer['correct_answer']=$item_detail->weight_details;
+
+                    $question_type=Questions::whereId($item_detail['item_id'])->pluck('question_type_id')->first();
+        
+                    if($question_type == 1)
+                        $grade=$this->gradeinterface->True_False($correction_answer);
+                
+                    ItemDetailsUser::firstOrCreate([
+                        'user_id' => Auth::id(),
+                        'item_details_id' => $item_detail->id,
+                        'grade' => $grade,
+                        'Answers_Correction' => json_encode($correction_answer)
+                    ]);
+                    $corrections['right']=0;
+                    if($grade > 0)
+                        $corrections['right']=1;
+                    $corrections['mark']=$grade;
+                    $stud_quest_ans->update(['correction'=>json_encode($corrections)]);
+                }
+            }
         }
     }
-
 }
