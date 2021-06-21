@@ -275,7 +275,50 @@ class UsersController extends Controller
      */
     public function show($id)
     {
-        //
+   
+        $user = User::find($id);
+        if(!Auth::user()->can('site/show-all-courses') && $id != Auth::id())
+            return response()->json(['message' => __('messages.error.not_allowed'), 'body' => null ], 404);
+
+        if(isset($user->attachment))
+            $user->picture = $user->attachment->path;
+        $user->roles;
+
+        $i = 0;
+        foreach ($user->enroll as $enroll) {
+            $all[$i]['role'] = $enroll->roles;
+            $all[$i]['enroll_id'] = $enroll->id;
+
+            $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
+            $all[$i]['Course'] = Course::where('id', $segment_Class_id->course_id)->first();
+
+            $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
+            $all[$i]['segment'] = Segment::find($segment->segment_id);
+
+            $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
+            $all[$i]['class'] = Classes::find($class_id->class_id);
+
+            $level = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
+            $all[$i]['level'] = level::find($level->level_id);
+
+            $year_type = AcademicYearType::where('id', $level->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
+            $all[$i]['type'] = "";
+            $all[$i]['year'] = "";
+            if(isset($year_type)){
+                $all[$i]['type'] = AcademicType::find($year_type->academic_type_id);
+                $all[$i]['year'] = AcademicYear::find($year_type->academic_year_id);    
+            }
+            $i++;
+        }
+        if (isset($all))
+        {
+            unset($user->enroll);
+            $user->Chain=$all;
+            return HelperController::api_response_format(201, $user, null);
+            return response()->json(['message' => null, 'body' => $user ], 200);
+
+        }
+        return response()->json(['message' =>  __('messages.error.no_available_data'), 'body' => $user ], 200);
     }
 
     /**
