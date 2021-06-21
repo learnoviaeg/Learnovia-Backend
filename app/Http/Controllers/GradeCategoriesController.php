@@ -14,6 +14,8 @@ class GradeCategoriesController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
+        $this->middleware(['permission:grade/category/add' ],   ['only' => ['store']]);
+        $this->middleware(['permission:grade/category/update'],   ['only' => ['update']]);
     }
 
     /**
@@ -21,9 +23,30 @@ class GradeCategoriesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+            'class' => 'nullable|integer|exists:classes,id',
+            'name' => 'string',
+            'parent' => 'exists:grade_categories,parent',
+        ]);
+
+        $grade_categories = GradeCategory::Query();
+            if($request->filled('name'))
+                $grade_categories->where('name','LIKE' , "%$request->name%");
+            if($request->filled('parent'))
+                $grade_categories->where('parent' ,$request->parent);
+            if($request->filled('class') && $request->filled('courses')){
+                $course_segment_id = $this->chain->getCourseSegmentByChain($request)->first()->course_segment;
+                $grade_categories->where('course_segment_id' ,$course_segment_id);
+            }
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories->with('Child')->get() ], 200);
     }
 
     /**
