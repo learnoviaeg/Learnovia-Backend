@@ -326,9 +326,11 @@ class UsersController extends Controller
             $users =  Enroll::whereIn('course_segment',$chain)->where('user_id' ,'!=' , Auth::id())->pluck('user_id');
             if (!in_array($id, $users->toArray()))
                 return response()->json(['message' => __('messages.error.not_allowed'), 'body' => null ], 404);
-            if(!Auth::user()->can('allow-edit-profiles'))
-                 unset($user->username);
-                 unset($user->real_password);
+            if(!Auth::user()->can('allow-edit-profiles')){
+                unset($user->username);
+                unset($user->real_password);
+            }
+               
         }
 
         if (isset($all))
