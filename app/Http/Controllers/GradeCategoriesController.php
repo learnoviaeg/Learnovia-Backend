@@ -46,7 +46,7 @@ class GradeCategoriesController extends Controller
                 $course_segment_id = $this->chain->getCourseSegmentByChain($request)->first()->course_segment;
                 $grade_categories->where('course_segment_id' ,$course_segment_id);
             }
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories->with('Child')->get() ], 200);
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories->with('Child.GradeItems','GradeItems')->get() ], 200);
     }
 
     /**
