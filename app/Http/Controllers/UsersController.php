@@ -9,11 +9,26 @@ use App\User;
 use App\Enroll;
 use App\Paginate;
 use App\LAstAction;
+use App\Level;
+use App\Classes;
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
 use App\Log;
 use App\Lesson;
 use App\UserSeen;
+use App\GradeCategory;
+use App\Segment;
+use App\Parents;
+use App\AcademicYear;
+use App\AcademicType;
+use App\YearLevel;
+use App\AcademicYearType;
+use App\Course;
+use App\Contract;
+use App\CourseSegment;
+use App\ClassLevel;
+use App\attachment;
+use App\SegmentClass;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
@@ -175,7 +190,6 @@ class UsersController extends Controller
                                         ->where('created_at','<=' ,Carbon::now()->subHours(1))
                                         ->whereNotIn('user',$active);
             }    
-
             $users_lastaction = $users_lastaction->select('user')->distinct()->get()->pluck('users');
             
             if($request->filled('never')){
@@ -277,9 +291,6 @@ class UsersController extends Controller
     {
    
         $user = User::find($id);
-        if(!Auth::user()->can('site/show-all-courses') && $id != Auth::id())
-            return response()->json(['message' => __('messages.error.not_allowed'), 'body' => null ], 404);
-
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
         $user->roles;
@@ -310,6 +321,16 @@ class UsersController extends Controller
             }
             $i++;
         }
+        if(!Auth::user()->can('site/show-all-courses') && $id != Auth::id()){
+            $chain = Enroll::where('user_id',Auth::id())->pluck('course_segment');
+            $users =  Enroll::whereIn('course_segment',$chain)->where('user_id' ,'!=' , Auth::id())->pluck('user_id');
+            if (!in_array($id, $users->toArray()))
+                return response()->json(['message' => __('messages.error.not_allowed'), 'body' => null ], 404);
+            if(!Auth::user()->can('allow-edit-profiles'))
+                 unset($user->username);
+                 unset($user->real_password);
+        }
+
         if (isset($all))
         {
             unset($user->enroll);
@@ -318,6 +339,9 @@ class UsersController extends Controller
             return response()->json(['message' => null, 'body' => $user ], 200);
 
         }
+       
+
+        
         return response()->json(['message' =>  __('messages.error.no_available_data'), 'body' => $user ], 200);
     }
 
