@@ -309,5 +309,6 @@ return [
         'add'    => 'Grade category added successfully',
         'update' => 'Grade category is updated successfully',
         'list' => 'Grade Categories List',
+        'delete' => 'Grade category deleted successfully',
     ],
 ];
