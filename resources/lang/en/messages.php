@@ -26,6 +26,8 @@ return [
         'extension_not_supported' => 'This extension is not supported',
         'no_permission' => 'User does not have the right permissions',
         'role_required' => 'Please, choose role first',
+        'not_allowed' => 'You are not allowed to view this.',
+        'not_allowed_to_edit' => 'You are not allowed to edit this.'
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
@@ -309,5 +311,6 @@ return [
         'add'    => 'Grade category added successfully',
         'update' => 'Grade category is updated successfully',
         'list' => 'Grade Categories List',
+        'delete' => 'Grade category deleted successfully',
     ],
 ];

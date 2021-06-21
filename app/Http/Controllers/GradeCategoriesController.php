@@ -16,6 +16,8 @@ class GradeCategoriesController extends Controller
         $this->middleware('auth');
         $this->middleware(['permission:grade/category/add' ],   ['only' => ['store']]);
         $this->middleware(['permission:grade/category/update'],   ['only' => ['update']]);
+        $this->middleware(['permission:grade/category/get'],   ['only' => ['index']]);
+        $this->middleware(['permission:grade/category/delete'],   ['only' => ['destroy']]);
     }
 
     /**
@@ -125,6 +127,15 @@ class GradeCategoriesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $grade_category = GradeCategory::find($id);
+        if(!isset($grade_category))
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 404);
+
+        foreach($grade_category->Child as $child){
+            $child->GradeItems()->delete();
+        }
+        $grade_category->Child()->delete();
+        $grade_category->delete();
+        return response()->json(['message' => __('messages.grade_category.delete'), 'body' => null], 200);
     }
 }
