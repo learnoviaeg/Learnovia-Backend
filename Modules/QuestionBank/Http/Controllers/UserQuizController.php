@@ -285,11 +285,18 @@ class UserQuizController extends Controller
                         if ($currentQuestion->content->and_why == true) {
                             // if ($currentQuestion->mark < $question['mark'])
                             //     return response()->json(['message' => __('messages.error.grade_less_than').$question['mark'], 'body' => null ], 400);
-                            $correction = $userQuizAnswer['correction'];
-
-                            $correction->and_why_right = isset($question['right']) ? $question['right'] : null;
-                            $correction->and_why_mark = isset($question['mark']) ? $question['mark'] : null;
-                            $correction->feedback = isset($question['feedback']) ? $question['feedback'] : null;
+                            if($userQuizAnswer['correction'] != null){
+                                $correction = $userQuizAnswer['correction'];
+                                $correction->and_why_right = isset($question['right']) ? $question['right'] : null;
+                                $correction->and_why_mark = isset($question['mark']) ? $question['mark'] : null;
+                                $correction->feedback = isset($question['feedback']) ? $question['feedback'] : null;
+                            }else{
+                                $correction = collect([
+                                    'and_why_right' => isset($question['right']) ? $question['right'] : null,
+                                    'and_why_mark' => isset($question['mark']) ? $question['mark'] : null,
+                                    'feedback' => isset($question['feedback']) ? $question['feedback'] : null
+                                ]);
+                            }
                             $data['correction'] =  json_encode($correction);
 
                         } else
