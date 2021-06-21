@@ -305,4 +305,8 @@ return [
         'not_graded' => 'Not graded',
         'no_answers' => 'No answers',
     ],
+    'grade_category' => [
+        'add'    => 'Grade category added successfully',
+        'update' => 'Grade category is updated successfully',
+    ],
 ];
