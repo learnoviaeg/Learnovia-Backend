@@ -18,7 +18,6 @@ class GradeCategoriesController extends Controller
         $this->middleware(['permission:grade/category/update'],   ['only' => ['update']]);
         $this->middleware(['permission:grade/category/get'],   ['only' => ['index']]);
         $this->middleware(['permission:grade/category/delete'],   ['only' => ['destroy']]);
-
     }
 
     /**
