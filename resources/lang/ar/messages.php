@@ -308,5 +308,6 @@ return [
     'grade_category' => [
         'add' => 'تم اضافة بنجاح',
         'update' => 'تم تعديل بنجاح',
+        // 'list' => 'Grade Categories List',
     ],
 ];

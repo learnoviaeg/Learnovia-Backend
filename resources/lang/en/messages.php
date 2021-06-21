@@ -308,5 +308,6 @@ return [
     'grade_category' => [
         'add'    => 'Grade category added successfully',
         'update' => 'Grade category is updated successfully',
+        'list' => 'Grade Categories List',
     ],
 ];
