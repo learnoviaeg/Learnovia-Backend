@@ -307,11 +307,10 @@ class UserQuizController extends Controller
                     case 4: // Essay
                         // if ($currentQuestion->mark < $question['mark'])
                         //     return response()->json(['message' => __('messages.error.grade_less_than').$question['mark'], 'body' => null ], 400);
-
-                        $correction['right'] = isset($question['right']) ? $question['right'] : null;
-                        $correction['grade'] = isset($question['mark']) ? $question['mark'] : null;
-                        $correction['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
-                        $data['correction'] =  json_encode($correction);
+                        $correct['right'] = isset($question['right']) ? $question['right'] : null;
+                        $correct['grade'] = isset($question['mark']) ? $question['mark'] : null;
+                        $correct['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
+                        $data['correction'] =  json_encode($correct);
                         break;
 
                     default:
