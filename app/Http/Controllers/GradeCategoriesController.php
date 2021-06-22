@@ -93,7 +93,8 @@ class GradeCategoriesController extends Controller
      */
     public function show($id)
     {
-        //
+        $grade_categories = GradeCategory::where('id', $id)->with('Child.GradeItems','GradeItems')->first();
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
     }
 
     /**
