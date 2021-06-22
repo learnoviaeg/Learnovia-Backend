@@ -214,8 +214,9 @@ class AttemptsController extends Controller
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
             $user_quiz->save();
         }
-
+// dd($user_quiz);
         $tt=new QuizGrader($user_quiz,$this->gradeInterface);
+        // dd($user_quiz);
         $tt->grade();
 
         // return $this->gradeInterface->MCQ();

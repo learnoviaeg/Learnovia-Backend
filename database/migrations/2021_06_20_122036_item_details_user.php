@@ -19,7 +19,7 @@ class ItemDetailsUser extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('item_details_id');
             $table->foreign('item_details_id')->references('id')->on('item_details')->onDelete('cascade')->onUpdate('cascade');
-            $table->double('grade');
+            $table->double('grade')->nullable();
             $table->longText('Answers_correction');
             $table->timestamps();
         });
