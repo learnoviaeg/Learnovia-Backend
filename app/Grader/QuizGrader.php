@@ -33,7 +33,7 @@ class QuizGrader implements ItemGraderInterface
     }
 
     public function grade(){
-        $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$this->item->id)->whereNotNull('user_answers')->get();
+        $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$this->item->id)->get();
         // dd($user_quiz_answers);
         $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$this->item->quiz_lesson->quiz_id)->where('lesson_id',$this->item->quiz_lesson->lesson_id)->first();
         //grade item ( attempt_item )
