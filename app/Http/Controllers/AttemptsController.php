@@ -201,6 +201,7 @@ class AttemptsController extends Controller
                             $data['user_answers'] = isset($question['content']) ? json_encode($question['content']) : null; //essay not have special answer
                             break;
                     }
+                    // dd($data);
                     $allData->push($data);
                 }
                 $answer1= userQuizAnswer::where('user_quiz_id',$id)->where('question_id',$question['id'])->first();
@@ -210,18 +211,13 @@ class AttemptsController extends Controller
 
         if($request->forced){
             $answer2=userQuizAnswer::where('user_quiz_id',$id)->update(['force_submit'=>'1']);
-            
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
             $user_quiz->save();
         }
-// dd($user_quiz);
-        $tt=new QuizGrader($user_quiz,$this->gradeInterface);
+
         // dd($user_quiz);
+        $tt=new QuizGrader($user_quiz,$this->gradeInterface);
         $tt->grade();
-
-        // return $this->gradeInterface->MCQ();
-
-        // $this->app->when('GraderInterface')->needs('True_False')->give('True_False');
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
