@@ -37,16 +37,32 @@ class ItemDetailslistener
         $quiz=Quiz::find($gradeCat->instance_id);
         $questions=$quiz->Question;
         if($event->grade_item->type == 'Attempt'){
-            foreach($questions as $question)
-            {
-                $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
-                // dd($quiz_question->grade_details);
-                ItemDetail::firstOrCreate([
-                    'type' => 'Question',
-                    'item_id' => $question->id,
-                    'parent_item_id' => $event->grade_item->id,
-                    'weight_details' => json_encode($quiz_question->grade_details),
-                ]);
+            foreach($questions as $question){
+                if($question->question_type_id == 5){
+                    $quest=$question->children->pluck('id');
+                    foreach($quest as $child){
+                        $child_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$child)->first();
+
+                        $item=ItemDetail::firstOrCreate([
+                            'type' => 'Question',
+                            'item_id' => $child,
+                            'parent_item_id' => $event->grade_item->id,
+                            'weight_details' => json_encode($child_question->grade_details),
+                        ]);
+                    }
+                }
+                else // because parent question(comprehension) not have answer
+                {
+                    $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
+                    
+                    // dd($quiz_question->grade_details);
+                    $item=ItemDetail::firstOrCreate([
+                        'type' => 'Question',
+                        'item_id' => $question->id,
+                        'parent_item_id' => $event->grade_item->id,
+                        'weight_details' => json_encode($quiz_question->grade_details),
+                    ]);
+                }
             }
         }
 
