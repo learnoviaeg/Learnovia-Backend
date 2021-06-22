@@ -35,7 +35,7 @@ class userQuizAnswer extends Model
                 if($user_answers->is_true == 1)
                     $user_answers->is_true=True;
 
-                else if($user_answers->is_true == 0)
+                else if($user_answers->is_true == 0 && $user_answers->is_true != null)
                     $user_answers->is_true=False;
                 
                 else

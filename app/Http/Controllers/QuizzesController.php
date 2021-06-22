@@ -237,6 +237,7 @@ class QuizzesController extends Controller
         $last_attempt=$query->latest()->first();
         $allow_edit=false;
         $remain_time = $quiz->duration;
+        $quiz->token_attempts = 0;
 
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz->quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
