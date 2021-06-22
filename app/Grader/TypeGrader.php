@@ -9,7 +9,8 @@ class TypeGrader implements GraderInterface
     {
         $grade['mark']=0;
         $grade['right']=0;
-        if(isset($answer['student_answer']) && $answer['student_answer']->is_true == $answer['correct_answer']->is_true){
+        if(isset($answer['student_answer']) && $answer['student_answer']->is_true == $answer['correct_answer']->is_true &&
+            $answer['student_answer']->is_true != null){
             $grade['mark']=$answer['correct_answer']->mark;
             $grade['right']=1;
         }

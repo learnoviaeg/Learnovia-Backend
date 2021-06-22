@@ -43,6 +43,7 @@ class QuizGrader implements ItemGraderInterface
         {
             foreach($user_quiz_answers as $stud_quest_ans)
             {
+                $grade = null ;
                 if($item_detail->item_id == $stud_quest_ans->question_id){
                     $correction_answer['student_answer']=$stud_quest_ans->user_answers;
                     $correction_answer['correct_answer']=$item_detail->weight_details;
