@@ -15,10 +15,6 @@ class ItemDetail extends Model
     {
         $content= json_decode($this->attributes['weight_details']);
 
-        // if($this->attributes['question_type_id'] == 3){
-        //     $content= json_decode($this->attributes['weight_details'],true);
-        // }
-
         $question_type=Questions::whereId($this->attributes['item_id'])->pluck('question_type_id')->first();
         
         if($question_type == 1){
@@ -34,6 +30,6 @@ class ItemDetail extends Model
             else
                 $content->and_why=False;
         }
-        return $content;
+        return $content; 
     }
 }
