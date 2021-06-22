@@ -26,6 +26,8 @@ return [
         'extension_not_supported' => 'هذا الامتداد غير معتمد ',
         'no_permission' => 'المستخدم ليس لديه الإذن',
         'role_required' => 'من فضلك ، اختر الوظيفة أولا',
+        'not_allowed' => 'غير مسموح بذلك',
+        'not_allowed_to_edit' => 'لا يمكن التعديل'
     ],
     'success' => [
         'submit_success' => 'تم إرسال الإجابة بنجاح',
@@ -308,6 +310,13 @@ return [
     'grade_category' => [
         'add' => 'تم اضافة بنجاح',
         'update' => 'تم تعديل بنجاح',
-        // 'list' => 'Grade Categories List',
+        'list' => 'القائمة',
+        'delete' => 'تم الحذف ',
+    ],
+    'grade_item' => [
+        'add' => 'تم اضافة بنجاح',
+        'update' => 'تم تعديل بنجاح',
+        'list' => 'القائمة',
+        'delete' => 'تم الحذف ',
     ],
 ];

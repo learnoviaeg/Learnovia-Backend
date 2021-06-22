@@ -481,7 +481,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('settings', SettingsController::class);
     Route::post('settings/update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
     Route::Resource('grade-category', GradeCategoriesController::class);
-
+    Route::Resource('grade-item', GradeItemsController::class);
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
