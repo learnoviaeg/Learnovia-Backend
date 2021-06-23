@@ -14,9 +14,9 @@ class GradeItemsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        // $this->middleware(['permission:grade/item/add' ],   ['only' => ['store']]);
-        // $this->middleware(['permission:grade/item/update'],   ['only' => ['update']]);
-        // $this->middleware(['permission:grade/item/get'],   ['only' => ['index']]);
+        $this->middleware(['permission:grade/item/add' ],   ['only' => ['store']]);
+        $this->middleware(['permission:grade/item/update'],   ['only' => ['update']]);
+        $this->middleware(['permission:grade/item/get'],   ['only' => ['index']]);
         $this->middleware(['permission:grade/item/delete'],   ['only' => ['destroy']]);
     }
 
