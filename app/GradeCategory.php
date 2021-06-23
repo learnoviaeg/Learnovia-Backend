@@ -7,7 +7,8 @@ use stdClass;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name', 'course_segment_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id'];
+    protected $fillable = ['name', 'course_segment_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id',
+                           'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
     public function Child()
     {
         return $this->hasMany('App\GradeCategory', 'parent', 'id');

@@ -10,7 +10,7 @@ class GradeItems extends Model
         'grade_category_id','item_id', 'name', 'type', 'index'
     ];
 
-    protected $appends = ['parent_aggregation'];
+    // protected $appends = ['parent_aggregation'];
 
     public function GradeCategory()
     {
@@ -39,16 +39,16 @@ class GradeItems extends Model
         return round(($this->grademax * $this->GradeCategory->percentage()) / $this->GradeCategory->total(), 3);
     }
 
-    public function getParentAggregationAttribute()
-    {
-        return $this->GradeCategory->aggregation;
-    }
-    public static function clacWitheval($calculation, $grade)
-    {
-        $str = $calculation . "(" . $grade . ")";
-        $p = eval('return ' . $str . ';');
-        return $p;
-    }
+    // public function getParentAggregationAttribute()
+    // {
+    //     return $this->GradeCategory->aggregation;
+    // }
+    // public static function clacWitheval($calculation, $grade)
+    // {
+    //     $str = $calculation . "(" . $grade . ")";
+    //     $p = eval('return ' . $str . ';');
+    //     return $p;
+    // }
 
     public static function rads()
     {

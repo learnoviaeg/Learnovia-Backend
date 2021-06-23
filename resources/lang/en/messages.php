@@ -313,4 +313,11 @@ return [
         'list' => 'Grade Categories List',
         'delete' => 'Grade category deleted successfully',
     ],
+    'grade_item' => [
+        'add'    => 'Grade item added successfully',
+        'update' => 'Grade item is updated successfully',
+        'list' => 'Grade items List',
+        'delete' => 'Grade item deleted successfully',
+    ],
+
 ];
