@@ -36,7 +36,7 @@ class GradeCategoriesController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
             'name' => 'string',
-            'parent' => 'exists:grade_categories,parent',
+            'parent' => 'exists:grade_categories,id',
         ]);
 
         $grade_categories = GradeCategory::Query();
