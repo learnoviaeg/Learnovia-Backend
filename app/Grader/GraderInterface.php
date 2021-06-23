@@ -7,7 +7,7 @@ interface GraderInterface
 {
     public function True_False($answer);
     public function MCQ($answer);
-    // public function Match();
+    public function Match($answer);
 }
 
 // class True_False implements GraderInterface

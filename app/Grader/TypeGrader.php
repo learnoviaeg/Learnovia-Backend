@@ -44,7 +44,7 @@ class TypeGrader implements GraderInterface
                         $detail->stu_ans=0;
                         $detail->right=0;
                         for($i=0;$i<count($answer['student_answer']);$i++){
-                            if($detail->key == $answer['student_answer'][$i] && $detail->is_true==1){
+                            if($detail->key == $answer['student_answer'][$i]){
                                 if($detail->is_true == 1){
                                     $mark+=$detail->mark;
                                     $detail->right=1;
@@ -64,7 +64,7 @@ class TypeGrader implements GraderInterface
                         $detail->stu_ans=0;
                         $detail->right=0;
                         for($i=0;$i<count($answer['student_answer']);$i++){
-                            if($detail->key == $answer['student_answer'][$i] && $detail->is_true==1){
+                            if($detail->key == $answer['student_answer'][$i]){
                                 if($detail->is_true == 1){
                                     $mark+=$detail->mark;
                                     $detail->right=1;
@@ -85,8 +85,14 @@ class TypeGrader implements GraderInterface
         return $grade;
     }
 
-    public function Match()
+    public function Match($answer)
     {
-        dd('match');
+        // dd($answer['correct_answer']->mark);
+        // foreach($answer['student_answer'] as $ans){
+        //     foreach($ans as $key=>$answer){
+        //         // if($key == $answer)
+        //         // $mark+=
+        //     }
+        // }
     }
 }
