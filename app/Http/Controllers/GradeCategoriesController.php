@@ -71,8 +71,14 @@ class GradeCategoriesController extends Controller
             'category.*.name' => 'required|string',
             'category.*.parent' => 'exists:grade_categories,id',
             'category.*.hidden' => 'boolean',
+            'category.*.calculation_type' => 'string',
+            'category.*.locked' => 'boolean',
+            'category.*.min'=>'between:0,99.99',
+            'category.*.max'=>'between:0,99.99',
+            'category.*.weight_adjust' => 'boolean',
+            'category.*.exclude_empty_grades' => 'boolean',
         ]);
-        
+
         $course_segment_id = $this->chain->getCourseSegmentByChain($request)->first()->course_segment;
         foreach($request->category as $key=>$category){
             GradeCategory::firstOrCreate([
@@ -80,6 +86,12 @@ class GradeCategoriesController extends Controller
                 'name' => $category['name'],
                 'parent' => isset($category['parent']) ? $category['parent'] : null,
                 'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
+                'calculation_type' =>isset($category['calculation_type']) ? $category['calculation_type'] : null,
+                'locked' =>isset($category['locked']) ? $category['locked'] : 0,
+                'min' =>isset($category['min']) ? $category['min'] : 0,
+                'max' =>isset($category['max']) ? $category['max'] : null,
+                'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
+                'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
             ]);
         }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
@@ -110,12 +122,19 @@ class GradeCategoriesController extends Controller
             'name' => 'string',
             'parent' => 'exists:grade_categories,id',
             'hidden' => 'boolean',
+
         ]);
         $grade_category = GradeCategory::findOrFail($id);
         $grade_category->update([
             'name'   => isset($request->name) ? $request->name : $grade_category->name,
             'parent' => isset($request->parent) ? $request->parent : $grade_category->parent,
             'hidden' => isset($request->hidden) ? $request->hidden : $grade_category->hidden,
+            'calculation_type' =>isset($request->calculation_type) ? $request->calculation_type : $category['calculation_type'],
+            'locked' =>isset($request->locked) ? $request->locked  : $grade_category['locked'],
+            'min' =>isset($request->min) ? $request->min : $grade_category['min'],
+            'max' =>isset($request->max) ? $request->max : $grade_category['max'],
+            'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_category['weight_adjust'],
+            'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : $grade_category['exclude_empty_grades'],
         ]);
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }

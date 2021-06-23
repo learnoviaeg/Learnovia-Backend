@@ -52,6 +52,11 @@ class GradeItemsController extends Controller
             'items' => 'required|array',
             'items.*.name' => 'required|string',
             'items.*.grade_category_id' => 'required|exists:grade_categories,id',
+            'items.*.min'=>'between:0,99.99',
+            'items.*.max'=>'between:0,99.99',
+            'items.*.weight_adjust' => 'boolean',
+            'items.*.locked' => 'boolean',
+            'items.*.hidden' => 'boolean',
         ]);
        
         foreach($request->items as $key=>$item){
@@ -59,6 +64,11 @@ class GradeItemsController extends Controller
                 'name' => $item['name'],
                 'grade_category_id' => isset($item['grade_category_id']) ? $item['grade_category_id'] : null,
                 'type' => 'Manual',
+                'locked' =>isset($item['locked']) ? $item['locked'] : 0,
+                'min' =>isset($item['min']) ? $item['min'] : 0,
+                'max' =>isset($item['max']) ? $item['max'] : null,
+                'weight_adjust' =>isset($item['weight_adjust']) ? $item['weight_adjust'] : 0,
+                'hidden' =>isset($item['hidden']) ? $item['hidden'] : 0,
             ]);
         }
         return response()->json(['message' => __('messages.grade_item.add'), 'body' => null ], 200);
@@ -92,6 +102,11 @@ class GradeItemsController extends Controller
         $grade_items->update([
             'name'   => isset($request->name) ? $request->name : $grade_items->name,
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $grade_items->grade_category_id,
+            'hidden' => isset($request->hidden) ? $request->hidden : $grade_items->hidden,
+            'locked' =>isset($request->locked) ? $request->locked  : $grade_items['locked'],
+            'min' =>isset($request->min) ? $request->min : $grade_items['min'],
+            'max' =>isset($request->max) ? $request->max : $grade_items['max'],
+            'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_items['weight_adjust'],
         ]);
         return response()->json(['message' => __('messages.grade_item.update'), 'body' => null ], 200);
     }
