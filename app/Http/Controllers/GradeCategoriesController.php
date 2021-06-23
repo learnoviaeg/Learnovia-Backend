@@ -71,7 +71,7 @@ class GradeCategoriesController extends Controller
             'category.*.name' => 'required|string',
             'category.*.parent' => 'exists:grade_categories,id',
             'category.*.hidden' => 'boolean',
-            'category.*.calculation_type' => 'string',
+            'category.*.calculation_type' => 'nullable',
             'category.*.locked' => 'boolean',
             'category.*.min'=>'between:0,99.99',
             'category.*.max'=>'between:0,99.99',
