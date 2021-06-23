@@ -60,7 +60,7 @@ class QuizGrader implements ItemGraderInterface
                     ItemDetailsUser::firstOrCreate([
                         'user_id' => Auth::id(),
                         'item_details_id' => $item_detail->id,
-                        'grade' => ($grade) ? $grade['mark']:null,
+                        'grade' => ($grade) ? $grade->mark:null,
                         'Answers_Correction' => json_encode($correction_answer)
                     ]);
 
