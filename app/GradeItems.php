@@ -120,4 +120,9 @@ class GradeItems extends Model
 
         return $result;
     }
+
+    public function userGrades()
+    {
+        return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','item');
+    }
 }
