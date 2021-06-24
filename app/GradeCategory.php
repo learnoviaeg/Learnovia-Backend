@@ -136,4 +136,9 @@ class GradeCategory extends Model
             $child->getUsergrades($userid);
         }
     }
+
+    public function userGrades()
+    {
+        return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','category');
+    }
 }
