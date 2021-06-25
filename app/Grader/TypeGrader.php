@@ -87,12 +87,62 @@ class TypeGrader implements GraderInterface
 
     public function Match($answer)
     {
-        // dd($answer['correct_answer']->mark);
-        // foreach($answer['student_answer'] as $ans){
-        //     foreach($ans as $key=>$answer){
-        //         // if($key == $answer)
-        //         // $mark+=
-        //     }
-        // }
+        //obj of answer of Match
+        /**
+         * array:[  
+            * "student_answer"[
+                * {"1": "1"}
+                * {"3": "3"}
+            * ]
+            * 
+            * "correct_answer"{
+                * "match_a"[
+                    * {"1": "mariam2"}
+                    * {"2": "ismail2"}
+                    * {"3": "roshdy3"}
+                * ]
+                * "match_b"[
+                    * {"1": "mariam2"}
+                    * {"2": "ismail2"}
+                * ]
+                * "mark"[
+                    * {"1": "3"}
+                    * {"2": "2"}
+                * ]
+                * "total_mark: 5
+            * }
+         * ]
+         * 
+         */
+        $right=0;
+        $mark=0;
+        $flag=false;
+        $grade=$answer['correct_answer'];
+        foreach($answer['student_answer'] as $kk=>$ans){
+            $ans->right=0;
+            $ans->grade=0;
+            foreach($ans as $key=>$aa){
+                foreach($answer['correct_answer']->mark[$kk] as $mrk){
+                    if($key === $aa){
+                        $ans->right=1;
+                        $ans->grade=$mrk;
+                        $mark+=$mrk;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if($mark > 0 && $mark < $answer['correct_answer']->total_mark)
+            $right=2;
+        if($mark == $answer['correct_answer']->total_mark)
+            $right=1;
+
+        $grade->mark=$mark;
+        $grade->right=$right;
+        $grade->stu_ans=$answer['student_answer'];
+        unset($grade->match_a);
+        unset($grade->match_b);
+        return $grade;
     }
 }
