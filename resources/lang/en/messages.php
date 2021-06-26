@@ -27,7 +27,8 @@ return [
         'no_permission' => 'User does not have the right permissions',
         'role_required' => 'Please, choose role first',
         'not_allowed' => 'You are not allowed to view this.',
-        'not_allowed_to_edit' => 'You are not allowed to edit this.'
+        'not_allowed_to_edit' => 'You are not allowed to edit this.',
+        'extension_error' => 'This extension is not valid'
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',

@@ -27,7 +27,8 @@ return [
         'no_permission' => 'المستخدم ليس لديه الإذن',
         'role_required' => 'من فضلك ، اختر الوظيفة أولا',
         'not_allowed' => 'غير مسموح بذلك',
-        'not_allowed_to_edit' => 'لا يمكن التعديل'
+        'not_allowed_to_edit' => 'لا يمكن التعديل',
+        'extension_error' => 'هذا الامتداد غير صالح'
     ],
     'success' => [
         'submit_success' => 'تم إرسال الإجابة بنجاح',
