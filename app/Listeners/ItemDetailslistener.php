@@ -33,10 +33,12 @@ class ItemDetailslistener
     public function handle(GradeItemEvent $event)
     {
         // $event->grade_item is attempt of quiz (type=>attempt)
-        $gradeCat=GradeCategory::find($event->grade_item->grade_category_id);
-        $quiz=Quiz::find($gradeCat->instance_id);
-        $questions=$quiz->Question;
         if($event->grade_item->type == 'Attempt'){
+            
+            $gradeCat=GradeCategory::find($event->grade_item->grade_category_id);
+            $quiz=Quiz::find($gradeCat->instance_id);
+            $questions=$quiz->Question;
+
             foreach($questions as $question){
                 if($question->question_type_id == 5){
                     $quest=$question->children->pluck('id');
