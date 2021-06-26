@@ -11,6 +11,8 @@ class userQuizAnswer extends Model
         'user_quiz_id','question_id','user_answers','correction','answered','force_submit'
     ];
 
+    protected $appends = ['grade'];
+
     public function Question()
     {
         return $this->belongsTo('Modules\QuestionBank\Entities\Questions', 'question_id', 'id');
@@ -47,5 +49,10 @@ class userQuizAnswer extends Model
     public function getCorrectionAttribute()
     {
         return json_decode($this->attributes['correction']);
+    }
+
+    //will get the attemp final grade from the gradder report after it's done
+    public function getGradeAttribute(){
+        return 10;
     }
 }

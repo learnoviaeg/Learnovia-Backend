@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\quiz_questions;
+use Carbon\Carbon;
 
 class userQuiz extends Model
 {
@@ -16,6 +17,8 @@ class userQuiz extends Model
         'device_data','browser_data','ip',
         'open_time','submit_time'
     ];
+
+    protected $appends = ['duration','status'];
 
     public function quiz_lesson()
     {
@@ -108,4 +111,42 @@ class userQuiz extends Model
         }
         return $grade;
     }  
+
+    public function getDurationAttribute(){
+
+        $duration = null;
+
+        if($this->attributes['open_time'] && $this->attributes['submit_time']){
+
+            $open = Carbon::parse($this->attributes['open_time']);
+            $submit = Carbon::parse($this->attributes['submit_time']);
+            $duration = $open->diffInMinutes($submit);
+        }
+        return $duration;
+    }
+        
+    public function getStatusAttribute(){
+
+        $status = 'not_solved';
+
+        if($this->attributes['open_time'] && !$this->attributes['submit_time']){
+
+            $status = 'in_progress';
+        }
+
+        if($this->attributes['open_time'] && $this->attributes['submit_time']){
+
+            $quiz_answer = count($this->UserQuizAnswer);
+            $answered = $this->UserQuizAnswer->where('answered',1)->count();
+            if($quiz_answer == $answered)
+                $status = 'solved';
+        }
+
+        return $status;
+    }
+
+    //will get the attemp final grade from the gradder report after it's done
+    public function getGradeAttribute(){
+        return 10;
+    }
 }
