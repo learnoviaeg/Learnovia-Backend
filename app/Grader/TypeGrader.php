@@ -141,8 +141,8 @@ class TypeGrader implements GraderInterface
         $grade->mark=$mark;
         $grade->right=$right;
         $grade->stu_ans=$answer['student_answer'];
-        unset($grade->match_a);
-        unset($grade->match_b);
+        // unset($grade->match_a);
+        // unset($grade->match_b);
         return $grade;
     }
 }
