@@ -221,11 +221,18 @@ class AssigmentsController extends Controller
     {
         $settings = $this->setting->get_value('create_assignment_extensions');
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string',
             'content' => 'string|required_without:file',
             'file' => 'file|distinct|required_without:content|mimes:'.$settings,
-        ]);
+        ];
+
+        $customMessages = [
+            'file.mimes' => __('messages.error.extension_error') 
+        ];
+
+        $this->validate($request, $rules, $customMessages);
+
        
         $assignment = new assignment;
         if ($request->hasFile('file')) {
