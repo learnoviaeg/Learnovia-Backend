@@ -92,7 +92,7 @@ class CalendarsController extends Controller
             $timeline->whereMonth('start_date','<=', $request->calendar_month)->whereMonth('due_date','>=', $request->calendar_month);
 
         if(isset($request->calendar_day))
-            $timeline->whereDay('start_date','<=', $request->calendar_month)->whereDay('due_date','>=', $request->calendar_month);
+            $timeline->whereDay('start_date','<=', $request->calendar_day)->whereDay('due_date','>=', $request->calendar_day);
 
         // if(isset($request->calendar_month))
         //     $timeline->whereMonth('publish_date', $request->calendar_month);
