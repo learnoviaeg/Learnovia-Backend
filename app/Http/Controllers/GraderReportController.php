@@ -35,6 +35,8 @@ class GraderReportController extends Controller
 
         $course_segment_id = $this->chain->getCourseSegmentByChain($request)->first()->course_segment;
         $main_category = GradeCategory::where('course_segment_id' ,$course_segment_id)->whereNull('parent')->with('userGrades.user')->get();
+        $main_category[0]['children'] = [];
+
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $main_category ], 200);
     }
 
@@ -58,6 +60,8 @@ class GraderReportController extends Controller
     public function show($id)
     {
         $categories = GradeCategory::where('parent',$id)->with('userGrades.user')->get();
+        foreach($categories as $key=>$category)
+           $category['children'] = [];
         $items = GradeItems::where('grade_category_id' ,$id)->with('userGrades.user')->get();
         $all['categories'] = $categories;
         $all['items'] = $items;
