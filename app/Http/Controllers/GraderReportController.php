@@ -66,7 +66,7 @@ class GraderReportController extends Controller
         }
         $items = GradeItems::where('grade_category_id' ,$id)->with('userGrades.user')->get();
         foreach($items as $key=>$item){
-            $category['Category_or_Item'] = 'Item';
+            $item['Category_or_Item'] = 'Item';
         }
         $all['categories'] = $categories;
         $all['items'] = $items;
