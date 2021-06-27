@@ -193,7 +193,7 @@ class QuizzesController extends Controller
             foreach($request->lesson_id as $lesson)
             {
                 $leson=Lesson::find($lesson);
-                $grade_Cat=GradeCategory::where('course_segment_id',$leson->course_segment_id)->where('lesson_id',$lesson)->first();
+                $grade_Cat=GradeCategory::where('course_segment_id',$leson->course_segment_id)->whereNull('parent')->first();
                 $index = QuizLesson::where('lesson_id',$lesson)->get()->max('index');
                 $Next_index = $index + 1;
                 //add validations for all the feilds
