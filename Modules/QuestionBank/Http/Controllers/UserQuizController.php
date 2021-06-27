@@ -23,6 +23,9 @@ use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use App\LastAction;
+use App\ItemDetail;
+use App\ItemDetailsUser;
+
 use function Opis\Closure\serialize;
 
 class UserQuizController extends Controller
@@ -265,10 +268,12 @@ class UserQuizController extends Controller
         $user_quiz = userQuiz::find($request->user_quiz_id);
         $allData = collect([]);
         $Corrected_answers = collect([]);
+
         foreach ($request->Questions as $question) {
             $currentQuestion = Questions::find($question['id']);
             $question_type_id = $currentQuestion->question_type->id;
-
+            $quiz_questions = quiz_questions::where('question_id',$question['id'])->
+            where('quiz_id',$user_quiz->quiz_lesson->quiz_id)->first()->grade_details;
             $data = [
                 'question_id' => $question['id']
             ];
@@ -277,14 +282,14 @@ class UserQuizController extends Controller
                 ->where('question_id', $question['id'])->first();
             if (!isset($userQuizAnswer))
                 return HelperController::api_response_format(400, null, __('messages.error.not_found'));
-
+                
             if (isset($question_type_id)) {
                 switch ($question_type_id) {
                     case 1: // True_false
 
                         if ($currentQuestion->content->and_why == true) {
-                            // if ($currentQuestion->mark < $question['mark'])
-                            //     return response()->json(['message' => __('messages.error.grade_less_than').$question['mark'], 'body' => null ], 400);
+                            if ($quiz_questions->and_why_mark < $question['mark'])
+                                return response()->json(['message' => __('messages.error.grade_less_than').$quiz_questions->and_why_mark , 'body' => null ], 400);
                             if($userQuizAnswer['correction'] != null){
                                 $correction = $userQuizAnswer['correction'];
                                 $correction->and_why_right = isset($question['right']) ? $question['right'] : null;
@@ -297,6 +302,17 @@ class UserQuizController extends Controller
                                     'feedback' => isset($question['feedback']) ? $question['feedback'] : null
                                 ]);
                             }
+                    $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
+                    $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->where('type','Attempts')->first();
+                    $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->where('item_id',$question['id'])->where('type','Question')->first();
+                    ItemDetailsUser::updateOrCreate(
+                        ['user_id'=>Auth::id(), 'item_details_id' => $item_details->id,],
+                        ['Answers_Correction' => json_encode($correction) 
+                        ,'grade' => $correction->and_why_mark +$correction->mark,
+                        ]
+                    );
+
+
                             $data['correction'] =  json_encode($correction);
 
                         } else
@@ -305,12 +321,23 @@ class UserQuizController extends Controller
 
 
                     case 4: // Essay
-                        // if ($currentQuestion->mark < $question['mark'])
-                        //     return response()->json(['message' => __('messages.error.grade_less_than').$question['mark'], 'body' => null ], 400);
+                        if ($quiz_questions->total_mark < $question['mark'])
+                            return response()->json(['message' => __('messages.error.grade_less_than').$quiz_questions->total_mark, 'body' => null ], 400);
                         $correct['right'] = isset($question['right']) ? $question['right'] : null;
                         $correct['grade'] = isset($question['mark']) ? $question['mark'] : null;
                         $correct['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
                         $data['correction'] =  json_encode($correct);
+                        $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
+                        $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->where('type','Attempts')->where('index',$user_quiz->attempt_index)->first();
+                        $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->where('item_id',$question['id'])->where('type','Question')->first();
+
+                        ItemDetailsUser::updateOrCreate(
+                            ['user_id'=>Auth::id(), 'item_details_id' => $item_details->id,],
+                            ['Answers_Correction' => json_encode($correct) 
+                            ,'grade' => $correct->mark,
+                            ]
+                        );
+
                         break;
 
                     default:
