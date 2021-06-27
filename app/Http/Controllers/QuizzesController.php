@@ -126,7 +126,7 @@ class QuizzesController extends Controller
              */
             'is_graded' => 'required|boolean',
             'grade_category_id' => 'required_if:is_graded,==,1',
-            'duration' => 'required|integer',
+            'duration' => 'required|integer|min:60', //by second
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'feedback' => 'integer| in:1,2,3',
             /**

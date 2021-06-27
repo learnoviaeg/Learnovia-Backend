@@ -383,8 +383,9 @@ class UserQuizController extends Controller
         $final= collect([]);
         $all_users = array();
         $user_attempts = array();
-        $quiz_questions = quiz_questions::where('quiz_id',$request->quiz_id)->pluck('question_id');
-        $essayQues = Questions::whereIn('id',$quiz_questions)->where('question_type_id',4)->pluck('id');
+        $quiz=Quiz::find($request->quiz_id);
+        $questions=$quiz->Question->pluck('id');
+        $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
         if(count($essayQues) > 0)
             $essay = 1;
         else
@@ -398,8 +399,7 @@ class UserQuizController extends Controller
         if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
             $quiz_duration_ended=true;
         
-        $lesson = Lesson::find($request->lesson_id);
-        $users=Enroll::where('course_segment',$lesson->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
+        $users=Enroll::where('course_segment',$quiz_lesson->lesson->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
 
         if (!isset($quiz_lesson))
             return HelperController::api_response_format(400, null, __('messages.quiz.quiz_not_belong'));
@@ -414,7 +414,7 @@ class UserQuizController extends Controller
 
         //count attempts NotGraded
         $userEssayCheckAnswer=UserQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)
-                                                ->whereNull('correct')->where('answered',1)->where('force_submit',1)->pluck('user_quiz_id');
+                                                ->where('answered',1)->where('force_submit',1)->pluck('user_quiz_id');
         $countOfNotGraded = count($userEssayCheckAnswer);
         
         $Submitted_users=0;
@@ -449,10 +449,9 @@ class UserQuizController extends Controller
                     $gradeNotWeight=0;
                     $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',1)->get();
                     foreach($user_quiz_answers as $user_quiz_answer)
-                        $gradeNotWeight+= $user_quiz_answer->user_grade;
+                        $gradeNotWeight+= $user_quiz_answer->correction->mark;
                         
                     $user_Attemp["grade"]=$gradeNotWeight;
-                    $user_Attemp["feedback"] =$attem->feedback;
                 }
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
                 if($useranswerSubmitted < 0){
@@ -481,7 +480,7 @@ class UserQuizController extends Controller
         $all_users['notGraded'] = $countOfNotGraded ;
         $final->put('submittedAndNotSub',$all_users);
         $final->put('users',$user_attempts);
-        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($quiz_lesson->lesson->courseSegment->course_id);
 
         return HelperController::api_response_format(200, $final, __('messages.quiz.students_attempts_list'));
     }
