@@ -10,6 +10,7 @@ use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\Lesson;
+use App\GradeCategory;
 use App\Classes;
 use App\Course;
 use App\Level;
