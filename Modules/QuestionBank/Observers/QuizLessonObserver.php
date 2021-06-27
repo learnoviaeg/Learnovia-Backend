@@ -63,7 +63,7 @@ class QuizLessonObserver
         //     ]);
         // }   
         
-        if($quiz->is_graded == 1){
+        // if($quiz->is_graded == 1){
             $grade_category=GradeCategory::find($quizLesson->grade_category_id);
             //creating grade category for quiz
             $categoryOfQuiz = GradeCategory::create([
@@ -78,7 +78,7 @@ class QuizLessonObserver
             //update quiz lesson with the id of grade categoey created for quiz
             $quizLesson->grade_category_id = $categoryOfQuiz->id;
             $quizLesson->save();
-        }
+        // }
     }
 
     /**
