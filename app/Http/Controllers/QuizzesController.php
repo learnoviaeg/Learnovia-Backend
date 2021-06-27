@@ -192,6 +192,7 @@ class QuizzesController extends Controller
             foreach($request->lesson_id as $lesson)
             {
                 $lesson=Lesson::find($lesson);
+                $grade_Cat=GradeCategory::where('course_segment_id',$lesson->course_segment_id)->where('lesson_id',$lesson)->first();
                 $index = QuizLesson::where('lesson_id',$lesson)->get()->max('index');
                 $Next_index = $index + 1;
                 //add validations for all the feilds
@@ -203,7 +204,7 @@ class QuizzesController extends Controller
                     'max_attemp' => $request->max_attemp,
                     'grading_method_id' => $request->grading_method_id,
                     'grade' => $request->grade,
-                    'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $lesson->course_segment_id,
+                    'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => $request->opening_time,
                     'index' => $Next_index,
                     'visible' => isset($request->visible)?$request->visible:1
