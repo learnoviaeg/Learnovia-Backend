@@ -251,35 +251,37 @@ class UserController extends Controller
 
         $user = User::find($request->id);
 
+        if (!Auth::user()->can('user/update-password')) 
+            return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+
+        if (isset($request->password)){
+            $user->real_password=$request->password;
+            $user->password =   bcrypt($request->password);
+
+            $tokens = $user->tokens->where('revoked',false);
+            foreach($tokens as $token)
+                $token->revoke();
+            unset($user->tokens);
+            Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+        }
+
+        if (!Auth::user()->can('user/update-username')) 
+            return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+
+        if (isset($request->username)){
+            $user->username=$request->username;
+
+            $tokens = $user->tokens->where('revoked',false);
+            foreach($tokens as $token)
+                $token->revoke();
+            unset($user->tokens);
+            Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+        }
+
         $check = $user->update([
             'firstname' => $request->firstname,
             'lastname' => $request->lastname,
         ]);
-
-            if (Auth::user()->can('user/update-password')) {
-                if (isset($request->password)){
-                    $user->real_password=$request->password;
-                    $user->password =   bcrypt($request->password);
-
-                    $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token)
-                        $token->revoke();
-                    unset($user->tokens);
-                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
-                }
-            }
-
-            if (Auth::user()->can('user/update-username')) {
-                if (isset($request->username)){
-                    $user->username=$request->username;
-
-                    $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token)
-                        $token->revoke();
-                    unset($user->tokens);
-                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
-                }
-            }
 
         if (isset($request->picture))
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
