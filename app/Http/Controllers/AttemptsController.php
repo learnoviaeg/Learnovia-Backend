@@ -23,6 +23,7 @@ use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use App\Events\QuizAttemptEvent;
+use App\Events\GradeAttemptEvent;
 use App\LastAction;
 
 class AttemptsController extends Controller
@@ -215,8 +216,10 @@ class AttemptsController extends Controller
         }
 
         // dd($user_quiz);
-        $tt=new QuizGrader($user_quiz,$this->gradeInterface);
-        $tt->grade();
+        // $tt=new QuizGrader($user_quiz,$this->gradeInterface);
+        // $tt->grade();
+
+        event(new GradeAttemptEvent($user_quiz,$this->gradeInterface));
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }

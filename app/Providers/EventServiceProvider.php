@@ -18,25 +18,21 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,    
         ],
-        
-        // 'App\Events\UserGradeEvent' => [
-        //     'App\Listeners\UserGradeListener',
-        // ],
-        // UserGradeEvent::class => [
-        //     UserGradeListener::class,
-        // ],
 
         'App\Events\MassLogsEvent' => [
             'App\Listeners\MassLogsListener',
         ],
 
         'App\Events\GradeItemEvent' => [
-            // 'App\Listeners\AttemptItemlistener',
             'App\Listeners\ItemDetailslistener',
         ],
 
         'App\Events\QuizAttemptEvent' => [
             'App\Listeners\AttemptItemlistener',
+        ],
+
+        'App\Events\GradeAttemptEvent' => [
+            'App\Listeners\GradeAttemptItemlistener',
         ],
     ];
 

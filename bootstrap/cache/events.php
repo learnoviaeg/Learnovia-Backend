@@ -17,5 +17,9 @@
     array (
       0 => 'App\\Listeners\\AttemptItemlistener',
     ),
+    'App\\Events\\GradeAttemptEvent' => 
+    array (
+      0 => 'App\\Listeners\\GradeAttemptItemlistener',
+    ),
   ),
 );
