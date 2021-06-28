@@ -64,11 +64,11 @@ class GraderReportController extends Controller
     public function show($id)
     {
         $categories = GradeCategory::where('parent',$id)->with('userGrades.user')->get();
+        $items = GradeItems::where('grade_category_id' ,$id)->with('userGrades.user')->get();
         foreach($categories as $key=>$category){
             $category['children'] = [];
             $category['Category_or_Item'] = 'Category';
             $cat = GradeCategory::where('parent',$category->id)->get();
-            $items = GradeItems::where('grade_category_id' ,$id)->with('userGrades.user')->get();
             $category['has_children'] = false;
             if(count($cat) > 0 || count($items) > 0)
                 $category['has_children'] = true;
