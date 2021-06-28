@@ -440,8 +440,10 @@ class UserQuizController extends Controller
         $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
 
         //count attempts NotGraded
+        // dd($essayQues);
         $userEssayCheckAnswer=UserQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)
-                                                ->where('answered',1)->where('force_submit',1)->pluck('user_quiz_id');
+                                                ->where('answered',1)->where('force_submit',1)->pluck('correction');
+                                                // dd($userEssayCheckAnswer);
         $countOfNotGraded = count($userEssayCheckAnswer);
         
         $Submitted_users=0;
