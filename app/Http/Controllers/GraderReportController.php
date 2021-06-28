@@ -75,7 +75,7 @@ class GraderReportController extends Controller
         }
         foreach($items as $key=>$item){
             $item['Category_or_Item'] = 'Item';
-            $category['has_children'] = false;
+            $item['has_children'] = false;
         }
         $all['categories'] = $categories;
         $all['items'] = $items;
