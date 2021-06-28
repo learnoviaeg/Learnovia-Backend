@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Events\MassLogsEvent;
 use Carbon\Carbon;
 use App\User;
+use App\Classes;
+use App\Level;
 use App\LastAction;
 use App\Language;
 use Spatie\Permission\Models\Permission;
@@ -225,9 +227,14 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = $request->user();
+        if(isset($user->class_id))
+          $user['class_name']=Classes::find($user->class_id)->name;
+        if(isset($user->level))
+          $user['level_name']=Level::find($user->level)->name;
+        
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
-        return HelperController::api_response_format(200, $user);
+        return HelperController::api_response_format(200, $user,'this is user ');
     }
 
     public function userRole(Request $request)
