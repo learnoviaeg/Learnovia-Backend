@@ -5,6 +5,8 @@ use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use App\GradeCategory;
 use App\GradeItems;
+use App\UserGrader;
+use App\Enroll;
 
 use Illuminate\Http\Request;
 
@@ -58,9 +60,9 @@ class GradeItemsController extends Controller
             'items.*.locked' => 'boolean',
             'items.*.hidden' => 'boolean',
         ]);
-       
+
         foreach($request->items as $key=>$item){
-            GradeItems::firstOrCreate([
+            $item = GradeItems::firstOrCreate([
                 'name' => $item['name'],
                 'grade_category_id' => isset($item['grade_category_id']) ? $item['grade_category_id'] : null,
                 'type' => 'Manual',
@@ -70,6 +72,15 @@ class GradeItemsController extends Controller
                 'weight_adjust' =>isset($item['weight_adjust']) ? $item['weight_adjust'] : 0,
                 'hidden' =>isset($item['hidden']) ? $item['hidden'] : 0,
             ]);
+            $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment',GradeCategory::whereId($item['grade_category_id'])->first()->course_segment_id)->pluck('user_id');
+            foreach($enrolled_students as $student){
+                UserGrader::create([
+                    'user_id'   => $student,
+                    'item_type' => 'Item',
+                    'item_id'   => $item->id,
+                    'grade'     => null
+                ]);
+            }
         }
         return response()->json(['message' => __('messages.grade_item.add'), 'body' => null ], 200);
     }
