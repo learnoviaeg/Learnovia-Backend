@@ -46,7 +46,7 @@ use App\Exports\CoursesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Modules\QuestionBank\Entities\QuestionsCategory;
-
+use App\UserGrader;
 
 class CourseController extends Controller
 {
@@ -162,6 +162,17 @@ class CourseController extends Controller
                                     'name' => $request->name . ' Total',
                                     'course_segment_id' => $courseSegment->id
                                 ]);
+                                //add user grade for every student in course total category in this course segment 
+                                $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment', $courseSegment->id)->pluck('user_id');
+                                foreach($enrolled_students as $student){
+                                    UserGrader::create([
+                                        'user_id'   => $student,
+                                        'item_type' => 'Category',
+                                        'item_id'   => $gradeCat->id,
+                                        'grade'     => null
+                                    ]);
+                                }
+
                                 if ($request->filled('no_of_lessons')) {
                                     $no_of_lessons = $request->no_of_lessons;
                                 }
