@@ -30,7 +30,7 @@ class GradeAttemptItemlistener
     }
 
     public function handle(GradeAttemptEvent $event){
-        $question_types=['True_False','MCQ','Match'];
+        
         $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$event->item->id)->get();
         // dd($user_quiz_answers);
 
@@ -48,7 +48,22 @@ class GradeAttemptItemlistener
                     $correction_answer['student_answer']=$stud_quest_ans->user_answers;
                     $correction_answer['correct_answer']=$item_detail->weight_details;
 
-                    $question_type=Questions::whereId($item_detail['item_id'])->pluck('question_type_id')->first();
+                    $Q=Questions::find($item_detail['item_id']);
+                    $question_type=$Q->question_type->name;
+
+                    //for grade all types of attempt
+
+                    // $files = scandir(__DIR__ . '/../Grader/Types/');
+                    // // dd($files);
+                    // $name = $question_type . '.php';
+            
+                    // if (in_array($name, $files)) {
+                    //     eval('$classes = new App\Grader\Types\\' . $question_type . '();');
+                    //     // $check = Excel::import($classes, request()->file('file'));
+                    //     return HelperController::api_response_format(201 , [] , 'done');
+                    // } else {
+                    //     return HelperController::api_response_format(201 , [] , 'can\'t grade this type of question');
+                    // }
         
                     if($question_type == 1)
                         $grade=$event->gradeinterface->True_False($correction_answer);
@@ -58,16 +73,17 @@ class GradeAttemptItemlistener
 
                     if($question_type == 3)
                         $grade=$event->gradeinterface->Match($correction_answer);
-                
+
                     ItemDetailsUser::firstOrCreate([
                         'user_id' => Auth::id(),
                         'item_details_id' => $item_detail->id,
-                        'grade' => ($grade) ? $grade->mark:null,
+                        'grade' => isset($grade) ? $grade->mark:null,
                         'Answers_Correction' => json_encode($correction_answer)
                     ]);
 
                     $stud_quest_ans->update(['correction'=>json_encode($grade)]);
-                    $total_grade_attempt=$grade->mark;
+                    if(isset($grade))
+                        $total_grade_attempt=$grade->mark;
                 }
             }
         }
