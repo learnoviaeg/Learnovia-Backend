@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use App\GradeCategory;
+use App\GradeItems;
+use App\UserGrader;
+use App\Enroll;
 
 class GradeCategoriesController extends Controller
 {
@@ -80,8 +83,9 @@ class GradeCategoriesController extends Controller
         ]);
 
         $course_segment_id = $this->chain->getCourseSegmentByChain($request)->first()->course_segment;
+        $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment',$course_segment_id)->pluck('user_id');
         foreach($request->category as $key=>$category){
-            GradeCategory::firstOrCreate([
+            $cat = GradeCategory::firstOrCreate([
                 'course_segment_id'=> $course_segment_id,
                 'name' => $category['name'],
                 'parent' => isset($category['parent']) ? $category['parent'] : null,
@@ -93,6 +97,14 @@ class GradeCategoriesController extends Controller
                 'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
                 'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
             ]);
+            foreach($enrolled_students as $student){
+                UserGrader::create([
+                    'user_id'   => $student,
+                    'item_type' => 'Category',
+                    'item_id'   => $cat->id,
+                    'grade'     => null
+                ]);
+            }
         }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
     }
