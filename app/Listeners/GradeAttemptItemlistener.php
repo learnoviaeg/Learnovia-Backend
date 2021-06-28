@@ -30,7 +30,7 @@ class GradeAttemptItemlistener
     }
 
     public function handle(GradeAttemptEvent $event){
-        $question_types=['True_False','MCQ','Match'];
+        
         $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$event->item->id)->get();
         // dd($user_quiz_answers);
 
@@ -67,7 +67,8 @@ class GradeAttemptItemlistener
                     ]);
 
                     $stud_quest_ans->update(['correction'=>json_encode($grade)]);
-                    $total_grade_attempt=$grade->mark;
+                    if(isset($grade))
+                        $total_grade_attempt=$grade->mark;
                 }
             }
         }
