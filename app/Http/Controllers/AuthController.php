@@ -234,7 +234,7 @@ class AuthController extends Controller
         
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
-        return HelperController::api_response_format(200, $user,'this is user ');
+        return HelperController::api_response_format(200, $user);
     }
 
     public function userRole(Request $request)
