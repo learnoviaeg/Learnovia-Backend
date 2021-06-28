@@ -59,6 +59,7 @@ class GradeAttemptItemlistener
                     if($question_type == 3)
                         $grade=$event->gradeinterface->Match($correction_answer);
                 
+                        // dd($grade);
                     ItemDetailsUser::firstOrCreate([
                         'user_id' => Auth::id(),
                         'item_details_id' => $item_detail->id,
