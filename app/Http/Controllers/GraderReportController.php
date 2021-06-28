@@ -37,8 +37,9 @@ class GraderReportController extends Controller
         $main_category = GradeCategory::where('course_segment_id' ,$course_segment_id)->whereNull('parent')->with('userGrades.user')->get();
         $main_category[0]['children'] = [];
         $cat = GradeCategory::where('parent',$main_category[0]->id)->get();
+        $items = GradeItems::where('grade_category_id',$main_category[0]->id)->get();
             $main_category[0]['has_children'] = false;
-            if(count($cat) > 0)
+            if(count($cat) > 0 || count($items) > 0)
                 $main_category[0]['has_children'] = true;
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $main_category ], 200);
     }
@@ -67,11 +68,11 @@ class GraderReportController extends Controller
             $category['children'] = [];
             $category['Category_or_Item'] = 'Category';
             $cat = GradeCategory::where('parent',$category->id)->get();
+            $items = GradeItems::where('grade_category_id' ,$id)->with('userGrades.user')->get();
             $category['has_children'] = false;
-            if(count($cat) > 0)
+            if(count($cat) > 0 || count($items) > 0)
                 $category['has_children'] = true;
         }
-        $items = GradeItems::where('grade_category_id' ,$id)->with('userGrades.user')->get();
         foreach($items as $key=>$item){
             $item['Category_or_Item'] = 'Item';
             $category['has_children'] = false;
