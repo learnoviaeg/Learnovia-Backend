@@ -449,8 +449,9 @@ class UserQuizController extends Controller
                                                 ->pluck('correction');  
         $countEss_TF=0;
         foreach($userEssayCheckAnswer as $checkCorrection)
-            if($checkCorrection == null || (isset($checkCorrection) && $checkCorrection->and_why_mark == null))
-                $countEss_TF+=1;
+            if($checkCorrection == null || (isset($checkCorrection) && isset($checkCorrection->and_why_mark)))
+                if(($checkCorrection->and_why_mark) == null)
+                    $countEss_TF+=1;
         
         $Submitted_users=0;
         foreach ($users as $user_id){
