@@ -239,7 +239,7 @@ class UserController extends Controller
             'second language' => 'integer|exists:languages,id',
             'birthdate' => 'nullable|date'
         ]);
-        if(!Auth::user()->can('allow-edit-profiles') && $id != Auth::id())
+        if(!Auth::user()->can('allow-edit-profiles') && $request->id != Auth::id())
             return response()->json(['message' => __('messages.error.not_allowed_to_edit'), 'body' => null ], 200);
 
         $users_is = collect([]);
