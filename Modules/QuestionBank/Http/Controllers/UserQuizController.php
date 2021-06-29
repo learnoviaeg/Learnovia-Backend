@@ -334,7 +334,7 @@ class UserQuizController extends Controller
                         ItemDetailsUser::updateOrCreate(
                             ['user_id'=>Auth::id(), 'item_details_id' => $item_details->id,],
                             ['Answers_Correction' => json_encode($correct) 
-                            ,'grade' => $correct->mark,
+                            ,'grade' => $question['mark'],
                             ]
                         );
 
