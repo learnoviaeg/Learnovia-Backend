@@ -210,7 +210,7 @@ class AttemptsController extends Controller
             }
 
         if($request->forced){
-            $answer2=userQuizAnswer::where('user_quiz_id',$id)->update(['force_submit'=>'1']);
+            $answer2=userQuizAnswer::where('user_quiz_id',$id)->update(['force_submit'=>1,'answered' => 1]);
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
             $user_quiz->save();
         }
