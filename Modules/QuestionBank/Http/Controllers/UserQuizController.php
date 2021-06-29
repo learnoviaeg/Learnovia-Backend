@@ -328,7 +328,7 @@ class UserQuizController extends Controller
                         $correct['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
                         $data['correction'] =  json_encode($correct);
                         $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
-                        $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->where('type','Attempts')->where('index',$user_quiz->attempt_index)->first();
+                        $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
                         $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->where('item_id',$question['id'])->where('type','Question')->first();
 
                         ItemDetailsUser::updateOrCreate(
