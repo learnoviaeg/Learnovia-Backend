@@ -412,11 +412,15 @@ class UserQuizController extends Controller
         $user_attempts = array();
         $quiz=Quiz::find($request->quiz_id);
         $questions=$quiz->Question->pluck('id');
+        $essay=0;
+        $t_f_Ques=0;
         $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
+        $t_f_Quest = Questions::whereIn('id',$questions)->where('question_type_id',1)->pluck('id');
         if(count($essayQues) > 0)
             $essay = 1;
-        else
-            $essay = 0;
+
+        if(count($t_f_Quest) > 0)
+            $t_f_Ques = 1;
         
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if(!$quiz_lesson)
@@ -440,11 +444,13 @@ class UserQuizController extends Controller
         $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
 
         //count attempts NotGraded
-        // dd($essayQues);
         $userEssayCheckAnswer=UserQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)
-                                                ->where('answered',1)->where('force_submit',1)->pluck('correction');
-                                                // dd($userEssayCheckAnswer);
-        $countOfNotGraded = count($userEssayCheckAnswer);
+                                                ->orWhereIn('question_id',$t_f_Quest)->where('answered',1)->where('force_submit',1)
+                                                ->pluck('correction');  
+        $countEss_TF=0;
+        foreach($userEssayCheckAnswer as $checkCorrection)
+            if($checkCorrection == null || (isset($checkCorrection) && $checkCorrection->and_why_mark == null))
+                $countEss_TF+=1;
         
         $Submitted_users=0;
         foreach ($users as $user_id){
@@ -468,13 +474,12 @@ class UserQuizController extends Controller
                 ]);
                 $user_Attemp['id']= $attem->id;
                 $user_Attemp["submit_time"]= $attem->submit_time;
-                $useranswer = userQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$essayQues)->where('answered',1)->where('user_grade', null)->count();
-                if($useranswer > 0){
+                if($countEss_TF > 0){
                     $user_Attemp["grade"]= null;
                     $user_Attemp["feedback"] =null;
                 } 
                 else{
-                    //withput wieght
+                    //without wieght
                     $gradeNotWeight=0;
                     $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',1)->get();
                     foreach($user_quiz_answers as $user_quiz_answer)
@@ -504,9 +509,10 @@ class UserQuizController extends Controller
                 $Submitted_users++;
         }
         $all_users['essay']=$essay;
+        $all_users['T_F']=$t_f_Ques;
         $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
         $all_users['submitted_users'] = $Submitted_users ;
-        $all_users['notGraded'] = $countOfNotGraded ;
+        $all_users['notGraded'] = $countEss_TF ;
         $final->put('submittedAndNotSub',$all_users);
         $final->put('users',$user_attempts);
         LastAction::lastActionInCourse($quiz_lesson->lesson->courseSegment->course_id);
