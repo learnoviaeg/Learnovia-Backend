@@ -320,7 +320,7 @@ class UserQuizController extends Controller
                         if ($quiz_questions->total_mark < $question['mark'])
                             return response()->json(['message' => __('messages.error.grade_less_than').$quiz_questions->total_mark, 'body' => null ], 400);
                         $correct['right'] = isset($question['right']) ? $question['right'] : null;
-                        $correct['mark'] = isset($question['mark']) ? $question['mark'] : null;
+                        $correct['grade'] = isset($question['mark']) ? $question['mark'] : null;
                         $correct['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
                         $data['correction'] =  json_encode($correct);
                         $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
@@ -331,7 +331,7 @@ class UserQuizController extends Controller
                             'user_id'=>Auth::id(),
                             'item_details_id' => $item_details->id,
                             'Answers_Correction' => json_encode($correct),
-                            'mark' => $question['mark'],
+                            'grade' => $question['mark'],
                         ]);
 
                         break;
@@ -447,9 +447,8 @@ class UserQuizController extends Controller
         foreach($userEssayCheckAnswer as $checkCorrection){
             if($checkCorrection == null)
                 $countEss_TF+=1;
-            if((isset($checkCorrection) && isset($checkCorrection->and_why_mark)))
-                if(($checkCorrection->and_why_mark) == null)
-                    $countEss_TF+=1;
+            if((isset($checkCorrection) && !isset($checkCorrection->grade)))
+                $countEss_TF+=1;
         }
         
         $Submitted_users=0;
@@ -481,10 +480,16 @@ class UserQuizController extends Controller
                 else{
                     //without wieght
                     $gradeNotWeight=0;
-                    $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',1)->get();
-                    foreach($user_quiz_answers as $user_quiz_answer)
-                        if(isset($user_quiz_answer->correction) && $user_quiz_answer->correction != null)
-                            $gradeNotWeight+= $user_quiz_answer->correction->mark;
+                    $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',1)
+                                                        ->whereIn('question_id',$essayQues)->orWhereIn('question_id',$t_f_Quest)->get();
+                    if(count($user_quiz_answers) >= 1)
+                        foreach($user_quiz_answers as $user_quiz_answer)
+                            if(isset($user_quiz_answer->correction))
+                                $gradeNotWeight+= $user_quiz_answer->correction->grade;
+                    else
+                        foreach($user_quiz_answers as $user_quiz_answer)
+                            if(isset($user_quiz_answer->correction))
+                                $gradeNotWeight+= $user_quiz_answer->correction->mark;
                         
                     $user_Attemp["grade"]=$gradeNotWeight;
                 }
