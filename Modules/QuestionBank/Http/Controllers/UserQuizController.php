@@ -437,19 +437,6 @@ class UserQuizController extends Controller
             if(count ($users) == 0)
                 return HelperController::api_response_format(200, __('messages.error.user_not_assign'));
         }
-        $allUserQuizzes = userQuiz::whereIn('user_id', $users)->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id')->unique();
-
-        //count attempts NotGraded
-        $userEssayCheckAnswer=UserQuizAnswer::whereIn('user_quiz_id',$allUserQuizzes)->whereIn('question_id',$essayQues)
-                                                ->orWhereIn('question_id',$t_f_Quest)->where('answered',1)->where('force_submit',1)
-                                                ->pluck('correction');  
-        $countEss_TF=0;
-        foreach($userEssayCheckAnswer as $checkCorrection){
-            if($checkCorrection == null)
-                $countEss_TF+=1;
-            if((isset($checkCorrection) && !isset($checkCorrection->grade)))
-                $countEss_TF+=1;
-        }
         
         $Submitted_users=0;
         foreach ($users as $user_id){
@@ -466,6 +453,19 @@ class UserQuizController extends Controller
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
 
             foreach($attems as $attem){
+
+                //count attempts NotGraded
+                $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$essayQues)
+                                                ->orWhereIn('question_id',$t_f_Quest)->where('answered',1)->where('force_submit',1)
+                                                ->pluck('correction');  
+                $countEss_TF=0;
+                foreach($userEssayCheckAnswer as $checkCorrection){
+                    if($checkCorrection == null)
+                        $countEss_TF+=1;
+                    if((isset($checkCorrection) && !isset($checkCorrection->grade)))
+                        $countEss_TF+=1;
+                }
+
                 $req=new Request([
                     'attempt_id' => $attem->id,
                     'user_id' => $user->id,
