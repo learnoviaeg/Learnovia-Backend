@@ -9,6 +9,7 @@ use App\Enroll;
 use App\Grader\GraderInterface;
 use App\Lesson;
 use App\UserGrade;
+use App\UserGrader;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -215,11 +216,8 @@ class AttemptsController extends Controller
             $user_quiz->save();
         }
 
-        // dd($user_quiz);
-        // $tt=new QuizGrader($user_quiz,$this->gradeInterface);
-        // $tt->grade();
-
-        event(new GradeAttemptEvent($user_quiz,$this->gradeInterface));
+        $totalGrade=event(new GradeAttemptEvent($user_quiz,$this->gradeInterface));
+        UserGrader::where('user_id',Auth::id())->where('item_id',$user_quiz->id)->where('item_type','item')->update(['grade'=>$totalGrade[0]]);
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
