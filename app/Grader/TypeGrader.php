@@ -122,6 +122,7 @@ class TypeGrader implements GraderInterface
         $flag=false;
         $grade=$answer['correct_answer'];
         if(isset(($answer['student_answer']))) // ana 4ayfa enha malha4 lazma aslun
+        dd($answer['student_answer']);
             foreach($answer['student_answer'] as $kk=>$ans){
                 $ans->right=0;
                 $ans->grade=0;
