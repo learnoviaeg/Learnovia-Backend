@@ -486,9 +486,11 @@ class UserQuizController extends Controller
                     //without wieght
                     $gradeNotWeight=0;
                     $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',1)->get();
-                    foreach($user_quiz_answers as $user_quiz_answer)
+                    foreach($user_quiz_answers as $user_quiz_answer){
+                        dd($user_quiz_answer->correction);
                         if(isset($user_quiz_answer->correction) && $user_quiz_answer->correction != null)
                             $gradeNotWeight+= $user_quiz_answer->correction->mark;
+                    }
                         
                     $user_Attemp["grade"]=$gradeNotWeight;
                 }
