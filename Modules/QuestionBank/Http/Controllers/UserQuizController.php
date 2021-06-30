@@ -448,10 +448,13 @@ class UserQuizController extends Controller
                                                 ->orWhereIn('question_id',$t_f_Quest)->where('answered',1)->where('force_submit',1)
                                                 ->pluck('correction');  
         $countEss_TF=0;
-        foreach($userEssayCheckAnswer as $checkCorrection)
-            if($checkCorrection == null || (isset($checkCorrection) && isset($checkCorrection->and_why_mark)))
+        foreach($userEssayCheckAnswer as $checkCorrection){
+            if($checkCorrection == null)
+                $countEss_TF+=1;
+            if((isset($checkCorrection) && isset($checkCorrection->and_why_mark)))
                 if(($checkCorrection->and_why_mark) == null)
                     $countEss_TF+=1;
+        }
         
         $Submitted_users=0;
         foreach ($users as $user_id){
