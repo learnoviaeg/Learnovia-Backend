@@ -126,8 +126,7 @@ class TypeGrader implements GraderInterface
                 $ans->right=0;
                 $ans->grade=0;
                 foreach($ans as $key=>$aa){
-                    dd($answer['correct_answer']->mark[$kk]);
-                    foreach($answer['correct_answer']->mark[$kk] as $mrk){
+                    foreach($answer['correct_answer']->mark[$kk] as $m=>$mrk){
                         if($key === $aa){
                             $ans->right=1;
                             $ans->grade=$mrk;
