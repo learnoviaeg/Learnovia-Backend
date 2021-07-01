@@ -12,6 +12,8 @@ use App\GradeCategory;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Log;
+use App\Enroll;
+use App\UserGrader;
 use App\User;
 use App\LessonComponent;
 use App\UserSeen;
@@ -75,6 +77,16 @@ class QuizLessonObserver
                 'instance_id' => $quiz->id,
                 'lesson_id' => $lesson->id
             ]);
+            ///add user grader to each enrolled student in course segment of this grade category
+            $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment',$lesson->courseSegment->id)->pluck('user_id');
+            foreach($enrolled_students as $student){
+                UserGrader::create([
+                    'user_id'   => $student,
+                    'item_type' => 'Category',
+                    'item_id'   => $categoryOfQuiz->id,
+                    'grade'     => null
+                ]);
+            }
             //update quiz lesson with the id of grade categoey created for quiz
             $quizLesson->grade_category_id = $categoryOfQuiz->id;
             $quizLesson->save();
