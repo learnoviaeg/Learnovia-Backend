@@ -11,6 +11,8 @@ use App\GradeItems;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuiz;
 use App\User;
+use App\Enroll;
+use App\UserGrader;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -48,6 +50,16 @@ class AttemptItemlistener
                     'name' => 'Attempt number ' .$key,
                     'grade_category_id' => $GradeCategory->id,
                 ]);
+
+                $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment',$GradeCategory->course_segment_id)->pluck('user_id');
+                foreach($enrolled_students as $student){
+                    UserGrader::create([
+                        'user_id'   => $student,
+                        'item_type' => 'Item',
+                        'item_id'   => $gradeItem->id,
+                        'grade'     => null
+                    ]);
+                }
                 event(new GradeItemEvent($gradeItem));
             }
         }
