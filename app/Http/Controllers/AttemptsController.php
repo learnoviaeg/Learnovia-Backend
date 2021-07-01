@@ -216,8 +216,11 @@ class AttemptsController extends Controller
             $user_quiz->save();
         }
 
-        $totalGrade=event(new GradeAttemptEvent($user_quiz,$this->gradeInterface));
-        UserGrader::where('user_id',Auth::id())->where('item_id',$user_quiz->id)->where('item_type','item')->update(['grade'=>$totalGrade[0]]);
+        // dd($user_quiz);
+        // $tt=new QuizGrader($user_quiz,$this->gradeInterface);
+        // $tt->grade();
+
+        event(new GradeAttemptEvent($user_quiz,$this->gradeInterface));
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
