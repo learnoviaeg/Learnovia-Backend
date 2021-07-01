@@ -42,7 +42,7 @@ class GradeCategoriesController extends Controller
             'parent' => 'exists:grade_categories,id',
         ]);
 
-        $grade_categories = GradeCategory::Query();
+        $grade_categories = GradeCategory::whereNull('instance_type');
             if($request->filled('name'))
                 $grade_categories->where('name','LIKE' , "%$request->name%");
             if($request->filled('parent'))
