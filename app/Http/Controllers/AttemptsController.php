@@ -9,6 +9,7 @@ use App\Enroll;
 use App\Grader\GraderInterface;
 use App\Lesson;
 use App\UserGrade;
+use App\UserGrader;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
