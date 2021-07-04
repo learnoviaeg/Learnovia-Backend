@@ -455,14 +455,17 @@ class UserQuizController extends Controller
             foreach($attems as $attem){
 
                 //count attempts NotGraded
-                $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$essayQues)
-                                                ->orWhereIn('question_id',$t_f_Quest)->where('answered',1)->where('force_submit',1)
-                                                ->pluck('correction');  
+                $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1);
+                if(count($essayQues) > 0)
+                    $userEssayCheckAnswer->whereIn('question_id',$essayQues);
+                if(count($t_f_Quest) > 0)
+                    $userEssayCheckAnswer->WhereIn('question_id',$t_f_Quest);
+
                 $countEss_TF=0;
-                foreach($userEssayCheckAnswer as $checkCorrection){
-                    if($checkCorrection == null)
+                foreach($userEssayCheckAnswer->get() as $checkCorrection){
+                    if($checkCorrection->correction == null)
                         $countEss_TF+=1;
-                    if((isset($checkCorrection) && !isset($checkCorrection->grade)))
+                    if((isset($checkCorrection->correction) && $checkCorrection->correction->grade == null) && $checkCorrection->correction->and_why == false )
                         $countEss_TF+=1;
                 }
 
