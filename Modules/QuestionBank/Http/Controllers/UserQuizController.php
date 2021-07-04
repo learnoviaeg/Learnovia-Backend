@@ -466,7 +466,6 @@ class UserQuizController extends Controller
                 if(count($userEssayCheckAnswerTF) > 0)
                 {
                     foreach($userEssayCheckAnswerTF as $TF)
-
                         if($TF->correction->and_why == true){
                             if(isset($TF->correction->grade))
                                 $gradeNotWeight+= $TF->correction->grade;
@@ -492,7 +491,8 @@ class UserQuizController extends Controller
                 }
 
                 $user_Attemp['id']= $attem->id;
-                $user_Attemp['grade']= $gradeNotWeight;
+                if($user_Attemp["grade"] != null)
+                    $user_Attemp['grade']= $gradeNotWeight;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
                 if($useranswerSubmitted < 0){

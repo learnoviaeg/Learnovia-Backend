@@ -161,7 +161,6 @@ class AttemptsController extends Controller
 
         // check that question exist in the Quiz
         $user_quiz = userQuiz::find($id);
-        
         LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->courseSegment->course_id);
 
         $allData = collect([]);
@@ -215,10 +214,6 @@ class AttemptsController extends Controller
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
             $user_quiz->save();
         }
-
-        // dd($user_quiz);
-        // $tt=new QuizGrader($user_quiz,$this->gradeInterface);
-        // $tt->grade();
         $totalGrade=event(new GradeAttemptEvent($user_quiz,$this->gradeInterface));
         $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)
                                     ->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
