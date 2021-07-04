@@ -452,8 +452,8 @@ class UserQuizController extends Controller
             
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
 
+            $countEss_TF=0;
             foreach($attems as $attem){
-
                 //count attempts NotGraded
                 $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1);
                 if(count($essayQues) > 0)
@@ -461,7 +461,6 @@ class UserQuizController extends Controller
                 if(count($t_f_Quest) > 0)
                     $userEssayCheckAnswer->WhereIn('question_id',$t_f_Quest);
 
-                $countEss_TF=0;
                 foreach($userEssayCheckAnswer->get() as $checkCorrection){
                     if($checkCorrection->correction == null)
                         $countEss_TF+=1;
