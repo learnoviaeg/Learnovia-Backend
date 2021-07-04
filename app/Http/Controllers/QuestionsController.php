@@ -240,8 +240,8 @@ class QuestionsController extends Controller
 
     public function Assign_Match($question , $quiz){
         $validator = Validator::make($question, [
-            'match_a' => 'required|array|min:2|distinct',
-            'match_b' => 'required|array|distinct',
+            'match_a' => 'required|array|min:1|distinct',
+            'match_b' => 'required|array|min:1|distinct',
             'mark_match' => 'required|array',
         ]);
         if ($validator->fails())
