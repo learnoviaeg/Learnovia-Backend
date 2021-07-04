@@ -293,11 +293,13 @@ class UserQuizController extends Controller
                                 $correction = $userQuizAnswer['correction'];
                                 $correction->and_why_right = isset($question['right']) ? $question['right'] : null;
                                 $correction->and_why_mark = isset($question['mark']) ? $question['mark'] : null;
+                                $correction->grade =$question['mark'] + $correction->mark;
                                 $correction->feedback = isset($question['feedback']) ? $question['feedback'] : null;
                             }else{
                                 $correction = collect([
                                     'and_why_right' => isset($question['right']) ? $question['right'] : null,
                                     'and_why_mark' => isset($question['mark']) ? $question['mark'] : null,
+                                    'grade' => $question['mark'],
                                     'feedback' => isset($question['feedback']) ? $question['feedback'] : null
                                 ]);
                             }
@@ -428,9 +430,6 @@ class UserQuizController extends Controller
         
         $users=Enroll::where('course_segment',$quiz_lesson->lesson->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
 
-        if (!isset($quiz_lesson))
-            return HelperController::api_response_format(400, null, __('messages.quiz.quiz_not_belong'));
-
         if($request->filled('user_id')){
             unset($users);
             $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$request->user_id)->pluck('user_id')->unique();
@@ -456,32 +455,44 @@ class UserQuizController extends Controller
             $gradeNotWeight=0;
             foreach($attems as $attem){
                 //count attempts NotGraded
-                $userEssayCheckAnswer=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1);
-                if(count($essayQues) > 0)
-                    $userEssayCheckAnswer->whereIn('question_id',$essayQues);
-                if(count($t_f_Quest) > 0)
-                    $userEssayCheckAnswer->WhereIn('question_id',$t_f_Quest);
-
-                $user_Attemp["grade"]= 0;
-                $user_Attemp["feedback"] =0;
-                foreach($userEssayCheckAnswer->get() as $checkCorrection){
-                    if($checkCorrection->correction == null || (isset($checkCorrection->correction) && $checkCorrection->correction->grade == null 
-                                && $checkCorrection->correction->and_why == false))
-                    {
-                        $user_Attemp["grade"]= NULL;
-                        $user_Attemp["feedback"] =null;
-                    }
-                    else
-                        $gradeNotWeight+= $user_quiz_answer->correction->grade;
+                $userEssayCheckAnswerAll=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereNotIn('question_id',$t_f_Quest)->whereNotIn('question_id',$essayQues)->get();
+                if(count($userEssayCheckAnswerAll) > 0){
+                    foreach($userEssayCheckAnswerAll as $All)
+                        $gradeNotWeight+= $All->correction->mark;
                 }
-                $user_Attemp["grade"]=$gradeNotWeight;
 
-                $req=new Request([
-                    'attempt_id' => $attem->id,
-                    'user_id' => $user->id,
-                    'quiz_id' => $request->quiz_id,
-                ]);
+                //7esab daragat el true_false questions
+                $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest)->get();
+                if(count($userEssayCheckAnswerTF) > 0)
+                {
+                    foreach($userEssayCheckAnswerTF as $TF)
+
+                        if($TF->correction->and_why == true){
+                            if(isset($TF->correction->grade))
+                                $gradeNotWeight+= $TF->correction->grade;
+                            else{
+                                $user_Attemp["grade"]= null;
+                                $user_Attemp["feedback"] =null;
+                            }
+                        }
+                }
+
+                //7esab daragat el essay questions
+                $userEssayCheckAnswerE=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$essayQues)->get();
+                if(count($userEssayCheckAnswerE) > 0)
+                {
+                    foreach($userEssayCheckAnswerE as $esay)
+                        if(isset($esay->correction)){
+                            $gradeNotWeight+= $esay->correction->grade;
+                        }
+                        else{
+                            $user_Attemp["grade"]= null;
+                            $user_Attemp["feedback"] =null;
+                        }
+                }
+
                 $user_Attemp['id']= $attem->id;
+                $user_Attemp['grade']= $gradeNotWeight;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
                 if($useranswerSubmitted < 0){
