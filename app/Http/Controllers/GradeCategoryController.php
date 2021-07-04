@@ -689,7 +689,7 @@ class GradeCategoryController extends Controller
         $coursesegment=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
         if($coursesegment)
         {
-            $gradeCategories=$coursesegment->GradeCategory;
+            $gradeCategories=$coursesegment->GradeCategory()->whereNull('instance_type')->get();
             LastAction::lastActionInCourse($request->course_id);
             return HelperController::api_response_format(200, $gradeCategories);
         }
