@@ -412,8 +412,8 @@ class QuestionsController extends Controller
     public function Match($question,$parent)
     {
         $validator = Validator::make($question, [
-            'match_a' => 'required|array|min:2|distinct',
-            'match_b' => 'required|array|distinct',
+            'match_a' => 'required|array|min:1|distinct',
+            'match_b' => 'required|array|min:1|distinct',
         ]);
 
         if ($validator->fails())
