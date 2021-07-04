@@ -294,7 +294,10 @@ class UsersController extends Controller
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
         $user->roles;
-
+        if(isset($user->class_id))
+           $user['class_name']=Classes::find($user->class_id)->name;
+        if(isset($user->level))
+           $user['level_name']=Level::find($user->level)->name;
         $i = 0;
         foreach ($user->enroll as $enroll) {
             $all[$i]['role'] = $enroll->roles;
