@@ -49,26 +49,25 @@ class CoursesController extends Controller
             'role_id' => 'integer|exists:roles,id',
             'for' => 'in:enroll',
             'search' => 'nullable',
+            'user_id'=>'exists:users,id'
         ]);
 
         $paginate = 12;
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
-        
+
         $user_courses=collect();
         if(isset($status)){
-
             $enrolls = $this->chain->getCourseSegmentByManyChain($request);
-            if(!$request->user()->can('site/show-all-courses')){ //student or teacher
-                $enrolls->where('user_id',Auth::id());
+            if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)){ //student or teacher
+                    $enrolls->where('user_id',Auth::id());
             }
-    
+
             if($request->has('role_id')){
                 $enrolls->where('role_id',$request->role_id);
             }
             $enrolls = $enrolls->with(['courseSegment.courses.attachment','levels'])->get()->groupBy(['course','level']);
-    
             foreach($enrolls as $course){
                 $levels=[];
                 $teacher = [];
