@@ -497,7 +497,7 @@ class UserQuizController extends Controller
                 }
 
                 $user_Attemp['id']= $attem->id;
-                if($user_Attemp["grade"] != null)
+                if(isset($user_Attemp['grade']))
                     $user_Attemp['grade']= $gradeNotWeight;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
