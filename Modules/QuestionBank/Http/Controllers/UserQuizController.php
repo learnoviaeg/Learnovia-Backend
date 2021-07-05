@@ -465,13 +465,15 @@ class UserQuizController extends Controller
                 if(count($userEssayCheckAnswerAll) > 0){
                     foreach($userEssayCheckAnswerAll as $All)
                         $gradeNotWeight+= $All->correction->mark;
+
+                    $user_Attemp['grade']= $gradeNotWeight;
                 }
 
                 //7esab daragat el true_false questions
                 $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest)->get();
                 if(count($userEssayCheckAnswerTF) > 0)
                 {
-                    foreach($userEssayCheckAnswerTF as $TF)
+                    foreach($userEssayCheckAnswerTF as $TF){
                         if($TF->correction->and_why == true){
                             if(isset($TF->correction->grade))
                                 $gradeNotWeight+= $TF->correction->grade;
@@ -480,13 +482,15 @@ class UserQuizController extends Controller
                                 $user_Attemp["feedback"] =null;
                             }
                         }
+                    }
+                    $user_Attemp['grade']= $gradeNotWeight;
                 }
 
                 //7esab daragat el essay questions
                 $userEssayCheckAnswerE=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$essayQues)->get();
                 if(count($userEssayCheckAnswerE) > 0)
                 {
-                    foreach($userEssayCheckAnswerE as $esay)
+                    foreach($userEssayCheckAnswerE as $esay){
                         if(isset($esay->correction)){
                             $gradeNotWeight+= $esay->correction->grade;
                         }
@@ -494,11 +498,11 @@ class UserQuizController extends Controller
                             $user_Attemp["grade"]= null;
                             $user_Attemp["feedback"] =null;
                         }
+                    }
+                    $user_Attemp['grade']= $gradeNotWeight;
                 }
 
                 $user_Attemp['id']= $attem->id;
-                if(isset($user_Attemp['grade']))
-                    $user_Attemp['grade']= $gradeNotWeight;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
                 if($useranswerSubmitted < 0){
