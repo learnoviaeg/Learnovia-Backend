@@ -455,6 +455,7 @@ class UserQuizController extends Controller
             $gradeNotWeight=0;
             foreach($attems as $attem){
                 //count attempts NotGraded
+                dd($essayQues);
                 $userEssayCheckAnswerAll=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereNotIn('question_id',$t_f_Quest)->whereNotIn('question_id',$essayQues)->get();
                 dd($userEssayCheckAnswerAll);
                 if(count($userEssayCheckAnswerAll) > 0){
