@@ -417,8 +417,8 @@ class UserQuizController extends Controller
         $questions=array_merge($quetions->toArray(),$childs);
         $essay=0;
         $t_f_Ques=0;
-        $essayQues[] = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
-        $t_f_Quest[] = Questions::whereIn('id',$questions)->where('question_type_id',1)->pluck('id');
+        $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
+        $t_f_Quest = Questions::whereIn('id',$questions)->where('question_type_id',1)->pluck('id');
         if(count($essayQues) > 0)
             $essay = 1;
 
@@ -461,6 +461,7 @@ class UserQuizController extends Controller
             foreach($attems as $attem){
                 //count attempts NotGraded
                 $userEssayCheckAnswerAll=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereNotIn('question_id',$t_f_Quest)->whereNotIn('question_id',$essayQues)->get();
+                // dd($userEssayCheckAnswerAll);
                 if(count($userEssayCheckAnswerAll) > 0){
                     foreach($userEssayCheckAnswerAll as $All)
                         $gradeNotWeight+= $All->correction->mark;
