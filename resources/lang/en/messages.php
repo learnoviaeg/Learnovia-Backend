@@ -313,6 +313,7 @@ return [
         'update' => 'Grade category is updated successfully',
         'list' => 'Grade Categories List',
         'delete' => 'Grade category deleted successfully',
+        'not_found' => 'Cann\'t find grade category'
     ],
     'grade_item' => [
         'add'    => 'Grade item added successfully',

@@ -194,6 +194,9 @@ class QuizzesController extends Controller
             {
                 $leson=Lesson::find($lesson);
                 $grade_Cat=GradeCategory::where('course_segment_id',$leson->course_segment_id)->whereNull('parent')->first();
+                if(!isset($grade_Cat))
+                    return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
+
                 $index = QuizLesson::where('lesson_id',$lesson)->get()->max('index');
                 $Next_index = $index + 1;
                 //add validations for all the feilds
