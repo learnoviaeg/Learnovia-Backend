@@ -69,7 +69,7 @@ class GradeAttemptItemlistener
 
                     $stud_quest_ans->update(['correction'=>json_encode($grade)]);
                     if(isset($grade))
-                        $total_grade_attempt=$grade->mark;
+                        $total_grade_attempt+=$grade->mark;
                 }
             }
         }
