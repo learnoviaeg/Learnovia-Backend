@@ -21,6 +21,7 @@ class userQuizAnswer extends Model
         $user_answers=json_decode($this->attributes['user_answers']);
         $question=Questions::find($this->attributes['question_id']);
         if(isset($user_answers)){
+            dd($user_answers);
             // if($question->question_type_id == 2){
             //     foreach($user_answers as $con)
             //     {
