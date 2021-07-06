@@ -24,6 +24,7 @@ use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use App\LastAction;
 use App\ItemDetail;
+use App\UserGrader;
 use App\ItemDetailsUser;
 
 use function Opis\Closure\serialize;
@@ -429,9 +430,9 @@ class UserQuizController extends Controller
         if(!$quiz_lesson)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
 
-        $quiz_duration_ended=false;
-        if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
-            $quiz_duration_ended=true;
+        // $quiz_duration_ended=false;
+        // if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
+        //     $quiz_duration_ended=true;
         
         $users=Enroll::where('course_segment',$quiz_lesson->lesson->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
 
@@ -459,15 +460,12 @@ class UserQuizController extends Controller
             $countEss_TF=0;
             $gradeNotWeight=0;
             foreach($attems as $attem){
-                //count attempts NotGraded
-                $userEssayCheckAnswerAll=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereNotIn('question_id',$t_f_Quest)->whereNotIn('question_id',$essayQues)->get();
-                // dd($userEssayCheckAnswerAll);
-                if(count($userEssayCheckAnswerAll) > 0){
-                    foreach($userEssayCheckAnswerAll as $All)
-                        $gradeNotWeight+= $All->correction->mark;
 
-                    $user_Attemp['grade']= $gradeNotWeight;
-                }
+                $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$attem->quiz_lesson->quiz_id)
+                                            ->where('lesson_id',$attem->quiz_lesson->lesson_id)->first();
+                //grade item ( attempt_item )user
+                $gradeitem=GradeItems::where('index',$attem->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
+                $grade=UserGrader::where('user_id',Auth::id())->where('item_id',$gradeitem->id)->where('item_type','item')->pluck('grade')->first();
 
                 //7esab daragat el true_false questions
                 $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest)->get();
@@ -483,7 +481,7 @@ class UserQuizController extends Controller
                             }
                         }
                     }
-                    $user_Attemp['grade']= $gradeNotWeight;
+                    // $user_Attemp['grade']= $gradeNotWeight;
                 }
 
                 //7esab daragat el essay questions
@@ -499,16 +497,19 @@ class UserQuizController extends Controller
                             $user_Attemp["feedback"] =null;
                         }
                     }
-                    $user_Attemp['grade']= $gradeNotWeight;
                 }
 
                 $user_Attemp['id']= $attem->id;
+
+                //check if grade is null so, there is and_why and essay not graded
+                if(array_key_exists('grade',$user_Attemp))
+                    if(!is_null($user_Attemp['grade']))
+                        $user_Attemp['grade']= $gradeNotWeight;
+
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
-                if($useranswerSubmitted < 0){
-                    if($quiz_duration_ended)
+                if($useranswerSubmitted > 0)
                         continue;
-                }
                 
                 else{
                     array_push($All_attemp, $user_Attemp);
