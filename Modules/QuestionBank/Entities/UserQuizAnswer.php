@@ -41,6 +41,7 @@ class userQuizAnswer extends Model
                 else
                     $user_answers->is_true=null;
             }
+            dd($user_answers->is_true);
         }
         return $user_answers;
     }
