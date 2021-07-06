@@ -455,7 +455,7 @@ class UserQuizController extends Controller
             if( !$user->can('site/quiz/store_user_quiz'))
                 continue;
             
-            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'asc')->get();
+            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
 
             $countEss_TF=0;
             $gradeNotWeight=0;
@@ -466,6 +466,7 @@ class UserQuizController extends Controller
                 $gradeitem=GradeItems::where('index',$attem->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
                 $grade=UserGrader::where('user_id',$user_id)->where('item_id',$gradeitem->id)->where('item_type','item')->pluck('grade')->first();
                 $gradeNotWeight+=$grade;
+                dd($grade);
 
                 //7esab daragat el true_false questions
                 $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest)->get();
