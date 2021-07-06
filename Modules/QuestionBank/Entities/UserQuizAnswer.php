@@ -33,12 +33,12 @@ class userQuizAnswer extends Model
             //     }
             // }
             if($question->question_type_id == 1){
-                if($user_answers->is_true == 1)
+                if($user_answers->is_true)
                     $user_answers->is_true=True;
 
-                else if($user_answers->is_true == 0 && $user_answers->is_true != null)
-                dd($user_answers->is_true);
-                    // $user_answers->is_true=False;
+                else if(!is_null($user_answers->is_true))
+                // dd($user_answers->is_true);
+                    $user_answers->is_true=False;
                 
                 else
                     $user_answers->is_true=null;
