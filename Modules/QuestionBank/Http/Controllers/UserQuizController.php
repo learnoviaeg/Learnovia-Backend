@@ -502,9 +502,12 @@ class UserQuizController extends Controller
                 $user_Attemp['id']= $attem->id;
 
                 //check if grade is null so, there is and_why and essay not graded
-                if(array_key_exists('grade',$user_Attemp))
+                if(array_key_exists('grade',$user_Attemp)){
                     if(!is_null($user_Attemp['grade']))
                         $user_Attemp['grade']= $gradeNotWeight;
+                }
+                else
+                    $user_Attemp['grade']= $gradeNotWeight;
 
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
