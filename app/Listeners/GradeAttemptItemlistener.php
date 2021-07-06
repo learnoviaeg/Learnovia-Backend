@@ -73,7 +73,6 @@ class GradeAttemptItemlistener
                 }
             }
         }
-        dd($total_grade_attempt);
         return $total_grade_attempt;
     }
 }
