@@ -429,9 +429,9 @@ class UserQuizController extends Controller
         if(!$quiz_lesson)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
 
-        $quiz_duration_ended=false;
-        if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
-            $quiz_duration_ended=true;
+        // $quiz_duration_ended=false;
+        // if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
+        //     $quiz_duration_ended=true;
         
         $users=Enroll::where('course_segment',$quiz_lesson->lesson->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
 
@@ -505,10 +505,8 @@ class UserQuizController extends Controller
                 $user_Attemp['id']= $attem->id;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
-                if($useranswerSubmitted < 0){
-                    if($quiz_duration_ended)
+                if($useranswerSubmitted > 0)
                         continue;
-                }
                 
                 else{
                     array_push($All_attemp, $user_Attemp);
