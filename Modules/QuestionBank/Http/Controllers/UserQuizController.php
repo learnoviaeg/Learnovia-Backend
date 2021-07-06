@@ -455,17 +455,17 @@ class UserQuizController extends Controller
             if( !$user->can('site/quiz/store_user_quiz'))
                 continue;
             
-            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
+            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'asc')->get();
 
             $countEss_TF=0;
             $gradeNotWeight=0;
-            foreach($attems as $attem){
-
+            foreach($attems as $key=>$attem){
                 $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$attem->quiz_lesson->quiz_id)
                                             ->where('lesson_id',$attem->quiz_lesson->lesson_id)->first();
                 //grade item ( attempt_item )user
                 $gradeitem=GradeItems::where('index',$attem->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
-                $grade=UserGrader::where('user_id',Auth::id())->where('item_id',$gradeitem->id)->where('item_type','item')->pluck('grade')->first();
+                $grade=UserGrader::where('user_id',$user_id)->where('item_id',$gradeitem->id)->where('item_type','item')->pluck('grade')->first();
+                $gradeNotWeight+=$grade;
 
                 //7esab daragat el true_false questions
                 $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest)->get();
@@ -483,6 +483,8 @@ class UserQuizController extends Controller
                     }
                     // $user_Attemp['grade']= $gradeNotWeight;
                 }
+                // dd($user_Attemp["grade"]);
+
 
                 //7esab daragat el essay questions
                 $userEssayCheckAnswerE=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$essayQues)->get();
@@ -511,10 +513,7 @@ class UserQuizController extends Controller
 
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
-                if($useranswerSubmitted > 0)
-                        continue;
-                
-                else{
+                if($useranswerSubmitted < 1){
                     array_push($All_attemp, $user_Attemp);
                     $i++;
                 }
@@ -529,6 +528,7 @@ class UserQuizController extends Controller
             if($i>0)
                 $Submitted_users++;
         }
+
         $all_users['essay']=$essay;
         $all_users['T_F']=$t_f_Ques;
         $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
