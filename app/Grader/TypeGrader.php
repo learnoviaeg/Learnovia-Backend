@@ -136,6 +136,7 @@ class TypeGrader implements GraderInterface
                                     break;
                                 }
                             }
+                    }
                 }
             }
 
