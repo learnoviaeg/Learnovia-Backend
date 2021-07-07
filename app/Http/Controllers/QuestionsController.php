@@ -530,6 +530,10 @@ class QuestionsController extends Controller
             case 4: // Essay
                 $data['content'] = $question->content; //essay not have special answer
                 break;
+
+            case 5: // Paragraph
+                $data['content'] = $question->content; 
+                break;
         }
         $question->content=$data['content'];
         $question->save();
