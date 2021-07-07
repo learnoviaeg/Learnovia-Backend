@@ -655,9 +655,6 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignments,id'
         ]);
         $assign = Assignment::where('id', $request->assignment_id)->first();
-        $grade_item=GradeItems::where('item_Entity',$request->assignment_id)->where('item_type',2)->first();
-        if(isset($grade_item))
-            $grade_item->delete();
         $assign->delete();
 
         return HelperController::api_response_format(200, Assignment::all(), $message = __('messages.assignment.delete'));
