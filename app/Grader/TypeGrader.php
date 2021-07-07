@@ -15,7 +15,7 @@ class TypeGrader implements GraderInterface
             $mark=$answer['correct_answer']->mark;
             $right=1;
         }
-        $grade->and_why_mark=null;
+        // $grade->and_why_mark=null;
         $grade->mark=$mark;
         $grade->right=$right;
         return $grade;
