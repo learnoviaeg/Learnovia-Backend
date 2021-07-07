@@ -483,6 +483,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grade-item', GradeItemsController::class);
     Route::Resource('grader-report', GraderReportController::class);
+    Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
 });
 
 Route::group(['middleware' => ['auth:api']], function () {

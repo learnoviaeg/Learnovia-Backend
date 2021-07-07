@@ -42,7 +42,6 @@ Route::group(['prefix' => 'quiz', 'middleware' =>[ 'auth:api','LastAction']], fu
     Route::post('correct-user-quiz', 'UserQuizController@estimateEssayandAndWhy')->middleware('permission:quiz/correct-user-quiz');
     Route::post('get-attempts', 'QuizController@get_user_quiz')->middleware(['permission:quiz/get-attempts', 'ParentCheck']);
     // Route::post('grade-user-quiz', 'UserQuizController@gradeUserQuiz')->middleware('permission:quiz/grade-user-quiz');
-    Route::post('get-all-attempts', 'UserQuizController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
     // Route::post('get-fully-detailed-attempt', 'UserQuizController@get_fully_detailed_attempt')->middleware('permission:quiz/get-fully-detailed-attempt');
 });
 
