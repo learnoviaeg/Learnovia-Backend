@@ -71,10 +71,7 @@ class Questions extends Model
                     }
                     $con->is_true=False;
                     $con->mark = null;
-
                 }
-
-
             }
         }
         return $content;

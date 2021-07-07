@@ -533,6 +533,7 @@ class QuestionsController extends Controller
 
             case 5: // Paragraph
                 $data['content'] = $question->content; 
+                $question->children;
                 break;
         }
         $question->content=$data['content'];
