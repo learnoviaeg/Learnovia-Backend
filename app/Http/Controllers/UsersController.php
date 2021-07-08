@@ -289,7 +289,6 @@ class UsersController extends Controller
      */
     public function show($id)
     {
-   
         $user = User::find($id);
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
@@ -333,20 +332,14 @@ class UsersController extends Controller
                 unset($user->username);
                 unset($user->real_password);
             }
-               
         }
 
         if (isset($all))
         {
             unset($user->enroll);
             $user->Chain=$all;
-            return HelperController::api_response_format(201, $user, null);
             return response()->json(['message' => null, 'body' => $user ], 200);
-
         }
-       
-
-        
         return response()->json(['message' =>  __('messages.error.no_available_data'), 'body' => $user ], 200);
     }
 
