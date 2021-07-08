@@ -278,6 +278,8 @@ class BigbluebuttonController extends Controller
         }
 
         $requestBody = [
+
+            //https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/meetingcreate
             'topic'	=> $bigbb->name,
             // 1 >> instance meeting
             // 2 >> schedualed meeting
