@@ -7,6 +7,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
+use App\Timeline;
 use App\Level;
 use App\Course;
 use App\Classes;
@@ -173,6 +174,8 @@ class AssignmentController extends Controller
         $assigment = AssignmentLesson::where('assignment_id', $id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($assigment))
             return HelperController::api_response_format(400,null,__('messages.assignment.assignment_not_belong'));
+
+        Timeline::where('item_id',$id)->where('type','assignment')->where('lesson_id',$request->lesson_id)->delete();
         
         $lesson=Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->courseSegment->course_id);
