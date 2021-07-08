@@ -121,9 +121,9 @@ class InterActiveController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request ,$id)
     {
-        return redirect(config('app.url').'/api/h5p/'.$id);
+        return redirect(config('app.url').'api/h5p/'.$id.'&api_token='.$request->api_token);
     }
 
     /**
