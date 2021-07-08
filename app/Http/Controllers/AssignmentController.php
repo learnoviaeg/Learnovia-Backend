@@ -166,7 +166,7 @@ class AssignmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         $request->validate([
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id'
@@ -188,5 +188,5 @@ class AssignmentController extends Controller
         $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
 
         return HelperController::api_response_format(200, $all, $message = __('messages.assignment.delete'));
-        }
+    }
 }
