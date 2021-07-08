@@ -168,10 +168,9 @@ class AssignmentController extends Controller
     public function destroy($id)
     {
         $request->validate([
-            'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id'
         ]);
-        $assigment = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
+        $assigment = AssignmentLesson::where('assignment_id', $id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($assigment))
             return HelperController::api_response_format(400,null,__('messages.assignment.assignment_not_belong'));
         
@@ -180,7 +179,7 @@ class AssignmentController extends Controller
         
         $assigment->delete();
 
-        $assign = Assignment::where('id', $request->assignment_id)->first();
+        $assign = Assignment::where('id', $id)->first();
         $assign->delete();
 
         $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
