@@ -145,7 +145,7 @@ class QuestionsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function assign(Request $request, $quiz_id=null, $question=null)
+    public function assign(Request $request, $quiz_id, $question)
     {
         //to assign questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
@@ -184,6 +184,25 @@ class QuestionsController extends Controller
             $quiz->save();
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
+    }
+
+    /**
+     * unAssign a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function unAssign(Request $request, $quiz_id, $question)
+    {
+        //to unAssign questions in quiz id //quizzes/quiz_id/questions'
+        $request->validate([
+            'questions' => 'required|array',
+            'questions.*' => 'exists:questions,id',
+        ]);
+        foreach($request->questions as $question)
+            quiz_questions::where('question_id',$question)->where('quiz_id',$quiz_id)->delete();
+        
+        return HelperController::api_response_format(200,null , __('messages.quiz.unAssign'));
     }
 
     public function Assign_TF($question , $quiz){
