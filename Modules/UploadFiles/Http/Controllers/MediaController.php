@@ -128,7 +128,7 @@ class MediaController extends Controller
     {
         $settings = $this->setting->get_value('upload_media_extensions');
 
-        $request->validate([
+        $rules = [
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'required_if:type,==,0|array',
             'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
@@ -140,8 +140,13 @@ class MediaController extends Controller
             'name' => 'required',
             'show' => 'nullable|in:0,1',
             'visible' =>'in:0,1'
+        ];
 
-        ]);
+        $customMessages = [
+            'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
+        ];
+    
+        $this->validate($request, $rules,$customMessages);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
