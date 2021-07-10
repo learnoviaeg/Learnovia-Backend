@@ -216,7 +216,7 @@ class FilesController extends Controller
     {
         $settings = $this->setting->get_value('upload_file_extensions');
 
-        $request->validate([
+        $rules = [
             'name' => 'string|min:1',
             'Imported_file' => 'required|array',
             'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
@@ -224,7 +224,13 @@ class FilesController extends Controller
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
             'visible' =>'in:0,1'
-        ]);
+        ];
+
+        $customMessages = [
+            'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
+        ];
+    
+        $this->validate($request, $rules,$customMessages);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
