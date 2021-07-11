@@ -207,7 +207,7 @@ class QuizzesController extends Controller
                     'due_date' => $request->closing_time,
                     'max_attemp' => $request->max_attemp,
                     'grading_method_id' => $request->grading_method_id,
-                    'grade' => $request->grade,
+                    'grade' => isset($request->grade) ? $request->grade : 0,
                     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => $request->opening_time,
                     'index' => $Next_index,
