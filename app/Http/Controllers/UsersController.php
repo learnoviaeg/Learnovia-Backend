@@ -113,8 +113,8 @@ class UsersController extends Controller
         
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
-            if(!$request->user()->can('site/show-all-courses')) //student
-                $enrolls=$enrolls->where('user_id',Auth::id());
+            // if(!$request->user()->can('site/show-all-courses')) //student
+            //     $enrolls=$enrolls->where('user_id',Auth::id());
 
             $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
             if($request->user()->can('site/course/student'))
