@@ -143,7 +143,7 @@ class QuizzesController extends Controller
             'grade_category_id.*' => 'required_if:is_graded,==,1|exists:grade_categories,id',
             'grade_min' => 'integer',
             'grade_max' => 'integer',
-            'grade_to_pass' => 'integer',
+            'grade_pass' => 'numeric',
             'visible'=>"in:1,0",
             'publish_date' => 'date|before_or_equal:opening_time'
         ]);
@@ -211,7 +211,8 @@ class QuizzesController extends Controller
                     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => $request->opening_time,
                     'index' => $Next_index,
-                    'visible' => isset($request->visible)?$request->visible:1
+                    'visible' => isset($request->visible)?$request->visible:1,
+                    'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
                 ]);
             }
 
