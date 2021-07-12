@@ -348,6 +348,7 @@ class QuizzesController extends Controller
             'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
             'grade' => isset($request->grade) ? $request->grade : $quiz_lesson->grade,
             'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
+            'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id,
         ]);
 
