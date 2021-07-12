@@ -318,7 +318,7 @@ class QuizzesController extends Controller
         LastAction::lastActionInCourse($request->course_id);
 
         $quiz=Quiz::find($id);
-        $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
+        $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id[0])->first();
         // dd($quiz_lesson);
         $user_quiz=UserQuiz::where('quiz_lesson_id',$quiz_lesson->id)->first();
         // if(isset($request->opening_time) && $request->opening_time > $quiz_lesson->start_date )
@@ -366,7 +366,6 @@ class QuizzesController extends Controller
 
         $quiz->save();
         $quiz_lesson->save();
-        $quiz->Question;
         $quiz->quizLesson;
             
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
