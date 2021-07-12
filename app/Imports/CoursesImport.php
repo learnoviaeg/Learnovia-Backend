@@ -82,7 +82,7 @@ class CoursesImport implements ToModel , WithHeadingRow
             $gradeCat = GradeCategory::firstOrCreate([
                 'name' => $course->name . ' Total',
                 'course_segment_id' => $courseSegment->id,
-                'id_number' => isset($row['level_id']) ? $yearLevel->id : null
+                // 'id_number' => isset($row['level_id']) ? $yearLevel->id : null
             ]);
 
             //Creating defult question category

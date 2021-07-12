@@ -94,6 +94,7 @@ return [
     'quiz' => [
         'add' => 'Quiz added successfully',
         'update' => 'Quiz updated successfully',
+        'NotUpdate' => 'you cann\'t update this quiz',
         'delete' => 'Quiz deleted successfully',
         'assign' => 'Quiz assigned successfully',
         'unAssign' => 'Quiz unAssigned successfully',

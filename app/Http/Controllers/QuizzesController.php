@@ -145,7 +145,7 @@ class QuizzesController extends Controller
             'grade_max' => 'integer',
             'grade_pass' => 'numeric',
             'visible'=>"in:1,0",
-            'publish_date' => 'date|before_or_equal:opening_time'
+            'publish_date' => 'required|date|before_or_equal:opening_time'
         ]);
         if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
             return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
@@ -209,7 +209,7 @@ class QuizzesController extends Controller
                     'grading_method_id' => $request->grading_method_id,
                     'grade' => isset($request->grade) ? $request->grade : 0,
                     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
-                    'publish_date' => $request->opening_time,
+                    'publish_date' => $request->publish_date,
                     'index' => $Next_index,
                     'visible' => isset($request->visible)?$request->visible:1,
                     'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
@@ -302,9 +302,7 @@ class QuizzesController extends Controller
     {
         $request->validate([
             'name' => 'string|min:3',
-            'course_id' => 'integer|exists:courses,id',
-            'question_id' => 'exists:questions,id',
-            'lesson_id' => 'exists:lessons,id',
+            'lesson_id' => 'required|exists:lessons,id',
             'is_graded' => 'boolean',
             'duration' => 'integer',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
@@ -321,44 +319,56 @@ class QuizzesController extends Controller
         LastAction::lastActionInCourse($request->course_id);
 
         $quiz=Quiz::find($id);
-        // $quiz_lesson=QuizLesson::where('id',$id)->where('lesson_id',$request->lesson_id);
-        if(isset($request->course_id))
-            if($quiz->course_id != $request->course_id)
-                quiz_questions::where('quiz_id',$request->quiz_id)->delete(); //delete assigned questions
+        $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
+        // dd($quiz_lesson);
+        $user_quiz=UserQuiz::where('quiz_lesson_id',$quiz_lesson->id)->first();
+        // if(isset($request->opening_time) && $request->opening_time > $quiz_lesson->start_date )
+        //     return HelperController::api_response_format(200, null,__('messages.quiz.NotUpdate'));   
+
+        if(!strtotime($quiz_lesson->start_date) < Carbon::now())
+        {
+            $quiz_lesson->update([
+                'start_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->opening_time,
+                'publish_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->opening_time,
+            ]);
+        }
+         
+        // if(isset($request->course_id))
+        //     if($quiz->course_id != $request->course_id)
+        //         quiz_questions::where('quiz_id',$request->quiz_id)->delete(); //delete assigned questions
         
         $quiz->update([
             'name' => isset($request->name) ? $request->name : $quiz->name,
-            'course_id' => isset($request->course_id) ? $request->course_id : $quiz->course_id,
             'is_graded' => isset($request->is_graded) ? $request->is_graded : $quiz->is_graded,
-            'duration' => isset($request->duration) ? $request->duration : $quiz->duration,
-            'created_by' => Auth::user()->id,
-            'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
-            'feedback' => isset($request->feedback) ? $request->feedback : 1,
+            'shuffle' => isset($request->shuffle)?$request->shuffle:$quiz->shuffle,
         ]);
-        // $quizLesson->update([
-        //     'quiz_id' => $quiz->id,
-        //     'lesson_id' => $lesson,
-        //     'start_date' => $request->opening_time,
-        //     'due_date' => $request->closing_time,
-        //     'max_attemp' => $request->max_attemp,
-        //     'grading_method_id' => $request->grading_method_id,
-        //     'grade' => $request->grade,
-        //     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id[$key] : null,
-        //     'publish_date' => $request->opening_time,
-        //     'index' => $Next_index,
-        //     'visible' => isset($request->visible)?$request->visible:1
-        // ]);
+
+        $quiz_lesson->update([
+            'quiz_id' => $quiz->id,
+            'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
+            'grade' => isset($request->grade) ? $request->grade : $quiz_lesson->grade,
+            'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
+            'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id,
+        ]);
+
+        if(!isset($user_quiz))
+        {
+            $quiz->update([
+                'duration' => isset($request->duration) ? $request->duration : $quiz->duration,
+                'feedback' => isset($request->feedback) ? $request->feedback : $quiz->feedback,
+            ]);
+    
+            $quiz_lesson->update([
+                'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->updated_lesson_id,
+                'max_attemp' => isset($request->max_attemp) ? $request->max_attemp : $quiz_lesson->max_attemp,
+                'grading_method_id' => isset($request->grading_method_id) ? $request->grading_method_id : $quiz_lesson->grading_method_id,
+            ]);
+        }
+
         $quiz->save();
+        $quiz_lesson->save();
         $quiz->Question;
         $quiz->quizLesson;
-
-        // if(isset($request->lesson_id))
-        //     $quiz->quizLesson()->update(['lesson_id' => $request->lesson_id]);
-
-        // if(isset($request->question_id)){
-        //     $quest=Questions::find($request->question_id);
-        //     $udatedQuestion=app('App\Http\Controllers\QuestionsController')->update($request,$request->question_id);
-        // }
             
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
