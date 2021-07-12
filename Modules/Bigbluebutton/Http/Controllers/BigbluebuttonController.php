@@ -278,6 +278,8 @@ class BigbluebuttonController extends Controller
         }
 
         $requestBody = [
+
+            //https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/meetingcreate
             'topic'	=> $bigbb->name,
             // 1 >> instance meeting
             // 2 >> schedualed meeting
@@ -344,6 +346,11 @@ class BigbluebuttonController extends Controller
         $bigbb->status = 'current';
         $bigbb->started = 1;
         $bigbb->actutal_start_date = Carbon::now();
+        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$meeting_id,0);
+        if($request->user()->can('site/show-all-courses'))
+            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$meeting_id,1);
+
+        $bigbb->signature=$signature;
         $bigbb->save();
         return $response;
     }

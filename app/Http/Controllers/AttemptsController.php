@@ -319,10 +319,7 @@ class AttemptsController extends Controller
                             }
                         }
                     }
-                    // $user_Attemp['grade']= $gradeNotWeight;
                 }
-                // dd($user_Attemp["grade"]);
-
 
                 //7esab daragat el essay questions
                 $userEssayCheckAnswerE=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$essayQues)->get();

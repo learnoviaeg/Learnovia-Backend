@@ -128,18 +128,18 @@ class QuizzesController extends Controller
             'is_graded' => 'required|boolean',
             'grade_category_id' => 'required_if:is_graded,==,1',
             'duration' => 'required|integer|min:60', //by second
-            'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
-            'feedback' => 'integer| in:1,2,3',
+            'shuffle' => 'required|string|in:No Shuffle,Questions,Answers,Questions and Answers',
+            'feedback' => 'required|integer| in:1,2,3',
             /**
              * feedback 1 => After submission
-             * feedback 2 =>After due date,
+             * feedback 2 => After due date,
              * feedback 3 => No feedback
             */
             'opening_time' => 'required|date',
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
-            'grade' => 'required|numeric|min:1',
+            'grade' => 'numeric',
             'grade_category_id.*' => 'required_if:is_graded,==,1|exists:grade_categories,id',
             'grade_min' => 'integer',
             'grade_max' => 'integer',
@@ -207,7 +207,7 @@ class QuizzesController extends Controller
                     'due_date' => $request->closing_time,
                     'max_attemp' => $request->max_attemp,
                     'grading_method_id' => $request->grading_method_id,
-                    'grade' => $request->grade,
+                    'grade' => isset($request->grade) ? $request->grade : 0,
                     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => $request->opening_time,
                     'index' => $Next_index,

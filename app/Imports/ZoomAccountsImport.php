@@ -23,6 +23,7 @@ class ZoomAccountsImport implements ToModel, WithHeadingRow
             // 'jwt_token' => 'required',
             'api_key' => 'required',
             'api_secret' => 'required',
+            'password' => 'required',
             'email' => 'required|email',
         ])->validate();
 
@@ -31,17 +32,17 @@ class ZoomAccountsImport implements ToModel, WithHeadingRow
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
-        CURLOPT_URL => "https://api.zoom.us/v2/users/". $row['email'],
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "authorization: Bearer " . $jwt_token,
-            "content-type: application/json"
-        ),
+            CURLOPT_URL => "https://api.zoom.us/v2/users/". $row['email'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_HTTPHEADER => array(
+                "authorization: Bearer " . $jwt_token,
+                "content-type: application/json"
+            ),
         ));
 
         $response = curl_exec($curl);
@@ -66,6 +67,7 @@ class ZoomAccountsImport implements ToModel, WithHeadingRow
             'api_secret' => $row['api_secret'],
             'email' => $row['email'],
             'user_zoom_id' => (json_decode($response,true)['id']),
+            'password' => $row['password']
         ]);
 
     }

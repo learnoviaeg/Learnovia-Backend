@@ -113,8 +113,8 @@ class UsersController extends Controller
         
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
-            if(!$request->user()->can('site/show-all-courses')) //student
-                $enrolls=$enrolls->where('user_id',Auth::id());
+            // if(!$request->user()->can('site/show-all-courses')) //student
+            //     $enrolls=$enrolls->where('user_id',Auth::id());
 
             $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
             if($request->user()->can('site/course/student'))
@@ -289,7 +289,6 @@ class UsersController extends Controller
      */
     public function show($id)
     {
-   
         $user = User::find($id);
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
@@ -333,20 +332,14 @@ class UsersController extends Controller
                 unset($user->username);
                 unset($user->real_password);
             }
-               
         }
 
         if (isset($all))
         {
             unset($user->enroll);
             $user->Chain=$all;
-            return HelperController::api_response_format(201, $user, null);
             return response()->json(['message' => null, 'body' => $user ], 200);
-
         }
-       
-
-        
         return response()->json(['message' =>  __('messages.error.no_available_data'), 'body' => $user ], 200);
     }
 
