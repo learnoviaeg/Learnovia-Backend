@@ -48,6 +48,9 @@ class GradeAttemptItemlistener
                     $correction_answer['student_answer']=$stud_quest_ans->user_answers;
                     $correction_answer['correct_answer']=$item_detail->weight_details;
 
+                    if($item_detail->weight_details->ignore)
+                        continue;
+
                     $question_type=Questions::whereId($item_detail['item_id'])->pluck('question_type_id')->first();
         
                     if($question_type == 1)
