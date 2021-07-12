@@ -331,7 +331,7 @@ class QuizLessonController extends Controller
         'quiz_id' => 'required|integer|exists:quizzes,id',
         'lesson_id' => 'required|integer|exists:lessons,id',
         'start_date' => 'required|before:due_date',
-        'due_date' => 'required|after:' . Carbon::now(),
+        'due_date' => 'required',//|after:' . Carbon::now(),
     ]);
     
     $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
@@ -346,15 +346,14 @@ class QuizLessonController extends Controller
 
     $usersOverride =array();
     foreach ($request->users_id as $user_id) {
-        $usersOverride [] =  QuizOverride::firstOrCreate([
-        'user_id'=> $user_id,
-        'quiz_lesson_id'=> $quizLesson->id,
-        'start_date' => $request->start_date ,
+        $usersOverride [] =  QuizOverride::updateOrCreate(
+        ['user_id'=> $user_id,
+        'quiz_lesson_id'=> $quizLesson->id,],
+        ['start_date' => $request->start_date,
         'due_date'=>$request->due_date ,
-        'attemps' => $quizLesson->max_attemp
-    ]);
-
-        }
+        'attemps' => $quizLesson->max_attemp]
+        );
+    }
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $quiz_name = Quiz::find($quizLesson->quiz_id)->name;

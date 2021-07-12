@@ -929,7 +929,7 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'start_date' => 'required|before:due_date',
-            'due_date' => 'required|after:' . Carbon::now(),
+            'due_date' => 'required',//|after:' . Carbon::now(),
         ]);
 
         $assigmentlesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->pluck('id')->first();
@@ -943,12 +943,12 @@ class AssigmentsController extends Controller
       
         foreach($request->user_id as $user)
         {
-            $assignmentOerride[] = assignmentOverride::firstOrCreate([
-                'user_id' => $user,
-                'assignment_lesson_id' => $assigmentlesson,
-                'start_date' =>  $request->start_date,
-                'due_date' => $request->due_date,
-            ]);
+            $assignmentOerride[] = assignmentOverride:: updateOrCreate(
+                ['user_id' => $user,
+                'assignment_lesson_id' => $assigmentlesson],
+                ['start_date' =>  $request->start_date,
+                'due_date' => $request->due_date,]
+            );
         }
         $course = $lesson->courseSegment->course_id;
         LastAction::lastActionInCourse($course);
