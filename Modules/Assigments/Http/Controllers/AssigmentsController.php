@@ -943,12 +943,12 @@ class AssigmentsController extends Controller
       
         foreach($request->user_id as $user)
         {
-            $assignmentOerride[] = assignmentOverride::firstOrCreate([
-                'user_id' => $user,
-                'assignment_lesson_id' => $assigmentlesson,
-                'start_date' =>  $request->start_date,
-                'due_date' => $request->due_date,
-            ]);
+            $assignmentOerride[] = assignmentOverride:: updateOrCreate(
+                ['user_id' => $user,
+                'assignment_lesson_id' => $assigmentlesson],
+                ['start_date' =>  $request->start_date,
+                'due_date' => $request->due_date,]
+            );
         }
         $course = $lesson->courseSegment->course_id;
         LastAction::lastActionInCourse($course);
