@@ -58,6 +58,9 @@ class UserQuizController extends Controller
         $override_flag = false;
         $attempt_index = 0;
         $override = QuizOverride::where('user_id',$user->id)->where('quiz_lesson_id',$quiz_lesson->id)->first();
+        if($override->attemps == 0 || $override->start_date >  Carbon::now() || (Carbon::now() > $override->due_date))
+            return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
+
         if(isset($override)){
             $override_flag = true;
             if($override->attemps <= $quiz_lesson->max_attemp &&  $override->attemps >= 0  ){

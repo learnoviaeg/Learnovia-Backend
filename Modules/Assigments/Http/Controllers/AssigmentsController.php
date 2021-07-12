@@ -445,8 +445,8 @@ class AssigmentsController extends Controller
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assilesson->id)->first();
 
         if($override != null)
-            if (((($override->start_date >  Carbon::now()) || (Carbon::now() > $override->due_date))))
-                return HelperController::api_response_format(400, $body = [], $message = __('messages.error.submit_limit'));
+            if (($override->start_date >  Carbon::now()) || (Carbon::now() > $override->due_date))
+                return HelperController::api_response_format(400,null, $message = __('messages.error.submit_limit'));
             
             
         /*
@@ -456,14 +456,14 @@ class AssigmentsController extends Controller
         */
 
         if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) && (!isset($request->file)))) {
-            return HelperController::api_response_format(400, $body = [], $message = __('messages.assignment.content_or_file'));
+            return HelperController::api_response_format(400, null, $message = __('messages.assignment.content_or_file'));
         }
         if ((($assilesson->allow_attachment == 0)) && ((!isset($request->content)) || (isset($request->file)))) {
-            return HelperController::api_response_format(400, $body = [], $message = __('messages.assignment.content_only'));
+            return HelperController::api_response_format(400, null, $message = __('messages.assignment.content_only'));
         }
 
         if ((($assilesson->allow_attachment == 1)) && ((isset($request->content)) || (!isset($request->file)))) {
-            return HelperController::api_response_format(400, $body = [], $message = __('messages.assignment.file_only'));
+            return HelperController::api_response_format(400, null, $message = __('messages.assignment.file_only'));
         }
         // if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) || (!isset($request->file)))) { // both 
         //     return HelperController::api_response_format(400, $body = [], $message = 'you must enter both the content and the file');
@@ -471,23 +471,23 @@ class AssigmentsController extends Controller
         $userassigment = UserAssigment::where('user_id', Auth::user()->id)->where('assignment_lesson_id', $assilesson->id)->first();
 
         if(!isset($userassigment))
-            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.user_not_assign'));
+            return HelperController::api_response_format(400, null, $message = __('messages.error.user_not_assign'));
 
         if($userassigment->grade != null && $assilesson->allow_edit_answer=1)
-            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.cannot_edit'));
+            return HelperController::api_response_format(400, null, $message = __('messages.error.cannot_edit'));
 
         $gradedusers=UserAssigment::where('assignment_lesson_id', $assilesson->id)->whereNotNull('grade')->first();
         if(isset($gradedusers) && $assilesson->allow_edit_answer=1)
-            return HelperController::api_response_format(400, $body = [], $message = __('messages.error.cannot_edit'));
+            return HelperController::api_response_format(400, null, $message = __('messages.error.cannot_edit'));
 
         if (isset($userassigment)) {
             if($override != null){
                 if (((($override->start_date >  Carbon::now()) || (Carbon::now() > $override->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
-                    return HelperController::api_response_format(400, $body = [], $message = __('messages.error.submit_limit'));
+                    return HelperController::api_response_format(400, null, $message = __('messages.error.submit_limit'));
                 }
             }else{
                 if (((($assilesson->start_date >  Carbon::now()) || (Carbon::now() > $assilesson->due_date)) && ($userassigment->override == 0)) || ($userassigment->status_id == 1)) {
-                    return HelperController::api_response_format(400, $body = [], $message = __('messages.error.submit_limit'));
+                    return HelperController::api_response_format(400, null, $message = __('messages.error.submit_limit'));
                 }
             }
         }
