@@ -346,15 +346,14 @@ class QuizLessonController extends Controller
 
     $usersOverride =array();
     foreach ($request->users_id as $user_id) {
-        $usersOverride [] =  QuizOverride::firstOrCreate([
-        'user_id'=> $user_id,
-        'quiz_lesson_id'=> $quizLesson->id,
-        'start_date' => $request->start_date ,
+        $usersOverride [] =  QuizOverride::updateOrCreate(
+        ['user_id'=> $user_id,
+        'quiz_lesson_id'=> $quizLesson->id,],
+        ['start_date' => $request->start_date,
         'due_date'=>$request->due_date ,
-        'attemps' => $quizLesson->max_attemp
-    ]);
-
-        }
+        'attemps' => $quizLesson->max_attemp]
+        );
+    }
         $course = $lesson->courseSegment->course_id;
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $quiz_name = Quiz::find($quizLesson->quiz_id)->name;
