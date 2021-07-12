@@ -152,6 +152,7 @@ class QuestionsController extends Controller
             $request->validate([
                 'questions' => 'required|array',
                 'questions.*.id' => 'exists:questions,id',
+                'questions.*.exclude_mark' => 'required|boolean|in:0,1',
             ]);
             $quiz=Quiz::find($quiz_id);
             // $quiz->Question()->attach($request->questions); //attach repeat the raw
@@ -220,6 +221,7 @@ class QuestionsController extends Controller
         $mark_details['mark']  = $question['mark_tf'];
         $mark_details['and_why']  = $question['and_why'];
         $mark_details['and_why_mark']  = $question['and_why_mark'];
+        $mark_details['exclude_mark']  = $question['exclude_mark'];
 
         quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
@@ -250,6 +252,7 @@ class QuestionsController extends Controller
             $total_mark += $mcq['mark'];
         }
         $mark_details['total_mark'] = $total_mark;
+        $mark_details['exclude_mark']  = $question['exclude_mark'];
 
         quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
@@ -258,6 +261,7 @@ class QuestionsController extends Controller
     }
 
     public function Assign_Match($question , $quiz){
+
         $validator = Validator::make($question, [
             'match_a' => 'required|array|min:1|distinct',
             'match_b' => 'required|array|min:1|distinct',
@@ -266,26 +270,26 @@ class QuestionsController extends Controller
         if ($validator->fails())
             throw new \Exception(__('messages.error.data_invalid'));
 
-            foreach($question['match_a'] as $key=>$mat_a){
-                $matA[]=[++$key=>$mat_a];
-                $match['match_a']=$matA;
-            }
-            foreach($question['match_b'] as $key=>$mat_b){
-                $matB[]=[++$key=>$mat_b];
-                $match['match_b']=$matB;
-            }
-            foreach($question['mark_match'] as $key=>$mark_match){
-                $marks_matchh[]=[++$key=>$mark_match];
-                $match['mark']=$marks_matchh;
-            }
-            $match['total_mark']=array_sum($question['mark_match']);
-            $mark_details = $match;
+        foreach($question['match_a'] as $key=>$mat_a){
+            $matA[]=[++$key=>$mat_a];
+            $match['match_a']=$matA;
+        }
+        foreach($question['match_b'] as $key=>$mat_b){
+            $matB[]=[++$key=>$mat_b];
+            $match['match_b']=$matB;
+        }
+        foreach($question['mark_match'] as $key=>$mark_match){
+            $marks_matchh[]=[++$key=>$mark_match];
+            $match['mark']=$marks_matchh;
+        }
+        $match['total_mark']=array_sum($question['mark_match']);
+        $mark_details = $match;
+        $mark_details['exclude_mark']  = $question['exclude_mark'];
 
         quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
             ['grade_details' => json_encode($mark_details)]
         );
-      
     }
 
     public function Assign_Essay($question , $quiz){
@@ -296,6 +300,7 @@ class QuestionsController extends Controller
             throw new \Exception(__('messages.error.data_invalid'));
 
         $mark_details['total_mark']  = $question['mark_essay'];
+        $mark_details['exclude_mark']  = $question['exclude_mark'];
 
         quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
