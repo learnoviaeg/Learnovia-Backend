@@ -929,7 +929,7 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'start_date' => 'required|before:due_date',
-            'due_date' => 'required|after:' . Carbon::now(),
+            'due_date' => 'required',//|after:' . Carbon::now(),
         ]);
 
         $assigmentlesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->pluck('id')->first();

@@ -331,7 +331,7 @@ class QuizLessonController extends Controller
         'quiz_id' => 'required|integer|exists:quizzes,id',
         'lesson_id' => 'required|integer|exists:lessons,id',
         'start_date' => 'required|before:due_date',
-        'due_date' => 'required|after:' . Carbon::now(),
+        'due_date' => 'required',//|after:' . Carbon::now(),
     ]);
     
     $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
