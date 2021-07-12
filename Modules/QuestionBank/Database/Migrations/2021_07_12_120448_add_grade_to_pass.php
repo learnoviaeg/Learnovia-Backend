@@ -15,6 +15,7 @@ class AddGradeToPass extends Migration
     {
         Schema::table('quiz_lessons', function (Blueprint $table) {
             $table->float('grade_pass')->nullable();
+            $table->float('grade')->nullable()->change();
         });
     }
 
