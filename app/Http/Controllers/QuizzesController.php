@@ -145,7 +145,7 @@ class QuizzesController extends Controller
             'grade_max' => 'integer',
             'grade_pass' => 'numeric',
             'visible'=>"in:1,0",
-            'publish_date' => 'required|date|before_or_equal:opening_time'
+            'publish_date' => 'date|before_or_equal:opening_time'
         ]);
         if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
             return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
@@ -209,7 +209,7 @@ class QuizzesController extends Controller
                     'grading_method_id' => $request->grading_method_id,
                     'grade' => isset($request->grade) ? $request->grade : 0,
                     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
-                    'publish_date' => $request->publish_date,
+                    'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_time,
                     'index' => $Next_index,
                     'visible' => isset($request->visible)?$request->visible:1,
                     'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
