@@ -443,6 +443,12 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200, null , $message = __('messages.assignment.assignment_not_belong'));
 
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assilesson->id)->first();
+
+        if($override != null)
+            if (((($override->start_date >  Carbon::now()) || (Carbon::now() > $override->due_date))))
+                return HelperController::api_response_format(400, $body = [], $message = __('messages.error.submit_limit'));
+            
+            
         /*
             0===================>content
             1===================>attached_file
