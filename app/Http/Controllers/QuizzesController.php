@@ -306,8 +306,8 @@ class QuizzesController extends Controller
             'is_graded' => 'boolean',
             'duration' => 'integer',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
-            'grade_feedback' => 'in:After submission, After due_date, Never',
-            'correct_feedback' => 'in:After submission, After due_date, Never',
+            'grade_feedback' => 'required|in:After submission,After due_date,Never',
+            'correct_feedback' => 'required|in:After submission,After due_date,Never',
         ]);
         // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
         //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
