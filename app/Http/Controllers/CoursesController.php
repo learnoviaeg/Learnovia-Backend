@@ -62,7 +62,8 @@ class CoursesController extends Controller
         if(isset($status)){
             $enrolls = $this->chain->getCourseSegmentByManyChain($request);
             // if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)) //student or teacher
-            //     $enrolls->where('user_id',Auth::id());
+            if(!$request->user()->can('site/show-all-courses')) //student or teacher
+                $enrolls->where('user_id',Auth::id());
 
             if($request->has('role_id')){
                 $enrolls->where('role_id',$request->role_id);
