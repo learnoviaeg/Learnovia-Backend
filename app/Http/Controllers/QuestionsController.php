@@ -66,7 +66,8 @@ class QuestionsController extends Controller
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
                 foreach($questions as $question){
-                    // dd($question);
+                    if(!$question->grade_details->exclude_shuffle)
+                        continue;
                     if($question['question_type_id'] == 2){ // MCQ
                         $re=collect($question['content'])->shuffle();
                         $question['content']= json_encode($re);
@@ -154,7 +155,7 @@ class QuestionsController extends Controller
                 'questions' => 'required|array',
                 'questions.*.id' => 'exists:questions,id',
                 'questions.*.exclude_mark' => 'required|boolean|in:0,1',
-                // 'questions.*.exclude_shuffle' => 'required|boolean|in:0,1',
+                'questions.*.exclude_shuffle' => 'required|boolean|in:0,1',
             ]);
             $quiz=Quiz::find($quiz_id);
             // $quiz->Question()->attach($request->questions); //attach repeat the raw
@@ -224,7 +225,7 @@ class QuestionsController extends Controller
         $mark_details['and_why']  = $question['and_why'];
         $mark_details['and_why_mark']  = $question['and_why_mark'];
         $mark_details['exclude_mark']  = $question['exclude_mark'];
-        // $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
+        $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
         quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
@@ -256,7 +257,7 @@ class QuestionsController extends Controller
         }
         $mark_details['total_mark'] = $total_mark;
         $mark_details['exclude_mark']  = $question['exclude_mark'];
-        // $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
+        $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
         quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
@@ -289,7 +290,7 @@ class QuestionsController extends Controller
         $match['total_mark']=array_sum($question['mark_match']);
         $mark_details = $match;
         $mark_details['exclude_mark']  = $question['exclude_mark'];
-        // $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
+        $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
         quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
@@ -306,7 +307,7 @@ class QuestionsController extends Controller
 
         $mark_details['total_mark']  = $question['mark_essay'];
         $mark_details['exclude_mark']  = $question['exclude_mark'];
-        // $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
+        $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
         quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
