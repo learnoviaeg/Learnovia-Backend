@@ -66,7 +66,7 @@ class QuestionsController extends Controller
             
             if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
                 foreach($questions as $question){
-                    if(!$question->grade_details->exclude_shuffle)
+                    if($question->grade_details->exclude_shuffle)
                         continue;
                     if($question['question_type_id'] == 2){ // MCQ
                         $re=collect($question['content'])->shuffle();
