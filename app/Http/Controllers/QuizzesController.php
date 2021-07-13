@@ -239,9 +239,9 @@ class QuizzesController extends Controller
         $quiz = quiz::where('id',$id)->with('Question.children')->first();
         $quiz->quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
         $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz->quizLesson->id);
-
         $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz->quizLesson->id)->where('attemps','>','0')->first();
-        $quiz->quizLesson->due_date = $quiz_override->due_date;
+        if(isset($quiz_override))
+            $quiz->quizLesson->due_date = $quiz_override->due_date;
 
         $query=clone $user_quiz;
         $last_attempt=$query->latest()->first();
