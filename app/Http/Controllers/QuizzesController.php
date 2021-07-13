@@ -129,8 +129,8 @@ class QuizzesController extends Controller
             'grade_category_id' => 'required_if:is_graded,==,1',
             'duration' => 'required|integer|min:60', //by second
             'shuffle' => 'required|string|in:No Shuffle,Questions,Answers,Questions and Answers',
-            'grade_feedback' => 'required|in:After submission, After due_date, Never',
-            'correct_feedback' => 'required|in:After submission, After due_date, Never',
+            'grade_feedback' => 'required|in:After submission,After due_date,Never',
+            'correct_feedback' => 'required|in:After submission,After due_date,Never',
             'opening_time' => 'required|date',
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
