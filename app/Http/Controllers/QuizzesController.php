@@ -129,12 +129,8 @@ class QuizzesController extends Controller
             'grade_category_id' => 'required_if:is_graded,==,1',
             'duration' => 'required|integer|min:60', //by second
             'shuffle' => 'required|string|in:No Shuffle,Questions,Answers,Questions and Answers',
-            'feedback' => 'required|integer| in:1,2,3',
-            /**
-             * feedback 1 => After submission
-             * feedback 2 => After due date,
-             * feedback 3 => No feedback
-            */
+            'grade_feedback' => 'required|in:After submission, After due_date, Never',
+            'correct_feedback' => 'required|in:After submission, After due_date, Never',
             'opening_time' => 'required|date',
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
@@ -147,8 +143,8 @@ class QuizzesController extends Controller
             'visible'=>"in:1,0",
             'publish_date' => 'date|before_or_equal:opening_time'
         ]);
-        if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
-            return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
+        // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
+        //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
 
         $course=  Course::where('id',$request->course_id)->first();
         LastAction::lastActionInCourse($request->course_id);
@@ -188,7 +184,8 @@ class QuizzesController extends Controller
                 'duration' => $request->duration,
                 'created_by' => Auth::user()->id,
                 'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
-                'feedback' => isset($request->feedback) ? $request->feedback : 1,
+                'grade_feedback' => $request->grade_feedback,
+                'correct_feedback' => $request->correct_feedback,
             ]);
             foreach($request->lesson_id as $lesson)
             {
@@ -309,15 +306,11 @@ class QuizzesController extends Controller
             'is_graded' => 'boolean',
             'duration' => 'integer',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
-            'feedback' => 'integer| in:1,2,3',
-            /**
-             * feedback 1 => After submission
-             * feedback 2 =>After due date,
-             * feedback 3 => No feedback
-            */
+            'grade_feedback' => 'in:After submission, After due_date, Never',
+            'correct_feedback' => 'in:After submission, After due_date, Never',
         ]);
-        if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
-            return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
+        // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
+        //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
 
         LastAction::lastActionInCourse($request->course_id);
 
@@ -359,7 +352,8 @@ class QuizzesController extends Controller
         {
             $quiz->update([
                 'duration' => isset($request->duration) ? $request->duration : $quiz->duration,
-                'feedback' => isset($request->feedback) ? $request->feedback : $quiz->feedback,
+                'grade_feedback' => isset($request->grade_feedback) ? $request->grade_feedback : $quiz->grade_feedback,
+                'correct_feedback' => isset($request->correct_feedback) ? $request->correct_feedback : $quiz->correct_feedback,
             ]);
     
             $quiz_lesson->update([
