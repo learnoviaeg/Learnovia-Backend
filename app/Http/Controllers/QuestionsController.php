@@ -64,15 +64,15 @@ class QuestionsController extends Controller
                 }
             }
             
-            // if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
+            if($quiz->shuffle == 'Answers'|| $quiz->shuffle == 'Questions and Answers'){
                 foreach($questions as $question){
-                    dd($question);
+                    // dd($question);
                     if($question['question_type_id'] == 2){ // MCQ
                         $re=collect($question['content'])->shuffle();
                         $question['content']= json_encode($re);
                     }
                 }
-            // }
+            }
             
             return response()->json(['message' => __('messages.question.list'), 'body' => $questions], 200);
         }
