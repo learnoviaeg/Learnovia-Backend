@@ -20,7 +20,7 @@ class quiz_questions extends Model
     {
         $grade_details = json_decode($this->attributes['grade_details']);
         
-        if(isset($grade_details->exclude_mark)
+        if(isset($grade_details->exclude_mark))
         {
             if($grade_details->exclude_mark)
                 $grade_details->exclude_mark= true;
