@@ -401,6 +401,7 @@ class UserController extends Controller
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
             'count' => 'in:1,0',
+            'suspend' => 'in:1,0',
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
         ]);
@@ -420,6 +421,8 @@ class UserController extends Controller
             $users= $users->whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
         });
+        if($request->filled('suspend'))
+            $users = $users->where('suspend',$request->suspend);
         if($request->filled('from') && $request->filled('to')){ //lastaction filter
             $ids = LastAction::whereBetween('date', [$request->from, $request->to])->whereNull('course_id')->pluck('user_id');
             $users = $users->whereIn('id',$ids);
