@@ -48,7 +48,7 @@ class GradeAttemptItemlistener
                     $correction_answer['student_answer']=$stud_quest_ans->user_answers;
                     $correction_answer['correct_answer']=$item_detail->weight_details;
 
-                    if( $question_type != 5 && $item_detail->weight_details->exclude_mark)
+                    if($item_detail->weight_details->exclude_mark)
                         continue;
 
                     $question_type=Questions::whereId($item_detail['item_id'])->pluck('question_type_id')->first();
