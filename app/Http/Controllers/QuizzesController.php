@@ -184,7 +184,6 @@ class QuizzesController extends Controller
                 'shuffle' => isset($request->shuffle)?$request->shuffle:'No Shuffle',
                 'grade_feedback' => $request->grade_feedback,
                 'correct_feedback' => $request->correct_feedback,
-                'allow_edit' => 1,
             ]);
             foreach($request->lesson_id as $lesson)
             {
