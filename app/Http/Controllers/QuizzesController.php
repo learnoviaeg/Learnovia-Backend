@@ -341,7 +341,7 @@ class QuizzesController extends Controller
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id,
         ]);
 
-        if(!$quiz->allow_edit)
+        if($quiz->allow_edit)
         {
             $quiz->update([
                 'duration' => isset($request->duration) ? $request->duration : $quiz->duration,
