@@ -196,7 +196,7 @@ class AttemptsController extends Controller
                         $ans->right=null;
             }
 
-            if($correct_feedback == 'Never'){
+            if($correct_feedback === 'Never'){
                 dd($one->correction->right);
                 $one->correction->right=null;
                 if($question_type == 2)
