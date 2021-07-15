@@ -129,7 +129,7 @@ class TypeGrader implements GraderInterface
                     if(is_numeric($key)){ // because key may be int|string cause object {1:2, right:1, feedback:"text", grade:19}
                         if(isset($answer['correct_answer']->mark[$key]))
                             foreach($answer['correct_answer']->mark[$key] as $mrk){
-                                dd($key);
+                                dd($answer['correct_answer']->mark);
                                 if($key === $aa){
                                     $ans->right=1;
                                     $ans->grade=$mrk;
