@@ -554,11 +554,11 @@ class QuestionsController extends Controller
                 break;
 
             case 3: // Match
-                foreach($question['match_a'] as $key=>$mat_a){
+                foreach($match_a as $key=>$mat_a){
                     $matA[]=[++$key=>$mat_a];
                     $match['match_a']=$matA;
                 }
-                foreach($question['match_b'] as $key=>$mat_b){
+                foreach($match_b as $key=>$mat_b){
                     $matB[]=[++$key=>$mat_b];
                     $match['match_b']=$matB;
                 }
