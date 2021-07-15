@@ -28,15 +28,16 @@ class RefreshGradeTreeListener
      */
     public function handle(RefreshGradeTreeEvent $event)
     {
-        foreach(json_decode($event->grade_category->calculation_type) as $calculation_type){
-            // dd($calculation_type);
+        foreach($event->grade_category->calculation_type as $calculation_type){
+            $calculator = resolve($calculation_type);
+            $grade = ($calculator->calculate($event->user , $event->grade_category));
+            UserGrader::updateOrCreate(
+                ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
+                ['grade' =>  $grade]
+            );
+
         }
         
-        $grade = $event->gradeMethodsInterface->calculate($user , $grade_category);
-        dd($grade);
-        UserGrader::updateOrCreate(
-            ['item_id'=>$grade_category->id, 'item_type' => 'category', 'user_id' => $user->id],
-            ['grade' =>  $grade]
-        );
+        
     }
 }

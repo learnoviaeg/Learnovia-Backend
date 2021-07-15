@@ -141,7 +141,7 @@ class GradeCategory extends Model
     {
         return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','category');
     }
-    public function getCalculationType($value)
+    public function getCalculationTypeAttribute($value)
     {
         $content= json_decode($value);
         return $content;
