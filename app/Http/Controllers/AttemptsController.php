@@ -167,7 +167,7 @@ class AttemptsController extends Controller
                         $ans->grade=null;
             }
 
-            if($grade_feedback == 'Never'){
+            if(strcmp($grade_feedback,'Never')){
                 $one->correction->mark=null;
                 if($question_type == 2)
                     foreach($one->correction->details as $detail)
