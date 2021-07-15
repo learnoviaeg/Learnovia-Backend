@@ -14,7 +14,7 @@ class AllowEditQuiz extends Migration
     public function up()
     {
         Schema::table('quizzes', function (Blueprint $table) {
-            $table->boolean('allow_edit')->default(0);
+            $table->boolean('allow_edit')->default(1);
         });
     }
 
