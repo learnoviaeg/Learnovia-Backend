@@ -106,6 +106,8 @@ class AttemptsController extends Controller
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
         ]);
+        $q=Quiz::whereId($quiz_lesson->quiz->id)->update(['allow_edit' => 0]);
+
         $userQuiz->left_time=$quiz_lesson->quiz->duration;
 
         foreach($quiz_lesson->quiz->Question as $question)

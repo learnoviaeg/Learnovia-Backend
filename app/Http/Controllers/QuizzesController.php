@@ -311,9 +311,6 @@ class QuizzesController extends Controller
 
         $quiz=Quiz::find($id);
         $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id[0])->first();
-        // dd($quiz_lesson);
-        // $users=UserQuiz::where('quiz_lesson_id',$quiz_lesson->id)->pluck('user_id');
-        $user_quiz=UserQuiz::where('quiz_lesson_id',$quiz_lesson->id)->first();
         // if(isset($request->opening_time) && $request->opening_time > $quiz_lesson->start_date )
         //     return HelperController::api_response_format(200, null,__('messages.quiz.NotUpdate'));   
 
@@ -344,7 +341,7 @@ class QuizzesController extends Controller
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id,
         ]);
 
-        if(!isset($user_quiz))
+        if(!$quiz->allow_edit)
         {
             $quiz->update([
                 'duration' => isset($request->duration) ? $request->duration : $quiz->duration,
