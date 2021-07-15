@@ -43,7 +43,7 @@ class QuestionsController extends Controller
             'question_type' => 'array',
             'question_type.*' => 'integer|exists:questions_types,id',
             'search' => 'nullable|string',
-            // 'update_shuffle' => 'nullable'
+            'update_shuffle' => 'nullable' //to prevent shuffle questions on update
         ]);
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
@@ -54,6 +54,7 @@ class QuestionsController extends Controller
                 $questions =$questions->shuffle();
             
             foreach($questions as $question){
+                $question['update_shuffle']=isset($request->update_shuffle) ? $request->update_shuffle:0;
                 $children_mark = 0;
                 self::mark_details_of_question_in_quiz($question ,$quiz);
                 if(isset($question->children)){
@@ -120,10 +121,12 @@ class QuestionsController extends Controller
         if(isset($quiz_question->grade_details)){
         $question['grade_details']=$quiz_question->grade_details;
         if($question['question_type_id'] == 3){
-            $questi['match_a']=collect($question['content']['match_a'])->shuffle();
-            $questi['match_b']=collect($question['content']['match_b'])->shuffle();
-            $question['content']= json_encode($questi);
-            $question->mark = $quiz_question->grade_details->total_mark;
+            if(!$question['update_shuffle']){
+                $questi['match_a']=collect($question['content']['match_a'])->shuffle();
+                $questi['match_b']=collect($question['content']['match_b'])->shuffle();
+                $question['content']= json_encode($questi);
+                $question->mark = $quiz_question->grade_details->total_mark;
+            }
         }
         if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
             if(isset($quiz_question->grade_details->total_mark))
