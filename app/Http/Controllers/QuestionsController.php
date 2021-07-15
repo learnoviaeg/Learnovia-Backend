@@ -125,8 +125,8 @@ class QuestionsController extends Controller
                 $questi['match_a']=collect($question['content']['match_a'])->shuffle();
                 $questi['match_b']=collect($question['content']['match_b'])->shuffle();
                 $question['content']= json_encode($questi);
-                $question->mark = $quiz_question->grade_details->total_mark;
             }
+            $question->mark = $quiz_question->grade_details->total_mark;
         }
         if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
             if(isset($quiz_question->grade_details->total_mark))
