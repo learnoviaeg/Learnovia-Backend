@@ -240,7 +240,6 @@ class QuizzesController extends Controller
 
         $query=clone $user_quiz;
         $last_attempt=$query->latest()->first();
-        $allow_edit=false;
         $remain_time = $quiz->duration;
         $quiz->token_attempts = 0;
 
@@ -266,9 +265,7 @@ class QuizzesController extends Controller
             $quiz->Question;
         }
         else
-            $allow_edit=true;
-        
-        $quiz->allow_edit=$allow_edit;
+            $q=Quiz::whereId($quiz->id)->update(['allow_edit' => 1]);
 
         if(isset($quiz)){
             foreach($quiz->Question as $question){
@@ -315,6 +312,7 @@ class QuizzesController extends Controller
         $quiz=Quiz::find($id);
         $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id[0])->first();
         // dd($quiz_lesson);
+        // $users=UserQuiz::where('quiz_lesson_id',$quiz_lesson->id)->pluck('user_id');
         $user_quiz=UserQuiz::where('quiz_lesson_id',$quiz_lesson->id)->first();
         // if(isset($request->opening_time) && $request->opening_time > $quiz_lesson->start_date )
         //     return HelperController::api_response_format(200, null,__('messages.quiz.NotUpdate'));   

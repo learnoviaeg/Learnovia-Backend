@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class quiz extends Model
 {
-    protected $fillable = ['name','course_id','is_graded','duration','created_by' , 'shuffle','grade_feedback', 'draft', 'correct_feedback'];
+    protected $fillable = ['name','course_id','is_graded','duration','created_by' , 'shuffle','grade_feedback', 'draft', 'correct_feedback','allow_edit'];
     protected $hidden = [
         'created_at', 'updated_at'
     ];
@@ -41,4 +41,14 @@ class quiz extends Model
         }
         return 0 ;
     }
+
+    public function getAllowEditAttribute()
+    {
+        if($this->attributes['allow_edit'])
+            $allow_edit= true;
+        else
+            $allow_edit= false;
+
+        return $allow_edit;
+   }
 }
