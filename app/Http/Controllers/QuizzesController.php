@@ -264,8 +264,6 @@ class QuizzesController extends Controller
             $quiz->token_attempts = $count_answered;
             $quiz->Question;
         }
-        else
-            $q=Quiz::whereId($quiz->id)->update(['allow_edit' => 1]);
 
         if(isset($quiz)){
             foreach($quiz->Question as $question){
