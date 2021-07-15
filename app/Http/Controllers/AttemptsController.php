@@ -142,7 +142,6 @@ class AttemptsController extends Controller
         $due_date=$attempt->quiz_lesson->due_date;
         $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
         $correct_feedback=$attempt->quiz_lesson->quiz->correct_feedback;
-        dd($correct_feedback);
         
         foreach($attempt->UserQuizAnswer as $one)
         {
@@ -169,6 +168,7 @@ class AttemptsController extends Controller
 
             if(strcmp($grade_feedback,'Never')){
                 $one->correction->mark=null;
+                dd($one->correction->mark);
                 if($question_type == 2)
                     foreach($one->correction->details as $detail)
                         $detail->mark=null;
