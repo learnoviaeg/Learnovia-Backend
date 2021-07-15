@@ -42,7 +42,8 @@ class QuestionsController extends Controller
             'Question_Category_id.*' => 'integer|exists:questions_categories,id',
             'question_type' => 'array',
             'question_type.*' => 'integer|exists:questions_types,id',
-            'search' => 'nullable|string'
+            'search' => 'nullable|string',
+            // 'update_shuffle' => 'nullable'
         ]);
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
@@ -553,8 +554,14 @@ class QuestionsController extends Controller
                 break;
 
             case 3: // Match
-                $match['match_a']=isset($request->match_a) ? $request->match_a : $question->content->match_a;
-                $match['match_b']=isset($request->match_b) ? $request->match_b : $question->content->match_b;
+                foreach($question['match_a'] as $key=>$mat_a){
+                    $matA[]=[++$key=>$mat_a];
+                    $match['match_a']=$matA;
+                }
+                foreach($question['match_b'] as $key=>$mat_b){
+                    $matB[]=[++$key=>$mat_b];
+                    $match['match_b']=$matB;
+                }
                 $data['content'] = json_encode($match);
                 break;
 
