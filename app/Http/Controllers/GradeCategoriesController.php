@@ -23,6 +23,7 @@ class GradeCategoriesController extends Controller
         $this->middleware(['permission:grade/category/delete'],   ['only' => ['destroy']]);
     }
 
+
     /**
      * Display a listing of the resource.
      *
@@ -51,6 +52,10 @@ class GradeCategoriesController extends Controller
                 $course_segment_id = $this->chain->getCourseSegmentByChain($request)->first()->course_segment;
                 $grade_categories->where('course_segment_id' ,$course_segment_id);
             }
+            
+            $event_array['grade_cat'] = $grade_categories->first();
+            $event_array['user'] = Auth::id();
+
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories->with('Child.GradeItems','GradeItems')->get() ], 200);
     }
 

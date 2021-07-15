@@ -454,6 +454,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
+    Route::get('GradeTree', 'UserGradeController@index');
 
 
     Route::Resource('interactive', InterActiveController::class);
