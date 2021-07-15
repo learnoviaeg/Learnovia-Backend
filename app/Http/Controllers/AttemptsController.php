@@ -145,6 +145,7 @@ class AttemptsController extends Controller
         
         foreach($attempt->UserQuizAnswer as $one)
         {
+            dd($attempt->UserQuizAnswer);
             $question_type=Questions::whereId($one->question_id)->pluck('question_type_id')->first();
 
             //grade feedback
