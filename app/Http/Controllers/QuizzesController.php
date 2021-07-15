@@ -214,7 +214,7 @@ class QuizzesController extends Controller
             // $quiz->Question()->attach($questionsIDs);
             // $quiz=Quiz::whereId($quiz->id)->with('Question.children')->get();
             
-            return HelperController::api_response_format(200, $quiz,__('messages.quiz.add'));
+            return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
         // }
         return HelperController::api_response_format(200, null, __('messages.error.not_found'));
     }
