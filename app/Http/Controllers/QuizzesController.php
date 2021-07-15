@@ -135,11 +135,9 @@ class QuizzesController extends Controller
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'required',
-            'grade' => 'numeric',
             'grade_category_id.*' => 'required_if:is_graded,==,1|exists:grade_categories,id',
             'grade_min' => 'integer',
             'grade_max' => 'integer',
-            'grade_pass' => 'numeric',
             'visible'=>"in:1,0",
             'publish_date' => 'date|before_or_equal:opening_time'
         ]);
