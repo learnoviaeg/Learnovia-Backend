@@ -135,7 +135,78 @@ class AttemptsController extends Controller
      */
     public function show($id)
     {
-        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer','user','quiz_lesson')->get();
+        // after_sub
+        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer','user','quiz_lesson')->first();
+        $due_date=$attempt->quiz_lesson->due_date;
+        $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
+        $correct_feedback=$attempt->quiz_lesson->quiz->correct_feedback;
+        
+        foreach($attempt->UserQuizAnswer as $one)
+        {
+            $question_type=Questions::whereId($one->question_id)->pluck('question_type_id')->first();
+
+            //grade feedback
+            if($grade_feedback == 'After submission')
+                continue;
+
+            if($grade_feedback == 'After due_date')
+            {
+                if(Carbon::parse($due_date) > Carbon::now())
+                    continue;
+                
+                $one->correction->mark=null;
+                if($question_type == 2)
+                    foreach($one->correction->details as $detail)
+                        $detail->mark=null;
+
+                if($question_type == 3)
+                    foreach($one->correction->stu_ans as $ans)
+                        $ans->grade=null;
+            }
+
+            if($grade_feedback == 'Never'){
+                $one->correction->mark=null;
+                if($question_type == 2)
+                    foreach($one->correction->details as $detail)
+                        $detail->mark=null;
+
+                if($question_type == 3)
+                    foreach($one->correction->stu_ans as $ans)
+                        $ans->grade=null;
+            }
+
+            //correct feedback
+            if($correct_feedback == 'After submission')
+                continue;
+
+            if($correct_feedback == 'After due_date')
+            {
+                if(Carbon::parse($due_date) > Carbon::now())
+                    continue;
+                
+                $one->correction->right=null;
+                if($question_type == 2)
+                    foreach($one->correction->details as $detail)
+                        $detail->right=null;
+
+                if($question_type == 3)
+                    foreach($one->correction->stu_ans as $ans)
+                        $ans->right=null;
+            }
+
+            if($correct_feedback == 'Never'){
+                $one->correction->right=null;
+                if($question_type == 2)
+                    foreach($one->correction->details as $detail)
+                        $detail->right=null;
+
+                if($question_type == 3)
+                    foreach($one->correction->stu_ans as $ans)
+                        $ans->right=null;
+            }
+            // dd($one->correction);
+        }
+
         return HelperController::api_response_format(200, $attempt);
     }
 
