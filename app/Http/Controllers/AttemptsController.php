@@ -145,7 +145,6 @@ class AttemptsController extends Controller
         
         foreach($attempt->UserQuizAnswer as $one)
         {
-            dd($attempt->UserQuizAnswer);
             $question_type=Questions::whereId($one->question_id)->pluck('question_type_id')->first();
 
             //grade feedback
@@ -169,7 +168,6 @@ class AttemptsController extends Controller
 
             if(strcmp($grade_feedback,'Never')){
                 $one->correction->mark=null;
-                dd($one->correction->mark);
                 if($question_type == 2)
                     foreach($one->correction->details as $detail)
                         $detail->mark=null;
@@ -199,7 +197,6 @@ class AttemptsController extends Controller
             }
 
             if($correct_feedback == 'Never'){
-                dd('hi');
                 $one->correction->right=null;
                 if($question_type == 2)
                     foreach($one->correction->details as $detail)
