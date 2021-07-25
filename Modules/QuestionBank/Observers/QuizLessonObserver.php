@@ -73,6 +73,7 @@ class QuizLessonObserver
                 'parent' => $grade_category->id,
                 'name' => $quiz->name,
                 'hidden' => 1,
+                'grading_method_id' => $quizLesson->grading_method_id,
                 'instance_type' => 'Quiz',
                 'instance_id' => $quiz->id,
                 'lesson_id' => $lesson->id
