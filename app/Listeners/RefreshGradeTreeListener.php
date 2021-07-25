@@ -27,7 +27,9 @@ class RefreshGradeTreeListener
      * @return void
      */
     public function handle(RefreshGradeTreeEvent $event)
-    {
+    {   
+        if(isset($event->grade_category->calculation_type)){
+
         foreach($event->grade_category->calculation_type as $calculation_type){
             $calculator = resolve($calculation_type);
             $grade = ($calculator->calculate($event->user , $event->grade_category));
@@ -37,6 +39,8 @@ class RefreshGradeTreeListener
             );
 
         }
+    }
+
         
         
     }
