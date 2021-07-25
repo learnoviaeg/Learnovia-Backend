@@ -189,7 +189,7 @@ class AttemptsController extends Controller
                             $detail->right=null;
     
                     if($question_type == 3)
-                        if(isset($con->stu_ans))
+                        dd($con->stu_ans);
                             foreach($con->stu_ans as $ans)
                                 $ans->right=null;
                 }
