@@ -139,7 +139,7 @@ class AttemptsController extends Controller
      */
     public function show($id)
     {
-        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer','user','quiz_lesson')->first();
+        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson')->first();
         $due_date=$attempt->quiz_lesson->due_date;
         $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
         $correct_feedback=$attempt->quiz_lesson->quiz->correct_feedback;
