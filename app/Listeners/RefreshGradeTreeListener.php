@@ -31,7 +31,7 @@ class RefreshGradeTreeListener
     {             
         if(is_null($event->grade_category->calculation_type)){
             Log::debug($event);
-            throw new Exception('Missing calculation type');
+            throw new \Exception('Missing calculation type');
         }
         foreach($event->grade_category->calculation_type as $calculation_type){
             Log::debug('listener');
