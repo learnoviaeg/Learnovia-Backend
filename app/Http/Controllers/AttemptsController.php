@@ -179,7 +179,7 @@ class AttemptsController extends Controller
             {
                 if(Carbon::parse($due_date) > Carbon::now())
                 {
-                    dd($con);
+                    dd($con->right);
                     $con->right=null;
                     if($question_type == 2)
                         foreach($con->details as $detail)
