@@ -21,5 +21,9 @@
     array (
       0 => 'App\\Listeners\\GradeAttemptItemlistener',
     ),
+    'App\\Events\\RefreshGradeTreeEvent' => 
+    array (
+      0 => 'App\\Listeners\\RefreshGradeTreeListener',
+    ),
   ),
 );

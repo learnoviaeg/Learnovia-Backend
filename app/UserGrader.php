@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserGrader extends Model
 {
-    protected $fillable = ['user_id', 'item_type', 'item_id'];
+    protected $fillable = ['user_id', 'item_type', 'item_id','grade'];
     
     public function user()
     {

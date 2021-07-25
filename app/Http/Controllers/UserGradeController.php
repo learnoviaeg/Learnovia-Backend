@@ -12,6 +12,9 @@ use stdClass;
 use App\GradeCategory;
 use App\GradeItems;
 use App\LastAction;
+use App\Grader\gradingMethodsInterface;
+use App\Events\RefreshGradeTreeEvent;
+use Auth;
 class UserGradeController extends Controller
 {
     /**

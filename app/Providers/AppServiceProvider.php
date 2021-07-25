@@ -8,6 +8,11 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use App\Repositories\BackendServiceProvider;
 use App\Grader\GraderServiceProvider;
+use App\Grader\HighestGrade;
+use App\Grader\AverageGrade;
+use App\Grader\LowestGrade;
+use App\Grader\FirstGrade;
+use App\Grader\LastGrade;
 use App\Enroll;
 use App\Observers\EnrollObserver;
 use App\GradeItems;
@@ -37,7 +42,6 @@ use App\YearLevel;
 use App\ClassLevel;
 use App\AcademicYearType;
 use App\CourseSegment;
-
 use App\Timeline;
 use App\Material;
 
@@ -52,6 +56,22 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->register(BackendServiceProvider::class);
         $this->app->register(GraderServiceProvider::class);
+        
+        $FirstGrade = new FirstGrade();
+        $this->app->instance('First', $FirstGrade);
+        
+        $LastGrade = new LastGrade();
+        $this->app->instance('Last', $LastGrade);
+
+        $HighestGrade = new HighestGrade();
+        $this->app->instance('Highest', $HighestGrade);
+
+        $LowestGrade = new LowestGrade();
+        $this->app->instance('Lowest', $LowestGrade);
+        
+        $AverageGrade = new AverageGrade();
+        $this->app->instance('Average', $AverageGrade);
+        
     }
 
     public function boot()
