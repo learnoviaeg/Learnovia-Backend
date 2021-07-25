@@ -30,7 +30,7 @@ class RefreshGradeTreeListener
     public function handle(RefreshGradeTreeEvent $event)
     {             
         Log::debug('calculator listener');
-        if(isset($event->grade_category->calculation_type)){
+        // if(isset($event->grade_category->calculation_type)){
 
         foreach($event->grade_category->calculation_type as $calculation_type){
             $calculator = resolve($calculation_type);
@@ -43,7 +43,7 @@ class RefreshGradeTreeListener
             Log::debug($event->grade_category->id .'  \   '.  $event->user->id . ' \ '. $grade);
 
         }
-    }
+    // }
 
         
         
