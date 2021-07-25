@@ -294,8 +294,7 @@ class AttemptsController extends Controller
         $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
         UserGrader::where('user_id',Auth::id())->where('item_id',$gradeitem->id)->where('item_type','item')->update(['grade'=>$totalGrade[0]]);
 
-        $test = event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
-        Log::debug($test);
+        event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
