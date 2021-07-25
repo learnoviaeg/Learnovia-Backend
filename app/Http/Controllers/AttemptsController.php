@@ -292,7 +292,6 @@ class AttemptsController extends Controller
         UserGrader::where('user_id',Auth::id())->where('item_id',$gradeitem->id)->where('item_type','item')->update(['grade'=>$totalGrade[0]]);
 
         event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
-
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
 
