@@ -13,6 +13,8 @@ use App\UserGrader;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use App\Grader\gradingMethodsInterface;
+use App\Events\RefreshGradeTreeEvent;
 use Auth;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
@@ -220,6 +222,8 @@ class AttemptsController extends Controller
         //grade item ( attempt_item )user
         $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
         UserGrader::where('user_id',Auth::id())->where('item_id',$gradeitem->id)->where('item_type','item')->update(['grade'=>$totalGrade[0]]);
+
+        event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
