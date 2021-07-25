@@ -144,6 +144,8 @@ class AttemptsController extends Controller
         
         foreach($attempt->UserQuizAnswer as $one)
         {
+            if(!isset($one->correction))
+                continue;
             $con=($one->correction);
             $question_type=Questions::whereId($one->question_id)->pluck('question_type_id')->first();
 
