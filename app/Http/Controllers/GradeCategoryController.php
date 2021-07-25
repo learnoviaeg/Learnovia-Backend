@@ -66,7 +66,7 @@ class GradeCategoryController extends Controller
                 'grademin' => ($request->type==0) ? $request->grademin : null,
                 'type' => $request->type,
                 'exclude_flag' => $request->exclude_flag,
-                'id_number' => $year_level[0]->id,
+                // 'id_number' => $year_level[0]->id,
                 'weight' => (isset($request->weight)) ? $request->weight : 0,
             ]);
 
