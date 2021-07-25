@@ -53,9 +53,6 @@ class GradeCategoriesController extends Controller
                 $grade_categories->where('course_segment_id' ,$course_segment_id);
             }
             
-            $event_array['grade_cat'] = $grade_categories->first();
-            $event_array['user'] = Auth::id();
-
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories->with('Child.GradeItems','GradeItems')->get() ], 200);
     }
 

@@ -17,44 +17,6 @@ use App\Events\RefreshGradeTreeEvent;
 use Auth;
 class UserGradeController extends Controller
 {
-
-   
-
-
-    public function index(Request $request)
-    {
-        $request->validate([
-            'year' => 'exists:academic_years,id',
-            'type' => 'exists:academic_types,id',
-            'level' => 'exists:levels,id',
-            'segment' => 'exists:segments,id',
-            'courses'    => 'nullable|array',
-            'courses.*'  => 'nullable|integer|exists:courses,id',
-            'class' => 'nullable|integer|exists:classes,id',
-            'name' => 'string',
-            'parent' => 'exists:grade_categories,id',
-        ]);
-
-        $grade_categories = GradeCategory::whereNull('instance_type');
-            if($request->filled('name'))
-                $grade_categories->where('name','LIKE' , "%$request->name%");
-            if($request->filled('parent'))
-                $grade_categories->where('parent' ,$request->parent);
-            if($request->filled('class') && $request->filled('courses')){
-                $course_segment_id = $this->chain->getCourseSegmentByChain($request)->first()->course_segment;
-                $grade_categories->where('course_segment_id' ,$course_segment_id);
-            }
-            
-            $event_array['grade_cat'] = $grade_categories->first();
-            $event_array['user'] = Auth::id();
-            event(new RefreshGradeTreeEvent(Auth::user() ,$grade_categories->first()));
-
-
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories->with('Child.GradeItems','GradeItems')->get() ], 200);
-    }
-
-
-
     /**
      * create User grade
      *
