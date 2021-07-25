@@ -189,8 +189,9 @@ class AttemptsController extends Controller
                             $detail->right=null;
     
                     if($question_type == 3)
-                        foreach($con->stu_ans as $ans)
-                            $ans->right=null;
+                        if(isset($con->stu_ans))
+                            foreach($con->stu_ans as $ans)
+                                $ans->right=null;
                 }
             }
             if($correct_feedback == 'Never'){
@@ -200,8 +201,9 @@ class AttemptsController extends Controller
                         $detail->right=null;
 
                 if($question_type == 3)
-                    foreach($con->stu_ans as $ans)
-                        $ans->right=null;
+                    if(isset($con->stu_ans))
+                        foreach($con->stu_ans as $ans)
+                            $ans->right=null;
             }
             $one->correction = json_encode($con);
         }
