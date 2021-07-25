@@ -6,7 +6,7 @@ use App\GradeCategory;
 use App\GradeItems;
 use App\User;
 use App\Enroll;
-use App\Grader\GraderInterface;
+use App\Grader\TypeGrader;
 use App\Lesson;
 use App\UserGrade;
 use App\UserGrader;
@@ -33,7 +33,7 @@ class AttemptsController extends Controller
 {
     protected $gradeInterface;
 
-    public function __construct(GraderInterface $gradeInterface)
+    public function __construct(TypeGrader $gradeInterface)
     {
         $this->gradeInterface = $gradeInterface;
     }
