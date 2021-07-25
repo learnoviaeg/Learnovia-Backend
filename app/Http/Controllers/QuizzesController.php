@@ -206,7 +206,7 @@ class QuizzesController extends Controller
                     'start_date' => $request->opening_time,
                     'due_date' => $request->closing_time,
                     'max_attemp' => $request->max_attemp,
-                    'grading_method_id' => $request->grading_method_id,
+                    'grading_method_id' => json_decode((array)$request->grading_method_id),
                     'grade' => isset($request->grade) ? $request->grade : 0,
                     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_time,
@@ -365,7 +365,7 @@ class QuizzesController extends Controller
             $quiz_lesson->update([
                 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
                 'max_attemp' => isset($request->max_attemp) ? $request->max_attemp : $quiz_lesson->max_attemp,
-                'grading_method_id' => isset($request->grading_method_id) ? $request->grading_method_id : $quiz_lesson->grading_method_id,
+                'grading_method_id' => isset($request->grading_method_id) ?  json_decode((array)$request->grading_method_id) : $quiz_lesson->grading_method_id,
             ]);
         }
 
