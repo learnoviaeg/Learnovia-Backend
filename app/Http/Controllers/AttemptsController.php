@@ -31,7 +31,7 @@ use App\LastAction;
 
 class AttemptsController extends Controller
 {
-    // protected $gradeInterface;
+    protected $gradeInterface;
 
     public function __construct(GraderInterface $gradeInterface)
     {
