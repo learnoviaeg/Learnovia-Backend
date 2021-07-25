@@ -28,6 +28,7 @@ use Modules\QuestionBank\Entities\userQuizAnswer;
 use App\Events\QuizAttemptEvent;
 use App\Events\GradeAttemptEvent;
 use App\LastAction;
+use Log;
 
 class AttemptsController extends Controller
 {
@@ -293,7 +294,9 @@ class AttemptsController extends Controller
         $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
         UserGrader::where('user_id',Auth::id())->where('item_id',$gradeitem->id)->where('item_type','item')->update(['grade'=>$totalGrade[0]]);
 
-        event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
+        $test = event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
+        Log::debug($test);
+
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
 
