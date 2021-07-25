@@ -141,7 +141,6 @@ class AttemptsController extends Controller
         $due_date=$attempt->quiz_lesson->due_date;
         $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
         $correct_feedback=$attempt->quiz_lesson->quiz->correct_feedback;
-        dd($correct_feedback);
         
         foreach($attempt->UserQuizAnswer as $one)
         {
@@ -151,7 +150,7 @@ class AttemptsController extends Controller
             //correct feedback
             if($grade_feedback == 'After due_date')
             {
-                if(Carbon::parse($due_date) < Carbon::now())
+                if(Carbon::parse($due_date) > Carbon::now())
                 {
                     $con->mark=null;
                     if($question_type == 2)
@@ -178,7 +177,7 @@ class AttemptsController extends Controller
             //correct feedback
             if($correct_feedback == 'After due_date')
             {
-                if(Carbon::parse($due_date) < Carbon::now())
+                if(Carbon::parse($due_date) > Carbon::now())
                 {
                     $con->right=null;
                     if($question_type == 2)
