@@ -33,10 +33,10 @@ class AttemptsController extends Controller
 {
     // protected $gradeInterface;
 
-    public function __construct(GraderInterface $gradeInterface)
-    {
-        $this->gradeInterface = $gradeInterface;
-    }
+    // public function __construct(GraderInterface $gradeInterface)
+    // {
+    //     $this->gradeInterface = $gradeInterface;
+    // }
     /**
      * Display a listing of the resource.
      *
