@@ -90,4 +90,10 @@ class QuizLesson extends Model
     {
         return $this->belongsTo('App\GradingMethod', 'grading_method_id', 'id');
     }
+
+    public function getGradingMethodIdAttribute($value)
+    {
+        $content= json_decode($value);
+        return $content;
+    }
 }
