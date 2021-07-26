@@ -171,8 +171,9 @@ class AttemptsController extends Controller
                             $detail->mark=null;
     
                     if($question_type == 3)
-                        foreach($con->stu_ans as $ans)
-                            $ans->grade=null;
+                        if(!property_exists('stu_ans',$con))
+                            foreach($con->stu_ans as $ans)
+                                $ans->grade=null;
                 }
             }
 
@@ -183,8 +184,9 @@ class AttemptsController extends Controller
                         $detail->mark=null;
 
                 if($question_type == 3)
-                    foreach($con->stu_ans as $ans)
-                        $ans->grade=null;
+                    if(!property_exists('stu_ans',$con))
+                        foreach($con->stu_ans as $ans)
+                            $ans->grade=null;
             }
 
             //correct feedback
@@ -198,7 +200,7 @@ class AttemptsController extends Controller
                             $detail->right=null;
     
                     if($question_type == 3)
-                        if(array_key_exists('stu_ans',$con))
+                        if(!property_exists('stu_ans',$con))
                             foreach($con->stu_ans as $ans)
                                 $ans->right=null;
                 }
@@ -210,7 +212,7 @@ class AttemptsController extends Controller
                         $detail->right=null;
 
                 if($question_type == 3)
-                    if(array_key_exists('stu_ans',$con))
+                    if(!property_exists('stu_ans',$con))
                         foreach($con->stu_ans as $ans)
                             $ans->right=null;
             }
