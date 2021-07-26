@@ -19,7 +19,6 @@ class RefreshGradeTreeListener
      */
     public function __construct()
     {
-        //
     }
 
     /**
@@ -32,19 +31,21 @@ class RefreshGradeTreeListener
     {   
         if(isset($event->grade_category->calculation_type)){
 
-            foreach($event->grade_category->calculation_type as $calculation_type){
-                
-                $calculator = resolve($calculation_type);
-                
-                $grade = ($calculator->calculate($event->user , $event->grade_category));
-                Log::debug('calculator listener');
-                UserGrader::updateOrCreate(
-                    ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
-                    ['grade' =>  $grade]
-                );
+        foreach($event->grade_category->calculation_type as $calculation_type){
+            $calculator = resolve($calculation_type);
+            $grade = ($calculator->calculate($event->user , $event->grade_category));
+            Log::debug('calculator listener');
+            UserGrader::updateOrCreate(
+                ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
+                ['grade' =>  $grade]
+            );
 
-                Log::debug($event->grade_category->id .'  \   '.  $event->user->id . ' \ '. $grade);
-            }
+            Log::debug($event->grade_category->id .'  \   '.  $event->user->id . ' \ '. $grade);
+
         }
+    }
+
+        
+        
     }
 }
