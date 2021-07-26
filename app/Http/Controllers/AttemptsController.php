@@ -431,7 +431,7 @@ class AttemptsController extends Controller
                     $user_Attemp['grade']= $gradeNotWeight;
 
                 $user_Attemp["submit_time"]= $attem->submit_time;
-                $user_Attemp['details'][]= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question.children')->first();
+                $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question.children')->first();
 
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
                 if($useranswerSubmitted < 1){
