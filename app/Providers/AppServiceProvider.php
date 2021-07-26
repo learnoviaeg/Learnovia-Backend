@@ -10,6 +10,7 @@ use App\Repositories\BackendServiceProvider;
 use App\Grader\GraderServiceProvider;
 use App\Grader\HighestGrade;
 use App\Grader\AverageGrade;
+use App\Grader\TypeGrader;
 use App\Grader\LowestGrade;
 use App\Grader\FirstGrade;
 use App\Grader\LastGrade;
@@ -71,7 +72,9 @@ class AppServiceProvider extends ServiceProvider
         
         $AverageGrade = new AverageGrade();
         $this->app->instance('Average', $AverageGrade);
-        
+
+        $TypeGrader = new TypeGrader();
+        $this->app->instance(TypeGrader::class, $TypeGrader);        
     }
 
     public function boot()

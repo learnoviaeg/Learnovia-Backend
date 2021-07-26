@@ -31,12 +31,12 @@ use App\LastAction;
 
 class AttemptsController extends Controller
 {
-    protected $gradeInterface;
+    // protected $typegrader;
 
-    public function __construct(TypeGrader $gradeInterface)
-    {
-        $this->gradeInterface = $gradeInterface;
-    }
+    // public function __construct(TypeGrader $typegrader)
+    // {
+    //     $this->typegrader = $typegrader;
+    // }
     /**
      * Display a listing of the resource.
      *
@@ -82,10 +82,11 @@ class AttemptsController extends Controller
         if(isset($last_attempt)) // first attempt
         {
             $index=$last_attempt->attempt_index;
-            $last_attempt->left_time=$quiz_lesson->quiz->duration;  
-
-            if($last_attempt->attempt_index == $quiz_lesson->max_attemp)
-                return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
+            $last_attempt->left_time=$quiz_lesson->quiz->duration;
+            $end_date = Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration);
+            $seconds = $end_date->diffInSeconds(Carbon::now());
+            if($seconds < 0) 
+                $seconds = 0;
 
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration)->format('Y-m-d H:i:s') > Carbon::now()->format('Y-m-d H:i:s')
                  && UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->count() > 0)
@@ -95,7 +96,14 @@ class AttemptsController extends Controller
                     $answers->Question;
                 return HelperController::api_response_format(200, $last_attempt, __('messages.quiz.continue_quiz'));
             }
-            userQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
+
+            if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp )
+            {                
+                $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
+                dispatch($job);
+
+                return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
+            }
         }
 
         $userQuiz = userQuiz::create([
@@ -286,12 +294,13 @@ class AttemptsController extends Controller
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
             $user_quiz->save();
         }
-        $totalGrade=event(new GradeAttemptEvent($user_quiz,$this->gradeInterface));
-        $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)
-                                    ->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
-        //grade item ( attempt_item )user
-        $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
-        UserGrader::where('user_id',Auth::id())->where('item_id',$gradeitem->id)->where('item_type','item')->update(['grade'=>$totalGrade[0]]);
+
+        //event to auto correction
+        // event(new GradeAttemptEvent($user_quiz,$this->typegrader));
+
+        
+        // event(new AutoCorrectionEvent($user_quiz,$this->typegrader));
+        $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
 
         event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));

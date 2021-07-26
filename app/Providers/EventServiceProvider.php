@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Event;
+use App\Providers\DispatcherContract;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -31,11 +32,14 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\AttemptItemlistener',
         ],
 
-        'App\Events\GradeAttemptEvent' => [
-            'App\Listeners\GradeAttemptItemlistener',
-        ],
+        // 'App\Events\GradeAttemptEvent' => [
+        // ],
         'App\Events\RefreshGradeTreeEvent' => [
             'App\Listeners\RefreshGradeTreeListener',
+        ],
+        'App\Events\UpdatedAttemptEvent' => [
+            'App\Listeners\FireAutoCorrectionEventListener',
+            'App\Listeners\GradeAttemptItemlistener',
         ],
     ];
 
@@ -47,7 +51,6 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
-
         //
     }
 }
