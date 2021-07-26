@@ -198,7 +198,7 @@ class AttemptsController extends Controller
                             $detail->right=null;
     
                     if($question_type == 3)
-                        if(array_key_exists('stu_ans',$con))
+                        if(property_exists($con,'stu_ans'))
                             foreach($con->stu_ans as $ans)
                                 $ans->right=null;
                 }
@@ -210,7 +210,7 @@ class AttemptsController extends Controller
                         $detail->right=null;
 
                 if($question_type == 3)
-                    if(array_key_exists('stu_ans',$con))
+                    if(property_exists($con,'stu_ans'))
                         foreach($con->stu_ans as $ans)
                             $ans->right=null;
             }
