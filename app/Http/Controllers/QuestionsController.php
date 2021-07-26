@@ -416,6 +416,7 @@ class QuestionsController extends Controller
             'MCQ_Choices' => 'required|array',
             'MCQ_Choices.*.is_true' => 'required|boolean',
             'MCQ_Choices.*.content' => 'required|string',
+            'mcq_type' => 'required|in:1,2,3',
         ]);
 
         if ($validator->fails())
@@ -428,6 +429,7 @@ class QuestionsController extends Controller
             'text' => $question['text'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
+            'mcq_type' => isset($request->mcq_type) ? $request->mcq_type : null,
             // 'content' => json_encode(($question['MCQ_Choices'])),
         ];
         foreach($question['MCQ_Choices'] as $key=>$mcq)
