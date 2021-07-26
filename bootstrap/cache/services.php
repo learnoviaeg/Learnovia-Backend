@@ -51,6 +51,7 @@
     47 => 'Elibyy\\TCPDF\\ServiceProvider',
     48 => 'hisorange\\BrowserDetect\\ServiceProvider',
     49 => 'Barryvdh\\DomPDF\\ServiceProvider',
+    50 => 'App\\Grader\\GraderServiceProvider',
   ),
   'eager' => 
   array (
@@ -89,6 +90,7 @@
     32 => 'Elibyy\\TCPDF\\ServiceProvider',
     33 => 'hisorange\\BrowserDetect\\ServiceProvider',
     34 => 'Barryvdh\\DomPDF\\ServiceProvider',
+    35 => 'App\\Grader\\GraderServiceProvider',
   ),
   'deferred' => 
   array (
