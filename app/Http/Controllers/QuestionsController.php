@@ -429,7 +429,7 @@ class QuestionsController extends Controller
             'text' => $question['text'],
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
-            'mcq_type' => isset($request->mcq_type) ? $request->mcq_type : null,
+            'mcq_type' => isset($question['mcq_type']) ? $question['mcq_type'] : null,
             // 'content' => json_encode(($question['MCQ_Choices'])),
         ];
         foreach($question['MCQ_Choices'] as $key=>$mcq)
@@ -556,6 +556,7 @@ class QuestionsController extends Controller
 
             case 2: // MCQ
                 $data['content'] = isset($request->MCQ_Choices) ? json_encode($request->MCQ_Choices) : $question->MCQ_Choices;
+                $data['mcq_type'] = isset($request->mcq_type) ? json_encode($request->mcq_type) : $question->mcq_type;
                 break;
 
             case 3: // Match
