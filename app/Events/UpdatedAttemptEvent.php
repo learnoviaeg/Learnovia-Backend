@@ -9,8 +9,11 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Modules\QuestionBank\Entities\UserQuiz;
 
-class GradeAttemptEvent
+
+
+class UpdatedAttemptEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -19,9 +22,9 @@ class GradeAttemptEvent
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(UserQuiz $user_quiz)
     {
-        //
+        $this->attempt=$user_quiz;
     }
 
     /**

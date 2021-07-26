@@ -17,13 +17,14 @@
     array (
       0 => 'App\\Listeners\\AttemptItemlistener',
     ),
-    'App\\Events\\GradeAttemptEvent' => 
-    array (
-      0 => 'App\\Listeners\\GradeAttemptItemlistener',
-    ),
     'App\\Events\\RefreshGradeTreeEvent' => 
     array (
       0 => 'App\\Listeners\\RefreshGradeTreeListener',
+    ),
+    'App\\Events\\UpdatedAttemptEvent' => 
+    array (
+      0 => 'App\\Listeners\\FireAutoCorrectionEventListener',
+      1 => 'App\\Listeners\\GradeAttemptItemlistener',
     ),
   ),
 );

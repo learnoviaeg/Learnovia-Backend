@@ -17,6 +17,10 @@ class userQuiz extends Model
         'open_time','submit_time'
     ];
 
+    protected $dispatchesEvents = [
+        'updated' => \App\Events\UpdatedAttemptEvent::class,
+    ];
+
     public function quiz_lesson()
     {
         return $this->belongsTo('Modules\QuestionBank\Entities\QuizLesson', 'quiz_lesson_id', 'id');
