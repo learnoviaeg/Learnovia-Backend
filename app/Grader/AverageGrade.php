@@ -12,8 +12,8 @@ class AverageGrade implements gradingMethodsInterface
     {
         $items = GradeItems::where('grade_category_id',$grade_category->id)->pluck('id');
         $categories = GradeCategory::where('parent',$grade_category->id)->pluck('id');
-        $items_grades = UserGrader::where('user_id',$user->id)->whereIn('item_id', $categories)->where('item_type' , 'Category')->pluck('grade');
-        $cats_grades =   UserGrader::where('user_id',$user->id)->whereIn('item_id', $items)->where('item_type' , 'Item')->pluck('grade');
+        $items_grades = UserGrader::where('user_id',$user->id)->whereNotNull('grade')->whereIn('item_id', $categories)->where('item_type' , 'Category')->pluck('grade');
+        $cats_grades =   UserGrader::where('user_id',$user->id)->whereNotNull('grade')->whereIn('item_id', $items)->where('item_type' , 'Item')->pluck('grade');
 
         $grades = array_merge($items_grades->toArray() , $cats_grades->toArray());
         return (array_sum($grades)/ count($grades));
