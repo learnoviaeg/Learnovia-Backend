@@ -10,18 +10,18 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class UpdateQuizQuestionsEvent
+class UpdatedQuizQuestionsEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-    public $QuizQuestion;
+    public $Quiz;
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($QuizQuestion)
+    public function __construct($Quiz)
     {
-        $this->QuizQuestion = $QuizQuestion;
+        $this->Quiz = $Quiz;
     }
 
     /**

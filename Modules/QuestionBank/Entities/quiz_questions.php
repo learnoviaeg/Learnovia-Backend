@@ -3,7 +3,6 @@
 namespace Modules\QuestionBank\Entities;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Events\UpdateQuizQuestionsEvent;
 
 class quiz_questions extends Model
 {
@@ -11,10 +10,7 @@ class quiz_questions extends Model
     protected $hidden = [
         'created_at','updated_at'
     ];
-    protected $dispatchesEvents = [
-        'created' => UpdateQuizQuestionsEvent::class,
-        'updated' => UpdateQuizQuestionsEvent::class,
-    ];
+
     public function Question()
     {
         return  $this->hasMany('Modules\QuestionBank\Entities\Questions', 'id', 'question_id');
