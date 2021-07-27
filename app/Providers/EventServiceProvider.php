@@ -31,9 +31,8 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\AttemptItemlistener',
         ],
 
-        'App\Events\GradeAttemptEvent' => [
-            'App\Listeners\GradeAttemptItemlistener',
-        ],
+        // 'App\Events\GradeAttemptEvent' => [
+        // ],
         'App\Events\RefreshGradeTreeEvent' => [
             'App\Listeners\RefreshGradeTreeListener',
         ],
