@@ -171,7 +171,7 @@ class AttemptsController extends Controller
 
                 $user_Attemp["open_time"]= $attem->open_time;
                 $user_Attemp["submit_time"]= $attem->submit_time;
-                $user_Attemp["taken_duration"]= $attem->open_time->diffInSeconds($attem->submit_time,false);
+                $user_Attemp["taken_duration"]= $attem->open_time->diffInSeconds($attem->submit_time,false)/60;
                 $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question.children')->first();
 
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
