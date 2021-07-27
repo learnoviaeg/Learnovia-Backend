@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\UpdatedAttemptEvent;
+use App\Events\RefreshGradeTreeEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\GradeItems;
