@@ -37,6 +37,10 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\RefreshGradeTreeEvent' => [
             'App\Listeners\RefreshGradeTreeListener',
         ],
+        'App\Events\UpdatedAttemptEvent' => [
+            'App\Listeners\FireAutoCorrectionEventListener',
+            'App\Listeners\GradeAttemptItemlistener',
+        ],
         'App\Events\UpdateQuizQuestionsEvent' => [
             'App\Listeners\UpdateQuizGradeListener',
         ],
