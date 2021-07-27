@@ -41,6 +41,9 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\FireAutoCorrectionEventListener',
             'App\Listeners\GradeAttemptItemlistener',
         ],
+        'App\Events\UpdateQuizQuestionsEvent' => [
+            'App\Listeners\UpdateQuizGradeListener',
+        ],
     ];
 
     /**

@@ -11,6 +11,7 @@ use App\Enroll;
 use Validator;
 use App\Paginate;
 use App\Events\GradeItemEvent;
+use App\Events\UpdateQuizQuestionsEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\CourseSegment;
 use Illuminate\Support\Facades\Auth;
@@ -184,7 +185,7 @@ class QuestionsController extends Controller
                         break;
                     
                     case 5: // Paragraph
-                        $comprehension=$this->Assign_Paragraph($question,$quiz);
+                        $comprehension = $this->Assign_Paragraph($question,$quiz);
                         break;    
                 }
             }
@@ -313,10 +314,11 @@ class QuestionsController extends Controller
         $mark_details['exclude_mark']  = $question['exclude_mark'];
         $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
-        quiz_questions::updateOrCreate(
+        $x = quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
             ['grade_details' => json_encode($mark_details)]
         );
+        event(new UpdateQuizQuestionsEvent($x));
     }
 
     public function Assign_Paragraph($question , $quiz){
@@ -557,6 +559,7 @@ class QuestionsController extends Controller
             case 2: // MCQ
                 $data['content'] = isset($request->MCQ_Choices) ? json_encode($request->MCQ_Choices) : $question->MCQ_Choices;
                 $data['mcq_type'] = isset($request->mcq_type) ? json_encode($request->mcq_type) : $question->mcq_type;
+                $question->mcq_type=$data['mcq_type'];
                 break;
 
             case 3: // Match
