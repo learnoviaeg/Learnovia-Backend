@@ -45,20 +45,160 @@ class AttemptsController extends Controller
      */
     public function index(Request $request)
     {
+        // $request->validate([
+        //     'quiz_id' => 'required|integer|exists:quizzes,id',
+        //     'lesson_id' => 'required|integer|exists:lessons,id',
+        //     'attempt_index'=>'integer|exists:user_quizzes,id',
+        //     'user_id' => 'integer|exists:users,id',
+        // ]);
+        // $user_id=($request->user_id) ? $request->user_id : Auth::id();
+        // $quiz=Quiz::find($request->quiz_id);
+        // $attempts=UserQuiz::where('user_id',$user_id)->where('quiz_lesson_id',$quiz->quizLesson[0]->id);
+
+        // if(isset($request->attempt_index))
+        //     $attempts->whereId($request->attempt_index);
+
+        // return HelperController::api_response_format(200, $attempts->with('UserQuizAnswer','user','quiz_lesson')->get());
+
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
-            'attempt_index'=>'integer|exists:user_quizzes,id',
             'user_id' => 'integer|exists:users,id',
         ]);
-        $user_id=($request->user_id) ? $request->user_id : Auth::id();
+
+        $final= collect([]);
+        $all_users = array();
+        $user_attempts = array();
         $quiz=Quiz::find($request->quiz_id);
-        $attempts=UserQuiz::where('user_id',$user_id)->where('quiz_lesson_id',$quiz->quizLesson[0]->id);
+        $childs=[];
+        foreach($quiz->Question as $oneQ)
+            if($oneQ->question_type_id == 5)
+                $childs=$oneQ->children->pluck('id')->toArray();
+        $quetions=$quiz->Question->pluck('id');
+        $questions=array_merge($quetions->toArray(),$childs);
+        $essay=0;
+        $t_f_Ques=0;
+        $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
+        $t_f_Quest = Questions::whereIn('id',$questions)->where('question_type_id',1)->pluck('id');
+        if(count($essayQues) > 0)
+            $essay = 1;
 
-        if(isset($request->attempt_index))
-            $attempts->whereId($request->attempt_index);
+        if(count($t_f_Quest) > 0)
+            $t_f_Ques = 1;
+        
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!$quiz_lesson)
+            return HelperController::api_response_format(200, null, __('messages.error.not_found'));
 
-        return HelperController::api_response_format(200, $attempts->with('UserQuizAnswer','user','quiz_lesson')->get());
+        // $quiz_duration_ended=false;
+        // if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
+        //     $quiz_duration_ended=true;
+        
+        $users=Enroll::where('course_segment',$quiz_lesson->lesson->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
+
+        if($request->filled('user_id')){
+            unset($users);
+            $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$request->user_id)->pluck('user_id')->unique();
+            if(count ($users) == 0)
+                return HelperController::api_response_format(200, __('messages.error.user_not_assign'));
+        }
+        
+        $Submitted_users=0;
+        foreach ($users as $user_id){
+            $i=0;
+            $All_attemp=[];
+            $user = User::find($user_id);
+            if($user == null){
+                unset($user);
+                continue;
+            }
+            if( !$user->can('site/quiz/store_user_quiz'))
+                continue;
+            
+            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
+
+            $countEss_TF=0;
+            foreach($attems as $key=>$attem){
+                $gradeNotWeight=0;
+                $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$attem->quiz_lesson->quiz_id)
+                                            ->where('lesson_id',$attem->quiz_lesson->lesson_id)->first();
+                //grade item ( attempt_item )user
+                $gradeitem=GradeItems::where('index',$attem->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
+                $grade=UserGrader::where('user_id',$user_id)->where('item_id',$gradeitem->id)->where('item_type','item')->pluck('grade')->first();
+                $gradeNotWeight+=$grade;
+                // dd($grade);
+
+                //7esab daragat el true_false questions
+                $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest)->get();
+                if(count($userEssayCheckAnswerTF) > 0)
+                {
+                    foreach($userEssayCheckAnswerTF as $TF){
+                        if($TF->correction->and_why == true){
+                            if(isset($TF->correction->grade))
+                                $gradeNotWeight+= $TF->correction->grade;
+                            else{
+                                $user_Attemp["grade"]= null;
+                                $user_Attemp["feedback"] =null;
+                            }
+                        }
+                    }
+                }
+
+                //7esab daragat el essay questions
+                $userEssayCheckAnswerE=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$essayQues)->get();
+                if(count($userEssayCheckAnswerE) > 0)
+                {
+                    foreach($userEssayCheckAnswerE as $esay){
+                        if(isset($esay->correction)){
+                            $gradeNotWeight+= $esay->correction->grade;
+                        }
+                        else{
+                            $user_Attemp["grade"]= null;
+                            $user_Attemp["feedback"] =null;
+                        }
+                    }
+                }
+
+                $user_Attemp['id']= $attem->id;
+
+                //check if grade is null so, there is and_why and essay not graded
+                if(array_key_exists('grade',$user_Attemp)){
+                    if(!is_null($user_Attemp['grade']))
+                        $user_Attemp['grade']= $gradeNotWeight;
+                }
+                else
+                    $user_Attemp['grade']= $gradeNotWeight;
+
+                $user_Attemp["submit_time"]= $attem->submit_time;
+                $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question.children')->first();
+
+                $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
+                if($useranswerSubmitted < 1){
+                    array_push($All_attemp, $user_Attemp);
+                    $i++;
+                }
+            }
+
+            $attemps['id'] = $user->id;
+            $attemps['username'] = $user->username;
+            $attemps['fullname'] =ucfirst($user->firstname) . ' ' . ucfirst($user->lastname);
+            $attemps['picture'] = $user->attachment;
+            $attemps['Attempts'] = $All_attemp;
+            array_push($user_attempts, $attemps);
+            if($i>0)
+                $Submitted_users++;
+        }
+
+        $all_users['essay']=$essay;
+        $all_users['T_F']=$t_f_Ques;
+        $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
+        $all_users['submitted_users'] = $Submitted_users ;
+        $all_users['notGraded'] = $countEss_TF ;
+        $final->put('submittedAndNotSub',$all_users);
+        $final->put('users',$user_attempts);
+        LastAction::lastActionInCourse($quiz_lesson->lesson->courseSegment->course_id);
+
+        return HelperController::api_response_format(200, $final, __('messages.quiz.students_attempts_list'));
     }
 
     /**
@@ -323,144 +463,6 @@ class AttemptsController extends Controller
 
     public function get_all_users_quiz_attempts(Request $request)
     {
-        $request->validate([
-            'quiz_id' => 'required|integer|exists:quizzes,id',
-            'lesson_id' => 'required|integer|exists:lessons,id',
-            'user_id' => 'integer|exists:users,id',
-        ]);
 
-        $final= collect([]);
-        $all_users = array();
-        $user_attempts = array();
-        $quiz=Quiz::find($request->quiz_id);
-        $childs=[];
-        foreach($quiz->Question as $oneQ)
-            if($oneQ->question_type_id == 5)
-                $childs=$oneQ->children->pluck('id')->toArray();
-        $quetions=$quiz->Question->pluck('id');
-        $questions=array_merge($quetions->toArray(),$childs);
-        $essay=0;
-        $t_f_Ques=0;
-        $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
-        $t_f_Quest = Questions::whereIn('id',$questions)->where('question_type_id',1)->pluck('id');
-        if(count($essayQues) > 0)
-            $essay = 1;
-
-        if(count($t_f_Quest) > 0)
-            $t_f_Ques = 1;
-        
-        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        if(!$quiz_lesson)
-            return HelperController::api_response_format(200, null, __('messages.error.not_found'));
-
-        // $quiz_duration_ended=false;
-        // if(Carbon::parse($quiz_lesson->due_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
-        //     $quiz_duration_ended=true;
-        
-        $users=Enroll::where('course_segment',$quiz_lesson->lesson->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
-
-        if($request->filled('user_id')){
-            unset($users);
-            $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$request->user_id)->pluck('user_id')->unique();
-            if(count ($users) == 0)
-                return HelperController::api_response_format(200, __('messages.error.user_not_assign'));
-        }
-        
-        $Submitted_users=0;
-        foreach ($users as $user_id){
-            $i=0;
-            $All_attemp=[];
-            $user = User::find($user_id);
-            if($user == null){
-                unset($user);
-                continue;
-            }
-            if( !$user->can('site/quiz/store_user_quiz'))
-                continue;
-            
-            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
-
-            $countEss_TF=0;
-            foreach($attems as $key=>$attem){
-                $gradeNotWeight=0;
-                $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$attem->quiz_lesson->quiz_id)
-                                            ->where('lesson_id',$attem->quiz_lesson->lesson_id)->first();
-                //grade item ( attempt_item )user
-                $gradeitem=GradeItems::where('index',$attem->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
-                $grade=UserGrader::where('user_id',$user_id)->where('item_id',$gradeitem->id)->where('item_type','item')->pluck('grade')->first();
-                $gradeNotWeight+=$grade;
-                // dd($grade);
-
-                //7esab daragat el true_false questions
-                $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest)->get();
-                if(count($userEssayCheckAnswerTF) > 0)
-                {
-                    foreach($userEssayCheckAnswerTF as $TF){
-                        if($TF->correction->and_why == true){
-                            if(isset($TF->correction->grade))
-                                $gradeNotWeight+= $TF->correction->grade;
-                            else{
-                                $user_Attemp["grade"]= null;
-                                $user_Attemp["feedback"] =null;
-                            }
-                        }
-                    }
-                }
-
-                //7esab daragat el essay questions
-                $userEssayCheckAnswerE=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$essayQues)->get();
-                if(count($userEssayCheckAnswerE) > 0)
-                {
-                    foreach($userEssayCheckAnswerE as $esay){
-                        if(isset($esay->correction)){
-                            $gradeNotWeight+= $esay->correction->grade;
-                        }
-                        else{
-                            $user_Attemp["grade"]= null;
-                            $user_Attemp["feedback"] =null;
-                        }
-                    }
-                }
-
-                $user_Attemp['id']= $attem->id;
-
-                //check if grade is null so, there is and_why and essay not graded
-                if(array_key_exists('grade',$user_Attemp)){
-                    if(!is_null($user_Attemp['grade']))
-                        $user_Attemp['grade']= $gradeNotWeight;
-                }
-                else
-                    $user_Attemp['grade']= $gradeNotWeight;
-
-                $user_Attemp["submit_time"]= $attem->submit_time;
-                $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question.children')->first();
-
-                $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
-                if($useranswerSubmitted < 1){
-                    array_push($All_attemp, $user_Attemp);
-                    $i++;
-                }
-            }
-
-            $attemps['id'] = $user->id;
-            $attemps['username'] = $user->username;
-            $attemps['fullname'] =ucfirst($user->firstname) . ' ' . ucfirst($user->lastname);
-            $attemps['picture'] = $user->attachment;
-            $attemps['Attempts'] = $All_attemp;
-            array_push($user_attempts, $attemps);
-            if($i>0)
-                $Submitted_users++;
-        }
-
-        $all_users['essay']=$essay;
-        $all_users['T_F']=$t_f_Ques;
-        $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
-        $all_users['submitted_users'] = $Submitted_users ;
-        $all_users['notGraded'] = $countEss_TF ;
-        $final->put('submittedAndNotSub',$all_users);
-        $final->put('users',$user_attempts);
-        LastAction::lastActionInCourse($quiz_lesson->lesson->courseSegment->course_id);
-
-        return HelperController::api_response_format(200, $final, __('messages.quiz.students_attempts_list'));
     }
 }
