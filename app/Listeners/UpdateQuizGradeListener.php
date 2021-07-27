@@ -37,12 +37,15 @@ class UpdateQuizGradeListener
                 // if(($question['question_id'] != 100))
                 // continue;
             if(isset($question['grade_details']->exclude_mark) && $question['grade_details']->exclude_mark == false)
-                continue;
-                
+                continue;  
             $marks_of_all_questions += (float)$question['grade_details']->total_mark;
         }
         foreach(QuizLesson::where('quiz_id', $event->QuizQuestion['quiz_id'])->cursor()  as $quiz_lesson){
-            $quiz_lesson->update(['questions_mark' => $marks_of_all_questions ]);
+                $quiz_lesson->questions_mark =  $marks_of_all_questions ;
+            if($quiz_lesson->grade == 0){
+                $quiz_lesson->grade = $marks_of_all_questions;
+            }
+            $quiz_lesson->save();
         }
     }
 }
