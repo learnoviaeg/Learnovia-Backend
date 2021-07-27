@@ -305,8 +305,6 @@ class AttemptsController extends Controller
         // event(new AutoCorrectionEvent($user_quiz,$this->typegrader));
         $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
 
-        event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
-
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
 
