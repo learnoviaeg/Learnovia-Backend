@@ -216,7 +216,7 @@ class QuestionsController extends Controller
         foreach($request->questions as $question)
             quiz_questions::where('question_id',$question)->where('quiz_id',$quiz_id)->delete();
             
-            event(new UpdatedQuizQuestionsEvent($assigned_question));
+        event(new UpdatedQuizQuestionsEvent($quiz_id));
         return HelperController::api_response_format(200,null , __('messages.quiz.unAssign'));
     }
 
