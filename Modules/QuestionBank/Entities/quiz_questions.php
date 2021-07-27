@@ -34,4 +34,9 @@ class quiz_questions extends Model
         }
         return $grade_details;
     }
+
+    protected $dispatchesEvents = [
+        'creating' => UpdateQuizQuestionsEvent::class,
+        'updating' => UpdateQuizQuestionsEvent::class,
+    ];
 }

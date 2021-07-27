@@ -37,6 +37,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\RefreshGradeTreeEvent' => [
             'App\Listeners\RefreshGradeTreeListener',
         ],
+        'App\Events\UpdateQuizQuestionsEvent' => [
+            'App\Listeners\UpdateQuizGradeListener',
+        ],
     ];
 
     /**

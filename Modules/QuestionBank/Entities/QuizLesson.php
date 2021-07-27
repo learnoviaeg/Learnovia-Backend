@@ -20,7 +20,7 @@ class QuizLesson extends Model
         'grade',
         'grade_category_id',
         'publish_date',
-        'visible','index','seen_number', 'grade_pass'
+        'visible','index','seen_number', 'grade_pass' , 'questions_mark'
     ];
     protected $table = 'quiz_lessons';
     protected $appends = ['started','user_seen_number','Status'];
