@@ -34,7 +34,7 @@ class UpdateQuizGradeListener
         foreach(quiz_questions::where('quiz_id', $event->QuizQuestion['quiz_id'])->cursor() as $question){
             if(is_null($question['grade_details']))
                 continue;
-            if(isset($question['grade_details']->exclude_mark) && $question['grade_details']->exclude_mark == false)
+            if(isset($question['grade_details']->exclude_mark) && (bool) $question['grade_details']->exclude_mark == true)
                 continue;  
             $marks_of_all_questions += (float)$question['grade_details']->total_mark;
         }
