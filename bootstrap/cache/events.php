@@ -26,7 +26,7 @@
       0 => 'App\\Listeners\\FireAutoCorrectionEventListener',
       1 => 'App\\Listeners\\GradeAttemptItemlistener',
     ),
-    'App\\Events\\UpdateQuizQuestionsEvent' => 
+    'App\\Events\\UpdatedQuizQuestionsEvent' => 
     array (
       0 => 'App\\Listeners\\UpdateQuizGradeListener',
     ),
