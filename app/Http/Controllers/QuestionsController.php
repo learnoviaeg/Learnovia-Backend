@@ -232,10 +232,12 @@ class QuestionsController extends Controller
         $mark_details['exclude_mark']  = $question['exclude_mark'];
         $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
-        quiz_questions::updateOrCreate(
+       $x = quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
             ['grade_details' => json_encode($mark_details)]
         );
+        event(new UpdateQuizQuestionsEvent($x));
+
     }
 
     public function Assign_MCQ($question , $quiz){
@@ -264,10 +266,12 @@ class QuestionsController extends Controller
         $mark_details['exclude_mark']  = $question['exclude_mark'];
         $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
-        quiz_questions::updateOrCreate(
+        $x = quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
             ['grade_details' => json_encode($mark_details)]
         );
+        event(new UpdateQuizQuestionsEvent($x));
+
     }
 
     public function Assign_Match($question , $quiz){
@@ -297,10 +301,11 @@ class QuestionsController extends Controller
         $mark_details['exclude_mark']  = $question['exclude_mark'];
         $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
-        quiz_questions::updateOrCreate(
+        $x = quiz_questions::updateOrCreate(
             ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
             ['grade_details' => json_encode($mark_details)]
         );
+        event(new UpdateQuizQuestionsEvent($x));
     }
 
     public function Assign_Essay($question , $quiz){
