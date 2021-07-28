@@ -416,7 +416,7 @@ class AttemptsController extends Controller
                             $data['user_answers']=null;
                             if(isset($question['match_a']) && $question['match_b']){
                                 foreach($question['match_a'] as $key => $matchA)
-                                    $MATCHS[]=[$matchA => $question['match_b'][$key]];
+                                    $MATCHS[]=[$matchA => $question['match_b'][$matchA]];
                                 
                                 $data['user_answers'] = json_encode($MATCHS);
                             }
