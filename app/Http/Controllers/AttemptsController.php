@@ -24,6 +24,7 @@ use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\QuizOverride;
 use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use App\Events\QuizAttemptEvent;
 use App\Events\GradeAttemptEvent;
@@ -172,7 +173,9 @@ class AttemptsController extends Controller
                 $user_Attemp["open_time"]= $attem->open_time;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $user_Attemp["taken_duration"]= Carbon::parse($attem->open_time)->diffInSeconds(Carbon::parse($attem->submit_time),false)/60;
-                $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question.children')->first();
+                $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question')->first();
+                foreach($user_Attemp['details']->UserQuizAnswer as $answ)
+                    $answ->Question->grade_details=quiz_questions::where('quiz_id',$request->quiz_id)->where('question_id',$answ->question_id)->pluck('grade_details')->first();
 
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
                 if($useranswerSubmitted < 1){
@@ -419,7 +422,7 @@ class AttemptsController extends Controller
                                     $MATCHS[]=[$matchA => $question['match_b'][$key]];
                                 
                                 $data['user_answers'] = json_encode($MATCHS);
-                                $MATCHS=[];
+                                $MATCHS=[]; //if there is more than one match_question >> clear array
                             }
                             break;
             
@@ -440,13 +443,6 @@ class AttemptsController extends Controller
             $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
             $user_quiz->save();
         }
-
-        //event to auto correction
-        // event(new GradeAttemptEvent($user_quiz,$this->typegrader));
-
-        
-        // event(new AutoCorrectionEvent($user_quiz,$this->typegrader));
-        $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
 
         return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
     }
