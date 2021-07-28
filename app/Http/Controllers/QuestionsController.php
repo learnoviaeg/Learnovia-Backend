@@ -11,7 +11,7 @@ use App\Enroll;
 use Validator;
 use App\Paginate;
 use App\Events\GradeItemEvent;
-use App\Events\UpdateQuizQuestionsEvent;
+use App\Events\UpdatedQuizQuestionsEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\CourseSegment;
 use Illuminate\Support\Facades\Auth;
@@ -169,25 +169,30 @@ class QuestionsController extends Controller
                 
                 switch ($type) {
                     case 1: // True/false
-                        $true_false = $this->Assign_TF($question,$quiz);
+                        $mark_details = $this->Assign_TF($question,$quiz);
                         break;
     
                     case 2: // MCQ
-                        $mcq = $this->Assign_MCQ($question,$quiz);
+                        $mark_details = $this->Assign_MCQ($question,$quiz);
                         break;
     
                     case 3: // Match
-                        $match = $this->Assign_Match($question,$quiz);
+                        $mark_details = $this->Assign_Match($question,$quiz);
                         break;
     
                     case 4: // Essay
-                        $essay = $this->Assign_Essay($question,$quiz);
+                        $mark_details = $this->Assign_Essay($question,$quiz);
                         break;
                     
                     case 5: // Paragraph
-                        $comprehension = $this->Assign_Paragraph($question,$quiz);
+                        $mark_details = $this->Assign_Paragraph($question,$quiz);
                         break;    
                 }
+                $assigned_question = quiz_questions::updateOrCreate(
+                    ['question_id'=> $question['id'], 'quiz_id' => $quiz_id,],
+                    ['grade_details' => json_encode($mark_details)]
+                );
+                event(new UpdatedQuizQuestionsEvent($quiz_id));
             }
             $quiz->draft=0;
             $quiz->save();
@@ -210,7 +215,8 @@ class QuestionsController extends Controller
         ]);
         foreach($request->questions as $question)
             quiz_questions::where('question_id',$question)->where('quiz_id',$quiz_id)->delete();
-        
+            
+        event(new UpdatedQuizQuestionsEvent($quiz_id));
         return HelperController::api_response_format(200,null , __('messages.quiz.unAssign'));
     }
 
@@ -232,12 +238,7 @@ class QuestionsController extends Controller
         $mark_details['exclude_mark']  = $question['exclude_mark'];
         $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
-       $x = quiz_questions::updateOrCreate(
-            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
-            ['grade_details' => json_encode($mark_details)]
-        );
-        event(new UpdateQuizQuestionsEvent($x));
-
+        return $mark_details;
     }
 
     public function Assign_MCQ($question , $quiz){
@@ -266,12 +267,7 @@ class QuestionsController extends Controller
         $mark_details['exclude_mark']  = $question['exclude_mark'];
         $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
-        $x = quiz_questions::updateOrCreate(
-            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
-            ['grade_details' => json_encode($mark_details)]
-        );
-        event(new UpdateQuizQuestionsEvent($x));
-
+        return $mark_details;
     }
 
     public function Assign_Match($question , $quiz){
@@ -301,11 +297,7 @@ class QuestionsController extends Controller
         $mark_details['exclude_mark']  = $question['exclude_mark'];
         $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
 
-        $x = quiz_questions::updateOrCreate(
-            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
-            ['grade_details' => json_encode($mark_details)]
-        );
-        event(new UpdateQuizQuestionsEvent($x));
+        return $mark_details;
     }
 
     public function Assign_Essay($question , $quiz){
@@ -318,19 +310,11 @@ class QuestionsController extends Controller
         $mark_details['total_mark']  = $question['mark_essay'];
         $mark_details['exclude_mark']  = $question['exclude_mark'];
         $mark_details['exclude_shuffle']  = $question['exclude_shuffle'];
-
-        $x = quiz_questions::updateOrCreate(
-            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
-            ['grade_details' => json_encode($mark_details)]
-        );
-        event(new UpdateQuizQuestionsEvent($x));
+        return $mark_details;
     }
 
     public function Assign_Paragraph($question , $quiz){
-        quiz_questions::updateOrCreate(
-            ['question_id'=>$question['id'], 'quiz_id' => $quiz->id,],
-            ['grade_details' => null]
-        );
+        return null;
     }
 
     /**

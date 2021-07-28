@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\UpdateQuizQuestionsEvent;
+use App\Events\UpdatedQuizQuestionsEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Lesson;
@@ -25,23 +25,21 @@ class UpdateQuizGradeListener
     /**
      * Handle the event.
      *
-     * @param  UpdateQuizQuestionsEvent  $event
+     * @param  UpdatedQuizQuestionsEvent  $event
      * @return void
      */
-    public function handle(UpdateQuizQuestionsEvent $event)
+    public function handle(UpdatedQuizQuestionsEvent $event)
     {
         $marks_of_all_questions = 0;
-        foreach(quiz_questions::where('quiz_id', $event->QuizQuestion['quiz_id'])->cursor() as $question){
+        foreach(quiz_questions::where('quiz_id', $event->Quiz)->cursor() as $question){
             if(is_null($question['grade_details']))
                 continue;
-                // if(($question['question_id'] != 100))
-                // continue;
-            if(isset($question['grade_details']->exclude_mark) && $question['grade_details']->exclude_mark == false)
+            if(isset($question['grade_details']->exclude_mark) && (bool) $question['grade_details']->exclude_mark == true)
                 continue;  
             $marks_of_all_questions += (float)$question['grade_details']->total_mark;
         }
-        foreach(QuizLesson::where('quiz_id', $event->QuizQuestion['quiz_id'])->cursor()  as $quiz_lesson){
-                $quiz_lesson->questions_mark =  $marks_of_all_questions ;
+        foreach(QuizLesson::where('quiz_id', $event->Quiz)->cursor()  as $quiz_lesson){
+            $quiz_lesson->questions_mark =  $marks_of_all_questions ;
             if($quiz_lesson->grade == 0){
                 $quiz_lesson->grade = $marks_of_all_questions;
             }
