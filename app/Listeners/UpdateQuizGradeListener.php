@@ -40,7 +40,7 @@ class UpdateQuizGradeListener
         }
         foreach(QuizLesson::where('quiz_id', $event->Quiz)->cursor()  as $quiz_lesson){
             $quiz_lesson->questions_mark =  $marks_of_all_questions ;
-            if($quiz_lesson->grade == 0){
+            if(is_null($quiz_lesson->grade_by_user)){
                 $quiz_lesson->grade = $marks_of_all_questions;
             }
             $quiz_lesson->save();
