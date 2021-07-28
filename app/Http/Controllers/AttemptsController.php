@@ -419,6 +419,7 @@ class AttemptsController extends Controller
                                     $MATCHS[]=[$matchA => $question['match_b'][$key]];
                                 
                                 $data['user_answers'] = json_encode($MATCHS);
+                                $MATCHS=[];
                             }
                             break;
             
