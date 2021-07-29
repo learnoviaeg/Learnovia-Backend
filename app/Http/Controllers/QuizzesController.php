@@ -340,8 +340,7 @@ class QuizzesController extends Controller
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id,
             'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
         ]);
-        if(empty($quiz_lesson->grading_method_id))
-            $quiz_lesson->grading_method_id = null;
+
         if($quiz->allow_edit)
         {
             $quiz->update([
@@ -353,7 +352,7 @@ class QuizzesController extends Controller
             $quiz_lesson->update([
                 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
                 'max_attemp' => isset($request->max_attemp) ? $request->max_attemp : $quiz_lesson->max_attemp,
-                'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : $quiz_lesson->grading_method_id,
+                'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : $quiz_lesson->getOriginal('grading_method_id'),
             ]);
         }
 
