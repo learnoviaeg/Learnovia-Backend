@@ -14,7 +14,7 @@ class AddPassZoom extends Migration
     public function up()
     {
         Schema::table('zoom_accounts', function (Blueprint $table) {
-            $table->Text('password');
+            $table->Text('password')->nullable();
         });
     }
 
