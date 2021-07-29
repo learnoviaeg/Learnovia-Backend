@@ -605,7 +605,7 @@ class BigbluebuttonController extends Controller
                 //error
             }
             if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
-                $m['join'] = false; //startmeeting has arrived but meeting didn't start yet
+                $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
         }
         }
 
