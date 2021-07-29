@@ -13,4 +13,10 @@ class UserGrader extends Model
         return $this->belongsTo('App\User', 'user_id', 'id');
     }
 
+    public function getGradeAttribute($value)
+    {
+        $content= round($value , 2);
+        return $content;
+    }
+
 }
