@@ -23,7 +23,7 @@ class ZoomAccountsImport implements ToModel, WithHeadingRow
             // 'jwt_token' => 'required',
             'api_key' => 'required',
             'api_secret' => 'required',
-            'password' => 'required',
+            // 'password' => 'required',
             'email' => 'required|email',
         ])->validate();
 
@@ -67,7 +67,7 @@ class ZoomAccountsImport implements ToModel, WithHeadingRow
             'api_secret' => $row['api_secret'],
             'email' => $row['email'],
             'user_zoom_id' => (json_decode($response,true)['id']),
-            'password' => $row['password']
+            'password' => isset($row['password']) ? $row['password'] : null
         ]);
 
     }
