@@ -346,9 +346,9 @@ class BigbluebuttonController extends Controller
         $bigbb->status = 'current';
         $bigbb->started = 1;
         $bigbb->actutal_start_date = Carbon::now();
-        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$meeting_id,0);
+        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
         if($request->user()->can('site/show-all-courses'))
-            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$meeting_id,1);
+            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
 
         $bigbb->signature=$signature;
         $bigbb->save();
