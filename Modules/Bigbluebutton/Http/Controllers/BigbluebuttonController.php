@@ -591,22 +591,22 @@ class BigbluebuttonController extends Controller
             return HelperController::api_response_format(301,null, __('messages.virtual.virtual_hidden'));
         
         foreach($meetings as $m){
-        $m['join'] = $m->started == 1 ? true: false;
-        $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d H:i:s'): null;
-        $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d H:i:s');
-        
-        if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
-            ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
-        {
-            try{
-                $try = self::create_hook($request);    
+            $m['join'] = $m->started == 1 ? true: false;
+            $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d H:i:s'): null;
+            $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d H:i:s');
+            
+            if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
+                ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
+            {
+                try{
+                    $try = self::create_hook($request);    
+                }
+                catch(\Exception $e){
+                    //error
+                }
+                if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
+                    $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
             }
-            catch(\Exception $e){
-                //error
-            }
-            if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
-                $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
-        }
         }
 
         if($request->has('pagination') && $request->pagination==true)
