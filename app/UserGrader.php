@@ -15,6 +15,7 @@ class UserGrader extends Model
 
     public function getGradeAttribute($value)
     {
+        $content= json_decode($value);
         if(!is_null($value))
             $content = round($value , 2);
         return $content;
