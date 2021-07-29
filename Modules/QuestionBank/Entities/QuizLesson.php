@@ -94,6 +94,8 @@ class QuizLesson extends Model
     public function getGradingMethodIdAttribute($value)
     {
         $content= json_decode($value);
+        if(is_null($value))
+            $content = [];
         return $content;
     }
 }
