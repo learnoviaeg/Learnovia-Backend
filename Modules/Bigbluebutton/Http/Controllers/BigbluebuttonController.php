@@ -606,6 +606,8 @@ class BigbluebuttonController extends Controller
                 }
                 if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
                     $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
+                else
+                    $m['join'] = false;
             }
         }
 
@@ -1136,7 +1138,6 @@ class BigbluebuttonController extends Controller
 
         $report=collect();
         foreach($meetings as $meeting){
-
             $user = User::find($meeting->user_id);
             $course = Course::find($meeting->course_id);
             $class = Classes::find($meeting->class_id);
@@ -1144,7 +1145,6 @@ class BigbluebuttonController extends Controller
             $present_student = AttendanceLog::where('session_id',$meeting->id)->where('type','online')
                                                                               ->whereNotNull('entered_date')
                                                                               ->select('student_id')->distinct()->count();
-
             $end_date = null;
             if(isset($meeting->actual_duration))
                 $end_date = Carbon::parse($meeting->start_date)->addMinutes($meeting->actual_duration);
