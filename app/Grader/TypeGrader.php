@@ -89,7 +89,7 @@ class TypeGrader implements GraderInterface
     }
 
     public function Match($answer)
-    {
+    {   
         //obj of answer of Match
         /**
          * array:[  
@@ -119,15 +119,14 @@ class TypeGrader implements GraderInterface
          */
         $right=0;
         $mark=0;
-        $flag=false;
         $grade=$answer['correct_answer'];
-        if(isset(($answer['student_answer']))) // ana 4ayfa enha malha4 lazma aslun
+        if(isset(($answer['student_answer'])))
             foreach($answer['student_answer'] as $kk=>$ans){
                 $ans->right=0;
                 $ans->grade=0;
                 foreach($ans as $key=>$aa){
                     if(is_numeric($key)){ // because key may be int|string cause object {1:2, right:1, feedback:"text", grade:19}
-                        if(isset($answer['correct_answer']->mark[$key]))
+                        if(isset($answer['correct_answer']->mark[$key-1]))
                             foreach($answer['correct_answer']->mark[$key-1] as $mrk){
                                 if($key === $aa){
                                     $ans->right=1;
