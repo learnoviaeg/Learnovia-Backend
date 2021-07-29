@@ -340,7 +340,8 @@ class QuizzesController extends Controller
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id,
             'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
         ]);
-
+        if(empty($quiz_lesson->grading_method_id))
+            $quiz_lesson->grading_method_id = null;
         if($quiz->allow_edit)
         {
             $quiz->update([
