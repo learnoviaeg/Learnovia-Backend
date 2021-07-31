@@ -42,7 +42,7 @@ class UpdateTimelineListener
             $course_id = $lesson->courseSegment->course_id;
             $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
             $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-            $x = Timeline::firstOrCreate([
+             Timeline::firstOrCreate([
                 'item_id' => $event->Quiz,
                 'name' => $quiz->name,
                 'start_date' => $quiz_lesson->start_date,
