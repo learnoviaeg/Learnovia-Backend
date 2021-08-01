@@ -215,6 +215,7 @@ class FilesController extends Controller
     public function store(Request $request)
     {
         $settings = $this->setting->get_value('upload_file_extensions');
+        // dd($request->Imported_file[0]->extension());
 
         $rules = [
             'name' => 'string|min:1',
@@ -227,10 +228,10 @@ class FilesController extends Controller
         ];
 
         $customMessages = [
-            'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
+            'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
         ];
     
-        $this->validate($request, $rules,$customMessages);
+        $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
@@ -396,8 +397,9 @@ class FilesController extends Controller
     public function update(Request $request)
     {
         $settings = $this->setting->get_value('upload_file_extensions');
+        // dd($request->Imported_file[0]->extension());
 
-        $request->validate([
+        $rules = [
             'id'            => 'required|exists:files,id',
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
@@ -406,7 +408,14 @@ class FilesController extends Controller
             'publish_date'  => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
             'visible' =>'in:0,1'
-        ]);
+        ];
+
+        $customMessages = [
+            'Imported_file.mimes' => $request->Imported_file->extension() . ' ' . __('messages.error.extension_not_supported')
+        ];
+    
+        $this->validate($request, $rules, $customMessages);
+
         $file = file::find($request->id);
 
         if ($request->filled('name'))
