@@ -262,7 +262,8 @@ class AttemptsController extends Controller
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
         ]);
-        $q=Quiz::whereId($quiz_lesson->quiz->id)->update(['allow_edit' => 0]);
+        if(!Auth::user()->can('site/show-all-courses'))
+            $q=Quiz::whereId($quiz_lesson->quiz->id)->update(['allow_edit' => 0]);
 
         $userQuiz->left_time=$quiz_lesson->quiz->duration;
 
