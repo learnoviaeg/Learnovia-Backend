@@ -75,7 +75,7 @@ class QuizLessonObserver
                 ]);
             }
             //update quiz lesson with the id of grade categoey created for quiz
-            $quizLesson->grade_category_id = $categoryOfQuiz->id;
+            // $quizLesson->grade_category_id = $categoryOfQuiz->id;
             $quizLesson->save();
         // }
     }
