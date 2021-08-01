@@ -427,7 +427,7 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
         ];
         $customMessages = [
-            'file.mimes' => $request->file->extension() . ' ' __('messages.error.extension_not_supported')
+            'file.mimes' => $request->file->extension() . ' ' . __('messages.error.extension_not_supported')
         ];
     
         $this->validate($request, $rules,$customMessages);
