@@ -39,20 +39,6 @@ class QuizLessonObserver
         $course_id = $lesson->courseSegment->course_id;
         $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        Timeline::firstOrCreate([
-            'item_id' => $quizLesson->quiz_id,
-            'name' => $quiz->name,
-            'start_date' => $quizLesson->start_date,
-            'due_date' => $quizLesson->due_date,
-            'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
-            'course_id' => $course_id,
-            'class_id' => $class_id,
-            'lesson_id' => $quizLesson->lesson_id,
-            'level_id' => $level_id,
-            'type' => 'quiz',
-            'visible' => $quizLesson->visible
-
-        ]);
         
         $this->report->calculate_course_progress($course_id);
 
@@ -104,6 +90,7 @@ class QuizLessonObserver
     {
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
         if(isset($quiz)){
+
             $forLogs=Timeline::where('item_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('type' , 'quiz')->first();
             // $forLogs->update([
             //     'item_id' => $quizLesson->quiz_id,

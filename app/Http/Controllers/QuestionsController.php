@@ -193,7 +193,7 @@ class QuestionsController extends Controller
                     ['grade_details' => json_encode($mark_details)]
                 );
             }
-            event(new UpdatedQuizQuestionsEvent($quiz_id));
+            event(new UpdatedQuizQuestionsEvent($quiz_id));            
             $quiz->draft=0;
             $quiz->save();
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
