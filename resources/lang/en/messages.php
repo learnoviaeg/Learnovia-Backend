@@ -23,7 +23,7 @@ return [
         'already_exist' => 'Item is already exist',
         'no_active_segment' => 'There is no active segment for this item',
         'no_active_year' => 'There is no active year available',
-        'extension_not_supported' => 'This extension is not supported',
+        'extension_not_supported' => 'extension is not valid',
         'no_permission' => 'User does not have the right permissions',
         'role_required' => 'Please, choose role first',
         'not_allowed' => 'You are not allowed to view this.',
