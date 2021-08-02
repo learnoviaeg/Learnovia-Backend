@@ -135,8 +135,11 @@ class AttemptsController extends Controller
                 {
                     foreach($userEssayCheckAnswerTF as $TF){
                         if($TF->correction->and_why == true){
-                            if(isset($TF->correction->grade))
+                            if(isset($TF->correction->grade)){
                                 $gradeNotWeight+= $TF->correction->grade;
+                                if(($TF->correction->grade+$TF->correction->mark) < $TF->correction->total_mark)
+                                    $TF->correction->right=2;
+                            }
                             else{
                                 $user_Attemp["grade"]= null;
                                 $user_Attemp["feedback"] =null;
