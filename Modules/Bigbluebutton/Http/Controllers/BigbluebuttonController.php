@@ -193,6 +193,7 @@ class BigbluebuttonController extends Controller
                             $bigbb->host_id = ($request->host_id) ? $request->host_id : null;
                             $bigbb->is_recorded = $request->is_recorded;
                             $bigbb->started = 0;
+                            $bigbb->status = 'future';
                             $bigbb->join_url = $request->join_url ? $request->join_url : null;
                             $bigbb->show = isset($request->visible)?$request->visible:1;
                             $bigbb->save();
