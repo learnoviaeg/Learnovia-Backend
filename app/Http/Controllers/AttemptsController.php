@@ -136,12 +136,13 @@ class AttemptsController extends Controller
                     foreach($userEssayCheckAnswerTF as $TF){
                         if($TF->correction->and_why == true){
                             if(isset($TF->correction->grade)){
-                                $gradeNotWeight+= $TF->correction->grade;
+                                $gradeNotWeight+= $TF->correction->and_why_mark;
                                 if(($TF->correction->and_why_right == 1 && $TF->correction->mark < 1) ||
                                     $TF->correction->and_why_right == 0 && $TF->correction->mark >= 1){
                                     $tes=$TF->correction;
                                     $tes->right=2;
-                                    $tes->user_quest_grade=$TF->correction->grade + $TF->correction->mark; // daraget el taleb fel so2al koloh
+                                    // $tes->user_quest_grade=$TF->correction->and_why_mark + $TF->correction->mark; // daraget el taleb fel so2al koloh
+                                    $tes->user_quest_grade=$TF->correction->grade; // daraget el taleb fel so2al koloh
                                     $TF->update(['correction'=>json_encode($tes)]); //because it doesn't read update
                                 }
                             }
