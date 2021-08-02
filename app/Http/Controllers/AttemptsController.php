@@ -299,6 +299,7 @@ class AttemptsController extends Controller
         $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
         $correct_feedback=$attempt->quiz_lesson->quiz->correct_feedback;
         $attempt['grading_method'] = $attempt->quiz_lesson->grading_method_id;
+        $attempt['quiz_mark'] = $attempt->quiz_lesson->grade;
         foreach($attempt->UserQuizAnswer as $one)
         {
             if(!isset($one->correction))
