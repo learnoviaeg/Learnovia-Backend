@@ -78,14 +78,20 @@ class AttemptsController extends Controller
         $quetions=$quiz->Question->pluck('id');
         $questions=array_merge($quetions->toArray(),$childs);
         $essay=0;
-        $t_f_Ques=0;
+        $t_f_Quest=0;
+        $t_f_Quest_check=0;
         $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
-        $t_f_Quest = Questions::whereIn('id',$questions)->where('question_type_id',1)->pluck('id');
+        $t_f_Quest = Questions::whereIn('id',$questions)->where('question_type_id',1);
+        foreach($t_f_Quest->cursor() as $tf_question){
+            if((bool) $tf_question->content->and_why == true)
+                $t_f_Quest_check +=1;
+                // if($tf_question->)
+        }
         if(count($essayQues) > 0)
             $essay = 1;
 
-        if(count($t_f_Quest) > 0)
-            $t_f_Ques = 1;
+        if($t_f_Quest_check > 0)
+            $t_f_Quest = 1;
         
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if(!$quiz_lesson)
@@ -130,7 +136,7 @@ class AttemptsController extends Controller
                 // dd($grade);
 
                 //7esab daragat el true_false questions
-                $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest)->get();
+                $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest->pluck('id'))->get();
                 if(count($userEssayCheckAnswerTF) > 0)
                 {
                     foreach($userEssayCheckAnswerTF as $TF){
@@ -195,7 +201,7 @@ class AttemptsController extends Controller
         }
 
         $all_users['essay']=$essay;
-        $all_users['T_F']=$t_f_Ques;
+        $all_users['T_F']=$t_f_Quest_check;
         $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
         $all_users['submitted_users'] = $Submitted_users ;
         $all_users['notGraded'] = $countEss_TF ;
