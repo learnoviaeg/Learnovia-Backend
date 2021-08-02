@@ -141,6 +141,7 @@ class AttemptsController extends Controller
                                     $TF->correction->and_why_right == 0 && $TF->correction->mark >= 1){
                                     $tes=$TF->correction;
                                     $tes->right=2;
+                                    $tes->user_quest_grade=$TF->correction->grade + $TF->correction->mark; // daraget el taleb fel so2al koloh
                                     $TF->update(['correction'=>json_encode($tes)]); //because it doesn't read update
                                 }
                             }
