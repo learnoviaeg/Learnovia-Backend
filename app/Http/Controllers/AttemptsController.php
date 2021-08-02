@@ -78,20 +78,20 @@ class AttemptsController extends Controller
         $quetions=$quiz->Question->pluck('id');
         $questions=array_merge($quetions->toArray(),$childs);
         $essay=0;
-        $t_f_Quest=0;
+        // $t_f_Quest=0;
         $t_f_Quest_check=0;
+        $t_f_Quest_count = 0;
         $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
         $t_f_Quest = Questions::whereIn('id',$questions)->where('question_type_id',1);
         foreach($t_f_Quest->cursor() as $tf_question){
             if((bool) $tf_question->content->and_why == true)
                 $t_f_Quest_check +=1;
-                // if($tf_question->)
         }
         if(count($essayQues) > 0)
             $essay = 1;
 
         if($t_f_Quest_check > 0)
-            $t_f_Quest = 1;
+            $t_f_Quest_count = 1;
         
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if(!$quiz_lesson)
@@ -211,7 +211,7 @@ class AttemptsController extends Controller
         }
 
         $all_users['essay']=$essay;
-        $all_users['T_F']=$t_f_Quest_check;
+        $all_users['T_F']=$t_f_Quest_count;
         $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
         $all_users['submitted_users'] = $Submitted_users ;
         $all_users['notGraded'] = $countEss_TF ;
