@@ -314,7 +314,7 @@ class UserQuizController extends Controller
                                 'user_id'=>Auth::id(),
                                 'item_details_id' => $item_details->id,
                                 'Answers_Correction' => json_encode($correction),
-                                'grade' => $correction->and_why_mark +$correction->mark,
+                                'grade' => ($correction instanceof \Illuminate\Database\Eloquent\Collection) ? $correction['grade'] : $correction->grade,
                             ]);
                             $data['correction'] =  json_encode($correction);
                         }
@@ -354,6 +354,8 @@ class UserQuizController extends Controller
                 return response()->json(['message' =>__('messages.error.incomplete_data'), 'body' => null ], 400);
         }
         $user_quiz->update(['status'=>'Graded']);
+        $user_quiz->save();
+
         foreach ($allData as $data) {
             $userAnswer = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
                 ->where('question_id', $data['question_id'])->first();
