@@ -297,7 +297,7 @@ class UserQuizController extends Controller
                                 $correction = $userQuizAnswer['correction'];
                                 $correction->and_why_right = isset($question['right']) ? $question['right'] : null;
                                 $correction->and_why_mark = isset($question['mark']) ? $question['mark'] : null;
-                                $correction->grade =$question['mark'] + $correction->mark;
+                                $correction->grade =$question['mark'];
                                 $correction->feedback = isset($question['feedback']) ? $question['feedback'] : null;
                             }else{
                                 $correction = collect([

@@ -178,6 +178,7 @@ class AttemptsController extends Controller
                 else
                     $user_Attemp['grade']= $gradeNotWeight;
 
+                $grade->grade=$user_Attemp['grade'];
                 $user_Attemp["open_time"]= $attem->open_time;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $user_Attemp["taken_duration"]= Carbon::parse($attem->open_time)->diffInSeconds(Carbon::parse($attem->submit_time),false);
