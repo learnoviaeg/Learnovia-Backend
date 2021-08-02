@@ -98,7 +98,7 @@ class CalendarsController extends Controller
         if($request->filled('item_type'))
             $timeline->whereIn('type', $request->item_type);
 
-        return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->orderBy('start_date', 'asc')->get()], 200);
+        return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->orderBy('start_date', 'desc')->get()], 200);
     }
 
     /**
