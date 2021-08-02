@@ -298,7 +298,7 @@ class AttemptsController extends Controller
         $due_date=$attempt->quiz_lesson->due_date;
         $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
         $correct_feedback=$attempt->quiz_lesson->quiz->correct_feedback;
-        
+        $attempt['grading_method'] = $attempt->quiz_lesson->grading_method_id;
         foreach($attempt->UserQuizAnswer as $one)
         {
             if(!isset($one->correction))
