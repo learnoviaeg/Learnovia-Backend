@@ -137,9 +137,11 @@ class AttemptsController extends Controller
                         if($TF->correction->and_why == true){
                             if(isset($TF->correction->grade)){
                                 $gradeNotWeight+= $TF->correction->grade;
-                                if(($TF->correction->grade+$TF->correction->mark) < $TF->correction->total_mark){
-                                    $TF->correction->right=2;
-                                    $TF->correction = json_encode($TF);
+                                if(($TF->correction->and_why_right == 1 && $TF->correction->mark < 1) ||
+                                    $TF->correction->and_why_right == 0 && $TF->correction->mark >= 1){
+                                    $tes=$TF->correction;
+                                    $tes->right=2;
+                                    $TF->update(['correction'=>json_encode($tes)]); //because it doesn't read update
                                 }
                             }
                             else{
