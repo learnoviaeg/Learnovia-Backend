@@ -139,7 +139,7 @@ class AttemptsController extends Controller
                                 $gradeNotWeight+= $TF->correction->grade;
                                 if(($TF->correction->grade+$TF->correction->mark) < $TF->correction->total_mark){
                                     $TF->correction->right=2;
-                                    $TF->correction = json_encode($$TF);
+                                    $TF->correction = json_encode($TF);
                                 }
                             }
                             else{
