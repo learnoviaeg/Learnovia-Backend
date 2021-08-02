@@ -427,8 +427,14 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
         ];
         $customMessages = [
-            'file.mimes' => $request->file->extension() . ' ' . __('messages.error.extension_not_supported')
+            'file.mimes' => __('messages.error.extension_not_supported')
         ];
+
+        if ($request->hasFile('file')) {
+            $customMessages = [
+                'file.mimes' => $request->file->extension() . ' ' . __('messages.error.extension_not_supported')
+            ];
+        }
     
         $this->validate($request, $rules,$customMessages);
         $roles = Auth::user()->roles->pluck('name');

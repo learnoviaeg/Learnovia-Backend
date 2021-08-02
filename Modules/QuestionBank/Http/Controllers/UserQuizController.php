@@ -353,6 +353,7 @@ class UserQuizController extends Controller
             } else
                 return response()->json(['message' =>__('messages.error.incomplete_data'), 'body' => null ], 400);
         }
+        $user_quiz->update(['status'=>'Graded']);
         foreach ($allData as $data) {
             $userAnswer = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
                 ->where('question_id', $data['question_id'])->first();

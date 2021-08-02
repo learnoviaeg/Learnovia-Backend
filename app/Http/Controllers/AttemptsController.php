@@ -152,10 +152,10 @@ class AttemptsController extends Controller
                                     $TF->update(['correction'=>json_encode($tes)]); //because it doesn't read update
                                 }
                             }
-                            else{
-                                $user_Attemp["grade"]= null;
-                                $user_Attemp["feedback"] =null;
-                            }
+                            // else{
+                            //     $user_Attemp["grade"]= null;
+                            //     $user_Attemp["feedback"] =null;
+                            // }
                         }
                     }
                 }
@@ -168,10 +168,10 @@ class AttemptsController extends Controller
                         if(isset($esay->correction)){
                             $gradeNotWeight+= $esay->correction->grade;
                         }
-                        else{
-                            $user_Attemp["grade"]= null;
-                            $user_Attemp["feedback"] =null;
-                        }
+                        // else{
+                        //     $user_Attemp["grade"]= null;
+                        //     $user_Attemp["feedback"] =null;
+                        // }
                     }
                 }
 
@@ -189,7 +189,7 @@ class AttemptsController extends Controller
                 $user_Attemp["open_time"]= $attem->open_time;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $user_Attemp["taken_duration"]= Carbon::parse($attem->open_time)->diffInSeconds(Carbon::parse($attem->submit_time),false);
-                $user_Attemp["status"]= ($user_Attemp["grade"]==null) ? 'Not Graded' : 'Graded';
+                // $user_Attemp["status"]= ($user_Attemp["grade"]==null) ? 'Not Graded' : 'Graded';
                 $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question')->first();
                 foreach($user_Attemp['details']->UserQuizAnswer as $answ)
                     $answ->Question->grade_details=quiz_questions::where('quiz_id',$request->quiz_id)->where('question_id',$answ->question_id)->pluck('grade_details')->first();
@@ -286,6 +286,10 @@ class AttemptsController extends Controller
 
         foreach($quiz_lesson->quiz->Question as $question)
         {
+            // for update status of attempt
+            if(!$question->question_type_id == 4 || !($question->question_type_id == 1 && $question->content->and_why == true))
+                $userQuiz->status='Graded';
+
             if($question->question_type_id == 5)
             {
                 $quest=$question->children->pluck('id');
