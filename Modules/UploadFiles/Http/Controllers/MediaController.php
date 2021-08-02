@@ -142,9 +142,11 @@ class MediaController extends Controller
             'visible' =>'in:0,1'
         ];
 
-        $customMessages = [
-            'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' .__('messages.error.extension_not_supported')
-        ];
+        if ($request->hasFile('Imported_file')) {
+            $customMessages = [
+                'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' .__('messages.error.extension_not_supported')
+            ];
+        }
     
         $this->validate($request, $rules, $customMessages);
 

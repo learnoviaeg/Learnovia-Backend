@@ -426,9 +426,6 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
         ];
-        $customMessages = [
-            'file.mimes' => __('messages.error.extension_not_supported')
-        ];
 
         if ($request->hasFile('file')) {
             $customMessages = [
