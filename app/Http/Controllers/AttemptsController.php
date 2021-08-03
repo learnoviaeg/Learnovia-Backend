@@ -311,10 +311,10 @@ class AttemptsController extends Controller
             $answers->Question;
                     
         event(new QuizAttemptEvent($userQuiz));
-        
+
         if($flag){
-            $userQuiz->update(['status'=>'Graded']);
-            $userQuiz->save();
+            $att = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->update(['status'=>'Graded']);
+            $att->save();
         }
         
         return HelperController::api_response_format(200, $userQuiz);
