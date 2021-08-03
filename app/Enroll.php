@@ -9,6 +9,10 @@ class Enroll extends Model
 {
     protected $fillable = ['user_id', 'username', 'course_segment', 'role_id', 'level', 'class' ,'year', 'type', 'segment', 'course'];
 
+    protected $dispatchesEvents = [
+        'created' => \App\Events\UserEnrolledEvent::class,
+    ];
+
     public static function getroleid($user_id, $course_segment)
     {
         return self::where('user_id', $user_id)->where('course_segment', $course_segment)->pluck('role_id')->first();
