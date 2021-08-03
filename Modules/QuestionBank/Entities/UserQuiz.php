@@ -11,7 +11,7 @@ use Modules\QuestionBank\Entities\quiz_questions;
 class userQuiz extends Model
 {
     protected $fillable = [
-        'quiz_lesson_id','user_id','status_id',
+        'quiz_lesson_id','user_id','status_id', 'status',
         'override','feedback','grade','attempt_index',
         'device_data','browser_data','ip',
         'open_time','submit_time'

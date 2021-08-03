@@ -189,7 +189,7 @@ class AttemptsController extends Controller
                 $user_Attemp["open_time"]= $attem->open_time;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $user_Attemp["taken_duration"]= Carbon::parse($attem->open_time)->diffInSeconds(Carbon::parse($attem->submit_time),false);
-                $user_Attemp["status"]= ($user_Attemp["grade"]==null) ? 'Not Graded' : 'Graded';
+                // $user_Attemp["status"]= ($user_Attemp["grade"]==null) ? 'Not Graded' : 'Graded';
                 $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question')->first();
                 foreach($user_Attemp['details']->UserQuizAnswer as $answ)
                     $answ->Question->grade_details=quiz_questions::where('quiz_id',$request->quiz_id)->where('question_id',$answ->question_id)->pluck('grade_details')->first();
@@ -251,13 +251,19 @@ class AttemptsController extends Controller
             if($seconds < 0) 
                 $seconds = 0;
 
-            if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration)->format('Y-m-d H:i:s') > Carbon::now()->format('Y-m-d H:i:s')
+            if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration) > Carbon::now()
                  && UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->count() > 0)
             {
                 $last_attempt->left_time=(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration))->diffInSeconds(Carbon::now());
                 foreach($last_attempt->UserQuizAnswer as $answers)
                     $answers->Question;
                 return HelperController::api_response_format(200, $last_attempt, __('messages.quiz.continue_quiz'));
+            }
+
+            if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration) < Carbon::now())
+            {
+                $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
+                dispatch($job);
             }
 
             if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp )
@@ -282,10 +288,13 @@ class AttemptsController extends Controller
         if(!Auth::user()->can('site/show-all-courses'))
             $q=Quiz::whereId($quiz_lesson->quiz->id)->update(['allow_edit' => 0]);
 
-        $userQuiz->left_time=$quiz_lesson->quiz->duration;
-
+        $flag=false;
         foreach($quiz_lesson->quiz->Question as $question)
         {
+            // for update status of attempt
+            if(!$question->question_type_id == 4 || !($question->question_type_id == 1 && $question->content->and_why == true))
+                $flag=true;
+            
             if($question->question_type_id == 5)
             {
                 $quest=$question->children->pluck('id');
@@ -295,6 +304,13 @@ class AttemptsController extends Controller
             else // because parent question(comprehension) not have answer
                 userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
         }
+
+        if($flag){
+            $userQuiz->update(['status'=>'Graded']);
+            $userQuiz->save();
+        }
+        $userQuiz->left_time=$quiz_lesson->quiz->duration;
+
         foreach($userQuiz->UserQuizAnswer as $answers)
             $answers->Question;
                     
