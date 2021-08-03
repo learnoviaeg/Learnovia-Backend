@@ -288,12 +288,12 @@ class AttemptsController extends Controller
         if(!Auth::user()->can('site/show-all-courses'))
             $q=Quiz::whereId($quiz_lesson->quiz->id)->update(['allow_edit' => 0]);
 
-        $flag=false;
+        $flag=true;
         foreach($quiz_lesson->quiz->Question as $question)
         {
             // for update status of attempt
-            if(!$question->question_type_id == 4 || ($question->question_type_id == 1 && $question->content->and_why != true))
-                $flag=true;
+            if($question->question_type_id == 4 || ($question->question_type_id == 1 && $question->content->and_why == true))
+                $flag=false;
             
             if($question->question_type_id == 5)
             {
