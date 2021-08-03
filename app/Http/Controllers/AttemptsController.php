@@ -314,7 +314,6 @@ class AttemptsController extends Controller
 
         if($flag){
             $att = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->update(['status'=>'Graded']);
-            $att->save();
         }
         
         return HelperController::api_response_format(200, $userQuiz);
