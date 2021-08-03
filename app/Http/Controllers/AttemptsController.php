@@ -292,7 +292,7 @@ class AttemptsController extends Controller
         foreach($quiz_lesson->quiz->Question as $question)
         {
             // for update status of attempt
-            if(!$question->question_type_id == 4 || !($question->question_type_id == 1 && $question->content->and_why == true))
+            if(!$question->question_type_id == 4 || ($question->question_type_id == 1 && $question->content->and_why != true))
                 $flag=true;
             
             if($question->question_type_id == 5)
