@@ -152,10 +152,10 @@ class AttemptsController extends Controller
                                     $TF->update(['correction'=>json_encode($tes)]); //because it doesn't read update
                                 }
                             }
-                            // else{
-                            //     $user_Attemp["grade"]= null;
-                            //     $user_Attemp["feedback"] =null;
-                            // }
+                            else{
+                                $user_Attemp["grade"]= null;
+                                $user_Attemp["feedback"] =null;
+                            }
                         }
                     }
                 }
@@ -168,10 +168,10 @@ class AttemptsController extends Controller
                         if(isset($esay->correction)){
                             $gradeNotWeight+= $esay->correction->grade;
                         }
-                        // else{
-                        //     $user_Attemp["grade"]= null;
-                        //     $user_Attemp["feedback"] =null;
-                        // }
+                        else{
+                            $user_Attemp["grade"]= null;
+                            $user_Attemp["feedback"] =null;
+                        }
                     }
                 }
 
