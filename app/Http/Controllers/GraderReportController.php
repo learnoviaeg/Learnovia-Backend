@@ -30,10 +30,10 @@ class GraderReportController extends Controller
         ]);
         $req = new Request([
             'class'   => $request->class_id,
-            'courses' => array($request->class_id)
+            'courses' => array($request->course_id)
         ]);
 
-        $course_segment_id = $this->chain->getCourseSegmentByChain($request)->first()->course_segment;
+        $course_segment_id = $this->chain->getCourseSegmentByChain($req)->first()->course_segment;
         $main_category = GradeCategory::where('course_segment_id' ,$course_segment_id)->whereNull('parent')->with('userGrades.user')->get();
         $main_category[0]['children'] = [];
         $cat = GradeCategory::where('parent',$main_category[0]->id)->get();
