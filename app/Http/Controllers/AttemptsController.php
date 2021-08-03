@@ -305,16 +305,17 @@ class AttemptsController extends Controller
                 userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
         }
 
-        if($flag){
-            $userQuiz->update(['status'=>'Graded']);
-            $userQuiz->save();
-        }
         $userQuiz->left_time=$quiz_lesson->quiz->duration;
 
         foreach($userQuiz->UserQuizAnswer as $answers)
             $answers->Question;
                     
         event(new QuizAttemptEvent($userQuiz));
+        
+        if($flag){
+            $userQuiz->update(['status'=>'Graded']);
+            $userQuiz->save();
+        }
         
         return HelperController::api_response_format(200, $userQuiz);
     }
