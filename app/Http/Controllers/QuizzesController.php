@@ -230,11 +230,15 @@ class QuizzesController extends Controller
     {
         $request->validate([
             'lesson_id' => 'required|exists:lessons,id',
+            'user_id' => 'exists:users,id',
         ]);
 
         $quiz = quiz::where('id',$id)->with('Question.children')->first();
         $quiz->quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
         $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz->quizLesson->id);
+        if($request->user_id)
+            $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quiz->quizLesson->id);
+
         $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz->quizLesson->id)->where('attemps','>','0')->first();
         if(isset($quiz_override))
             $quiz->quizLesson->due_date = $quiz_override->due_date;
