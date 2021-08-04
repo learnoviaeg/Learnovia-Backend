@@ -11,7 +11,6 @@ class TypeGrader implements GraderInterface
         $right=0;
         $grade=$answer['correct_answer'];
         if(isset($answer['student_answer']) && $answer['student_answer']->is_true == $answer['correct_answer']->is_true){
-            //  &&$answer['student_answer']->is_true != null){
             $mark=$answer['correct_answer']->mark;
             $right=1;
         }
