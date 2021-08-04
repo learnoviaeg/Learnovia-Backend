@@ -89,7 +89,7 @@ class GradeAttemptItemlistener
         
         UserGrader::where('user_id',Auth::id())->where('item_id',$gradeitem->id)->where('item_type','item')->update(['grade'=>$actual_mark]);
         
-        UserQuiz::whereId($user_quiz_answers->user_quiz_id)->update([
+        UserQuiz::whereId($event->attempt->id)->update([
             'grade'=> $actual_mark
         ]);
         event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
