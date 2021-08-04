@@ -409,10 +409,14 @@ class FilesController extends Controller
             'updated_lesson_id' =>'nullable|exists:lessons,id',
             'visible' =>'in:0,1'
         ];
-
         $customMessages = [
-            'Imported_file.mimes' => $request->Imported_file->extension() . ' ' . __('messages.error.extension_not_supported')
+            'Imported_file.mimes' =>__('messages.error.extension_not_supported')
         ];
+        if(isset($request->Imported_file)){
+            $customMessages = [
+                'Imported_file.mimes' => $request->Imported_file->extension() . ' ' . __('messages.error.extension_not_supported')
+            ];
+        }
     
         $this->validate($request, $rules, $customMessages);
 
