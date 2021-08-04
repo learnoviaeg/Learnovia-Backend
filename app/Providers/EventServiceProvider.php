@@ -45,7 +45,9 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\UpdateQuizGradeListener',
             'App\Listeners\UpdateTimelineListener',
         ],
-   
+         'App\Events\UserEnrolledEvent' => [
+            'App\Listeners\AddUserGradersListener',
+        ],
     ];
 
     /**
