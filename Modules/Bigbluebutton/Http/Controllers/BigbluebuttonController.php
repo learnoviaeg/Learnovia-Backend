@@ -609,7 +609,7 @@ class BigbluebuttonController extends Controller
             }
             else{
                 $m['join'] = false;
-                $m->status = 'Past';
+                $m->status = 'past';
             }
         }
 
