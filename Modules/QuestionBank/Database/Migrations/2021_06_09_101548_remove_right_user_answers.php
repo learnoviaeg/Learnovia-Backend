@@ -16,7 +16,6 @@ class RemoveRightUserAnswers extends Migration
         Schema::table('user_quiz_answers', function (Blueprint $table) {
             $table->dropColumn('right');
             $table->dropColumn('correct');
-            $table->dropColumn('feedback');
             $table->dropColumn('user_grade');
             $table->longText('correction')->nullable();
         });
