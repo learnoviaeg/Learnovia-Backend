@@ -77,6 +77,23 @@ class QuizLessonObserver
             //update quiz lesson with the id of grade categoey created for quiz
             // $quizLesson->grade_category_id = $categoryOfQuiz->id;
             $quizLesson->save();
+            $lesson=Lesson::find($quizLesson->lesson_id);
+
+            $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
+            $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+
+            $requ = ([
+                'message' => $quiz->name . ' quiz was added',
+                'id' => $quiz->id,
+                'users' => $users,
+                'type' =>'quiz',
+                'publish_date'=> Carbon::parse($quizLesson->publish_date),
+                'course_id' => $lesson->courseSegment->course_id,
+                'class_id'=> $class,
+                'lesson_id'=> $lesson,
+                'from' => Auth::id(),
+            ]);
+            user::notify($requ);
         // }
     }
 
