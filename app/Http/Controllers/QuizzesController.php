@@ -21,6 +21,7 @@ use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\Questions;
 use App\LastAction;
 use Carbon\Carbon;
+use App\Timeline;
 
 class QuizzesController extends Controller
 {
@@ -374,6 +375,7 @@ class QuizzesController extends Controller
             'lesson_id' => 'required|exists:lessons,id',
         ]);
         QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->delete();
+        Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
         if(!isset($quizlesson))
             $quiz=Quiz::where('id',$id)->delete();
