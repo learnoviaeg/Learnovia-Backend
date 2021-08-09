@@ -72,7 +72,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::post('delete', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:roles/delete');
         Route::post('assign-to-user', 'SpatieController@Assign_Role_to_user')->name('assignroletouser')->middleware('permission:roles/assign');
         Route::post('revoke-from-user', 'SpatieController@Revoke_Role_from_user')->name('revokerolefromuser')->middleware('permission:roles/revoke-from-user');
-        Route::post('get', 'SpatieController@Get_Role')->name('getrolebyid')->middleware('permission:roles/get');
+        Route::get('get', 'SpatieController@Get_Role')->name('getrolebyid')->middleware('permission:roles/get');
         Route::post('update', 'SpatieController@Update_Role')->name('updaterolebyid')->middleware('permission:roles/update');
     });
 
