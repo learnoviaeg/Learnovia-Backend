@@ -37,7 +37,7 @@ class LogsObserver
         $arr['after']=$req;
 
         Log::create([
-            'user' => User::find(Auth::id())->username,
+            'user' => isset($user) ? $user->username : 'UnKnown',
             'action' => 'updated',
             'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
             'data' => serialize($arr),
