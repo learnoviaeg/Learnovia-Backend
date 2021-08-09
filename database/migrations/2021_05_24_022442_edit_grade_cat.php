@@ -23,6 +23,8 @@ class EditGradeCat extends Migration
             $table->foreign('course_segment_id')->references('id')->on('course_segments')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('parent')->nullable();
             $table->foreign('parent')->references('id')->on('grade_categories')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('instance_type')->nullable();
+            $table->integer('instance_id')->nullable();
             $table->boolean('hidden')->default(0);
             $table->timestamps();
         });
