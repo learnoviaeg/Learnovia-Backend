@@ -136,7 +136,6 @@ class QuizLessonController extends Controller
                     'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
                     'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
                     'item_type' => 1, //Quiz
-                    'item_Entity' => $request->quiz_id,
                     'name' => $quizLesson[0]->quiz->name,
                     'weight' => 0,
                  ]);

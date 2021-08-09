@@ -14,10 +14,10 @@ class AlterGradeCategories extends Migration
     public function up()
     {
         Schema::table('grade_categories', function (Blueprint $table) {
-            $table->boolean('type')->default(1);
-            $table->integer('grademin')->nullable();
-            $table->integer('grademax')->nullable();
-            $table->integer('exclude_flag')->default(0);
+            // $table->boolean('type')->default(1);
+            // $table->integer('grademin')->nullable();
+            // $table->integer('grademax')->nullable();
+            // $table->integer('exclude_flag')->default(0);
         });
     }
 
