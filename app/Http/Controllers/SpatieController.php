@@ -617,10 +617,13 @@ class SpatieController extends Controller
     public function Get_Role(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:roles,id'
+            'id' => 'exists:roles,id'
         ]);
 
-        $role = Role::find($request->id);
+        if(isset($request->id))
+            $role = Role::find($request->id);
+
+        $role = Role::get();
 
         unset($role->guard_name);
         unset($role->created_at);
