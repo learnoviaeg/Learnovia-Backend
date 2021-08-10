@@ -67,18 +67,18 @@ class QuestionCategoryController extends Controller
             'text' => 'string',
             'lastpage' => 'bool',
             'dropdown' => 'boolean',
-            'class' => 'array|exists:classes,id'
+            'class' => 'exists:classes,id'
         ]);
 
-        $enrolls = $this->chain->getCourseSegmentByChain($request);
+        $chain_request = new Request ([
+            'class' => isset($request->class) ? $request->class : null,
+            'courses' => isset($request->courese) ? [$request->course_id] : null,
+        ]);
+
+        $enrolls = $this->chain->getCourseSegmentByChain($chain_request);
         
         if(!$request->user()->can('site/show-all-courses'))//teacher 
-        {
             $enrolls = $enrolls->where('user_id',Auth::id());
-        }
-
-        if($request->filled('course_id'))
-            $enrolls->where('course',$request->course_id);
 
         $enrolls = $enrolls->select('course')->distinct()->pluck('course');
 
@@ -89,19 +89,16 @@ class QuestionCategoryController extends Controller
 
         if($request->filled('course_id'))
         {
-        LastAction::lastActionInCourse($request->course_id);
+            LastAction::lastActionInCourse($request->course_id);
 
             $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
             if($request->filled('class'))
             {
                 $courses=[];
-                foreach($request->class as $class)
-                {
-                    $course_seg=CourseSegment::GetWithClassAndCourse($class,$request->course_id);
-                    // return $course_seg;
-                    if(isset($course_seg))
-                        $courses[]=$course_seg->id;
-                }
+                $course_seg=CourseSegment::GetWithClassAndCourse($request->class,$request->course_id);
+                // return $course_seg;
+                if(isset($course_seg))
+                    $courses[]=$course_seg->id;
                 $all_courses=$courses;
             }
             $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
@@ -110,13 +107,11 @@ class QuestionCategoryController extends Controller
             })->with('CourseSegment.courses')->get();
         }
         foreach($ques_cat as $cat)
-        {
             $cat->class= isset($cat->CourseSegment)  && count($cat->CourseSegment->segmentClasses) > 0  && count($cat->CourseSegment->segmentClasses[0]->classLevel) > 0 && count($cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes) > 0 ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;
-        }
 
-        if(isset($request->lastpage) && $request->lastpage == true){
+        if(isset($request->lastpage) && $request->lastpage == true)
             $request['page'] = $ques_cat->paginate(HelperController::GetPaginate($request))->lastPage();
-        }
+        
         if(isset($request->dropdown) && $request->dropdown == true)
             return HelperController::api_response_format(200, $ques_cat, __('messages.question_category.list'));    
         else
