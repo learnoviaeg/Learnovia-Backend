@@ -24,10 +24,7 @@ class DatabaseSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
-
-        
-
+    { 
         $this->call(ContractSeeder::class);
         $this->call(PermissionSeeder::class);
         $this->call(RoleSeeder::class);
@@ -38,7 +35,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ScaleSeeder::class);
         $this->call(SettingsSeeder::class);
         //$this->call(SeedLearnoviaDB::class);
-
         eval('$importer = new App\Imports\\LanguageImport();');
         $check = Excel::import($importer, public_path('translation/EngTranslate.xlsx'));
         $check1 = Excel::import($importer, public_path('translation/ArabTranslate.xlsx'));
@@ -51,6 +47,10 @@ class DatabaseSeeder extends Seeder
         \App::call('Modules\Page\Http\Controllers\PageController@install');
         \App::call('Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController@install');
         \App::call('App\Http\Controllers\H5PLessonController@install');
+        
+        \Artisan::call('storage:link', ['--env' => 'local']);
+
+   
 
     }
 }
