@@ -6,6 +6,9 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use GuzzleHttp\Client;
 use App\Exports\ExportRoleWithPermissions;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Auth\RequestGuard;
 
 
 class UserSeeder extends Seeder
@@ -55,6 +58,8 @@ class UserSeeder extends Seeder
         //$Super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%user/parent-child%')->where('name', 'not like', '%site/course/student%')->where('name', 'not like', 'user/get-my-child')->where('name', 'not like', '%user/get-current-child%')->where('name', 'not like', '%site/show/as-participant%')->get());
 
         $user->assignRole($Super);
+        //Auth::guard('api')->loginUsingId(i);
+        //Auth::loginUsingId(1);
 
     }
 }
