@@ -81,10 +81,9 @@ class CoursesController extends Controller
                 })->with(['courses.attachment','levels',])->with(array('courseSegment.teachersEnroll.user' => function($query) {
                     $query->addSelect(array('id', 'firstname', 'lastname', 'picture'));
                 }))->groupBy(['course','level'])->get();
-            return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($enrolls)->paginate($paginate)], 200);
         }
 
-        if($status == null){
+        if($status == null) {
             
             $enrolls = $this->chain->getCourseSegmentByManyChain($request);
 
@@ -93,56 +92,16 @@ class CoursesController extends Controller
                 if($request->for == 'enroll')
                     $q->where('start_date','<=',Carbon::now())->where('end_date','>=',Carbon::now());
 
-                })->with(['courseSegment.courses' => function($query)use ($request ) {
-
+                })->whereHas('courseSegment.courses' , function($query)use ($request ) {
                     if($request->filled('search'))
                         $query->where('name', 'LIKE' , "%$request->search%");
-                        $query->with('attachment');
                 }
-                ,'levels',])->with(array('courseSegment.teachersEnroll.user' => function($query) {
+                )->with(array('levels','courseSegment.teachersEnroll.user' => function($query) {
                     $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
                 }))->groupBy(['course','level'])->get();
-            return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($enrolls)->paginate($paginate)], 200);
         }
 
-        // if($status == null){
-        //     $course_segments = $this->chain->getCourseSegmentByManyChain($request);
-
-        //     if($request->for == 'enroll')
-        //         $course_segments = $course_segments->where('start_date','<=',Carbon::now())->where('end_date','>=',Carbon::now());
-        //     foreach($course_segments->distinct('course')->cursor() as $cs){
-
-        //         // if(count($user_courses->where('id',$cou->id)) == 0){
-        //             $course = Course::find($cs->course);
-        //             // return $cs->courseSegment;
-        //             $user_courses->push([
-        //                 'id' => $course->id ,
-        //                 'name' => $course->name ,
-        //                 'short_name' => $course->short_name ,
-        //                 'image' => isset($course->image) ? $course->attachment->path : null,
-        //                 'description' => $course->description ,
-        //                 'mandatory' => $course->mandatory == 1 ? true : false ,
-        //                 // 'level' => $course->courseSegments->with(array('segmentClasses.classLevel.yearLevels.levels' => function($query) {
-        //                 //     $query->addSelect(array( 'name'));
-        //                 // }))->get(),
-        //                 // 'level' => $cou->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values()->pluck('name'),
-        //                 'teachers' => $cs->courseSegment->teachersEnroll,
-        //                 //Enroll::where('course',$course->id)->where('role_id',4)->with('user.attachment')->get()->pluck('user'),
-        //                 'start_date' => $cs->courseSegment->start_date,
-        //                 'end_date' => $cs->courseSegment->end_date,
-        //                 'progress' => $course->progress ,
-        //             ]);
-        //         // }
-
-        //     }
-
-            // if($request->filled('search')){
-            //     $user_courses = $user_courses->filter(function ($item) use ($request) {
-            //         return str_contains(strtolower($item['name']), strtolower($request->search));
-            //     });
-            // }
-        // }
-        return response()->json(['message' => __('messages.course.list'), 'body' => $user_courses->paginate($paginate)], 200);
+        return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($enrolls)->paginate($paginate)], 200);
 
     }
 
