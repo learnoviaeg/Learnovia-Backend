@@ -480,11 +480,7 @@ class AssigmentsController extends Controller
         if(!isset($userassigment))
             return HelperController::api_response_format(400, null, $message = __('messages.error.user_not_assign'));
 
-        if($userassigment->grade != null && $assilesson->allow_edit_answer=1)
-            return HelperController::api_response_format(400, null, $message = __('messages.error.cannot_edit'));
-
-        $gradedusers=UserAssigment::where('assignment_lesson_id', $assilesson->id)->whereNotNull('grade')->first();
-        if(isset($gradedusers) && $assilesson->allow_edit_answer=1)
+        if($userassigment->grade != null && $assilesson->allow_edit_answer=0)
             return HelperController::api_response_format(400, null, $message = __('messages.error.cannot_edit'));
 
         if (isset($userassigment)) {
