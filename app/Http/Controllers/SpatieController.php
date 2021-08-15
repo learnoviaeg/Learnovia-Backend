@@ -1114,7 +1114,8 @@ class SpatieController extends Controller
                 }
             }
         }
-        return HelperController::api_response_format(200, ['permissions' => $dashbordPermission], 'Successfully');
+        $unique = array_map("unserialize", array_unique(array_map("serialize", $dashbordPermission)));
+        return HelperController::api_response_format(200, ['permissions' => $unique], 'Successfully');
     }
 
     public function export(Request $request)
