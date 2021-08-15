@@ -79,7 +79,7 @@ class CoursesController extends Controller
                 if($status == "past")
                     $q->where("end_date", '<' ,Carbon::now())->where("start_date", '<' ,Carbon::now());
                 })->with(['courses.attachment','levels',])->with(array('courseSegment.teachersEnroll.user' => function($query) {
-                    $query->addSelect(array('id', 'firstname', 'lastname', 'picture'));
+                    $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
                 }))->groupBy(['course','level'])->get();
         }
 
