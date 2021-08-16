@@ -64,7 +64,8 @@ class QuestionsController extends Controller
                         $childd = self::mark_details_of_question_in_quiz($child ,$quiz);
                         $children_mark += $childd->mark;
                     }
-                    $question->mark += $children_mark;
+                    if($question->question_type_id != 5)
+                        $question->mark += $children_mark;
                 }
             }
             
