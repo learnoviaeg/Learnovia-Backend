@@ -19,6 +19,6 @@ class page extends Model
 
     public function getContent($value)
     {
-        return $content->getOriginal();
+        return $value->getOriginal();
     }
 }
