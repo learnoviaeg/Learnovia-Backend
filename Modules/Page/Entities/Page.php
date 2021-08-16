@@ -16,4 +16,9 @@ class page extends Model
     {
         return $this->hasMany('Modules\Page\Entities\pageLesson');
     }
+
+    public function getContent($value)
+    {
+        return $content->getOriginal();
+    }
 }
