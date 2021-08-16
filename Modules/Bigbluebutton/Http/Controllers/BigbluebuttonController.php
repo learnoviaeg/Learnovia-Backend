@@ -131,7 +131,7 @@ class BigbluebuttonController extends Controller
             'start_date.*' => 'date',
             'last_day' => 'date',
             'visible' => 'in:0,1',
-            'host_id' => 'required_if:type,==,Zoom',
+            // 'host_id' => 'required_if:type,==,Zoom',
             'join_url' => 'required_if:type,==,teams'
         ]);
     
@@ -190,7 +190,7 @@ class BigbluebuttonController extends Controller
                             $bigbb->start_date=$temp_start->format('Y-m-d H:i:s');
                             $bigbb->meeting_id = $i == 0 ? $meeting_id : $meeting_id.'repeat'.$i;
                             $bigbb->user_id = Auth::user()->id;
-                            $bigbb->host_id = ($request->host_id) ? $request->host_id : null;
+                            $bigbb->host_id = ($request->host_id) ? $request->host_id : Auth::id();
                             $bigbb->is_recorded = $request->is_recorded;
                             $bigbb->started = 0;
                             $bigbb->status = 'future';
