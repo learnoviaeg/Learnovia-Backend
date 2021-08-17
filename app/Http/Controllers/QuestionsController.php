@@ -57,13 +57,15 @@ class QuestionsController extends Controller
             foreach($questions as $question){
                 $question['update_shuffle']=isset($request->update_shuffle) ? $request->update_shuffle:0;
                 $children_mark = 0;
-                self::mark_details_of_question_in_quiz($question ,$quiz);
+                if($question->question_type_id != 5)
+                    self::mark_details_of_question_in_quiz($question ,$quiz);
                 if(isset($question->children)){
                     foreach($question->children as $child){
                         $childd = self::mark_details_of_question_in_quiz($child ,$quiz);
                         $children_mark += $childd->mark;
                     }
-                    $question->mark += $children_mark;
+                    if($question->question_type_id != 5)
+                        $question->mark += $children_mark;
                 }
             }
             

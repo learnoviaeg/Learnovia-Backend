@@ -79,57 +79,29 @@ class CoursesController extends Controller
                 if($status == "past")
                     $q->where("end_date", '<' ,Carbon::now())->where("start_date", '<' ,Carbon::now());
                 })->with(['courses.attachment','levels',])->with(array('courseSegment.teachersEnroll.user' => function($query) {
-                    $query->addSelect(array('id', 'firstname', 'lastname', 'picture'));
+                    $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
                 }))->groupBy(['course','level'])->get();
-            return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($enrolls)->paginate($paginate)], 200);
         }
 
-        if($status == null){
+        if($status == null) {
+            
+            $enrolls = $this->chain->getCourseSegmentByManyChain($request);
 
-            $chain_request = new Request ([
-                'year' => $request->filled('years') ? $request->years[0] : null,
-                'type' => $request->filled('types') ? $request->types[0] : null,
-                'level' => $request->filled('levels') ? $request->levels[0] : null,
-                'class' => $request->filled('classes') ? $request->classes[0] : null,
-                'segment' => $request->filled('segments') ? $request->segments[0] : null,
-            ]);
+            $enrolls = $enrolls->whereHas("courseSegment", function ($q) use ($request) {
 
-            $course_segments = collect($this->chain->getAllByChainRelation($chain_request));
+                if($request->for == 'enroll')
+                    $q->where('start_date','<=',Carbon::now())->where('end_date','>=',Carbon::now());
 
-            if($request->for == 'enroll')
-                $course_segments = $course_segments->where('start_date','<=',Carbon::now())->where('end_date','>=',Carbon::now());
-
-            $course_segments->map(function ($cs) use ($user_courses){
-
-                foreach($cs->courses as $cou){
-
-                    if(count($user_courses->where('id',$cou->id)) == 0){
-
-                        $user_courses->push([
-                            'id' => $cou->id ,
-                            'name' => $cou->name ,
-                            'short_name' => $cou->short_name ,
-                            'image' => isset($cou->image) ? $cou->attachment->path : null,
-                            'description' => $cou->description ,
-                            'mandatory' => $cou->mandatory == 1 ? true : false ,
-                            'level' => $cou->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values()->pluck('name'),
-                            'teachers' => Enroll::where('course',$cou->id)->where('role_id',4)->with('user.attachment')->get()->pluck('user'),
-                            'start_date' => $cou->courseSegments[0]->start_date,
-                            'end_date' => $cou->courseSegments[0]->end_date,
-                            'progress' => $cou->progress ,
-                        ]);
-                    }
+                })->whereHas('courseSegment.courses' , function($query)use ($request ) {
+                    if($request->filled('search'))
+                        $query->where('name', 'LIKE' , "%$request->search%");
                 }
-
-            });
-
-            if($request->filled('search')){
-                $user_courses = $user_courses->filter(function ($item) use ($request) {
-                    return str_contains(strtolower($item['name']), strtolower($request->search));
-                });
-            }
+                )->with(array('levels','courseSegment.teachersEnroll.user' => function($query) {
+                    $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
+                }))->groupBy(['course','level'])->get();
         }
-        return response()->json(['message' => __('messages.course.list'), 'body' => $user_courses->paginate($paginate)], 200);
+
+        return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($enrolls)->paginate($paginate)], 200);
 
     }
 

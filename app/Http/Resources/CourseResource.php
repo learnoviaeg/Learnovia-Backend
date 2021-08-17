@@ -26,7 +26,6 @@ class CourseResource extends JsonResource
             $temp_course = $this->courseSegment->courses[0];
         // if(!isset($temp_course))
         //     continue;
-
         return [
             'id' => $temp_course->id ,
             'name' => $temp_course->name ,

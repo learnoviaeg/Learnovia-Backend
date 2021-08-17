@@ -206,6 +206,7 @@ class NotificationsController extends Controller
     public function read(Request $request,$read=null)
     {
         $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+        $check=null;
         foreach ($noti as $not) {
             $not->data= json_decode($not->data, true);
             if($read == 'notify')

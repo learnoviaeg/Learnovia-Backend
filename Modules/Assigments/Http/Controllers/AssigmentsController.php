@@ -385,7 +385,8 @@ class AssigmentsController extends Controller
     */
     public function assignAsstoUsers($request)
     {
-        $usersIDs = Enroll::where('course_segment', $request['course_segment'])->where('role_id',3)->pluck('user_id')->toarray();
+        //teacher can submit assignment as student
+        $usersIDs = Enroll::where('course_segment', $request['course_segment'])->whereIn('role_id',[3,4])->pluck('user_id')->toArray();
         foreach ($usersIDs as $userId) {
             $userassigment = new UserAssigment;
             $userassigment->user_id = $userId;
@@ -479,11 +480,7 @@ class AssigmentsController extends Controller
         if(!isset($userassigment))
             return HelperController::api_response_format(400, null, $message = __('messages.error.user_not_assign'));
 
-        if($userassigment->grade != null && $assilesson->allow_edit_answer=1)
-            return HelperController::api_response_format(400, null, $message = __('messages.error.cannot_edit'));
-
-        $gradedusers=UserAssigment::where('assignment_lesson_id', $assilesson->id)->whereNotNull('grade')->first();
-        if(isset($gradedusers) && $assilesson->allow_edit_answer=1)
+        if($userassigment->grade != null && $assilesson->allow_edit_answer=0)
             return HelperController::api_response_format(400, null, $message = __('messages.error.cannot_edit'));
 
         if (isset($userassigment)) {
