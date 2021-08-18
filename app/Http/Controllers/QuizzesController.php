@@ -309,7 +309,7 @@ class QuizzesController extends Controller
         LastAction::lastActionInCourse($request->course_id);
 
         $quiz=Quiz::find($id);
-        $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id[0])->first();
+        $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
         // if(isset($request->opening_time) && $request->opening_time > $quiz_lesson->start_date )
         //     return HelperController::api_response_format(200, null,__('messages.quiz.NotUpdate'));   
 
