@@ -127,7 +127,7 @@ class H5PLessonController extends Controller
         return HelperController::api_response_format(200, $h5pLesson, __('messages.success.toggle'));
     }
 
-    public function get (Request $request){
+    public function get(Request $request){
 
         $rules = [
             'content_id' => 'exists:h5p_contents,id|required_with:lesson_id',

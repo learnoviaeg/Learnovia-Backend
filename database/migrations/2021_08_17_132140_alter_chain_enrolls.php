@@ -13,11 +13,17 @@ class AlterChainEnrolls extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::table('enrolls', function (Blueprint $table) {
-            $table->dropForeign(['course_segment']);
             $table->dropColumn(['course_segment']);
+        });
+        Schema::table('enrolls', function (Blueprint $table) {
             $table->renameColumn('class', 'group');
         });
+
+        Schema::enableForeignKeyConstraints();
+
     }
 
     /**

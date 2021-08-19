@@ -10,7 +10,7 @@ class Segment extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name','current','academic_type_id'];
+    protected $fillable = ['name','current','academic_type_id','start_date','end_date'];
 
     public function Segment_class(){
         return $this->belongsToMany('App\ClassLevel', 'segment_classes','segment_id','class_level_id');
