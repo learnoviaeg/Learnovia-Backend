@@ -32,7 +32,7 @@ class CourseResource extends JsonResource
             'short_name' => $temp_course->short_name ,
             'image' => isset($temp_course->image) ? $temp_course->attachment->path : null,
             'description' => $temp_course->description ,
-            'mandatory' => $temp_course->mandatory == 1 ? true : false ,
+            'mandatory' => $temp_course->mandatory,
             'level' => $levels,
             'teachers' => collect($teacher)->collapse()->unique()->values(),
             'start_date' => $start_date,

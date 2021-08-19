@@ -4,6 +4,7 @@ namespace Modules\Assigments\Http\Controllers;
 
 use App\attachment;
 use App\CourseSegment;
+use App\Course;
 use App\Enroll;
 use App\User;
 use App\Lesson;
@@ -683,7 +684,8 @@ class AssigmentsController extends Controller
         $user = Auth::user();
         $lesson=Lesson::find($request->lesson_id);
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        $Course=Course::find($lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($Course->id);
 
         $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();        
@@ -710,7 +712,8 @@ class AssigmentsController extends Controller
                 $assignment_lesson->AssignmentLesson[0]->due_date = $override->due_date;
             }
             $assignment['lesson'] =  $assignment_lesson;
-            $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
+            $assignment['course_id'] = $Course->id;
+            $assignment['course_name'] = $Course->name;
             $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
             $start = $assignment_lesson->AssignmentLesson[0]->start_date;
             $due = $assignment_lesson->AssignmentLesson[0]->due_date;
@@ -757,8 +760,9 @@ class AssigmentsController extends Controller
             }])->first();
             $start = $assignment_lesson->AssignmentLesson[0]->start_date;
             $due = $assignment_lesson->AssignmentLesson[0]->due_date;
-            $assignment['lesson'] =$assignment_lesson;
-            $assignment['course_id'] = CourseSegment::where('id', $assignment_lesson->course_segment_id)->pluck('course_id')->first();
+            $assignment['lesson'] =  $assignment_lesson;
+            $assignment['course_id'] = $Course->id;
+            $assignment['course_name'] = $Course->name;
             $assignment['class'] = Lesson::find($request->lesson_id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
