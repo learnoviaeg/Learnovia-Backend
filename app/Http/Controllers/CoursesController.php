@@ -70,8 +70,6 @@ class CoursesController extends Controller
                 $enrolls->where('role_id',$request->role_id);
             }
              $results = $enrolls->with('SecondaryChain.Teacher')->groupBy(['course','level'])->get();
-            // return response()->json(['message' => __('messages.course.list'), 'body' => (new CourseResource($enrolls))->paginate($paginate)], 200);
-
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
 
     }
