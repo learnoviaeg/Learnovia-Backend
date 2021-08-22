@@ -103,7 +103,7 @@ class H5PLessonController extends Controller
             'lesson_id' => $request->lesson_id,
             'type' => 'h5p',
             'link' => $url.'/api/h5p/'.$h5p_lesson->content_id,
-            'publish_date' => $request->publish_date,
+            'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
         ]);
         
         return HelperController::api_response_format(200,$h5p_lesson, __('messages.interactive.add'));
