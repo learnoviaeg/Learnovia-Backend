@@ -43,15 +43,16 @@ class CoursesController extends Controller
             'types.*' => 'exists:academic_types,id',
             'levels'    => 'nullable|array',
             'levels.*' => 'exists:levels,id',
-            'classes'    => 'nullable|array',
-            'classes.*' => 'exists:classes,id',
+            'groups'    => 'nullable|array',
+            'groups.*' => 'exists:classes,id',
             'segments'    => 'nullable|array',
             'segments.*' => 'exists:segments,id',
             'paginate' => 'integer',
             'role_id' => 'integer|exists:roles,id',
             'for' => 'in:enroll',
             'search' => 'nullable',
-            'user_id'=>'exists:users,id'
+            'user_id'=>'exists:users,id',
+            'period' => 'in:past,future,ongoing'
         ]);
 
         $paginate = 12;
@@ -60,8 +61,8 @@ class CoursesController extends Controller
         }
 
         $user_courses=collect();
-        if(isset($status)){
-            $enrolls = $this->chain->getCourseSegmentByManyChain($request);
+        if($request->filled('period')){
+            $enrolls = $this->chain->getEnrollsByManyChain($request);
             // if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)) //student or teacher
             if(!$request->user()->can('site/show-all-courses')) //student or teacher
                 $enrolls->where('user_id',Auth::id());
@@ -69,38 +70,12 @@ class CoursesController extends Controller
             if($request->has('role_id')){
                 $enrolls->where('role_id',$request->role_id);
             }
-            $enrolls = $enrolls->whereHas("courseSegment", function ($q) use ($request, $status) {
-                if($status =="ongoing")
-                    $q->where("end_date", '>' ,Carbon::now())->where("start_date", '<=' ,Carbon::now());
-
-                if($status =="future")
-                    $q->where("end_date", '>' ,Carbon::now())->where("start_date", '>' ,Carbon::now());
-
-                if($status == "past")
-                    $q->where("end_date", '<' ,Carbon::now())->where("start_date", '<' ,Carbon::now());
-                })->with(['courses.attachment','levels',])->with(array('courseSegment.teachersEnroll.user' => function($query) {
-                    $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
-                }))->groupBy(['course','level'])->get();
+            $enrolls = $enrolls->with(['courses.attachment','levels',])->groupBy(['course','level'])->get();
         }
 
-        if($status == null) {
-            
-            $enrolls = $this->chain->getCourseSegmentByManyChain($request);
-
-            $enrolls = $enrolls->whereHas("courseSegment", function ($q) use ($request) {
-
-                if($request->for == 'enroll')
-                    $q->where('start_date','<=',Carbon::now())->where('end_date','>=',Carbon::now());
-
-                })->whereHas('courseSegment.courses' , function($query)use ($request ) {
-                    if($request->filled('search'))
-                        $query->where('name', 'LIKE' , "%$request->search%");
-                }
-                )->with(array('levels','courseSegment.teachersEnroll.user' => function($query) {
-                    $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
-                }))->groupBy(['course','level'])->get();
+        if(!$request->filled('period')){
+            $enrolls = Enroll::select('*')->distinct('course')->with(['courses.attachment','levels',])->groupBy(['course','level'])->get();
         }
-
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($enrolls)->paginate($paginate)], 200);
 
     }

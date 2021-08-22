@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 
 class Segment extends Model
@@ -23,7 +24,12 @@ class Segment extends Model
 
     public static function Get_current($type)
     {
-        $segment = self::where('academic_type_id', $type)->where('current',1)->first();
+        $segment = self::where('academic_type_id', $type)->where("end_date", '>' ,Carbon::now())->where("start_date", '<=' ,Carbon::now())->first();
+        return $segment;
+    }
+    public static function Get_current_by_many_types($types)
+    {
+        $segment = self::whereIn('academic_type_id', $types)->where("end_date", '>' ,Carbon::now())->where("start_date", '<=' ,Carbon::now())->pluck('id');
         return $segment;
     }
 
