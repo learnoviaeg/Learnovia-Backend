@@ -49,10 +49,10 @@ class CoursesController extends Controller
             'segments.*' => 'exists:segments,id',
             'paginate' => 'integer',
             'role_id' => 'integer|exists:roles,id',
-            'for' => 'in:enroll',
+            // 'for' => 'in:enroll',
             'search' => 'nullable',
             'user_id'=>'exists:users,id',
-            'period' => 'in:past,future,ongoing'
+            'period' => 'in:past,future,no_segment'
         ]);
 
         $paginate = 12;
@@ -60,8 +60,6 @@ class CoursesController extends Controller
             $paginate = $request->paginate;
         }
 
-        $user_courses=collect();
-        if($request->filled('period')){
             $enrolls = $this->chain->getEnrollsByManyChain($request);
             // if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)) //student or teacher
             if(!$request->user()->can('site/show-all-courses')) //student or teacher
@@ -70,12 +68,6 @@ class CoursesController extends Controller
             if($request->has('role_id')){
                 $enrolls->where('role_id',$request->role_id);
             }
-            $enrolls = $enrolls->with(['courses.attachment','levels',])->groupBy(['course','level'])->get();
-        }
-
-        if(!$request->filled('period')){
-            $enrolls = Enroll::select('*')->distinct('course')->with(['courses.attachment','levels',])->groupBy(['course','level'])->get();
-        }
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($enrolls)->paginate($paginate)], 200);
 
     }

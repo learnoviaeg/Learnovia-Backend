@@ -207,11 +207,16 @@ class ChainRepository implements ChainRepositoryInterface
 
         $active_segments = Segment::Get_current_by_many_types($types);
 
-        if($request->filled('period') && $request->period == 'past'){
-            $active_segments = Segment::whereIn('academic_type_id', $types)->where("end_date", '<' ,Carbon::now())->where("start_date", '<' ,Carbon::now())->pluck('id');
-        }
-        if($request->filled('period') && $request->period == 'future'){
-            $active_segments = Segment::whereIn('academic_type_id', $types)->where("end_date", '>' ,Carbon::now())->where("start_date", '>' ,Carbon::now())->pluck('id');
+        if($request->filled('period')){
+            
+            if($request->period == 'no_segment')
+                $active_segments = Segment::whereIn('academic_type_id', $types)->pluck('id'); 
+
+            if($request->period == 'past')
+                $active_segments = Segment::whereIn('academic_type_id', $types)->where("end_date", '<' ,Carbon::now())->where("start_date", '<' ,Carbon::now())->pluck('id');
+           
+            if($request->period == 'future')
+                $active_segments = Segment::whereIn('academic_type_id', $types)->where("end_date", '>' ,Carbon::now())->where("start_date", '>' ,Carbon::now())->pluck('id');
         }
 
         if($request->filled('segments')){
