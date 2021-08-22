@@ -27,7 +27,7 @@ class CourseResource extends JsonResource
             'short_name' => $this->courses['short_name'] ,
             'image' => isset($this->courses['image']) ? $this->courses->attachment->path : null,
             'description' => $this->courses['description'] ,
-            'mandatory' => $this->courses['mandatory'] == 1 ? true : false ,
+            'mandatory' => $this->courses['mandatory'] ,
             'level' => $levels,
             'teachers' => Enroll::where('role_id',4)->where('course',$this->courses['id'])->where('level', $this->levels->id)->where('type',$this['type'])
                     ->where('year',$this['year'])->with(array('users' => function($query) {
