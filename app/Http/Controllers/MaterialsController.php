@@ -92,7 +92,6 @@ class MaterialsController extends Controller
             $counts = $material->select(DB::raw
                 (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
                     COUNT(case `type` when 'media' then 1 else null end) as media ,
-                    COUNT(case `type` when 'media' then 1 else null end) as media ,
                     COUNT(case `type` when 'page' then 1 else null end) as page" 
                 ))->first()->only(['file','media','page']);
             $counts['all']=$cc['all'];

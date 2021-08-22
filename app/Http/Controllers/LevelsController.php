@@ -39,6 +39,8 @@ class LevelsController extends Controller
             'year.*' => 'exists:academic_years,id',
             'type' => 'array|required_with:year',
             'type.*' => 'exists:academic_types,id',
+            'segment' => 'array',
+            'segment.*' => 'exists:segments,id',
         ]);
         $level = Level::create([
             'name' => $request->name,
@@ -49,10 +51,19 @@ class LevelsController extends Controller
                 foreach ($request->type as $type) {
                     # code...
                     $yeartype = AcademicYearType::checkRelation($year, $type);
-                    YearLevel::firstOrCreate([
+                    $year_level=YearLevel::firstOrCreate([
                         'academic_year_type_id' => $yeartype->id,
                         'level_id' => $level->id,
                     ]);
+                    $currectSegment=Segment::where('current',1)->first();
+                    if(isset($request->segment))
+                        foreach ($request->segment as $segment) {
+                            Segment_level::firstOrCreate([
+                                'level_id' => $level->id,
+                                'segment_id' => $segment,
+                                'year_level_id' => $year_level->id
+                            ]);
+                        }
                 }
             }
         }
