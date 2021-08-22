@@ -11,6 +11,8 @@ use App\Course;
 use App\LastAction;
 use App\User;
 use App\Enroll;
+use DB;
+
 class CoursesController extends Controller
 {
     protected $chain;
@@ -59,7 +61,6 @@ class CoursesController extends Controller
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
-
             $enrolls = $this->chain->getEnrollsByManyChain($request);
             // if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)) //student or teacher
             if(!$request->user()->can('site/show-all-courses')) //student or teacher
@@ -68,7 +69,10 @@ class CoursesController extends Controller
             if($request->has('role_id')){
                 $enrolls->where('role_id',$request->role_id);
             }
-        return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($enrolls)->paginate($paginate)], 200);
+             $results = $enrolls->with('SecondaryChain.Teacher')->groupBy(['course','level'])->get();
+            // return response()->json(['message' => __('messages.course.list'), 'body' => (new CourseResource($enrolls))->paginate($paginate)], 200);
+
+        return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
 
     }
 

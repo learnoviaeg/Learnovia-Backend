@@ -29,10 +29,11 @@ class CourseResource extends JsonResource
             'description' => $this->courses['description'] ,
             'mandatory' => $this->courses['mandatory'] ,
             'level' => $levels,
-            'teachers' => Enroll::where('role_id',4)->where('course',$this->courses['id'])->where('level', $this->levels->id)->where('type',$this['type'])
-                    ->where('year',$this['year'])->with(array('users' => function($query) {
-                        $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
-                    }))->get(),
+            'teachers' => $this->SecondaryChain,
+            // 'teachers' => Enroll::where('role_id',4)->where('course',$this->courses['id'])->where('level', $this->levels->id)->where('type',$this['type'])
+            //         ->where('year',$this['year'])->with(array('users' => function($query) {
+            //             $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
+            //         }))->get(),
             
             'start_date' => $start_date,
             'end_date' => $end_date,
