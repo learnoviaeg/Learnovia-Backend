@@ -50,8 +50,7 @@ Pulling_Latest_Version-dev:
        - php artisan config:clear
        - php artisan migrate --force
        - php artisan queue:restart
-       - php artisan relation:seed
-#       - php artisan migrate:fresh --seed     # Not sure from the impact on production
+       - php artisan migrate:fresh --seed     # Not sure from the impact on production
        - php artisan h5p
        - php artisan annotation
        - service supervisor restart
