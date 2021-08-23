@@ -41,14 +41,9 @@ class h5p extends Command
     public function handle()
     {
 
-        \Artisan::call('migrate:fresh --seed');
-        $this->info('Migrations complete successfully'); 
-
-
         shell_exec('chmod -R 777 storage/h5p/temp');
         $this->info('Success chmod  storage/h5p/temp');
-
-        
+     
         $vendor_h5p = base_path().'/public/vendor/h5p';
        
         $content = base_path().'/storage/h5p/content';
@@ -60,7 +55,6 @@ class h5p extends Command
         if(!File::exists($editor)) {
             symlink($vendor_h5p,$editor);
             $this->info('Success symbolic link  editor');
-
         }
         $libraries = base_path().'/storage/h5p/libraries'; //var/wwww/html
         if(!File::exists($libraries)) {
@@ -99,9 +93,6 @@ class h5p extends Command
            $this->info('Success symbolic link  images');
        }
 
-
-        
- 
         \Artisan::call('optimize:clear');
         $this->info('Optimize cleared successfully ');
 
@@ -109,20 +100,14 @@ class h5p extends Command
         shell_exec('cp -R /'.base_path().'/public/vendor/laravel-h5p/ /'.base_path().'/storage/app/public/ ');
         $this->info('Folder laravel-h5p copied successfully ');
 
-      
-
-        \Artisan::call('config:cache');
-        $this->info('Configuration cache cleared');
-        \Artisan::call('route:clear');
-        $this->info('Route cleared successfully ');
-        \Artisan::call('view:clear');
-        $this->info('View cleared successfully ');
-        \Artisan::call('config:clear');
-        $this->info('Config cleared successfully ');
-        \Artisan::call('cache:clear');
-        $this->info('Cache cleared successfully ');
-
-
+        \Artisan::call('optimize:clear');
+        $this->info('Compiled views cleared!');
+        $this->info('Application cache cleared!');
+        $this->info('Route cache cleared!');
+        $this->info('Configuration cache cleared!');
+        $this->info('Compiled services and packages files removed!');
+        $this->info('Caches cleared successfully!');
+    
 
         $this->info('Success installed');
         
