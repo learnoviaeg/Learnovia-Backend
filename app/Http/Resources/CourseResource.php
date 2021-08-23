@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Resources;
-
+use App\Segment;
+use App\Enroll;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseResource extends JsonResource
@@ -14,30 +15,29 @@ class CourseResource extends JsonResource
      */
     public function toArray($request)
     {
-        // return parent::toArray($request);
         $levels=[];
         $teacher = [];
-        
-            $teacher[] = $this->courseSegment->teachersEnroll;
-            $start_date = $this->courseSegment->start_date;
-            $end_date = $this->courseSegment->end_date;
-
-            $levels[] =  isset($this->levels) ? $this->levels->name : null;
-            $temp_course = $this->courseSegment->courses[0];
-        // if(!isset($temp_course))
-        //     continue;
+        $segment = Segment::where('id',$this->segment)->first();
+        $start_date = $segment->start_date;
+        $end_date = $segment->end_date;
+        $levels[] =  isset($this->levels) ? $this->levels->name : null;
         return [
-            'id' => $temp_course->id ,
-            'name' => $temp_course->name ,
-            'short_name' => $temp_course->short_name ,
-            'image' => isset($temp_course->image) ? $temp_course->attachment->path : null,
-            'description' => $temp_course->description ,
-            'mandatory' => $temp_course->mandatory == 1 ? true : false ,
+            'id' => $this->courses['id'],
+            'name' => $this->courses['name'] ,
+            'short_name' => $this->courses['short_name'] ,
+            'image' => isset($this->courses['image']) ? $this->courses->attachment->path : null,
+            'description' => $this->courses['description'] ,
+            'mandatory' => $this->courses['mandatory'] ,
             'level' => $levels,
-            'teachers' => collect($teacher)->collapse()->unique()->values(),
+            'teachers' => $this->SecondaryChain,
+            // 'teachers' => Enroll::where('role_id',4)->where('course',$this->courses['id'])->where('level', $this->levels->id)->where('type',$this['type'])
+            //         ->where('year',$this['year'])->with(array('users' => function($query) {
+            //             $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
+            //         }))->get(),
+            
             'start_date' => $start_date,
             'end_date' => $end_date,
-            'progress' => round($temp_course->progress,2) ,
+            'progress' => round($this->courses['progress'],2) ,
         ];
     }
 }
