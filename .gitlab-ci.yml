@@ -1,0 +1,236 @@
+stages:
+  - build
+  - deploy
+  - rollback
+  
+#+++++++++DEVELOPMENT++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#=========================================================
+build-code-job-dev:
+     stage: build
+     tags:
+       - sercl
+       - dev
+     only:
+       - dev
+     script:
+       - echo "$CI_JOB_STAGE"
+       - echo "checking service status"
+       - cd
+       - sync; echo 3 > /proc/sys/vm/drop_caches # Clearing Memory Cache
+       - service gitlab-runner status
+       - service apache2 status
+       - service mysql status
+       - ssh -T git@gitlab.com
+#-------Backup------------------
+       - echo "$CI_JOB_STAGE"
+       -  -d /var/circle-backend-Backup/circle-backend-backend-backup/  || mkdir -p /var/circle-backend-Backup/circle-backend-backend-backup/
+       - cp -R /var/www/html/circle-backend/* /var/circle-backend-Backup/circle-backend-backend-backup
+#======================================================
+Pulling_Latest_Version-dev:
+     stage: deploy
+     tags:
+       - sercl
+       - dev
+     only:
+       - dev
+     script:
+       - cd /var/www/html/circle-backend
+       - git reset HEAD^ --hard
+       - git stash
+       - git checkout dev
+       - git pull origin dev
+       - echo "Starting Composer using Gitlab CI"
+       - cd /var/www/html/circle-backend
+       - composer install --ignore-platform-reqs
+#       - php artisan key:generate
+#       - php artisan config:cache
+       - php artisan cache:clear
+       - php artisan config:clear
+       - php artisan migrate --force
+       - php artisan queue:restart
+       - php artisan relation:seed
+       - service supervisor restart
+       - service apache2 restart
+       - service mysql restart
+       - sync; echo 3 > /proc/sys/vm/drop_caches
+#===========================================================
+Rollback_to_Latest_Version-dev:
+     stage: rollback
+     tags:
+       - sercl
+       - dev
+     only:
+       - dev
+     script:
+       - cd /var/www/html/circle-backend
+       - git revert dev -n
+       - echo "Starting Composer using Gitlab CI"
+       - cd /var/www/html/circle-backend
+       - composer install --ignore-platform-reqs
+#       - php artisan key:generate
+#       - php artisan config:cache
+       - php artisan cache:clear
+       - php artisan config:clear
+       - php artisan migrate --force
+       - php artisan queue:restart
+       - php artisan relation:seed
+       - service supervisor restart
+       - service apache2 restart
+       - service mysql restart
+       - sync; echo 3 > /proc/sys/vm/drop_caches
+#       - cp -R /var/circle-backend-Backup/circle-backend-backend-backup/* /var/www/html/circle-backend 
+     when: manual
+#+++++++++STAGING++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#=========================================================
+build-code-job-staging:
+     stage: build
+     tags:
+       - sercl
+       - staging
+     only:
+       - staging
+     script:
+       - echo "$CI_JOB_STAGE"
+       - echo "checking service status"
+       - cd
+       - sync; echo 3 > /proc/sys/vm/drop_caches # Clearing Memory Cache
+       - service gitlab-runner status
+       - service apache2 status
+       - service mysql status
+       - ssh -T git@gitlab.com
+#-------Backup------------------
+       - echo "$CI_JOB_STAGE"
+       -  -d /var/circle-backend-Backup/circle-backend-backend-backup/  || mkdir -p /var/circle-backend-Backup/circle-backend-backend-backup/
+       - cp -R /var/www/html/circle-backend/* /var/circle-backend-Backup/circle-backend-backend-backup
+#======================================================
+Pulling_Latest_Version-staging:
+     stage: deploy
+     tags:
+       - sercl
+       - staging
+     only:
+       - staging
+     script:
+       - cd /var/www/html/circle-backend
+       - git reset HEAD^ --hard
+       - git stash
+       - git checkout staging
+       - git pull origin staging
+       - echo "Starting Composer using Gitlab CI"
+       - cd /var/www/html/circle-backend
+       - composer install --ignore-platform-reqs
+#       - php artisan key:generate
+#       - php artisan config:cache
+       - php artisan cache:clear
+       - php artisan config:clear
+       - php artisan migrate --force
+       - php artisan queue:restart
+       - php artisan relation:seed
+       - service supervisor restart
+       - service apache2 restart
+       - service mysql restart
+       - sync; echo 3 > /proc/sys/vm/drop_caches
+#===========================================================
+Rollback_to_Latest_Version-staging:
+     stage: rollback
+     tags:
+       - sercl
+       - staging
+     only:
+       - staging
+     script:
+       - cd /var/www/html/circle-backend
+       - git revert staging -n
+       - echo "Starting Composer using Gitlab CI"
+       - cd /var/www/html/circle-backend
+       - composer install --ignore-platform-reqs
+#       - php artisan key:generate
+#       - php artisan config:cache
+       - php artisan cache:clear
+       - php artisan config:clear
+       - php artisan migrate --force
+       - php artisan queue:restart
+       - php artisan relation:seed
+       - service supervisor restart
+       - service apache2 restart
+       - service mysql restart
+       - sync; echo 3 > /proc/sys/vm/drop_caches
+#       - cp -R /var/circle-backend-Backup/circle-backend-backend-backup/* /var/www/html/circle-backend 
+     when: manual
+#+++++++++PRODUCTION++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  
+#=========================================================
+build-code-job-production:
+     stage: build
+     tags:
+       - sercl
+       - master
+     only:
+       - master
+     script:
+       - echo "$CI_JOB_STAGE"
+       - echo "checking service status"
+       - cd
+       - sync; echo 3 > /proc/sys/vm/drop_caches # Clearing Memory Cache
+       - service gitlab-runner status
+       - service apache2 status
+       - service mysql status
+       - ssh -T git@gitlab.com
+#-------Backup------------------
+       - echo "$CI_JOB_STAGE"
+       -  -d /var/circle-backend-Backup/circle-backend-backend-backup/  || mkdir -p /var/circle-backend-Backup/circle-backend-backend-backup/
+       - cp -R /var/www/html/circle-backend/* /var/circle-backend-Backup/circle-backend-backend-backup
+#======================================================
+Pulling_Latest_Version-production:
+     stage: deploy
+     tags:
+       - sercl
+       - master
+     only:
+       - master
+     script:
+       - cd /var/www/html/circle-backend
+       - git reset HEAD^ --hard
+       - git stash
+       - git checkout master
+       - git pull origin master
+       - echo "Starting Composer using Gitlab CI"
+       - cd /var/www/html/circle-backend
+       - composer install --ignore-platform-reqs
+#       - php artisan key:generate
+#       - php artisan config:cache
+       - php artisan cache:clear
+       - php artisan config:clear
+       - php artisan migrate --force
+       - php artisan queue:restart
+       - php artisan relation:seed
+       - service supervisor restart
+       - service apache2 restart
+       - service mysql restart
+       - sync; echo 3 > /proc/sys/vm/drop_caches
+#===========================================================
+Rollback_to_Latest_Version-production:
+     stage: rollback
+     tags:
+       - sercl
+       - master
+     only:
+       - master
+     script:
+       - cd /var/www/html/circle-backend
+       - git revert master -n
+       - echo "Starting Composer using Gitlab CI"
+       - cd /var/www/html/circle-backend
+       - composer install --ignore-platform-reqs
+#       - php artisan key:generate
+#       - php artisan config:cache
+       - php artisan cache:clear
+       - php artisan config:clear
+       - php artisan migrate --force
+       - php artisan queue:restart
+       - php artisan relation:seed
+       - service supervisor restart
+       - service apache2 restart
+       - service mysql restart
+       - sync; echo 3 > /proc/sys/vm/drop_caches
+#       - cp -R /var/circle-backend-Backup/circle-backend-backend-backup/* /var/www/html/circle-backend 
+     when: manual
