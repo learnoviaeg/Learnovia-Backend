@@ -171,7 +171,7 @@ class ChainRepository implements ChainRepositoryInterface
             }        
         if ($request->filled('level'))
             $enrolls=$enrolls->where('level', $request->level);
-        if ($request->filled('group'))
+        if ($request->filled('class'))
             $enrolls=$enrolls->where('group', $request->class);
         if ($request->filled('courses')){
             foreach($request->courses as $course_id){
@@ -230,8 +230,8 @@ class ChainRepository implements ChainRepositoryInterface
         if($request->filled('levels'))
             $enrolls->whereIn('level', $request->levels);
 
-        if($request->filled('groups'))
-            $enrolls->whereIn('groups', $request->classes);
+        if($request->filled('classes'))
+            $enrolls->whereIn('group', $request->classes);
 
         if($request->filled('courses'))
             $enrolls->whereIn('course', $request->courses);
