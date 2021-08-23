@@ -54,4 +54,12 @@ class Course extends Model
     {
         return $this->hasMany('App\Timeline','course_id','id');
     }
+
+    public function getMandatoryAttribute()
+    {
+        $content=false;
+        if($this->attributes['mandatory']==1)
+            $content = true;
+        return $content;
+    }
 }

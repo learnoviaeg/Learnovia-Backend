@@ -300,8 +300,8 @@ class QuizzesController extends Controller
             'is_graded' => 'boolean',
             'duration' => 'integer',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
-            'grade_feedback' => 'required|in:After submission,After due_date,Never',
-            'correct_feedback' => 'required|in:After submission,After due_date,Never',
+            'grade_feedback' => 'in:After submission,After due_date,Never',
+            'correct_feedback' => 'in:After submission,After due_date,Never',
         ]);
         // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
         //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
@@ -309,7 +309,7 @@ class QuizzesController extends Controller
         LastAction::lastActionInCourse($request->course_id);
 
         $quiz=Quiz::find($id);
-        $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id[0])->first();
+        $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
         // if(isset($request->opening_time) && $request->opening_time > $quiz_lesson->start_date )
         //     return HelperController::api_response_format(200, null,__('messages.quiz.NotUpdate'));   
 
