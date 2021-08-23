@@ -24,18 +24,28 @@ class LevelsImport implements ToModel , WithHeadingRow
         ];
         $validator = Validator::make($row,[
             'name' => 'required',
-            'type_id' => 'required|exists:academic_year_types,academic_type_id'
+            'type_id' => 'required|exists:academic_year_types,academic_type_id',
+            'segment_id' => 'exists:segments,id'
         ],$messages)->validate();
 
         $year_type_id = AcademicType::find($row['type_id'])->yearType->pluck('id')->first();
+        $segment=Segment::where('academic_type_id',$type)->where('end_date','>=',Carbon::now())->pluck('id')->first();
+        if(isset($row['segment_id']))
+            $segment=$row['segment_id'];
 
         $level = Level::create([
             'name' => $row['name'],
         ]);
 
-        YearLevel::firstOrCreate([
+        $year_type=YearLevel::firstOrCreate([
             'academic_year_type_id' => $year_type_id,
             'level_id' => $level->id,
+        ]);
+
+        SegmentLevel::firstOrCreate([
+            'segment_id' => $segment->id,
+            'level_id' => $level_id->id,
+            'year_level_id' => $year_type->id
         ]);
         
     }

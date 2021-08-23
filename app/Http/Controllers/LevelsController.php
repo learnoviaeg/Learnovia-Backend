@@ -9,10 +9,12 @@ use App\YearLevel;
 use Illuminate\Http\Request;
 use App\AcademicYear;
 use App\Level;
+use App\Segment;
 use App\Enroll;
 use App\User;
 use Carbon\Carbon;
 use App\CourseSegment;
+use App\SegmentLevel;
 use Auth;
 use App\Events\MassLogsEvent;
 use Illuminate\Support\Collection;
@@ -39,6 +41,8 @@ class LevelsController extends Controller
             'year.*' => 'exists:academic_years,id',
             'type' => 'array|required_with:year',
             'type.*' => 'exists:academic_types,id',
+            'segment' => 'array',
+            'segment.*' => 'exists:segments,id',
         ]);
         $level = Level::create([
             'name' => $request->name,
@@ -49,10 +53,26 @@ class LevelsController extends Controller
                 foreach ($request->type as $type) {
                     # code...
                     $yeartype = AcademicYearType::checkRelation($year, $type);
-                    YearLevel::firstOrCreate([
+                    $year_level=YearLevel::firstOrCreate([
                         'academic_year_type_id' => $yeartype->id,
                         'level_id' => $level->id,
                     ]);
+                    if(isset($request->segment))
+                        foreach ($request->segment as $segment) {
+                            SegmentLevel::firstOrCreate([
+                                'level_id' => $level->id,
+                                'segment_id' => $segment,
+                                'year_level_id' => $year_level->id
+                            ]);
+                        }
+                    else{
+                        $currectSegment=Segment::where('academic_type_id',$type)->where('end_date','>=',Carbon::now())->first();
+                        SegmentLevel::firstOrCreate([
+                            'level_id' => $level->id,
+                            'segment_id' => $currectSegment->id,
+                            'year_level_id' => $year_level->id
+                        ]);
+                    }
                 }
             }
         }
