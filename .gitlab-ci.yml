@@ -53,6 +53,7 @@ Pulling_Latest_Version-dev:
        - php artisan relation:seed
 #       - php artisan migrate:fresh --seed     # Not sure from the impact on production
        - php artisan h5p
+       - php artisan annotation
        - service supervisor restart
        - service apache2 restart
        - service mysql restart
@@ -81,6 +82,7 @@ Rollback_to_Latest_Version-dev:
        - php artisan relation:seed
 #       - php artisan migrate:fresh --seed     # Not sure from the impact on production
        - php artisan h5p
+       - sudo php artisan annotation
        - service supervisor restart
        - service apache2 restart
        - service mysql restart
