@@ -167,7 +167,7 @@ class AnnouncementsController extends Controller
             ]);
 
             //get users that should receive the announcement
-            $enrolls = $this->chain->getCourseSegmentByChain($chain_request)->where('user_id','!=' ,Auth::id());
+            $enrolls = $this->chain->getEnrollsByChain($chain_request)->where('user_id','!=' ,Auth::id());
 
             if(isset($chain['roles']) && count($chain['roles']) > 0){
                 $enrolls->whereIn('role_id',$chain['roles']);
