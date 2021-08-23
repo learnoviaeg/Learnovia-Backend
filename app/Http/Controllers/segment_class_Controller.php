@@ -172,43 +172,41 @@ class segment_class_Controller extends Controller
             'name'      => 'required',
             'year'      => 'required|exists:academic_years,id',
             'type'      => 'required|exists:academic_types,id',
-            'levels'    => 'required|array',
-            'levels.*.id'  => 'required|exists:levels,id',
-            'levels.*.classes'   => 'required|array',
-            'levels.*.classes.*'   => 'required|exists:classes,id',
+            // 'levels'    => 'required|array',
+            // 'levels.*.id'  => 'required|exists:levels,id',
+            // 'levels.*.classes'   => 'required|array',
+            // 'levels.*.classes.*'   => 'required|exists:classes,id',
         ]);
 
-        if ($valid->fails()) {
+        if ($valid->fails()) 
             return HelperController::api_response_format(400, $valid->errors());
-        }
+        
         $type = AcademicType::find($req->type);
         $current_segment_created = Segment::where('academic_type_id',$req->type)->count();
-        if($current_segment_created >= $type->segment_no){
+        if($current_segment_created >= $type->segment_no)
             return HelperController::api_response_format(200, null,__('messages.segment.type_invalid'));
-        }
+        
         $segment = Segment::firstOrCreate([
             'name' => $req->name,
-            'academic_type_id'=>$req->type
+            'academic_type_id'=>$req->type,
+            'academic_year_id'=>$req->year
         ]);
-        $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
-        foreach($req->levels as $level){
-            $yearlevel = YearLevel::checkRelation($yeartype->id, $level['id']);
-            foreach($level['classes'] as $class){
-                $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
-                $count = SegmentClass::whereClass_level_id($classLevel->id)->count();
-                if ($count >= $type->segment_no) {
-                    continue;
-                }
-                SegmentClass::create([
-                    'class_level_id' => $classLevel->id,
-                    'segment_id' => $segment->id,
-                ]);
-            }
-        }
-        if ($segment) {
-            return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), __('messages.segment.add'));
-        }
-        return HelperController::NOTFOUND();
+        // $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
+        // foreach($req->levels as $level){
+        //     $yearlevel = YearLevel::checkRelation($yeartype->id, $level['id']);
+        //     foreach($level['classes'] as $class){
+        //         $classLevel = ClassLevel::checkRelation($class, $yearlevel->id);
+        //         $count = SegmentClass::whereClass_level_id($classLevel->id)->count();
+        //         if ($count >= $type->segment_no) {
+        //             continue;
+        //         }
+        //         SegmentClass::create([
+        //             'class_level_id' => $classLevel->id,
+        //             'segment_id' => $segment->id,
+        //         ]);
+        //     }
+        // }
+        return HelperController::api_response_format(200, Segment::get()->paginate(HelperController::GetPaginate($req)), __('messages.segment.add'));
     }
 
     /**

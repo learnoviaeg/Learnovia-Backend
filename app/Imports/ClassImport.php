@@ -26,30 +26,12 @@ class ClassImport implements ToModel , WithHeadingRow
         ];
         $validator = Validator::make($row,[
             'name' => 'required',
-            'level_id' => 'required|exists:year_levels,level_id'
+            'level_id' => 'required|exists:levels,id'
         ],$messages)->validate();
 
-        $class = Classes::create([
+        $class = Classes::firstOrCreate([
             'name' => $row['name'],
+            'level_id' => $row['level_id']
         ]);
-        
-        $year_level_id = Level::find($row['level_id'])->yearlevel->first();
-
-        $class_level=ClassLevel::firstOrCreate([
-            'year_level_id' => $year_level_id->id,
-            'class_id' => $class->id
-        ]);
-            // dd($year_level_id->yearType->academictype);
-        $segments=Segment::where('academic_type_id',$acadymic_type=$year_level_id->yearType->pluck('academic_type_id')->first());
-        if(isset($row['segment_id']))
-            $segments->where('id',$row['segment_id']);
-        foreach($segments->get() as $segment)
-        {
-            SegmentClass::firstOrCreate([
-                'segment_id' => $segment->id,
-                'class_level_id' =>$class_level->id
-            ]);
-        }
-
     }
 }

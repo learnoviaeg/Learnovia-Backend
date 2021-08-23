@@ -39,10 +39,10 @@ use App\Course;
 use App\Level;
 use App\Lesson;
 use App\Segment;
-use App\YearLevel;
-use App\ClassLevel;
-use App\AcademicYearType;
-use App\CourseSegment;
+// use App\YearLevel;
+// use App\ClassLevel;
+// use App\AcademicYearType;
+// use App\CourseSegment;
 use App\Timeline;
 use App\Material;
 
@@ -103,12 +103,12 @@ class AppServiceProvider extends ServiceProvider
         Level::observe(LogsObserver::class);
         Lesson::observe(LogsObserver::class);
         Segment::observe(LogsObserver::class);
-        AcademicYearType::observe(LogsObserver::class);
-        ClassLevel::observe(LogsObserver::class);
-        YearLevel::observe(LogsObserver::class);
+        // AcademicYearType::observe(LogsObserver::class);
+        // ClassLevel::observe(LogsObserver::class);
+        // YearLevel::observe(LogsObserver::class);
         User::observe(LogsObserver::class);
         Parents::observe(LogsObserver::class);
-        CourseSegment::observe(LogsObserver::class);
+        // CourseSegment::observe(LogsObserver::class);
         Enroll::observe(EnrollObserver::class);
 
         // UserGrade::observe(UserGradeObserver::class);

@@ -60,33 +60,11 @@ class AC_year_type extends Controller
             'years.*' => 'exists:academic_years,id',
         ]);
     
-        $types = AcademicType::whereNull('deleted_at')
-        ->where('name', 'LIKE' , "%$request->search%")
-        ->whereHas('yearType',function($q)use ($request)
-        {
-            if ($request->has('years')) {
-                $q->whereIn('academic_year_id',$request->years);
-            }
-        });
-        $all_types = $types;
-        if($call==1){
-            return $all_types->get();
-        }
-        $all_types= $all_types->with('yearType.academicyear')->get();//;->pluck(['yearType.*.academicyear.*.name'])->collapse();
-        foreach($all_types as $type){
-            $type->year_type = $type->yearType->pluck('academicyear.*.name')->collapse();
-            unset($type->yearType);
+        $all_types = AcademicType::whereNull('deleted_at');
+        if(isset($request->search))
+            $all_types->where('name', 'LIKE' , "%$request->search%");
 
-        }
-        if($request->returnmsg == 'delete')
-            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),__('messages.type.delete'));
-        if($request->returnmsg == 'add')
-            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),__('messages.type.add'));
-        if($request->returnmsg == 'update')
-            return HelperController::api_response_format(202, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)),__('messages.type.update'));
-
-        else
-            return HelperController::api_response_format(200, (new Collection($all_types))->paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200, (new Collection($all_types->get()))->paginate(HelperController::GetPaginate($request)));
     }
 
     /**
@@ -129,36 +107,21 @@ class AC_year_type extends Controller
     {
         $valid = Validator::make($req->all(), [
             'name' => 'required',
-            'segment_no' => 'required',
-            'year' => 'array',
-            'year.*' => 'exists:academic_years,id'
+            'segment_no' => 'required'
         ]);
 
-        if ($valid->fails()) {
+        if ($valid->fails()) 
             return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
-        }
-        $Ac = AcademicType::firstOrCreate([
+        
+        AcademicType::firstOrCreate([
             'name' => $req->name,
             'segment_no' => $req->segment_no
         ]);
-       if($req->filled('year')){
-           foreach ($req->year as $year) {
-               # code...
-               AcademicYearType::firstOrCreate([
-                'academic_year_id' => $year,
-                'academic_type_id' => $Ac->id
-            ]);
 
-           }
-        }
-        if ($Ac) {
-            $output= AcademicType::paginate(HelperController::GetPaginate($req));
-            $req['returnmsg'] = 'add';
-            $print = self::get($req);
-            return $print;
-            // return HelperController::api_response_format(200, $output, 'Type Added Successfully');
-        }
-        return HelperController::api_response_format(404, [], __('messages.error.try_again'));
+        $output= AcademicType::paginate(HelperController::GetPaginate($req));
+        $req['returnmsg'] = 'add';
+        $print = self::get($req);
+        return $print;
     }
 
     /**
