@@ -33,7 +33,7 @@ use Modules\Assigments\Entities\UserAssigment;
 use Modules\Assigments\Entities\assignmentOverride;
 use App\Component;
 use App\LessonComponent;
-use App\status;
+use App\Status;
 use Illuminate\Support\Facades\Validator;
 use App\Timeline;
 use Modules\QuestionBank\Entities\QuizOverride;
