@@ -51,8 +51,8 @@ Pulling_Latest_Version-dev:
        - php artisan migrate --force
        - php artisan queue:restart
        - php artisan migrate:fresh --seed     # Not sure from the impact on production
-       - php artisan h5p
-       - php artisan annotation
+#       - php artisan h5p             # only used for first time and no need to run the command on every change
+#       - php artisan annotation      # only used for first time and no need to run the command on every change
        - service supervisor restart
        - service apache2 restart
        - service mysql restart
