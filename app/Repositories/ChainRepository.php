@@ -168,7 +168,7 @@ class ChainRepository implements ChainRepositoryInterface
             if ($request->filled('segment'))
                 $segment_id = $request->segment;
             $enrolls=$enrolls->where('segment', $segment_id);
-            }        
+            }
         if ($request->filled('level'))
             $enrolls=$enrolls->where('level', $request->level);
         if ($request->filled('class'))
