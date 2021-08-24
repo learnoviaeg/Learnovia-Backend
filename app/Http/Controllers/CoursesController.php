@@ -99,8 +99,8 @@ class CoursesController extends Controller
             LastAction::lastActionInCourse($id);
             return response()->json(['message' => __('messages.course.object'), 'body' => $course], 200);
         }
-    return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
-}
+        return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
+    }
 
     /**
      * Update the specified resource in storage.

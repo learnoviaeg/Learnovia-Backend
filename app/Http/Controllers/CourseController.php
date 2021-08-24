@@ -84,49 +84,20 @@ class CourseController extends Controller
             'end_date' =>'required_with:year|date|after:start_date'
         ]);
         
-        // $short_name=Course::whereNotIn('id',Enroll::whereIn('year',$request->chains[0]['year'])->pluck('course'))->pluck('short_name');
-        $courses=Course::fromQuery('select * from courses where id in (
-                                    select course_id from course_segments where segment_class_id in (
-                                        select id from segment_classes where class_level_id in (
-                                            select id from class_levels where year_level_id in (
-                                                select id from year_levels where academic_year_type_id in (
-                                                    select id from academic_year_types where academic_year_id =' . $request->chains[0]['year'][0].'
-                                                )
-                                            )
-                                        )
-                                    )
-                                )'
-                            );
-        foreach($courses->toArray() as $course)
-            if($request->short_name == $course['short_name'])
-                return HelperController::api_response_format(400, null, 'short_name must be unique');
+        $short_names=Course::where('segment_id',$row['segment_id'])->where('short_name',$row['short_name'])->get();
+        if(count($short_names)>0)
+            return HelperController::api_response_format(400, null, 'short_name must be unique');
 
         $no_of_lessons = 4;
-        $course = Course::create([
+        $course = Course::firstOrCreate([
             'name' => $request->name,
             'short_name' => $request->short_name,
+            'image' => isset($request->image) ? attachment::upload_attachment($request->image, 'course')->id : null,
+            'category_id' => isset($request->category) ? $request->category : null,
+            'description' => isset($request->description) ? $request->description : null,
+            'mandatory' => isset($request->mandatory) ? $request->mandatory : 1,
+
         ]);
-        // if course has an image
-        if ($request->hasFile('image')) {
-            $course->image = attachment::upload_attachment($request->image, 'course')->id;
-            $course->save();
-        }
-        if ($request->filled('category')) {
-            $course->category_id = $request->category;
-            $course->save();
-        }
-
-        // if course has description
-        if ($request->filled('description')) {
-            $course->description = $request->description;
-            $course->save();
-        }
-
-        // if course is mandatory
-        if ($request->filled('mandatory')) {
-            $course->mandatory = $request->mandatory;
-            $course->save();
-        }
 
         foreach ($request->chains as $chain){
             // dd($chain);

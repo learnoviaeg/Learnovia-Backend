@@ -29,7 +29,8 @@ class LessonController extends Controller
             'description' => 'array',
             'description.*' => 'string',
             'course' => 'required|exists:courses,id',
-            'class' => 'required|exists:classes,id'
+            'class' => 'required|exists:classes,id',
+            'shared_lesson' => 'required|in:0,1'
         ]);
         $courseSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
         if (!isset($courseSegment))
