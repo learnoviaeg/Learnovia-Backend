@@ -45,8 +45,13 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\UpdateQuizGradeListener',
             'App\Listeners\UpdateTimelineListener',
         ],
-         'App\Events\UserEnrolledEvent' => [
+        'App\Events\UserEnrolledEvent' => [
             'App\Listeners\AddUserGradersListener',
+        ],
+
+        //7esab daragat el2s2la el manual(and_why & essay)
+        'App\Events\ManualCorrectionEvent' => [
+            'App\Listeners\GradeManualListener',
         ],
     ];
 
