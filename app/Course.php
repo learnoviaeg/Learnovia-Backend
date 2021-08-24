@@ -10,6 +10,9 @@ class Course extends Model
 {
     protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id'];
 
+    protected $dispatchesEvents = [
+        'created' => \App\Events\CourseCreatedEvent::class,
+    ];
 
     public static function findByName($course_name)
     {

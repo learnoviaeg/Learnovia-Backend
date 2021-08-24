@@ -31,8 +31,6 @@ class CoursesImport implements ToModel , WithHeadingRow
     */
     public function model(array $row)
     {
-        $no_of_lessons = 4;
-
         Validator::make($row,[
             'name'=>'required',
             'category'=>'exists:categories,id',
@@ -40,9 +38,12 @@ class CoursesImport implements ToModel , WithHeadingRow
             'segment_id' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
             'mandatory' => 'in:0,1',
-            'short_name' => 'unique:courses',
-            'shared_lesson' => 'required|in:0,1'
+            // 'short_name' => 'unique:courses',
         ])->validate();
+
+        $short_names=Course::where('segment_id',$row['segment_id'])->where('short_name',$row['short_name'])->get();
+        if(count($short_names)>0)
+            die('short name must be unique');
 
         $course = Course::firstOrCreate([
             'name' => $row['name'],
@@ -53,46 +54,6 @@ class CoursesImport implements ToModel , WithHeadingRow
             'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,
             'description' => isset($row['description']) ? $row['description'] : null
         ]);
-
-        $level_id=$row['level_id'];
-        $segment=Segment::find($row['segment_id']);
-        $segment_id=$segment->id;
-        $year_id=$segment->academic_year_id;
-        $type_id=$segment->academic_type_id;
-        $classes=Classes::where('level_id',$row['level_id'])->get()->unique();
-        // dd($classes);
-
-        foreach($classes as $class)
-        {
-            $enroll=Enroll::firstOrCreate([
-                'user_id'=> 1,
-                'role_id' => 1,
-                'year' => $year_id,
-                'type' => $type_id,
-                'segment' => $segment_id,
-                'level' => $level_id,
-                'group' => $class->id,
-                'course' => $course->id
-            ]);
-
-            if (isset($row['no_of_lessons'])) 
-                $no_of_lessons = $row['no_of_lessons'];
-
-            for ($i = 1; $i <= $no_of_lessons; $i++) {
-                $lesson=lesson::firstOrCreate([
-                    'name' => 'Lesson ' . $i,
-                    'index' => $i,
-                ]);
-
-                SecondaryChain::firstOrCreate([
-                    'user_id' => 1,
-                    'role_id' => 1,
-                    'group_id' => $class->id,
-                    'lesson_id' => $lesson->id,
-                    'enroll_id' => $enroll->id
-                ]);
-            }
-        }
 
         //Creating defult question category
         $quest_cat = QuestionsCategory::firstOrCreate([
