@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
 use App\SegmentClass;
+use App\Classes;
 
 class ClassesController extends Controller
 {
@@ -62,7 +63,15 @@ class ClassesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'level' => 'required',
+        ]);
+        $class = Classes::firstOrCreate([
+            'name' => $request->name,
+            'level_id' => $request->level,
+        ]);
+        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.add'));
     }
 
     /**

@@ -100,9 +100,11 @@ class ClassController extends Controller
     {
         $request->validate([
             'name' => 'required',
+            'level' => 'required',
         ]);
         $class = new Classes;
         $class->name = $request->name;
+        $class->level_id = $request->level;
         $class->save();
         return HelperController::api_response_format(200, new Classs($class), __('messages.class.add'));
     }

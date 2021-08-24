@@ -24,19 +24,12 @@ class LevelsImport implements ToModel , WithHeadingRow
         ];
         $validator = Validator::make($row,[
             'name' => 'required',
-            'type_id' => 'required|exists:academic_year_types,academic_type_id'
+            'type_id' => 'required|exists:academic_types,id'
         ],$messages)->validate();
-
-        $year_type_id = AcademicType::find($row['type_id'])->yearType->pluck('id')->first();
 
         $level = Level::create([
             'name' => $row['name'],
-        ]);
-
-        YearLevel::firstOrCreate([
-            'academic_year_type_id' => $year_type_id,
-            'level_id' => $level->id,
-        ]);
-        
+            'academic_type_id' => $row['type_id']
+        ]);        
     }
 }

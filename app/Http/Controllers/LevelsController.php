@@ -35,38 +35,12 @@ class LevelsController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'year' => 'array|required_with:type',
-            'year.*' => 'exists:academic_years,id',
-            'type' => 'array|required_with:year',
-            'type.*' => 'exists:academic_types,id',
-            'segment' => 'array',
-            'segment.*' => 'exists:segments,id',
+            'type' => 'required|exists:academic_types,id',
         ]);
-        $level = Level::create([
+        $dd=Level::create([
             'name' => $request->name,
+            'academic_type_id' => $request->type
         ]);
-        if ($request->filled('year') && $request->filled('type')) {
-            foreach ($request->year as $year) {
-                # code...
-                foreach ($request->type as $type) {
-                    # code...
-                    $yeartype = AcademicYearType::checkRelation($year, $type);
-                    $year_level=YearLevel::firstOrCreate([
-                        'academic_year_type_id' => $yeartype->id,
-                        'level_id' => $level->id,
-                    ]);
-                    $currectSegment=Segment::where('current',1)->first();
-                    if(isset($request->segment))
-                        foreach ($request->segment as $segment) {
-                            Segment_level::firstOrCreate([
-                                'level_id' => $level->id,
-                                'segment_id' => $segment,
-                                'year_level_id' => $year_level->id
-                            ]);
-                        }
-                }
-            }
-        }
         $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(201, $levels, __('messages.level.add'));
     }

@@ -8,7 +8,7 @@ use Modules\Attendance\Entities\AttendanceSession;
 
 class Course extends Model
 {
-    protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress'];
+    protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id'];
 
 
     public static function findByName($course_name)
@@ -32,13 +32,13 @@ class Course extends Model
         return $this->belongsTo('App\Category');
     }
 
-    public  function courseSegments(){
-        return $this->hasMany('App\CourseSegment');
-    }
+    // public  function courseSegments(){
+    //     return $this->hasMany('App\CourseSegment');
+    // }
 
-    public function activeSegment(){
-        return $this->hasOne('App\CourseSegment')->whereIs_active(1);
-    }
+    // public function activeSegment(){
+    //     return $this->hasOne('App\CourseSegment')->whereIs_active(1);
+    // }
 
     public function attachment()
     {
