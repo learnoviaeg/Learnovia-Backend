@@ -13,4 +13,12 @@ class SecondaryChain extends Model
         return $this->hasOne('App\User','id','user_id');
     }
 
+    public function Courses()
+    {
+        return $this->hasOne('App\Course','id','course_id');
+    }
+    public function Class()
+    {
+        return $this->hasOne('App\Classes','id','group_id');
+    }
 }
