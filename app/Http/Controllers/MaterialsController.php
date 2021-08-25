@@ -12,6 +12,7 @@ use App\Level;
 use App\Classes;
 use App\Paginate;
 use DB;
+use App\SecondaryChain;
 use Carbon\Carbon;
 
 class MaterialsController extends Controller
@@ -46,18 +47,14 @@ class MaterialsController extends Controller
         ]);
 
         if($request->user()->can('site/show-all-courses')){//admin
-            $course_segments = collect($this->chain->getAllByChainRelation($request));
-            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+            $lessons = $this->chain->getEnrollsByChain($request);
         }
 
         if(!$request->user()->can('site/show-all-courses')){//enrolled users
-
-            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-            $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+            $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
         }
-      
+        $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();  
+
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
@@ -99,11 +96,11 @@ class MaterialsController extends Controller
             return response()->json(['message' => __('messages.materials.count'), 'body' => $counts], 200);
         }
 
-        $AllMat=$material->get();
+        $AllMat=$material->with(['lesson.SecondaryChain.Class'])->get();
         foreach($AllMat as $one){
-            $one->class = Classes::find($one->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
-            $one->level = Level::find($one->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-            unset($one->lesson->courseSegment);
+            $one->class = $one->lesson->SecondaryChain->pluck('class')->unique();
+            $one->level = Level::whereIn('id',$one->class->pluck('level_id'))->get();
+            unset($one->lesson->SecondaryChain);
         }
 
         return response()->json(['message' => __('messages.materials.list'), 'body' => $AllMat->paginate(Paginate::GetPaginate($request))], 200);

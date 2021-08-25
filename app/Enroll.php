@@ -99,5 +99,10 @@ class Enroll extends Model
     {
         return $this->hasMany('App\SecondaryChain','enroll_id' , 'id')->where('role_id', 4);
     }
+
+    public function Lessons()
+    {
+        return $this->hasManyThrough(Lesson::class, SecondaryChain::class);
+    }
     
 }

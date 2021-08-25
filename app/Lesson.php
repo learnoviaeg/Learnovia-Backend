@@ -52,4 +52,9 @@ class Lesson extends Model
     {
         return $this->hasMany('Modules\QuestionBank\Entities\Quiz','id');
     }
+
+    public function SecondaryChain(){
+        return $this->hasMany('App\SecondaryChain','lesson_id' , 'id');
+
+    }
 }
