@@ -268,7 +268,7 @@ class AuthController extends Controller
     {
         // $bool=;
         $firebase=[
-            'apiKey' => env('APP_KEY'),
+            'apiKey' => 'AIzaSyDNHapmkBjO39XztyBqjb_0syU0pHSXd8k',
             'authDomain'=> 'learnovia-notifications.firebaseapp.com',
             'databaseURL'=> 'https://learnovia-notifications.firebaseio.com',
             'projectId'=> 'learnovia-notifications',
