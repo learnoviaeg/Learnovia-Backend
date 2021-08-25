@@ -228,11 +228,11 @@ class FilesController extends Controller
             'visible' =>'in:0,1'
         ];
 
-        // $customMessages = [
-        //     'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
-        // ];
+        $customMessages = [
+            'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
+        ];
     
-        // $this->validate($request, $rules, $customMessages);
+        $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
