@@ -32,28 +32,23 @@ class LessonController extends Controller
             'class' => 'required|exists:classes,id',
             'shared_lesson' => 'required|in:0,1'
         ]);
-        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
-        if (!isset($courseSegment))
-            return HelperController::api_response_format(200, null,'no courses');
         LastAction::lastActionInCourse($request->course);
         foreach ($request->name as $key => $name) {
-            $check = Lesson::where('course_segment_id', $courseSegment->id)->where('name',$name)->first();
-            if(!isset($check)){
-                $lessons_in_CourseSegment = Lesson::where('course_segment_id', $courseSegment->id)->max('index');
-                $Next_index = $lessons_in_CourseSegment + 1;
-                $lesson = Lesson::create([
-                    'name' => $name,
-                    'course_segment_id' => $courseSegment->id,
-                    'index' => $Next_index
-                ]);
-                if (isset($request->image[$key])) {
-                    $lesson->image = attachment::upload_attachment($request->image[$key], 'lesson', '')->path;
-                }
-                if (isset($request->description[$key])) {
-                    $lesson->description = $request->description[$key];
-                }
-                $lesson->save();
-            }
+            $lessons_in_Course = Lesson::where('course_id', $request->course)->max('index');
+            $Next_index = $lessons_in_Course + 1;
+            $lesson = Lesson::create([
+                'name' => $name,
+                'course_id' => $request->course,
+                'shared_lesson' => $request->shared_lesson,
+                'index' => $Next_index
+            ]);
+            if (isset($request->image[$key]))
+                $lesson->image = attachment::upload_attachment($request->image[$key], 'lesson', '')->path;
+            
+            if (isset($request->description[$key]))
+                $lesson->description = $request->description[$key];
+            
+            $lesson->save();
         }
         return HelperController::api_response_format(200, $courseSegment->lessons,__('messages.lesson.add'));
     }

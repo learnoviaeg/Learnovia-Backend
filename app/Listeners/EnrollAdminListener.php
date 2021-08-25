@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\CourseCreatedEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Events\LessonCreatedEvent;
 use App\Segment;
 use App\Classes;
 use App\Enroll;
@@ -51,15 +52,13 @@ class EnrollAdminListener
                 'course' => $event->course->id
             ]);
 
-            $no_of_lessons = 4;
-            if (isset($row['no_of_lessons'])) 
-                $no_of_lessons = $row['no_of_lessons'];
-
-            for ($i = 1; $i <= $no_of_lessons; $i++) {
+            for ($i = 1; $i <= $event->no_of_lessons; $i++) {
                 $lesson=lesson::firstOrCreate([
                     'name' => 'Lesson ' . $i,
                     'index' => $i,
                 ]);
+
+                event(new LessonCreatedEvent($lesson,$enroll));
             }
         }
     }

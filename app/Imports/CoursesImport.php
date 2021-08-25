@@ -15,7 +15,7 @@ use App\Enroll;
 use App\Http\Controllers\CourseController;
 // use App\SegmentClass;
 use Illuminate\Http\Request;
-// use App\YearLevel;
+use App\Events\CourseCreatedEvent;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use App\GradeCategory;
@@ -45,6 +45,10 @@ class CoursesImport implements ToModel , WithHeadingRow
         if(count($short_names)>0)
             die('short name must be unique');
 
+        $no_of_lessons = 4;
+        if (isset($row['no_of_lessons'])) 
+            $no_of_lessons = $row['no_of_lessons'];
+
         $course = Course::firstOrCreate([
             'name' => $row['name'],
             'short_name' => $row['short_name'],
@@ -54,6 +58,8 @@ class CoursesImport implements ToModel , WithHeadingRow
             'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,
             'description' => isset($row['description']) ? $row['description'] : null
         ]);
+
+        event(new CourseCreatedEvent($course,$no_of_lessons));
 
         //Creating defult question category
         $quest_cat = QuestionsCategory::firstOrCreate([

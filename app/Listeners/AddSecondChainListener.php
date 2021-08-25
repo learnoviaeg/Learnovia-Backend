@@ -30,8 +30,9 @@ class AddSecondChainListener
             'user_id' => 1,
             'role_id' => 1,
             'group_id' => $class->id,
+            'course_id' => $event->enroll->course,
             'lesson_id' => $event->lesson->id,
-            'enroll_id' => $enroll->id
+            'enroll_id' => $event->enroll->id
         ]);
     }
 }
