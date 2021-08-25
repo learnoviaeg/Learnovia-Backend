@@ -239,6 +239,8 @@ class UserController extends Controller
             'second language' => 'integer|exists:languages,id',
             'birthdate' => 'nullable|date'
         ]);
+        if(!Auth::user()->can('allow-edit-profiles') && $request->id != Auth::id())
+            return response()->json(['message' => __('messages.error.not_allowed_to_edit'), 'body' => null ], 200);
 
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address','nationality', 'notes', 'email', 'suspend',
@@ -249,35 +251,37 @@ class UserController extends Controller
 
         $user = User::find($request->id);
 
+        if (!Auth::user()->can('user/update-password')) 
+            return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+
+        if (isset($request->password)){
+            $user->real_password=$request->password;
+            $user->password =   bcrypt($request->password);
+
+            $tokens = $user->tokens->where('revoked',false);
+            foreach($tokens as $token)
+                $token->revoke();
+            unset($user->tokens);
+            Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+        }
+
+        if (!Auth::user()->can('user/update-username')) 
+            return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+
+        if (isset($request->username)){
+            $user->username=$request->username;
+
+            $tokens = $user->tokens->where('revoked',false);
+            foreach($tokens as $token)
+                $token->revoke();
+            unset($user->tokens);
+            Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+        }
+
         $check = $user->update([
             'firstname' => $request->firstname,
             'lastname' => $request->lastname,
         ]);
-
-            if (Auth::user()->can('user/update-password')) {
-                if (isset($request->password)){
-                    $user->real_password=$request->password;
-                    $user->password =   bcrypt($request->password);
-
-                    $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token)
-                        $token->revoke();
-                    unset($user->tokens);
-                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
-                }
-            }
-
-            if (Auth::user()->can('user/update-username')) {
-                if (isset($request->username)){
-                    $user->username=$request->username;
-
-                    $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token)
-                        $token->revoke();
-                    unset($user->tokens);
-                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
-                }
-            }
 
         if (isset($request->picture))
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
@@ -361,15 +365,15 @@ class UserController extends Controller
     public function delete(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+            'users_id' => 'required|array',
+            'users_id.*' => 'exists:users,id',
         ]);
 
-        $enrolls=Enroll::where('user_id',$request->id)->get();
-        $all=Enroll::where('user_id',$request->id)->delete();
+        $enrolls=Enroll::whereIn('user_id',$request->users_id)->get();
+        $all=Enroll::whereIn('user_id',$request->users_id)->delete();
         if($all > 0)
             event(new MassLogsEvent($enrolls,'deleted'));
-        $user = User::find($request->id);
-        $user->delete();
+        $user = User::whereIn('id',$request->users_id)->delete();
 
         return HelperController::api_response_format(201, null, __('messages.users.delete'));
     }
@@ -397,10 +401,14 @@ class UserController extends Controller
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
             'count' => 'in:1,0',
+            'suspend' => 'in:1,0',
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
         ]);
         $users = User::where('id','!=',0)->with('roles');
+        if(Auth::id() != 1)
+            $users = $users->where('id','!=',1);
+            
         if($request->filled('country'))
             $users = $users->where('country','LIKE',"%$request->country%");
         if($request->filled('nationality'))
@@ -413,6 +421,8 @@ class UserController extends Controller
             $users= $users->whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
         });
+        if($request->filled('suspend'))
+            $users = $users->where('suspend',$request->suspend);
         if($request->filled('from') && $request->filled('to')){ //lastaction filter
             $ids = LastAction::whereBetween('date', [$request->from, $request->to])->whereNull('course_id')->pluck('user_id');
             $users = $users->whereIn('id',$ids);
@@ -502,24 +512,27 @@ class UserController extends Controller
     public function suspend_user(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+            'users_id' => 'required|array',
+            'users_id.*' => 'exists:users,id',
         ]);
 
-        $user = User::find($request->id);
-        $check = $user->update([
-            'suspend' => 1,
-            'token' => null
-        ]);
-
-        $tokens = $user->tokens->where('revoked',false);
-
-        foreach($tokens as $token){
-            $token->revoke();
-        }
+        foreach($request->users_id as $user)
+        {
+            $user = User::find($user);
+            $user->update([
+                'suspend' => 1,
+                'token' => null
+            ]);
     
-        unset($user->tokens);
+            $tokens = $user->tokens->where('revoked',false);
+    
+            foreach($tokens as $token)
+                $token->revoke();
+        
+            unset($user->tokens);
+        }
 
-        return HelperController::api_response_format(201, $user, __('messages.users.user_blocked'));
+        return HelperController::api_response_format(201, null , __('messages.users.user_blocked'));
     }
 
     /**
@@ -531,13 +544,14 @@ class UserController extends Controller
     public function unsuspend_user(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+            'users_id' => 'required|array',
+            'users_id.*' => 'exists:users,id',
         ]);
-        $user = User::find($request->id);
-        $check = $user->update([
+
+        $user = User::whereIn('id',$request->users_id)->update([
             'suspend' => 0
         ]);
-        return HelperController::api_response_format(201, $user, __('messages.users.user_un_blocked'));
+        return HelperController::api_response_format(201, null, __('messages.users.user_un_blocked'));
     }
 
     /**

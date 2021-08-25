@@ -7,6 +7,7 @@ return [
         'not_found' => 'Item is not found!',
         'parent_cannot_submit' => 'Parents can not submit answers',
         'user_not_assign' => 'This user is not assigned to this item',
+        'cannot_edit' => 'you can\'t edit you submission',
         'submit_limit' => 'Sorry, you are not allowed to submit anymore',
         'not_available_now' => 'Sorry, This item is not available for you at this moment',
         'try_again' => 'Something went wrong, please try again',
@@ -22,9 +23,12 @@ return [
         'already_exist' => 'Item is already exist',
         'no_active_segment' => 'There is no active segment for this item',
         'no_active_year' => 'There is no active year available',
-        'extension_not_supported' => 'This extension is not supported',
+        'extension_not_supported' => 'extension is not valid',
         'no_permission' => 'User does not have the right permissions',
         'role_required' => 'Please, choose role first',
+        'not_allowed' => 'You are not allowed to view this.',
+        'not_allowed_to_edit' => 'You are not allowed to edit this.',
+        'extension_error' => 'This extension is not valid'
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
@@ -85,11 +89,15 @@ return [
         'delete' => 'Questions category deleted successfully',
         'list' => 'Questions categories List',
         'category_cannot_deleted' => 'This category has related questions, cannot be deleted',
+        'cannot_deleted' => 'you can\'t delete this category',
     ],
     'quiz' => [
         'add' => 'Quiz added successfully',
         'update' => 'Quiz updated successfully',
+        'NotUpdate' => 'you cann\'t update this quiz',
         'delete' => 'Quiz deleted successfully',
+        'assign' => 'Quiz assigned successfully',
+        'unAssign' => 'Quiz unAssigned successfully',
         'list' => 'Quizzes List',
         'count' => 'Quizzes count',
         'invaled_feedback' => 'Invalid feedback type, feedback can not be After submission',
@@ -99,7 +107,8 @@ return [
         'continue_quiz' => 'You can continue your last attempt',
         'students_attempts_list' => 'Students attempts list',
         'quiz_object' => 'Quiz details',
-        'quiz_hidden' => 'This quiz is hidden'
+        'quiz_hidden' => 'This quiz is hidden',
+        'quiz_not_started' => 'This quiz didnt start yet',
     ],
     'permissions' => [
         'no_roles_assigned' => 'There is no roles assigned to this permission',
@@ -112,14 +121,14 @@ return [
         'parent_choose_child'=> 'Please, choose your child first',
         'add' => 'User added successfully',
         'update' => 'User updated successfully',
-        'delete' => 'User deleted successfully',
+        'delete' => 'User/s deleted successfully',
         'list' => 'Users list',
         'all_list' => 'All users list',
         'count' => 'Users roles count',
         'exeed_max_users' => 'Sorry, you have reached the maximum. you cannot add anymore users',
         'username_already_used' => 'Username is used already',
-        'user_blocked' => 'User blocked successfully',
-        'user_un_blocked' => 'User unblocked successfully',
+        'user_blocked' => 'Users blocked successfully',
+        'user_un_blocked' => 'Users unblocked successfully',
         'parent_assign_child' => 'Parent assigned to child successfully',
         'parent_unassign_child' => 'Parent un assigned to child successfully',
         'current_child' => 'Your current child is...',
@@ -200,6 +209,9 @@ return [
         'no_one_entered' => 'No one entered this virtual classroom',
         'virtual_hidden' => "This virtual classroom is hidden",
         'server_error' => 'Virtual classrooms is not available for now',
+        'current' => 'Current',
+        'past' => 'Past',
+        'future' => 'Future',
 
         'record' => [
             'list' => 'Virtual classrooms records list',
@@ -298,4 +310,18 @@ return [
         'not_graded' => 'Not graded',
         'no_answers' => 'No answers',
     ],
+    'grade_category' => [
+        'add'    => 'Grade category added successfully',
+        'update' => 'Grade category is updated successfully',
+        'list' => 'Grade Categories List',
+        'delete' => 'Grade category deleted successfully',
+        'not_found' => 'Cann\'t find grade category'
+    ],
+    'grade_item' => [
+        'add'    => 'Grade item added successfully',
+        'update' => 'Grade item is updated successfully',
+        'list' => 'Grade items List',
+        'delete' => 'Grade item deleted successfully',
+    ],
+
 ];

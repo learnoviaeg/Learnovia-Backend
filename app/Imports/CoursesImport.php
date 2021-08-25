@@ -16,6 +16,7 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use App\GradeCategory;
 use Validator;
+use Modules\QuestionBank\Entities\QuestionsCategory;
 
 class CoursesImport implements ToModel , WithHeadingRow
 {
@@ -79,10 +80,18 @@ class CoursesImport implements ToModel , WithHeadingRow
                 'end_date' =>  Date::excelToDateTimeObject($row['end_date']),
             ]);
             $gradeCat = GradeCategory::firstOrCreate([
-                'name' => 'Course Total',
+                'name' => $course->name . ' Total',
                 'course_segment_id' => $courseSegment->id,
-                'id_number' => isset($row['level_id']) ? $yearLevel->id : null
+                // 'id_number' => isset($row['level_id']) ? $yearLevel->id : null
             ]);
+
+            //Creating defult question category
+            $quest_cat = QuestionsCategory::firstOrCreate([
+                'name' => $course->name . ' Category',
+                'course_id' => $course->id,
+                'course_segment_id' => $courseSegment->id
+            ]);
+
             for ($i = 1; $i <= $no_of_lessons; $i++) {
                 $courseSegment->lessons()->firstOrCreate([
                     'name' => 'Lesson ' . $i,

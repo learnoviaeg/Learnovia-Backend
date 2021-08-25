@@ -7,6 +7,13 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use App\Repositories\BackendServiceProvider;
+use App\Grader\GraderServiceProvider;
+use App\Grader\HighestGrade;
+use App\Grader\AverageGrade;
+use App\Grader\TypeGrader;
+use App\Grader\LowestGrade;
+use App\Grader\FirstGrade;
+use App\Grader\LastGrade;
 use App\Enroll;
 use App\Observers\EnrollObserver;
 use App\GradeItems;
@@ -14,11 +21,13 @@ use App\GradeCategory;
 use App\Observers\GradeItemObserver;
 use App\UserGrade;
 use App\Observers\UserGradeObserver;
-
+use App\Observers\MaterialsObserver;
 use App\h5pLesson;
+use App\Observers\H5pObserver;
 use App\Observers\LogsObserver;
 use Modules\Attendance\Entities\AttendanceSession;
-
+use App\Observers\UserSeenObserver;
+use App\UserSeen;
 use App\User;
 use App\Parents;
 use App\AcademicType;
@@ -34,7 +43,6 @@ use App\YearLevel;
 use App\ClassLevel;
 use App\AcademicYearType;
 use App\CourseSegment;
-
 use App\Timeline;
 use App\Material;
 
@@ -48,6 +56,25 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->register(BackendServiceProvider::class);
+        $this->app->register(GraderServiceProvider::class);
+        
+        $FirstGrade = new FirstGrade();
+        $this->app->instance('First', $FirstGrade);
+        
+        $LastGrade = new LastGrade();
+        $this->app->instance('Last', $LastGrade);
+
+        $HighestGrade = new HighestGrade();
+        $this->app->instance('Highest', $HighestGrade);
+
+        $LowestGrade = new LowestGrade();
+        $this->app->instance('Lowest', $LowestGrade);
+        
+        $AverageGrade = new AverageGrade();
+        $this->app->instance('Average', $AverageGrade);
+
+        $TypeGrader = new TypeGrader();
+        $this->app->instance(TypeGrader::class, $TypeGrader);        
     }
 
     public function boot()
@@ -92,5 +119,8 @@ class AppServiceProvider extends ServiceProvider
         Material::observe(LogsObserver::class);
         AttendanceSession::observe(LogsObserver::class);
         Announcement::observe(Announcements::class);
+        Material::observe(MaterialsObserver::class);
+        UserSeen::observe(UserSeenObserver::class);
+        h5pLesson::observe(H5pObserver::class);
     }
 }

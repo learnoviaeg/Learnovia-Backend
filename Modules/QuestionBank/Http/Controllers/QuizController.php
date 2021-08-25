@@ -46,7 +46,7 @@ class QuizController extends Controller
              * type 2 => Without Question
              */
             'is_graded' => 'required|boolean',
-            'duration' => 'required|integer',
+            'duration' => 'required|integer|min:60', // by sec
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'feedback' => 'integer| in:1,2,3',
             /**
@@ -74,10 +74,10 @@ class QuizController extends Controller
                             'text' => 'required|string',
                             'answers.*' => 'required|boolean|distinct',
                             'And_why' => 'integer|required',
-                            'And_why_mark' => 'integer|min:1|required_if:And_why,==,1',
+                            'And_why_mark' => 'min:1|required_if:And_why,==,1',
                             'Is_True' => 'required|boolean',
                             'Question_Type_id' => 'required|integer|exists:questions_types,id',
-                            'mark' => 'required|integer|min:1',
+                            'mark' => 'required|min:1',
                             'Question_Category_id' => 'required|exists:questions_categories,id',
                             // 'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
@@ -96,7 +96,7 @@ class QuizController extends Controller
                             'Is_True' => 'required|integer',
                             'text' => 'required|string',
                             'Question_Type_id' => 'required|integer|exists:questions_types,id',
-                            'mark' => 'required|integer|min:1',
+                            'mark' => 'required|min:1',
                             'Question_Category_id' => 'required|exists:questions_categories,id',
                             // 'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
@@ -120,7 +120,7 @@ class QuizController extends Controller
                             'match_B.*' => 'required|distinct',
                             'Question_Type_id' => 'required|integer|exists:questions_types,id',
                             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-                            'mark' => 'required|integer|min:1',
+                            'mark' => 'required|min:1',
                             'Question_Category_id' => 'required|exists:questions_categories,id',
                             // 'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
@@ -137,7 +137,7 @@ class QuizController extends Controller
                         $validator = Validator::make($question, [
                             'Question_Type_id' => 'required|integer|exists:questions_types,id',
                             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-                            'mark' => 'required|integer|min:1',
+                            'mark' => 'required|min:1',
                             'Question_Category_id' => 'required|exists:questions_categories,id',
                             // 'Category_id' => 'required|exists:categories,id',
                             'course_id' => 'required|exists:courses,id',
@@ -337,8 +337,8 @@ class QuizController extends Controller
         if(!isset($quizles))
             return HelperController::api_response_format(200, __('messages.quiz.quiz_not_belong'));
 
-        $max_attemp= $qq->quizLessson[0]->max_attemp;
-        $grade_category_id= $qq->quizLessson[0]->grade_category_id;
+        $max_attemp= $qq->quizLesson[0]->max_attemp;
+        $grade_category_id= $qq->quizLesson[0]->grade_category_id;
 
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
         //return $quizLesson;
@@ -694,7 +694,7 @@ class QuizController extends Controller
         if( $request->user()->can('site/course/student') && $quiz_lesson->visible==0)
             return HelperController::api_response_format(301,null, __('messages.quiz.quiz_hidden'));
         
-        $grade_category_id= $qq->quizLessson[0]->grade_category_id;
+        $grade_category_id= $qq->quizLesson[0]->grade_category_id;
         /**delete from */
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray()) &&  $quiz_lesson->due_date > Carbon::now() )
@@ -709,12 +709,14 @@ class QuizController extends Controller
         /** to */
         // if($quiz_lesson->due_date < Carbon::now()->format('Y-m-d H:i:s'))
         //     return HelperController::api_response_format(400, null, 'Time is out');
-        $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where("user_id",Auth::id())->first();
+        $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where('user_id',Auth::id())->first();
         $quiz['start_date']=$quiz_lesson->start_date;
         $quiz['due_date']=$quiz_lesson->due_date;
+        $quiz['publish_date']=$quiz_lesson->publish_date;
         if(isset($override_user)){
             $quiz['start_date']=$override_user->start_date;
             $quiz['due_date']=$override_user->due_date;
+            $quiz['publish_date']=$quiz_lesson->publish_date;
         }
         $userquizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->get();
         $quiz['allow_edit'] = true;
@@ -862,14 +864,10 @@ class QuizController extends Controller
         ]);
         $user_id = ($request->filled('user_id'))? $request->user_id : Auth::id();
         $quiz = Quiz::find($request->quiz_id);
-        $qq = Quiz::where('id', $request->quiz_id)->first();
-        if(!isset($qq->quizLessson[0]))
+        if(!isset($quiz->quizLesson[0]))
             return HelperController::api_response_format(200,__('messages.quiz.quiz_not_belong'));
-        $grade_category_id= $qq->quizLessson[0]->grade_category_id;
+        $grade_category_id= $quiz->quizLesson[0]->grade_category_id;
         $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
-        // return $quiz_lesson->due_date;
-        if(!isset($quiz_lesson))
-            return HelperController::api_response_format(200, __('messages.quiz.quiz_not_belong'));
         if(User::find(Auth::id())->can('site/quiz/store_user_quiz')){
             if($quiz->feedback == 1 )
                 $show_is_true=1;
@@ -891,11 +889,12 @@ class QuizController extends Controller
         }
 
         $gradecat=GradeCategory::where('id',$grade_category_id)->first();
-        $quiz['grading_method']=$quiz_lesson->grading_method_id;
-        $quiz['max_attemp']=$quiz_lesson->max_attemp;
-        $quiz['start_date']=$quiz_lesson->start_date;
-        $quiz['due_date']=$quiz_lesson->due_date;
-        $quiz['mark']=$quiz_lesson->grade;
+        // all of these inside quiz_lesson so we don't need return again
+        // $quiz['grading_method']=$quiz_lesson->grading_method_id;
+        // $quiz['max_attemp']=$quiz_lesson->max_attemp;
+        // $quiz['start_date']=$quiz_lesson->start_date;
+        // $quiz['due_date']=$quiz_lesson->due_date;
+        // $quiz['mark']=$quiz_lesson->grade;
         $quiz['grade_category']=$gradecat;
         // return $quiz_lesson;
         $override_user = QuizOverride::where('quiz_lesson_id',$quiz_lesson->id)->where("user_id",$user_id)->first();
@@ -938,14 +937,16 @@ class QuizController extends Controller
                 $user_Quiz= max($user_quizzes);
         }
         if($request->filled('attempt_index'))
-            {
-            $user_quizzes = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->where('id',$request->attempt_index)->pluck('id');
-            if(isset($user_quizzes))
                 $user_Quiz  =  $request->attempt_index;
-            }
+
+        $quiz['status_grade']=true;
+        $usr_grd=UserQuizAnswer::where('user_quiz_id',$user_Quiz)->whereNull('user_grade')->first();
+        if(isset($usr_grd))
+            $quiz['status_grade']=false;
+
         $user_answer=UserQuizAnswer::where('user_quiz_id',$user_Quiz)->get();
-            if(count($user_answer)>0)
-                $userAnswers=$user_answer;
+        if(count($user_answer)>0)
+            $userAnswers=$user_answer;
         
         // return $userAnswers;
         // $quiz['attempts_index'] = UserQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$user_id)->pluck('id');
@@ -959,9 +960,8 @@ class QuizController extends Controller
         $quiz['user_mark']=0;
         $quiz['mark_precentage']=0;
         foreach($quiz->Question as $question){
-            if(count($question->childeren) > 0){
-                foreach($question->childeren as $single){
-                    // foreach($userAnswerss as $userAnswers)
+            if($question->question_type_id == 5){
+                foreach($question->children as $single){
                         foreach($userAnswers as $userAnswer){
                             if($userAnswer->question_id == $question->id)
                                 $question->User_Answer=$userAnswer;
@@ -969,14 +969,14 @@ class QuizController extends Controller
 
                         $single->question_type;
                         if($show_is_true == 1)
-                            $single->question_answer;
+                            // $single->question_answer;
 
                         $question->question_category;
                         unset($single->pivot);
                 }
             }
             else
-                unset($question->childeren);
+                unset($question->children);
 
             if(isset($userAnswers))
             {
@@ -999,8 +999,6 @@ class QuizController extends Controller
                 }
                 $quiz['mark_precentage']=sprintf("%.2f",($quiz['user_mark']*100)/$quiz_lesson->grade);
             }
-            if($show_is_true == 1)
-                $question->question_answer;
 
             $question->question_category;
             $question->question_type;

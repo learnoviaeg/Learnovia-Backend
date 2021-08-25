@@ -40,7 +40,8 @@ class CalendarsController extends Controller
             'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
-            'item_type' => 'in:quiz,assignment,announcement',
+            'item_type'    => 'array',
+            'item_type.*' => 'in:quiz,assignment,announcement',
             'calendar_year' => 'required|integer',
             'calendar_month' => 'integer|required_with:calendar_day',
             'calendar_day' => 'integer',
@@ -82,18 +83,22 @@ class CalendarsController extends Controller
                                 $query->whereIn('item_id',$calendar['announcements'])->where('type','announcement')->orWhereIn('lesson_id',$calendar['lessons']);
                             })
                             ->where('visible',1)
-                            ->whereYear('start_date', $request->calendar_year)
+                            ->whereYear('publish_date', $request->calendar_year)
                             ->where(function ($query) {
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });
         
         if(isset($request->calendar_month))
-            $timeline->whereMonth('start_date', $request->calendar_month);
+            $timeline->whereMonth('start_date','<=', $request->calendar_month)->whereMonth('due_date','>=', $request->calendar_month);
 
         if(isset($request->calendar_day))
-            $timeline->whereDay('start_date', $request->calendar_day);
+            $timeline->whereDate('start_date','<=', $request->calendar_year.'-'.$request->calendar_month.'-'.$request->calendar_day)
+                     ->whereDate('due_date','>=', $request->calendar_year.'-'.$request->calendar_month.'-'.$request->calendar_day);
 
-        return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->get()], 200);
+        if($request->filled('item_type'))
+            $timeline->whereIn('type', $request->item_type);
+
+        return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->orderBy('start_date', 'desc')->get()], 200);
     }
 
     /**

@@ -136,7 +136,7 @@ class User extends Authenticatable
                 $touserid[] = $temp;
         }
         $date=$request['publish_date'];
-        $seconds = $date->diffInSeconds(Carbon::now());
+        $seconds = Carbon::parse($date)->diffInSeconds(Carbon::now());
         if($seconds < 0) {
             $seconds = 0 ;
         }
@@ -230,8 +230,8 @@ class User extends Authenticatable
     public function getStatusAttribute() {
         $status = 'offline';
 
-        $active_user  = Log::where('user',$this->username)->where('created_at','>=' ,Carbon::now()->subMinutes(2))
-                                                              ->where('created_at','<=' ,Carbon::now())->first();
+        // $active_user  = Log::where('user',$this->username)->where('created_at','>=' ,Carbon::now()->subMinutes(1))
+        //                                                       ->where('created_at','<=' ,Carbon::now())->first();
         if(isset($active_user))
             $status = 'online';
 

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterGradeItemsTable extends Migration
+class AalterGradeCategories extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,12 @@ class AlterGradeItemsTable extends Migration
      */
     public function up()
     {
-        Schema::table('grade_items', function (Blueprint $table) {
-            $table->enum('type', ['scale', 'value'])->nullable();
+        Schema::table('grade_categories', function (Blueprint $table) {
+            $table->string('instance_type')->nullable();
+            $table->integer('instance_id')->nullable();
         });
     }
+
 
     /**
      * Reverse the migrations.

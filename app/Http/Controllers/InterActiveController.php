@@ -42,12 +42,18 @@ class InterActiveController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id',
             'sort_in' => 'in:asc,desc', 
         ]);
-        
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        if(!$request->user()->can('site/show-all-courses'))//student
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
+        if($request->user()->can('site/show-all-courses')){//admin
+            $course_segments = collect($this->chain->getAllByChainRelation($request));
+            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+        }
+        
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
+
+            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
             $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+        }
       
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
@@ -115,9 +121,9 @@ class InterActiveController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request ,$id)
     {
-        return redirect(config('app.url').'/api/h5p/'.$id);
+        return redirect(config('app.url').'api/h5p/'.$id.'&api_token='.$request->api_token);
     }
 
     /**

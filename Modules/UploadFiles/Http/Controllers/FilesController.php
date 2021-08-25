@@ -27,10 +27,22 @@ use  Modules\Page\Entities\pageLesson;
 use  Modules\Page\Entities\page;
 use App\Material;
 use  App\LastAction;
-
+use App\Repositories\SettingsReposiotryInterface;
 
 class FilesController extends Controller
 {
+
+    protected $setting;
+
+    /**
+     *constructor.
+     *
+     * @param SettingsReposiotryInterface $setting
+     */
+    public function __construct(SettingsReposiotryInterface $setting)
+    {
+        $this->setting = $setting;        
+    }
 
     public function install_file()
     {
@@ -202,16 +214,24 @@ class FilesController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $settings = $this->setting->get_value('upload_file_extensions');
+        // dd($request->Imported_file[0]->extension());
+
+        $rules = [
             'name' => 'string|min:1',
             'Imported_file' => 'required|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,
-                        wpd,rpm,z,ods,xlsm,pps,odp',
+            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
             'visible' =>'in:0,1'
-        ]);
+        ];
+
+        $customMessages = [
+            'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
+        ];
+    
+        $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
@@ -376,17 +396,30 @@ class FilesController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
+        $settings = $this->setting->get_value('upload_file_extensions');
+        // dd($request->Imported_file[0]->extension());
+
+        $rules = [
             'id'            => 'required|exists:files,id',
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,
-            wpd,rpm,z,ods,xlsm,pps,odp',
+            'Imported_file' => 'nullable|file|distinct|mimes:'.$settings,
             'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
             'visible' =>'in:0,1'
-        ]);
+        ];
+        $customMessages = [
+            'Imported_file.mimes' =>__('messages.error.extension_not_supported')
+        ];
+        if(isset($request->Imported_file)){
+            $customMessages = [
+                'Imported_file.mimes' => $request->Imported_file->extension() . ' ' . __('messages.error.extension_not_supported')
+            ];
+        }
+    
+        $this->validate($request, $rules, $customMessages);
+
         $file = file::find($request->id);
 
         if ($request->filled('name'))
@@ -428,11 +461,10 @@ class FilesController extends Controller
         if (!$request->filled('updated_lesson_id')) {
           $request->updated_lesson_id= $request->lesson_id;
         }
-        $fileLesson->update([
-            'lesson_id' => $request->updated_lesson_id
-        ]);
+        $fileLesson->lesson_id = $request->updated_lesson_id;
         $fileLesson->updated_at = Carbon::now();
         $file->save();
+        $fileLesson->save();
         $course_seg_drag = Lesson::where('id',$request->lesson_id)->pluck('course_segment_id')->first();
         $courseID_drag = CourseSegment::where('id', $course_seg_drag)->pluck('course_id')->first();
         LastAction::lastActionInCourse($courseID_drag);

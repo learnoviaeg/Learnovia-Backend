@@ -20,6 +20,7 @@ use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\QuestionsType;
 use App\Component;
 use App\LastAction;
+use Modules\QuestionBank\Entities\QuestionAnswer;
 
 class QuestionBankController extends Controller
 {
@@ -62,6 +63,7 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-students-answer','title' => 'get all students answer']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/answer','title' => 'Answer quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/detailes','title' => 'Quiz Details']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/view-drafts','title' => 'Quiz Drafts']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/correct-user-quiz','title' => 'correct user quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-grade-category','title' => 'get quiz grade category']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/toggle','title' => 'toggle quiz']);
@@ -73,7 +75,7 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
 
-        $teacher_permissions=['question/category/add','question/category/delete','question/category/update','question/category/get','question/add','question/update',
+        $teacher_permissions=['question/category/add','quiz/view-drafts','question/category/delete','question/category/update','question/category/get','question/add','question/update',
         'question/get','question/delete','question/random','question/add-answer','question/delete-answer','quiz/add','quiz/update','quiz/delete','quiz/get',
         'quiz/add-quiz-lesson','quiz/grading-method','quiz/update-quiz-lesson','quiz/destroy-quiz-lesson','quiz/get-all-types','quiz/get-all-categories',
         'quiz/sort','quiz/get-quiz-lesson','quiz/get-all-quizes','quiz/get-student-in-quiz','quiz/get-student-answer-quiz','quiz/get-all-students-answer',
@@ -89,6 +91,7 @@ class QuestionBankController extends Controller
         $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
 
         $role = \Spatie\Permission\Models\Role::find(1);
+        $role->givePermissionTo('quiz/view-drafts');
         $role->givePermissionTo('site/quiz/getStudentinQuiz');
         $role->givePermissionTo('site/quiz/store_user_quiz');
         $role->givePermissionTo('question/add');
@@ -294,7 +297,7 @@ class QuestionBankController extends Controller
         $valid = Validator::make($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             'Question_Category_id' => 'exists:questions_categories,id',
             // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'exists:courses,id',
@@ -338,7 +341,7 @@ class QuestionBankController extends Controller
         $valid = Validator::make($Question, [
             'Question_Type_id' => 'required|integer|exists:questions_types,id',
             'text' => 'required_if:Question_Type_id,==,4|required_if:Question_Type_id,==,5',
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             'Question_Category_id' => 'exists:questions_categories,id',
             // 'Category_id' => 'required|exists:categories,id',
             'course_id' => 'exists:courses,id',
@@ -384,7 +387,7 @@ class QuestionBankController extends Controller
             'text' => 'required|string',
             'answers.*' => 'required|boolean|distinct',
             'And_why' => 'integer|required',
-            'And_why_mark' => 'integer|min:0|required_if:And_why,==,1',
+            'And_why_mark' => 'min:0|required_if:And_why,==,1',
             'Is_True' => 'required|boolean',
             'survey' => 'boolean'
         ]);
@@ -606,7 +609,7 @@ class QuestionBankController extends Controller
     {
         $request->validate([
             'question_id' => 'required|integer|exists:questions,id',
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'integer|exists:questions_categories,id',
             'parent' => 'integer|exists:questions,id',
@@ -644,14 +647,13 @@ class QuestionBankController extends Controller
     public function updatesubQuestion($squestion, $parent=null,$Question_Type_id=null)
     {
         $validator = Validator::make($squestion->all(), [
-            'mark' => 'required|integer|min:0',
+            'mark' => 'required|min:0',
             // 'category_id' => 'required|integer|exists:categories,id',
             'question_category_id' => 'integer|exists:questions_categories,id',
         ]);
         if ($validator->fails()) {
             return HelperController::api_response_format(400, $validator->errors());
         }
-
 
         $question_id = Questions::where('parent', $parent)->where('question_type_id', $Question_Type_id)->pluck('id')->first();
         $question = Questions::find($question_id);
@@ -683,7 +685,7 @@ class QuestionBankController extends Controller
             'answers.*' => 'required|boolean|distinct',
             'Is_True' => 'required|boolean',
             'And_why' => 'integer|required',
-            'And_why_mark' => 'integer|min:0|required_if:And_why,==,1'
+            'And_why_mark' => 'min:0|required_if:And_why,==,1'
         ]);
 
         if ($parent==null){
@@ -955,34 +957,11 @@ class QuestionBankController extends Controller
             'question_id' => 'required|integer|exists:questions,id'
         ]);
 
-        $delete_answers=QuestionAnswer::where('question_id',$request->question_id)->delete();
+        $delete_answers=QuestionsAnswer::where('question_id',$request->question_id)->delete();
         $question = Questions::find($request->question_id);
         LastAction::lastActionInCourse($question->course_id);        
         $question->delete();
         return HelperController::api_response_format(200, [], __('messages.question.delete'));
-    }
-
-    public function addAnswer(Request $request)
-    {
-        $request->validate([
-            'question_id' => 'required|integer|exists:questions,id',
-            'contents' => 'required|string|min:1',
-            'true_false' => 'nullable|boolean',
-            'match_a' => 'nullable|string|max:10',
-            'match_b' => 'nullable|string|max:10',
-            'is_true' => 'required|boolean',
-        ]);
-
-        $answer = QuestionsAnswer::create([
-            'content'    => $request->contents,
-            'true_false' => $request->true_false,
-            'match_a' => $request->match_a,
-            'match_b' => $request->match_b,
-            'is_true' => $request->is_true,
-            'question_id' => $request->question_id
-        ]);
-
-        return HelperController::api_response_format(200, $answer, __('messages.answer.add'));
     }
 
     public function getAllTypes(Request $request){

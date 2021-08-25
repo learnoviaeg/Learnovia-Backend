@@ -45,14 +45,18 @@ class MaterialsController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
 
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+        if($request->user()->can('site/show-all-courses')){//admin
+            $course_segments = collect($this->chain->getAllByChainRelation($request));
+            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+        }
 
-        if(!$request->user()->can('site/show-all-courses'))//student
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
+
+            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
             $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-
-        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-
-        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+            $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
+            $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+        }
       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
@@ -70,6 +74,16 @@ class MaterialsController extends Controller
         if($request->has('sort_in'))
             $material->orderBy("publish_date",$request->sort_in);
 
+        //copy this counts to count it before filteration
+        $query=clone $material;
+        $all=$query->select(DB::raw
+                        (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
+                            COUNT(case `type` when 'media' then 1 else null end) as media ,
+                            COUNT(case `type` when 'page' then 1 else null end) as page" 
+                        ))->first()->only(['file','media','page']);
+        $cc['all']=$all['file']+$all['media']+$all['page'];
+        //
+
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
 
@@ -78,8 +92,10 @@ class MaterialsController extends Controller
             $counts = $material->select(DB::raw
                 (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
                     COUNT(case `type` when 'media' then 1 else null end) as media ,
+                    COUNT(case `type` when 'media' then 1 else null end) as media ,
                     COUNT(case `type` when 'page' then 1 else null end) as page" 
                 ))->first()->only(['file','media','page']);
+            $counts['all']=$cc['all'];
 
             return response()->json(['message' => __('messages.materials.count'), 'body' => $counts], 200);
         }

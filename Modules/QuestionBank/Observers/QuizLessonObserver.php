@@ -8,11 +8,15 @@ use Modules\QuestionBank\Entities\Quiz;
 use App\Events\MassLogsEvent;
 use App\Lesson;
 use App\Timeline;
+use App\GradeCategory;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Log;
+use App\Enroll;
+use App\UserGrader;
 use App\User;
 use App\LessonComponent;
+use App\UserSeen;
 
 class QuizLessonObserver
 {
@@ -35,22 +39,60 @@ class QuizLessonObserver
         $course_id = $lesson->courseSegment->course_id;
         $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        if(isset($quiz)){
-            Timeline::firstOrCreate([
-                'item_id' => $quizLesson->quiz_id,
-                'name' => $quiz->name,
-                'start_date' => $quizLesson->start_date,
-                'due_date' => $quizLesson->due_date,
-                'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
-                'course_id' => $course_id,
-                'class_id' => $class_id,
-                'lesson_id' => $quizLesson->lesson_id,
-                'level_id' => $level_id,
-                'type' => 'quiz',
-                'visible' => $quizLesson->visible
+        
+        $this->report->calculate_course_progress($course_id);
 
+        // if($quiz->is_graded == 1){
+        //     $grade_category=GradeCategory::find($quizLesson->grade_category_id);
+        //     $grade_category->GradeItems()->create([
+        //         'type' => 'Quiz',
+        //         'item_id' => $quiz->id,
+        //         'name' => $quiz->name,
+        //     ]);
+        // }   
+        
+        // if($quiz->is_graded == 1){
+            $grade_category=GradeCategory::find($quizLesson->grade_category_id);
+            //creating grade category for quiz
+            $categoryOfQuiz = GradeCategory::create([
+                'course_segment_id' => $lesson->courseSegment->id,
+                'parent' => $grade_category->id,
+                'name' => $quiz->name,
+                'hidden' => 1,
+                'calculation_type' => json_encode($quizLesson->grading_method_id),
+                'instance_type' => 'Quiz',
+                'instance_id' => $quiz->id,
+                'lesson_id' => $lesson->id
             ]);
-        }
+            ///add user grader to each enrolled student in course segment of this grade category
+            $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment',$lesson->courseSegment->id)->pluck('user_id');
+            foreach($enrolled_students as $student){
+                UserGrader::create([
+                    'user_id'   => $student,
+                    'item_type' => 'Category',
+                    'item_id'   => $categoryOfQuiz->id,
+                    'grade'     => null
+                ]);
+            }
+            //update quiz lesson with the id of grade categoey created for quiz
+            // $quizLesson->grade_category_id = $categoryOfQuiz->id;
+            $quizLesson->save();
+
+            $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
+
+            $requ = ([
+                'message' => $quiz->name . ' quiz was added',
+                'id' => $quiz->id,
+                'users' => $users,
+                'type' =>'quiz',
+                'publish_date'=> Carbon::parse($quizLesson->publish_date),
+                'course_id' => $course_id,
+                'class_id'=> $class_id,
+                'lesson_id'=> $lesson,
+                'from' => Auth::id(),
+            ]);
+            user::notify($requ);
+        // }
     }
 
     /**
@@ -61,25 +103,59 @@ class QuizLessonObserver
      */
     public function updated(QuizLesson $quizLesson)
     {
+        $lesson=Lesson::find($quizLesson->lesson_id);
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
+
+        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
+        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+
+        $requ = ([
+            'message' => $quiz->name . ' quiz was updated',
+            'id' => $quiz->id,
+            'users' => $users,
+            'type' =>'quiz',
+            'publish_date'=> Carbon::parse($quizLesson->publish_date),
+            'course_id' => $lesson->courseSegment->course_id,
+            'class_id'=> $class,
+            'lesson_id'=> $lesson,
+            'from' => Auth::id(),
+        ]);
+        user::notify($requ);
+
         if(isset($quiz)){
+
             $forLogs=Timeline::where('item_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('type' , 'quiz')->first();
-            $forLogs->update([
-                'item_id' => $quizLesson->quiz_id,
-                'name' => $quiz->name,
-                'start_date' => $quizLesson->start_date,
-                'due_date' => $quizLesson->due_date,
-                'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
-                'lesson_id' => $quizLesson->lesson_id,
-                'type' => 'quiz',
-                'visible' => $quizLesson->visible
-            ]);
+            // $forLogs->update([
+            //     'item_id' => $quizLesson->quiz_id,
+            //     'name' => $quiz->name,
+            //     'start_date' => $quizLesson->start_date,
+            //     'due_date' => $quizLesson->due_date,
+            //     'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
+            //     'lesson_id' => $quizLesson->lesson_id,
+            //     'type' => 'quiz',
+            //     'visible' => $quizLesson->visible
+            // ]);
         }
 
-        if($quizLesson->isDirty('seen_number')){
-            $lesson = Lesson::find($quizLesson->lesson_id);
-            $course_id = $lesson->courseSegment->course_id;
-            $this->report->calculate_course_progress($course_id);
+        if($quizLesson->isDirty('lesson_id')){
+            
+            // $lesson = Lesson::find($quizLesson->lesson_id);
+            // $course_id = $lesson->courseSegment->course_id;
+            // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+
+            // $old_lesson = Lesson::find($quizLesson->getOriginal('lesson_id'));
+            // $old_class_id = $old_lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            
+            // if($old_class_id != $class_id)
+            //     UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
+
+            // if($old_class_id == $class_id){
+            //     UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->update([
+            //         'lesson_id' => $quizLesson->lesson_id
+            //     ]);
+            // }
+
+            // $this->report->calculate_course_progress($course_id);
         }
     }
 
@@ -102,6 +178,8 @@ class QuizLessonObserver
 
         $lesson = Lesson::find($quizLesson->lesson_id);
         $course_id = $lesson->courseSegment->course_id;
+
+        UserSeen::where('lesson_id',$quizLesson->lesson_id)->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
         $this->report->calculate_course_progress($course_id);
     }
 

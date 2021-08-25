@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Event;
+use App\Providers\DispatcherContract;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -18,16 +19,39 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,    
         ],
-        
-        // 'App\Events\UserGradeEvent' => [
-        //     'App\Listeners\UserGradeListener',
-        // ],
-        // UserGradeEvent::class => [
-        //     UserGradeListener::class,
-        // ],
 
         'App\Events\MassLogsEvent' => [
             'App\Listeners\MassLogsListener',
+        ],
+
+        'App\Events\GradeItemEvent' => [
+            'App\Listeners\ItemDetailslistener',
+        ],
+
+        'App\Events\QuizAttemptEvent' => [
+            'App\Listeners\AttemptItemlistener',
+        ],
+
+        // 'App\Events\GradeAttemptEvent' => [
+        // ],
+        'App\Events\RefreshGradeTreeEvent' => [
+            'App\Listeners\RefreshGradeTreeListener',
+        ],
+        'App\Events\UpdatedAttemptEvent' => [
+            'App\Listeners\FireAutoCorrectionEventListener',
+            'App\Listeners\GradeAttemptItemlistener',
+        ],
+        'App\Events\UpdatedQuizQuestionsEvent' => [
+            'App\Listeners\UpdateQuizGradeListener',
+            'App\Listeners\UpdateTimelineListener',
+        ],
+        'App\Events\UserEnrolledEvent' => [
+            'App\Listeners\AddUserGradersListener',
+        ],
+
+        //7esab daragat el2s2la el manual(and_why & essay)
+        'App\Events\ManualCorrectionEvent' => [
+            'App\Listeners\GradeManualListener',
         ],
     ];
 
@@ -39,7 +63,6 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
-
         //
     }
 }

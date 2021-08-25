@@ -7,8 +7,8 @@ use stdClass;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name', 'course_segment_id', 'parent', 'aggregation', 'locked',
-                'aggregatedOnlyGraded', 'hidden', 'id_number' , 'weight','type','grademin','exclude_flag','grademax'];
+    protected $fillable = ['name', 'course_segment_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id',
+                           'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
     public function Child()
     {
         return $this->hasMany('App\GradeCategory', 'parent', 'id');
@@ -23,7 +23,7 @@ class GradeCategory extends Model
     }
     public function GradeItems()
     {
-        return $this->hasMany('App\GradeItems', 'grade_category', 'id');
+        return $this->hasMany('App\GradeItems', 'grade_category_id', 'id');
     }
     public function Children()
     {
@@ -136,4 +136,15 @@ class GradeCategory extends Model
             $child->getUsergrades($userid);
         }
     }
+
+    public function userGrades()
+    {
+        return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','category');
+    }
+    public function getCalculationTypeAttribute($value)
+    {
+        $content= json_decode($value);
+        return $content;
+    }
+
 }

@@ -181,6 +181,8 @@ return [
         Elibyy\TCPDF\ServiceProvider::class,
         \hisorange\BrowserDetect\ServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
+        App\Grader\GraderServiceProvider::class,
+        // App\Grader\GraderInterface::class,
 
 
 

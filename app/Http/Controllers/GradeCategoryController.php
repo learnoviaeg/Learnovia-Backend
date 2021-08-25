@@ -66,7 +66,7 @@ class GradeCategoryController extends Controller
                 'grademin' => ($request->type==0) ? $request->grademin : null,
                 'type' => $request->type,
                 'exclude_flag' => $request->exclude_flag,
-                'id_number' => $year_level[0]->id,
+                // 'id_number' => $year_level[0]->id,
                 'weight' => (isset($request->weight)) ? $request->weight : 0,
             ]);
 
@@ -689,7 +689,7 @@ class GradeCategoryController extends Controller
         $coursesegment=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
         if($coursesegment)
         {
-            $gradeCategories=$coursesegment->GradeCategory;
+            $gradeCategories=$coursesegment->GradeCategory()->whereNull('instance_type')->get();
             LastAction::lastActionInCourse($request->course_id);
             return HelperController::api_response_format(200, $gradeCategories);
         }

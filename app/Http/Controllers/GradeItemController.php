@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\GradeItems;
 use App\CourseSegment;
 use App\GradeCategory;
+use Auth;
 use App\YearLevel;
 use App\GradingMethod;
 use stdClass;
@@ -403,7 +404,8 @@ class GradeItemController extends Controller
         'id' => 'required|exists:grade_items,id',
          ]);
 
-        $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale'])->get();
+        $grade = GradeItems::with(['GradeCategory', 'ItemType', 'scale'])->first();
+
         if($request->filled('id'))
             $grade = GradeItems::where('id', $request->id)->with(['GradeCategory', 'ItemType', 'scale'])->get();
 

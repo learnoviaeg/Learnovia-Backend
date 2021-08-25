@@ -7,12 +7,14 @@ use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\Assignment;
 use App\Timeline;
 use App\Lesson;
+use App\GradeCategory;
 use App\User;
 use App\Events\MassLogsEvent;
 use App\Log;
 use carbon\Carbon;
 use App\LessonComponent;
 use Illuminate\Support\Facades\Auth;
+use App\UserSeen;
 
 class AssignmentLessonObserver
 {
@@ -35,20 +37,28 @@ class AssignmentLessonObserver
         $course_id = $lesson->courseSegment->course_id;
         $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        if(isset($assignment)){
-            Timeline::firstOrCreate([
-                'item_id' => $assignmentLesson->assignment_id,
-                'name' => $assignment->name,
-                'start_date' => $assignmentLesson->start_date,
-                'due_date' => $assignmentLesson->due_date,
-                'publish_date' => isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
-                'course_id' => $course_id,
-                'class_id' => $class_id,
-                'lesson_id' => $assignmentLesson->lesson_id,
-                'level_id' => $level_id,
-                'type' => 'assignment',  
-                'visible' => isset($assignmentLesson->visible)?$assignmentLesson->visible:1
+        Timeline::firstOrCreate([
+            'item_id' => $assignmentLesson->assignment_id,
+            'name' => $assignment->name,
+            'start_date' => $assignmentLesson->start_date,
+            'due_date' => $assignmentLesson->due_date,
+            'publish_date' => isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
+            'course_id' => $course_id,
+            'class_id' => $class_id,
+            'lesson_id' => $assignmentLesson->lesson_id,
+            'level_id' => $level_id,
+            'type' => 'assignment',  
+            'visible' => isset($assignmentLesson->visible)?$assignmentLesson->visible:1
+        ]);
 
+        $this->report->calculate_course_progress($course_id);
+
+        if($assignmentLesson->is_graded == 1){
+            $grade_category=GradeCategory::find($assignmentLesson->grade_category);
+            $grade_category->GradeItems()->create([
+                'type' => 'Assignment',
+                'item_id' => $assignment->id,
+                'name' => $assignment->name,
             ]);
         }
     }
@@ -76,9 +86,24 @@ class AssignmentLessonObserver
             ]);
         }
 
-        if($assignmentLesson->isDirty('seen_number')){
+        if($assignmentLesson->isDirty('lesson_id')){
+
             $lesson = Lesson::find($assignmentLesson->lesson_id);
             $course_id = $lesson->courseSegment->course_id;
+            $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+
+            $old_lesson = Lesson::find($assignmentLesson->getOriginal('lesson_id'));
+            $old_class_id = $old_lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            
+            if($old_class_id != $class_id)
+                UserSeen::where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
+            
+            if($old_class_id == $class_id){
+                UserSeen::where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->update([
+                    'lesson_id' => $assignmentLesson->lesson_id
+                ]);
+            }
+
             $this->report->calculate_course_progress($course_id);
         }
     }
@@ -103,6 +128,8 @@ class AssignmentLessonObserver
 
         $lesson = Lesson::find($assignmentLesson->lesson_id);
         $course_id = $lesson->courseSegment->course_id;
+
+        UserSeen::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
         $this->report->calculate_course_progress($course_id);
     }
 

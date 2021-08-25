@@ -22,9 +22,21 @@ use Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Lesson;
 use Modules\Page\Entities\pageLesson;
+use App\Repositories\SettingsReposiotryInterface;
 
 class MediaController extends Controller
 {
+    protected $setting;
+
+    /**
+     *constructor.
+     *
+     * @param SettingsReposiotryInterface $setting
+     */
+    public function __construct(SettingsReposiotryInterface $setting)
+    {
+        $this->setting = $setting;        
+    }
 
     public function getAllMedia(Request $request)
     {
@@ -114,10 +126,12 @@ class MediaController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $settings = $this->setting->get_value('upload_media_extensions');
+
+        $rules = [
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'required_if:type,==,0|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie',
+            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'url' => 'required_if:type,==,1|array',
@@ -126,8 +140,19 @@ class MediaController extends Controller
             'name' => 'required',
             'show' => 'nullable|in:0,1',
             'visible' =>'in:0,1'
+        ];
 
-        ]);
+        $customMessages = [
+            'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
+        ];
+
+        if ($request->hasFile('Imported_file')) {
+            $customMessages = [
+                'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' .__('messages.error.extension_not_supported')
+            ];
+        }
+    
+        $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
@@ -258,11 +283,13 @@ class MediaController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
+        $settings = $this->setting->get_value('upload_media_extensions');
+
+        $rules = [
             'id' => 'required|integer|exists:media,id',
             'name' => 'nullable|string|max:190',
             'description' => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|mimes:mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie',
+            'Imported_file' => 'nullable|file|mimes:'.$settings,
             'url' => 'nullable|active_url',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
@@ -270,8 +297,18 @@ class MediaController extends Controller
             'updated_lesson_id' =>'nullable|exists:lessons,id',
             'type' => 'in:0,1',
             'visible' => 'in:0,1',
-        ]);
+        ];
 
+        $customMessages = [
+            'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
+        ];
+        if(isset($request->Imported_file)){
+            $customMessages = [
+                'Imported_file.mimes' => $request->Imported_file->extension() . ' ' .__('messages.error.extension_not_supported')
+            ];
+        }
+    
+        $this->validate($request, $rules, $customMessages);
 
         $media = media::find($request->id);
         $mediaLesson = MediaLesson::whereIn('lesson_id' , $request->lesson_id)->where('media_id' , $request->id)->first();

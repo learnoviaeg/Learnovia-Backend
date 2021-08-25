@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterUserQuizAnswerTable extends Migration
+class NullableTypeGradeItem extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,11 @@ class AlterUserQuizAnswerTable extends Migration
      */
     public function up()
     {
-        Schema::table('user_quiz_answers', function (Blueprint $table) {
-            $table->string('feedback')->nullable();
+        Schema::table('grade_items', function (Blueprint $table) {
+            $table->dropColumn('type');
+        });
+        Schema::table('grade_items', function (Blueprint $table) {
+            $table->enum('type',['Assignment','Attendance','Interactive','Attempts','Manual']);
         });
     }
 

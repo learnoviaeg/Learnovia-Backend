@@ -14,13 +14,19 @@ use Illuminate\Http\Request;
 Route::get('h5p_protect', function(Request $request)
 {   
     $data = explode('/',request()->data);
-     $video_name = $data[count($data) - 1];
-     $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
-     $stream =  new \App\VideoStream($filePath);
-     $stream->start();
+    $video_name = $data[count($data) - 1];
+
+    if(str_contains($video_name,'jpg') || str_contains($video_name,'jpeg') || str_contains($video_name,'png'))
+        $filePath =ltrim( Storage::url('images/'.$video_name), '/');
+    else
+        $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
+
+    $stream =  new \App\VideoStream($filePath);
+    $stream->start();
 
 })->name('h5p_protect');
 Route::resource('h5p', "H5pController");
+Route::get('config', "AuthController@config");
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     //user main routes without permissions
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
@@ -67,7 +73,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::post('delete', 'SpatieController@Delete_Role')->name('deleterole')->middleware('permission:roles/delete');
         Route::post('assign-to-user', 'SpatieController@Assign_Role_to_user')->name('assignroletouser')->middleware('permission:roles/assign');
         Route::post('revoke-from-user', 'SpatieController@Revoke_Role_from_user')->name('revokerolefromuser')->middleware('permission:roles/revoke-from-user');
-        Route::post('get', 'SpatieController@Get_Role')->name('getrolebyid')->middleware('permission:roles/get');
+        Route::get('get', 'SpatieController@Get_Role')->name('getrolebyid')->middleware('permission:roles/get');
         Route::post('update', 'SpatieController@Update_Role')->name('updaterolebyid')->middleware('permission:roles/update');
     });
 
@@ -263,6 +269,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], fu
 Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api','LastAction']], function () {
     Route::post('enroll-single-user', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/user');
     Route::post('un-enroll-single-user', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
+    Route::post('reset-enrollment', 'EnrollUserToCourseController@reset_enrollment')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
     Route::get('get-enrolled-courses', 'EnrollUserToCourseController@ViewAllCoursesThatUserEnrollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
     Route::post('mandatory-course', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:enroll/mandatory');
     Route::post('bulk-of-exist-users', 'EnrollUserToCourseController@EnrollExistUsersFromExcel')->name('enrollexcel')->middleware('permission:enroll/bulk-of-exist-users');
@@ -431,14 +438,25 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], fu
 });
 
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
-    Route::Resource('timeline', TimelineController::class);
+    Route::delete('quizzes/{quiz_id}/{questions}', 'QuestionsController@unAssign');//->middleware(['permission:quiz/add' , 'ParentCheck']);
     Route::Resource('quizzes', QuizzesController::class);
+    Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
+    Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@assign');//->middleware(['permission:quiz/add' , 'ParentCheck']);
     Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
-    Route::Resource('materials', MaterialsController::class);
-    Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
+
+    Route::Resource('attempts', AttemptsController::class);
+    Route::post('attempts/{id}', 'AttemptsController@update');
+    // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);
+
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
     Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
+    
+    Route::Resource('timeline', TimelineController::class);
+    Route::Resource('materials', MaterialsController::class);
+    Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
+    Route::get('GradeTree', 'UserGradeController@index');
+
 
     Route::Resource('interactive', InterActiveController::class);
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
@@ -447,10 +465,10 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('lessons', LessonsController::class);
     Route::Resource('levels', LevelController::class);
     Route::Resource('classes', ClassesController::class);
+    Route::get('claass/{option}', 'ClassesController@index')->middleware(['permission:course/layout']);
     Route::Resource('users', UsersController::class);
     Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
-    Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::Resource('notify', NotificationsController::class);
     Route::get('notification/{read}', 'NotificationsController@read')->middleware('permission:notifications/seen');
     Route::get('notifications/{types}', 'NotificationsController@index')->middleware('permission:notifications/get-all');
@@ -463,6 +481,13 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('enroll', EnrollController::class);
     Route::Resource('calendars', CalendarsController::class);
     Route::Resource('overall_seen', SeenReportController::class);
+    Route::get('seen/{my_chain}', 'SeenReportController@index')->middleware('permission:reports/overall_seen_report');
+    Route::Resource('settings', SettingsController::class);
+    Route::post('settings/update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
+    Route::Resource('grade-category', GradeCategoriesController::class);
+    Route::Resource('grade-item', GradeItemsController::class);
+    Route::Resource('grader-report', GraderReportController::class);
+    Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
 });
 
 Route::group(['middleware' => ['auth:api']], function () {

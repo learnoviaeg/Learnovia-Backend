@@ -30,7 +30,6 @@ class CreateGradeItemsTable extends Migration
             $table->decimal('aggregationcoef2')->nullable();
             $table->unsignedBigInteger('item_type');
             $table->foreign('item_type')->references('id')->on('item_types')->onDelete('cascade')->onUpdate('cascade');
-            $table->integer('item_Entity');
             $table->boolean('hidden')->default(0);
             $table->timestamps();
         });

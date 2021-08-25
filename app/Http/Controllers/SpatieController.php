@@ -30,11 +30,14 @@ use App\Http\Controllers\H5PLessonController;
 use Modules\Assigments\Http\Controllers\AssigmentsController;
 use App\Exports\ExportRoleWithPermissions;
 use Illuminate\Support\Facades\Storage;
+use App\Settings;
+use GuzzleHttp\Client;
 
 class SpatieController extends Controller
 {
     public function install()
     {
+        ini_set('max_execution_time', '3600'); //300 seconds = 60 minutes
 
         (new BigbluebuttonController)->clear();
         $user = User::whereEmail('admin@learnovia.com')->first();
@@ -154,7 +157,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'category/get-all', 'title' => 'get all categories']);
 
             //management
-            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'management/get', 'title' => 'Course Management' , 'dashboard' => 1, 'icon' => 'Settings']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'management/get', 'title' => 'Course Management' , 'dashboard' => 1, 'icon' => 'university']);
             
             //Course Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/add', 'title' => 'add course' , 'dashboard' => 0, 'icon' => 'Course']);
@@ -182,6 +185,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/export', 'title' => 'export courses']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/teachers', 'title' => 'view course teachers']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/participants', 'title' => 'view course participants']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/progress-bar', 'title' => 'view course progress bar']);
 
             //Enroll Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/user', 'title' => 'Staff Enrollment' , 'dashboard' => 1, 'icon' => 'Star']);
@@ -331,6 +335,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/update', 'title' => 'update user grade']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/delete', 'title' => 'delete user grade']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/course-grade', 'title' => 'course\'s user and grades']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'allow-edit-profiles', 'title' => 'allow user to edit any profile']);
 
             //Grades Reports
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/report/grader', 'title' => 'grader report']);
@@ -410,6 +415,15 @@ class SpatieController extends Controller
             //logs
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'user/logs', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'User']);
 
+            //system settings
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'settings/general', 'title' => 'General Settings', 'dashboard' => 1 , 'icon'=> 'Settings']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'settings/create_assignment_extensions', 'title' => 'Manage create assignment extensions']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'settings/submit_assignment_extensions', 'title' => 'Manage submit assignment extensions']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'settings/upload_media_extensions', 'title' => 'Manage upload media extensions']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'settings/upload_file_extensions', 'title' => 'Manage upload file extensions']);
+
+
+
             // $super->givePermissionTo(\Spatie\Permission\Models\Permission::all());
             $teacher_permissions = [
                 'site/restrict','notifications/get-all','notifications/get-unread','notifications/mark-as-read','notifications/seen','year/get','year/get-all',
@@ -424,7 +438,7 @@ class SpatieController extends Controller
                 'grade/category/get-gradecategories','grade/item/add','grade/item/get','grade/item/delete','grade/item/update','grade/user/add','grade/user/get','grade/user/update',
                 'grade/user/delete','grade/report/grader','grade/report/user','grade/report/over-all','scale/add','scale/update','scale/delete','scale/get','scale/get-with-course',
                 'letter/add','letter/update','letter/delete','letter/get','letter/assign','site/user/search-all-users','site/course/teacher','chat/add-room','timeline/get','material/get',
-                'course/teachers','course/participants','notifications/send','site/show/as-participant'
+                'course/teachers','course/participants','notifications/send','site/show/as-participant','course/progress-bar'
             ];
             $student_permissions=['notifications/get-all','notifications/get-unread','notifications/mark-as-read','notifications/seen','year/get-all','year/get-my-years',
             'type/get-all','type/get-my-types','level/get-my-levels','class/get-all','class/get-my-classes','class/get','class/get-lessons','segment/get-all','segment/get',
@@ -447,13 +461,34 @@ class SpatieController extends Controller
             $student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
             $parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $parent_permissions)->get());
 
+            $clientt = new Client();
+            $data = array(
+                'name' => 'Learnovia Company', 
+                'meta_data' => array(
+                    "image_link" => null,
+                    'role'=> 'Super Admin'
+                ),
+            );
+
+            $data = json_encode($data);
+
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                'headers'   => [
+                    'Content-Type' => 'application/json'
+                ], 
+                'body' => $data
+            ]);
+
             $user = new User([
                 'firstname' => 'Learnovia',
                 'lastname' => 'Company',
                 'username' => 'Admin',
                 'email' => 'admin@learnovia.com',
                 'password' => bcrypt('Learnovia123'),
-                'real_password' => 'Learnovia123'
+                'real_password' => 'Learnovia123',
+                'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+                'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+                'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
             ]);
             $user->save();
             $user->assignRole($super);
@@ -511,13 +546,44 @@ class SpatieController extends Controller
             $check1 = Excel::import($importer, public_path('translation/ArabTranslate.xlsx'));
             
             //install components
-            (new FilesController)->install_file();
-            (new QuestionBankController)->install_question_bank();
-            (new AttendanceSessionController)->install();
-            (new AssigmentsController)->install_Assignment();
-            (new PageController)->install();
-            (new BigbluebuttonController)->install();
-            (new H5PLessonController)->install();
+            \App::call('Modules\UploadFiles\Http\Controllers\FilesController@install_file');
+            \App::call('Modules\QuestionBank\Http\Controllers\QuestionBankController@install_question_bank');
+            \App::call('Modules\Attendance\Http\Controllers\AttendanceSessionController@install');
+            \App::call('Modules\Assigments\Http\Controllers\AssigmentsController@install_Assignment');
+            \App::call('Modules\Page\Http\Controllers\PageController@install');
+            \App::call('Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController@install');
+            \App::call('App\Http\Controllers\H5PLessonController@install');
+
+
+            Settings::create([
+                'key' => 'create_assignment_extensions',
+                'title' => 'Create/Edit Assignment Supported Extensions',
+                'value' => 'txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpeg,png,gif,csv,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls',
+                'type' => 'extensions'
+            ]);
+
+            Settings::create([
+                'key' => 'submit_assignment_extensions',
+                'title' => 'Submit Assignment Supported Extensions',
+                'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,mp3,wav,amr',
+                'type' => 'extensions'
+            ]);
+
+            Settings::create([
+                'key' => 'upload_file_extensions',
+                'title' => 'Upload File Supported Extensions',
+                'value' => 'pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss',
+                'type' => 'extensions'
+            ]);
+
+            Settings::create([
+                'key' => 'upload_media_extensions',
+                'title' => 'Upload Media Supported Extensions',
+                'value' => 'mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie,aac,au,flac,m3u,m4a,wma,ai,bmp,gdraw,ico,jpe,pct,pic,pict,svg,svgz,tif,tiff,3gp,dv,dif,f4v,m4v,mpg,rmvb,swf,swfl,webm,wmv,asf',
+                'type' => 'extensions'
+            ]);
+
+            \Artisan::call('storage:link', ['--env' => 'local']);
 
             return "System Installed Your User is $user->email and Password is Learnovia123.";
 
@@ -551,10 +617,13 @@ class SpatieController extends Controller
     public function Get_Role(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:roles,id'
+            'id' => 'exists:roles,id'
         ]);
 
-        $role = Role::find($request->id);
+        if(isset($request->id))
+            $role = Role::find($request->id);
+
+        $role = Role::get();
 
         unset($role->guard_name);
         unset($role->created_at);

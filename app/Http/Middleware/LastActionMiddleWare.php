@@ -78,12 +78,12 @@ class LastActionMiddleWare
         //start seen report
         $route_seen = Config::get('routes.seen_report');
 
-        if(in_array($request->route()->uri,$route_seen) && $request->user()->can('site/show/as-participant')){
+        if(in_array($request->route()->uri,$route_seen) && $request->user()->can('site/course/student')){
 
             if(str_contains($request->route()->uri, 'material') || str_contains($request->route()->uri, 'page')){
 
                 if(str_contains($request->route()->uri, 'material'))
-                    $materials = Material::find($request->route()->parameters()['id']);
+                    $materials = Material::whereId($request->route()->parameters()['id'])->first();
 
                 if(str_contains($request->route()->uri, 'page'))
                     $materials = Material::where('item_id',$request->id)->where('lesson_id',$request->lesson_id)->where('type','page')->first();

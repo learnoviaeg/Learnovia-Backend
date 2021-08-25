@@ -87,6 +87,14 @@ class ChainRepository implements ChainRepositoryInterface
         if($request->filled('courses'))
             $enrolls->whereIn('course', $request->courses);
 
+        if($request->has('user_id'))
+        {
+            if(!$request->user()->can('site/show-all-courses'))
+                $enrolls->where('user_id',Auth::id());
+
+            $enrolls->where('user_id',$request->user_id);
+        }
+
         return $enrolls;    
     }
 
@@ -135,7 +143,7 @@ class ChainRepository implements ChainRepositoryInterface
             if ($request->filled('courses'))
                 $query->whereIn('course_id', $request->courses);
 
-        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment.courses.attachment']);
+        }, 'YearType.yearLevel.classLevels.segmentClass.courseSegment.courses.attachment'])->get()->pluck('YearType.*.yearLevel.*.classLevels.*.segmentClass.*.courseSegment.*')[0];
 
         return $YearTypes;
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
+use App\SegmentClass;
 
 class ClassesController extends Controller
 {
@@ -26,7 +27,7 @@ class ClassesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$option = null)
     {
         //validate the request
         $request->validate([
@@ -34,6 +35,13 @@ class ClassesController extends Controller
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
         ]);
+
+        if($option == 'all' || $request->user()->can('site/show-all-courses')){
+            $course_segments = collect($this->chain->getAllByChainRelation($request));           
+            $classes = SegmentClass::with('classLevel.classes')->whereIn('id',$course_segments->pluck('segment_class_id'))->get()->pluck('classLevel.*.classes.*')->collapse();
+
+            return response()->json(['message' => __('messages.class.list'), 'body' => $classes], 200);
+        }
 
         $enrolls = $this->chain->getCourseSegmentByChain($request);
 

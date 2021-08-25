@@ -70,8 +70,8 @@ class H5PLessonController extends Controller
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|exists:lessons,id',
-            'visible'=>'in:0,1'
-
+            'visible'=>'in:0,1',
+            'publish_date' => 'nullable|after:' . Carbon::now(),
         ]);
         
         $h5p_lesson = h5pLesson::where('content_id',$request->content_id)->where('lesson_id',$request->lesson_id)->first();
@@ -79,7 +79,7 @@ class H5PLessonController extends Controller
             $h5p_lesson = h5pLesson::firstOrCreate([
                 'content_id' => $request->content_id,
                 'lesson_id' => $request->lesson_id,
-                'publish_date' => Carbon::now(),
+                'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
                 'start_date' => Carbon::now(),
                 'user_id' => Auth::id(),
                 'visible'=>isset($request->visible)?$request->visible:1
@@ -103,7 +103,7 @@ class H5PLessonController extends Controller
             'lesson_id' => $request->lesson_id,
             'type' => 'h5p',
             'link' => $url.'/api/h5p/'.$h5p_lesson->content_id,
-            'publish_date' => Carbon::now(),
+            'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
         ]);
         
         return HelperController::api_response_format(200,$h5p_lesson, __('messages.interactive.add'));
@@ -143,12 +143,13 @@ class H5PLessonController extends Controller
         if($request->filled('content_id') && $request->filled('lesson_id')){
             $h5p_lesson =  h5pLesson::where('lesson_id',$request->lesson_id)->where('content_id',$request->content_id)->first();
 
-            if($request->user()->can('site/course/student')  && $h5p_lesson->visible == 0){
+            if($request->user()->can('site/course/student')  && ($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()) ){
                 return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
             }
 
             return HelperController::api_response_format(200, $h5p_lesson, __('messages.interactive.list'));
         }
+        
 
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5p_lesson =  h5pLesson::get();

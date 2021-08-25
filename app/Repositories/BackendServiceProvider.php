@@ -22,7 +22,11 @@ class BackendServiceProvider extends ServiceProvider
         $this->app->bind(
             'App\Repositories\RepportsRepositoryInterface',
             'App\Repositories\RepportsRepository'
-        ); 
+        );
 
+        $this->app->bind(
+            'App\Repositories\SettingsReposiotryInterface',
+            'App\Repositories\SettingsReposiotry'
+        ); 
     }
 }

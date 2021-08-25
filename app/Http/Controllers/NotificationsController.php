@@ -43,7 +43,7 @@ class NotificationsController extends Controller
             {
                 $currentChild =User::find(Auth::user()->currentChild->child_id);
                 Auth::setUser($currentChild);
-        }
+            }
         }
 
         $notify = DB::table('notifications')->select('data','read_at','id')
@@ -69,7 +69,11 @@ class NotificationsController extends Controller
                 'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
                 'course_name' => isset($decoded_data['course_name'])?$decoded_data['course_name']:null,
             ]);
-            $notifications_types->push($decoded_data['type']);
+            if($decoded_data['type']=='Page') 
+                $notifications_types->push('page');
+            else
+                $notifications_types->push($decoded_data['type']);
+
         }
 
         // for route api/notifications/{types} 
@@ -202,6 +206,7 @@ class NotificationsController extends Controller
     public function read(Request $request,$read=null)
     {
         $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+        $check=null;
         foreach ($noti as $not) {
             $not->data= json_decode($not->data, true);
             if($read == 'notify')

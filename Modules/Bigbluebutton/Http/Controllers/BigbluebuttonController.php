@@ -131,7 +131,7 @@ class BigbluebuttonController extends Controller
             'start_date.*' => 'date',
             'last_day' => 'date',
             'visible' => 'in:0,1',
-            'host_id' => 'required_if:type,==,Zoom',
+            // 'host_id' => 'required_if:type,==,Zoom',
             'join_url' => 'required_if:type,==,teams'
         ]);
     
@@ -190,9 +190,10 @@ class BigbluebuttonController extends Controller
                             $bigbb->start_date=$temp_start->format('Y-m-d H:i:s');
                             $bigbb->meeting_id = $i == 0 ? $meeting_id : $meeting_id.'repeat'.$i;
                             $bigbb->user_id = Auth::user()->id;
-                            $bigbb->host_id = ($request->host_id) ? $request->host_id : null;
+                            $bigbb->host_id = ($request->host_id) ? $request->host_id : Auth::id();
                             $bigbb->is_recorded = $request->is_recorded;
                             $bigbb->started = 0;
+                            $bigbb->status = 'future';
                             $bigbb->join_url = $request->join_url ? $request->join_url : null;
                             $bigbb->show = isset($request->visible)?$request->visible:1;
                             $bigbb->save();
@@ -278,6 +279,7 @@ class BigbluebuttonController extends Controller
         }
 
         $requestBody = [
+            //https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/meetingcreate
             'topic'	=> $bigbb->name,
             // 1 >> instance meeting
             // 2 >> schedualed meeting
@@ -296,19 +298,19 @@ class BigbluebuttonController extends Controller
             //     'end_date_time'=> "2020-06-02T03:59:00Z",
             // ],
             'settings'		=> [
-                    'host_video'			=> false,
-                    'participant_video'		=> false,
-                    'cn_meeting'			=> false,
-                    'in_meeting'			=> false,
-                    'join_before_host'		=> false,
-                    'mute_upon_entry'		=> true,
-                    'watermark'				=> false,
-                    'use_pmi'				=> false,
-                    'approval_type'			=> 1,
-                    'registration_type'		=> 1,
-                    'audio'					=> 'voip',
-                    'auto_recording'		=> $record, //2:local, 1:cloud, 0:none
-                    'waiting_room'			=> false
+                'host_video'			=> false,
+                'participant_video'		=> false,
+                'cn_meeting'			=> false,
+                'in_meeting'			=> false,
+                'join_before_host'		=> false,
+                'mute_upon_entry'		=> true,
+                'watermark'				=> false,
+                'use_pmi'				=> false,
+                'approval_type'			=> 1,
+                'registration_type'		=> 1,
+                'audio'					=> 'voip',
+                'auto_recording'		=> $record, //2:local, 1:cloud, 0:none
+                'waiting_room'			=> false
             ]
         ];
 
@@ -344,6 +346,11 @@ class BigbluebuttonController extends Controller
         $bigbb->status = 'current';
         $bigbb->started = 1;
         $bigbb->actutal_start_date = Carbon::now();
+        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
+        if($request->user()->can('site/show-all-courses'))
+            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
+
+        $bigbb->signature=$signature;
         $bigbb->save();
         return $response;
     }
@@ -530,16 +537,14 @@ class BigbluebuttonController extends Controller
         $this->validate($request, $rules, $customMessages);
             
         $classes = [];
-        if(isset($request->class)){
+        if(isset($request->class))
             $classes = [$request->class];
-        }
 
-        if(isset($request->course)){
+        if(isset($request->course))
             $request['courses']= [$request->course];
-        }
-        if($request->filled('course')){
+        
+        if($request->filled('course'))
             LastAction::lastActionInCourse($request->course);
-        }
 
         $sort_in = 'desc';
         if($request->has('sort_in'))
@@ -578,36 +583,35 @@ class BigbluebuttonController extends Controller
         if($request->has('id'))
             $meeting->where('id',$request->id);
 
-        if($count == 'count'){
-        
-            return response()->json(['message' => 'Virtual classrooms count', 'body' => $meeting->count()], 200);        
-        }
+        if($count == 'count')
+            return response()->json(['message' => 'Virtual classrooms count', 'body' => $meeting->count()], 200);
         
         $meetings = $meeting->get();
         
-        if($request->has('id') && $request->user()->can('site/course/student') && count($meetings) == 0){
+        if($request->has('id') && $request->user()->can('site/course/student') && count($meetings) == 0)
             return HelperController::api_response_format(301,null, __('messages.virtual.virtual_hidden'));
-        }
         
-        foreach($meetings as $m)
+        foreach($meetings as $m){
+            $m['join'] = $m->started == 1 ? true: false;
+            $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d H:i:s'): null;
+            $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d H:i:s');
+            
+            if(Carbon::parse($m->start_date) <= Carbon::now() && Carbon::now() <= Carbon::parse($m->start_date)->addMinutes($m->duration))
             {
-                $m['join'] = $m->started == 1 ? true: false;
-                $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d H:i:s'): null;
-                $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d H:i:s');
-                
-                if(Carbon::parse($m->start_date)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s') && Carbon::now()->format('Y-m-d H:i:s') <= Carbon::parse($m->start_date)
-                ->addMinutes($m->duration)->format('Y-m-d H:i:s'))
-                {
-                    try{
-                        $try = self::create_hook($request);    
-                    }
-                    catch(\Exception $e){
-                        //error
-                    }
-                    if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
-                        $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
+                try{
+                    $try = self::create_hook($request);    
                 }
+                catch(\Exception $e){
+                    //error
+                }
+                if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
+                    $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
             }
+            else{
+                $m['join'] = false;
+                $m->status = 'past';
+            }
+        }
 
         if($request->has('pagination') && $request->pagination==true)
             return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),__('messages.virtual.list'));
@@ -1136,7 +1140,6 @@ class BigbluebuttonController extends Controller
 
         $report=collect();
         foreach($meetings as $meeting){
-
             $user = User::find($meeting->user_id);
             $course = Course::find($meeting->course_id);
             $class = Classes::find($meeting->class_id);
@@ -1144,7 +1147,6 @@ class BigbluebuttonController extends Controller
             $present_student = AttendanceLog::where('session_id',$meeting->id)->where('type','online')
                                                                               ->whereNotNull('entered_date')
                                                                               ->select('student_id')->distinct()->count();
-
             $end_date = null;
             if(isset($meeting->actual_duration))
                 $end_date = Carbon::parse($meeting->start_date)->addMinutes($meeting->actual_duration);
