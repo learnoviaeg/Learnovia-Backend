@@ -26,6 +26,7 @@ Route::get('h5p_protect', function(Request $request)
 
 })->name('h5p_protect');
 Route::resource('h5p', "H5pController");
+Route::get('config', "AuthController@config");
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     //user main routes without permissions
     Route::get('userRole', 'AuthController@userRole')->name('userRole');
