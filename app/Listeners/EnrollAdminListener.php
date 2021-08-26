@@ -56,9 +56,10 @@ class EnrollAdminListener
                 $lesson=lesson::firstOrCreate([
                     'name' => 'Lesson ' . $i,
                     'index' => $i,
+                    // 'shared_lesson' => ,
                 ]);
 
-                event(new LessonCreatedEvent($lesson,$enroll));
+                // event(new LessonCreatedEvent($lesson,$enroll));
             }
         }
     }

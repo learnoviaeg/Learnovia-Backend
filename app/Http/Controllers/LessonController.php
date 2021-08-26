@@ -22,35 +22,32 @@ class LessonController extends Controller
     public function AddLesson(Request $request)
     {
         $request->validate([
-            'name' => 'required|array',
-            'name.*' => 'required|string',
-            'image' => 'array',
-            'image.*' => 'mimes:jpeg,jpg,png,gif|max:10000',
-            'description' => 'array',
-            'description.*' => 'string',
+            'name' => 'required|string',
+            // 'image' => 'array',
+            'image' => 'mimes:jpeg,jpg,png,gif|max:10000',
+            // 'description' => 'array',
+            'description' => 'string',
             'course' => 'required|exists:courses,id',
             'class' => 'required|exists:classes,id',
             'shared_lesson' => 'required|in:0,1'
         ]);
         LastAction::lastActionInCourse($request->course);
-        foreach ($request->name as $key => $name) {
-            $lessons_in_Course = Lesson::where('course_id', $request->course)->max('index');
-            $Next_index = $lessons_in_Course + 1;
-            $lesson = Lesson::create([
-                'name' => $name,
-                'course_id' => $request->course,
-                'shared_lesson' => $request->shared_lesson,
-                'index' => $Next_index
-            ]);
-            if (isset($request->image[$key]))
-                $lesson->image = attachment::upload_attachment($request->image[$key], 'lesson', '')->path;
-            
-            if (isset($request->description[$key]))
-                $lesson->description = $request->description[$key];
-            
-            $lesson->save();
-        }
-        return HelperController::api_response_format(200, $courseSegment->lessons,__('messages.lesson.add'));
+        $lessons_in_Course = Lesson::where('course_id', $request->course)->max('index');
+        $Next_index = $lessons_in_Course + 1;
+        $lesson= Lesson::create([
+            'name' => $request->name,
+            'course_id' => $request->course,
+            'shared_lesson' => $request->shared_lesson,
+            'index' => $Next_index
+        ]);
+        if (isset($request->image))
+            $lesson->image = attachment::upload_attachment($request->image[$key], 'lesson', '')->path;
+        
+        if (isset($request->description))
+            $lesson->description = $request->description;
+        
+        $lesson->save();
+        return HelperController::api_response_format(200, Lesson::where('course_id',$request->course)->get(),__('messages.lesson.add'));
     }
 
     /**
