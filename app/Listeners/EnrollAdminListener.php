@@ -51,16 +51,6 @@ class EnrollAdminListener
                 'group' => $class->id,
                 'course' => $event->course->id
             ]);
-
-            for ($i = 1; $i <= $event->no_of_lessons; $i++) {
-                $lesson=lesson::firstOrCreate([
-                    'name' => 'Lesson ' . $i,
-                    'index' => $i,
-                    // 'shared_lesson' => ,
-                ]);
-
-                // event(new LessonCreatedEvent($lesson,$enroll));
-            }
         }
     }
 }
