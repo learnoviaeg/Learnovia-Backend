@@ -20,10 +20,9 @@ class CourseCreatedEvent
      *
      * @return void
      */
-    public function __construct(Course $course,$no_of_lessons)
+    public function __construct(Course $course)
     {
         $this->course=$course;
-        $this->no_of_lessons=$no_of_lessons;
     }
 
     /**

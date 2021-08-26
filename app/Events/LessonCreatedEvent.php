@@ -21,10 +21,9 @@ class LessonCreatedEvent
      *
      * @return void
      */
-    public function __construct(Lesson $lesson,Enroll $enroll)
+    public function __construct(Lesson $lesson)
     {
         $this->lesson=$lesson;
-        $this->enroll=$enroll;
     }
 
     /**

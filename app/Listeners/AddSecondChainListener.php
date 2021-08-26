@@ -6,6 +6,7 @@ use App\Events\LessonCreatedEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\SecondaryChain;
+use App\Enroll;
 
 class AddSecondChainListener
 {
@@ -27,13 +28,17 @@ class AddSecondChainListener
      */
     public function handle(LessonCreatedEvent $event)
     {
-        // SecondaryChain::firstOrCreate([
-        //     'user_id' => 1,
-        //     'role_id' => 1,
-        //     'group_id' => $event->enroll->group,
-        //     'course_id' => $event->enroll->course,
-        //     'lesson_id' => $event->lesson->id,
-        //     'enroll_id' => $event->enroll->id
-        // ]);
+        $enrollsOfCourse=Enroll::where('course',$event->lesson->course_id)->get();
+        foreach($enrollsOfCourse as $enroll)
+        {
+            SecondaryChain::firstOrCreate([
+                'user_id' => 1,
+                'role_id' => 1,
+                'group_id' => $enroll->group,
+                'course_id' => $enroll->course,
+                'lesson_id' => $event->lesson->id,
+                'enroll_id' => $enroll->id
+            ]);
+        }
     }
 }
