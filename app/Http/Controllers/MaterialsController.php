@@ -65,7 +65,7 @@ class MaterialsController extends Controller
             $lessons = [$request->lesson];
         }
             
-        $material = Material::with(['lesson','course'])->whereIn('lesson_id',$lessons);
+        $material = Material::with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
 
         if($request->user()->can('site/course/student')){
             $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
