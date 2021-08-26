@@ -86,7 +86,7 @@ class AssignmentController extends Controller
         $assignments = collect([]);
 
         foreach($assignment_lessons as $assignment_lesson){
-            $assignment=assignment::where('id',$assignment_lesson->assignment_id)->with('assignmentLessson')->first();
+            $assignment=assignment::where('id',$assignment_lesson->assignment_id)->with('assignmentLesson')->first();
             // $assignment['assignmentlesson'] = $assignment_lesson;
             $assignment['lesson'] = Lesson::find($assignment_lesson->lesson_id);
             $assignment['class'] = Classes::find($assignment['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
