@@ -16,7 +16,9 @@ class CourseInLesson extends Migration
         Schema::table('lessons', function (Blueprint $table) {
             $table->dropForeign(['course_segment_id']);
             $table->dropColumn(['course_segment_id']);
-            $table->integer('shared_lesson')->default(0);
+            $table->integer('shared_lesson')->default(0)->after('description');
+            $table->unsignedBigInteger('course_id')->after('description');
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

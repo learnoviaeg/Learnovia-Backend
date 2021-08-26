@@ -207,10 +207,10 @@ Route::group(['prefix' => 'category', 'middleware' => ['auth:api','LastAction']]
 
 //Course Routes
 Route::group(['prefix' => 'course', 'middleware' => ['auth:api','LastAction']], function () {
-    Route::post('add', 'CourseController@add')->name('addcourse')->middleware('permission:course/add');
+    // Route::post('add', 'CourseController@add')->name('addcourse')->middleware('permission:course/add');
     Route::post('update', 'CourseController@update')->name('editcourse')->middleware('permission:course/update');
     Route::post('delete', 'CourseController@delete')->name('deletecourse')->middleware('permission:course/delete');
-    Route::get('get-all', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
+    // Route::get('get-all', 'CourseController@get')->name('getcourse')->middleware('permission:course/get-all');
     Route::get('my-courses', 'CourseController@CurrentCourses')->name('mycourses')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::get('all-courses', 'CourseController@EnrolledCourses')->name('enrolledcourses')->middleware(['permission:course/all-courses' , 'ParentCheck']);
     Route::get('past-courses', 'CourseController@PastCourses')->name('pastcourses')->middleware(['permission:course/past-courses' , 'ParentCheck']);

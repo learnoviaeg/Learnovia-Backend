@@ -10,6 +10,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use App\Lesson;
+use App\Enroll;
 
 class LessonCreatedEvent
 {
@@ -20,9 +21,10 @@ class LessonCreatedEvent
      *
      * @return void
      */
-    public function __construct(Lesson $lesson)
+    public function __construct(Lesson $lesson,Enroll $enroll)
     {
         $this->lesson=$lesson;
+        $this->enroll=$enroll;
     }
 
     /**

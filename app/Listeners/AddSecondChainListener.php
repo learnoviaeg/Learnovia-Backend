@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\LessonCreatedEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\SecondaryChain;
 
 class AddSecondChainListener
 {
@@ -26,12 +27,13 @@ class AddSecondChainListener
      */
     public function handle(LessonCreatedEvent $event)
     {
-        SecondaryChain::firstOrCreate([
-            'user_id' => 1,
-            'role_id' => 1,
-            'group_id' => $class->id,
-            'lesson_id' => $event->lesson->id,
-            'enroll_id' => $enroll->id
-        ]);
+        // SecondaryChain::firstOrCreate([
+        //     'user_id' => 1,
+        //     'role_id' => 1,
+        //     'group_id' => $event->enroll->group,
+        //     'course_id' => $event->enroll->course,
+        //     'lesson_id' => $event->lesson->id,
+        //     'enroll_id' => $event->enroll->id
+        // ]);
     }
 }
