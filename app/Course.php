@@ -65,7 +65,7 @@ class Course extends Model
 
     public function getImageAttribute()
     {
-        if(isset($this->attributes['image'])){
+        if($this->attributes['image'] !=null){
             $attachment=attachment::find($this->attributes['image']);
             return $attachment->path;
         }
