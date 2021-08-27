@@ -22,6 +22,7 @@ build-code-job-dev:
        - service apache2 status
        - service mysql status
        - ssh -T git@gitlab.com
+       
 #-------Backup------------------
        - echo "$CI_JOB_STAGE"
        -  -d /var/Learnovia-Backend-Backup  || mkdir -p /var/Learnovia-Backend-Backup 
