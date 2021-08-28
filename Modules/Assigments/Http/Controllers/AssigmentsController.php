@@ -242,6 +242,7 @@ class AssigmentsController extends Controller
         if ($request->filled('content'))
             $assignment->content = $request->content;
         $assignment->name = $request->name;
+        $assignment->created_by = Auth::id();
         $assignment->save();
         return HelperController::api_response_format(200, $body = $assignment, $message = __('messages.assignment.add'));
     }
