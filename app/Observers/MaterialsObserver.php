@@ -6,7 +6,7 @@ use App\Material;
 use App\Repositories\RepportsRepositoryInterface;
 use App\UserSeen;
 use App\Lesson;
-use Illuminate\Support\Facades\Auth;
+
 class MaterialsObserver
 {
     protected $report;
@@ -15,7 +15,6 @@ class MaterialsObserver
     {
         $this->report = $report;
     }
-    
     /**
      * Handle the material "created" event.
      *
@@ -25,11 +24,6 @@ class MaterialsObserver
     public function created(Material $material)
     {
         $this->report->calculate_course_progress($material->course_id);
-    }
-
-    public function creating(Material $material)
-    {
-        $material->created_by = Auth::id();
     }
 
     /**

@@ -53,6 +53,10 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\ManualCorrectionEvent' => [
             'App\Listeners\GradeManualListener',
         ],
+
+        'eloquent.creating: App\Material' => [
+            'App\Listeners\MaterialsCreating',
+        ],
     ];
 
     /**
