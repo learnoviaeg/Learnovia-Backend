@@ -8,9 +8,7 @@ stages:
 build-code-job-dev:
      stage: build
      tags:
-       - learnovia
-       - development
-       - test
+       - ansible
      only:
        - development
      script:
@@ -30,9 +28,7 @@ build-code-job-dev:
 Pulling_Latest_Version-dev:
      stage: deploy
      tags:
-       - learnovia
-       - development
-       - test
+       - ansible
      only:
        - development
      script:
@@ -61,9 +57,7 @@ Pulling_Latest_Version-dev:
 Rollback_to_Latest_Version-dev:
      stage: rollback
      tags:
-       - learnovia
-       - development
-       - test
+       - ansible
      only:
        - development
      script:
@@ -94,9 +88,7 @@ Rollback_to_Latest_Version-dev:
 build-code-job-production:
      stage: build
      tags:
-       - learnovia
-       - production
-       - backend
+       - ansible
      only:
        - production
      script:
@@ -116,9 +108,7 @@ build-code-job-production:
 Pulling_Latest_Version-production:
      stage: deploy
      tags:
-       - learnovia
-       - production
-       - backend
+       - ansible
      only:
        - production
      script:
@@ -147,9 +137,7 @@ Pulling_Latest_Version-production:
 Rollback_to_Latest_Version-production:
      stage: rollback
      tags:
-       - learnovia
-       - production
-       - backend
+       - ansible
      only:
        - production
      script:
