@@ -92,53 +92,14 @@ Rollback_to_Latest_Version-dev:
 #+++++++++Production++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #=========================================================
 build-code-job-production:
-     stage: build
-     tags:
-       - ansible
-     only:
-       - production
-     script:
-       - echo "$CI_JOB_STAGE"
-       - echo "checking service status"
-       - cd
-       - sync; echo 3 > /proc/sys/vm/drop_caches # Clearing Memory Cache
-       - service gitlab-runner status
-       - service apache2 status
-       - service mysql status
-       - ssh -T git@gitlab.com
-#-------Backup------------------
-       - echo "$CI_JOB_STAGE"
-       -  -d /var/Learnovia-Backend-Backup  || mkdir -p /var/Learnovia-Backend-Backup 
-       - cp -R /var/www/html/learnovia-backend/* /var/Learnovia-Backend-Backup
-#======================================================
-Pulling_Latest_Version-production:
      stage: deploy
      tags:
        - ansible
      only:
        - production
      script:
-       - cd /var/www/html/learnovia-backend
-       - git reset HEAD^ --hard
-       - git stash
-       - git checkout production
-       - git pull origin production
-       - echo "Starting Composer using Gitlab CI"
-       - cd /var/www/html/learnovia-backend
-       - composer install --ignore-platform-reqs
-#       - php artisan key:generate
-#       - php artisan config:cache
-       - php artisan cache:clear
-       - php artisan config:clear
-       - php artisan migrate --force
-       - php artisan queue:restart
-#       - php artisan migrate:fresh --seed     # Not sure from the impact on production & only used for first time and no need to run the command on every change
-#       - php artisan h5p             # only used for first time and no need to run the command on every change
-#       - php artisan annotation      # only used for first time and no need to run the command on every change
-       - service supervisor restart
-       - service apache2 restart
-       - service mysql restart
-       - sync; echo 3 > /proc/sys/vm/drop_caches
+       - ansible-playbook /var/ansible/playbook/backend-deploy.yml
+
 #===========================================================
 Rollback_to_Latest_Version-production:
      stage: rollback
