@@ -8,8 +8,8 @@ stages:
 build-code-job-dev:
      stage: build
      tags:
-       - learnovia
        - development
+       - learnovia
        - test
      only:
        - development
@@ -22,7 +22,6 @@ build-code-job-dev:
        - service apache2 status
        - service mysql status
        - ssh -T git@gitlab.com
-       
 #-------Backup------------------
        - echo "$CI_JOB_STAGE"
        -  -d /var/Learnovia-Backend-Backup  || mkdir -p /var/Learnovia-Backend-Backup 
@@ -31,8 +30,8 @@ build-code-job-dev:
 Pulling_Latest_Version-dev:
      stage: deploy
      tags:
-       - learnovia
        - development
+       - learnovia
        - test
      only:
        - development
@@ -62,8 +61,8 @@ Pulling_Latest_Version-dev:
 Rollback_to_Latest_Version-dev:
      stage: rollback
      tags:
-       - learnovia
        - development
+       - learnovia
        - test
      only:
        - development
@@ -95,9 +94,7 @@ Rollback_to_Latest_Version-dev:
 build-code-job-production:
      stage: build
      tags:
-       - learnovia
-       - production
-       - backend
+       - ansible
      only:
        - production
      script:
@@ -117,9 +114,7 @@ build-code-job-production:
 Pulling_Latest_Version-production:
      stage: deploy
      tags:
-       - learnovia
-       - production
-       - backend
+       - ansible
      only:
        - production
      script:
@@ -148,9 +143,7 @@ Pulling_Latest_Version-production:
 Rollback_to_Latest_Version-production:
      stage: rollback
      tags:
-       - learnovia
-       - production
-       - backend
+       - ansible
      only:
        - production
      script:
