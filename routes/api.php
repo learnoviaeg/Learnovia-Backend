@@ -460,6 +460,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('GradeTree', 'UserGradeController@index');
 
 
+    Route::Resource('year', YearController::class);
+
     Route::Resource('interactive', InterActiveController::class);
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
     Route::Resource('courses', CoursesController::class);
