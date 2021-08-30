@@ -459,9 +459,11 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
 
-
-    Route::Resource('year', YearController::class);
-    Route::Resource('type', TypeController::class);
+    Route::get('years/{my}', 'YearController@index');
+    Route::get('years/{export}', 'YearController@index');
+    Route::patch('years/{id}/{current}', 'YearController@update');
+    Route::Resource('years', YearController::class);
+    Route::Resource('types', TypeController::class);
 
     Route::Resource('interactive', InterActiveController::class);
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);

@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\AcademicYear;
+use App\Enroll;
+use Auth;
+use App\Exports\YearsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 class YearController extends Controller
 {
@@ -12,23 +17,35 @@ class YearController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$status=null)
     {
         $request->validate([
             'search' => 'nullable',
-            'id' => 'exists:academic_years,id',
             'all' => 'boolean',
         ]);
-        
-        $years=AcademicYear::whereNull('deleted_at');
-        if($request->filled('search'))
-            $years = AcademicYear::where('name', 'LIKE' , "%$request->search%"); 
 
-        if ($request->filled('id'))
-            $years = AcademicYear::where('id', $request->id)->first();
+        $years=AcademicYear::whereNull('deleted_at');
+
+        if($status == 'my')
+        {
+            $myYears=Enroll::where('user_id',Auth::id())->pluck('year');
+            $years->whereIn('id',$myYears);
+        }
+
+        if($status=='export')
+        {
+            $years = $years->get();
+            $filename = uniqid();
+            $file = Excel::store(new YearsExport($years), 'Year'.$filename.'.xls','public');
+            $file = url(Storage::url('Year'.$filename.'.xls'));
+
+            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+        }
         
-        $years =$years->paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(202, $years);
+        if($request->filled('search'))
+            $years = $years->where('name', 'LIKE' , "%$request->search%"); 
+        
+        return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
     }
 
     /**
@@ -42,11 +59,12 @@ class YearController extends Controller
         $request->validate([
             'name' => 'required'
         ]);
-        $year = AcademicYear::create([
+
+        $year = AcademicYear::firstOrCreate([
             'name' => $request->name
         ]);
-        $years = AcademicYear::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(201, $years, __('messages.year.add'));
+
+        return HelperController::api_response_format(201, AcademicYear::paginate(HelperController::GetPaginate($request)), __('messages.year.add'));
     }
 
     /**
@@ -57,7 +75,8 @@ class YearController extends Controller
      */
     public function show($id)
     {
-        //
+        $year = AcademicYear::where('id', $id)->first();
+        return HelperController::api_response_format(201, $year);
     }
 
     /**
@@ -67,9 +86,26 @@ class YearController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id,$current=null)
     {
-        //
+        $year = AcademicYear::find($id);
+        if($current=='current')
+        {
+            if($year->current == 1)
+                $year->update(['current' => 0]);
+            
+            else
+                $year->update(['current' => 1]);
+
+            $all = AcademicYear::where('id', '!=', $request->id)->update(['current' => 0]);
+        }
+
+        if(isset($request->name))
+            $year->name=$request->name;
+
+        $year->save();
+
+        return HelperController::api_response_format(201, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), __('messages.year.update'));
     }
 
     /**
@@ -78,8 +114,10 @@ class YearController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id,Request $request)
     {
-        //
+        $year=AcademicYear::find($id);
+        $year->delete();
+        return HelperController::api_response_format(200, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), __('messages.year.delete'));            
     }
 }
