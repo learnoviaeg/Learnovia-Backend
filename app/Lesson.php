@@ -8,9 +8,9 @@ class Lesson extends Model
 {
     protected $fillable = ['name','course_segment_id','index' , 'image' , 'description','shared_lesson','course_id'];
 
-    // protected $dispatchesEvents = [
-    //     'created' => \App\Events\LessonCreatedEvent::class,
-    // ];
+    protected $dispatchesEvents = [
+        'created' => \App\Events\LessonCreatedEvent::class,
+    ];
 
     public function courseSegment(){
         return $this->belongsTo('App\CourseSegment');

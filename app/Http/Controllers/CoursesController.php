@@ -85,7 +85,7 @@ class CoursesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public static function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required',
@@ -125,6 +125,15 @@ class CoursesController extends Controller
         // dd($classes);
         if ($request->filled('no_of_lessons'))
             $no_of_lessons = $request->no_of_lessons;
+
+        for ($i = 1; $i <= $no_of_lessons; $i++) {
+            $lesson=lesson::firstOrCreate([
+                'name' => 'Lesson ' . $i,
+                'index' => $i,
+                'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
+                'course_id' => $course->id
+            ]);
+        }
 
         foreach($classes as $class)
         {

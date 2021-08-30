@@ -65,67 +65,7 @@ class CoursesImport implements ToModel , WithHeadingRow
         ]);
 
         //should to find a way to call this without change it to static
-        CoursesController::store($req);
-
-
-        // $course = Course::firstOrCreate([
-        //     'name' => $row['name'],
-        //     'short_name' => $row['short_name'],
-        //     'segment_id' => $row['segment_id'],
-        //     'level_id' => $row['level_id'],
-        //     'category_id' => isset($row['category']) ? $row['category'] : null,
-        //     'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,
-        //     'description' => isset($row['description']) ? $row['description'] : null
-        // ]);
-
-        // $level_id=$course->level_id;
-        // $segment=Segment::find($course->segment_id);
-        // $segment_id=$segment->id;
-        // $year_id=$segment->academic_year_id;
-        // $type_id=$segment->academic_type_id;
-        // $classes=Classes::where('level_id',$course->level_id)->get();
-        // // dd($classes);
-
-        // foreach($classes as $class)
-        // {
-        //     $enroll=Enroll::firstOrCreate([
-        //         'user_id'=> 1,
-        //         'role_id' => 1,
-        //         'year' => $year_id,
-        //         'type' => $type_id,
-        //         'segment' => $segment_id,
-        //         'level' => $level_id,
-        //         'group' => $class->id,
-        //         'course' => $course->id
-        //     ]);
-
-        //     for ($i = 1; $i <= $no_of_lessons; $i++) {
-        //         $lesson=lesson::firstOrCreate([
-        //             'name' => 'Lesson ' . $i,
-        //             'index' => $i,
-        //             'shared_lesson' => $row['shared_lesson'],
-        //             'course_id' => $course->id
-        //         ]);
-
-        //         SecondaryChain::firstOrCreate([
-        //             'user_id' => 1,
-        //             'role_id' => 1,
-        //             'group_id' => $enroll->group,
-        //             'course_id' => $enroll->course,
-        //             'lesson_id' => $lesson->id,
-        //             'enroll_id' => $enroll->id
-        //         ]);
-
-        //         // event(new LessonCreatedEvent($lesson,$enroll));
-        //     }
-        // }
-
-        // // event(new CourseCreatedEvent($course,$no_of_lessons));
-
-        // //Creating defult question category
-        // $quest_cat = QuestionsCategory::firstOrCreate([
-        //     'name' => $course->name . ' Category',
-        //     'course_id' => $course->id,
-        // ]);
+        // CoursesController::store($req);
+        app('App\Http\Controllers\CoursesController')->store($req);
     }
 }
