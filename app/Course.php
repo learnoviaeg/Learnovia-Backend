@@ -62,4 +62,12 @@ class Course extends Model
             $content = true;
         return $content;
     }
+
+    public function getImageAttribute()
+    {
+        if($this->attributes['image'] !=null){
+            $attachment=attachment::find($this->attributes['image']);
+            return $attachment->path;
+        }
+    }
 }

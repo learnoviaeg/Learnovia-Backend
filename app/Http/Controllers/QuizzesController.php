@@ -96,8 +96,8 @@ class QuizzesController extends Controller
         $quizzes = collect([]);
 
         foreach($quiz_lessons as $quiz_lesson){
-            $quiz=quiz::with('course','Question.children')->where('id',$quiz_lesson->quiz_id)->first();
-            $quiz['quizlesson'] = $quiz_lesson;
+            $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
+            // $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
             $quiz['level'] = Level::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
@@ -230,14 +230,14 @@ class QuizzesController extends Controller
         ]);
 
         $quiz = quiz::where('id',$id)->with('Question.children')->first();
-        $quiz->quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
-        $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz->quizLesson->id);
+        $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
+        $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id);
         if($request->user_id)
-            $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quiz->quizLesson->id);
+            $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);
 
-        $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz->quizLesson->id)->where('attemps','>','0')->first();
+        $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
         if(isset($quiz_override))
-            $quiz->quizLesson->due_date = $quiz_override->due_date;
+            $quizLesson->due_date = $quiz_override->due_date;
 
         $query=clone $user_quiz;
         $last_attempt=$query->latest()->first();
@@ -245,7 +245,7 @@ class QuizzesController extends Controller
         $quiz->token_attempts = 0;
 
         if(isset($last_attempt)){
-            if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz->quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
+            if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
                 UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
 
             $check_time = ($remain_time) - (strtotime(Carbon::now())- strtotime(Carbon::parse($last_attempt->open_time)));
@@ -266,23 +266,20 @@ class QuizzesController extends Controller
             $quiz->Question;
         }
 
-        if(isset($quiz)){
-            foreach($quiz->Question as $question){
-                $children_mark = 0;
-                QuestionsController::mark_details_of_question_in_quiz($question ,$quiz);
-                if(isset($question->children)){
-                    foreach($question->children as $child){
-                        $childd = QuestionsController::mark_details_of_question_in_quiz($child ,$quiz);
-                        $children_mark += $childd->mark;
-                    }
-                    $question->mark += $children_mark;
+        $quiz->quiz_lesson=[$quizLesson];
+        foreach($quiz->Question as $question){
+            $children_mark = 0;
+            QuestionsController::mark_details_of_question_in_quiz($question ,$quiz);
+            if(isset($question->children)){
+                foreach($question->children as $child){
+                    $childd = QuestionsController::mark_details_of_question_in_quiz($child ,$quiz);
+                    $children_mark += $childd->mark;
                 }
+                $question->mark += $children_mark;
             }
-            LastAction::lastActionInCourse($quiz->course_id);
-            return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
         }
-
-        return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
+        LastAction::lastActionInCourse($quiz->course_id);
+        return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
     }
 
     /**
