@@ -54,32 +54,25 @@ class ClassController extends Controller
 
         $classes = new Classes;
 
-        $classes = Classes::WhereHas('classlevel.yearLevels.yearType', function ($q) use ($request) {
-            if($request->filled('years'))
-                $q->whereIn("academic_year_id", $request->years);
-            if($request->filled('types'))
-                $q->whereIn("academic_type_id", $request->types);
-        });
-
-        $classes = $classes->WhereHas('classlevel.yearLevels', function ($q) use ($request) {
-            if($request->filled('levels'))
-                $q->whereIn("level_id", $request->levels);
-        });
+        $Classes = Classes::whereNull('deleted_at')
+        ->whereHas('level', function($q)use ($request){ 
+                if ($request->has('level')) 
+                    $q->where('level_id',$request->level);
+        })->get();
 
         if($request->filled('search'))
             $classes = $classes->where('name', 'LIKE' , "%$request->search%");
 
         $classes = $classes->get();
         $all_classes=collect([]);
-
-        foreach ($classes as $class){ 
-            $levels_id= $class->classlevel->pluck('yearLevels.*.level_id')->collapse()->unique();
-            $class['levels']= Level::whereIn('id',$levels_id)->pluck('name');
-            $academic_year_id= array_values( $class->classlevel->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse()->unique()->toArray());
-            $class['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
-            $academic_type_id = array_values($class->classlevel->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse()->unique()->toArray());
-            $class['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-            unset($class->classlevel);
+        foreach($Classes as $class){ 
+            $levels_id= $class->level->pluck('id')->collapse()->unique();
+            // $class['levels']= Level::whereIn('id',$levels_id)->pluck('name');
+            // $academic_year_id= array_values( $class->classlevel->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse()->unique()->toArray());
+            // $class['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+            // $academic_type_id = array_values($class->classlevel->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse()->unique()->toArray());
+            // $class['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+            // unset($class->classlevel);
             $all_classes->push($class);
         }
 
