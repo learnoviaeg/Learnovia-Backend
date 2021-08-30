@@ -136,7 +136,6 @@ class LevelsController extends Controller
                                                 if($request->filled('types'))
                                                     $q->whereIn("academic_type_id", $request->types);
                                             });
-                                            // dd($levels->get());
         
         if($request->filled('search'))
             $levels=$levels->where('name', 'LIKE' , "%$request->search%");

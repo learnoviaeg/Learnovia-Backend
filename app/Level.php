@@ -13,7 +13,7 @@ class Level extends Model
     protected $fillable = ['name','academic_type_id'];
     public function type()
     {
-        return $this->belongsTo('App\AcademicType', 'id', 'academic_type_id');
+        return $this->belongsTo('App\AcademicType', 'academic_type_id', 'id');
     }
 
     // public function yearlevel()
