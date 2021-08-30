@@ -42,7 +42,7 @@ use App\Segment;
 // use App\YearLevel;
 // use App\ClassLevel;
 // use App\AcademicYearType;
-// use App\CourseSegment;
+use App\Observers\SecodaryChainObserver;
 use App\Timeline;
 use App\Material;
 
@@ -110,6 +110,8 @@ class AppServiceProvider extends ServiceProvider
         Parents::observe(LogsObserver::class);
         // CourseSegment::observe(LogsObserver::class);
         Enroll::observe(EnrollObserver::class);
+
+        Enroll::observe(SecodaryChainObserver::class);
 
         // UserGrade::observe(UserGradeObserver::class);
         GradeItems::observe(GradeItemObserver::class);
