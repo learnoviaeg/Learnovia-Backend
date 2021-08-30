@@ -97,8 +97,14 @@ class CoursesController extends Controller
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
             // 'description' => 'string',
             'mandatory' => 'nullable',
-            'short_name' =>'required'
+            'short_name' =>'required',
             // 'typical' => 'nullable|boolean',
+
+            'chains.*.year' => 'array',
+            'chains.*.level' => 'array|required_with:chains.*.year',
+            'chains.*.level.*' => 'required|exists:levels,id',
+            'chains.*.class' => 'array',
+            'chains.*.class.*' => 'exists:classes,id',
         ]);
         
         $short_names=Course::where('segment_id',$request->segment_id)->where('short_name',$request->short_name)->get();

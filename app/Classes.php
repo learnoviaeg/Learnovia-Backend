@@ -17,10 +17,11 @@ class Classes extends Model
     protected $hidden = [
        'created_at','updated_at'
     ];
-    // public function classlevel()
-    // {
-    //     return $this->hasMany('App\ClassLevel' ,  'class_id', 'id');
-    // }
+
+    public function level()
+    {
+        return $this->hasOne('App\Level' , 'id', 'level_id');
+    }
 
     // public function Segment_class()
     // {
