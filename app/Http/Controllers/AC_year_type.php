@@ -43,12 +43,13 @@ class AC_year_type extends Controller
             return HelperController::api_response_format(200, $types);
         }
         else {
-            $cat = AcademicYear::whereId($request->year)->first()->AC_Type->pluck('id');
-            $types = AcademicType::with('yearType.academicyear')->whereIn('id',$cat);     
-            if(isset($request->dropdown) && $request->dropdown == true)       
-                return HelperController::api_response_format(200, $types->get());
-            else
-                return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)));
+            // $cat = AcademicYear::whereId($request->year)->first()->AC_Type->pluck('id');
+            // $types = AcademicType::with('yearType.academicyear')->whereIn('id',$cat);     
+            $types = AcademicType::all();     
+            // if(isset($request->dropdown) && $request->dropdown == true)       
+            //     return HelperController::api_response_format(200, $types->get());
+            // else
+            return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)));
         }
     }
 
