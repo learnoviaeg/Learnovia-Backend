@@ -74,6 +74,7 @@ class AcademicYearController extends Controller
         if ($request->filled('id')) {
             $year = AcademicYear::where('id', $request->id)->first();
         }
+        $year = AcademicYear::get();
         // else if ($request->filled('all')) {
         //     $year = AcademicYear::with('AC_Type')->get();
         // } else {
