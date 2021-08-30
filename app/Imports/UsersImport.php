@@ -145,10 +145,10 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$enrollOptional.$enrollcounter])) {
                     $course_id=Course::where('short_name',$row[$enrollOptional.$enrollcounter])->pluck('id')->first();
                     if(!isset($course_id))
-                        break;
+                        break; //continue; // die('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist'])
                     $courseSeg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);
                     if($courseSeg == null)
-                        break;
+                        break; //continue;
             
                     Enroll::firstOrCreate([
                         'course_segment' => $courseSeg->id,
