@@ -72,13 +72,13 @@ class AcademicYearController extends Controller
         ]);
         //$year = AcademicYear::with('AC_Type');
         if ($request->filled('id')) {
-            $year = AcademicYear::with('AC_Type')->where('id', $request->id)->first();
+            $year = AcademicYear::where('id', $request->id)->first();
         }
-        else if ($request->filled('all')) {
-            $year = AcademicYear::with('AC_Type')->get();
-        } else {
-            $year = AcademicYear::with('AC_Type')->paginate(HelperController::GetPaginate($request));
-        }
+        // else if ($request->filled('all')) {
+        //     $year = AcademicYear::with('AC_Type')->get();
+        // } else {
+        //     $year = AcademicYear::with('AC_Type')->paginate(HelperController::GetPaginate($request));
+        // }
         return HelperController::api_response_format(200, $year);
     }
 
