@@ -87,6 +87,7 @@ class InterActiveController extends Controller
             $content->original->link = config('app.url').'api/interactive/'.$h5p->content_id.'/?api_token='.Auth::user()->api_token;
             $content->original->item_lesson_id = $h5p->id;
             $content->original->visible = $h5p->visible;
+            $content->original->publish_date = $h5p->publish_date;
             $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit'.'?editting_done=false';
             if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id())
                 $content->original->edit_link = null;
