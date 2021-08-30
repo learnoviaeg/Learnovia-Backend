@@ -19,7 +19,7 @@ class Segment extends Model
 
     public function academicType()
     {
-        return $this->belongsTo('App\AcademicType', 'academic_type_id', 'id');
+        return $this->belongsTo('App\AcademicType', 'academic_type_id', 'id','start_date','end_date');
     }
 
     public function academicYear()
