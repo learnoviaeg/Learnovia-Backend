@@ -136,7 +136,7 @@ class User extends Authenticatable
                 $touserid[] = $temp;
         }
         $date=$request['publish_date'];
-        $seconds = $date->diffInSeconds(Carbon::now());
+        $seconds = Carbon::parse($date)->diffInSeconds(Carbon::now());
         if($seconds < 0) {
             $seconds = 0 ;
         }

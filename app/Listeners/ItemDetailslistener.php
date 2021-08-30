@@ -73,7 +73,7 @@ class ItemDetailslistener
                 'type' => $event->type,
                 'item_id' => $event->grade_item->item_id,
                 'parent_item_id' => $event->grade_item->id,
-                'weight_details' => json_encode($event->grade_item->assignmentLessson[0]->mark),
+                'weight_details' => json_encode($event->grade_item->assignmentLesson[0]->mark),
             ]);
         }
     }

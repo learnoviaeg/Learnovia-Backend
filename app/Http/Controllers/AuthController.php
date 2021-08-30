@@ -263,4 +263,26 @@ class AuthController extends Controller
         $array['site'] = env('APP_NAME' , 'Learnovia');
         return HelperController::api_response_format(200,$array);
     }
+
+    public function config()
+    {
+        // $bool=;
+        $firebase=[
+            'apiKey' => 'AIzaSyDNHapmkBjO39XztyBqjb_0syU0pHSXd8k',
+            'authDomain'=> 'learnovia-notifications.firebaseapp.com',
+            'databaseURL'=> 'https://learnovia-notifications.firebaseio.com',
+            'projectId'=> 'learnovia-notifications',
+            'storageBucket'=> 'learnovia-notifications.appspot.com',
+            'messagingSenderId'=> '1056677579116',
+            'appId'=> '1:1056677579116:web:23adce50898d8016ec8b49',
+            'measurementId'=> 'G-BECF0Q93VE'
+        ];
+        $config=[
+            'production'=> env('APP_DEBUG'),
+            'apiUrl'=> env('APP_URL'),
+            'firebase'=> $firebase
+        ];
+
+        return $config;
+    }
 }

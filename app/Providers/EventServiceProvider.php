@@ -57,6 +57,10 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\LessonCreatedEvent' => [
             'App\Listeners\AddSecondChainListener',
         ],
+        //7esab daragat el2s2la el manual(and_why & essay)
+        'App\Events\ManualCorrectionEvent' => [
+            'App\Listeners\GradeManualListener',
+        ],
     ];
 
     /**
