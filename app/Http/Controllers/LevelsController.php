@@ -35,7 +35,7 @@ class LevelsController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'types' => 'required|exists:academic_types,id',
+            'type' => 'required|exists:academic_types,id',
         ]);
         foreach($request->types as $type){
             $dd=Level::create([
