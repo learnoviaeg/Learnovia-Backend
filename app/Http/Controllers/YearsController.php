@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\AcademicYear;
 use App\Enroll;
+use Carbon\Carbon;
 use Auth;
 use App\Exports\YearsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
-class YearController extends Controller
+class YearsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,14 +22,15 @@ class YearController extends Controller
     {
         $request->validate([
             'search' => 'nullable',
-            'all' => 'boolean',
         ]);
 
         $years=AcademicYear::whereNull('deleted_at');
 
         if($status == 'my')
         {
-            $myYears=Enroll::where('user_id',Auth::id())->pluck('year');
+            $currentSegment=Segment::where('start_date', '<=',Carbon::now())
+                ->where('end_date','>=',Carbon::now())->pluck('academic_year_id');
+            $myYears=Enroll::where('user_id',Auth::id())->whereIn('year',$currentSegment)->pluck('year');
             $years->whereIn('id',$myYears);
         }
 
@@ -97,7 +99,7 @@ class YearController extends Controller
             else
                 $year->update(['current' => 1]);
 
-            $all = AcademicYear::where('id', '!=', $request->id)->update(['current' => 0]);
+            AcademicYear::where('id', '!=', $request->id)->update(['current' => 0]);
         }
 
         if(isset($request->name))

@@ -176,7 +176,9 @@ class AcademicYearController extends Controller
         //     }
         // $years = Enroll::where('user_id',Auth::id())->whereIn('course_segment' ,$CS)->pluck('year');
 
-        $myYears=Enroll::where('user_id',Auth::id())->pluck('year');
+        $currentSegment= Segment::where('start_date', '<=',Carbon::now())
+                        ->where('end_date','>=',Carbon::now())->pluck('academic_year_id');
+        $myYears=Enroll::where('user_id',Auth::id())->whereIn('year',$currentSegment)->pluck('year');
 
         $yearr = AcademicYear::whereIn('id', $myYears)->get();
         // if(isset($yearr) && count($yearr) > 0)
