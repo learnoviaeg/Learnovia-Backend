@@ -21,6 +21,8 @@ use Illuminate\Support\Carbon;
 use App\Component;
 use App\LessonComponent;
 use App\LastAction;
+use App\SecondaryChain;
+
 class PageController extends Controller
 {
     /**
@@ -112,20 +114,26 @@ class PageController extends Controller
                 'index' => LessonComponent::getNextIndex($request->Lesson_id)
             ]);
             $TempLesson = Lesson::find($lesson);
-            LastAction::lastActionInCourse($TempLesson->courseSegment->courses[0]->id);
-            $usersIDs = Enroll::where('course_segment', $TempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
-            User::notify([
-                'id' => $page->id,
-                'message' => $page->title . ' page is added',
-                'from' => Auth::user()->id,
-                'users' => $usersIDs,
-                'course_id' => $TempLesson->courseSegment->courses[0]->id,
-                'class_id' => $TempLesson->courseSegment->segmentClasses[0]->classLevel[0]->classes[0]->id,
-                'lesson_id' => $lesson,
-                'type' => 'Page',
-                'link' => url(route('getPage')) . '?id=' . $page->id,
-                'publish_date' => $publishdate,
-            ]);
+            //getting secondary chain of each lesson
+            $secondary_chains = SecondaryChain::where('lesson_id',$lesson)->get()->keyBy('group_id');
+            foreach($secondary_chains as $secondary_chain){
+                $courseID = $secondary_chain->course_id;
+                $class_id = $secondary_chain->group_id;
+                $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
+                LastAction::lastActionInCourse($courseID);
+                User::notify([
+                    'id' => $page->id,
+                    'message' => $page->title . ' page is added',
+                    'from' => Auth::user()->id,
+                    'users' => $usersIDs->toArray(),
+                    'course_id' => $courseID,
+                    'class_id' => $class_id,
+                    'lesson_id' => $lesson,
+                    'type' => 'Page',
+                    'publish_date' => $publishdate,
+                ]);
+            }
+
         }
         $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
         return HelperController::api_response_format(200, $tempReturn, __('messages.page.add'));
@@ -184,7 +192,8 @@ class PageController extends Controller
             $page_lesson->update(['visible' => $request->visible]);
 
         $lesson_drag = Lesson::find($request->lesson_id[0]);
-        LastAction::lastActionInCourse($lesson_drag->courseSegment->courses[0]->id);
+
+        LastAction::lastActionInCourse($lesson_drag->course_id);
         if (!$request->filled('updated_lesson_id')) {
             $request->updated_lesson_id= $request->lesson_id[0];
             }
@@ -198,20 +207,25 @@ class PageController extends Controller
         // $page = Lesson::find($request->updated_lesson_id)->module('Page', 'page')->get();
         $page['lesson'] =  $page->Lesson;
         $lesson = Lesson::find($request->updated_lesson_id);
-        LastAction::lastActionInCourse($lesson->courseSegment->courses[0]->id);
-        $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
-        User::notify([
-            'id' => $request->id,
-            'message' => $pagename.' page is updated',
-            'from' => Auth::user()->id,
-            'users' => $usersIDs,
-            'course_id' => $lesson->courseSegment->courses[0]->id,
-            'class_id' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->classes[0]->id,
-            'lesson_id' => $request->updated_lesson_id,
-            'type' => 'Page',
-            'link' => url(route('getPage')) . '?id=' . $request->id,
-            'publish_date' => Carbon::now()
-        ]);
+        LastAction::lastActionInCourse($lesson_drag->course_id);
+        $secondary_chains = SecondaryChain::where('lesson_id',$lesson)->get()->keyBy('group_id');
+        foreach($secondary_chains as $secondary_chain){
+            $courseID = $secondary_chain->course_id;
+            $class_id = $secondary_chain->group_id;
+            $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
+            User::notify([
+                'id' => $request->id,
+                'message' => $pagename.' page is updated',
+                'from' => Auth::user()->id,
+                'users' => $usersIDs->toArray(),
+                'course_id' => $courseID,
+                'class_id' => $class_id,
+                'lesson_id' => $request->updated_lesson_id,
+                'type' => 'Page',
+                'link' => url(route('getPage')) . '?id=' . $request->id,
+                'publish_date' => Carbon::now()
+            ]);
+        }
         return HelperController::api_response_format(200, $page, __('messages.page.update'));
         
     }
@@ -259,8 +273,9 @@ class PageController extends Controller
         if ($page == null)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
         $lesson = $page->lesson->where('id', $request->lesson_id)->first();
+
         if(isset($lesson))
-            $course_id= $lesson->courseSegment->course_id;
+            $course_id= $lesson->course_id;
         else
             return HelperController::api_response_format(200, null , __('messages.page.page_not_belong'));
         $page->course_id=$course_id;
@@ -286,7 +301,7 @@ class PageController extends Controller
                 return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
             }
             $TempLesson = Lesson::find($request->lesson_id);
-            LastAction::lastActionInCourse($TempLesson->courseSegment->courses[0]->id);
+            LastAction::lastActionInCourse($TempLesson->courses_id);
             $page_lesson->visible = ($page_lesson->visible == 1) ? 0 : 1;
             $page_lesson->save();
 

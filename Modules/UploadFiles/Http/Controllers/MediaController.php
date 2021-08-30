@@ -222,21 +222,21 @@ class MediaController extends Controller
 
                     $mediaLesson->save();
                     foreach($secondary_chains as $secondary_chain){
-                    $courseID = $secondary_chain->course_id;
-                    $class_id = $secondary_chain->group_id;
-                    $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
-                    LastAction::lastActionInCourse($courseID);
-                    User::notify([
-                        'id' => $media->id,
-                        'message' => $media->name.' media is added',
-                        'from' => Auth::user()->id,
-                        'users' => $usersIDs,
-                        'course_id' => $courseID,
-                        'class_id' => $class_id,
-                        'lesson_id' => $mediaLesson->lesson_id,
-                        'type' => 'media',
-                        'publish_date' => Carbon::parse($publishdate),
-                    ]);
+                        $courseID = $secondary_chain->course_id;
+                        $class_id = $secondary_chain->group_id;
+                        $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
+                        LastAction::lastActionInCourse($courseID);
+                        User::notify([
+                            'id' => $media->id,
+                            'message' => $media->name.' media is added',
+                            'from' => Auth::user()->id,
+                            'users' => $usersIDs->toArray(),
+                            'course_id' => $courseID,
+                            'class_id' => $class_id,
+                            'lesson_id' => $mediaLesson->lesson_id,
+                            'type' => 'media',
+                            'publish_date' => Carbon::parse($publishdate),
+                        ]);
                 }
 
                 LessonComponent::firstOrCreate([
@@ -370,26 +370,29 @@ class MediaController extends Controller
         $mediaLesson->save();
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'media')->get();
         $lesson = Lesson::find($request->updated_lesson_id);
-        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        $courseID = $lesson->course_id;
         LastAction::lastActionInCourse($courseID);
-        $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        $usersIDs = Enroll::where('course_segment', $lesson->course_segment_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toarray();
-        
         $publish_date=$mediaLesson->publish_date;
         if(carbon::parse($publish_date)->isPast())
             $publish_date=Carbon::now();
-        User::notify([
-            'id' => $media->id,
-            'message' => $media->name.' media is updated',
-            'from' => Auth::user()->id,
-            'users' => $usersIDs,
-            'course_id' => $courseID,
-            'class_id' => $class_id,
-            'lesson_id' => $mediaLesson->lesson_id,
-            'type' => 'media',
-            'publish_date' => carbon::parse($publish_date),
-        ]);
 
+        $secondary_chains = SecondaryChain::where('lesson_id',$lesson)->get()->keyBy('group_id');
+        foreach($secondary_chains as $secondary_chain){
+            $courseID = $secondary_chain->course_id;
+            $class_id = $secondary_chain->group_id;
+            $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
+            User::notify([
+                'id' => $media->id,
+                'message' => $media->name.' media is updated',
+                'from' => Auth::user()->id,
+                'users' => $usersIDs->toArray(),
+                'course_id' => $courseID,
+                'class_id' => $class_id,
+                'lesson_id' => $mediaLesson->lesson_id,
+                'type' => 'media',
+                'publish_date' => carbon::parse($publish_date),
+            ]);
+        }
         if($media->type != null)
         {
             if(str_contains($media->type , 'image'))
