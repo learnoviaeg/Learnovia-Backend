@@ -106,54 +106,53 @@ class segment_class_Controller extends Controller
 
             $segmentt = Segment::whereNull('deleted_at')
             ->where('name', 'LIKE' , "%$request->search%")
-            ->whereHas('Segment_class.classes' , function($q)use ($request)
+            ->whereHas('academicType' , function($q)use ($request)
             { 
-                    if ($request->has('classes'))
-                        $q->whereIn('id',$request->classes);
-                
-            })
-            ->whereHas('Segment_class.classes.classlevel.yearLevels', function($q)use ($request)
-            { 
-                    if ($request->has('levels')) 
-                        $q->whereIn('level_id',$request->levels);
-            })
-            ->whereHas('Segment_class.classes.classlevel.yearLevels.yearType' , function($q)use ($request)
-            { 
-                if ($request->has('years'))
-                    $q->whereIn('academic_year_id',$request->years);
                 if ($request->has('types'))
                     $q->whereIn('academic_type_id',$request->types);
+            })
+            ->whereHas('academicYear', function($q)use ($request)
+            { 
+                if ($request->has('years')) 
+                    $q->whereIn('academic_year_id',$request->years);
             })->get();
-            $segments = Segment::with(['academicType.yearType.academicyear','Segment_class.yearLevels.yearType']);
+            // ->whereHas('Segment_class.classes.classlevel.yearLevels.yearType' , function($q)use ($request)
+            // { 
+            //     if ($request->has('years'))
+            //         $q->whereIn('academic_year_id',$request->years);
+            //     if ($request->has('types'))
+            //         $q->whereIn('academic_type_id',$request->types);
+            // })->get();
+            $segments = Segment::with(['academicType','academicYear']);
             $all_segments=collect([]);
            
             if($call == 1){
                 $segmentIds = $segmentt->pluck('id');
                 return $segmentIds;
             }
-            foreach($segmentt as $segment){
-                $academic_year_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse();
-                $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
-                $academic_type_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse();
-                $segment['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-                if(isset($segment->segment_class/*->class_id*/)){
-                    $class_id = $segment->segment_class->pluck('class_id');
-                    $segment['class']=Classes::whereIn('id',$class_id)->pluck('name');
-                }
-                $level_id = $segment->Segment_class->pluck('yearLevels.*.level_id')->collapse();
-                $segment['level'] = Level::whereIn('id',$level_id)->pluck('name');
-                unset($segment->segment_class);
-                $all_segments->push($segment);
-            }
+            // foreach($segmentt as $segment){
+            //     $academic_year_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse();
+            //     $segment['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+            //     $academic_type_id = $segment->Segment_class->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse();
+            //     $segment['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+            //     if(isset($segment->segment_class/*->class_id*/)){
+            //         $class_id = $segment->segment_class->pluck('class_id');
+            //         $segment['class']=Classes::whereIn('id',$class_id)->pluck('name');
+            //     }
+            //     $level_id = $segment->Segment_class->pluck('yearLevels.*.level_id')->collapse();
+            //     $segment['level'] = Level::whereIn('id',$level_id)->pluck('name');
+            //     unset($segment->segment_class);
+            //     $all_segments->push($segment);
+            // }
             
             if($request->returnmsg == 'delete')
-                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.delete'));
+                return HelperController::api_response_format(200,  $segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.delete'));
             if($request->returnmsg == 'add')
-                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.add'));
+                return HelperController::api_response_format(200,  $segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.add'));
             if($request->returnmsg == 'update')
-                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.update'));
+                return HelperController::api_response_format(200,  $segments->paginate(HelperController::GetPaginate($request)),__('messages.segment.update'));
             else
-                return HelperController::api_response_format(200,  $all_segments->paginate(HelperController::GetPaginate($request)));
+                return HelperController::api_response_format(200,  $segments->paginate(HelperController::GetPaginate($request)));
         }
     }
 
