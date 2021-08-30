@@ -126,21 +126,19 @@ class ClassController extends Controller
             'level.*'=> 'exists:levels,id',
         ]);
 
-        $class = Classes::create([
-            'name' => $request->name,
-        ]);
+        // $class = Classes::create([
+        //     'name' => $request->name,
+        // ]);
         if($request->filled('year')&&$request->filled('type')&&$request->filled('level')){
             foreach ($request->year as $year) {
                 # code...
                 foreach ($request->type as $type) {
                     # code...
-                    $yeartype = AcademicYearType::checkRelation($year , $type);
                     foreach ($request->level as $level) {
                         # code...
-                        $yearlevel = YearLevel::checkRelation($yeartype->id , $level);
-                        ClassLevel::firstOrCreate([
-                            'year_level_id' => $yearlevel->id,
-                            'class_id' => $class->id
+                        $class = Classes::create([
+                            'name' => $request->name,
+                            'level_id' => $level
                         ]);
                     }
                 }

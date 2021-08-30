@@ -35,12 +35,15 @@ class LevelsController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'type' => 'required|exists:academic_types,id',
+            'types' => 'required|exists:academic_types,id',
         ]);
-        $dd=Level::create([
-            'name' => $request->name,
-            'academic_type_id' => $request->type
-        ]);
+        foreach($request->types as $type){
+            $dd=Level::create([
+                'name' => $request->name,
+                'academic_type_id' => $type
+            ]);
+        }
+
         $levels = Level::paginate(HelperController::GetPaginate($request));
         return HelperController::api_response_format(201, $levels, __('messages.level.add'));
     }
@@ -129,12 +132,11 @@ class LevelsController extends Controller
         }
         
         $levels = new Level;
-        $levels = Level::whereHas("years", function ($q) use ($request) {
-                                                if($request->filled('years'))
-                                                    $q->whereIn("academic_year_id", $request->years);
+        $levels = Level::whereHas('type', function ($q) use ($request) {
                                                 if($request->filled('types'))
-                                                        $q->whereIn("academic_type_id", $request->types);
+                                                    $q->whereIn("academic_type_id", $request->types);
                                             });
+                                            dd($levels->get());
         
         if($request->filled('search'))
             $levels=$levels->where('name', 'LIKE' , "%$request->search%");
@@ -144,11 +146,8 @@ class LevelsController extends Controller
 
         foreach ($levels as $level)
         {
-            $academic_type_id= $level->years->pluck('academic_type_id')->unique();
+            $academic_type_id= $level->type->pluck('id')->unique();
             $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-            $academic_year_id= $level->years->pluck('academic_year_id')->unique();
-            $level['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
-            unset($level->years);
             $all_levels->push($level); 
         }
 

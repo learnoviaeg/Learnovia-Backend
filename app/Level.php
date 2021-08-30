@@ -11,10 +11,10 @@ class Level extends Model
     use SoftDeletes;
 
     protected $fillable = ['name','academic_type_id'];
-    // public function years()
-    // {
-    //     return $this->belongsToMany('App\AcademicYearType', 'year_levels', 'level_id', 'academic_year_type_id');
-    // }
+    public function type()
+    {
+        return $this->belongsTo('App\AcademicType', 'id', 'academic_type_id');
+    }
 
     // public function yearlevel()
     // {
