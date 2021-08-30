@@ -172,6 +172,8 @@ class segment_class_Controller extends Controller
             'name'      => 'required',
             'year'      => 'required|exists:academic_years,id',
             'type'      => 'required|exists:academic_types,id',
+            'start_date'      => 'required|date|before_or_equal:end_date',
+            'end_date'      => 'required|date',
             // 'levels'    => 'required|array',
             // 'levels.*.id'  => 'required|exists:levels,id',
             // 'levels.*.classes'   => 'required|array',
@@ -189,7 +191,9 @@ class segment_class_Controller extends Controller
         $segment = Segment::firstOrCreate([
             'name' => $req->name,
             'academic_type_id'=>$req->type,
-            'academic_year_id'=>$req->year
+            'academic_year_id'=>$req->year,
+            'start_date' => $req->start_date,
+            'end_date' => $req->end_date
         ]);
         // $yeartype = AcademicYearType::checkRelation($req->year, $req->type);
         // foreach($req->levels as $level){
