@@ -153,7 +153,7 @@ Route::group(['prefix' => 'type', 'middleware' => ['auth:api','LastAction']], fu
     Route::get('get-my-types', 'AC_year_type@getMytypes')->name('getmytype')->middleware('permission:type/get-my-types');
     Route::get('get-all', 'AC_year_type@get')->name('gettypes')->middleware('permission:type/get-all');
     Route::post('update', 'AC_year_type@updateType')->name('updatetype')->middleware('permission:type/update');
-    Route::post('assign', 'AC_year_type@Assign_to_anther_year')->name('assigntype')->middleware('permission:type/assign');
+    // Route::post('assign', 'AC_year_type@Assign_to_anther_year')->name('assigntype')->middleware('permission:type/assign');
     Route::get('export', 'AC_year_type@export')->name('exportTypes')->middleware('permission:type/export');
 
 });
@@ -459,9 +459,14 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
 
+    Route::get('years/{my}', 'YearsController@index');
+    Route::get('years/{export}', 'YearsController@index');
+    Route::patch('years/{id}/{current}', 'YearsController@update');
+    Route::Resource('years', YearsController::class);
 
-    Route::Resource('year', YearController::class);
-    Route::Resource('type', TypeController::class);
+    Route::get('types/{my}', 'TypesController@index');
+    Route::get('types/{export}', 'TypesController@index');
+    Route::Resource('types', TypesController::class);
 
     Route::Resource('interactive', InterActiveController::class);
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
