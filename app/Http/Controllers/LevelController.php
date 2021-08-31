@@ -41,7 +41,7 @@ class LevelController extends Controller
         ]);
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $levels=Level::whereIn('id',$enrolls->pluck('level'));  
+        $levels=Level::with('type')->whereIn('id',$enrolls->pluck('level'));  
         
         if($request->filled('search'))
             $levels=$levels->where('name', 'LIKE' , "%$request->search%");
@@ -62,18 +62,7 @@ class LevelController extends Controller
             return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
         }
 
-        $all_levels = collect([]);
-        $levels= $levels->get();  
-
-        foreach ($levels as $level)
-        {
-            $academic_type_id= $level->type->pluck('id')->unique();
-            // $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-            // unset($level->type);
-            $all_levels->push($level); 
-        }
-
-        return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
+        return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
     }
 
     /**
