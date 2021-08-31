@@ -479,7 +479,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('levels/{export}', 'TypesController@index');
     Route::Resource('levels', LevelController::class);
 
-    Route::Resource('classes', ClassesController::class);
+    Route::Resource('classs', ClassesController::class);
     Route::get('claass/{option}', 'ClassesController@index')->middleware(['permission:course/layout']);
     Route::Resource('users', UsersController::class);
     Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
