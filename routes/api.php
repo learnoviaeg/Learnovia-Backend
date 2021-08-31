@@ -461,7 +461,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('interactive', InterActiveController::class);
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
     Route::Resource('courses', CoursesController::class);
-    Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
+    // Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
     Route::Resource('levels', LevelController::class);
     Route::Resource('classes', ClassesController::class);

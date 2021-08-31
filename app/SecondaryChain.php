@@ -21,4 +21,8 @@ class SecondaryChain extends Model
     {
         return $this->hasOne('App\Classes','id','group_id');
     }
+    public function Enroll()
+    {
+        return $this->hasOne('App\Enroll','id','enroll_id');
+    }
 }
