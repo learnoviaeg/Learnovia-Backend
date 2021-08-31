@@ -62,7 +62,7 @@ class SegmentsController extends Controller
             return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
         }
 
-        return HelperController::api_response_format(200, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
+        return HelperController::api_response_format(200, null, __('messages.segment.list'));
     }
 
     /**
@@ -109,7 +109,8 @@ class SegmentsController extends Controller
      */
     public function show($id)
     {
-        //
+        $segment = Segment::where('id', $id)->first();
+        return HelperController::api_response_format(201, $segment);
     }
 
     /**
@@ -132,6 +133,12 @@ class SegmentsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $course = Courses::whereIn('segment_id',Segment::whereId($id))->get();
+        if (count($course) > 0) 
+            return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
+        
+        Segment::whereId($req->id)->first()->delete();
+
+        return HelperController::api_response_format(200, null, __('messages.segment.delete'));
     }
 }
