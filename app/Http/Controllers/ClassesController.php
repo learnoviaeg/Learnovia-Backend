@@ -32,7 +32,8 @@ class ClassesController extends Controller
     {
         //validate the request
         $request->validate([
-            'level' => 'exists:levels,id',
+            'levels' => 'array',
+            'levels.*' => 'exists:levels,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
         ]);

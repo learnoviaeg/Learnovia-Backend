@@ -10,31 +10,40 @@ use Auth;
 use App\Exports\YearsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use App\Repositories\ChainRepositoryInterface;
 
 class YearsController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request,$status=null)
+    public function index(Request $request)
     {
         $request->validate([
             'search' => 'nullable',
+            'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        $years=AcademicYear::whereNull('deleted_at');
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $years=AcademicYear::whereIn('id',$enrolls->pluck('year'));    
 
-        if($status == 'my')
+        if($request->filled('search'))
+            $years = $years->where('name', 'LIKE' , "%$request->search%"); 
+
+        if($request->filter == 'all')
         {
-            $currentSegment=Segment::where('start_date', '<=',Carbon::now())
-                ->where('end_date','>=',Carbon::now())->pluck('academic_year_id');
-            $myYears=Enroll::where('user_id',Auth::id())->whereIn('year',$currentSegment)->pluck('year');
-            $years->whereIn('id',$myYears);
+            $years=AcademicYear::whereNull('deleted_at');
+            return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
         }
 
-        if($status=='export')
+        if($request->filter == 'export')
         {
             $years = $years->get();
             $filename = uniqid();
@@ -43,9 +52,6 @@ class YearsController extends Controller
 
             return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
         }
-        
-        if($request->filled('search'))
-            $years = $years->where('name', 'LIKE' , "%$request->search%"); 
         
         return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
     }
