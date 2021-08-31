@@ -9,6 +9,9 @@ use App\Level;
 use App\Course;
 use App\AcademicType;
 use App\Classes;
+use App\Exports\LevelsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 class LevelController extends Controller
 {
@@ -33,27 +36,23 @@ class LevelController extends Controller
             'years.*' => 'nullable|exists:academic_years,id',
             'types' => 'array',
             'types.*' => 'nullable|exists:academic_types,id',
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
-        
-        $levels = new Level;
-        $levels = Level::whereHas('type', function ($q) use ($request) {
-                                                if($request->filled('types'))
-                                                    $q->whereIn("academic_type_id", $request->types);
-                                            });
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $levels=Level::whereIn('id',$enrolls->pluck('level'));  
         
         if($request->filled('search'))
             $levels=$levels->where('name', 'LIKE' , "%$request->search%");
 
-        if($status == 'my')
+        if($request->filter == 'all')
         {
-            $types=Segment::where('start_date', '<=',Carbon::now())
-                                ->where('end_date','>=',Carbon::now())->pluck('academic_type_id');
-            $myLevels=Enroll::where('user_id',Auth::id())->whereIn('type',$types)->pluck('level');
-            $levels->whereIn('id',$myLevels);
+            $levels=Level::with('type')->whereNull('deleted_at');
+            return HelperController::api_response_format(201, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
         }
 
-        if($status=='export')
+        if($request->filter == 'export')
         {
             $levelsIDs = $levels->get();
             $filename = uniqid();
@@ -69,8 +68,8 @@ class LevelController extends Controller
         foreach ($levels as $level)
         {
             $academic_type_id= $level->type->pluck('id')->unique();
-            $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-            unset($level->type);
+            // $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+            // unset($level->type);
             $all_levels->push($level); 
         }
 

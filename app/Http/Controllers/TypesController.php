@@ -12,9 +12,16 @@ use Carbon\Carbon;
 use App\Exports\TypesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use App\Repositories\ChainRepositoryInterface;
 
 class TypesController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -22,17 +29,24 @@ class TypesController extends Controller
      */
     public function index(Request $request,$status=null)
     {
-        $types = AcademicType::whereNull('deleted_at');
+        $request->validate([
+            'search' => 'nullable',
+            'filter' => 'in:all,export' //all without enroll  //export for exporting
+        ]);
+        
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $types=AcademicType::whereIn('id',$enrolls->pluck('type'));    
 
-        if($status == 'my')
+        if($request->filled('search'))
+            $years = $years->where('name', 'LIKE' , "%$request->search%"); 
+
+        if($request->filter == 'all')
         {
-            $currentSegment=Segment::where('start_date', '<=',Carbon::now())
-                                ->where('end_date','>=',Carbon::now())->pluck('academic_type_id');
-            $myTypes=Enroll::where('user_id',Auth::id())->pluck('type');
-            $types->whereIn('id',$myTypes);
+            $types = AcademicType::whereNull('deleted_at');
+            return HelperController::api_response_format(201, $types->paginate(HelperController::GetPaginate($request)), __('messages.type.list'));
         }
 
-        if($status=='export')
+        if($request->filter == 'export')
         {
             $types = $types->get();
             $filename = uniqid();
@@ -41,9 +55,6 @@ class TypesController extends Controller
 
             return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
         }
-
-        if($request->filled('search'))
-            $years = $years->where('name', 'LIKE' , "%$request->search%");
 
         return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)),__('messages.type.list'));
     }
