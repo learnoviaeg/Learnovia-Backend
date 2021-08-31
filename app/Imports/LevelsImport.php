@@ -27,7 +27,7 @@ class LevelsImport implements ToModel , WithHeadingRow
             'type_id' => 'required|exists:academic_types,id'
         ],$messages)->validate();
 
-        $level = Level::create([
+        $level = Level::firstOrCreate([
             'name' => $row['name'],
             'academic_type_id' => $row['type_id']
         ]);        

@@ -473,7 +473,11 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('courses', CoursesController::class);
     Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
+
+    Route::get('levels/{my}', 'TypesController@index');
+    Route::get('levels/{export}', 'TypesController@index');
     Route::Resource('levels', LevelController::class);
+
     Route::Resource('classes', ClassesController::class);
     Route::get('claass/{option}', 'ClassesController@index')->middleware(['permission:course/layout']);
     Route::Resource('users', UsersController::class);
