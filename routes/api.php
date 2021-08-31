@@ -134,7 +134,7 @@ Route::group(['prefix' => 'languages'], function () {
 
 //Year Routes
 Route::group(['prefix' => 'year', 'middleware' => ['auth:api','LastAction']], function () {
-    Route::post('add', 'AcademicYearController@store')->name('addyear')->middleware('permission:year/add');
+    // Route::post('add', 'AcademicYearController@store')->name('addyear')->middleware('permission:year/add');
     Route::get('get', 'AcademicYearController@get')->name('getyear')->middleware('permission:year/get');
     Route::get('get-all', 'AcademicYearController@getall')->name('getallyear')->middleware('permission:year/get-all');
     Route::post('update', 'AcademicYearController@update')->name('updateyear')->middleware('permission:year/update');
