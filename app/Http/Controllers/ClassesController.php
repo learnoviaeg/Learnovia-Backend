@@ -102,7 +102,8 @@ class ClassesController extends Controller
      */
     public function show($id)
     {
-        //
+        $class = Classes::where('id', $id)->first();
+        return HelperController::api_response_format(201, $class);
     }
 
     /**
@@ -125,6 +126,12 @@ class ClassesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $course = Courses::whereIn('segment_id',Segment::whereId($id))->get();
+        if (count($course) > 0) 
+            return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
+        
+        Segment::whereId($req->id)->first()->delete();
+
+        return HelperController::api_response_format(200, null, __('messages.class.delete'));
     }
 }
