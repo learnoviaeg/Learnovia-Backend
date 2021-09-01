@@ -302,7 +302,7 @@ class ClassController extends Controller
         $request->validate([
             'course'    => 'required|integer|exists:courses,id',
         ]);
-        $lessons = Lesson::where('course',$request->course)->get();
+        $lessons = Lesson::where('course_id',$request->course)->get();
         return HelperController::api_response_format(200, $lessons,__('messages.lesson.list'));
     }
 
