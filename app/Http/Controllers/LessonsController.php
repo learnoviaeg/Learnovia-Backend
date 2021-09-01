@@ -41,12 +41,11 @@ class LessonsController extends Controller
         ]);
         $enrolls = $this->chain->getEnrollsByManyChain($request)->get()->pluck('id');
         if($request->user()->can('site/show-all-courses')){//admin
-            $lessons = SecondaryChain::select('lesson_id')->distinct()->where('enroll_id',$enrolls)->get()->pluck('lesson_id');
+            $lessons = SecondaryChain::select('lesson_id')->distinct()->whereIn('enroll_id',$enrolls)->get()->pluck('lesson_id');
         }
 
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
-            $enrolls = $this->chain->getEnrollsByManyChain($request);
-            $lessons = SecondaryChain::select('lesson_id')->distinct()->where('user_id',Auth::id())->where('enroll_id',$enrolls)->get()->pluck('lesson_id');
+            $lessons = SecondaryChain::select('lesson_id')->distinct()->where('user_id',Auth::id())->whereIn('enroll_id',$enrolls)->get()->pluck('lesson_id');
         }
         $result = Lesson::whereIn('id',$lessons)->get();
         return response()->json(['message' => __('messages.lesson.list'), 'body' => $result], 200);
