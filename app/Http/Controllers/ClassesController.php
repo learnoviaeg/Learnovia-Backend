@@ -66,7 +66,7 @@ class ClassesController extends Controller
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
         }
 
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
         $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
 
         return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
