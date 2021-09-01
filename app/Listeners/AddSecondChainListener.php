@@ -28,12 +28,15 @@ class AddSecondChainListener
      */
     public function handle(LessonCreatedEvent $event)
     {
-        $enrollsOfCourse=Enroll::where('course',$event->lesson->course_id)->get();
-        foreach($enrollsOfCourse as $enroll)
+        $enrollsOfCourse=Enroll::where('course',$event->lesson->course_id);//->get();
+        if((json_decode($event->lesson->shared_classes))!= null)
+            $enrollsOfCourse->whereIn('group',json_decode($event->lesson->shared_classes));
+        
+        foreach($enrollsOfCourse->cursor() as $enroll)
         {
             SecondaryChain::firstOrCreate([
-                'user_id' => 1,
-                'role_id' => 1,
+                'user_id' => $enroll->user_id,
+                'role_id' => $enroll->role_id,
                 'group_id' => $enroll->group,
                 'course_id' => $enroll->course,
                 'lesson_id' => $event->lesson->id,
