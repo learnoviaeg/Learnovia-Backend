@@ -44,25 +44,23 @@ class ClassesController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
+        $classes=Classes::with('level')->where('type','class')->whereNull('deleted_at');
+        if($request->filled('search'))
+            $classes->where('name', 'LIKE' , "%$request->search%"); 
+
         if($request->user()->can('site/show-all-courses'))
         {
-            $classes=Classes::with('level')->where('type','class')->whereNull('deleted_at');
             if(isset($request->types) &&isset($request->levels) )
             {
                 $levels=Level::whereIn('academic_type_id',$request->types)->pluck('id');
                 if(isset($request->levels))
-                    $classes=Classes::whereIn('level_id',$levels)->where('type','class');
+                    $classes->whereIn('level_id',$levels)->where('type','class');
             }
-            if($request->filled('search'))
-                $classes->where('name', 'LIKE' , "%$request->search%"); 
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $classes=Classes::with('level')->where('type','class')->whereIn('id',$enrolls->pluck('group')); 
-
-        if($request->filled('search'))
-            $classes->where('name', 'LIKE' , "%$request->search%"); 
+        $classes->where('type','class')->whereIn('id',$enrolls->pluck('group')); 
 
         return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
     }

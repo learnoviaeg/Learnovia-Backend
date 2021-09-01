@@ -42,20 +42,21 @@ class SegmentsController extends Controller
             'classes.*' => 'exists:classes,id',
         ]);
 
+        $segments=Segment::with('academicType','academicYear')->whereNull('deleted_at');
+
+        if($request->filled('search'))
+            $segments->where('name', 'LIKE' , "%$request->search%");
+
         if($request->user()->can('site/show-all-courses'))
         {
-            $segments=Segment::with('academicType','academicYear')->whereNull('deleted_at');
             if(isset($request->types))
-                $segments=Segment::whereIn('academic_type_id',$request->types)->with('academicType','academicYear')->whereNull('deleted_at');
+                $segments->whereIn('academic_type_id',$request->types)->with('academicType','academicYear')->whereNull('deleted_at');
 
             return HelperController::api_response_format(201, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $segments=Segment::with('academicType','academicYear')->whereIn('id',$enrolls->pluck('segment'));    
-
-        if($request->filled('search'))
-            $segments->where('name', 'LIKE' , "%$request->search%");
+        $segments->whereIn('id',$enrolls->pluck('segment'));    
 
         if($request->filter == 'export')
         {

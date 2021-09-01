@@ -39,21 +39,20 @@ class LevelController extends Controller
             'search' => 'nullable',
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
+        $levels=Level::with('type')->whereNull('deleted_at');
+        if($request->filled('search'))
+            $levels->where('name', 'LIKE' , "%$request->search%");
 
         if($request->user()->can('site/show-all-courses'))
         {
-            $levels=Level::with('type')->whereNull('deleted_at');
             if(isset($request->types))
-                $levels=Level::whereIn('academic_type_id',$request->types)->with('type');
-
-            if($request->filled('search'))
-                $levels=$levels->where('name', 'LIKE' , "%$request->search%");
+                $levels->whereIn('academic_type_id',$request->types)->with('type');
 
             return HelperController::api_response_format(201, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $levels=Level::with('type')->whereIn('id',$enrolls->pluck('level'));  
+        $levels->whereIn('id',$enrolls->pluck('level'));  
         
         if($request->filled('search'))
             $levels=$levels->where('name', 'LIKE' , "%$request->search%");
