@@ -56,14 +56,13 @@ class ClassesController extends Controller
                 $levels=Level::whereIn('academic_type_id',$request->types)->pluck('id');
                 if(isset($request->levels))
                     $classes->whereIn('level_id',$levels)->where('type','class');
-                
-                if(isset($request->courses)){
-                    $levels = Course::select('level_id')->whereIn('id',$request->courses) ->distinct()->get()->pluck('level_id');
-                    $classes->whereIn('level_id',$levels)->where('type','class');
-                }
-
-
             }
+            if($request->filled('courses')){
+                $levels = Course::select('level_id')->whereIn('id',$request->courses) ->distinct()->get()->pluck('level_id');
+                // return Course::whereIn('id',$request->courses)->get();
+                $classes->whereIn('level_id',$levels)->where('type','class');
+            }
+
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
         }
 
