@@ -43,9 +43,6 @@ class ClassesController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $classes=Classes::with('level')->where('type','class')->whereIn('id',$enrolls->pluck('group')); 
-
         if($request->filter == 'all') //ghaleban admin
         {
             $classes=Classes::with('level')->where('type','class')->whereNull('deleted_at');
@@ -57,6 +54,9 @@ class ClassesController extends Controller
             }
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
         }
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $classes=Classes::with('level')->where('type','class')->whereIn('id',$enrolls->pluck('group')); 
 
         if($request->filled('search'))
             $classes->where('name', 'LIKE' , "%$request->search%"); 

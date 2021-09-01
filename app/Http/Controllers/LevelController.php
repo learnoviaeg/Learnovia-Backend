@@ -40,12 +40,6 @@ class LevelController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $levels=Level::with('type')->whereIn('id',$enrolls->pluck('level'));  
-        
-        if($request->filled('search'))
-            $levels=$levels->where('name', 'LIKE' , "%$request->search%");
-
         if($request->filter == 'all')
         {
             $levels=Level::with('type')->whereNull('deleted_at');
@@ -54,6 +48,12 @@ class LevelController extends Controller
 
             return HelperController::api_response_format(201, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
         }
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $levels=Level::with('type')->whereIn('id',$enrolls->pluck('level'));  
+        
+        if($request->filled('search'))
+            $levels=$levels->where('name', 'LIKE' , "%$request->search%");
 
         if($request->filter == 'export')
         {

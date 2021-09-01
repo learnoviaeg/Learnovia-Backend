@@ -42,12 +42,6 @@ class SegmentsController extends Controller
             'classes.*' => 'exists:classes,id',
         ]);
 
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $segments=Segment::with('academicType','academicYear')->whereIn('id',$enrolls->pluck('segment'));    
-
-        if($request->filled('search'))
-            $segments->where('name', 'LIKE' , "%$request->search%");
-
         if($request->filter == 'all')
         {
             $segments=Segment::with('academicType','academicYear')->whereNull('deleted_at');
@@ -56,6 +50,12 @@ class SegmentsController extends Controller
 
             return HelperController::api_response_format(201, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
         }
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $segments=Segment::with('academicType','academicYear')->whereIn('id',$enrolls->pluck('segment'));    
+
+        if($request->filled('search'))
+            $segments->where('name', 'LIKE' , "%$request->search%");
 
         if($request->filter == 'export')
         {

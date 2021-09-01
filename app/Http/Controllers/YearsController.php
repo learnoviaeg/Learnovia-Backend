@@ -31,17 +31,17 @@ class YearsController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $years=AcademicYear::whereIn('id',$enrolls->pluck('year'));    
-
-        if($request->filled('search'))
-            $years = $years->where('name', 'LIKE' , "%$request->search%"); 
-
         if($request->filter == 'all')
         {
             $years=AcademicYear::whereNull('deleted_at');
             return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
         }
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $years=AcademicYear::whereIn('id',$enrolls->pluck('year'));    
+
+        if($request->filled('search'))
+            $years = $years->where('name', 'LIKE' , "%$request->search%"); 
 
         if($request->filter == 'export')
         {
