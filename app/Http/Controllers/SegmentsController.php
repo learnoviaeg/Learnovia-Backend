@@ -42,7 +42,7 @@ class SegmentsController extends Controller
             'classes.*' => 'exists:classes,id',
         ]);
 
-        if($request->filter == 'all')
+        if($request->user()->can('site/show-all-courses'))
         {
             $segments=Segment::with('academicType','academicYear')->whereNull('deleted_at');
             if(isset($request->types))

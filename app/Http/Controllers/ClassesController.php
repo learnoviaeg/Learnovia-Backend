@@ -43,7 +43,7 @@ class ClassesController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        if($request->filter == 'all') //ghaleban admin
+        if($request->user()->can('site/show-all-courses'))
         {
             $classes=Classes::with('level')->where('type','class')->whereNull('deleted_at');
             if(isset($request->types) &&isset($request->levels) )

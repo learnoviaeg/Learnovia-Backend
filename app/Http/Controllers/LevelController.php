@@ -40,7 +40,7 @@ class LevelController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        if($request->filter == 'all')
+        if($request->user()->can('site/show-all-courses'))
         {
             $levels=Level::with('type')->whereNull('deleted_at');
             if(isset($request->types))
