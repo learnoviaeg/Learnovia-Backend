@@ -53,14 +53,12 @@ class AcademicYearController extends Controller
         
         $years=AcademicYear::whereNull('deleted_at');
         if($request->filled('search'))
-        {
             $years = AcademicYear::where('name', 'LIKE' , "%$request->search%"); 
-        }
-        if($call == 1 ){
+        
+        if($call == 1 )
             return $years->get();
-        }
-        $years =$years->paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(202, $years);
+
+        return HelperController::api_response_format(202, $years->paginate(HelperController::GetPaginate($request)));
     }
 
     public function get(Request $request)

@@ -60,7 +60,9 @@ class ClassesController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $classes->where('type','class')->whereIn('id',$enrolls->pluck('group')); 
+        // $results = $enrolls->with('SecondaryChain')->groupBy(['course'])->get();
+
+        $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
 
         return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
     }

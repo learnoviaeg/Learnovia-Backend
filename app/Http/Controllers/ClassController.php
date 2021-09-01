@@ -53,35 +53,35 @@ class ClassController extends Controller
             return HelperController::NOTFOUND();
         }
 
-        $classes = new Classes;
+        $classes = Classes::with('level')->whereNull('deleted_at');
+        
+        if(isset($request->types))
+            $classes->whereIn('level_id',Level::where('academic_type_id',$request->types)->pluck('id'));
 
-        $Classes = Classes::whereNull('deleted_at')
-        ->whereHas('level', function($q)use ($request){ 
-                if ($request->has('level')) 
-                    $q->where('level_id',$request->level);
-        })->get();
+        if(isset($request->levels))
+            $classes->whereIn('level_id',$request->levels);
 
         if($request->filled('search'))
             $classes = $classes->where('name', 'LIKE' , "%$request->search%");
 
         $classes = $classes->get();
-        $all_classes=collect([]);
-        foreach($Classes as $class){ 
-            $levels_id= $class->level->pluck('id')->collapse()->unique();
-            // $class['levels']= Level::whereIn('id',$levels_id)->pluck('name');
-            // $academic_year_id= array_values( $class->classlevel->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse()->unique()->toArray());
-            // $class['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
-            // $academic_type_id = array_values($class->classlevel->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse()->unique()->toArray());
-            // $class['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-            // unset($class->classlevel);
-            $all_classes->push($class);
-        }
+        // $all_classes=collect([]);
+        // foreach($classes as $class){ 
+        //     $levels_id= $class->level->pluck('id')->collapse()->unique();
+        //     // $class['levels']= Level::whereIn('id',$levels_id)->pluck('name');
+        //     // $academic_year_id= array_values( $class->classlevel->pluck('yearLevels.*.yearType.*.academic_year_id')->collapse()->unique()->toArray());
+        //     // $class['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+        //     // $academic_type_id = array_values($class->classlevel->pluck('yearLevels.*.yearType.*.academic_type_id')->collapse()->unique()->toArray());
+        //     // $class['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+        //     // unset($class->classlevel);
+        //     $all_classes->push($class);
+        // }
 
         if($call == 1){
-            $classesIds = $all_classes->pluck('id');
+            $classesIds = $classes->pluck('id');
             return $classesIds;
         }
-        return HelperController::api_response_format(200, $all_classes->paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200, $classes->paginate(HelperController::GetPaginate($request)));
 
     }
 

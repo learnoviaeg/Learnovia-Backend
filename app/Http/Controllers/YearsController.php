@@ -38,17 +38,7 @@ class YearsController extends Controller
             return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $years->whereIn('id',$enrolls->pluck('year'));    
-
-        if($request->filter == 'export')
-        {
-            $years = $years->get();
-            $filename = uniqid();
-            $file = Excel::store(new YearsExport($years), 'Year'.$filename.'.xls','public');
-            $file = url(Storage::url('Year'.$filename.'.xls'));
-
-            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
-        }
+        $years->whereIn('id',$enrolls->pluck('year'));
         
         return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
     }
