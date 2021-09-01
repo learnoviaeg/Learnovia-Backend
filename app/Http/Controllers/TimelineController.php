@@ -18,6 +18,7 @@ use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use Modules\Assigments\Entities\Assignment;
+use App\SecondaryChain;
 
 class TimelineController extends Controller
 {
@@ -57,14 +58,13 @@ class TimelineController extends Controller
             'start_date' => 'date',
             'due_date' => 'date',
         ]);
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+        $enrolls = $this->chain->getEnrollsByChain($request)->get()->pluck('id');
+        $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->get()->pluck('lesson_id')->unique();
         if(!$request->user()->can('site/show-all-courses'))//student and teacher
-        {
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-        }
-
-        $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
-
+            {
+                $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
+                $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
+            }
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$lessons)
                             ->where('visible',1)
@@ -134,24 +134,30 @@ class TimelineController extends Controller
         }
         
         $lesson = Lesson::find($item_Lesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
-        $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        if(isset($item_name)){
-           $new_timeline = Timeline::firstOrCreate([
-                'item_id' => $request->id,
-                'name' => $item_name,
-                'start_date' => $item_Lesson->start_date,
-                'due_date' => $item_Lesson->due_date,
-                'publish_date' => isset($item_Lesson->publish_date)? $item_Lesson->publish_date : Carbon::now(),
-                'course_id' => $course_id,
-                'class_id' => $class_id,
-                'lesson_id' => $item_Lesson->lesson_id,
-                'level_id' => $level_id,
-                'type' => $request->type,
-                'visible' => $item_Lesson->visible
-            ]);
-        }
+        $secondary_chains = SecondaryChain::where('lesson_id',$assignmentLesson->lesson_id)->get()->keyBy('group_id');
+            foreach($secondary_chains as $secondary_chain){
+                $course_id = $secondary_chain->course_id;
+                $class_id = $secondary_chain->group_id;
+                $level_id = Course::find($courseID)->level_id;
+                // $course_id = $lesson->courseSegment->course_id;
+                // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+                // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
+                if(isset($item_name)){
+                    $new_timeline = Timeline::firstOrCreate([
+                            'item_id' => $request->id,
+                            'name' => $item_name,
+                            'start_date' => $item_Lesson->start_date,
+                            'due_date' => $item_Lesson->due_date,
+                            'publish_date' => isset($item_Lesson->publish_date)? $item_Lesson->publish_date : Carbon::now(),
+                            'course_id' => $course_id,
+                            'class_id' => $class_id,
+                            'lesson_id' => $item_Lesson->lesson_id,
+                            'level_id' => $level_id,
+                            'type' => $request->type,
+                            'visible' => $item_Lesson->visible
+                        ]);
+                }
+    }
         return response()->json(['message' => 'timeline created.','body' => $new_timeline], 200);
     }
 
