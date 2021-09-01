@@ -8,6 +8,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\SegmentClass;
 use App\Classes;
 use App\Level;
+use App\Course;
 
 class ClassesController extends Controller
 {
@@ -56,12 +57,16 @@ class ClassesController extends Controller
                 if(isset($request->levels))
                     $classes->whereIn('level_id',$levels)->where('type','class');
             }
+            if($request->filled('courses')){
+                $levels = Course::select('level_id')->whereIn('id',$request->courses) ->distinct()->get()->pluck('level_id');
+                // return Course::whereIn('id',$request->courses)->get();
+                $classes->whereIn('level_id',$levels)->where('type','class');
+            }
+
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
         }
 
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
-        // $results = $enrolls->with('SecondaryChain')->groupBy(['course'])->get();
-
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
         $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
 
         return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
