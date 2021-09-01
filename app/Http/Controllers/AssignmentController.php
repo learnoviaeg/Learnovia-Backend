@@ -18,6 +18,7 @@ use Modules\Assigments\Entities\assignmentOverride;
 use App\Paginate;
 use App\LastAction;
 use Carbon\Carbon;
+use App\SecondaryChain;
 
 class AssignmentController extends Controller
 {
@@ -47,16 +48,14 @@ class AssignmentController extends Controller
         ]);
 
         if($request->user()->can('site/show-all-courses')){//admin
-
-            $course_segments = collect($this->chain->getAllByChainRelation($request));
-            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+            $enrolls = $this->chain->getEnrollsByChain($request);
+            $lessons = $enrolls->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
         }
 
         if(!$request->user()->can('site/show-all-courses')){//enrolled users
 
-            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+           $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
+           $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
         }
        
         if($request->filled('lesson')){
@@ -87,12 +86,13 @@ class AssignmentController extends Controller
 
         foreach($assignment_lessons as $assignment_lesson){
             $assignment=assignment::where('id',$assignment_lesson->assignment_id)->with('assignmentLesson')->first();
-            // $assignment['assignmentlesson'] = $assignment_lesson;
-            $assignment['lesson'] = Lesson::find($assignment_lesson->lesson_id);
-            $assignment['class'] = Classes::find($assignment['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
-            $assignment['level'] = Level::find($assignment['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-            $assignment['course'] = Course::find($assignment['lesson']->courseSegment->course_id);
-            unset($assignment['lesson']->courseSegment);
+            $lessonn = Lesson::find($assignment_lesson->lesson_id);
+            $classesIDS = SecondaryChain::select('group_id')->distinct()->where('lesson_id',$lessonn->id)->pluck('group_id');
+            $classes = Classes::whereIn('id',$classesIDS)->get();
+            $assignment['lesson'] = $lessonn;
+            $assignment['class'] = $classes;
+            $assignment['level'] = Course::whereId($lessonn->course_id)->first();
+            $assignment['course'] = $lessonn->course_id;
             $assignments[]=$assignment;
         }
 
