@@ -46,6 +46,9 @@ class LevelController extends Controller
             if(isset($request->types))
                 $levels=Level::whereIn('academic_type_id',$request->types)->with('type');
 
+            if($request->filled('search'))
+                $levels=$levels->where('name', 'LIKE' , "%$request->search%");
+
             return HelperController::api_response_format(201, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
         }
 

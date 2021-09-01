@@ -53,6 +53,8 @@ class ClassesController extends Controller
                 if(isset($request->levels))
                     $classes=Classes::whereIn('level_id',$levels)->where('type','class');
             }
+            if($request->filled('search'))
+                $classes->where('name', 'LIKE' , "%$request->search%"); 
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
         }
 

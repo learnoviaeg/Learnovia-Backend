@@ -37,6 +37,8 @@ class TypesController extends Controller
         if($request->user()->can('site/show-all-courses'))
         {
             $types = AcademicType::whereNull('deleted_at');
+            if($request->filled('search'))
+                $types = $types->where('name', 'LIKE' , "%$request->search%"); 
             return HelperController::api_response_format(201, $types->paginate(HelperController::GetPaginate($request)), __('messages.type.list'));
         }
         
@@ -44,7 +46,7 @@ class TypesController extends Controller
         $types=AcademicType::whereIn('id',$enrolls->pluck('type'));    
 
         if($request->filled('search'))
-            $years = $years->where('name', 'LIKE' , "%$request->search%"); 
+            $types = $types->where('name', 'LIKE' , "%$request->search%"); 
 
         if($request->filter == 'export')
         {
