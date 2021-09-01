@@ -34,9 +34,9 @@ class ClassesController extends Controller
         $request->validate([
             'years'  => 'array',
             'years.*'  => 'nullable|exists:academic_years,id',
-            'types'  => 'array',
+            'types'  => 'array|required_with:levels',
             'types.*'  => 'nullable|exists:academic_types,id',
-            'levels' => 'array',
+            'levels' => 'array|required_with:types',
             'levels.*' => 'exists:levels,id',
             // 'courses'    => 'nullable|array',
             // 'courses.*'  => 'nullable|integer|exists:courses,id',
@@ -46,9 +46,15 @@ class ClassesController extends Controller
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $classes=Classes::with('level')->where('type','class')->whereIn('id',$enrolls->pluck('group')); 
 
-        if($request->filter == 'all')
+        if($request->filter == 'all') //ghaleban admin
         {
             $classes=Classes::with('level')->where('type','class')->whereNull('deleted_at');
+            if(isset($request->types) &&isset($request->levels) )
+            {
+                $levels=Level::whereIn('academic_type_id',$request->types)->pluck('id');
+                if(isset($request->levels))
+                    $classes=Classes::whereIn('level_id',$levels)->where('type','class');
+            }
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
         }
 

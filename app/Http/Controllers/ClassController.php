@@ -300,9 +300,9 @@ class ClassController extends Controller
 
     public function get_lessons_of_class(Request $request){
         $request->validate([
-            'class'    => 'required|integer|exists:classes,id',
+            'course'    => 'required|integer|exists:courses,id',
         ]);
-        $lessons = CourseSegment::GetWithClass($request->class)->lessons;
+        $lessons = Lesson::where('course',$request->course)->get();
         return HelperController::api_response_format(200, $lessons,__('messages.lesson.list'));
     }
 

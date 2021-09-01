@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ChainRepositoryInterface;
 use App\Segment;
+use App\Course;
 use App\AcademicType;
 
 class SegmentsController extends Controller
@@ -50,6 +51,9 @@ class SegmentsController extends Controller
         if($request->filter == 'all')
         {
             $segments=Segment::with('academicType','academicYear')->whereNull('deleted_at');
+            if(isset($request->types))
+                $segments=Segment::whereIn('academic_type_id',$request->types)->with('academicType','academicYear')->whereNull('deleted_at');
+
             return HelperController::api_response_format(201, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
         }
 
@@ -133,7 +137,7 @@ class SegmentsController extends Controller
      */
     public function destroy($id)
     {
-        $course = Courses::whereIn('segment_id',Segment::whereId($id))->get();
+        $course = Course::whereIn('segment_id',Segment::whereId($id))->get();
         if (count($course) > 0) 
             return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
         
