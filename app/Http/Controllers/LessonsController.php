@@ -6,6 +6,7 @@ use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Lesson;
+use App\SecondaryChain;
 
 class LessonsController extends Controller
 {
@@ -32,24 +33,23 @@ class LessonsController extends Controller
     {
         //validate the request
         $request->validate([
-            'level' => 'exists:levels,id',
-            'class' => 'exists:classes,id',
+            // 'level' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*'  => 'nullable|integer|exists:classes,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
         ]);
-
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->get()->pluck('id');
         if($request->user()->can('site/show-all-courses')){//admin
-            $course_segments = collect($this->chain->getAllByChainRelation($request));
-            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->get();
+            $lessons = SecondaryChain::select('lesson_id')->distinct()->where('enroll_id',$enrolls)->get()->pluck('lesson_id');
         }
 
         if(!$request->user()->can('site/show-all-courses')){ //student or teacher
             $enrolls = $this->chain->getCourseSegmentByChain($request);
-            $enrolls->where('user_id',Auth::id());
-            $lessons = $enrolls->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons')->collapse()->filter()->values();
+            $lessons = SecondaryChain::select('lesson_id')->distinct()->where('user_id',Auth::id())->where('enroll_id',$enrolls)->get()->pluck('lesson_id');
         }
-
-        return response()->json(['message' => __('messages.lesson.list'), 'body' => $lessons], 200);
+        $result = Lesson::whereIn('id',$lessons)->get();
+        return response()->json(['message' => __('messages.lesson.list'), 'body' => $result], 200);
     }
 
     /**
