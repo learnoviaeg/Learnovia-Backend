@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
 use App\SegmentClass;
 use App\Classes;
+use App\Level;
 
 class ClassesController extends Controller
 {
