@@ -15,6 +15,7 @@ use App\Segment;
 use App\User;
 use App\ClassLevel;
 use App\Enroll;
+use App\Lesson;
 use Carbon\Carbon;
 use Auth;
 use App\Http\Resources\Classes as Classs;
@@ -300,9 +301,9 @@ class ClassController extends Controller
 
     public function get_lessons_of_class(Request $request){
         $request->validate([
-            'class'    => 'required|integer|exists:classes,id',
+            'course'    => 'required|integer|exists:courses,id',
         ]);
-        $lessons = CourseSegment::GetWithClass($request->class)->lessons;
+        $lessons = Lesson::where('course_id',$request->course)->get();
         return HelperController::api_response_format(200, $lessons,__('messages.lesson.list'));
     }
 

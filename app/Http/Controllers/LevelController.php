@@ -49,6 +49,9 @@ class LevelController extends Controller
         if($request->filter == 'all')
         {
             $levels=Level::with('type')->whereNull('deleted_at');
+            if(isset($request->types))
+                $levels=Level::whereIn('academic_type_id',$request->types)->with('type');
+
             return HelperController::api_response_format(201, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
         }
 
