@@ -33,18 +33,18 @@ class TypesController extends Controller
             'search' => 'nullable',
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
-        
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $types=AcademicType::whereIn('id',$enrolls->pluck('type'));    
-
-        if($request->filled('search'))
-            $years = $years->where('name', 'LIKE' , "%$request->search%"); 
 
         if($request->filter == 'all')
         {
             $types = AcademicType::whereNull('deleted_at');
             return HelperController::api_response_format(201, $types->paginate(HelperController::GetPaginate($request)), __('messages.type.list'));
         }
+        
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $types=AcademicType::whereIn('id',$enrolls->pluck('type'));    
+
+        if($request->filled('search'))
+            $years = $years->where('name', 'LIKE' , "%$request->search%"); 
 
         if($request->filter == 'export')
         {
