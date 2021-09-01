@@ -113,14 +113,13 @@ class UsersImport implements ToModel, WithHeadingRow
                 'segment_id' => 'required|exists:segments,id',
             ])->validate();
 
-            if ($row['role_id'] == 3) {
+            $level=Classes::find($row['class_id'])->level_id;
+            $segment=Segment::find($row['segment_id']);
+            $segment_id=$segment->id;
+            $type=$segment->academic_type_id;
+            $year=$segment->academic_year_id;
 
-                $level=Classes::find($row['class_id'])->level_id;
-                $segment=Segment::find($row['segment_id']);
-                $segment_id=$segment->id;
-                $type=$segment->academic_type_id;
-                $year=$segment->academic_year_id;
-                
+            if ($row['role_id'] == 3) {
                 $request = new Request([
                     'year' => $year,
                     'type' => $type,
@@ -144,7 +143,7 @@ class UsersImport implements ToModel, WithHeadingRow
                         'year' => $year,
                         'type' => $type,
                         'level' => $level,
-                        'class' => $row['class_id'],
+                        'group' => $row['class_id'],
                         'segment' => $segment_id,
                         'course' => $course_id
                     ]);
@@ -160,28 +159,18 @@ class UsersImport implements ToModel, WithHeadingRow
                         // break;
                         die('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist']);
         
-                    foreach($courseSeg as $course_seg)
-                    {
-                        $cour_seg=CourseSegment::find($course_seg);
-                        $class = $cour_seg->segmentClasses[0]->classLevel[0]->class_id;
-                        $level= $cour_seg->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-                        $type = $cour_seg->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id;
-                        $year = $cour_seg->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_year_id;
-                        $segment =$cour_seg->segmentClasses[0]->segment_id;
-        
                         Enroll::firstOrCreate([
                             'user_id' => $user->id,
                             'role_id'=> $row['role_id'],
                             'year' => $year,
                             'type' => $type,
                             'level' => $level,
-                            'class' => $class,
-                            'segment' => $segment,
+                            'group' => $row['class_id'],
+                            'segment' => $segment_id,
                             'course' => $course_id
                         ]);
         
                         $teachercounter++;
-                    }
                 }
             }
         }
