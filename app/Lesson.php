@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Lesson extends Model
 {
-    protected $fillable = ['name','course_segment_id','index' , 'image' , 'description','shared_lesson','course_id'];
+    protected $fillable = ['name','course_segment_id','index' , 'image' , 'description','shared_lesson','course_id' ,'shared_classes'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\LessonCreatedEvent::class,
@@ -62,4 +62,5 @@ class Lesson extends Model
         return $this->hasMany('App\SecondaryChain','lesson_id' , 'id');
 
     }
+
 }

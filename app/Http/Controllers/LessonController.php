@@ -28,17 +28,20 @@ class LessonController extends Controller
             // 'description' => 'array',
             'description' => 'string',
             'course' => 'required|exists:courses,id',
-            'class' => 'required|exists:classes,id',
+            'classes' => 'required|array',
+            'classes.*' => 'exists:classes,id',
             'shared_lesson' => 'required|in:0,1'
         ]);
         LastAction::lastActionInCourse($request->course);
         $lessons_in_Course = Lesson::where('course_id', $request->course)->max('index');
+        // return $lessons_in_Course;
         $Next_index = $lessons_in_Course + 1;
         $lesson= Lesson::create([
             'name' => $request->name,
             'course_id' => $request->course,
             'shared_lesson' => $request->shared_lesson,
-            'index' => $Next_index
+            'index' => $Next_index,
+            'shared_classes' => json_encode($request->classes),
         ]);
         if (isset($request->image))
             $lesson->image = attachment::upload_attachment($request->image[$key], 'lesson', '')->path;
