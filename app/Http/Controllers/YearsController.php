@@ -31,7 +31,7 @@ class YearsController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        if($request->filter == 'all')
+        if($request->user()->can('site/show-all-courses'))
         {
             $years=AcademicYear::whereNull('deleted_at');
             return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));

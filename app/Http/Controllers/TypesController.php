@@ -34,7 +34,7 @@ class TypesController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        if($request->filter == 'all')
+        if($request->user()->can('site/show-all-courses'))
         {
             $types = AcademicType::whereNull('deleted_at');
             return HelperController::api_response_format(201, $types->paginate(HelperController::GetPaginate($request)), __('messages.type.list'));
