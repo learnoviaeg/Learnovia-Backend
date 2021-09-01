@@ -15,6 +15,7 @@ use App\Segment;
 use App\User;
 use App\ClassLevel;
 use App\Enroll;
+use App\Lesson;
 use Carbon\Carbon;
 use Auth;
 use App\Http\Resources\Classes as Classs;
