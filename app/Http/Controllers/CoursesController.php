@@ -285,7 +285,7 @@ class CoursesController extends Controller
             return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));
 
         $course->delete();
-        return app('App\Http\Controllers\CoursesController')->index($request);
+        return app('App\Http\Controllers\CourseController')->get($request);
         // return HelperController::api_response_format(200, $course, __('messages.course.delete'));
     }
 

@@ -277,12 +277,12 @@ class CourseController extends Controller
             'for' => 'in:enroll'
         ]);
         $cs=[];
-        if(!isset($request->year))
-        {
-            $year = AcademicYear::Get_current();
-            if(!$year)
-                return HelperController::api_response_format(200, null, __('messages.error.no_active_year'));
-        }
+        // if(!isset($request->year))
+        // {
+        //     $year = AcademicYear::Get_current();
+        //     if(!$year)
+        //         return HelperController::api_response_format(200, null, __('messages.error.no_active_year'));
+        // }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $enrolls->where('user_id',Auth::id());
@@ -322,11 +322,11 @@ class CourseController extends Controller
             'id' => 'required|exists:courses,id'
         ]);
         $course = Course::find($request->id);
-        $enrolls = Enroll::where('course_segment',CourseSegment::where('course_id',$request->id)->pluck('id'))->get();
+        $enrolls = Enroll::where('course',$request->id)->where('user_id','!=',1)->get();
         if(count($enrolls)>0)
             return HelperController::api_response_format(400, [], __('messages.error.cannot_delete'));
 
-        CourseSegment::where('course_id',$request->id)->delete();
+        // CourseSegment::where('course_id',$request->id)->delete();
         $course->delete();
         $request['returnmsg'] = 'Course Deleted Successfully';
         $request = new Request($request->only(['returnmsg']));
