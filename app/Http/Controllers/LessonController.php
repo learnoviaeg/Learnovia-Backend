@@ -112,6 +112,7 @@ class LessonController extends Controller
             'description' => 'string',
             'classes' => 'nullable|array',
             'classes.*' => 'exists:classes,id',
+            'shared_lesson' => 'in:0,1'
         ]);
         $lesson = Lesson::find($request->id);
         LastAction::lastActionInCourse($lesson->course_id);
@@ -123,6 +124,9 @@ class LessonController extends Controller
         if ($request->filled('description')) {
             $lesson->description = $request->description;
         }
+        if ($request->filled('shared_lesson'))
+            $lesson->shared_lesson = $request->shared_lesson;
+
         foreach($lesson->shared_classes as $class){
             $secondary_chain = SecondaryChain::where('group_id', $class)->whereNotIn('group_id',$request->classes)->where('lesson_id',$request->id)->delete();
         }
