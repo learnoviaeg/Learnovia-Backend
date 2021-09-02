@@ -63,6 +63,7 @@ class CoursesController extends Controller
         ]);
 
         $paginate = 12;
+       
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
@@ -73,6 +74,10 @@ class CoursesController extends Controller
 
             if($request->has('role_id')){
                 $enrolls->where('role_id',$request->role_id);
+            }
+            if($request->templates == 1){
+                $templates = Course::where('is_template',1)->get()->pluck('id');
+                $enrolls->whereIn('course',$templates);
             }
              $results = $enrolls->with('SecondaryChain.Teacher')->groupBy(['course','level'])->get();
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);

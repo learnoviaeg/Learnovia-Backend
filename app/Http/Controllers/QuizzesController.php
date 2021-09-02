@@ -55,15 +55,13 @@ class QuizzesController extends Controller
         ]);
 
         if($request->user()->can('site/show-all-courses')){//admin
-            $course_segments = collect($this->chain->getAllByChainRelation($request));
-            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+            $enrolls = $this->chain->getEnrollsByChain($request);
+            $lessons = $enrolls->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
         }
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
 
-        if(!$request->user()->can('site/show-all-courses')){// any one who is enrolled
-            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-            $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');    
+           $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
+           $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
         }
 
         if($request->filled('lesson')){

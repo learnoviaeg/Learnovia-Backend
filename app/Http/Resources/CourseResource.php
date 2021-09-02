@@ -28,6 +28,7 @@ class CourseResource extends JsonResource
             'image' => isset($this->courses['image']) ? $this->courses->attachment->path : null,
             'description' => $this->courses['description'] ,
             'mandatory' => $this->courses['mandatory'] ,
+            'is_template' => $this->courses['is_template'] ,
             'level' => $levels,
             'teachers' => $this->SecondaryChain,
             // 'teachers' => Enroll::where('role_id',4)->where('course',$this->courses['id'])->where('level', $this->levels->id)->where('type',$this['type'])
