@@ -7,6 +7,8 @@ use App\Lesson;
 use App\CourseSegment;
 use App\attachment;
 use App\LastAction;
+use App\SecondaryChain;
+use App\Events\LessonCreatedEvent;
 
 class LessonController extends Controller
 {
@@ -82,10 +84,10 @@ class LessonController extends Controller
 
         ]);
         $lesson = Lesson::find($request->id);
-        LastAction::lastActionInCourse($lesson->courseSegment->courses[0]->id);
+        LastAction::lastActionInCourse($lesson->course_id);
         $lesson->delete();
-        $lessons = Lesson::whereCourse_segment_id($lesson->course_segment_id)->where('index', '>', $lesson->index)->get();
-
+        SecondaryChain::where('lesson_id',$request->id)->delete();
+        $lessons = Lesson::where('course_id',$lesson->course_id)->where('index', '>', $lesson->index)->get();
         foreach ($lessons as $temp) {
             $temp->index = $temp->index - 1;
             $temp->save();
@@ -104,13 +106,15 @@ class LessonController extends Controller
     public function updateLesson(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'nullable',
             'id'  => 'required|exists:lessons,id',
             'image' => 'mimes:jpeg,jpg,png,gif|max:10000',
-            'description' => 'string'
+            'description' => 'string',
+            'classes' => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
         ]);
         $lesson = Lesson::find($request->id);
-        LastAction::lastActionInCourse($lesson->courseSegment->courses[0]->id);
+        LastAction::lastActionInCourse($lesson->course_id);
         $lesson->name = $request->name;
         if ($request->hasFile('image')) {
             $lesson->image = attachment::upload_attachment($request->image, 'lesson', '')->path;
@@ -119,8 +123,12 @@ class LessonController extends Controller
         if ($request->filled('description')) {
             $lesson->description = $request->description;
         }
+        foreach($lesson->shared_classes as $class){
+            $secondary_chain = SecondaryChain::where('group_id', $class)->whereNotIn('group_id',$request->classes)->where('lesson_id',$request->id)->delete();
+        }
+        $lesson->shared_classes = json_encode($request->classes);
         $lesson->save();
-
+        event(new LessonCreatedEvent($lesson));
         return HelperController::api_response_format(200, $lesson, __('messages.lesson.update'));
     }
 
