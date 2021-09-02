@@ -23,7 +23,7 @@ class MaterialsObserver
      */
     public function created(Material $material)
     {
-        // $this->report->calculate_course_progress($material->course_id);
+        $this->report->calculate_course_progress($material->course_id);
     }
 
     public function creating(Material $material)
@@ -57,7 +57,7 @@ class MaterialsObserver
                 ]);
             }
 
-            // $this->report->calculate_course_progress($material->course_id);
+            $this->report->calculate_course_progress($material->course_id);
         }
     }
 
