@@ -46,10 +46,15 @@ use App\Exports\CoursesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Modules\QuestionBank\Entities\QuestionsCategory;
+use App\Repositories\ChainRepositoryInterface;
 
 
 class CourseController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+    }
     /**
      * Add course
      *
@@ -233,7 +238,7 @@ class CourseController extends Controller
      * @return [object] course with attachment and category in paginate with search
      * @return [object] course with attachment and category in paginate if id
      */
-    public static function get(Request $request,$call=0)
+    public function get(Request $request,$call=0)
     {
         $request->validate([
             'id' => 'exists:courses,id',
@@ -251,16 +256,6 @@ class CourseController extends Controller
             'for' => 'in:enroll'
         ]);
         $cs=[];
-        if (isset($request->id))
-        {
-            $cor=Course::find($request->id);
-            $cor->levels=$cor->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
-            unset($cor->courseSegments);
-            $cor->category;
-            $cor->attachmnet;
-            return HelperController::api_response_format(200, $cor);
-        }
-
         if(!isset($request->year))
         {
             $year = AcademicYear::Get_current();
@@ -268,20 +263,10 @@ class CourseController extends Controller
                 return HelperController::api_response_format(200, null, __('messages.error.no_active_year'));
         }
 
-        $couresegs = GradeCategoryController::getCourseSegmentWithArray($request);
-        if(count($couresegs) == 0)
-            return HelperController::api_response_format(200, null, __('messages.error.no_available_data') );
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls->where('user_id',Auth::id());
 
-        foreach($couresegs as $one){
-            $cc=CourseSegment::find($one);
-            if($request->for == 'enroll')
-                if(!($cc->start_date <= Carbon::now() && $cc->end_date >= Carbon::now()))
-                    continue;
-
-            $cs[]=$cc->course_id;
-        }
-
-        $courses =  Course::whereIn('id',$cs)->with(['category', 'attachment','courseSegments.segmentClasses.classLevel.yearLevels.levels'])
+        $courses =  Course::whereIn('id',$enrolls->pluck('course'))->with(['category', 'attachment','level'])
                             ->where(function($q)use($request){
                                 $q->orWhere('name', 'LIKE', "%$request->search%")
                                 ->orWhere('short_name', 'LIKE' ,"%$request->search%");})->get();
@@ -289,16 +274,11 @@ class CourseController extends Controller
             return $courses;
         }
         foreach($courses as $le){
-            $le['levels'] = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
-            $teacher = User::whereIn('id',
-                        Enroll::where('role_id', '4')
-                            ->whereIn('course_segment',  $le->courseSegments->pluck('id'))
+            $le['levels'] = $le->level;
+            $teacher = User::whereIn('id',$enrolls->where('role_id', '4')
                             ->pluck('user_id')
                             )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
                             $le['teachers']  = $teacher ;
-            $le['start_date']=$le->courseSegments->pluck('start_date')->unique();
-            $le['end_date']=$le->courseSegments->pluck('end_date')->unique();
-            unset($le->courseSegments);
         }
         if($call == 2 ){ //$call by function update 
             return $courses;

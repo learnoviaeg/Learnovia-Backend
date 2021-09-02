@@ -40,8 +40,8 @@ class ClassesController extends Controller
             'types.*'  => 'nullable|exists:academic_types,id',
             'levels' => 'array|required_with:types',
             'levels.*' => 'exists:levels,id',
-            // 'courses'    => 'nullable|array',
-            // 'courses.*'  => 'nullable|integer|exists:courses,id',
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 

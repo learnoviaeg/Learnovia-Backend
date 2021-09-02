@@ -27,6 +27,9 @@ use App\Course;
 use App\Contract;
 use App\CourseSegment;
 use App\ClassLevel;
+use Str;
+use Spatie\Permission\Models\Role;
+use DB;
 use App\attachment;
 use App\SegmentClass;
 use Illuminate\Validation\Rule;
@@ -85,6 +88,27 @@ class UsersController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByChain($request);
+
+        if($my_chain=='count'){
+            $count = [];
+            $roles = new Role;
+            if($request->filled('roles'))
+                $roles = $roles->whereIn('id',$request->roles);
+
+            $roles = $roles->get();
+            $users = User::with(['attachment','roles']);
+
+            if(count($enrolls->pluck('id')))
+                $users= $enrolls->pluck('id');
+
+            $all_roles = Role::all();
+
+            foreach($all_roles as $role){
+                $count[Str::slug($role->name, '_')] = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
+            }
+
+            return HelperController::api_response_format(200 ,$count,__('messages.users.count'));
+        }
 
         if($request->filled('class') && getType($request->class) == 'array')
         {

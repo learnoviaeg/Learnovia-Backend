@@ -26,8 +26,8 @@ class LevelsExport implements FromCollection, WithHeadings
         foreach ($levels as $level) {
             $level['id'] = $level->id;
             $level['name'] = $level->name;
-            // $level['year'] = count($level->academicYear) > 0 ? $level->academicYear[0] : '-';
-            $level['type'] = $level->type;
+            $level['year'] = $level->type->year->name;
+            $level['type'] = $level->type->name;
             $level->setHidden([])->setVisible($this->fields);
         }
         return $levels;

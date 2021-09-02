@@ -483,6 +483,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('claass/{option}', 'ClassesController@index')->middleware(['permission:course/layout']);
     Route::Resource('users', UsersController::class);
     Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
+    Route::get('user/{count}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
+    Route::get('user/{all}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user-report/{option}', 'ReportsController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
     Route::Resource('notify', NotificationsController::class);

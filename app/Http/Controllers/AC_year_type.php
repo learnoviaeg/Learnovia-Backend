@@ -65,7 +65,10 @@ class AC_year_type extends Controller
         if(isset($request->search))
             $all_types->where('name', 'LIKE' , "%$request->search%");
 
-        return HelperController::api_response_format(200, (new Collection($all_types->get()))->paginate(HelperController::GetPaginate($request)));
+        if($call==1)
+            return $all_types->get();
+
+        return HelperController::api_response_format(200, $all_types->paginate(HelperController::GetPaginate($request)));
     }
 
     /**
