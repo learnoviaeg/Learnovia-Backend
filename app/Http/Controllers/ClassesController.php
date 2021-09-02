@@ -150,11 +150,11 @@ class ClassesController extends Controller
      */
     public function destroy($id)
     {
-        $course = Courses::whereIn('segment_id',Segment::whereId($id))->get();
-        if (count($course) > 0) 
+        $check = Enroll::whereIn('group',$id)->get();
+        if (count($check) > 0) 
             return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
         
-        Segment::whereId($req->id)->first()->delete();
+        Classes::whereId($id)->first()->delete();
 
         return HelperController::api_response_format(200, null, __('messages.class.delete'));
     }

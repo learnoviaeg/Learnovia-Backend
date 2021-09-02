@@ -127,7 +127,24 @@ class SegmentsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
+        ]);
+
+        $segment = Segment::find($id);
+        $segment->name = $request->name;
+        $segment->save();
+
+        if ($request->filled('year') && $request->filled('type'))
+        {
+            Segment::whereId($id)->update([
+                'academic_year_id' => $request->year,
+                'academic_type_id' => $request->type,
+            ]);
+        }
+        return HelperController::api_response_format(200, null, __('messages.segment.update'));
     }
 
     /**
@@ -138,11 +155,11 @@ class SegmentsController extends Controller
      */
     public function destroy($id)
     {
-        $course = Course::whereIn('segment_id',Segment::whereId($id))->get();
+        $course = Course::whereIn('segment_id',$id)->get();
         if (count($course) > 0) 
             return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
         
-        Segment::whereId($req->id)->first()->delete();
+        Segment::whereId($id)->first()->delete();
 
         return HelperController::api_response_format(200, null, __('messages.segment.delete'));
     }

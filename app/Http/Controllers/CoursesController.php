@@ -227,7 +227,48 @@ class CoursesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'nullable',
+            'category' => 'nullable|exists:categories,id',
+            'id' => 'required|exists:courses,id',
+            'image' => 'nullable',
+            'description' => 'nullable',
+            'mandatory' => 'nullable|in:0,1',
+            'short_name' => 'unique:courses,short_name,'.$id,
+            'course_template' => 'nullable|exists:courses,id',
+            'is_template' => 'nullable|boolean|required_with:course_template',
+            'old_lessons' => 'nullable|boolean|required_with:course_template',
+        ]);
+
+        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template'];
+        $course = Course::find($id);
+        // if course has an image
+        if ($request->hasFile('image')) 
+            $course->image = attachment::upload_attachment($request->image, 'course')->id;
+        
+        foreach ($editable as $key) 
+            if ($request->filled($key)) 
+                $course->$key = $request->$key;
+
+        if($request->filled('course_template')){
+            if($request->old_lessons == 0){
+                $old_lessons = Lesson::where('course_id', $id)->get();
+                $secondary_chains = SecondaryChain::whereIn('lesson_id',$old_lessons)->where('course_id',$id)->delete();
+            }
+            $new_lessons = Lesson::where('course_id', $request->course_template);
+            foreach($new_lessons->cursor() as $lesson){
+                Lesson::create([
+                    'name' => $lesson->name,
+                    'course_id' => $id,
+                    'shared_lesson' => 1,//$lesson->shared_lesson,
+                    'index' => $lesson->index,
+                    'description' => $lesson->description,
+                    'image' => $lesson->image,
+                ]);
+            }            
+        }
+        $course->save();
+        return HelperController::api_response_format(200, $course, __('messages.course.update'));
     }
 
     /**
@@ -238,6 +279,12 @@ class CoursesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $course = Course::find($id);
+        $enrolls = Enroll::where('course',$id)->get();
+        if(count($enrolls)>0)
+            return HelperController::api_response_format(400, [], __('messages.error.cannot_delete'));
+
+        $course->delete();
+        return HelperController::api_response_format(200, $course, __('messages.course.delete'));
     }
 }
