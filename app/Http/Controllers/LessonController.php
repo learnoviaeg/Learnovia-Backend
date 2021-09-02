@@ -86,7 +86,7 @@ class LessonController extends Controller
         $lesson = Lesson::find($request->id);
         LastAction::lastActionInCourse($lesson->course_id);
         $lesson->delete();
-        $secondary_chain = SecondaryChain::where('lesson_id',$request->id)->delete();
+        SecondaryChain::where('lesson_id',$request->id)->delete();
         $lessons = Lesson::where('course_id',$lesson->course_id)->where('index', '>', $lesson->index)->get();
         foreach ($lessons as $temp) {
             $temp->index = $temp->index - 1;
