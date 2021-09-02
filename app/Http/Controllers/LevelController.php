@@ -135,7 +135,7 @@ class LevelController extends Controller
     public function destroy($id,Request $request)
     {
         $courses= Course::where('level_id',$id)->get();
-        $classes = Classes::whereIn('level_id',$id)->get();
+        $classes = Classes::where('level_id',$id)->get();
         if (count($courses) > 0 || count($classes) > 0)
             return HelperController::api_response_format(200, [] , __('messages.error.cannot_delete'));
 

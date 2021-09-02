@@ -59,13 +59,14 @@ class SegmentsController extends Controller
                     $segment['levels']=$levels->pluck('name');
                     $segment['classes']=Classes::whereIn('level_id',$levels->pluck('id'))->pluck('name');
                 }
+                dd($segments);
 
             return HelperController::api_response_format(201, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $segments->whereIn('id',$enrolls->pluck('segment'));
-        
+
         foreach($segments->get() as $segment)
         {
             $levels=Level::where('academic_type_id',$segment->academic_type_id);
