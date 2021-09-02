@@ -34,7 +34,10 @@ class TypesController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        $types = AcademicType::with('year')->whereNull('deleted_at');
+        $types = AcademicType::with('year')->whereHas('year',function ($q) use ($request) {
+            if($request->filled('year'))
+                $q->whereIn("academic_year_id", $request->year);
+        });
         if($request->filled('search'))
             $types = $types->where('name', 'LIKE' , "%$request->search%"); 
 

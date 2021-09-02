@@ -52,11 +52,15 @@ class CoursesImport implements ToModel , WithHeadingRow
         if (isset($row['no_of_lessons'])) 
             $no_of_lessons = $row['no_of_lessons'];
 
+        $chains[0]['segment'][0]=$row['segment_id'];
+        $chains[0]['level'][0]=$row['level_id'];
+        // dd($chains);
+
         $req=new Request([
             'name' => $row['name'],
             'short_name' => $row['short_name'],
-            'segment_id' => $row['segment_id'],
-            'level_id' => $row['level_id'],
+            'chains' => $chains,
+            'chains' => $chains,
             'category_id' => isset($row['category']) ? $row['category'] : null,
             'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,
             'description' => isset($row['description']) ? $row['description'] : null,
