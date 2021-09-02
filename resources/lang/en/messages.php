@@ -276,6 +276,7 @@ return [
         'list' => 'Courses List',
         'object' => 'Course details',
         'assign' => 'Course assigned successfully',
+        'template' => 'Templates added successfully',
     ],
     'announcement' => [
         'add' => 'Announcement sent successfully',
