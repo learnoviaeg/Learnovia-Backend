@@ -54,8 +54,9 @@ class ClassesController extends Controller
             if(isset($request->types) &&isset($request->levels) )
             {
                 $levels=Level::whereIn('academic_type_id',$request->types)->pluck('id');
+                $classes->whereIn('level_id',$levels)->where('type','class');
                 if(isset($request->levels))
-                    $classes->whereIn('level_id',$levels)->where('type','class');
+                    $classes->whereIn('level_id',$request->levels)->where('type','class');
             }
             if($request->filled('courses')){
                 $levels = Course::select('level_id')->whereIn('id',$request->courses) ->distinct()->get()->pluck('level_id');
@@ -129,25 +130,15 @@ class ClassesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $valid = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'required',
-            // 'id' => 'required|exists:classes,id',
-            // 'year' => 'exists:academic_years,id',
-            // 'type' => 'exists:academic_types,id|required_with:year',
-            'level' => 'exists:levels,id|required_with:year',
+            'level_id' => 'exists:levels,id|required_with:year',
         ]);
 
-        if ($valid->fails())
-            return HelperController::api_response_format(400 , $valid->errors() , __('messages.error.try_again'));
         $class = Classes::find($request->id);
         $class->update($request->all());
         $class->save();
-        if ($request->filled('year'))
-        {
-            $year_type= AcademicYearType::where('academic_year_id',$request->year)->where('academic_type_id',$request->type)->first();
-            $year_level=YearLevel::where('level_id',$request->level)->where('academic_year_type_id',$year_type->id)->first();
-            ClassLevel::where('class_id',$request->id)->update(['year_level_id' => $year_level->id]);
-        }
+
         return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.update'));
     }
 
