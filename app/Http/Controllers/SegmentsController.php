@@ -135,6 +135,8 @@ class SegmentsController extends Controller
 
         $segment = Segment::find($id);
         $segment->name = $request->name;
+        $segment->start_date = $request->start_date;
+        $segment->end_date = $request->end_date;
         $segment->save();
 
         if ($request->filled('year') && $request->filled('type'))
