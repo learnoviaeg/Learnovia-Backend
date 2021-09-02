@@ -34,7 +34,7 @@ class TypesController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        $types = AcademicType::whereNull('deleted_at');
+        $types = AcademicType::with('year')->whereNull('deleted_at');
         if($request->filled('search'))
             $types = $types->where('name', 'LIKE' , "%$request->search%"); 
 
@@ -67,15 +67,22 @@ class TypesController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'segment_no' => 'required'
+            'segment_no' => 'required',
+            'year' => 'array|required',
+            'year.*' => 'exists:academic_years,id'
         ]);
 
-        AcademicType::firstOrCreate([
-            'name' => $request->name,
-            'segment_no' => $request->segment_no
-        ]);
+        foreach ($request->year as $year) {
+            # code...
 
-        return HelperController::api_response_format(201, AcademicType::paginate(HelperController::GetPaginate($request)), __('messages.type.add'));
+            AcademicType::firstOrCreate([
+                'name' => $request->name,
+                'segment_no' => $request->segment_no,
+                'academic_year_id' => $year
+            ]);
+        }
+
+        return HelperController::api_response_format(201, AcademicType::with('Year')->paginate(HelperController::GetPaginate($request)), __('messages.type.add'));
     }
 
     /**

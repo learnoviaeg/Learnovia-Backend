@@ -45,7 +45,7 @@ class ClassesController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        $classes=Classes::with('level')->where('type','class')->whereNull('deleted_at');
+        $classes=Classes::with('level.type.year')->where('type','class')->whereNull('deleted_at');
         if($request->filled('search'))
             $classes->where('name', 'LIKE' , "%$request->search%"); 
 
