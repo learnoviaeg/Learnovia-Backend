@@ -10,9 +10,9 @@ class Course extends Model
 {
     protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id','is_template'];
 
-    // protected $dispatchesEvents = [
-    //     'created' => \App\Events\CourseCreatedEvent::class,
-    // ];
+    protected $dispatchesEvents = [
+        'created' => \App\Events\CourseCreatedEvent::class,
+    ];
 
     public function level()
     {
