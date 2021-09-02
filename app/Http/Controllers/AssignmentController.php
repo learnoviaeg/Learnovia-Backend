@@ -129,7 +129,7 @@ class AssignmentController extends Controller
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
 
         $lesson_drag = Lesson::find($lesson_id);
-        LastAction::lastActionInCourse($lesson_drag->courseSegment->courses[0]->id);
+        LastAction::lastActionInCourse($lesson_drag->course_id);
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
         if (count($userassigments) > 0) {
             $assignment['allow_edit'] = false;
@@ -178,7 +178,7 @@ class AssignmentController extends Controller
         Timeline::where('item_id',$id)->where('type','assignment')->where('lesson_id',$request->lesson_id)->delete();
         
         $lesson=Lesson::find($request->lesson_id);
-        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($lesson->course_id);
         
         $assigment->delete();
 
