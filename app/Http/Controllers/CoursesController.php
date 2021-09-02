@@ -315,6 +315,6 @@ class CoursesController extends Controller
                 ]);
             }            
         }
-        return HelperController::api_response_format(200, $course, __('messages.course.template'));
+        return HelperController::api_response_format(200, null, __('messages.course.template'));
     }
 }
