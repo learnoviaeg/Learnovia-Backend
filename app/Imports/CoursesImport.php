@@ -66,6 +66,7 @@ class CoursesImport implements ToModel , WithHeadingRow
             'description' => isset($row['description']) ? $row['description'] : null,
             'shared_lesson' => isset($row['shared_lesson']) ? $row['shared_lesson'] : 0,
             'no_of_lessons' => isset($row['no_of_lessons']) ? $row['no_of_lessons'] : 4,
+            'is_template' => isset($row['is_template']) ? $row['no_of_lessons'] : 0,
         ]);
 
         //should to find a way to call this without change it to static
