@@ -198,15 +198,6 @@ class ClassController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
-            'name'  => 'required',
-            'year'=>'array|required_with:type|required_with:level',
-            'year.*'=>'exists:academic_years,id',
-            'type'=>'array|required_with:year',
-            'type.*'=> 'exists:academic_types,id',
-            'level'=>'array|required_with:year',
-            'level.*'=> 'exists:levels,id',
-        ]);
         $valid = Validator::make($request->all(), [
             'name' => 'required',
             'id' => 'required|exists:classes,id',
