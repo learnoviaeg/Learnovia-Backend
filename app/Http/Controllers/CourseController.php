@@ -198,9 +198,13 @@ class CourseController extends Controller
             'mandatory' => 'nullable|in:0,1',
             'short_name' => 'unique:courses,short_name,'.$request->id,
             'start_date' => 'date',
-            'end_date' =>'date|after:start_date'
+            'end_date' =>'date|after:start_date',
+            'course_template' => 'nullable|exists:courses,id',
+            'is_template' => 'nullable|boolean|required_with:course_template',
+            'old_lessons' => 'nullable|boolean|required_with:course_template',
         ]);
-        $editable = ['name', 'category_id', 'description', 'mandatory','short_name'];
+
+        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template'];
         $course = Course::find($request->id);
         // if course has an image
         if ($request->hasFile('image')) 
@@ -210,17 +214,34 @@ class CourseController extends Controller
             if ($request->filled($key)) 
                 $course->$key = $request->$key;
 
-        $course_segment = CourseSegment::where("course_id",$request->id);
-        if ($request->filled('start_date')) 
-             $course_segment->update(['start_date'=>$request->start_date]); 
+        if($request->filled('course_template')){
+            if($request->old_lessons == 0){
+                $old_lessons = Lesson::where('course_id', $request->id)->get();
+                $secondary_chains = SecondaryChain::whereIn('lesson_id',$old_lessons)->where('course_id',$request->id)->delete();
+            }
+            $new_lessons = Lesson::where('course_id', $request->course_template);
+            foreach($new_lessons->cursor() as $lesson){
+                Lesson::create([
+                    'name' => $lesson->name,
+                    'course_id' => $request->id,
+                    'shared_lesson' => 1,//$lesson->shared_lesson,
+                    'index' => $lesson->index,
+                    'description' => $lesson->description,
+                    'image' => $lesson->image,
+                ]);
+            }            
+        }
+
+        // $course_segment = CourseSegment::where("course_id",$request->id);
+        // if ($request->filled('start_date')) 
+        //      $course_segment->update(['start_date'=>$request->start_date]); 
         
-        if ($request->filled('end_date')) 
-            $course_segment->update(['end_date' => $request->end_date]);
+        // if ($request->filled('end_date')) 
+        //     $course_segment->update(['end_date' => $request->end_date]);
          
         $course->save();
-        $req = new Request();
-
-        return HelperController::api_response_format(200, $this->get($req,2)->paginate(HelperController::GetPaginate($request)), __('messages.course.update'));
+        // $req = new Request();
+        return HelperController::api_response_format(200, $course, __('messages.course.update'));
           // return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
     }
 

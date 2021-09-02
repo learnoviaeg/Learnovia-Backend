@@ -98,8 +98,7 @@ class CoursesController extends Controller
             // 'description' => 'string',
             'mandatory' => 'nullable',
             'short_name' =>'required',
-            // 'typical' => 'nullable|boolean',
-
+            'is_template' => 'nullable|boolean',
             'chains.*.level' => 'array|required_with:chains.*.year',
             'chains.*.level.*' => 'required|exists:levels,id',
             'chains.*.segment' => 'array|required_with:chains.*.year',
@@ -122,6 +121,7 @@ class CoursesController extends Controller
                         'mandatory' => isset($request->mandatory) ? $request->mandatory : 1,
                         'segment_id' => $segment,
                         'level_id' => $level,
+                        'is_template' => isset($request->is_template) ? $request->is_template : 0,
                     ]);
                     $level_id=$course->level_id;
                     $segment=Segment::find($course->segment_id);
