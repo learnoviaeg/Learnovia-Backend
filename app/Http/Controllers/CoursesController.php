@@ -63,6 +63,7 @@ class CoursesController extends Controller
         ]);
 
         $paginate = 12;
+       
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
@@ -73,6 +74,10 @@ class CoursesController extends Controller
 
             if($request->has('role_id')){
                 $enrolls->where('role_id',$request->role_id);
+            }
+            if($request->templates == 1){
+                $templates = Course::where('is_template',1)->get()->pluck('id');
+                $enrolls->whereIn('course',$templates);
             }
              $results = $enrolls->with('SecondaryChain.Teacher')->groupBy(['course','level'])->get();
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
@@ -98,8 +103,7 @@ class CoursesController extends Controller
             // 'description' => 'string',
             'mandatory' => 'nullable',
             'short_name' =>'required',
-            // 'typical' => 'nullable|boolean',
-
+            'is_template' => 'nullable|boolean',
             'chains.*.level' => 'array|required_with:chains.*.year',
             'chains.*.level.*' => 'required|exists:levels,id',
             'chains.*.segment' => 'array|required_with:chains.*.year',
@@ -122,6 +126,7 @@ class CoursesController extends Controller
                         'mandatory' => isset($request->mandatory) ? $request->mandatory : 1,
                         'segment_id' => $segment,
                         'level_id' => $level,
+                        'is_template' => isset($request->is_template) ? $request->is_template : 0,
                     ]);
                     $level_id=$course->level_id;
                     $segment=Segment::find($course->segment_id);
