@@ -112,7 +112,7 @@ class LessonController extends Controller
             'description' => 'string',
             'classes' => 'nullable|array',
             'classes.*' => 'exists:classes,id',
-            'shared_lesson' => 'required|in:0,1'
+            'shared_lesson' => 'in:0,1'
         ]);
         $lesson = Lesson::find($request->id);
         LastAction::lastActionInCourse($lesson->course_id);
