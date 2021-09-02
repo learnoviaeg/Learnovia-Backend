@@ -53,13 +53,13 @@ class SegmentsController extends Controller
         {
             if(isset($request->types))
                 $segments->whereIn('academic_type_id',$request->types);
-                foreach($segments->get() as $segment)
-                {
-                    $levels=Level::where('academic_type_id',$segment->academic_type_id);
-                    $segment['levels']=$levels->pluck('name');
-                    $segment['classes']=Classes::whereIn('level_id',$levels->pluck('id'))->pluck('name');
-                }
-                dd($segments);
+                // foreach($segments->get() as $segment)
+                // {
+                //     $levels=Level::where('academic_type_id',$segment->academic_type_id);
+                //     $segment['levels']=$levels->pluck('name');
+                //     $segment['classes']=Classes::whereIn('level_id',$levels->pluck('id'))->pluck('name');
+                // }
+                // dd($segments);
 
             return HelperController::api_response_format(201, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
         }
@@ -67,12 +67,12 @@ class SegmentsController extends Controller
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $segments->whereIn('id',$enrolls->pluck('segment'));
 
-        foreach($segments->get() as $segment)
-        {
-            $levels=Level::where('academic_type_id',$segment->academic_type_id);
-            $segment['levels']=$levels->pluck('name');
-            $segment['classes']=Classes::whereIn('level_id',$levels->pluck('id'))->pluck('name');
-        }
+        // foreach($segments->get() as $segment)
+        // {
+        //     $levels=Level::where('academic_type_id',$segment->academic_type_id);
+        //     $segment['levels']=$levels->pluck('name');
+        //     $segment['classes']=Classes::whereIn('level_id',$levels->pluck('id'))->pluck('name');
+        // }
 
         return HelperController::api_response_format(200, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
     }
