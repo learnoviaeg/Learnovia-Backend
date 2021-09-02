@@ -282,7 +282,7 @@ class CoursesController extends Controller
         $course = Course::find($id);
         $enrolls = Enroll::where('course',$id)->get();
         if(count($enrolls)>0)
-            return HelperController::api_response_format(400, [], __('messages.error.cannot_delete'));
+            return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));
 
         $course->delete();
         return HelperController::api_response_format(200, $course, __('messages.course.delete'));

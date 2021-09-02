@@ -120,7 +120,7 @@ class TypesController extends Controller
         $segment= Segment::where('academic_type_id',$id)->get();
         $level= Level::where('academic_type_id',$id)->get();
         if((count($segment) > 0 || count($level) > 0))
-            return HelperController::api_response_format(404, [], __('messages.error.cannot_delete'));
+            return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));
         
         AcademicType::whereId($id)->first()->delete();
 
