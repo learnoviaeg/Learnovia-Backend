@@ -127,7 +127,20 @@ class SegmentsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
+        ]);
+
+        $segment = Segment::find($request->id);
+        $segment->name = $request->name;
+        $segment->academic_type_id = $request->year;
+        $segment->academic_year_id = $request->type;
+        $segment->save();
+
+        return HelperController::api_response_format(200, null, __('messages.segment.update'));
+
     }
 
     /**

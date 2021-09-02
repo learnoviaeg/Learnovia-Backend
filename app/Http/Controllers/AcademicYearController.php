@@ -38,7 +38,8 @@ class AcademicYearController extends Controller
         return HelperController::api_response_format(201, $years, __('messages.year.add'));
     }
 
- /**
+    /**
+     * 
      * @Description :Get all years in database or get years with a given filter.
      * @param : 'search' as an optional parameter.
      * @return: If request contains search :returns years according to the search,

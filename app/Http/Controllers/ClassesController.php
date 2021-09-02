@@ -51,7 +51,7 @@ class ClassesController extends Controller
 
         if($request->user()->can('site/show-all-courses'))
         {
-            if(isset($request->types) &&isset($request->levels) )
+            if(isset($request->types) && isset($request->levels) )
             {
                 $levels=Level::whereIn('academic_type_id',$request->types)->pluck('id');
                 $classes->whereIn('level_id',$levels)->where('type','class');
