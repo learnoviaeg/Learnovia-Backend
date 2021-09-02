@@ -45,7 +45,17 @@ class TypesController extends Controller
             return HelperController::api_response_format(201, $types->paginate(HelperController::GetPaginate($request)), __('messages.type.list'));
         
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $types->whereIn('id',$enrolls->pluck('type'));
+        $types->whereIn('id',$enrolls->pluck('type'));    
+
+        if($request->filter == 'export')
+        {
+            $types = $types->get();
+            $filename = uniqid();
+            $file = Excel::store(new TypesExport($types), 'Type'.$filename.'.xls','public');
+            $file = url(Storage::url('Type'.$filename.'.xls'));
+
+            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+        }
 
         return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)),__('messages.type.list'));
     }

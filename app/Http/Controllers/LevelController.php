@@ -57,6 +57,16 @@ class LevelController extends Controller
         if($request->filled('search'))
             $levels=$levels->where('name', 'LIKE' , "%$request->search%");
 
+        if($request->filter == 'export')
+        {
+            $levelsIDs = $levels->get();
+            $filename = uniqid();
+            $file = Excel::store(new LevelsExport($levelsIDs), 'levels'.$filename.'.xls','public');
+            $file = url(Storage::url('levels'.$filename.'.xls'));
+
+            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+        }
+
         return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
     }
 
