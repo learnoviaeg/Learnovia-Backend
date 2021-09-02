@@ -277,15 +277,16 @@ class CoursesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id ,Request $request)
     {
         $course = Course::find($id);
-        $enrolls = Enroll::where('course',$id)->get();
+        $enrolls = Enroll::where('course',$id)->where('user_id','!=',1)->get();
         if(count($enrolls)>0)
             return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));
 
         $course->delete();
-        return HelperController::api_response_format(200, $course, __('messages.course.delete'));
+        return app('App\Http\Controllers\CoursesController')->index($request);
+        // return HelperController::api_response_format(200, $course, __('messages.course.delete'));
     }
 
 

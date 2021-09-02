@@ -164,7 +164,7 @@ class SegmentsController extends Controller
      */
     public function destroy($id)
     {
-        $course = Course::whereIn('segment_id',$id)->get();
+        $course = Course::where('segment_id',$id)->get();
         if (count($course) > 0) 
             return HelperController::api_response_format(200, [] , __('messages.error.cannot_delete'));
         

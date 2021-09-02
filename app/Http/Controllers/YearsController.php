@@ -111,6 +111,9 @@ class YearsController extends Controller
      */
     public function destroy($id,Request $request)
     {
+        $check = AcademicType::where('academic_year_id',$id)->get();
+        if (count($check) > 0) 
+            return HelperController::api_response_format(200, [] , __('messages.error.cannot_delete'));
         $year=AcademicYear::find($id);
         $year->delete();
         return HelperController::api_response_format(200, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), __('messages.year.delete'));            
