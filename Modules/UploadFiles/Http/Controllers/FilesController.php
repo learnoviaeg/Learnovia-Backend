@@ -521,8 +521,8 @@ class FilesController extends Controller
 
         $file = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
         $lesson = Lesson::find($request->lesson_id);
-        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
-        LastAction::lastActionInCourse($courseID);
+        // $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($lesson->course_id);
         $file->delete();
         File::whereId($request->fileID)->delete();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
@@ -547,8 +547,8 @@ class FilesController extends Controller
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $lesson = Lesson::find($request->lesson_id);
-        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
-        LastAction::lastActionInCourse($courseID);
+        // $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($lesson->course_id);
         $fileLesson->visible = ($fileLesson->visible == 1) ? 0 : 1;
         $fileLesson->save();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
