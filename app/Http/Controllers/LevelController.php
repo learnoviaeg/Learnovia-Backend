@@ -39,7 +39,7 @@ class LevelController extends Controller
             'search' => 'nullable',
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
-        $levels=Level::with('type')->whereNull('deleted_at');
+        $levels=Level::with('type.year')->whereNull('deleted_at');
         if($request->filled('search'))
             $levels->where('name', 'LIKE' , "%$request->search%");
 
