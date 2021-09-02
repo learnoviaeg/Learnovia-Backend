@@ -63,4 +63,10 @@ class Lesson extends Model
 
     }
 
+    public function getSharedClassesAttribute($value)
+    {
+        $content= json_decode($value);
+        return $content;
+    }
+
 }
