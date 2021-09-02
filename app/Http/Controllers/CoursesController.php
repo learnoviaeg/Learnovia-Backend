@@ -287,4 +287,34 @@ class CoursesController extends Controller
         $course->delete();
         return HelperController::api_response_format(200, $course, __('messages.course.delete'));
     }
+
+
+    public function Apply_Template(Request $request)
+    {
+        $request->validate([
+            'template_id' => 'required|exists:courses,id',
+            'old_lessons' => 'required|nullable|boolean',
+            'courses' => 'required|array',
+            'courses.*' => 'nullable|exists:courses,id',
+        ]);
+
+        foreach($request->courses as $course){
+            if($request->old_lessons == 0){
+                $old_lessons = Lesson::where('course_id', $course)->get();
+                $secondary_chains = SecondaryChain::whereIn('lesson_id',$old_lessons)->where('course_id',$course)->delete();
+            }
+            $new_lessons = Lesson::where('course_id', $request->template_id);
+            foreach($new_lessons->cursor() as $lesson){
+                Lesson::create([
+                    'name' => $lesson->name,
+                    'course_id' => $course,
+                    'shared_lesson' => 1,//$lesson->shared_lesson,
+                    'index' => $lesson->index,
+                    'description' => $lesson->description,
+                    'image' => $lesson->image,
+                ]);
+            }            
+        }
+        return HelperController::api_response_format(200, null, __('messages.course.template'));
+    }
 }
