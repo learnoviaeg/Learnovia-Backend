@@ -204,7 +204,7 @@ class CoursesController extends Controller
      */
     public function show($id)
     {
-        $course = Course::with('attachment')->find($id);
+        $course = Course::with('attachment','level')->find($id);
 
         if(isset($course)){
             LastAction::lastActionInCourse($id);
