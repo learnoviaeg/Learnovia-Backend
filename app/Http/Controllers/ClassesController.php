@@ -8,6 +8,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\SegmentClass;
 use App\Classes;
 use App\Level;
+use App\Enroll;
 use App\Course;
 
 class ClassesController extends Controller
