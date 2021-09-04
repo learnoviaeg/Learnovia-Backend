@@ -11,7 +11,7 @@ use App\Exports\YearsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ChainRepositoryInterface;
-
+use App\AcademicType;
 class YearsController extends Controller
 {
     public function __construct(ChainRepositoryInterface $chain)
