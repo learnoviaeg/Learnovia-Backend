@@ -67,21 +67,20 @@ class CoursesController extends Controller
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
-            $enrolls = $this->chain->getEnrollsByManyChain($request);
-            // if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)) //student or teacher
-            if(!$request->user()->can('site/show-all-courses')) //student or teacher
-                $enrolls->where('user_id',Auth::id());
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        // if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)) //student or teacher
+        if(!$request->user()->can('site/show-all-courses')) //student or teacher
+            $enrolls->where('user_id',Auth::id());
 
-            if($request->has('role_id')){
-                $enrolls->where('role_id',$request->role_id);
-            }
-            if($request->templates == 1){
-                $templates = Course::where('is_template',1)->get()->pluck('id');
-                $enrolls->whereIn('course',$templates);
-            }
-             $results = $enrolls->with('SecondaryChain.Teacher')->groupBy(['course','level'])->get();
+        if($request->has('role_id'))
+            $enrolls->where('role_id',$request->role_id);
+        
+        if($request->templates == 1){
+            $templates = Course::where('is_template',1)->get()->pluck('id');
+            $enrolls->whereIn('course',$templates);
+        }
+        $results = $enrolls->with('SecondaryChain.Teacher')->groupBy(['course','level'])->get();
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
-
     }
 
     /**
@@ -189,7 +188,11 @@ class CoursesController extends Controller
                 }
             }
         }
-        $courses =  Course::with(['category', 'attachment','level'])->get();
+        $courses =  Course::query();
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
+        $courses->whereIn('id',$enrolls->pluck('course'));
+        $courses->with(['category', 'attachment','level'])->get();
+
         foreach($courses as $le){
             $teacher = User::whereIn('id',Enroll::where('role_id', '4')->where('course',  $le->id)
                                                 ->pluck('user_id')
