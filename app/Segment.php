@@ -38,7 +38,7 @@ class Segment extends Model
         return $segment;
     }
 
-    public static function Get_current_by_one_types($type)
+    public static function Get_current_by_one_type($type)
     {
         $segment = self::where('academic_type_id', $type)->where("end_date", '>' ,Carbon::now())->where("start_date", '<=' ,Carbon::now())->pluck('id');
         return $segment;
