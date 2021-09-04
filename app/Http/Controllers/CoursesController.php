@@ -196,7 +196,7 @@ class CoursesController extends Controller
                             )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
             $le['teachers']  = $teacher ;
         }
-        return response()->json(['message' => __('messages.course.list'), 'body' => $courses->paginate(HelperController::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.course.add'), 'body' => $courses->paginate(HelperController::GetPaginate($request))], 200);
 
         // return $courses;
     }
