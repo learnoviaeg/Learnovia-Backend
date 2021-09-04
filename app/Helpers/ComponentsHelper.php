@@ -2,9 +2,11 @@
 
 namespace App\Helpers;
 
+use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
 use Modules\Assigments\Entities\assignment;
 use Modules\QuestionBank\Entities\quiz;
 use App\SecondaryChain;
+use App\h5pLesson;
 use App\Material;
 use App\Lesson;
 
@@ -128,26 +130,41 @@ class ComponentsHelper
         return $lessons;
     }
 
-    //belw still not implemented
     public function interactives()
     {
-        $lessons = Lesson::whereIn('id',$this->lessons);
+        $interactives = h5pLesson::whereIn('lesson_id',$this->lessons);
 
-        if($this->from && $this->to){
-            $lessons->whereBetween('created_at', [$this->from,$this->to]);
+        if($this->teacher){
+            $interactives->where('user_id', $this->teacher);
         }
 
-        return $lessons;
+        if($this->from && $this->to){
+            $interactives->whereBetween('created_at', [$this->from,$this->to]);
+        }
+
+        return $interactives;
     }
 
     public function virtuals()
     {
-        $lessons = Lesson::whereIn('id',$this->lessons);
+        $virtuals = BigbluebuttonModel::whereNotNull('id');
 
-        if($this->from && $this->to){
-            $lessons->whereBetween('created_at', [$this->from,$this->to]);
+        if($this->course){
+            $virtuals->where('course_id', $this->course);
         }
 
-        return $lessons;
+        if($this->class){
+            $virtuals->where('class_id', $this->class);
+        }
+
+        if($this->teacher){
+            $virtuals->where('user_id', $this->teacher);
+        }
+
+        if($this->from && $this->to){
+            $virtuals->whereBetween('created_at', [$this->from,$this->to]);
+        }
+
+        return $virtuals;
     }
 }
