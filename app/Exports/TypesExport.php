@@ -21,7 +21,7 @@ class TypesExport implements FromCollection, WithHeadings
     public function collection()
     {
         foreach ($this->types as $type) {
-            $type['year'] = $type->year->name;
+            $type['year'] = $type->year ? $type->year->name : '-';
             $type->setHidden([])->setVisible($this->fields);
         }
         return $this->types;
