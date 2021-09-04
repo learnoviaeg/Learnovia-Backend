@@ -267,6 +267,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], fu
 
 //Enroll Routes
 Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api','LastAction']], function () {
+    //de enroll staff
     Route::post('enroll-single-user', 'EnrollUserToCourseController@EnrollCourses')->name('EnrollCourses')->middleware('permission:enroll/user');
     Route::post('un-enroll-single-user', 'EnrollUserToCourseController@UnEnroll')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
     Route::post('reset-enrollment', 'EnrollUserToCourseController@reset_enrollment')->name('UnEnrollUsers')->middleware('permission:enroll/un-enroll-single-user');
@@ -279,7 +280,7 @@ Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api','LastAction']], 
     Route::get('get-unenroll-users', 'EnrollUserToCourseController@getUnEnroll')->name('getUnEnroll')->middleware('permission:enroll/get-unenroll-users');
     Route::get('get-unenroll-users-role', 'EnrollUserToCourseController@UnEnrolledUsers')->name('UnEnrolledUsers')->middleware('permission:enroll/get-unenroll-users-role');
     Route::get('get-unenrolled-users-Bulk', 'EnrollUserToCourseController@unEnrolledUsersBulk')->name('getUnEnrolleduser')->middleware('permission:enroll/get-unenrolled-users-Bulk');
-    //de enroll staff
+    //
     Route::post('users', 'EnrollUserToCourseController@enrollWithChain')->name('Enrollusers')->middleware('permission:enroll/users');
     Route::post('migrate-user', 'EnrollUserToCourseController@Migration')->name('migrateuser')->middleware('permission:enroll/migrate-user');
     Route::post('empty-courses', 'EnrollUserToCourseController@EmptyCourses');
