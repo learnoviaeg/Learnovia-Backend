@@ -3,7 +3,7 @@
 namespace App\Repositories;
 use Illuminate\Http\Request;
 use App\Enroll;
-use App\Lesson;
+use App\SecondaryChain;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\QuestionBank\Entities\QuizLesson;
 use App\h5pLesson;
@@ -29,50 +29,51 @@ class RepportsRepository implements RepportsRepositoryInterface
         //0.75x100 = 75%
         // so the progress will be 75%
 
-        // $enroll_students = Enroll::where('course',$course_id)->where('role_id',3)->get()->groupBy('class');
-        // $all_percentages = [];
-        // $i=0;
+        $enroll_students = Enroll::where('course',$course_id)->where('role_id',3)->get()->groupBy('group');
+        $all_percentages = [];
+        $i=0;
 
-        // foreach($enroll_students as $enroll){
+        foreach($enroll_students as $classId => $enroll){
             
-        //     $lessons = Lesson::whereIn('course_segment_id',$enroll->pluck('course_segment'))->pluck('id');
-            
-        //     //Assignments
-        //     $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->count();
-            
-        //     //quizzes
-        //     $quizzes = QuizLesson::whereIn('lesson_id',$lessons)->count();
-
-        //     //h5p
-        //     $h5p = h5pLesson::whereIn('lesson_id',$lessons)->count();
+            $lessons = SecondaryChain::where('course_id',$course_id)->where('group_id',$classId)->pluck('lesson_id');
     
-        //     //materials
-        //     $materials = Material::whereIn('lesson_id',$lessons)->count();
-
-        //     //items count 
-        //     $items_count = $assignments + $quizzes + $h5p  + $materials;
+            //Assignments
+            $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->count();
             
-        //     //sum all the seen number for all components
-        //     $sum_views = UserSeen::whereIn('user_id',$enroll->pluck('user_id'))->whereIn('lesson_id',$lessons)->count();
-        //     $divided_by = count($enroll) * $items_count;
+            //quizzes
+            $quizzes = QuizLesson::whereIn('lesson_id',$lessons)->count();
 
-        //     $percentage = 0;
-        //     if($divided_by > 0)
-        //         $percentage = ($sum_views / $divided_by) * 100;
+            //h5p
+            $h5p = h5pLesson::whereIn('lesson_id',$lessons)->count();
+    
+            //materials
+            $materials = Material::whereIn('lesson_id',$lessons)->count();
 
-        //     if($divided_by > 0){
-        //         $all_percentages[$i]= $percentage;
-        //         $i++;    
-        //     }
-        // }
+            //items count 
+            $items_count = $assignments + $quizzes + $h5p  + $materials;
+            
+            //sum all the seen number for all components
+            $sum_views = UserSeen::whereIn('user_id',$enroll->pluck('user_id'))->whereIn('lesson_id',$lessons)->count();
+            
+            $divided_by = count($enroll) * $items_count;
 
-        // $final=0;
-        // if(count($all_percentages) > 0)
-        //     $final = (array_sum($all_percentages) / count($all_percentages));
+            $percentage = 0;
+            if($divided_by > 0)
+                $percentage = ($sum_views / $divided_by) * 100;
 
-        // Course::where('id',$course_id)->update([
-        //     'progress' => round($final,2)
-        // ]);
+            if($divided_by > 0){
+                $all_percentages[$i]= $percentage;
+                $i++;    
+            }
+        }
+
+        $final=0;
+        if(count($all_percentages) > 0)
+            $final = (array_sum($all_percentages) / count($all_percentages));
+
+        Course::where('id',$course_id)->update([
+            'progress' => round($final,2)
+        ]);
        
     }
 }
