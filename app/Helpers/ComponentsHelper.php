@@ -16,7 +16,7 @@ class ComponentsHelper
 
     public function __construct()
     {
-        $this->lessons = $this->getLessons();
+        $this->getLessons();
     }
 
     public function setCourse($course){
@@ -41,7 +41,7 @@ class ComponentsHelper
     }
 
     private function getLessons(){
-        $this->lessons = SecondaryChain::whereNotNull('lesson_id');
+        $this->lessons = SecondaryChain::query();
 
         if($this->course){
             $this->lessons->where('course_id',$this->course);
@@ -51,12 +51,12 @@ class ComponentsHelper
             $this->lessons->where('group_id',$this->class);
         }
 
-        return $this->lessons->select('lesson_id')->distinct()->pluck('lesson_id');
+        $this->lessons = $this->lessons->select('lesson_id')->distinct()->pluck('lesson_id');
     }
 
     public function materials()
     {
-        $materials = Material::whereNotNull('lesson_id');
+        $materials = Material::query();
         
         if($this->course){
             $materials->where('course_id',$this->course);
@@ -147,7 +147,7 @@ class ComponentsHelper
 
     public function virtuals()
     {
-        $virtuals = BigbluebuttonModel::whereNotNull('id');
+        $virtuals = BigbluebuttonModel::query();
 
         if($this->course){
             $virtuals->where('course_id', $this->course);
