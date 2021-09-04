@@ -12,10 +12,13 @@ class ComponentsHelper
 {
     public $course,$class,$teacher,$lessons,$from,$to;
 
-    public function __construct($course = null)
+    public function __construct()
     {
-        $this->course = $course;
         $this->lessons = $this->getLessons();
+    }
+
+    public function setCourse($course){
+        $this->course = $course;
     }
 
     public function setClass($class){
@@ -36,7 +39,11 @@ class ComponentsHelper
     }
 
     private function getLessons(){
-        $this->lessons = SecondaryChain::where('course_id',$this->course);
+        $this->lessons = SecondaryChain::whereNotNull('lesson_id');
+
+        if($this->course){
+            $this->lessons->where('course_id',$this->course);
+        }
 
         if($this->class){
             $this->lessons->where('group_id',$this->class);
@@ -47,8 +54,12 @@ class ComponentsHelper
 
     public function materials()
     {
-        $materials = Material::where('course_id',$this->course);
+        $materials = Material::whereNotNull('lesson_id');
         
+        if($this->course){
+            $materials->where('course_id',$this->course);
+        }
+
         if($this->teacher){
             $materials->where('created_by', $this->teacher);
         }
@@ -108,6 +119,29 @@ class ComponentsHelper
 
     public function lessons(){
 
+        $lessons = Lesson::whereIn('id',$this->lessons);
+
+        if($this->from && $this->to){
+            $lessons->whereBetween('created_at', [$this->from,$this->to]);
+        }
+
+        return $lessons;
+    }
+
+    //belw still not implemented
+    public function interactives()
+    {
+        $lessons = Lesson::whereIn('id',$this->lessons);
+
+        if($this->from && $this->to){
+            $lessons->whereBetween('created_at', [$this->from,$this->to]);
+        }
+
+        return $lessons;
+    }
+
+    public function virtuals()
+    {
         $lessons = Lesson::whereIn('id',$this->lessons);
 
         if($this->from && $this->to){

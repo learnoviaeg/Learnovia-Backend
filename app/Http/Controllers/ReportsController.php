@@ -220,7 +220,7 @@ class ReportsController extends Controller
 
     public function courseProgressReport(Request $request){
 
-        $types = ['materials','assignments','quizzes'];
+        $types = ['materials','assignments','quizzes','interactives','virtuals'];
 
         //validate the request
         $request->validate([
@@ -261,7 +261,8 @@ class ReportsController extends Controller
                 $group = Classes::find($groupId);
                 $course = Course::find($courses->keys()->first());
                
-                $componentsHelper = new ComponentsHelper($course->id);
+                $componentsHelper = new ComponentsHelper();
+                $componentsHelper->setCourse($course->id);
                 $componentsHelper->setClass($groupId);
 
                 if($request->has('user_id')){
@@ -291,7 +292,7 @@ class ReportsController extends Controller
 
     public function CourseProgressCounters(Request $request){
 
-        $types = ['materials','assignments','quizzes','lessons'];
+        $types = ['materials','assignments','quizzes','lessons','interactives','virtuals'];
 
         //validate the request
         $request->validate([
@@ -318,6 +319,14 @@ class ReportsController extends Controller
 
         $componentsHelper = new ComponentsHelper();
         $componentsHelper->setLessons($lessons);
+
+        if($request->has('user_id')){
+            $componentsHelper->setTeacher($request->user_id);
+        }
+
+        if($request->has('from') && $request->has('to')){
+            $componentsHelper->setDate($request->from,$request->to);
+        }
 
         $counterObject = collect();
 
