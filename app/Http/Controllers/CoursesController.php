@@ -280,9 +280,11 @@ class CoursesController extends Controller
     public function destroy($id ,Request $request)
     {
         $course = Course::find($id);
-        $enrolls = Enroll::where('course',$id)->where('user_id','!=',1)->get();
-        if(count($enrolls)>0)
+        $enrolls = Enroll::where('course',$id)->where('user_id','!=',1)->count();
+
+        if($enrolls > 0){
             return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));
+        }
 
         $course->delete();
         return app('App\Http\Controllers\CourseController')->get($request);
