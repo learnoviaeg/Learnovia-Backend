@@ -22,6 +22,7 @@ use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
 use BigBlueButton\Parameters\GetMeetingInfoParameters;
 use BigBlueButton\Parameters\HooksDestroyParameters;
 use Illuminate\Support\Carbon;
+use App\Repositories\ChainRepositoryInterface;
 use App\Http\Controllers\HelperController;
 use DB;
 use GuzzleHttp\Client;
@@ -39,6 +40,11 @@ use App\Exports\BigbluebuttonGeneralReport;
 
 class BigbluebuttonController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+        $this->middleware('auth');
+    }
 
     public function install()
     {
@@ -551,22 +557,27 @@ class BigbluebuttonController extends Controller
 
         self::clear(); 
 
-        $CS_ids=GradeCategoryController::getCourseSegment($request);
+        $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
+        // $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
 
-        $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
+        // $CS_ids=GradeCategoryController::getCourseSegment($request);
 
-        $CourseSeg = array_intersect($CS_ids->toArray(),$CourseSeg->toArray());
+        // $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
 
-        if($request->user()->can('site/show-all-courses')){
-            $CourseSeg = $CS_ids;
-            $classes = count($classes) == 0? Classes::pluck('id') : $classes;
-        }
+        // $CourseSeg = array_intersect($CS_ids->toArray(),$CourseSeg->toArray());
 
-        $classes = count($classes) == 0 ? Enroll::where('user_id', Auth::id())->pluck('class') : $classes;
+        // if($request->user()->can('site/show-all-courses')){
+        //     $CourseSeg = $CS_ids;
+        //     $classes = count($classes) == 0? Classes::pluck('id') : $classes;
+        // }
+
+        $classes = $enrolls->pluck('group')->unique()->values();
         
-        $courses=CourseSegment::whereIn('id',$CourseSeg)->where('end_date','>',Carbon::now())
-                                                        ->where('start_date','<',Carbon::now())
-                                                        ->pluck('course_id')->unique()->values();
+        // $courses=CourseSegment::whereIn('id',$CourseSeg)->where('end_date','>',Carbon::now())
+        //                                                 ->where('start_date','<',Carbon::now())
+        //                                                 ->pluck('course_id')->unique()->values();
+
+        $courses=$enrolls->pluck('course')->unique()->values();
 
         $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('start_date',$sort_in);
 
