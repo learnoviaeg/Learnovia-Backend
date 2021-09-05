@@ -67,6 +67,8 @@ class AC_year_type extends Controller
         ]);
     
         $all_types = AcademicType::whereNull('deleted_at');
+        if(isset($request->years))
+            $all_types->whereIn('academic_year_id',$request->years);
         if(isset($request->search))
             $all_types->where('name', 'LIKE' , "%$request->search%");
 
