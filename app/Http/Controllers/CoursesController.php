@@ -111,9 +111,19 @@ class CoursesController extends Controller
             'chains.*.segment' => 'array|required_with:chains.*.year',
             'chains.*.segment.*' => 'required|exists:segments,id',
         ]);
-
+        // return $request->chains;
+        // if($request->is_template == 1){
+        //     $check = Course::where('segment_id',$segment)->where('short_name',$request->short_name)->count();
+        // }
         $no_of_lessons = 4;
         foreach ($request->chains as $chain){
+            if($request->is_template == 1){
+                $check = Course::whereIn('level',$chain['level'])->count();
+                if($check > 0)
+                    return response()->json(['message' => __('messages.course.anotherTemplate'), 'body' => null], 200);
+
+            }
+            // return $chain['level'];
             foreach ($chain['segment'] as $segment) {
                 foreach ($chain['level'] as $level) {
                     $short_names=Course::where('segment_id',$segment)->where('short_name',$request->short_name)->get();
