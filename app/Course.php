@@ -8,8 +8,16 @@ use Modules\Attendance\Entities\AttendanceSession;
 
 class Course extends Model
 {
-    protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress'];
+    protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id','is_template'];
 
+    protected $dispatchesEvents = [
+        'created' => \App\Events\CourseCreatedEvent::class,
+    ];
+
+    public function level()
+    {
+        return $this->belongsTo('App\Level','level_id','id');
+    }
 
     public static function findByName($course_name)
     {
@@ -19,6 +27,11 @@ class Course extends Model
     public static function findById($course_id)
     {
         return self::where('id',$course_id)->pluck('id')->first();
+    }
+
+    public function optionalCourses()
+    {
+        return self::whereMandatory(0);
     }
 
     public function letter()
@@ -32,13 +45,13 @@ class Course extends Model
         return $this->belongsTo('App\Category');
     }
 
-    public  function courseSegments(){
-        return $this->hasMany('App\CourseSegment');
-    }
+    // public  function courseSegments(){
+    //     return $this->hasMany('App\CourseSegment');
+    // }
 
-    public function activeSegment(){
-        return $this->hasOne('App\CourseSegment')->whereIs_active(1);
-    }
+    // public function activeSegment(){
+    //     return $this->hasOne('App\CourseSegment')->whereIs_active(1);
+    // }
 
     public function attachment()
     {
@@ -61,5 +74,13 @@ class Course extends Model
         if($this->attributes['mandatory']==1)
             $content = true;
         return $content;
+    }
+
+    public function getImageAttribute()
+    {
+        if($this->attributes['image'] !=null){
+            $attachment=attachment::find($this->attributes['image']);
+            return $attachment->path;
+        }
     }
 }

@@ -32,23 +32,31 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\AttemptItemlistener',
         ],
 
-        // 'App\Events\GradeAttemptEvent' => [
-        // ],
         'App\Events\RefreshGradeTreeEvent' => [
             'App\Listeners\RefreshGradeTreeListener',
         ],
+
         'App\Events\UpdatedAttemptEvent' => [
             'App\Listeners\FireAutoCorrectionEventListener',
             'App\Listeners\GradeAttemptItemlistener',
         ],
+
         'App\Events\UpdatedQuizQuestionsEvent' => [
             'App\Listeners\UpdateQuizGradeListener',
             'App\Listeners\UpdateTimelineListener',
         ],
-        'App\Events\UserEnrolledEvent' => [
+
+         'App\Events\UserEnrolledEvent' => [
             'App\Listeners\AddUserGradersListener',
         ],
 
+        'App\Events\CourseCreatedEvent' => [
+            'App\Listeners\EnrollAdminListener',
+        ],
+
+        'App\Events\LessonCreatedEvent' => [
+            'App\Listeners\AddSecondChainListener',
+        ],
         //7esab daragat el2s2la el manual(and_why & essay)
         'App\Events\ManualCorrectionEvent' => [
             'App\Listeners\GradeManualListener',

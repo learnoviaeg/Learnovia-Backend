@@ -15,6 +15,8 @@ use carbon\Carbon;
 use App\LessonComponent;
 use Illuminate\Support\Facades\Auth;
 use App\UserSeen;
+use App\SecondaryChain;
+use App\Course;
 
 class AssignmentLessonObserver
 {
@@ -32,26 +34,29 @@ class AssignmentLessonObserver
      */
     public function created(AssignmentLesson $assignmentLesson)
     {
+        $secondary_chains = SecondaryChain::where('lesson_id',$assignmentLesson->lesson_id)->get()->keyBy('group_id');
         $assignment = Assignment::where('id',$assignmentLesson->assignment_id)->first();
-        $lesson = Lesson::find($assignmentLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
-        $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        Timeline::firstOrCreate([
-            'item_id' => $assignmentLesson->assignment_id,
-            'name' => $assignment->name,
-            'start_date' => $assignmentLesson->start_date,
-            'due_date' => $assignmentLesson->due_date,
-            'publish_date' => isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
-            'course_id' => $course_id,
-            'class_id' => $class_id,
-            'lesson_id' => $assignmentLesson->lesson_id,
-            'level_id' => $level_id,
-            'type' => 'assignment',  
-            'visible' => isset($assignmentLesson->visible)?$assignmentLesson->visible:1
-        ]);
 
-        $this->report->calculate_course_progress($course_id);
+        foreach($secondary_chains as $secondary_chain){
+            $courseID = $secondary_chain->course_id;
+            $class_id = $secondary_chain->group_id;
+            $level_id = Course::find($courseID)->level_id;
+            Timeline::firstOrCreate([
+                'item_id' => $assignmentLesson->assignment_id,
+                'name' => $assignment->name,
+                'start_date' => $assignmentLesson->start_date,
+                'due_date' => $assignmentLesson->due_date,
+                'publish_date' => isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
+                'course_id' => $courseID,
+                'class_id' => $class_id,
+                'lesson_id' => $assignmentLesson->lesson_id,
+                'level_id' => $level_id,
+                'type' => 'assignment',  
+                'visible' => isset($assignmentLesson->visible)?$assignmentLesson->visible:1
+            ]);
+            $this->report->calculate_course_progress($courseID);
+        }
+
 
         if($assignmentLesson->is_graded == 1){
             $grade_category=GradeCategory::find($assignmentLesson->grade_category);
@@ -127,7 +132,7 @@ class AssignmentLessonObserver
         ->where('module','Assignment')->delete();
 
         $lesson = Lesson::find($assignmentLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
+        $course_id = $lesson->course_id;
 
         UserSeen::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
         $this->report->calculate_course_progress($course_id);

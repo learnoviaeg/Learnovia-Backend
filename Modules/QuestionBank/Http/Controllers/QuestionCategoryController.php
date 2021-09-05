@@ -38,19 +38,11 @@ class QuestionCategoryController extends Controller
             return HelperController::api_response_format(400, $duplicate, __('messages.error.item_added_before'));
 
         LastAction::lastActionInCourse($request->course);
-
-        //course segment doesn't have any need better to be removed
-        $course_segment = CourseSegment::where('course_id',$request->course)->first();
-        if(!isset($course_segment))
-            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
             
         $quest_cat = QuestionsCategory::firstOrCreate([
             'name' => $request->name,
             'course_id' => $request->course,
-            'course_segment_id' => $course_segment->id
         ]);
-
-        $quest_cat = [$quest_cat];
         
         return HelperController::api_response_format(200, $quest_cat, __('messages.question_category.add'));
     }

@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use App\AcademicYear;
 use App\Level;
 use App\Enroll;
+use App\Course;
+use App\Segment;
+use App\Classes;
 use App\User;
 use Carbon\Carbon;
 use App\CourseSegment;
@@ -35,29 +38,22 @@ class LevelsController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'year' => 'array|required_with:type',
+            'year' => 'array',
             'year.*' => 'exists:academic_years,id',
-            'type' => 'array|required_with:year',
+            'type' => 'array|required',
             'type.*' => 'exists:academic_types,id',
         ]);
-        $level = Level::create([
-            'name' => $request->name,
-        ]);
-        if ($request->filled('year') && $request->filled('type')) {
-            foreach ($request->year as $year) {
+
+        if ($request->filled('year') || $request->filled('type')) {
+            foreach ($request->type as $type) {
                 # code...
-                foreach ($request->type as $type) {
-                    # code...
-                    $yeartype = AcademicYearType::checkRelation($year, $type);
-                    YearLevel::firstOrCreate([
-                        'academic_year_type_id' => $yeartype->id,
-                        'level_id' => $level->id,
-                    ]);
-                }
+                $level = Level::firstOrCreate([
+                    'name' => $request->name,
+                    'academic_type_id' => $type
+                ]);
             }
         }
-        $levels = Level::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(201, $levels, __('messages.level.add'));
+        return HelperController::api_response_format(201, Level::paginate(HelperController::GetPaginate($request)), __('messages.level.add'));
     }
 
     /**
@@ -72,21 +68,18 @@ class LevelsController extends Controller
             'id' => 'required|exists:levels,id',
         ]);
         
-        $year_levels_id= YearLevel::where('level_id',$request->id)->pluck('id');
-        $class_level = ClassLevel::whereIn('year_level_id',$year_levels_id)->get();
-        if (count($class_level) > 0)
+        $courses= Course::where('level_id',$request->id)->get();
+        $classes = Classes::where('level_id',$request->id)->get();
+        if (count($courses) > 0 || count($classes) > 0)
             return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
 
-        $yearLevel=YearLevel::where('level_id',$request->id)->first();
-        if(isset($yearLevel))
-            $yearLevel->delete();
+        // $yearLevel=YearLevel::where('level_id',$request->id)->first();
+        // if(isset($yearLevel))
+        //     $yearLevel->delete();
         Level::whereId($request->id)->first()->delete();
 
-        User::where('level',$request->id)->update(["level"=>null]);
-        Enroll::where('level',$request->id)->update(["level"=>null]);
-
-        $levels = Level::paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(203, $levels, __('messages.level.delete'));
+        // $levels = Level::paginate(HelperController::GetPaginate($request));
+        return HelperController::api_response_format(203, Level::paginate(HelperController::GetPaginate($request)), __('messages.level.delete'));
     }
 
     /**
@@ -98,25 +91,20 @@ class LevelsController extends Controller
     */
     public function UpdateLevel(Request $request)
     {
-        $valid = Validator::make($request->all(), [
-            'name' => 'required',
+        $request->validate([
+            // 'name' => 'required',
             'id' => 'required|exists:levels,id',
             'year' => 'exists:academic_years,id',
-            'type' => 'exists:academic_types,id|required_with:year',
+            'type' => 'exists:academic_types,id',
         ]);
 
-        if ($valid->fails())
-            return HelperController::api_response_format(400, $valid->errors(), __('messages.error.try_again'));
-            
         $level = Level::find($request->id);
-        $level->name = $request->name;
+        if(isset($request->name))
+            $level->name = $request->name;
         $level->save();
 
-        if ($request->filled('year'))
-        {
-            $year_type= AcademicYearType::where('academic_year_id',$request->year)->where('academic_type_id',$request->type)->first();
-            YearLevel::where('level_id',$request->id)->update(['academic_year_type_id' => $year_type->id]);
-        }
+        if ($request->filled('type'))
+            Level::where('id',$request->id)->update(['academic_type_id' => $request->type]);
                 
         return HelperController::api_response_format(200, Level::paginate(HelperController::GetPaginate($request)), __('messages.level.update'));
     }
@@ -144,11 +132,9 @@ class LevelsController extends Controller
         }
         
         $levels = new Level;
-        $levels = Level::whereHas("years", function ($q) use ($request) {
-                                                if($request->filled('years'))
-                                                    $q->whereIn("academic_year_id", $request->years);
+        $levels = Level::whereHas('type', function ($q) use ($request) {
                                                 if($request->filled('types'))
-                                                        $q->whereIn("academic_type_id", $request->types);
+                                                    $q->whereIn("academic_type_id", $request->types);
                                             });
         
         if($request->filled('search'))
@@ -159,11 +145,9 @@ class LevelsController extends Controller
 
         foreach ($levels as $level)
         {
-            $academic_type_id= $level->years->pluck('academic_type_id')->unique();
+            $academic_type_id= $level->type->pluck('id')->unique();
             $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-            $academic_year_id= $level->years->pluck('academic_year_id')->unique();
-            $level['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
-            unset($level->years);
+            unset($level->type);
             $all_levels->push($level); 
         }
 
@@ -172,7 +156,7 @@ class LevelsController extends Controller
            return $all_levels;
         }
 
-        return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));
+        return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
     }
 
     /**
@@ -222,33 +206,36 @@ class LevelsController extends Controller
             'type' => 'required|exists:academic_types,id',
             'id' => 'exists:levels,id',
         ]);
-        $yearType = AcademicYearType::checkRelation($request->year, $request->type);
+
         $levels = collect([]);
-        $all_levels = collect([]);
-        if ($request->filled('id')) {
-            $all_levels = Level::find($request->id);
+        // $all_levels = collect([]);
 
-            return HelperController::api_response_format(200, $all_levels);
-        } else {
-            foreach ($yearType->yearLevel as $yearLevel) {
-                if(count($yearLevel->levels) > 0)
-                    $levels[] = $yearLevel->levels[0]->id;
-            }
+        // $types=Segment::where('start_date', '<=',Carbon::now())
+        //     ->where('end_date','>=',Carbon::now())->pluck('academic_type_id');
 
-            $levels = Level::with('years')->whereIn('id',$levels);
-            $levels= $levels->get();        
-            foreach ($levels as $level)
-            {
-            $academic_type_id= $level->years->pluck('academic_type_id')->unique();
-            $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
-            $academic_year_id= $level->years->pluck('academic_year_id')->unique();
-            $level['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
-            unset($level->years);
-            $all_levels->push($level); 
-            
-            }
+            // foreach ($yearType->yearLevel as $yearLevel) {
+            //     if(count($yearLevel->levels) > 0)
+            //         $levels[] = $yearLevel->levels[0]->id;
+            // }
+
+        $levels = Level::whereNull('deleted_at');        
+
+        if($request->has('type')){
+            $levels->where('academic_type_id',$request->type);
         }
-        return HelperController::api_response_format(200, $all_levels->paginate(HelperController::GetPaginate($request)));  
+
+        $levels = $levels->get();
+        
+        foreach ($levels as $level){
+            $academic_type_id= $level->type->pluck('id')->unique();
+            $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');
+        // // $academic_year_id= $level->years->pluck('academic_year_id')->unique();
+        // // $level['academicYear']= AcademicYear::whereIn('id',$academic_year_id)->pluck('name');
+            unset($level->type);
+        // $all_levels->push($level); 
+        
+        }
+        return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));  
     }
 
     public function GetMyLevels(Request $request)
@@ -260,50 +247,55 @@ class LevelsController extends Controller
         $result=array();
         $lev=array();
 
-        if($request->user()->can('site/show-all-courses'))
-        {
-            $year_type = AcademicYear::where('current',1)->first();
-            if(isset($year_type))
-                $year_type = $year_type->YearType->pluck('id');
+        // if($request->user()->can('site/show-all-courses'))
+        // {
+        //     $year_type = AcademicYear::where('current',1)->first();
+        //     if(isset($year_type))
+        //         $year_type = $year_type->YearType->pluck('id');
           
-            if ($request->filled('type'))
-                $year_type = AcademicYearType::whereIn('academic_type_id',$request->type)->pluck('id');
+        //     // if ($request->filled('type'))
+        //     //     $year_type = AcademicYearType::whereIn('academic_type_id',$request->type)->pluck('id');
 
-            if(!isset($year_type))
-                return HelperController::api_response_format(200,null, __('messages.error.no_active_year'));
+        //     if(!isset($year_type))
+        //         return HelperController::api_response_format(200,null, __('messages.error.no_active_year'));
 
-            $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('level_id');
-            $levels;
-            if(isset($year_levels))
-                $levels = Level::whereIn('id',$year_levels)->get();
+        //     $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('level_id');
+        //     $levels;
+        //     if(isset($year_levels))
+        //         $levels = Level::whereIn('id',$year_levels)->get();
 
-            if(count($levels) == 0)
-                return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
+        //     if(count($levels) == 0)
+        //         return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
 
-            return HelperController::api_response_format(200,$levels, __('messages.level.list'));
-        }
+        //     return HelperController::api_response_format(200,$levels, __('messages.level.list'));
+        // }
 
-        $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
-            //validate that course in my current course start < now && now < end
-            $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
-        },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
-            if ($request->filled('type'))
-                $query->whereIn('academic_type_id', $request->type);            
-        }])->first();
+        $types=Segment::where('start_date', '<=',Carbon::now())
+                ->where('end_date','>=',Carbon::now())->pluck('academic_type_id');
+        $myLevels=Enroll::where('user_id',Auth::id())->whereIn('type',$types)->pluck('level');
+        $levels->whereIn('id',$myLevels);
 
-        foreach($users ->enroll as $enrolls){
-            if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
-                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-                foreach($segmetClas->classLevel as $clas)
-                        foreach($clas->yearLevels as $level)
-                            if(count($level->yearType) > 0)
-                                if(!in_array($level->level_id, $result))
-                                {
-                                    $result[]=$level->level_id;
-                                    $lev[]=Level::find($level->level_id);
-                                }
-            }
-        }
+        // $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
+        //     //validate that course in my current course start < now && now < end
+        //     $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
+        // },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
+        //     if ($request->filled('type'))
+        //         $query->whereIn('academic_type_id', $request->type);            
+        // }])->first();
+
+        // foreach($users ->enroll as $enrolls){
+        //     if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
+        //         foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
+        //         foreach($segmetClas->classLevel as $clas)
+        //                 foreach($clas->yearLevels as $level)
+        //                     if(count($level->yearType) > 0)
+        //                         if(!in_array($level->level_id, $result))
+        //                         {
+        //                             $result[]=$level->level_id;
+        //                             $lev[]=Level::find($level->level_id);
+        //                         }
+        //     }
+        // }
                              
         if(count($lev) > 0)
             return HelperController::api_response_format(201,$lev, __('messages.level.list'));

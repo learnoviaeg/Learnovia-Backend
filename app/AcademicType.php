@@ -9,23 +9,23 @@ class AcademicType extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name' , 'segment_no'];
-    public function AC_year()
-    {
-        return $this->belongsToMany('App\AcademicYear', 'academic_year_types', 'academic_year_id', 'academic_type_id');
-    }
+    protected $fillable = ['name' , 'segment_no','academic_year_id'];
+    // public function AC_year()
+    // {
+    //     return $this->belongsToMany('App\AcademicYear', 'academic_year_types', 'academic_year_id', 'academic_type_id');
+    // }
 
-    public function yearType() // this is wrong but it used so, i cann't delete it (same type in 2 years no way)
+    public function Year()
     { 
-        return $this->hasMany('App\AcademicYearType','academic_type_id','id');
+        return $this->hasone('App\AcademicYear','id','academic_year_id');
     }
 
     protected $hidden = [
         'created_at','updated_at','pivot'
     ];
 
-    public function Actypeyear() // this is right
-    {
-        return $this->belongsTo('App\AcademicYearType', 'id', 'academic_type_id');
-    }
+    // public function Actypeyear() // this is right
+    // {
+    //     return $this->belongsTo('App\AcademicYearType', 'id', 'academic_type_id');
+    // }
 }

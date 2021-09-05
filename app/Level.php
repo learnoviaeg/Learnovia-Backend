@@ -10,16 +10,16 @@ class Level extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name'];
-    public function years()
+    protected $fillable = ['name','academic_type_id'];
+    public function type()
     {
-        return $this->belongsToMany('App\AcademicYearType', 'year_levels', 'level_id', 'academic_year_type_id');
+        return $this->belongsTo('App\AcademicType', 'academic_type_id', 'id');
     }
 
-    public function yearlevel()
-    {
-        return $this->hasMany('App\YearLevel', 'level_id', 'id');
-    }
+    // public function yearlevel()
+    // {
+    //     return $this->hasMany('App\YearLevel', 'level_id', 'id');
+    // }
 
     public static function Validate($data){
         $validator = Validator::make($data, [

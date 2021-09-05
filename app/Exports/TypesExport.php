@@ -9,7 +9,8 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class TypesExport implements FromCollection, WithHeadings
 {
-    protected $fields = ['id','name','segment_no','year'];
+    protected $fields = ['id','name','segment_no'];
+
     function __construct($types) {
         $this->types = $types;
     }
@@ -20,10 +21,7 @@ class TypesExport implements FromCollection, WithHeadings
     public function collection()
     {
         foreach ($this->types as $type) {
-            $year_id = AcademicType::find($type->id)->yearType->pluck('academic_year_id')->first();
-            if(isset($year_id))
-                $year_id = AcademicYear::find(AcademicType::find($type->id)->yearType->pluck('academic_year_id')->first())->name;
-            $type['year'] = $year_id;
+            $type['year'] = $type->year ? $type->year->name : '-';
             $type->setHidden([])->setVisible($this->fields);
         }
         return $this->types;

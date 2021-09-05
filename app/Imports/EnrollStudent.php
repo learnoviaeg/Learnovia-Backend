@@ -8,6 +8,7 @@ use Validator;
 use App\Enroll;
 use App\User;
 use App\Course;
+use App\Classes;
 use App\Segment;
 use App\CourseSegment;
 use Illuminate\Http\Request;
@@ -26,32 +27,27 @@ class EnrollStudent implements ToModel,WithHeadingRow
             'exists' => 'user with username '.$row['username'].' not found'
         ];
         $validator = Validator::make($row,[
-            'class_id' => 'required|exists:classes,id',
+            'class_id' => 'exists:classes,id',
             'username' => 'required|exists:users,username',
-            'segment_id' => 'exists:segments,id'
+            'segment_id' => 'required|exists:segments,id'
         ],$messages)->validate();
         
         $optional='optional';
 
         $user_id = User::FindByName($row['username'])->id;
-        if(!isset($row['class_id']))
-            die('class_id is required');
-        $classLevel=ClassLevel::where('class_id',$row['class_id'])->pluck('id')->first();
-        $level=ClassLevel::find($classLevel)->yearLevels[0]->level_id;
-        $type=ClassLevel::find($classLevel)->yearLevels[0]->yearType[0]->academic_type_id;
-        $year=ClassLevel::find($classLevel)->yearLevels[0]->yearType[0]->academic_year_id;
-
-        //get current segment if there just one in all types of all system 
-        $segment = Segment::where('current',1)->pluck('id')->first();
-        if(isset($row['segment_id']))
-            $segment=$row['segment_id'];
+        
+        $level=Classes::find($row['class_id'])->level_id;
+        $segment=Segment::find($row['segment_id']);
+        $segment_id=$segment->id;
+        $type=$segment->academic_type_id;
+        $year=$segment->academic_year_id;
 
         $request = new Request([
             'year' => $year,
             'type' => $type,
             'level' => $level,
             'class' => $row['class_id'],
-            'segment' => $segment,
+            'segment' => $row['segment_id'],
             'users' => [$user_id]
         ]);
 
@@ -61,20 +57,17 @@ class EnrollStudent implements ToModel,WithHeadingRow
         while(isset($row[$optional.$count])) {
             $course_id=Course::where('short_name',$row[$optional.$count])->pluck('id')->first();
             if(!isset($course_id))
-                break;
-            $courseSeg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);
-            if($courseSeg == null)
-                break;
+            // break;
+                die('shortname '.$row[$optional.$count].'doesn\'t exist');
 
             Enroll::firstOrCreate([
-                'course_segment' => $courseSeg->id,
                 'user_id' => $user_id,
                 'role_id'=> 3,
                 'year' => $year,
                 'type' => $type,
                 'level' => $level,
-                'class' => $row['class_id'],
-                'segment' => $segment,
+                'group' => $row['class_id'],
+                'segment' => $segment_id,
                 'course' => $course_id
             ]);
 

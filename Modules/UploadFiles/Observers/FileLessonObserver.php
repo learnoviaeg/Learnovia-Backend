@@ -7,6 +7,7 @@ use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\File;
 use App\Lesson;
 use App\Material;
+use App\SecondaryChain;
 
 class FileLessonObserver
 {
@@ -18,9 +19,10 @@ class FileLessonObserver
      */
     public function created(FileLesson $fileLesson)
     {
+        $sec_chain = SecondaryChain::where('lesson_id',$fileLesson->lesson_id)->first();
         $file = File::where('id',$fileLesson->file_id)->first();
         $lesson = Lesson::find($fileLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
+        $course_id = $sec_chain->course_id;
         if(isset($file)){
             Material::firstOrCreate([
                 'item_id' => $fileLesson->file_id,

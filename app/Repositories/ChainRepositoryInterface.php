@@ -12,4 +12,8 @@ interface ChainRepositoryInterface
 
     public function getAllByChainRelation(Request $request);
 
+    public function getEnrollsByChain(Request $request);
+
+    public function getEnrollsByManyChain(Request $request);
+
 }

@@ -43,16 +43,27 @@ class InterActiveController extends Controller
             'sort_in' => 'in:asc,desc', 
         ]);
 
-        if($request->user()->can('site/show-all-courses')){//admin
-            $course_segments = collect($this->chain->getAllByChainRelation($request));
-            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
-        }
+        // if($request->user()->can('site/show-all-courses')){//admin
+        //     $course_segments = collect($this->chain->getAllByChainRelation($request));
+        //     $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+        // }
         
+        // if(!$request->user()->can('site/show-all-courses')){//enrolled users
+
+        //     $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+        //     $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+        //     $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+        // }
+
+        if($request->user()->can('site/show-all-courses')){//admin
+            $enrolls = $this->chain->getEnrollsByChain($request);
+            $lessons = $enrolls->with('SecondaryChain')->where('user_id',Auth::id())->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
+        }
+
         if(!$request->user()->can('site/show-all-courses')){//enrolled users
 
-            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+           $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
+           $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
         }
       
         if($request->filled('lesson')){
@@ -87,6 +98,7 @@ class InterActiveController extends Controller
             $content->original->link = config('app.url').'api/interactive/'.$h5p->content_id.'/?api_token='.Auth::user()->api_token;
             $content->original->item_lesson_id = $h5p->id;
             $content->original->visible = $h5p->visible;
+            $content->original->publish_date = $h5p->publish_date;
             $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit'.'?editting_done=false';
             if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id())
                 $content->original->edit_link = null;
@@ -94,10 +106,12 @@ class InterActiveController extends Controller
             unset($content->original->parameters,$content->original->filtered,$content->original->metadata);
 
             $content->original->lesson = Lesson::find($h5p->lesson_id);
-            $content->original->class = Classes::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
-            $content->original->level = Level::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-            $content->original->course = Course::find($content->original->lesson->courseSegment->course_id);
-            unset($content->original->lesson->courseSegment);
+            $sec_chain = SecondaryChain::where('lesson_id',$h5p->lesson_id)->get();
+            $classess = Classes::wherenIn('id', $sec_chain->pluck('group_id'))->get();//
+            $content->original->class = $classess;
+            $content->original->level = Level::where('id',Course::find($Lesson->course_id)->get()->pluck('level_id'))->get();
+            $content->original->course = Course::find($Lesson->course_id);
+            // unset($content->original->lesson->courseSegment);
 
             $h5p_contents[]=$content->original;
         }

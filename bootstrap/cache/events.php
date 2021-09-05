@@ -35,6 +35,14 @@
     array (
       0 => 'App\\Listeners\\AddUserGradersListener',
     ),
+    'App\\Events\\CourseCreatedEvent' => 
+    array (
+      0 => 'App\\Listeners\\EnrollAdminListener',
+    ),
+    'App\\Events\\LessonCreatedEvent' => 
+    array (
+      0 => 'App\\Listeners\\AddSecondChainListener',
+    ),
     'App\\Events\\ManualCorrectionEvent' => 
     array (
       0 => 'App\\Listeners\\GradeManualListener',

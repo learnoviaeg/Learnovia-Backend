@@ -53,14 +53,12 @@ class AcademicYearController extends Controller
         
         $years=AcademicYear::whereNull('deleted_at');
         if($request->filled('search'))
-        {
             $years = AcademicYear::where('name', 'LIKE' , "%$request->search%"); 
-        }
-        if($call == 1 ){
+        
+        if($call == 1 )
             return $years->get();
-        }
-        $years =$years->paginate(HelperController::GetPaginate($request));
-        return HelperController::api_response_format(202, $years);
+
+        return HelperController::api_response_format(202, $years->paginate(HelperController::GetPaginate($request)));
     }
 
     public function get(Request $request)
@@ -72,13 +70,14 @@ class AcademicYearController extends Controller
         ]);
         //$year = AcademicYear::with('AC_Type');
         if ($request->filled('id')) {
-            $year = AcademicYear::with('AC_Type')->where('id', $request->id)->first();
+            $year = AcademicYear::where('id', $request->id)->first();
         }
-        else if ($request->filled('all')) {
-            $year = AcademicYear::with('AC_Type')->get();
-        } else {
-            $year = AcademicYear::with('AC_Type')->paginate(HelperController::GetPaginate($request));
-        }
+        $year = AcademicYear::get()->paginate(HelperController::GetPaginate($request));
+        // else if ($request->filled('all')) {
+        //     $year = AcademicYear::with('AC_Type')->get();
+        // } else {
+        //     $year = AcademicYear::with('AC_Type')->paginate(HelperController::GetPaginate($request));
+        // }
         return HelperController::api_response_format(200, $year);
     }
 
@@ -113,14 +112,14 @@ class AcademicYearController extends Controller
         ]);
 
         $year = AcademicYear::whereId($request->id)->first();
-        if(count( $year->YearType)>0){
-            return HelperController::api_response_format(400, [], __('messages.error.cannot_delete'));
-        }
+        // if(count( $year->YearType)>0){
+        //     return HelperController::api_response_format(400, [], __('messages.error.cannot_delete'));
+        // }
         
         //for log event
-        $logsbefore=Enroll::where('year',$request->id)->get();
+        // $logsbefore=Enroll::where('year',$request->id)->get();
         
-        $check=Enroll::where('year',$request->id)->update(["year"=>null]);
+        // $check=Enroll::where('year',$request->id)->update(["year"=>null]);
         // if($check > 0)
         //     event(new MassLogsEvent($logsbefore,'updated'));
 
@@ -137,91 +136,61 @@ class AcademicYearController extends Controller
         ]);
 
         $year = AcademicYear::find($request->id);
-        if($year->current == 1){
+        if($year->current == 1)
             $year->update(['current' => 0]);
-            $types = $year->AC_Type;
-            foreach($types as $type){
-                $active_segment = Segment::where('academic_type_id',$type->id)
-                                    ->where('current',1)
-                                    ->first();
-                if(isset($active_segment))
-                    $active_segment->update(['current' => 0]);
-            }
-            unset($year->AC_Type);
-        }
+        
         else
             $year->update(['current' => 1]);
         
         //for log event
-        $logsbefore=AcademicYear::where('id', '!=', $request->id)->get();
+        // $logsbefore=AcademicYear::where('id', '!=', $request->id)->get();
 
         $all = AcademicYear::where('id', '!=', $request->id)->update(['current' => 0]);
-        if($all > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // if($all > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         return HelperController::api_response_format(200, $year , __('messages.success.toggle'));
     }
 
-    // public function GetMyYears(Request $request)
-    // {
-    //     $result=array();
-    //     $lev=array();
-    //     $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
-    //         //validate that course in my current course start < now && now < end
-    //         $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
-    //     },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
-    //         if ($request->filled('year'))
-    //             $query->where('academic_year_id', $request->year);            
-    //     }])->first();
-    //     foreach($users ->enroll as $enrolls)
-    //         foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-    //             foreach($segmetClas->classLevel as $clas)
-    //                     foreach($clas->yearLevels as $level)
-    //                         foreach($level->yearType as $typ)
-    //                             if(!in_array($typ->academic_year_id, $result))
-    //                             {
-    //                                 $result[]=$typ->academic_year_id;
-    //                                 $yearr[]=AcademicYear::find($typ->academic_year_id);
-    //                             }
-    //     if(isset($yearr) && count($yearr) > 0)
-    //         return HelperController::api_response_format(201,$yearr, 'Here are your years');
-        
-    //     return HelperController::api_response_format(201,null, 'You are not enrolled in any year');
-    // }
     public function GetMyYears(Request $request)
     {
-        $result=array();
-        $CS=array();
+        // $result=array();
+        // $CS=array();
 
-        if($request->user()->can('site/show-all-courses'))
-        {
-            $year = AcademicYear::get();
-            if(count($year) == 0)
-                return HelperController::api_response_format(201,null, __('messages.error.not_found'));
+        // if($request->user()->can('site/show-all-courses'))
+        // {
+        //     $year = AcademicYear::get();
+        //     if(count($year) == 0)
+        //         return HelperController::api_response_format(201,null, __('messages.error.not_found'));
 
-            return HelperController::api_response_format(201,$year, __('messages.year.list'));
-        }
+        //     return HelperController::api_response_format(201,$year, __('messages.year.list'));
+        // }
 
-        $course_segments = Enroll::where('user_id',Auth::id())->with(['courseSegment' => function($query){
-            //validate that course in my current course start < now && now < end
-            $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());}])->get();
-            foreach($course_segments as $course_segment){
-                array_push($CS , $course_segment->course_segment);
-            }
-        $years = Enroll::where('user_id',Auth::id())->whereIn('course_segment' ,$CS)->pluck('year');
-        $yearr = AcademicYear::whereIn('id', $years)->get();
-        if(isset($yearr) && count($yearr) > 0)
-            return HelperController::api_response_format(201,$yearr, __('messages.year.list'));
+        // $course_segments = Enroll::where('user_id',Auth::id())->with(['courseSegment' => function($query){
+        //     //validate that course in my current course start < now && now < end
+        //     $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());}])->get();
+        //     foreach($course_segments as $course_segment){
+        //         array_push($CS , $course_segment->course_segment);
+        //     }
+        // $years = Enroll::where('user_id',Auth::id())->whereIn('course_segment' ,$CS)->pluck('year');
+
+        $currentSegment= Segment::where('start_date', '<=',Carbon::now())
+                        ->where('end_date','>=',Carbon::now())->pluck('academic_year_id');
+        $myYears=Enroll::where('user_id',Auth::id())->whereIn('year',$currentSegment)->pluck('year');
+
+        $yearr = AcademicYear::whereIn('id', $myYears)->get();
+        // if(isset($yearr) && count($yearr) > 0)
+        return HelperController::api_response_format(201,$yearr, __('messages.year.list'));
         
-        return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
+        // return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
     }
 
     public function export(Request $request)
     {
-         $years = self::getall($request,1);
+        $years = self::getall($request,1);
         $filename = uniqid();
-         $file = Excel::store(new YearsExport($years), 'Year'.$filename.'.xls','public');
-         $file = url(Storage::url('Year'.$filename.'.xls'));
-         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+        $file = Excel::store(new YearsExport($years), 'Year'.$filename.'.xls','public');
+        $file = url(Storage::url('Year'.$filename.'.xls'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

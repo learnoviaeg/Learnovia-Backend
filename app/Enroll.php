@@ -7,7 +7,7 @@ use DB;
 
 class Enroll extends Model
 {
-    protected $fillable = ['user_id', 'username', 'course_segment', 'role_id', 'level', 'class' ,'year', 'type', 'segment', 'course'];
+    protected $fillable = ['user_id', 'username', 'course_segment', 'role_id', 'level', 'group' ,'year', 'type', 'segment', 'course'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\UserEnrolledEvent::class,
@@ -18,9 +18,9 @@ class Enroll extends Model
         return self::where('user_id', $user_id)->where('course_segment', $course_segment)->pluck('role_id')->first();
     }
 
-    public static function IsExist($course_segment_id, $user_id,$role_id)
+    public static function IsExist($course, $user_id,$role_id)
     {
-        $check = self::where('course_segment', $course_segment_id)->where('role_id',$role_id)->where('user_id', $user_id)->pluck('id')->first();
+        $check = self::where('course', $course)->where('role_id',$role_id)->where('user_id', $user_id)->pluck('id')->first();
         return $check;
     }
 
@@ -94,4 +94,15 @@ class Enroll extends Model
     {
         return $this->hasMany('App\User','id' , 'user_id');
     }
+
+    public function SecondaryChain()
+    {
+        return $this->hasMany('App\SecondaryChain','enroll_id' , 'id');
+    }
+
+    public function Lessons()
+    {
+        return $this->hasManyThrough(Lesson::class, SecondaryChain::class);
+    }
+    
 }
