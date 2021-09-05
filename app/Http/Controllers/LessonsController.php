@@ -44,7 +44,7 @@ class LessonsController extends Controller
             $lessons = SecondaryChain::select('*')->distinct()->where('user_id',Auth::id())->whereIn('enroll_id',$enrolls);
             if($request->filled('classes'))
                 $lessons->whereIn('group_id',$request->classes);
-            $lessons->get()->groupBy('lesson_id');
+            $result_lessons = $lessons->get()->groupBy('lesson_id');
             // return $lessons;
         // }
 
@@ -52,14 +52,14 @@ class LessonsController extends Controller
             // $lessons = SecondaryChain::select('lesson_id')->distinct()->where('user_id',Auth::id())->whereIn('enroll_id',$enrolls)->get()->pluck('lesson_id');
         // }
         if($request->filled('classes')){
-            foreach($lessons as $key=>$lesson){
+            foreach($result_lessons as $key=>$lesson){
                 if(count($lesson) != count($request->classes)){
-                    unset($lessons[$lesson[0]->lesson_id]);
+                    unset($result_lessons[$lesson[0]->lesson_id]);
                     
                 }
             }
         }
-        $result = Lesson::whereIn('id',$lessons->keys())->get();
+        $result = Lesson::whereIn('id',$result_lessons->keys())->get();
         return response()->json(['message' => __('messages.lesson.list'), 'body' => $result], 200);
     }
 
