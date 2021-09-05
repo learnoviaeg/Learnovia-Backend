@@ -461,7 +461,7 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(400, null , $message = __('messages.error.parent_cannot_submit'));
         
         $lesson=Lesson::find($request->lesson_id);
-        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($lesson->course_id);
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $assilesson = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
         if(!isset($assilesson))
