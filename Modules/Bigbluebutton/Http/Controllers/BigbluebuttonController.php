@@ -157,24 +157,23 @@ class BigbluebuttonController extends Controller
         $created_meetings=collect();
         if(count($request->object) > 0){
             foreach($request->object as $object){
-                $course_segments_ids=collect();
+                // $course_segments_ids=collect();
                 $meeting_id = 'Learnovia'.env('DB_DATABASE').uniqid();
                 foreach($object['class_id'] as $class){
                     $i=0;
-                    $courseseg = CourseSegment::GetWithClassAndCourse($class,$object['course_id']);
+                    // $courseseg = CourseSegment::GetWithClassAndCourse($class,$object['course_id']);
                     LastAction::lastActionInCourse($object['course_id']);
-                    if(isset($courseseg))
-                        $course_segments_ids->push($courseseg->id);
+                    // if(isset($courseseg))
+                    //     $course_segments_ids->push($courseseg->id);
 
-                    if(count($course_segments_ids) <= 0)
-                        return HelperController::api_response_format(404, null ,__('messages.error.no_active_segment'));
+                    // if(count($course_segments_ids) <= 0)
+                    //     return HelperController::api_response_format(404, null ,__('messages.error.no_active_segment'));
             
-                    $usersIDs=Enroll::whereIn('course_segment',$course_segments_ids)->where('user_id','!=', Auth::id())->pluck('user_id')->unique()->values()->toarray();
+                    $usersIDs=Enroll::where('group',$class)->where('course',$object['course_id'])->where('user_id','!=', Auth::id())->pluck('user_id')->unique()->values()->toarray();
                     foreach($request->start_date as $start_date){
                         $last_date = $start_date;
-                        if(isset($request->last_day)){
+                        if(isset($request->last_day))
                             $last_date= $request->last_day;
-                        }
             
                         $temp_start = Carbon::parse($start_date);
                         while(Carbon::parse($temp_start)->format('Y-m-d H:i:s') <= Carbon::parse($last_date)->format('Y-m-d H:i:s')){
