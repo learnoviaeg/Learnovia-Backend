@@ -52,10 +52,7 @@ class LevelController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $levels->whereIn('id',$enrolls->pluck('level'));  
-        
-        if($request->filled('search'))
-            $levels=$levels->where('name', 'LIKE' , "%$request->search%");
+        $levels->whereIn('id',$enrolls->pluck('level'));
 
         return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
     }
@@ -76,7 +73,7 @@ class LevelController extends Controller
             'type.*' => 'exists:academic_types,id',
         ]);
 
-        if ($request->filled('year') || $request->filled('type')) {
+        if ($request->filled('type')) {
             foreach ($request->type as $type) {
                 # code...
                 $level = Level::firstOrCreate([

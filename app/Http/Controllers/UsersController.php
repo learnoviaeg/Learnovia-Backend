@@ -200,7 +200,7 @@ class UsersController extends Controller
             $all[$i]['segment'] = Segment::find($enroll->segment);
 
             // $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
-            $all[$i]['class'] = Classes::find($enroll->class);
+            $all[$i]['class'] = Classes::find($enroll->group);
 
             // $level = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
             $all[$i]['level'] = level::find($enroll->level);
