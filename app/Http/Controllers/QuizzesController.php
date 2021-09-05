@@ -187,9 +187,9 @@ class QuizzesController extends Controller
             foreach($request->lesson_id as $lesson)
             {
                 $leson=Lesson::find($lesson);
-                $grade_Cat=GradeCategory::where('course_segment_id',$leson->course_segment_id)->whereNull('parent')->first();
-                if(!isset($grade_Cat))
-                    return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
+                // $grade_Cat=GradeCategory::where('course_segment_id',$leson->course_segment_id)->whereNull('parent')->first();
+                // if(!isset($grade_Cat))
+                //     return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
 
                 $index = QuizLesson::where('lesson_id',$lesson)->get()->max('index');
                 $Next_index = $index + 1;
@@ -202,7 +202,7 @@ class QuizzesController extends Controller
                     'max_attemp' => $request->max_attemp,
                     'grading_method_id' => isset($request->grading_method_id)? json_encode((array)$request->grading_method_id) : null,
                     'grade' => isset($request->grade) ? $request->grade : 0,
-                    'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
+                    // 'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_time,
                     'index' => $Next_index,
                     'visible' => isset($request->visible)?$request->visible:1,
