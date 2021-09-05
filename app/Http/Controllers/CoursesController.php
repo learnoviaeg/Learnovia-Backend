@@ -79,7 +79,10 @@ class CoursesController extends Controller
             $templates = Course::where('is_template',1)->get()->pluck('id');
             $enrolls->whereIn('course',$templates);
         }
-        $results = $enrolls->with('SecondaryChain.Teacher.attachment')->groupBy(['course','level'])->get();
+        $results = $enrolls->whereHas('courses' , function($query)use ($request ) {
+            if($request->filled('search'))
+                $query->where('name', 'LIKE' , "%$request->search%");
+        })->groupBy(['course','level'])->get();
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
     }
 
