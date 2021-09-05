@@ -157,6 +157,6 @@ class ClassesController extends Controller
         
         Classes::whereId($id)->first()->delete();
 
-        return HelperController::api_response_format(200, null, __('messages.class.delete'));
+        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.delete'));
     }
 }
