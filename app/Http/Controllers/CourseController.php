@@ -812,21 +812,24 @@ class CourseController extends Controller
      */
     public function getCoursesOptional(Request $request)
     {
-        $test = 0;
-        $course_segment = GradeCategoryController::getCourseSegment($request);
-        if (!isset($course_segment))
-            return HelperController::api_response_format(404,null,__('messages.error.no_available_data'));
-        foreach ($course_segment as $cs) {
-            $cour_seg=CourseSegment::find($cs);
-            if (count($cour_seg->optionalCourses) > 0){
-                $optional[] = $cour_seg->optionalCourses[0];
-                $test += 1;
-            }
-        }
-        if ($test > 0)
-            return HelperController::api_response_format(200, $optional);
+        // $test = 0;
+        // $course_segment = GradeCategoryController::getCourseSegment($request);
+        // if (!isset($course_segment))
+        //     return HelperController::api_response_format(404,null,__('messages.error.no_available_data'));
+        // foreach ($course_segment as $cs) {
+        $enrolls = $this->chain->getEnrollsByChain($request);
 
-        return HelperController::api_response_format(200,null, __('messages.error.no_available_data'));
+        $courses=Course::whereIn('id',$enrolls->pluck('course'))->where('mandatory',0);
+            // $courses->optionalCourses;
+        //     if (count($cour_seg->optionalCourses) > 0){
+        //         $optional[] = $cour_seg->optionalCourses[0];
+        //         $test += 1;
+        //     }
+        // }
+        // if ($test > 0)
+        return HelperController::api_response_format(200, $courses->get());
+
+        // return HelperController::api_response_format(200,null, __('messages.error.no_available_data'));
     }
 
     /**
