@@ -151,7 +151,7 @@ class ClassesController extends Controller
      */
     public function destroy($id)
     {
-        $check = Enroll::whereIn('group',$id)->get();
+        $check = Enroll::where('group',$id)->get();
         if (count($check) > 0) 
             return HelperController::api_response_format(200, [] , __('messages.error.cannot_delete'));
         

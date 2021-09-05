@@ -29,6 +29,11 @@ class Course extends Model
         return self::where('id',$course_id)->pluck('id')->first();
     }
 
+    public function optionalCourses()
+    {
+        return self::whereMandatory(0);
+    }
+
     public function letter()
     {
         return $this->hasMany('App\Letter');
