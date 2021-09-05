@@ -160,7 +160,7 @@ class CoursesController extends Controller
                         ]);
 
                         for ($i = 1; $i <= $no_of_lessons; $i++) {
-                            $lesson=lesson::firstOrCreate([
+                            $lesson=lesson::create([
                                 'name' => 'Lesson ' . $i,
                                 'index' => $i,
                                 'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
