@@ -63,8 +63,8 @@ class ClassesController extends Controller
                 $classesObj = Course::whereIn('id',$request->courses)->pluck('classes');
                 // $class=json_decode($classesObj);
                 // return Course::whereIn('id',$request->courses)->get();
-                dd($classesObj);
-                $classes->whereIn('id',$classesObj)->where('type','class');
+                // dd($classesObj);
+                $classes->whereIn('id',$classesObj[0])->where('type','class');
             }
 
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
