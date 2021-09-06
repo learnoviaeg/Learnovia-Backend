@@ -60,8 +60,8 @@ class ClassesController extends Controller
                     $classes->whereIn('level_id',$request->levels)->where('type','class');
             }
             if($request->filled('courses')){
-                $classes = Course::whereIn('id',$request->courses)->pluck('classes');
-                $class=json_decode($classes);
+                $classesObj = Course::whereIn('id',$request->courses)->pluck('classes');
+                $class=json_decode($classesObj);
                 // return Course::whereIn('id',$request->courses)->get();
                 $classes->whereIn('id',$class)->where('type','class');
             }
