@@ -151,6 +151,7 @@ class PermissionSeeder extends Seeder
         Permission::create(['guard_name' => 'api', 'name' => 'course/teachers', 'title' => 'view course teachers']);
         Permission::create(['guard_name' => 'api', 'name' => 'course/participants', 'title' => 'view course participants']);
         Permission::create(['guard_name' => 'api', 'name' => 'course/progress-bar', 'title' => 'view course progress bar']);
+        Permission::create(['guard_name' => 'api', 'name' => 'course/template', 'title' => 'apply course template']);
 
         //Enroll Permissions
         Permission::create(['guard_name' => 'api', 'name' => 'enroll/user', 'title' => 'Staff Enrollment' , 'dashboard' => 1, 'icon' => 'Star']);
