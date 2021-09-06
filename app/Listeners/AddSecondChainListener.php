@@ -30,7 +30,7 @@ class AddSecondChainListener
     {
         $enrollsOfCourse=Enroll::where('course',$event->lesson->course_id);//->get();
         if(($event->lesson->shared_classes)!= null)
-            $enrollsOfCourse->whereIn('group',$event->lesson->shared_classes);
+            $enrollsOfCourse->whereIn('group',$event->lesson->getOriginal('shared_classes'));
         foreach($enrollsOfCourse->cursor() as $enroll)
         {
             SecondaryChain::firstOrCreate([
