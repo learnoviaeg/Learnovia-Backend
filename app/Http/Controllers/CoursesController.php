@@ -323,7 +323,7 @@ class CoursesController extends Controller
                     $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
                     $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
                     foreach($new_lessons as $lesson){
-                        $lesson=lesson::firstOrCreate([
+                        lesson::firstOrCreate([
                             'name' => $lesson->name,
                             'index' => $lesson->index,
                             'shared_lesson' => $lesson->shared_lesson,
