@@ -569,33 +569,37 @@ class EnrollUserToCourseController extends Controller
 
         $this->validate($request, $rules, $customMessages);
 
-        $courseSeg = GradeCategoryController::getCourseSegmentWithArray($request);
+        // $courseSeg = GradeCategoryController::getCourseSegmentWithArray($request);
         // return $courseSeg;
-        if (isset($courseSeg)) {
+        if (isset($request->courses)) {
             $count = 0;
             foreach ($request->users as $user) {
-                foreach ($courseSeg as $course) {
-                    $courseseg = CourseSegment::find($course);
-                    $class = $courseseg->segmentClasses[0]->classLevel[0]->class_id;
-                    $level= $courseseg->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-                    $type = $courseseg->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id;
-                    $segment =$courseseg->segmentClasses[0]->segment_id;
+                foreach ($request->courses as $course) {
+                    foreach ($request->classes as $class) {
+                    $coco = Course::find($course);
+                    $seg = Segment::find($coco->segment_id);
+                    // $class = $courseseg->segmentClasses[0]->classLevel[0]->class_id;
+                    $level= $coco->level_id;
+                    $type = $seg->academic_type_id;
+                    $segment =$coco->segment_id;
+                    // $segment =$courseseg->segmentClasses[0]->segment_id;
                         
                     $check = Enroll::IsExist($course, $user,$request->role_id);
                     if ($check == null) {
-                        Enroll::Create([
+                        Enroll::firstOrCreate([
                             'user_id' => $user,
-                            'course_segment' => $course,
+                            // 'course_segment' => $course,
                             'role_id' => $request->role_id,
                             'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
                             'type' => $type,
                             'level' => $level,
-                            'class' => $class,
+                            'group' => $class,
                             'segment' => $segment,
-                            'course' => CourseSegment::whereId($course)->pluck('course_id')->first(),
+                            'course' => $course,
                         ]);
                     } else
                         $EnrolledBefore[] = $user[$count];
+                    }
                 }
                 $count++;
             }

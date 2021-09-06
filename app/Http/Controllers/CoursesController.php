@@ -121,7 +121,6 @@ class CoursesController extends Controller
                 $check = Course::whereIn('level_id',$chain['level'])->count();
                 if($check > 0)
                     return response()->json(['message' => __('messages.course.anotherTemplate'), 'body' => null], 200);
-
             }
             // return $chain['level'];
             foreach ($chain['segment'] as $segment) {
@@ -188,7 +187,7 @@ class CoursesController extends Controller
                                     'course_id' => $course->id
                                 ]);
                             }else{
-                                $lesson=lesson::create([
+                                $lesson=lesson::firstOrCreate([
                                     'name' => 'Lesson ' . $i,
                                     'index' => $i,
                                     'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
@@ -196,14 +195,14 @@ class CoursesController extends Controller
                                 ]);
                             }
 
-                            SecondaryChain::firstOrCreate([
-                                'user_id' => 1,
-                                'role_id' => 1,
-                                'group_id' => $enroll->group,
-                                'course_id' => $enroll->course,
-                                'lesson_id' => $lesson->id,
-                                'enroll_id' => $enroll->id
-                            ]);
+                            // SecondaryChain::firstOrCreate([
+                            //     'user_id' => 1,
+                            //     'role_id' => 1,
+                            //     'group_id' => $enroll->group,
+                            //     'course_id' => $enroll->course,
+                            //     'lesson_id' => $lesson->id,
+                            //     'enroll_id' => $enroll->id
+                            // ]);
 
                             // event(new LessonCreatedEvent($lesson,$enroll));
                         }
