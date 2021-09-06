@@ -61,7 +61,7 @@ class ClassesController extends Controller
             }
             if($request->filled('courses')){
                 $classesObj = Course::whereIn('id',$request->courses)->pluck('classes');
-                $class=json_decode($classesObj);
+                // $class=json_decode($classesObj);
                 // return Course::whereIn('id',$request->courses)->get();
                 dd($class);
                 $classes->whereIn('id',$class)->where('type','class');

@@ -84,4 +84,12 @@ class Course extends Model
             return $attachment->path;
         }
     }
+
+    public function getClassesAttribute($value)
+    {   if($value != null){
+            $content= json_decode($value);
+            return $content;
+        }
+        return $value;
+    }
 }
