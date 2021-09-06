@@ -15,7 +15,7 @@ class AcademicType extends Model
     //     return $this->belongsToMany('App\AcademicYear', 'academic_year_types', 'academic_year_id', 'academic_type_id');
     // }
 
-    public function Year()
+    public function year()
     { 
         return $this->hasone('App\AcademicYear','id','academic_year_id');
     }

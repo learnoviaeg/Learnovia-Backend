@@ -333,18 +333,18 @@ class QuizController extends Controller
         $qq = Quiz::where('id', $request->quiz_id)->first();
         $quizles=QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
         $Lesson = Lesson::find($request->lesson_id);
-        LastAction::lastActionInCourse($Lesson->courseSegment->courses[0]->id);
+        LastAction::lastActionInCourse($Lesson->courses_id);
         if(!isset($quizles))
             return HelperController::api_response_format(200, __('messages.quiz.quiz_not_belong'));
 
         $max_attemp= $qq->quizLesson[0]->max_attemp;
-        $grade_category_id= $qq->quizLesson[0]->grade_category_id;
+        // $grade_category_id= $qq->quizLesson[0]->grade_category_id;
 
-        $gradecat=GradeCategory::where('id',$grade_category_id)->first();
+        // $gradecat=GradeCategory::where('id',$grade_category_id)->first();
         //return $quizLesson;
         $quiz = quiz::find($request->quiz_id);
         $quiz['max_attemp']=$max_attemp;
-        $quiz['grade_category']=$gradecat;
+        // $quiz['grade_category']=$gradecat;
 
         if ($quiz_shuffle == 'No Shuffle') {
             $Questions = $quiz->Question;

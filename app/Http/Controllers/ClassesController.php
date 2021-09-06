@@ -60,9 +60,11 @@ class ClassesController extends Controller
                     $classes->whereIn('level_id',$request->levels)->where('type','class');
             }
             if($request->filled('courses')){
-                $levels = Course::select('level_id')->whereIn('id',$request->courses) ->distinct()->get()->pluck('level_id');
+                $classesObj = Course::whereIn('id',$request->courses)->pluck('classes');
+                // $class=json_decode($classesObj);
                 // return Course::whereIn('id',$request->courses)->get();
-                $classes->whereIn('level_id',$levels)->where('type','class');
+                // dd($classesObj);
+                $classes->whereIn('id',$classesObj[0])->where('type','class');
             }
 
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
