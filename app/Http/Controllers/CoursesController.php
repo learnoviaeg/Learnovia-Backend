@@ -317,7 +317,7 @@ class CoursesController extends Controller
                 $classes_of_course = Course::find($course);
                 $lessons_array = $new_lessons->get();
 
-                foreach (json_decode($classes_of_course->classes) as $class) {
+                foreach (($classes_of_course->classes) as $class) {
                     for ($i = 1; $i <= $new_lessons->count(); $i++) {
 
                         if($lessons_array[$i-1]->shared_lesson == 1){
