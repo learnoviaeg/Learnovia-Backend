@@ -121,7 +121,7 @@ class CoursesController extends Controller
         foreach ($request->chains as $chain){
             if($request->is_template == 1){
                 $check = Course::whereIn('level_id',$chain['level'])->count();
-                if($check > 0)
+                if($check != 0)
                     return response()->json(['message' => __('messages.course.anotherTemplate'), 'body' => null], 200);
             }
             // return $chain['level'];
