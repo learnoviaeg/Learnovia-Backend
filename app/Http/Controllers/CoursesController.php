@@ -328,7 +328,7 @@ class CoursesController extends Controller
                             'index' => $lesson->index,
                             'shared_lesson' => $lesson->shared_lesson,
                             'course_id' => $course,
-                            'shared_classes' => json_decode($lesson->shared_classes),
+                            'shared_classes' => json_encode($lesson->shared_classes),
                         ]);
                     }
              
