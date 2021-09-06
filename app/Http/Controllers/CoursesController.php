@@ -315,10 +315,12 @@ class CoursesController extends Controller
                 $old_lessons = Lesson::where('course_id', $course);
                 $new_lessons = Lesson::where('course_id', $request->template_id);
                 $classes_of_course = Course::find($course);
+                $lessons_array = $new_lessons->get();
 
                 foreach (json_decode($classes_of_course->shared_classes) as $class) {
                     for ($i = 1; $i <= $new_lessons->count(); $i++) {
-                        if($request->shared_lesson == 1){
+
+                        if($lessons_array[$i-1]->shared_lesson == 1){
                             $lesson=lesson::firstOrCreate([
                                 'name' => 'Lesson ' . $i,
                                 'index' => $i,
