@@ -331,8 +331,7 @@ class CoursesController extends Controller
                             'shared_classes' => $lesson->getOriginal('shared_classes'),
                         ]);
                     }
-             
-            }   
+            }
         }
         return HelperController::api_response_format(200, null, __('messages.course.template'));
     }
