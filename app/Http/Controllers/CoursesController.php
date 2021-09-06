@@ -325,7 +325,7 @@ class CoursesController extends Controller
                                 'name' => 'Lesson ' . $i,
                                 'index' => $i,
                                 'shared_lesson' => 1,
-                                'course_id' => $course->id,
+                                'course_id' => $course,
                                 'shared_classes' => $classes_of_course->shared_classes,
                             ]);
                         }else{
@@ -333,7 +333,7 @@ class CoursesController extends Controller
                                 'name' => 'Lesson ' . $i,
                                 'index' => $i,
                                 'shared_lesson' => 0,
-                                'course_id' => $course->id,
+                                'course_id' => $course,
                                 'shared_classes' => json_encode([$class]),
                             ]);
                         }
