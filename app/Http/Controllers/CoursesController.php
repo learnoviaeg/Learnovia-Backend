@@ -120,7 +120,7 @@ class CoursesController extends Controller
         $no_of_lessons = 4;
 
         if($request->is_template == 1){
-            $check = Course::whereIn('level_id',$chains[0]['level'])->count();
+            $check = Course::whereIn('level_id',$request->chains[0]['level'])->count();
             if($check != 0)
                 return response()->json(['message' => __('messages.course.anotherTemplate'), 'body' => null], 200);
         }
