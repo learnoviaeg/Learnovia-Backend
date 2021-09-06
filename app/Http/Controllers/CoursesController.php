@@ -183,14 +183,14 @@ class CoursesController extends Controller
                                 $lesson=lesson::firstOrCreate([
                                     'name' => 'Lesson ' . $i,
                                     'index' => $i,
-                                    'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
+                                    'shared_lesson' => 1,
                                     'course_id' => $course->id
                                 ]);
                             }else{
-                                $lesson=lesson::firstOrCreate([
+                                $lesson=lesson::create([
                                     'name' => 'Lesson ' . $i,
                                     'index' => $i,
-                                    'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
+                                    'shared_lesson' => 0,
                                     'course_id' => $course->id
                                 ]);
                             }
