@@ -127,8 +127,8 @@ class LessonController extends Controller
         if ($request->filled('shared_lesson'))
             $lesson->shared_lesson = $request->shared_lesson;
 
-        if($lesson->getOriginal('shared_classes')){
-            foreach($lesson->getOriginal('shared_classes') as $class){
+        if($event->lesson->shared_classes->pluck('id')){
+            foreach($event->lesson->shared_classes->pluck('id') as $class){
                 $secondary_chain = SecondaryChain::where('group_id', $class)->whereNotIn('group_id',$request->classes)->where('lesson_id',$request->id)->delete();
             }
         }
