@@ -311,42 +311,27 @@ class CoursesController extends Controller
         ]);
 
         foreach($request->courses as $course){
-
-                $old_lessons = Lesson::where('course_id', $course);
-                $new_lessons = Lesson::where('course_id', $request->template_id);
                 $classes_of_course = Course::find($course);
-                $lessons_array = $new_lessons->get();
-
-                foreach (($classes_of_course->classes) as $class) {
-                    for ($i = 1; $i <= $new_lessons->count(); $i++) {
-
-                        if($lessons_array[$i-1]->shared_lesson == 1){
-                            $lesson=lesson::firstOrCreate([
-                                'name' => 'Lesson ' . $i,
-                                'index' => $i,
-                                'shared_lesson' => 1,
-                                'course_id' => $course,
-                                'shared_classes' => $classes_of_course->classes,
-                            ]);
-                        }else{
-                            $lesson=lesson::create([
-                                'name' => 'Lesson ' . $i,
-                                'index' => $i,
-                                'shared_lesson' => 0,
-                                'course_id' => $course,
-                                'shared_classes' => json_encode([$class]),
-                            ]);
-                        }
+                foreach ($classes_of_course->classes as $class) {
+                    $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
+                    $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
+                    foreach($new_lessons as $lesson){
+                        $lesson=lesson::firstOrCreate([
+                            'name' => $lesson->name,
+                            'index' => $lesson->index,
+                            'shared_lesson' => $lesson->shared_lesson,
+                            'course_id' => $course,
+                            'shared_classes' => $lesson->classes,
+                        ]);
                     }
-                }
-
-
                 if($request->old_lessons == 0){
+                    $old_lessons = Lesson::where('course_id', $course);
                     $secondary_chains = SecondaryChain::whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->delete();
                     $old_lessons->delete();
                 }
-            }
-            return HelperController::api_response_format(200, null, __('messages.course.template'));
-   
+             
+            }   
         }
+        return HelperController::api_response_format(200, null, __('messages.course.template'));
+    }
 }
