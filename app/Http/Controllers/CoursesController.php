@@ -110,6 +110,8 @@ class CoursesController extends Controller
             'chains.*.level.*' => 'required|exists:levels,id',
             'chains.*.segment' => 'array|required_with:chains.*.year',
             'chains.*.segment.*' => 'required|exists:segments,id',
+            'chains.*.class' => 'array|required_with:chains.*.year',
+            'chains.*.class.*' => 'required|exists:classes,id',
         ]);
         // return $request->chains;
         // if($request->is_template == 1){
@@ -128,6 +130,7 @@ class CoursesController extends Controller
                     $short_names=Course::where('segment_id',$segment)->where('short_name',$request->short_name)->get();
                     if(count($short_names)>0)
                         return HelperController::api_response_format(400, null, 'short_name must be unique');
+
                     $course = Course::firstOrCreate([
                         'name' => $request->name,
                         'short_name' => $request->short_name,
@@ -138,13 +141,15 @@ class CoursesController extends Controller
                         'segment_id' => $segment,
                         'level_id' => $level,
                         'is_template' => isset($request->is_template) ? $request->is_template : 0,
+                        'classes' => json_encode($chain['class']),
                     ]);
-                    $level_id=$course->level_id;
-                    $segment=Segment::find($course->segment_id);
-                    $segment_id=$segment->id;
-                    $year_id=$segment->academic_year_id;
-                    $type_id=$segment->academic_type_id;
-                    $classes=Classes::where('level_id',$course->level_id)->get();
+
+                    // $level_id=$course->level_id;
+                    // $segment=Segment::find($course->segment_id);
+                    // $segment_id=$segment->id;
+                    // $year_id=$segment->academic_year_id;
+                    // $type_id=$segment->academic_type_id;
+                    // $classes=Classes::where('level_id',$course->level_id)->get();
                     // dd($classes);
                     if ($request->filled('no_of_lessons'))
                         $no_of_lessons = $request->no_of_lessons;
@@ -158,53 +163,26 @@ class CoursesController extends Controller
                     //     ]);
                     // }
 
-                    foreach($classes as $class)
-                    {
-                        $enroll=Enroll::firstOrCreate([
-                            'user_id'=> 1,
-                            'role_id' => 1,
-                            'year' => $year_id,
-                            'type' => $type_id,
-                            'segment' => $segment_id,
-                            'level' => $level_id,
-                            'group' => $class->id,
-                            'course' => $course->id
-                        ]);
+                    foreach ($chain['class'] as $class) {
 
                         for ($i = 1; $i <= $no_of_lessons; $i++) {
-                            // $lesson=lesson::firstOrCreate([
-                            //     'name' => 'Lesson ' . $i,
-                            //     'index' => $i,
-                            //     'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
-                            //     'course_id' => $course->id
-                            // ]);
-
                             if($request->shared_lesson == 1){
                                 $lesson=lesson::firstOrCreate([
                                     'name' => 'Lesson ' . $i,
                                     'index' => $i,
                                     'shared_lesson' => 1,
-                                    'course_id' => $course->id
+                                    'course_id' => $course->id,
+                                    'shared_classes' => json_encode($chain['class']),
                                 ]);
                             }else{
                                 $lesson=lesson::create([
                                     'name' => 'Lesson ' . $i,
                                     'index' => $i,
                                     'shared_lesson' => 0,
-                                    'course_id' => $course->id
+                                    'course_id' => $course->id,
+                                    'shared_classes' => json_encode([$class]),
                                 ]);
                             }
-
-                            // SecondaryChain::firstOrCreate([
-                            //     'user_id' => 1,
-                            //     'role_id' => 1,
-                            //     'group_id' => $enroll->group,
-                            //     'course_id' => $enroll->course,
-                            //     'lesson_id' => $lesson->id,
-                            //     'enroll_id' => $enroll->id
-                            // ]);
-
-                            // event(new LessonCreatedEvent($lesson,$enroll));
                         }
                     }
 

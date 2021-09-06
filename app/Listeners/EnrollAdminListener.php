@@ -39,6 +39,7 @@ class EnrollAdminListener
         $classes=Classes::where('level_id',$event->course->level_id)->get();
         // dd($classes);
 
+        $classes=json_decode($event->course->classes);
         foreach($classes as $class)
         {
             $enroll=Enroll::firstOrCreate([
@@ -48,7 +49,7 @@ class EnrollAdminListener
                 'type' => $type_id,
                 'segment' => $segment_id,
                 'level' => $level_id,
-                'group' => $class->id,
+                'group' => $class,
                 'course' => $event->course->id
             ]);
         }

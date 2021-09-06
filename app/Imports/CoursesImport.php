@@ -54,6 +54,11 @@ class CoursesImport implements ToModel , WithHeadingRow
 
         $chains[0]['segment'][0]=$row['segment_id'];
         $chains[0]['level'][0]=$row['level_id'];
+        $chains[0]['class']=Classes::where('level_id',$row['level_id'])->pluck('id');
+        if(isset($row['class_id'])){
+            $chains[0]['class']=null;
+            $chains[0]['class'][0]=$row['class_id'];
+        }
         // dd($chains);
 
         $req=new Request([
