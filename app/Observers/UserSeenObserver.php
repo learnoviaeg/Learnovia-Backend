@@ -23,8 +23,8 @@ class UserSeenObserver
     public function created(UserSeen $userSeen)
     {
         $lesson = Lesson::find($userSeen->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
-        $this->report->calculate_course_progress($course_id);
+        // $course_id = $lesson->courseSegment->course_id;
+        $this->report->calculate_course_progress($lesson->course_id);
     }
 
     /**

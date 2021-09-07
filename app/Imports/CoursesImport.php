@@ -52,9 +52,16 @@ class CoursesImport implements ToModel , WithHeadingRow
         if (isset($row['no_of_lessons'])) 
             $no_of_lessons = $row['no_of_lessons'];
 
+        $chains=array();
+
         $chains[0]['segment'][0]=$row['segment_id'];
         $chains[0]['level'][0]=$row['level_id'];
-        $chains[0]['class']=Classes::where('level_id',$row['level_id'])->pluck('id');
+        // dd(Classes::where('level_id',$row['level_id'])->pluck('id'));
+        $cl=Classes::where('level_id',$row['level_id'])->pluck('id');
+        if(!isset($cl))
+            die('This Level doesn\'t have any classes');
+
+        $chains[0]['class']=$cl->toArray();
         if(isset($row['class_id'])){
             $chains[0]['class']=null;
             $chains[0]['class'][0]=$row['class_id'];
