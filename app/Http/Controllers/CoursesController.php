@@ -321,9 +321,6 @@ class CoursesController extends Controller
                     $old_ids =  $old_lessons->get()->pluck('id');
                 }
                 foreach ($classes_of_course->classes as $class) {
-                    if($request->old_lessons == 0){
-                        $secondary_chains = SecondaryChain::where('group_id',$class)->whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->delete();                            
-                    }
                     $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
                     $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
                     foreach($new_lessons as $lesson){
@@ -336,6 +333,7 @@ class CoursesController extends Controller
                                 'shared_classes' => $lesson->getOriginal('shared_classes'),
                             ]);
                             $shared_ids[] = $shared->id;
+                            
                         }else{
                             $not_shared = lesson::create([
                                 'name' => $lesson->name,
@@ -346,6 +344,9 @@ class CoursesController extends Controller
                             ]);
                             $shared_ids[] = $not_shared->id;
                         }
+                    }
+                    if($request->old_lessons == 0){
+                        $secondary_chains = SecondaryChain::where('group_id',$class)->whereNotIn('lesson_id',$shared_ids)->whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->delete();                            
                     }
             }
 
