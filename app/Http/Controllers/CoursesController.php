@@ -321,9 +321,7 @@ class CoursesController extends Controller
                 }
                 foreach ($classes_of_course->classes as $class) {
                     if($request->old_lessons == 0){
-                        $secondary_chains = SecondaryChain::where('group_id',$class)->whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->get();
-                        if($secondary_chains)
-                            $secondary_chains->delete();
+                        $secondary_chains = SecondaryChain::where('group_id',$class)->whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->delete();                            
                     }
                     $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
                     $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
@@ -339,7 +337,7 @@ class CoursesController extends Controller
             }
 
             if($request->old_lessons == 0){
-                Lesson::whereIn('id',$old_ids)->get()->delete();
+                Lesson::whereIn('id',$old_ids)->delete();
             }
         }
         return HelperController::api_response_format(200, null, __('messages.course.template'));
