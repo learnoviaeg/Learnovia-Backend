@@ -91,7 +91,7 @@ class EnrollUserToCourseController extends Controller
                     // $segment= $courseseg->segmentClasses[0]->segment_id;
                     // $type = $courseseg->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id;
                     // $year = $courseseg->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_year_id;
-                    $check = Enroll::IsExist($course, $user_id,$request->role_id[$rolecount]);
+                    $check = Enroll::IsExist($course,$request->class, $user_id,$request->role_id[$rolecount]);
                     if (!$check) {
                         $enroll = new Enroll;
                         $enroll->setAttribute('user_id', $user_id);
