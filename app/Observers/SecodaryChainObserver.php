@@ -19,6 +19,8 @@ class SecodaryChainObserver
         // dd($lessons);    
         foreach ($lessons as $lesson)
         {
+            if(!in_array($enroll->group ,$lesson->shared_classes->pluck('id')->toArray()))
+                continue;
             SecondaryChain::firstOrCreate([
                 'user_id' => $enroll->user_id,
                 'role_id' => $enroll->role_id,
