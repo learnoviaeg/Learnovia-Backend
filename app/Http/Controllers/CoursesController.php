@@ -321,7 +321,9 @@ class CoursesController extends Controller
                 }
                 foreach ($classes_of_course->classes as $class) {
                     if($request->old_lessons == 0){
-                        $secondary_chains = SecondaryChain::where('group_id',$class)->whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->get()->delete();
+                        $secondary_chains = SecondaryChain::where('group_id',$class)->whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->get();
+                        if($secondary_chains)
+                            $secondary_chains->delete();
                     }
                     $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
                     $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
