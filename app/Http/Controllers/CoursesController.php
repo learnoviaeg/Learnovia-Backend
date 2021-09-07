@@ -337,13 +337,14 @@ class CoursesController extends Controller
                             ]);
                             $shared_ids[] = $shared->id;
                         }else{
-                            lesson::create([
+                            $not_shared = lesson::create([
                                 'name' => $lesson->name,
                                 'index' => $lesson->index,
                                 'shared_lesson' => $lesson->shared_lesson,
                                 'course_id' => $course,
                                 'shared_classes' => $lesson->getOriginal('shared_classes'),
                             ]);
+                            $shared_ids[] = $not_shared->id;
                         }
                     }
             }
