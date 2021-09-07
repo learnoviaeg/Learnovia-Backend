@@ -34,7 +34,7 @@ class AddSecondChainListener
             $enrollsOfCourse->whereIn('group',$event->lesson->shared_classes->pluck('id'));
         foreach($enrollsOfCourse->cursor() as $enroll)
         {
-            if(!in_array($enroll->group , $event->lesson->shared_classes->pluck('id')->toArray()))
+            if(!in_array($enroll->group ,$event->lesson->shared_classes->pluck('id')->toArray()))
                 continue;
             SecondaryChain::firstOrCreate([
                 'user_id' => $enroll->user_id,
