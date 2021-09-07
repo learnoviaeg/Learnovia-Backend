@@ -557,7 +557,7 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200, null, $message = __('messages.assignment.assignment_not_belong'));
             
         $lesson=Lesson::find($request->lesson_id);
-        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($lesson->course_id);
 
         $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
         if ($assilesson->mark < $request->grade) {

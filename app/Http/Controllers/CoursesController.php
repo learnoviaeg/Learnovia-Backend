@@ -302,7 +302,6 @@ class CoursesController extends Controller
         // return HelperController::api_response_format(200, $course, __('messages.course.delete'));
     }
 
-
     public function Apply_Template(Request $request)
     {
         $request->validate([
@@ -352,4 +351,5 @@ class CoursesController extends Controller
         }
         return HelperController::api_response_format(200, null, __('messages.course.template'));
     }
+
 }
