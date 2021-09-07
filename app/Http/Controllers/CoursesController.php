@@ -313,7 +313,6 @@ class CoursesController extends Controller
         ]);
 
         foreach($request->courses as $course){
-            $shared_ids = [];
                 $classes_of_course = Course::find($course);
                 if($request->old_lessons == 0){
                     $old_lessons = Lesson::where('course_id', $course);
@@ -321,6 +320,7 @@ class CoursesController extends Controller
                     $old_ids =  $old_lessons->get()->pluck('id');
                 }
                 foreach ($classes_of_course->classes as $class) {
+                    $shared_ids = [];
                     $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
                     $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
                     foreach($new_lessons as $lesson){
