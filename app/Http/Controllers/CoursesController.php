@@ -327,7 +327,7 @@ class CoursesController extends Controller
                     $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
                     foreach($new_lessons as $lesson){
                         if($lesson->shared_lesson == 1){
-                            lesson::createOrcreate([
+                            lesson::firstOrcreate([
                                 'name' => $lesson->name,
                                 'index' => $lesson->index,
                                 'shared_lesson' => $lesson->shared_lesson,
