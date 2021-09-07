@@ -119,7 +119,16 @@ class UsersController extends Controller
             $enrolls = $this->chain->getEnrollsByManyChain($requ);
         }
         //using in participants api new route { api/user/participants}
-        if($my_chain=='participants' || $my_chain=='seen_report'){
+        // if($my_chain=='participants' || $my_chain=='seen_report'){
+        //     // site/show/as-participant
+        //     $permission = Permission::where('name','site/show/as-participant')->with('roles')->first();
+        //     $roles_id = $permission->roles->pluck('id');
+        //     if(isset($request->roles))
+        //         $roles_id = $permission->roles->whereIn('id',$request->roles)->pluck('id');
+
+        //     $enrolls->whereIn('role_id',$roles_id);
+        // }
+        if($my_chain=='participants'){
             // site/show/as-participant
             $permission = Permission::where('name','site/show/as-participant')->with('roles')->first();
             $roles_id = $permission->roles->pluck('id');
@@ -128,6 +137,7 @@ class UsersController extends Controller
 
             $enrolls->whereIn('role_id',$roles_id);
         }
+        
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
             if(!$request->user()->can('site/show-all-courses')) //student

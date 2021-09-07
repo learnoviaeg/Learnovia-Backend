@@ -8,7 +8,8 @@ use Modules\Attendance\Entities\AttendanceSession;
 
 class Course extends Model
 {
-    protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id','is_template'];
+    protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id',
+    'is_template','classes'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\CourseCreatedEvent::class,
@@ -82,5 +83,13 @@ class Course extends Model
             $attachment=attachment::find($this->attributes['image']);
             return $attachment->path;
         }
+    }
+
+    public function getClassesAttribute($value)
+    {   if($value != null){
+            $content= json_decode($value);
+            return $content;
+        }
+        return $value;
     }
 }

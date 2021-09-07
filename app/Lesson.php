@@ -64,9 +64,11 @@ class Lesson extends Model
     }
 
     public function getSharedClassesAttribute($value)
-    {
-        $content= json_decode($value);
-        return $content;
+    {   if($value != null){
+            $content= json_decode($value);
+            return Classes::whereIn('id',$content)->get();
+        }
+        return $value;
     }
 
 }

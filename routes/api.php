@@ -474,7 +474,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
     Route::Resource('courses', CoursesController::class);
     Route::post('courses/{id}', 'CoursesController@update');
-    Route::post('course/template', 'CoursesController@Apply_Template');//->middleware(['permission:course/my-courses' , 'ParentCheck']);
+    Route::post('course/template', 'CoursesController@Apply_Template');//->middleware(['permission:course/template']);
     // Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
 
@@ -487,6 +487,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('users', UsersController::class);
     Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user/{count}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
+    Route::get('user/{participants}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user/{all}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user-report/{option}', 'ReportsController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);

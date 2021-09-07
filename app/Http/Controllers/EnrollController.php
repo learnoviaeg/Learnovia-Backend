@@ -85,7 +85,7 @@ class EnrollController extends Controller
 
         foreach($logsbefore as $enroll){
             $parent = Parents::where('child_id',$enroll->user_id)->pluck('parent_id');
-            Enroll::whereIn('user_id',$parent)->where('role_id',7)->where('course_segment',$enroll->course_segment)->delete();
+            Enroll::whereIn('user_id',$parent)->where('role_id',7)->where('course',$enroll->course)->delete();
         }
 
         $chains->delete();
