@@ -38,7 +38,7 @@ class LessonsController extends Controller
             'classes.*'  => 'nullable|integer|exists:classes,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
-            'shared_lesson' => 'in:0,1'
+            'shared' => 'in:0,1'
         ]);
         $enrolls = $this->chain->getEnrollsByManyChain($request)->get()->pluck('id');
         // if($request->user()->can('site/show-all-courses')){//admin
@@ -46,12 +46,6 @@ class LessonsController extends Controller
             if($request->filled('classes'))
                 $lessons->whereIn('group_id',$request->classes);
             $result_lessons = $lessons->get()->groupBy('lesson_id');
-            // return $lessons;
-        // }
-
-        // if(!$request->user()->can('site/show-all-courses')){ //student or teacher
-            // $lessons = SecondaryChain::select('lesson_id')->distinct()->where('user_id',Auth::id())->whereIn('enroll_id',$enrolls)->get()->pluck('lesson_id');
-        // }
         if($request->filled('classes')){
             foreach($result_lessons as $key=>$lesson){
                 if(count($lesson) != count($request->classes)){
