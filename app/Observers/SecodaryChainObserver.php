@@ -14,7 +14,7 @@ class SecodaryChainObserver
 
     public function created(Enroll $enroll)
     {
-        // dd($event);
+        // dd($enroll);
         $lessons=Lesson::where('course_id',$enroll->course)->get();
         // dd($lessons);    
         foreach ($lessons as $lesson)

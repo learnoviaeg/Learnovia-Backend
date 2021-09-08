@@ -107,11 +107,11 @@ class CoursesController extends Controller
             'mandatory' => 'nullable',
             'short_name' =>'required',
             'is_template' => 'nullable|boolean',
-            'chains.*.level' => 'array|required_with:chains.*.year',
+            'chains.*.level' => 'array|required',
             'chains.*.level.*' => 'required|exists:levels,id',
-            'chains.*.segment' => 'array|required_with:chains.*.year',
+            'chains.*.segment' => 'array|required_with:chains.*.level',
             'chains.*.segment.*' => 'required|exists:segments,id',
-            'chains.*.class' => 'array|required_with:chains.*.year',
+            'chains.*.class' => 'array|required_with:chains.*.level',
             'chains.*.class.*' => 'required|exists:classes,id',
         ]);
         // return $request->chains;
