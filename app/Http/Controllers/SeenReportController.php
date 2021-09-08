@@ -15,6 +15,7 @@ use App\Enroll;
 use App\Lesson;
 use App\UserSeen;
 use App\CourseSegment;
+use App\SecondaryChain;
 
 class SeenReportController extends Controller
 {
@@ -58,17 +59,17 @@ class SeenReportController extends Controller
         ]);
 
         
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
+        $enrollss = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
 
         if($request->filled('role'))
-            $user_course_segments->whereIn('role_id',$request->role);
+            $enrollss->whereIn('role_id',$request->role);
 
-        if(!$request->user()->can('site/show-all-courses'))//student
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+        // if(!$request->user()->can('site/show-all-courses'))//student
+            // $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
-        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
+        // $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
 
-        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+        $lessons = SecondaryChain::where('enroll_id', $enrollss)->get()->pluck('lesson_id');
       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
@@ -125,7 +126,7 @@ class SeenReportController extends Controller
                     'user_seen_number' => $assignment->user_seen_number,
                     'lesson_id' => $assignment->lesson_id,
                     'percentage' => isset($total) && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->courseSegment->courses[0],
+                    'course' => $lesson->course_id,
                     'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
                 ]);
 
@@ -214,8 +215,8 @@ class SeenReportController extends Controller
                     'user_seen_number' => $material->user_seen_number,
                     'lesson_id' => $material->lesson_id,
                     'percentage' => isset($total) && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->courseSegment->courses[0],
-                    'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
+                    'course' => $lesson->course_id,
+                    'class' => $lesson->shared_classes
                 ]);
                 return $report;
             });
