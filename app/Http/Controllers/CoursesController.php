@@ -312,6 +312,7 @@ class CoursesController extends Controller
         ]);
 
         foreach($request->courses as $course){
+                $shared_ids = [];
                 $classes_of_course = Course::find($course);
                 if($request->old_lessons == 0){
                     $old_lessons = Lesson::where('course_id', $course);
@@ -325,14 +326,16 @@ class CoursesController extends Controller
                     $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
                     $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
                     foreach($new_lessons as $lesson){
-                        if($lesson->shared_lesson == 1){
-                            lesson::firstOrcreate([
+                        if($lesson->shared_lesson == 1 ){
+                            $id = lesson::firstOrcreate([
                                 'name' => $lesson->name,
                                 'index' => $lesson->index,
                                 'shared_lesson' => $lesson->shared_lesson,
                                 'course_id' => $course,
                                 'shared_classes' => $lesson->getOriginal('shared_classes'),
                             ]);
+                        event(new LessonCreatedEvent(Lesson::find($id)));
+                        $shared_ids[] = $id;
                         }else{
                             lesson::create([
                                 'name' => $lesson->name,
@@ -346,7 +349,7 @@ class CoursesController extends Controller
             }
 
             if($request->old_lessons == 0){
-                Lesson::whereIn('id',$old_ids)->delete();
+                Lesson::whereIn('id',$old_ids)->whereNotIn('id',$shared_ids)->delete();
             }
         }
         return HelperController::api_response_format(200, null, __('messages.course.template'));
