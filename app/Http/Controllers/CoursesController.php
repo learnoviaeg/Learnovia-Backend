@@ -327,7 +327,7 @@ class CoursesController extends Controller
                     $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
                     $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
                     foreach($new_lessons as $lesson){
-                        if(($key == 0 &&  $request->old_lessons == 1) || ($key != 0 &&  $request->old_lessons == 1 && $lesson->shared_classes == [$class] )){
+                        if(($key == 0 &&  $request->old_lessons == 1) || ($key != 0 &&  $request->old_lessons == 1 && json_decode($lesson->getOriginal('shared_classes')) == [$class] )){
                             $id = lesson::create([
                                 'name' => $lesson->name,
                                 'index' => $lesson->index,
