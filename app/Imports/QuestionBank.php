@@ -32,7 +32,7 @@ class QuestionBank implements ToModel , WithHeadingRow
     public $qArray= array();
     public $flage = 0;
     public $count= 0;
-    public $content1;
+    public $content;
 
 
     public function model(array $row )
