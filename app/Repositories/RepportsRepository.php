@@ -3,7 +3,7 @@
 namespace App\Repositories;
 use Illuminate\Http\Request;
 use App\Enroll;
-use App\Lesson;
+use App\SecondaryChain;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\QuestionBank\Entities\QuizLesson;
 use App\h5pLesson;
@@ -29,14 +29,14 @@ class RepportsRepository implements RepportsRepositoryInterface
         //0.75x100 = 75%
         // so the progress will be 75%
 
-        $enroll_students = Enroll::where('course',$course_id)->where('role_id',3)->get()->groupBy('class');
+        $enroll_students = Enroll::where('course',$course_id)->where('role_id',3)->get()->groupBy('group');
         $all_percentages = [];
         $i=0;
 
-        foreach($enroll_students as $enroll){
+        foreach($enroll_students as $classId => $enroll){
             
-            $lessons = Lesson::whereIn('course_segment_id',$enroll->pluck('course_segment'))->pluck('id');
-            
+            $lessons = SecondaryChain::where('course_id',$course_id)->where('group_id',$classId)->pluck('lesson_id');
+    
             //Assignments
             $assignments = AssignmentLesson::whereIn('lesson_id',$lessons)->count();
             
@@ -54,6 +54,7 @@ class RepportsRepository implements RepportsRepositoryInterface
             
             //sum all the seen number for all components
             $sum_views = UserSeen::whereIn('user_id',$enroll->pluck('user_id'))->whereIn('lesson_id',$lessons)->count();
+            
             $divided_by = count($enroll) * $items_count;
 
             $percentage = 0;

@@ -218,7 +218,14 @@ class LevelsController extends Controller
             //         $levels[] = $yearLevel->levels[0]->id;
             // }
 
-        $levels = Level::whereNull('deleted_at')->get();        
+        $levels = Level::whereNull('deleted_at');        
+
+        if($request->has('type')){
+            $levels->where('academic_type_id',$request->type);
+        }
+
+        $levels = $levels->get();
+        
         foreach ($levels as $level){
             $academic_type_id= $level->type->pluck('id')->unique();
             $level['academicType']= AcademicType::whereIn('id',$academic_type_id)->pluck('name');

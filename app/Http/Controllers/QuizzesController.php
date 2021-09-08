@@ -55,15 +55,13 @@ class QuizzesController extends Controller
         ]);
 
         if($request->user()->can('site/show-all-courses')){//admin
-            $course_segments = collect($this->chain->getAllByChainRelation($request));
-            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+            $enrolls = $this->chain->getEnrollsByChain($request);
+            $lessons = $enrolls->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
         }
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
 
-        if(!$request->user()->can('site/show-all-courses')){// any one who is enrolled
-            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-            $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');    
+           $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
+           $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
         }
 
         if($request->filled('lesson')){
@@ -189,9 +187,9 @@ class QuizzesController extends Controller
             foreach($request->lesson_id as $lesson)
             {
                 $leson=Lesson::find($lesson);
-                $grade_Cat=GradeCategory::where('course_segment_id',$leson->course_segment_id)->whereNull('parent')->first();
-                if(!isset($grade_Cat))
-                    return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
+                // $grade_Cat=GradeCategory::where('course_segment_id',$leson->course_segment_id)->whereNull('parent')->first();
+                // if(!isset($grade_Cat))
+                //     return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
 
                 $index = QuizLesson::where('lesson_id',$lesson)->get()->max('index');
                 $Next_index = $index + 1;
@@ -204,7 +202,7 @@ class QuizzesController extends Controller
                     'max_attemp' => $request->max_attemp,
                     'grading_method_id' => isset($request->grading_method_id)? json_encode((array)$request->grading_method_id) : null,
                     'grade' => isset($request->grade) ? $request->grade : 0,
-                    'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
+                    // 'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_time,
                     'index' => $Next_index,
                     'visible' => isset($request->visible)?$request->visible:1,

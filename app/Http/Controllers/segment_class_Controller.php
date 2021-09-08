@@ -104,8 +104,9 @@ class segment_class_Controller extends Controller
                 return HelperController::api_response_format(200, $segment->paginate(HelperController::GetPaginate($request)));
             }
 
-            $segmentt = Segment::whereNull('deleted_at')
+            $segments = Segment::whereNull('deleted_at')
             ->where('name', 'LIKE' , "%$request->search%")
+            ->with(['academicType','academicYear'])
             ->whereHas('academicType' , function($q)use ($request)
             { 
                 if ($request->has('types'))
@@ -115,7 +116,8 @@ class segment_class_Controller extends Controller
             { 
                 if ($request->has('years')) 
                     $q->whereIn('academic_year_id',$request->years);
-            })->get();
+            });
+            
             // ->whereHas('Segment_class.classes.classlevel.yearLevels.yearType' , function($q)use ($request)
             // { 
             //     if ($request->has('years'))
@@ -123,11 +125,11 @@ class segment_class_Controller extends Controller
             //     if ($request->has('types'))
             //         $q->whereIn('academic_type_id',$request->types);
             // })->get();
-            $segments = Segment::with(['academicType','academicYear']);
+            // $segments = Segment::with(['academicType','academicYear']);
             $all_segments=collect([]);
            
             if($call == 1){
-                $segmentIds = $segmentt->pluck('id');
+                $segmentIds = $segments->pluck('id');
                 return $segmentIds;
             }
             // foreach($segmentt as $segment){

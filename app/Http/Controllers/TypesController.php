@@ -34,7 +34,9 @@ class TypesController extends Controller
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        $types = AcademicType::whereNull('deleted_at');
+        $types = AcademicType::whereNull('deleted_at')->with('year');
+        if(isset($request->years))
+            $types = AcademicType::with('year')->whereIn("academic_year_id", $request->years);
         if($request->filled('search'))
             $types = $types->where('name', 'LIKE' , "%$request->search%"); 
 
@@ -42,17 +44,7 @@ class TypesController extends Controller
             return HelperController::api_response_format(201, $types->paginate(HelperController::GetPaginate($request)), __('messages.type.list'));
         
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $types->whereIn('id',$enrolls->pluck('type'));    
-
-        if($request->filter == 'export')
-        {
-            $types = $types->get();
-            $filename = uniqid();
-            $file = Excel::store(new TypesExport($types), 'Type'.$filename.'.xls','public');
-            $file = url(Storage::url('Type'.$filename.'.xls'));
-
-            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
-        }
+        $types->whereIn('id',$enrolls->pluck('type'));
 
         return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)),__('messages.type.list'));
     }
@@ -67,15 +59,21 @@ class TypesController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'segment_no' => 'required'
+            'segment_no' => 'required',
+            'year' => 'array|required',
+            'year.*' => 'exists:academic_years,id'
         ]);
 
-        AcademicType::firstOrCreate([
-            'name' => $request->name,
-            'segment_no' => $request->segment_no
-        ]);
+        foreach ($request->year as $year) {
+            # code...
+            AcademicType::firstOrCreate([
+                'name' => $request->name,
+                'segment_no' => $request->segment_no,
+                'academic_year_id' => $year
+            ]);
+        }
 
-        return HelperController::api_response_format(201, AcademicType::paginate(HelperController::GetPaginate($request)), __('messages.type.add'));
+        return HelperController::api_response_format(201, AcademicType::with('Year')->paginate(HelperController::GetPaginate($request)), __('messages.type.add'));
     }
 
     /**
@@ -121,7 +119,7 @@ class TypesController extends Controller
         $segment= Segment::where('academic_type_id',$id)->get();
         $level= Level::where('academic_type_id',$id)->get();
         if((count($segment) > 0 || count($level) > 0))
-            return HelperController::api_response_format(404, [], __('messages.error.cannot_delete'));
+            return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));
         
         AcademicType::whereId($id)->first()->delete();
 

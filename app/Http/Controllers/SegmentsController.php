@@ -7,6 +7,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ChainRepositoryInterface;
 use App\Segment;
+use App\Level;
+use App\Classes;
 use App\Course;
 use App\AcademicType;
 
@@ -50,24 +52,29 @@ class SegmentsController extends Controller
         if($request->user()->can('site/show-all-courses'))
         {
             if(isset($request->types))
-                $segments->whereIn('academic_type_id',$request->types)->with('academicType','academicYear')->whereNull('deleted_at');
+                $segments->whereIn('academic_type_id',$request->types);
+                // foreach($segments->get() as $segment)
+                // {
+                //     $levels=Level::where('academic_type_id',$segment->academic_type_id);
+                //     $segment['levels']=$levels->pluck('name');
+                //     $segment['classes']=Classes::whereIn('level_id',$levels->pluck('id'))->pluck('name');
+                // }
+                // dd($segments);
 
             return HelperController::api_response_format(201, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $segments->whereIn('id',$enrolls->pluck('segment'));    
+        $segments->whereIn('id',$enrolls->pluck('segment'));
 
-        if($request->filter == 'export')
-        {
-            $segmentsIDs = $segments->get();
-            $filename = uniqid();
-            $file = Excel::store(new SegmentsExport($segmentsIDs), 'Segment'.$filename.'.xls','public');
-            $file = url(Storage::url('Segment'.$filename.'.xls'));
-            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
-        }
+        // foreach($segments->get() as $segment)
+        // {
+        //     $levels=Level::where('academic_type_id',$segment->academic_type_id);
+        //     $segment['levels']=$levels->pluck('name');
+        //     $segment['classes']=Classes::whereIn('level_id',$levels->pluck('id'))->pluck('name');
+        // }
 
-        return HelperController::api_response_format(200, null, __('messages.segment.list'));
+        return HelperController::api_response_format(200, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
     }
 
     /**
@@ -127,7 +134,26 @@ class SegmentsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id|required_with:year',
+        ]);
+
+        $segment = Segment::find($id);
+        $segment->name = $request->name;
+        $segment->start_date = $request->start_date;
+        $segment->end_date = $request->end_date;
+        $segment->save();
+
+        if ($request->filled('year') && $request->filled('type'))
+        {
+            Segment::whereId($id)->update([
+                'academic_year_id' => $request->year,
+                'academic_type_id' => $request->type,
+            ]);
+        }
+        return HelperController::api_response_format(200, null, __('messages.segment.update'));
     }
 
     /**
@@ -138,11 +164,11 @@ class SegmentsController extends Controller
      */
     public function destroy($id)
     {
-        $course = Course::whereIn('segment_id',Segment::whereId($id))->get();
+        $course = Course::where('segment_id',$id)->get();
         if (count($course) > 0) 
-            return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
+            return HelperController::api_response_format(200, [] , __('messages.error.cannot_delete'));
         
-        Segment::whereId($req->id)->first()->delete();
+        Segment::whereId($id)->first()->delete();
 
         return HelperController::api_response_format(200, null, __('messages.segment.delete'));
     }

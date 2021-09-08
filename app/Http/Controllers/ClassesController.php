@@ -8,6 +8,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\SegmentClass;
 use App\Classes;
 use App\Level;
+use App\Enroll;
 use App\Course;
 
 class ClassesController extends Controller
@@ -40,12 +41,12 @@ class ClassesController extends Controller
             'types.*'  => 'nullable|exists:academic_types,id',
             'levels' => 'array|required_with:types',
             'levels.*' => 'exists:levels,id',
-            // 'courses'    => 'nullable|array',
-            // 'courses.*'  => 'nullable|integer|exists:courses,id',
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
-        $classes=Classes::with('level')->where('type','class')->whereNull('deleted_at');
+        $classes=Classes::with('level.type.year')->where('type','class')->whereNull('deleted_at');
         if($request->filled('search'))
             $classes->where('name', 'LIKE' , "%$request->search%"); 
 
@@ -54,13 +55,16 @@ class ClassesController extends Controller
             if(isset($request->types) &&isset($request->levels) )
             {
                 $levels=Level::whereIn('academic_type_id',$request->types)->pluck('id');
+                $classes->whereIn('level_id',$levels)->where('type','class');
                 if(isset($request->levels))
-                    $classes->whereIn('level_id',$levels)->where('type','class');
+                    $classes->whereIn('level_id',$request->levels)->where('type','class');
             }
             if($request->filled('courses')){
-                $levels = Course::select('level_id')->whereIn('id',$request->courses) ->distinct()->get()->pluck('level_id');
+                $classesObj = Course::whereIn('id',$request->courses)->pluck('classes');
+                // $class=json_decode($classesObj);
                 // return Course::whereIn('id',$request->courses)->get();
-                $classes->whereIn('level_id',$levels)->where('type','class');
+                // dd($classesObj);
+                $classes->whereIn('id',$classesObj[0])->where('type','class');
             }
 
             return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
@@ -129,7 +133,16 @@ class ClassesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'level_id' => 'exists:levels,id|required_with:year',
+        ]);
+
+        $class = Classes::find($request->id);
+        $class->update($request->all());
+        $class->save();
+
+        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.update'));
     }
 
     /**
@@ -138,14 +151,14 @@ class ClassesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id,Request $request)
     {
-        $course = Courses::whereIn('segment_id',Segment::whereId($id))->get();
-        if (count($course) > 0) 
-            return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
+        $check = Enroll::where('group',$id)->get();
+        if (count($check) > 0) 
+            return HelperController::api_response_format(200, [] , __('messages.error.cannot_delete'));
         
-        Segment::whereId($req->id)->first()->delete();
+        Classes::whereId($id)->first()->delete();
 
-        return HelperController::api_response_format(200, null, __('messages.class.delete'));
+        return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.delete'));
     }
 }

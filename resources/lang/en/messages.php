@@ -276,6 +276,8 @@ return [
         'list' => 'Courses List',
         'object' => 'Course details',
         'assign' => 'Course assigned successfully',
+        'template' => 'Templates added successfully',
+        'anotherTemplate'=> 'There is another template in this level. Please change it first.',
     ],
     'announcement' => [
         'add' => 'Announcement sent successfully',

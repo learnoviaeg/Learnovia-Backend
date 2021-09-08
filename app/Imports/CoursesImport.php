@@ -52,16 +52,33 @@ class CoursesImport implements ToModel , WithHeadingRow
         if (isset($row['no_of_lessons'])) 
             $no_of_lessons = $row['no_of_lessons'];
 
+        $chains=array();
+
+        $chains[0]['segment'][0]=$row['segment_id'];
+        $chains[0]['level'][0]=$row['level_id'];
+        // dd(Classes::where('level_id',$row['level_id'])->pluck('id'));
+        $cl=Classes::where('level_id',$row['level_id'])->pluck('id');
+        if(!isset($cl))
+            die('This Level doesn\'t have any classes');
+
+        $chains[0]['class']=$cl->toArray();
+        if(isset($row['class_id'])){
+            $chains[0]['class']=null;
+            $chains[0]['class'][0]=$row['class_id'];
+        }
+        // dd($chains);
+
         $req=new Request([
             'name' => $row['name'],
             'short_name' => $row['short_name'],
-            'segment_id' => $row['segment_id'],
-            'level_id' => $row['level_id'],
+            'chains' => $chains,
+            'chains' => $chains,
             'category_id' => isset($row['category']) ? $row['category'] : null,
             'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,
             'description' => isset($row['description']) ? $row['description'] : null,
             'shared_lesson' => isset($row['shared_lesson']) ? $row['shared_lesson'] : 0,
             'no_of_lessons' => isset($row['no_of_lessons']) ? $row['no_of_lessons'] : 4,
+            'is_template' => isset($row['is_template']) ? $row['is_template'] : 0,
         ]);
 
         //should to find a way to call this without change it to static

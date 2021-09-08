@@ -63,20 +63,27 @@ class CoursesController extends Controller
         ]);
 
         $paginate = 12;
+       
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
-            $enrolls = $this->chain->getEnrollsByManyChain($request);
-            // if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)) //student or teacher
-            if(!$request->user()->can('site/show-all-courses')) //student or teacher
-                $enrolls->where('user_id',Auth::id());
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        // if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)) //student or teacher
+        if(!$request->user()->can('site/show-all-courses')) //student or teacher
+            $enrolls->where('user_id',Auth::id());
 
-            if($request->has('role_id')){
-                $enrolls->where('role_id',$request->role_id);
-            }
-             $results = $enrolls->with('SecondaryChain.Teacher')->groupBy(['course','level'])->get();
+        if($request->has('role_id'))
+            $enrolls->where('role_id',$request->role_id);
+        
+        if($request->templates == 1){
+            $templates = Course::where('is_template',1)->get()->pluck('id');
+            $enrolls->whereIn('course',$templates);
+        }
+        $results = $enrolls->whereHas('courses' , function($query)use ($request ) {
+            if($request->filled('search'))
+                $query->where('name', 'LIKE' , "%$request->search%");
+        })->groupBy(['course','level'])->get();
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
-
     }
 
     /**
@@ -90,106 +97,117 @@ class CoursesController extends Controller
         $request->validate([
             'name' => 'required',
             // 'category' => 'exists:categories,id',
-            'level_id' => 'required|exists:levels,id',
-            'segment_id' => 'required|exists:segments,id',
+            // 'level_id' => 'required|exists:levels,id',
+            // 'segment_id' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
-            'shared_lesson' => 'required_with:no_of_lessons|in:0,1',
+            // 'shared_lesson' => 'required_with:no_of_lessons|in:0,1',
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
             // 'description' => 'string',
             'mandatory' => 'nullable',
             'short_name' =>'required',
-            // 'typical' => 'nullable|boolean',
-
-            'chains.*.year' => 'array',
+            'is_template' => 'nullable|boolean',
             'chains.*.level' => 'array|required_with:chains.*.year',
             'chains.*.level.*' => 'required|exists:levels,id',
-            'chains.*.class' => 'array',
-            'chains.*.class.*' => 'exists:classes,id',
+            'chains.*.segment' => 'array|required_with:chains.*.year',
+            'chains.*.segment.*' => 'required|exists:segments,id',
+            'chains.*.class' => 'array|required_with:chains.*.year',
+            'chains.*.class.*' => 'required|exists:classes,id',
         ]);
-        
-        $short_names=Course::where('segment_id',$request->segment_id)->where('short_name',$request->short_name)->get();
-        if(count($short_names)>0)
-            return HelperController::api_response_format(400, null, 'short_name must be unique');
-
+        // return $request->chains;
+        // if($request->is_template == 1){
+        //     $check = Course::where('segment_id',$segment)->where('short_name',$request->short_name)->count();
+        // }
         $no_of_lessons = 4;
-        $course = Course::firstOrCreate([
-            'name' => $request->name,
-            'short_name' => $request->short_name,
-            'image' => isset($request->image) ? attachment::upload_attachment($request->image, 'course')->id : null,
-            'category_id' => isset($request->category) ? $request->category : null,
-            'description' => isset($request->description) ? $request->description : null,
-            'mandatory' => isset($request->mandatory) ? $request->mandatory : 1,
-            'segment_id' => $request->segment_id,
-            'level_id' => $request->level_id,
-        ]);
-        $level_id=$course->level_id;
-        $segment=Segment::find($course->segment_id);
-        $segment_id=$segment->id;
-        $year_id=$segment->academic_year_id;
-        $type_id=$segment->academic_type_id;
-        $classes=Classes::where('level_id',$course->level_id)->get();
-        // dd($classes);
-        if ($request->filled('no_of_lessons'))
-            $no_of_lessons = $request->no_of_lessons;
 
-        for ($i = 1; $i <= $no_of_lessons; $i++) {
-            $lesson=lesson::firstOrCreate([
-                'name' => 'Lesson ' . $i,
-                'index' => $i,
-                'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
-                'course_id' => $course->id
-            ]);
+        if($request->is_template == 1){
+            $check = Course::whereIn('level_id',$request->chains[0]['level'])->where('is_template', 1)->count();
+            if($check != 0)
+                return response()->json(['message' => __('messages.course.anotherTemplate'), 'body' => null], 200);
         }
+        
+        foreach ($request->chains as $chain){
+            // return $chain['level'];
+            foreach ($chain['segment'] as $segment) {
+                foreach ($chain['level'] as $level) {
+                    $short_names=Course::where('segment_id',$segment)->where('short_name',$request->short_name)->get();
+                    if(count($short_names)>0)
+                        return HelperController::api_response_format(400, null, 'short_name must be unique');
 
-        foreach($classes as $class)
-        {
-            $enroll=Enroll::firstOrCreate([
-                'user_id'=> 1,
-                'role_id' => 1,
-                'year' => $year_id,
-                'type' => $type_id,
-                'segment' => $segment_id,
-                'level' => $level_id,
-                'group' => $class->id,
-                'course' => $course->id
-            ]);
+                    $course = Course::firstOrCreate([
+                        'name' => $request->name,
+                        'short_name' => $request->short_name,
+                        'image' => isset($request->image) ? attachment::upload_attachment($request->image, 'course')->id : null,
+                        'category_id' => isset($request->category) ? $request->category : null,
+                        'description' => isset($request->description) ? $request->description : null,
+                        'mandatory' => isset($request->mandatory) ? $request->mandatory : 1,
+                        'segment_id' => $segment,
+                        'level_id' => $level,
+                        'is_template' => isset($request->is_template) ? $request->is_template : 0,
+                        'classes' => json_encode($chain['class']),
+                    ]);
 
-            for ($i = 1; $i <= $no_of_lessons; $i++) {
-                $lesson=lesson::firstOrCreate([
-                    'name' => 'Lesson ' . $i,
-                    'index' => $i,
-                    'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
-                    'course_id' => $course->id
-                ]);
+                    // $level_id=$course->level_id;
+                    // $segment=Segment::find($course->segment_id);
+                    // $segment_id=$segment->id;
+                    // $year_id=$segment->academic_year_id;
+                    // $type_id=$segment->academic_type_id;
+                    // $classes=Classes::where('level_id',$course->level_id)->get();
+                    // dd($classes);
+                    if ($request->filled('no_of_lessons'))
+                        $no_of_lessons = $request->no_of_lessons;
 
-                SecondaryChain::firstOrCreate([
-                    'user_id' => 1,
-                    'role_id' => 1,
-                    'group_id' => $enroll->group,
-                    'course_id' => $enroll->course,
-                    'lesson_id' => $lesson->id,
-                    'enroll_id' => $enroll->id
-                ]);
+                    // for ($i = 1; $i <= $no_of_lessons; $i++) {
+                    //     $lesson=lesson::firstOrCreate([
+                    //         'name' => 'Lesson ' . $i,
+                    //         'index' => $i,
+                    //         'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
+                    //         'course_id' => $course->id
+                    //     ]);
+                    // }
 
-                // event(new LessonCreatedEvent($lesson,$enroll));
+                    foreach ($chain['class'] as $class) {
+
+                        for ($i = 1; $i <= $no_of_lessons; $i++) {
+                            if($request->shared_lesson == 1){
+                                $lesson=lesson::firstOrCreate([
+                                    'name' => 'Lesson ' . $i,
+                                    'index' => $i,
+                                    'shared_lesson' => 1,
+                                    'course_id' => $course->id,
+                                    'shared_classes' => json_encode($chain['class']),
+                                ]);
+                            }else{
+                                $lesson=lesson::create([
+                                    'name' => 'Lesson ' . $i,
+                                    'index' => $i,
+                                    'shared_lesson' => 0,
+                                    'course_id' => $course->id,
+                                    'shared_classes' => json_encode([$class]),
+                                ]);
+                            }
+                        }
+                    }
+
+                    //Creating defult question category
+                    $quest_cat = QuestionsCategory::firstOrCreate([
+                        'name' => $course->name . ' Category',
+                        'course_id' => $course->id,
+                    ]);
+                }
             }
         }
+        $courses =  Course::query();
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
+        $courses->whereIn('id',$enrolls->pluck('course'));
+        $courses->with(['category', 'attachment','level'])->get();
 
-        //Creating defult question category
-        $quest_cat = QuestionsCategory::firstOrCreate([
-            'name' => $course->name . ' Category',
-            'course_id' => $course->id,
-        ]);
-
-        $course->attachment;
-        $courses =  Course::with(['category', 'attachment','level'])->get();
         foreach($courses as $le){
             $teacher = User::whereIn('id',Enroll::where('role_id', '4')->where('course',  $le->id)
                                                 ->pluck('user_id')
                             )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
             $le['teachers']  = $teacher ;
         }
-        return response()->json(['message' => __('messages.course.list'), 'body' => $courses->paginate(HelperController::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.course.add'), 'body' => $courses->paginate(HelperController::GetPaginate($request))], 200);
 
         // return $courses;
     }
@@ -202,7 +220,7 @@ class CoursesController extends Controller
      */
     public function show($id)
     {
-        $course = Course::with('attachment')->find($id);
+        $course = Course::with('attachment','level')->find($id);
 
         if(isset($course)){
             LastAction::lastActionInCourse($id);
@@ -220,7 +238,48 @@ class CoursesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'nullable',
+            'category' => 'nullable|exists:categories,id',
+            'id' => 'required|exists:courses,id',
+            'image' => 'nullable',
+            'description' => 'nullable',
+            'mandatory' => 'nullable|in:0,1',
+            'short_name' => 'unique:courses,short_name,'.$id,
+            'course_template' => 'nullable|exists:courses,id',
+            'is_template' => 'nullable|boolean|required_with:course_template',
+            'old_lessons' => 'nullable|boolean|required_with:course_template',
+        ]);
+
+        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template'];
+        $course = Course::find($id);
+        // if course has an image
+        if ($request->hasFile('image')) 
+            $course->image = attachment::upload_attachment($request->image, 'course')->id;
+        
+        foreach ($editable as $key) 
+            if ($request->filled($key)) 
+                $course->$key = $request->$key;
+
+        if($request->filled('course_template')){
+            if($request->old_lessons == 0){
+                $old_lessons = Lesson::where('course_id', $id)->get();
+                $secondary_chains = SecondaryChain::whereIn('lesson_id',$old_lessons)->where('course_id',$id)->delete();
+            }
+            $new_lessons = Lesson::where('course_id', $request->course_template);
+            foreach($new_lessons->cursor() as $lesson){
+                Lesson::create([
+                    'name' => $lesson->name,
+                    'course_id' => $id,
+                    'shared_lesson' => 1,//$lesson->shared_lesson,
+                    'index' => $lesson->index,
+                    'description' => $lesson->description,
+                    'image' => $lesson->image,
+                ]);
+            }            
+        }
+        $course->save();
+        return HelperController::api_response_format(200, $course, __('messages.course.update'));
     }
 
     /**
@@ -229,8 +288,68 @@ class CoursesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id ,Request $request)
     {
-        //
+        $course = Course::find($id);
+        $enrolls = Enroll::where('course',$id)->where('user_id','!=',1)->count();
+
+        if($enrolls > 0){
+            return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));
+        }
+
+        $course->delete();
+        return app('App\Http\Controllers\CourseController')->get($request);
+        // return HelperController::api_response_format(200, $course, __('messages.course.delete'));
     }
+
+    public function Apply_Template(Request $request)
+    {
+        $request->validate([
+            'template_id' => 'required|exists:courses,id',
+            'old_lessons' => 'required|nullable|boolean',
+            'courses' => 'required|array',
+            'courses.*' => 'nullable|exists:courses,id',
+        ]);
+
+        foreach($request->courses as $course){
+                $classes_of_course = Course::find($course);
+                if($request->old_lessons == 0){
+                    $old_lessons = Lesson::where('course_id', $course);
+                    // $secondary_chains = SecondaryChain::whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->get()->delete();
+                    $old_ids =  $old_lessons->get()->pluck('id');
+                }
+                foreach ($classes_of_course->classes as $class) {
+                    if($request->old_lessons == 0){
+                        $secondary_chains = SecondaryChain::where('group_id',$class)->whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->delete();                            
+                    }
+                    $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
+                    $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
+                    foreach($new_lessons as $lesson){
+                        if($lesson->shared_lesson == 1){
+                            lesson::firstOrcreate([
+                                'name' => $lesson->name,
+                                'index' => $lesson->index,
+                                'shared_lesson' => $lesson->shared_lesson,
+                                'course_id' => $course,
+                                'shared_classes' => $lesson->getOriginal('shared_classes'),
+                            ]);
+                        }else{
+                            lesson::create([
+                                'name' => $lesson->name,
+                                'index' => $lesson->index,
+                                'shared_lesson' => $lesson->shared_lesson,
+                                'course_id' => $course,
+                                'shared_classes' => $lesson->getOriginal('shared_classes'),
+                            ]);
+                        }
+                    }
+            }
+
+            if($request->old_lessons == 0){
+                Lesson::whereIn('id',$old_ids)->delete();
+            }
+        }
+        return HelperController::api_response_format(200, null, __('messages.course.template'));
+    }
+
 }

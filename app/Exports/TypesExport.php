@@ -21,10 +21,7 @@ class TypesExport implements FromCollection, WithHeadings
     public function collection()
     {
         foreach ($this->types as $type) {
-            $type = AcademicType::find($type->id)->yearType->pluck('academic_year_id')->first();
-            // if(isset($year_id))
-            //     $year_id = AcademicYear::find(AcademicType::find($type->id)->yearType->pluck('academic_year_id')->first())->name;
-            // $type['year'] = $year_id;
+            $type['year'] = $type->year ? $type->year->name : '-';
             $type->setHidden([])->setVisible($this->fields);
         }
         return $this->types;

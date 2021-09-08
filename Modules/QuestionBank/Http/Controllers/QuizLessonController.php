@@ -61,11 +61,9 @@ class QuizLessonController extends Controller
             $lesson = Lesson::find($lessons);
 
             //for notification
-            $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
-            $course = $lesson->courseSegment->course_id;
+            $users = Enroll::where('course_id',$lesson->course_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
+            $course = $lesson->course_id;
             LastAction::lastActionInCourse($course);
-
-            $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
             if($request->filled('grade_category_id') && $request->grade_category_id[$key] != null)
             {
@@ -82,7 +80,7 @@ class QuizLessonController extends Controller
                 }
             }
 
-            if($quiz->course_id != $lesson->courseSegment->course_id){
+            if($quiz->course_id != $lesson->course_id){
                 return HelperController::api_response_format(500, null,__('messages.quiz.quiz_not_belong'));
             }
 
@@ -111,19 +109,22 @@ class QuizLessonController extends Controller
                 'index' => $Next_index,
                 'visible' => isset($request->visible)?$request->visible:1
             ]);
-
-            $requ = ([
-                'message' => $quiz->name.' quiz is added',
-                'id' => $request->quiz_id,
-                'users' => $users,
-                'type' =>'quiz',
-                'publish_date'=> Carbon::parse($request->publish_date),
-                'course_id' => $course,
-                'class_id'=> $class,
-                'lesson_id'=> $lessons,
-                'from' => Auth::id(),
-            ]);
-            user::notify($requ);
+            // $class = Second$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            $classes = SecondaryChain::whereIn('lesson_id', $lessons)->get()->pluck('group_id')->unique();
+            foreach($classes as $class){
+                $requ = ([
+                    'message' => $quiz->name.' quiz is added',
+                    'id' => $request->quiz_id,
+                    'users' => $users,
+                    'type' =>'quiz',
+                    'publish_date'=> Carbon::parse($request->publish_date),
+                    'course_id' => $course,
+                    'class_id'=> $class,
+                    'lesson_id'=> $lessons,
+                    'from' => Auth::id(),
+                ]);
+                user::notify($requ);
+            }
 
              if($request->graded == true){
                  $grade_category=GradeCategory::find($request->grade_category_id[$key]);

@@ -39,7 +39,7 @@ class LevelController extends Controller
             'search' => 'nullable',
             'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
-        $levels=Level::with('type')->whereNull('deleted_at');
+        $levels=Level::with('type.year')->whereNull('deleted_at');
         if($request->filled('search'))
             $levels->where('name', 'LIKE' , "%$request->search%");
 
@@ -52,20 +52,7 @@ class LevelController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $levels->whereIn('id',$enrolls->pluck('level'));  
-        
-        if($request->filled('search'))
-            $levels=$levels->where('name', 'LIKE' , "%$request->search%");
-
-        if($request->filter == 'export')
-        {
-            $levelsIDs = $levels->get();
-            $filename = uniqid();
-            $file = Excel::store(new LevelsExport($levelsIDs), 'levels'.$filename.'.xls','public');
-            $file = url(Storage::url('levels'.$filename.'.xls'));
-
-            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
-        }
+        $levels->whereIn('id',$enrolls->pluck('level'));
 
         return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
     }
@@ -86,7 +73,7 @@ class LevelController extends Controller
             'type.*' => 'exists:academic_types,id',
         ]);
 
-        if ($request->filled('year') || $request->filled('type')) {
+        if ($request->filled('type')) {
             foreach ($request->type as $type) {
                 # code...
                 $level = Level::firstOrCreate([
@@ -145,9 +132,9 @@ class LevelController extends Controller
     public function destroy($id,Request $request)
     {
         $courses= Course::where('level_id',$id)->get();
-        $classes = Classes::whereIn('level_id',$id)->get();
+        $classes = Classes::where('level_id',$id)->get();
         if (count($courses) > 0 || count($classes) > 0)
-            return HelperController::api_response_format(404, [] , __('messages.error.cannot_delete'));
+            return HelperController::api_response_format(200, [] , __('messages.error.cannot_delete'));
 
         Level::whereId($id)->first()->delete(); //it's not mass delete
 

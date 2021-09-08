@@ -69,7 +69,7 @@ class AuthController extends Controller
             'remember_me' => 'boolean'
         ]);
 
-        (new BigbluebuttonController)->clear();
+        // (new BigbluebuttonController)->clear();
         // (new BigbluebuttonController)->create_hook($request);
         $credentials = request(['username', 'password']);
         if (!Auth::attempt($credentials))

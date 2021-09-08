@@ -27,6 +27,9 @@ use App\Course;
 use App\Contract;
 use App\CourseSegment;
 use App\ClassLevel;
+use Str;
+use Spatie\Permission\Models\Role;
+use DB;
 use App\attachment;
 use App\SegmentClass;
 use Illuminate\Validation\Rule;
@@ -86,6 +89,27 @@ class UsersController extends Controller
 
         $enrolls = $this->chain->getEnrollsByChain($request);
 
+        if($my_chain=='count'){
+            $count = [];
+            $roles = new Role;
+            if($request->filled('roles'))
+                $roles = $roles->whereIn('id',$request->roles);
+
+            $roles = $roles->get();
+            $users = User::with(['attachment','roles']);
+
+            if(count($enrolls->pluck('id')))
+                $users= $enrolls->pluck('id');
+
+            $all_roles = Role::all();
+
+            foreach($all_roles as $role){
+                $count[Str::slug($role->name, '_')] = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
+            }
+
+            return HelperController::api_response_format(200 ,$count,__('messages.users.count'));
+        }
+
         if($request->filled('class') && getType($request->class) == 'array')
         {
             $requ = new Request([
@@ -95,7 +119,16 @@ class UsersController extends Controller
             $enrolls = $this->chain->getEnrollsByManyChain($requ);
         }
         //using in participants api new route { api/user/participants}
-        if($my_chain=='participants' || $my_chain=='seen_report'){
+        // if($my_chain=='participants' || $my_chain=='seen_report'){
+        //     // site/show/as-participant
+        //     $permission = Permission::where('name','site/show/as-participant')->with('roles')->first();
+        //     $roles_id = $permission->roles->pluck('id');
+        //     if(isset($request->roles))
+        //         $roles_id = $permission->roles->whereIn('id',$request->roles)->pluck('id');
+
+        //     $enrolls->whereIn('role_id',$roles_id);
+        // }
+        if($my_chain=='participants'){
             // site/show/as-participant
             $permission = Permission::where('name','site/show/as-participant')->with('roles')->first();
             $roles_id = $permission->roles->pluck('id');
@@ -104,12 +137,13 @@ class UsersController extends Controller
 
             $enrolls->whereIn('role_id',$roles_id);
         }
+        
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
             if(!$request->user()->can('site/show-all-courses')) //student
                 $enrolls=$enrolls->where('user_id',Auth::id());
 
-            $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
+            // $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
             if($request->user()->can('site/course/student'))
                 $enrolls->where('role_id','!=',7);
         }
@@ -169,30 +203,32 @@ class UsersController extends Controller
             $all[$i]['role'] = $enroll->roles;
             $all[$i]['enroll_id'] = $enroll->id;
 
-            $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
-            $all[$i]['Course'] = Course::where('id', $segment_Class_id->course_id)->first();
+            // $segment_Class_id = CourseSegment::where('id', $enroll->CourseSegment->id)->get(['segment_class_id', 'course_id'])->first();
+            $all[$i]['Course'] = Course::where('id', $enroll->course)->first();
 
-            $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
-            $all[$i]['segment'] = Segment::find($segment->segment_id);
+            // $segment = SegmentClass::where('id', $segment_Class_id->segment_class_id)->get(['segment_id', 'class_level_id'])->first();
+            $all[$i]['segment'] = Segment::find($enroll->segment);
 
-            $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
-            $all[$i]['class'] = Classes::find($class_id->class_id);
+            // $class_id = ClassLevel::where('id', $segment->class_level_id)->get(['class_id', 'year_level_id'])->first();
+            $all[$i]['class'] = Classes::find($enroll->group);
 
-            $level = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
-            $all[$i]['level'] = level::find($level->level_id);
+            // $level = YearLevel::where('id', $class_id->year_level_id)->get(['level_id', 'academic_year_type_id'])->first();
+            $all[$i]['level'] = level::find($enroll->level);
 
-            $year_type = AcademicYearType::where('id', $level->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
-            $all[$i]['type'] = "";
-            $all[$i]['year'] = "";
-            if(isset($year_type)){
-                $all[$i]['type'] = AcademicType::find($year_type->academic_type_id);
-                $all[$i]['year'] = AcademicYear::find($year_type->academic_year_id);    
-            }
+            // $year_type = AcademicYearType::where('id', $level->academic_year_type_id)->get(['academic_year_id', 'academic_type_id'])->first();
+            // $all[$i]['type'] = "";
+            // $all[$i]['year'] = "";
+            // if(isset($year_type)){
+                $all[$i]['type'] = AcademicType::find($enroll->type);
+                $all[$i]['year'] = AcademicYear::find($enroll->year);    
+            // }
             $i++;
         }
         if(!Auth::user()->can('site/show-all-courses') && $id != Auth::id()){
-            $chain = Enroll::where('user_id',Auth::id())->pluck('course_segment');
-            $users =  Enroll::whereIn('course_segment',$chain)->where('user_id' ,'!=' , Auth::id())->pluck('user_id');
+            $enrolls = $this->chain->getEnrollsByManyChain($requ);
+
+            // $chain = Enroll::where('user_id',Auth::id())->pluck('course_segment');
+            $users = $enrolls->where('user_id' ,'!=' , Auth::id())->pluck('user_id');
             if (!in_array($id, $users->toArray()))
                 return response()->json(['message' => __('messages.error.not_allowed'), 'body' => null ], 404);
             if(!Auth::user()->can('allow-edit-profiles')){

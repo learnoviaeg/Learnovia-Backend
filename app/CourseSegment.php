@@ -41,11 +41,6 @@ class CourseSegment extends Model
         return $this->hasMany('App\Course', 'id', 'course_id');
     }
 
-    public function optionalCourses()
-    {
-        return $this->hasMany('App\Course', 'id', 'course_id')->whereMandatory(0);
-    }
-
     public function users()
     {
         return $this->hasMany('App\User');
