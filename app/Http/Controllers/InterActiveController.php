@@ -108,7 +108,7 @@ class InterActiveController extends Controller
 
             $content->original->lesson = Lesson::find($h5p->lesson_id);
             $sec_chain = SecondaryChain::where('lesson_id',$h5p->lesson_id)->get();
-            $classess = Classes::wherenIn('id', $sec_chain->pluck('group_id'))->get();//
+            $classess = Classes::whereIn('id', $sec_chain->pluck('group_id'))->get();//
             $content->original->class = $classess;
             $content->original->level = Level::where('id',Course::find($Lesson->course_id)->get()->pluck('level_id'))->get();
             $content->original->course = Course::find($Lesson->course_id);
