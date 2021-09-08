@@ -57,7 +57,7 @@ class LessonsController extends Controller
         $result = Lesson::whereIn('id',$result_lessons->keys());
         if($request->filled('shared'))
             $result->where('shared_lesson', $request->shared);
-        return response()->json(['message' => __('messages.lesson.list'), 'body' => $result->get()], 200);
+        return response()->json(['message' => __('messages.lesson.list'), 'body' => $result->orderBy('index', 'ASC')->get()], 200);
     }
 
     /**
