@@ -320,31 +320,32 @@ class CoursesController extends Controller
                     // $secondary_chains = SecondaryChain::whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->get()->delete();
                     $old_ids =  $old_lessons->get()->pluck('id');
                 }
-                foreach ($classes_of_course->classes as $class) {
+                foreach ($classes_of_course->classes as $key => $class) {
                     if($request->old_lessons == 0){
                         $secondary_chains = SecondaryChain::where('group_id',$class)->whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->delete();                            
                     }
                     $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
                     $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
                     foreach($new_lessons as $lesson){
-                        if($lesson->shared_lesson == 1 ){
-                            $id = lesson::firstOrcreate([
+                        if(($key == 0 &&  $request->old_lessons == 1) || ($key != 0 &&  $request->old_lessons == 1 && json_decode($lesson->getOriginal('shared_classes')) == [$class] )){
+                            $id = lesson::create([
                                 'name' => $lesson->name,
                                 'index' => $lesson->index,
                                 'shared_lesson' => $lesson->shared_lesson,
                                 'course_id' => $course,
                                 'shared_classes' => $lesson->getOriginal('shared_classes'),
                             ]);
-                        event(new LessonCreatedEvent(Lesson::find($id->id)));
-                        $shared_ids[] = $id->id;
+                            $shared_ids[] = $id->id;
                         }else{
-                            lesson::create([
+                            $id = lesson::firstOrCreate([
                                 'name' => $lesson->name,
                                 'index' => $lesson->index,
                                 'shared_lesson' => $lesson->shared_lesson,
                                 'course_id' => $course,
                                 'shared_classes' => $lesson->getOriginal('shared_classes'),
                             ]);
+                            event(new LessonCreatedEvent(Lesson::find($id->id)));
+                            $shared_ids[] = $id->id;
                         }
                     }
             }
