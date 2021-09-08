@@ -2,7 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\ChainRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\User;
+use App\Enroll;
+use App\Paginate;
+use App\LAstAction;
+use App\Level;
+use App\Classes;
+use Spatie\Permission\Models\Permission;
+use Carbon\Carbon;
+use App\Log;
+use App\Lesson;
+use App\UserSeen;
+use App\GradeCategory;
+use App\Segment;
+use App\Parents;
+use App\AcademicYear;
+use App\AcademicType;
+use App\YearLevel;
+use App\AcademicYearType;
+use App\Course;
+use App\Contract;
+use App\CourseSegment;
+use App\ClassLevel;
+use Str;
+use Spatie\Permission\Models\Role;
+use DB;
+use App\attachment;
+use App\SegmentClass;
+use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use App\Exports\InactiveUsers;
 
 class ReportsController extends Controller
 {
