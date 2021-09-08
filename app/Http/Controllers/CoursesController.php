@@ -17,6 +17,7 @@ use Modules\QuestionBank\Entities\QuestionsCategory;
 use App\Lesson;
 use App\Enroll;
 use DB;
+use App\Events\LessonCreatedEvent;
 
 class CoursesController extends Controller
 {
