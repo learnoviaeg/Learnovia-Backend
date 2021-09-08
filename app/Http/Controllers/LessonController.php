@@ -127,13 +127,13 @@ class LessonController extends Controller
         if ($request->filled('shared_lesson'))
             $lesson->shared_lesson = $request->shared_lesson;
 
-        if($lesson->shared_lesson){
+        if ($request->filled('classes')){
             foreach($lesson->shared_classes->pluck('id') as $class){
                 $secondary_chain = SecondaryChain::where('group_id', $class)->whereNotIn('group_id',$request->classes)->where('lesson_id',$request->id)->delete();
             }
         }
-        
-        $lesson->shared_classes = json_encode($request->classes);
+        if ($request->filled('classes'))
+            $lesson->shared_classes = json_encode($request->classes);
         $lesson->save();
         event(new LessonCreatedEvent($lesson));
         return HelperController::api_response_format(200, $lesson, __('messages.lesson.update'));
