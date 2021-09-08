@@ -14,6 +14,7 @@ use App\Level;
 use App\Classes;
 use App\Course;
 use Carbon\Carbon;
+use App\SecondaryChain;
 
 class InterActiveController extends Controller
 {
