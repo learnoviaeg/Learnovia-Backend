@@ -55,8 +55,8 @@ class LessonsController extends Controller
             }
         }
         $result = Lesson::whereIn('id',$result_lessons->keys());
-        if($request->shared == 1)
-            $result->where('shared_lesson', 1);
+        if($request->filled('shared'))
+            $result->where('shared_lesson', $request->shared);
         return response()->json(['message' => __('messages.lesson.list'), 'body' => $result->get()], 200);
     }
 
