@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Events\LessonCreatedEvent;
 use App\Segment;
 use App\Classes;
+use App\User;
 use App\Enroll;
 use App\Lesson;
 
@@ -42,16 +43,20 @@ class EnrollAdminListener
         $classes=$event->course->classes;
         foreach($classes as $class)
         {
-            $enroll=Enroll::firstOrCreate([
-                'user_id'=> 1,
-                'role_id' => 1,
-                'year' => $year_id,
-                'type' => $type_id,
-                'segment' => $segment_id,
-                'level' => $level_id,
-                'group' => $class,
-                'course' => $event->course->id
-            ]);
+            $users=User::whereHas('roles',function($q){  $q->where('id',1);  })->get();
+
+            foreach($users as $user){
+                $enroll=Enroll::firstOrCreate([
+                    'user_id'=> $user->id,
+                    'role_id' => 1,
+                    'year' => $year_id,
+                    'type' => $type_id,
+                    'segment' => $segment_id,
+                    'level' => $level_id,
+                    'group' => $class,
+                    'course' => $event->course->id
+                ]);
+            }
         }
     }
 }
