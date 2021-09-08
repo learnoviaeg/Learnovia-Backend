@@ -6,6 +6,14 @@ use Illuminate\Http\Request;
 
 class ReportsController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+        $this->middleware('auth');
+        $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
+        
+    }
+
     public function index(Request $request,$option=null)
     {
         //validate the request
