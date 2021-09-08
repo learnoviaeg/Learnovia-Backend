@@ -335,7 +335,7 @@ class CoursesController extends Controller
                                 'course_id' => $course,
                                 'shared_classes' => $lesson->getOriginal('shared_classes'),
                             ]);
-                        event(new LessonCreatedEvent(Lesson::find($id)));
+                        event(new LessonCreatedEvent(Lesson::find($id->id)));
                         $shared_ids[] = $id;
                         }else{
                             lesson::create([
