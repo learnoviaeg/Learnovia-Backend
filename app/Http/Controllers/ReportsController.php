@@ -11,8 +11,9 @@ class ReportsController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
+        
     }
-    
+
     public function index(Request $request,$option=null)
     {
         //validate the request
