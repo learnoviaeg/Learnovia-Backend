@@ -38,6 +38,7 @@ class LessonsController extends Controller
             'classes.*'  => 'nullable|integer|exists:classes,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
+            'shared_lesson' => 'in:0,1'
         ]);
         $enrolls = $this->chain->getEnrollsByManyChain($request)->get()->pluck('id');
         // if($request->user()->can('site/show-all-courses')){//admin
@@ -59,8 +60,10 @@ class LessonsController extends Controller
                 }
             }
         }
-        $result = Lesson::whereIn('id',$result_lessons->keys())->get();
-        return response()->json(['message' => __('messages.lesson.list'), 'body' => $result], 200);
+        $result = Lesson::whereIn('id',$result_lessons->keys());
+        if($request->shared == 1)
+            $result->where('shared_lesson', 1);
+        return response()->json(['message' => __('messages.lesson.list'), 'body' => $result->get()], 200);
     }
 
     /**
