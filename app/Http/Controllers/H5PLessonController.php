@@ -90,7 +90,7 @@ class H5PLessonController extends Controller
             $url= substr($request->url(), 0, strpos($request->url(), "/api"));
             $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
             $lesson = Lesson::find($lesson_id);
-            LastAction::lastActionInCourse($lesson->cours_id);
+            LastAction::lastActionInCourse($lesson->course_id);
             // $class_id=$Lesson->shared_classes;
             $usersIDs = User::whereIn('id' , Enroll::where('course', $lesson->course_id)->whereIn('group',$lesson->shared_classes->pluck('id'))
                             ->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
@@ -101,7 +101,7 @@ class H5PLessonController extends Controller
                     'message' => $content->title.' interactive is added',
                     'from' => Auth::user()->id,
                     'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
-                    'course_id' => $lesson->cours_id,
+                    'course_id' => $lesson->course_id,
                     'class_id' => $class_id,
                     'lesson_id' => $lesson_id,
                     'type' => 'h5p',
