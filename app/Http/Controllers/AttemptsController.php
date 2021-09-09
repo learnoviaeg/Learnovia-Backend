@@ -97,7 +97,7 @@ class AttemptsController extends Controller
         if(!$quiz_lesson)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
         
-        $users=Enroll::where('course_segment',$quiz_lesson->lesson->course_segment_id)->where('role_id',3)->pluck('user_id')->toArray();
+        $users=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3)->pluck('user_id')->toArray();
 
         if($request->filled('user_id')){
             unset($users);
@@ -222,7 +222,7 @@ class AttemptsController extends Controller
         $all_users['notGraded'] = $countEss_TF ;
         $final->put('submittedAndNotSub',$all_users);
         $final->put('users',$user_attempts);
-        LastAction::lastActionInCourse($quiz_lesson->lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
 
         return HelperController::api_response_format(200, $final, __('messages.quiz.students_attempts_list'));
     }
@@ -240,7 +240,7 @@ class AttemptsController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        LastAction::lastActionInCourse($quiz_lesson->lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
         $user_quiz = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id);
         
         $last_attempt=$user_quiz->latest()->first();
@@ -428,7 +428,7 @@ class AttemptsController extends Controller
 
         // check that question exist in the Quiz
         $user_quiz = userQuiz::find($id);
-        LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
 
         $allData = collect([]);
         if(isset($request->Questions))

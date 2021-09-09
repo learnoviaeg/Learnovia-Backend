@@ -36,11 +36,11 @@ class QuizLessonObserver
     {
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
         $lesson = Lesson::find($quizLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
-        $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
+        // $course_id = $lesson->courseSegment->course_id;
+        // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
         
-        $this->report->calculate_course_progress($course_id);
+        $this->report->calculate_course_progress($lesson->course_id);
 
         // if($quiz->is_graded == 1){
         //     $grade_category=GradeCategory::find($quizLesson->grade_category_id);
@@ -55,7 +55,8 @@ class QuizLessonObserver
             $grade_category=GradeCategory::find($quizLesson->grade_category_id);
             //creating grade category for quiz
             $categoryOfQuiz = GradeCategory::create([
-                'course_segment_id' => $lesson->courseSegment->id,
+                // 'course_segment_id' => $lesson->courseSegment->id,
+                'course_id' => $lesson->course_id,
                 'parent' => $grade_category->id,
                 'name' => $quiz->name,
                 'hidden' => 1,
@@ -65,7 +66,8 @@ class QuizLessonObserver
                 'lesson_id' => $lesson->id
             ]);
             ///add user grader to each enrolled student in course segment of this grade category
-            $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment',$lesson->courseSegment->id)->pluck('user_id');
+            $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->getOriginal('shared_classes'))
+                                        ->where('course',$lesson->course_id)->pluck('user_id');
             foreach($enrolled_students as $student){
                 UserGrader::create([
                     'user_id'   => $student,
@@ -78,21 +80,23 @@ class QuizLessonObserver
             // $quizLesson->grade_category_id = $categoryOfQuiz->id;
             $quizLesson->save();
 
-            $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
+            $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
+                            ->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
 
-            $requ = ([
-                'message' => $quiz->name . ' quiz was added',
-                'id' => $quiz->id,
-                'users' => $users,
-                'type' =>'quiz',
-                'publish_date'=> Carbon::parse($quizLesson->publish_date),
-                'course_id' => $course_id,
-                'class_id'=> $class_id,
-                'lesson_id'=> $lesson,
-                'from' => Auth::id(),
-            ]);
-            user::notify($requ);
-        // }
+            foreach($lesson->getOriginal('shared_classes') as $class){
+                $requ = ([
+                    'message' => $quiz->name . ' quiz was added',
+                    'id' => $quiz->id,
+                    'users' => $users,
+                    'type' =>'quiz',
+                    'publish_date'=> Carbon::parse($quizLesson->publish_date),
+                    'course_id' => $lesson->course_id,
+                    'class_id'=> $class,
+                    'lesson_id'=> $lesson,
+                    'from' => Auth::id(),
+                ]);
+                user::notify($requ);
+            }
     }
 
     /**
@@ -106,35 +110,23 @@ class QuizLessonObserver
         $lesson=Lesson::find($quizLesson->lesson_id);
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
 
-        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
-        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        $users = Enroll::whereIn('group',$lesson->getOriginal('shared_classes'))->where('course',$lesson->course_id)
+                    ->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
+        // $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-        $requ = ([
-            'message' => $quiz->name . ' quiz was updated',
-            'id' => $quiz->id,
-            'users' => $users,
-            'type' =>'quiz',
-            'publish_date'=> Carbon::parse($quizLesson->publish_date),
-            'course_id' => $lesson->courseSegment->course_id,
-            'class_id'=> $class,
-            'lesson_id'=> $lesson,
-            'from' => Auth::id(),
-        ]);
-        user::notify($requ);
-
-        if(isset($quiz)){
-
-            $forLogs=Timeline::where('item_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('type' , 'quiz')->first();
-            // $forLogs->update([
-            //     'item_id' => $quizLesson->quiz_id,
-            //     'name' => $quiz->name,
-            //     'start_date' => $quizLesson->start_date,
-            //     'due_date' => $quizLesson->due_date,
-            //     'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
-            //     'lesson_id' => $quizLesson->lesson_id,
-            //     'type' => 'quiz',
-            //     'visible' => $quizLesson->visible
-            // ]);
+        foreach($lesson->getOriginal('shared_classes') as $class){
+            $requ = ([
+                'message' => $quiz->name . ' quiz was updated',
+                'id' => $quiz->id,
+                'users' => $users,
+                'type' =>'quiz',
+                'publish_date'=> Carbon::parse($quizLesson->publish_date),
+                'course_id' => $lesson->course_id,
+                'class_id'=> $class,
+                'lesson_id'=> $lesson,
+                'from' => Auth::id(),
+            ]);
+            user::notify($requ);
         }
 
         if($quizLesson->isDirty('lesson_id')){
@@ -177,7 +169,7 @@ class QuizLessonObserver
         ->where('module','Quiz')->delete();
 
         $lesson = Lesson::find($quizLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
+        $course_id = $lesson->course_id;
 
         UserSeen::where('lesson_id',$quizLesson->lesson_id)->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
         $this->report->calculate_course_progress($course_id);

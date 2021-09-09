@@ -97,9 +97,9 @@ class QuizzesController extends Controller
             $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
             // $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
-            $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
-            $quiz['level'] = Level::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-            unset($quiz['lesson']->courseSegment);
+            $quiz['class'] = Classes::whereIn('id',$quiz['lesson']->getOriginal('shared_classes'))->get();
+            $quiz['level'] = Level::find(Course::find($quiz['lesson']->course_id)->level_id);
+            // unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
 
@@ -187,9 +187,10 @@ class QuizzesController extends Controller
             foreach($request->lesson_id as $lesson)
             {
                 $leson=Lesson::find($lesson);
-                // $grade_Cat=GradeCategory::where('course_segment_id',$leson->course_segment_id)->whereNull('parent')->first();
-                // if(!isset($grade_Cat))
-                //     return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
+                // dd($leson);
+                $grade_Cat=GradeCategory::where('course_id',$leson->course_id)->whereNull('parent')->first();
+                if(!isset($grade_Cat))
+                    return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
 
                 $index = QuizLesson::where('lesson_id',$lesson)->get()->max('index');
                 $Next_index = $index + 1;
@@ -202,7 +203,7 @@ class QuizzesController extends Controller
                     'max_attemp' => $request->max_attemp,
                     'grading_method_id' => isset($request->grading_method_id)? json_encode((array)$request->grading_method_id) : null,
                     'grade' => isset($request->grade) ? $request->grade : 0,
-                    // 'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
+                    'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_time,
                     'index' => $Next_index,
                     'visible' => isset($request->visible)?$request->visible:1,
