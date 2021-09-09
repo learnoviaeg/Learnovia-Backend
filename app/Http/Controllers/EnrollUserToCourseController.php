@@ -532,6 +532,29 @@ class EnrollUserToCourseController extends Controller
         return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'users that unenrolled in this chain  are ... ');
     }
 
+    public function EnrollAdmin(REquest $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+        $Enrolls=Enroll::where('user_id',1)->get();
+        foreach($Enrolls as $enroll)
+        {
+            Enroll::firstOrCreate([
+                'user_id' => $request->user_id,
+                'role_id' => 1,
+                'year' => $enroll->year,
+                'type' => $enroll->type,
+                'level' => $enroll->level,
+                'group' => $enroll->group,
+                'segment' => $enroll->segment,
+                'course' => $enroll->course,
+            ]);
+
+        }
+        return 'Done';
+    }
+
     /**
      * Enroll uses/s to course/s with chain
      *

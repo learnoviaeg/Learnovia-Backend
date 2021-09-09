@@ -8,19 +8,26 @@ use Illuminate\Http\Request;
 use App\Level;
 use App\Classes;
 use App\Course;
+use App\User;
+use App\Paginate;
+use App\LAstAction;
+use Spatie\Permission\Models\Permission;
+use Carbon\Carbon;
+use App\Log;
+use App\UserSeen;
+use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use App\Exports\InactiveUsers;
 
 class ReportsController extends Controller
 {
-    protected $chain;
-
-    /**
-     * ChainController constructor.
-     *
-     * @param ChainRepositoryInterface $chain
-     */
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
+        $this->middleware('auth');
+        $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
+        
     }
 
     public function index(Request $request,$option=null)
