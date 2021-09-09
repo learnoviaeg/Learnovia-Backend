@@ -66,7 +66,8 @@ class QuizLessonObserver
                 'lesson_id' => $lesson->id
             ]);
             ///add user grader to each enrolled student in course segment of this grade category
-            $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->getOriginal('shared_classes'))
+            // dd($lesson->shared_classes->pluck('id')->toArray());
+            $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->shared_classes->pluck('id'))
                                         ->where('course',$lesson->course_id)->pluck('user_id');
             foreach($enrolled_students as $student){
                 UserGrader::create([
@@ -83,7 +84,7 @@ class QuizLessonObserver
             $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
                             ->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
 
-            foreach($lesson->getOriginal('shared_classes') as $class){
+            foreach($lesson->shared_classes->pluck('id') as $class){
                 $requ = ([
                     'message' => $quiz->name . ' quiz was added',
                     'id' => $quiz->id,
@@ -110,11 +111,11 @@ class QuizLessonObserver
         $lesson=Lesson::find($quizLesson->lesson_id);
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
 
-        $users = Enroll::whereIn('group',$lesson->getOriginal('shared_classes'))->where('course',$lesson->course_id)
+        $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
                     ->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
         // $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-        foreach($lesson->getOriginal('shared_classes') as $class){
+        foreach($lesson->shared_classes->pluck('id') as $class){
             $requ = ([
                 'message' => $quiz->name . ' quiz was updated',
                 'id' => $quiz->id,
