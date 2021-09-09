@@ -14,6 +14,7 @@ class CourseInGradeCat extends Migration
     public function up()
     {
         Schema::table('grade_categories', function (Blueprint $table) {
+            $table->dropForeign(['course_segment_id']);
             $table->dropColumn(['course_segment_id']);
         });
 
