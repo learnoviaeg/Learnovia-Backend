@@ -12,7 +12,7 @@ use App\UserSeen;
 class Material extends Model
 {
     protected $fillable = [
-        'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number'
+        'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number','created_by'
     ];
     protected $appends = ['media_type','attachment_name','user_seen_number'];
     protected $hidden = ['mime_type'];
@@ -52,4 +52,9 @@ class Material extends Model
     public function lesson(){
         return $this->belongsTo('App\Lesson');
     }
+    
+    public function user(){
+        return $this->belongsTo('App\User','created_by');
+    }
+
 }

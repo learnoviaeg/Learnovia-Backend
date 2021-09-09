@@ -239,7 +239,8 @@ class ReportsController extends Controller
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
             'user_id' => 'exists:users,id',
-            'component' => 'in:'.implode(',',$types)
+            'component' => 'in:'.implode(',',$types),
+            'details' => 'in:1'
         ]);
 
         if($request->has('component')){
@@ -254,15 +255,18 @@ class ReportsController extends Controller
 
         foreach($mainObject as $levelId =>  $groups){
 
-            $level = Level::find($levelId);
+            $level = Level::whereId($levelId)->pluck('name')->first();
 
             foreach($groups as $groupId => $courses){
 
-                $group = Classes::find($groupId);
-                $course = Course::find($courses->keys()->first());
+                $group = Classes::whereId($groupId)->pluck('name')->first();
+    
+                $courseId = $courses->keys()->first();
+                $course = Course::whereId($courseId)->pluck('name')->first();
                
                 $componentsHelper = new ComponentsHelper();
-                $componentsHelper->setCourse($course->id);
+                
+                $componentsHelper->setCourse($courseId);
                 $componentsHelper->setClass($groupId);
 
                 if($request->has('user_id')){
@@ -274,14 +278,38 @@ class ReportsController extends Controller
                 }
     
                 foreach($types as $type){
+
+                    //if we need the detailed report
+                    if($request->has('details') && $request->details){
+
+                        $items = $componentsHelper->$type()->with('user')->get();
+                    
+                        foreach($items as $item){
     
-                    $reportObjects->push([
-                        'level' => $level,
-                        'course' => $course,
-                        'class' => $group,
-                        'type' => $type,
-                        'count' => $componentsHelper->$type()->count(),
-                    ]);
+                            $reportObjects->push([
+                                'level' => $level,
+                                'course' => $course,
+                                'class' => $group,
+                                'type' => $type,
+                                'item_name' => $item->name,
+                                'created_at' => $item->created_at,
+                                'teacher' => $item->user? $item->user->full_name : null
+                            ]);
+                        }
+                    }
+
+                    //if just the counters
+                    if(!$request->has('details')){
+
+                        $reportObjects->push([
+                            'level' => $level,
+                            'course' => $course,
+                            'class' => $group,
+                            'type' => $type,
+                            'count' => $componentsHelper->$type()->count(),
+                        ]);
+                    }
+
                 }
             }
 
@@ -346,4 +374,5 @@ class ReportsController extends Controller
 
         return response()->json(['message' => 'Course progress Counters', 'body' =>  $counterObject], 200);
     }
+    
 }

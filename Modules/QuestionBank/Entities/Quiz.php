@@ -51,4 +51,8 @@ class quiz extends Model
 
         return $allow_edit;
    }
+
+    public function user(){
+        return $this->belongsTo('App\User','created_by');
+    }
 }
