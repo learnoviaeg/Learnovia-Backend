@@ -101,7 +101,7 @@ class H5PLessonController extends Controller
                     'message' => $content->title.' interactive is added',
                     'from' => Auth::user()->id,
                     'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
-                    'course_id' => $$lesson->cours_id,
+                    'course_id' => $lesson->cours_id,
                     'class_id' => $class_id,
                     'lesson_id' => $lesson_id,
                     'type' => 'h5p',
