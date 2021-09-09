@@ -12,6 +12,7 @@ use Modules\QuestionBank\Entities\Quiz;
 use App\GradeCategory;
 use App\UserGrader;
 use App\Lesson;
+use App\Course;
 use App\Timeline;
 use App\Enroll;
 
@@ -39,23 +40,24 @@ class UpdateTimelineListener
         $quiz_lessons = QuizLesson::where('quiz_id',$event->Quiz)->get();
         foreach($quiz_lessons as $quiz_lesson){
             $lesson = Lesson::find($quiz_lesson['lesson_id']);
-            $course_id = $lesson->courseSegment->course_id;
-            $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-            $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-             Timeline::firstOrCreate([
-                'item_id' => $event->Quiz,
-                'name' => $quiz->name,
-                'start_date' => $quiz_lesson->start_date,
-                'due_date' => $quiz_lesson->due_date,
-                'publish_date' => isset($quiz_lesson->publish_date)? $quiz_lesson->publish_date : Carbon::now(),
-                'course_id' => $course_id,
-                'class_id' => $class_id,
-                'lesson_id' => $quiz_lesson->lesson_id,
-                'level_id' => $level_id,
-                'type' => 'quiz',
-                'visible' => $quiz_lesson->visible
-    
-            ]);
+            $course_id = $lesson->course_id;
+            // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
+            foreach($lesson->shared_classes as $class){
+                Timeline::firstOrCreate([
+                    'item_id' => $event->Quiz,
+                    'name' => $quiz->name,
+                    'start_date' => $quiz_lesson->start_date,
+                    'due_date' => $quiz_lesson->due_date,
+                    'publish_date' => isset($quiz_lesson->publish_date)? $quiz_lesson->publish_date : Carbon::now(),
+                    'course_id' => $course_id,
+                    'class_id' => $class,
+                    'lesson_id' => $quiz_lesson->lesson_id,
+                    'level_id' => Course::find($lesson->course_id)->level_id,
+                    'type' => 'quiz',
+                    'visible' => $quiz_lesson->visible
+                ]);
+            }
         }
     }
 }

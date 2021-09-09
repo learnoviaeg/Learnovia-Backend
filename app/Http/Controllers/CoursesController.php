@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Course;
 use App\LastAction;
 use App\User;
+use App\GradeCategory;
 use App\Segment;
 use App\Classes;
 use App\SecondaryChain;
@@ -192,6 +193,11 @@ class CoursesController extends Controller
                     $quest_cat = QuestionsCategory::firstOrCreate([
                         'name' => $course->name . ' Category',
                         'course_id' => $course->id,
+                    ]);
+
+                    $gradeCat = GradeCategory::firstOrCreate([
+                        'name' => $course->name . ' Total',
+                        'course_id' => $course->id
                     ]);
                 }
             }

@@ -7,7 +7,7 @@ use stdClass;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name', 'course_segment_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id',
+    protected $fillable = ['name', 'course_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id',
                            'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
     public function Child()
     {
@@ -17,9 +17,9 @@ class GradeCategory extends Model
     {
         return $this->hasOne('App\GradeCategory', 'id', 'parent');
     }
-    public function CourseSegment()
+    public function course()
     {
-        return $this->belongsTo('App\CourseSegment', 'course_segment_id', 'id');
+        return $this->belongsTo('App\Course', 'course_id', 'id');
     }
     public function GradeItems()
     {
