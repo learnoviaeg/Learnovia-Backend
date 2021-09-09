@@ -111,11 +111,11 @@ class QuizLessonObserver
         $lesson=Lesson::find($quizLesson->lesson_id);
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
 
-        $users = Enroll::whereIn('group',$lesson->getOriginal('shared_classes'))->where('course',$lesson->course_id)
+        $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
                     ->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
         // $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-        foreach($lesson->getOriginal('shared_classes') as $class){
+        foreach($lesson->shared_classes->pluck('id') as $class){
             $requ = ([
                 'message' => $quiz->name . ' quiz was updated',
                 'id' => $quiz->id,
