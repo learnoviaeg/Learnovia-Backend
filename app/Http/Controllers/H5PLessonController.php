@@ -90,7 +90,7 @@ class H5PLessonController extends Controller
             $url= substr($request->url(), 0, strpos($request->url(), "/api"));
             $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
             $lesson = Lesson::find($lesson_id);
-            LastAction::lastActionInCourse($Lesson->cours_id);
+            LastAction::lastActionInCourse($lesson->cours_id);
             // $class_id=$Lesson->shared_classes;
             $usersIDs = User::whereIn('id' , Enroll::where('course', $lesson->course_id)->whereIn('group',$lesson->shared_classes->pluck('id'))
                             ->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
