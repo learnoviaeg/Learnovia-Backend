@@ -66,7 +66,8 @@ class QuizLessonObserver
                 'lesson_id' => $lesson->id
             ]);
             ///add user grader to each enrolled student in course segment of this grade category
-            $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->getOriginal('shared_classes'))
+            // dd($lesson->shared_classes->pluck('id')->toArray());
+            $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->shared_classes->pluck('id'))
                                         ->where('course',$lesson->course_id)->pluck('user_id');
             foreach($enrolled_students as $student){
                 UserGrader::create([

@@ -97,7 +97,7 @@ class QuizzesController extends Controller
             $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
             // $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
-            $quiz['class'] = Classes::whereIn('id',$quiz['lesson']->getOriginal('shared_classes'))->get();
+            $quiz['class'] = Classes::whereIn('id',$quiz['lesson']->shared_classes->pluck('id'))->get();
             $quiz['level'] = Level::find(Course::find($quiz['lesson']->course_id)->level_id);
             // unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
