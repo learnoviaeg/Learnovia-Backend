@@ -607,8 +607,11 @@ class BigbluebuttonController extends Controller
             $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d H:i:s');
             
             $m['join'] = false;
-            $m->status = Carbon::parse($m->start_date) < Carbon::now() ? 'past' : $m->status;
-            
+
+            if(Carbon::now() >= Carbon::parse($m->start_date)->addMinutes($m->duration)){
+                $m->status = 'past';
+            }
+
             if(Carbon::parse($m->start_date) <= Carbon::now() && Carbon::now() <= Carbon::parse($m->start_date)->addMinutes($m->duration))
             {
                 try{
@@ -623,6 +626,8 @@ class BigbluebuttonController extends Controller
 
         }
 
+        $meetings = $meetings->sortBy('status')->values();
+        
         if($request->has('pagination') && $request->pagination==true)
             return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),__('messages.virtual.list'));
             
