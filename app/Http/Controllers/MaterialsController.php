@@ -68,8 +68,9 @@ class MaterialsController extends Controller
             $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
         }
 
+        $sort_in = 'desc';
         if($request->has('sort_in'))
-            $material->orderBy("created_at",$request->sort_in);
+            $material->orderBy('created_at',$request->sort_in);
 
         //copy this counts to count it before filteration
         $query=clone $material;
