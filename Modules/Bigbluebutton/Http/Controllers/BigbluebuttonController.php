@@ -606,10 +606,10 @@ class BigbluebuttonController extends Controller
             $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d H:i:s'): null;
             $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d H:i:s');
             
-            $m['join'] = false;
 
             if(Carbon::now() >= Carbon::parse($m->start_date)->addMinutes($m->duration)){
                 $m->status = 'past';
+                $m['join'] = false;
             }
 
             if(Carbon::parse($m->start_date) <= Carbon::now() && Carbon::now() <= Carbon::parse($m->start_date)->addMinutes($m->duration))
