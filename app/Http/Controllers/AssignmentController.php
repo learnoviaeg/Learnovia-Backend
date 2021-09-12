@@ -92,7 +92,7 @@ class AssignmentController extends Controller
             $assignment['lesson'] = $lessonn;
             $assignment['class'] = $classes;
             $assignment['course'] = Course::whereId($lessonn->course_id)->first();
-            $assignment['level'] = $assignment['course']->level_id;
+            $assignment['level'] = level::find($assignment['course']->level_id);
             $assignments[]=$assignment;
         }
 
