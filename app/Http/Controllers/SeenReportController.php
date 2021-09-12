@@ -127,7 +127,7 @@ class SeenReportController extends Controller
                     'user_seen_number' => $assignment->user_seen_number,
                     'lesson_id' => $assignment->lesson_id,
                     'percentage' => isset($total) && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->course_id,
+                    'course' => Course::find($lesson->course_id),
                     'class' => $lesson->shared_classes
                 ]);
 
@@ -157,7 +157,7 @@ class SeenReportController extends Controller
                     'user_seen_number' => $quiz->user_seen_number,
                     'lesson_id' => $quiz->lesson_id,
                     'percentage' => isset($total) && $quiz->user_seen_number != 0 ? round(($quiz->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->course_id,
+                    'course' => Course::find($lesson->course_id),
                     'class' => $lesson->shared_classes
                 ]);
                 return $report;
@@ -185,7 +185,7 @@ class SeenReportController extends Controller
                     'user_seen_number' => $h5p->user_seen_number,
                     'lesson_id' => $h5p->lesson_id,
                     'percentage' => isset($total) && $h5p->user_seen_number != 0 ? round(($h5p->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->course_id,
+                    'course' => Course::find($lesson->course_id),
                     'class' => $lesson->shared_classes
                 ]);
                 return $report;
@@ -216,7 +216,7 @@ class SeenReportController extends Controller
                     'user_seen_number' => $material->user_seen_number,
                     'lesson_id' => $material->lesson_id,
                     'percentage' => isset($total) && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->course_id,
+                    'course' => Course::find($lesson->course_id),
                     'class' => $lesson->shared_classes
                 ]);
                 return $report;
