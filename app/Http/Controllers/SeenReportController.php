@@ -85,7 +85,7 @@ class SeenReportController extends Controller
         if($request->filled('lesson_id'))
             $lessons_object = collect([Lesson::find($request->lesson_id)]);
 
-        $lessons_object->map(function ($lesson) use ($lessons_enrolls) {
+        $lessons_object->map(function ($lesson) use ($lessons_enrolls,$lessons) {
 
             $total = SecondaryChain::whereIn('lesson_id', $lessons)->where('role_id',3)->count();
             // $total = count(Enroll::where('course_segment',$lesson->course_segment_id)->where('role_id',3)->select('user_id')->distinct()->get());
