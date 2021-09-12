@@ -32,7 +32,7 @@ class AddUserGradersListener
     public function handle(UserEnrolledEvent $event)
     {
         if($event->enroll->role_id == 3){
-            foreach(GradeCategory::where('course_segment_id' , $event->enroll->course_segment)->cursor() as $grade_cat){
+            foreach(GradeCategory::where('course_id' , $event->enroll->course)->cursor() as $grade_cat){
                 UserGrader::firstOrCreate(
                     ['item_id' =>  $grade_cat->id , 'item_type' => 'category', 'user_id' => $event->enroll->user_id],
                     ['grade' => null]
