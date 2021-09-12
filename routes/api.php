@@ -411,6 +411,10 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], fun
     Route::get('all-events', 'EventController@GetAllEvents')->name('allevent')->middleware('permission:event/all-events');
 });
 
+Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], function () {
+    Route::get('grade-cat-course', 'ScriptsController@CreateGradeCatForCourse');
+});
+
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
     Route::post('add', 'ContractController@create')->name('addcontract')->middleware(['permission:contract/add']);
     Route::post('update', 'ContractController@update')->name('updatecontract')->middleware('permission:contract/update');
