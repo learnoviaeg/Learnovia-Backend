@@ -12,6 +12,7 @@ use DB;
 use App\Paginate;
 use Auth;
 use App\Enroll;
+use App\Course;
 use App\Lesson;
 use App\UserSeen;
 use App\CourseSegment;
