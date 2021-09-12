@@ -210,6 +210,7 @@ class QuizzesController extends Controller
                     'visible' => isset($request->visible)?$request->visible:1,
                     'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
                     'grade_by_user' => isset($request->grade) ? carbon::now() : null,
+                    'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
                 ]);
             }
             
@@ -335,6 +336,7 @@ class QuizzesController extends Controller
             'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
             'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id,
+            'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
             'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
         ]);
 
