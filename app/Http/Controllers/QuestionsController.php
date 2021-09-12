@@ -91,7 +91,7 @@ class QuestionsController extends Controller
 
         // $course_ides = $user_course_segments->with('courseSegment')->get()->pluck('courseSegment.course_id')->unique()->values();
 
-        $questions = Questions::whereIn('course_id',$enrolls->pluck('course'))->where('parent',null)->where('survey',0)->with(['course','question_category','question_type','children']);
+        $questions = Questions::orderBy('created_at','desc')->whereIn('course_id',$enrolls->pluck('course'))->where('parent',null)->where('survey',0)->with(['course','question_category','question_type','children']);
 
         if($request->filled('search'))
            $questions->where('text', 'LIKE' , "%$request->search%");

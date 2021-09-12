@@ -69,7 +69,7 @@ class MaterialsController extends Controller
         }
 
         if($request->has('sort_in'))
-            $material->orderBy("publish_date",$request->sort_in);
+            $material->orderBy("created_at",$request->sort_in);
 
         //copy this counts to count it before filteration
         $query=clone $material;
