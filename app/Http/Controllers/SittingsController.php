@@ -17,7 +17,7 @@ class SittingsController extends Controller
         if($check)
             $check->delete();
 
-        $attachment = attachment::upload_attachment($request->school_logo, 'Logo');
+        $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
 
         // return $attachment;
         return response()->json(['message' => __('messages.logo.set'), 'body' => $attachment], 200);

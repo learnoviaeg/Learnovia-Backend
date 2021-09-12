@@ -19,7 +19,7 @@ class attachment extends Model
         return $this->belongsTo('Modules\Assigments\Entities\UserAssigment', 'attachment_id', 'id');
     }
 
-    public static function upload_attachment($file, $type, $description = null)
+    public static function upload_attachment($file, $type, $description = null,$school_name=null)
     {
         $attachment = new attachment;
         $singlefile = $file;
@@ -30,6 +30,8 @@ class attachment extends Model
         $fileName = uniqid() . $Name;
 
         $size = $singlefile->getSize();
+        if($school_name != null)
+            $Name=$school_name;
         $attachment->name = $Name;
         $attachment->path = $type . '/' . $fileName;
         $attachment->description = $description;

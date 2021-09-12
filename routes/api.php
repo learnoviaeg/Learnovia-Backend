@@ -413,7 +413,8 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], fun
 
 Route::group(['prefix' => 'sitting', 'middleware' => 'auth:api','LastAction'], function () {
     Route::post('logo-set', 'SittingsController@setLogo');
-    Route::post('logo-get', 'SittingsController@getLogo');
+    Route::get('logo-get', 'SittingsController@getLogo');
+    Route::get('logo-delete', 'SittingsController@deleteLogo');
 });
 
 Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], function () {
