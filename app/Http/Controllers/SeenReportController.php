@@ -69,7 +69,7 @@ class SeenReportController extends Controller
 
         // $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
 
-        $lessons = SecondaryChain::where('enroll_id', $enrollss)->get()->pluck('lesson_id');
+        $lessons = SecondaryChain::where('enroll_id', $enrollss->get()->pluck('id'))->get()->pluck('lesson_id');
       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
