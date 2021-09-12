@@ -606,6 +606,12 @@ class BigbluebuttonController extends Controller
             $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d H:i:s'): null;
             $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d H:i:s');
             
+
+            if(Carbon::now() >= Carbon::parse($m->start_date)->addMinutes($m->duration)){
+                $m->status = 'past';
+                $m['join'] = false;
+            }
+
             if(Carbon::parse($m->start_date) <= Carbon::now() && Carbon::now() <= Carbon::parse($m->start_date)->addMinutes($m->duration))
             {
                 try{
@@ -617,12 +623,11 @@ class BigbluebuttonController extends Controller
                 if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
                     $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
             }
-            else{
-                $m['join'] = false;
-                $m->status = 'past';
-            }
+
         }
 
+        $meetings = $meetings->sortBy('status')->values();
+        
         if($request->has('pagination') && $request->pagination==true)
             return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),__('messages.virtual.list'));
             
