@@ -69,7 +69,7 @@ class AssignmentController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->orderBy('created_at',$sort_in);
 
         if($request->user()->can('site/course/student')){
             $assignment_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());

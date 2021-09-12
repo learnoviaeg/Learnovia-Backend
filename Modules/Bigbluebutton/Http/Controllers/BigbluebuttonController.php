@@ -579,7 +579,7 @@ class BigbluebuttonController extends Controller
 
         $courses=$enrolls->pluck('course')->unique()->values();
 
-        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('start_date',$sort_in);
+        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('created_at',$sort_in);
 
         if($request->user()->can('site/course/student'))
             $meeting->where('show',1);

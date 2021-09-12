@@ -58,8 +58,8 @@ class QuizzesController extends Controller
             $enrolls = $this->chain->getEnrollsByChain($request);
             $lessons = $enrolls->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
         }
-        if(!$request->user()->can('site/show-all-courses')){//enrolled users
 
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
            $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
            $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
         }
@@ -75,7 +75,7 @@ class QuizzesController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('created_at',$sort_in);
 
         if($request->user()->can('site/course/student'))
             $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
