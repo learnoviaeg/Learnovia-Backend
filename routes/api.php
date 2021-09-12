@@ -411,12 +411,6 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], fun
     Route::get('all-events', 'EventController@GetAllEvents')->name('allevent')->middleware('permission:event/all-events');
 });
 
-Route::group(['prefix' => 'sitting', 'middleware' => 'auth:api','LastAction'], function () {
-    Route::post('logo-set', 'SittingsController@setLogo');
-    Route::get('logo-get', 'SittingsController@getLogo');
-    Route::get('logo-delete', 'SittingsController@deleteLogo');
-});
-
 Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], function () {
     Route::get('grade-cat-course', 'ScriptsController@CreateGradeCatForCourse');
 });
@@ -516,6 +510,9 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('overall_seen', SeenReportController::class);
     Route::get('seen/{my_chain}', 'SeenReportController@index')->middleware('permission:reports/overall_seen_report');
     Route::Resource('settings', SettingsController::class);
+    Route::post('settings/logo-set', 'SettingsController@setLogo');
+    Route::get('settings/logo-get', 'SettingsController@getLogo');
+    Route::get('settings/logo-delete', 'SettingsController@deleteLogo');
     Route::post('settings/update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grade-item', GradeItemsController::class);
