@@ -91,8 +91,8 @@ class AssignmentController extends Controller
             $classes = Classes::whereIn('id',$classesIDS)->get();
             $assignment['lesson'] = $lessonn;
             $assignment['class'] = $classes;
-            $assignment['level'] = Course::whereId($lessonn->course_id)->first();
-            $assignment['course'] = $lessonn->course_id;
+            $assignment['course'] = Course::whereId($lessonn->course_id)->first();
+            $assignment['level'] = $assignment['course']->level_id;
             $assignments[]=$assignment;
         }
 
