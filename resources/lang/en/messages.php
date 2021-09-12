@@ -325,5 +325,10 @@ return [
         'list' => 'Grade items List',
         'delete' => 'Grade item deleted successfully',
     ],
-
+    'logo' => [
+        'set' => 'logo added successfully',
+        'delete' => 'logo deleted successfully',
+        'faild' => 'there is no logo',
+        'get' => 'logo is'
+    ],
 ];

@@ -411,9 +411,13 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], fun
     Route::get('all-events', 'EventController@GetAllEvents')->name('allevent')->middleware('permission:event/all-events');
 });
 
+Route::group(['prefix' => 'sitting', 'middleware' => 'auth:api','LastAction'], function () {
+    Route::post('logo-set', 'SittingsController@setLogo');
+    Route::post('logo-get', 'SittingsController@getLogo');
+});
+
 Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], function () {
     Route::get('grade-cat-course', 'ScriptsController@CreateGradeCatForCourse');
-    Route::post('logo', 'ScriptsController@setLogo');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
