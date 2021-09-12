@@ -21,4 +21,17 @@ class ScriptsController extends Controller
 
         return 'done';
     }
+
+    public function setLogo(Request $request)
+    {
+        $request->validate([
+            'school_logo' => 'required|mimes::jpg,jpeg,png',
+            'school_name' => 'string',
+        ]);
+
+        $attachment = attachment::upload_attachment($request->school_logo, 'Logo');
+        dd($attachment);
+
+        return $attachment;
+    }
 }
