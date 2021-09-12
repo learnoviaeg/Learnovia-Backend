@@ -11,6 +11,7 @@ use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\Lesson;
 use App\GradeCategory;
+use App\SecondaryChain;
 use App\Classes;
 use App\Course;
 use App\Level;
