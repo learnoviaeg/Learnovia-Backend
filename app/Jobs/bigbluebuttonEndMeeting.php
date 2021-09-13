@@ -33,7 +33,7 @@ class bigbluebuttonEndMeeting implements ShouldQueue
     public function handle()
     {
         Log::debug('job of bbb -> meeting id is '.$this->bigbb['meeting_id']);
-        $meetings = BigbluebuttonModel::where('meeting_id',$this->bigbb['meeting_id'])->where('status','future')->where('started',0)->update([
+        $meetings = BigbluebuttonModel::where('meeting_id',$this->bigbb['meeting_id'])->update([
             'status' => 'past'
         ]);
         
