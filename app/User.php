@@ -237,4 +237,10 @@ class User extends Authenticatable
 
         return $status;
     }
+
+    public function topicChain()
+    {
+        return $this->belongsToMany('App\TopicChain', 'topic_chain', 'id');
+
+    }
 }
