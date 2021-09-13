@@ -286,4 +286,20 @@ class SettingsController extends Controller
 
         return response()->json(['message' => __('messages.logo.get'), 'body' => $attachment], 200);
     }
+
+    public function updateLogo(Request $request)
+    {
+        $request->validate([
+            'school_logo' => 'mimes:jpg,jpeg,png',
+            'school_name' => 'string',
+            'attachment_id' => 'required|exists:attachments,id'
+        ]);
+        $attachment=attachment::find($request->attachment_id);
+
+        if(isset($request->school_logo))
+            $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
+
+        // return $attachment;
+        return response()->json(['message' => __('messages.logo.update'), 'body' => $attachment], 200);
+    }
 }
