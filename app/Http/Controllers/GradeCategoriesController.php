@@ -69,45 +69,65 @@ class GradeCategoriesController extends Controller
             // 'year' => 'exists:academic_years,id',
             // 'type' => 'exists:academic_types,id',
             // 'level' => 'exists:levels,id',
-            'segment' => 'exists:segments,id',
+            // 'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array|required_without:levels',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'levels'    => 'nullable|array|required_without:courses',
             'levels.*'  => 'nullable|integer|exists:levels,id',
-            'name' => 'required|string',
-            'parent' => 'exists:grade_categories,id',
-            'hidden' => 'boolean',
-            'calculation_type' => 'nullable',
-            'locked' => 'boolean',
-            'min'=>'between:0,99.99',
-            'max'=>'between:0,99.99',
-            'weight_adjust' => 'boolean',
-            'exclude_empty_grades' => 'boolean',
+            'category.*.name' => 'required|string',
+            'category.*.parent' => 'exists:grade_categories,id',
+            'category.*.hidden' => 'boolean',
+            'category.*.calculation_type' => 'nullable',
+            'category.*.locked' => 'boolean',
+            'category.*.min'=>'between:0,99.99',
+            'category.*.max'=>'between:0,99.99',
+            'category.*.weight_adjust' => 'boolean',
+            'category.*.exclude_empty_grades' => 'boolean',
+            // 'name' => 'required|string',
+            // 'parent' => 'exists:grade_categories,id',
+            // 'hidden' => 'boolean',
+            // 'calculation_type' => 'nullable',
+            // 'locked' => 'boolean',
+            // 'min'=>'between:0,99.99',
+            // 'max'=>'between:0,99.99',
+            // 'weight_adjust' => 'boolean',
+            // 'exclude_empty_grades' => 'boolean',
         ]);
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $courses = $enrolls->get()->pluck('course')->unique(); 
 
         foreach($courses as $course){
-            $cat = GradeCategory::firstOrCreate([
-                'course_id'=> $course,
-                'name' => $request->name,
-                'parent' => isset($request->parent) ? $request->parent : null,
-                'hidden' =>isset($request->hidden) ? $request->hidden : 0,
-                'calculation_type' =>isset($request->calculation_type) ? $request->calculation_type : null,
-                'locked' =>isset($request->locked) ? $request->locked : 0,
-                'min' =>isset($request->min) ? $request->min : 0,
-                'max' =>isset($request->max) ? $request->max : null,
-                'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : 0,
-                'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : 0,
-            ]);
-            $enrolled_students = Enroll::where('course',$course)->where('role_id',3)->get()->pluck('user_id')->unique();
-            foreach($enrolled_students as $student){
-                UserGrader::create([
-                    'user_id'   => $student,
-                    'item_type' => 'Category',
-                    'item_id'   => $cat->id,
-                    'grade'     => null
+            foreach($request->category as $key=>$category){
+                $cat = GradeCategory::firstOrCreate([
+                    'course_id'=> $course,
+                    'name' => $category['name'],
+                    'parent' => isset($category['parent']) ? $category['parent'] : null,
+                    'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
+                    'calculation_type' =>isset($category['calculation_type']) ? $category['calculation_type'] : null,
+                    'locked' =>isset($category['locked']) ? $category['locked'] : 0,
+                    'min' =>isset($category['min']) ? $category['min'] : 0,
+                    'max' =>isset($category['max']) ? $category['max'] : null,
+                    'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
+                    'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
+                    // 'name' => $request->name,
+                    // 'parent' => isset($request->parent) ? $request->parent : null,
+                    // 'hidden' =>isset($request->hidden) ? $request->hidden : 0,
+                    // 'calculation_type' =>isset($request->calculation_type) ? $request->calculation_type : null,
+                    // 'locked' =>isset($request->locked) ? $request->locked : 0,
+                    // 'min' =>isset($request->min) ? $request->min : 0,
+                    // 'max' =>isset($request->max) ? $request->max : null,
+                    // 'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : 0,
+                    // 'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : 0,
                 ]);
+                $enrolled_students = Enroll::where('course',$course)->where('role_id',3)->get()->pluck('user_id')->unique();
+                foreach($enrolled_students as $student){
+                    UserGrader::create([
+                        'user_id'   => $student,
+                        'item_type' => 'Category',
+                        'item_id'   => $cat->id,
+                        'grade'     => null
+                    ]);
+                }
             }
         }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
