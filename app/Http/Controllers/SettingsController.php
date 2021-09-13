@@ -278,7 +278,7 @@ class SettingsController extends Controller
         return response()->json(['message' => __('messages.logo.delete'), 'body' => null], 200);
     }
 
-    public function getLogo(Request $request)
+    public function getLogo()
     {
         $attachment=attachment::where('type','Logo')->first();
         if(!$attachment)
