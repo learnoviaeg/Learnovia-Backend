@@ -210,7 +210,7 @@ class EnrollUserToCourseController extends Controller
 
         foreach ($request->users as $user) {
             // $class=Classes::find($request->class);
-            $courses=Course::where('level_id',$request->level)->get();
+            $courses=Course::where('level_id',$request->level)->where('mandatory',1)->get();
             // dd($courses);
             if (count($courses) > 0) {
                 foreach($courses as $course){
