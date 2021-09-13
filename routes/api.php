@@ -463,6 +463,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
+    Route::get('materials-details', 'MaterialsController@Material_Details');
     Route::get('GradeTree', 'UserGradeController@index');
 
     // Route::get('years/{export}', 'YearsController@index');
