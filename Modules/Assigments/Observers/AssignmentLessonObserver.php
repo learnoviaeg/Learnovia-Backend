@@ -58,14 +58,14 @@ class AssignmentLessonObserver
         }
 
 
-        if($assignmentLesson->is_graded == 1){
-            $grade_category=GradeCategory::find($assignmentLesson->grade_category);
-            $grade_category->GradeItems()->create([
-                'type' => 'Assignment',
-                'item_id' => $assignment->id,
-                'name' => $assignment->name,
-            ]);
-        }
+        // if($assignmentLesson->is_graded == 1){
+        //     $grade_category=GradeCategory::find($assignmentLesson->grade_category);
+        //     $grade_category->GradeItems()->create([
+        //         'type' => 'Assignment',
+        //         'item_id' => $assignment->id,
+        //         'name' => $assignment->name,
+        //     ]);
+        // }
     }
 
     /**

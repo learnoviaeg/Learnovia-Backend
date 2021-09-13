@@ -20,16 +20,16 @@ class GradeItemObserver
     public function created(GradeItems $gradeItems)
     {
             // $gradeItems->keepWeight();
-        $course_segment=($gradeItems->gradeCategory->course_segment_id);
-        $grade_item_id=$gradeItems->id;
-        $users=Enroll::where('course_segment',$course_segment)->pluck('user_id');
-        foreach($users as $user)
-        {
-            $usr_grade=UserGrade::create([
-                'user_id' => $user,
-                'grade_item_id' => $grade_item_id
-            ]);
-        }
+        // $course_segment=($gradeItems->gradeCategory->course_segment_id);
+        // $grade_item_id=$gradeItems->id;
+        // $users=Enroll::where('course_segment',$course_segment)->pluck('user_id');
+        // foreach($users as $user)
+        // {
+        //     $usr_grade=UserGrade::create([
+        //         'user_id' => $user,
+        //         'grade_item_id' => $grade_item_id
+        //     ]);
+        // }
 
         Log::create([
             'user' => User::find(Auth::id())->username,

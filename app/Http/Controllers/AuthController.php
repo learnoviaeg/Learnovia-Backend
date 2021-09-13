@@ -14,6 +14,7 @@ use App\User;
 use App\Classes;
 use App\Level;
 use App\LastAction;
+use App\attachment;
 use App\Language;
 use Spatie\Permission\Models\Permission;
 use Laravel\Passport\Passport;
@@ -267,6 +268,14 @@ class AuthController extends Controller
     public function config()
     {
         // $bool=;
+        $path=null;
+        $name=null;
+        $attachment=attachment::where('type','Logo')->first();
+        if($attachment){
+            $path=$attachment->path;
+            $name =$attachment->description;
+        }
+
         $firebase=[
             'apiKey' => 'AIzaSyDNHapmkBjO39XztyBqjb_0syU0pHSXd8k',
             'authDomain'=> 'learnovia-notifications.firebaseapp.com',
@@ -280,7 +289,9 @@ class AuthController extends Controller
         $config=[
             'production'=> env('APP_DEBUG'),
             'apiUrl'=> env('APP_URL'),
-            'firebase'=> $firebase
+            'firebase'=> $firebase,
+            'school_logo' => $path,
+            'school_name' => $name
         ];
 
         return $config;

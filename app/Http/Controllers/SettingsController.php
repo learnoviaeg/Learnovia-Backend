@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\attachment;
 use App\Settings;
 use App\Repositories\SettingsReposiotry;
 
@@ -247,5 +248,60 @@ class SettingsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function setLogo(Request $request)
+    {
+        $request->validate([
+            'school_logo' => 'required|mimes:jpg,jpeg,png',
+            'school_name' => 'required|string',
+        ]);
+        $check=attachment::where('type','Logo')->first();
+        if($check)
+            $check->delete();
+
+        $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
+
+        // return $attachment;
+        return response()->json(['message' => __('messages.logo.set'), 'body' => $attachment], 200);
+    }
+
+    public function deleteLogo(Request $request)
+    {
+        $request->validate([
+            'attachment_id' => 'required|exists:attachments,id',
+        ]);
+        $check=attachment::whereId($request->attachment_id)->first();
+        if($check)
+            $check->delete();
+
+        return response()->json(['message' => __('messages.logo.delete'), 'body' => null], 200);
+    }
+
+    public function getLogo()
+    {
+        $attachment=attachment::where('type','Logo')->first();
+        if(!$attachment)
+            return response()->json(['message' => __('messages.logo.faild'), 'body' => null], 200);
+
+        return response()->json(['message' => __('messages.logo.get'), 'body' => $attachment], 200);
+    }
+
+    public function updateLogo(Request $request)
+    {
+        $request->validate([
+            'school_logo' => 'mimes:jpg,jpeg,png',
+            'school_name' => 'required|string',
+            'attachment_id' => 'required|exists:attachments,id'
+        ]);
+        $attachment=attachment::find($request->attachment_id);
+        $attachment->description=$request->school_name;
+        $attachment->save();
+
+        if(isset($request->school_logo))
+            $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
+
+        // return $attachment;
+        return response()->json(['message' => __('messages.logo.update'), 'body' => $attachment], 200);
     }
 }

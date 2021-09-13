@@ -579,7 +579,7 @@ class BigbluebuttonController extends Controller
 
         $courses=$enrolls->pluck('course')->unique()->values();
 
-        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('start_date',$sort_in);
+        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('created_at',$sort_in);
 
         if($request->user()->can('site/course/student'))
             $meeting->where('show',1);
@@ -606,23 +606,32 @@ class BigbluebuttonController extends Controller
             $m->actutal_start_date = isset($m->actutal_start_date)?Carbon::parse($m->actutal_start_date)->format('Y-m-d H:i:s'): null;
             $m->start_date = Carbon::parse($m->start_date)->format('Y-m-d H:i:s');
             
+
+            if(Carbon::now() >= Carbon::parse($m->start_date)->addMinutes($m->duration)){
+                $m->status = 'past';
+                $m['join'] = false;
+            }
+
             if(Carbon::parse($m->start_date) <= Carbon::now() && Carbon::now() <= Carbon::parse($m->start_date)->addMinutes($m->duration))
             {
-                try{
-                    $try = self::create_hook($request);    
+                if($m->type == 'BBB'){
+
+                    try{
+                        self::create_hook($request);    
+                    }
+                    catch(\Exception $e){
+                        //error
+                    }
                 }
-                catch(\Exception $e){
-                    //error
-                }
+          
                 if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
                     $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
             }
-            else{
-                $m['join'] = false;
-                $m->status = 'past';
-            }
+
         }
 
+        $meetings = $meetings->sortBy('status')->values();
+        
         if($request->has('pagination') && $request->pagination==true)
             return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),__('messages.virtual.list'));
             

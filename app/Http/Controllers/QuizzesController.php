@@ -11,6 +11,7 @@ use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\Lesson;
 use App\GradeCategory;
+use App\SecondaryChain;
 use App\Classes;
 use App\Course;
 use App\Level;
@@ -58,8 +59,8 @@ class QuizzesController extends Controller
             $enrolls = $this->chain->getEnrollsByChain($request);
             $lessons = $enrolls->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
         }
-        if(!$request->user()->can('site/show-all-courses')){//enrolled users
 
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
            $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
            $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
         }
@@ -75,7 +76,7 @@ class QuizzesController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('created_at',$sort_in);
 
         if($request->user()->can('site/course/student'))
             $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
@@ -97,9 +98,9 @@ class QuizzesController extends Controller
             $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
             // $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
-            $quiz['class'] = Classes::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
-            $quiz['level'] = Level::find($quiz['lesson']->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-            unset($quiz['lesson']->courseSegment);
+            $quiz['class'] = Classes::whereIn('id',$quiz['lesson']->shared_classes->pluck('id'))->get();
+            $quiz['level'] = Level::find(Course::find($quiz['lesson']->course_id)->level_id);
+            // unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
 
@@ -187,9 +188,10 @@ class QuizzesController extends Controller
             foreach($request->lesson_id as $lesson)
             {
                 $leson=Lesson::find($lesson);
-                // $grade_Cat=GradeCategory::where('course_segment_id',$leson->course_segment_id)->whereNull('parent')->first();
-                // if(!isset($grade_Cat))
-                //     return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
+                // dd($leson);
+                $grade_Cat=GradeCategory::where('course_id',$leson->course_id)->whereNull('parent')->first();
+                if(!isset($grade_Cat))
+                    return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
 
                 $index = QuizLesson::where('lesson_id',$lesson)->get()->max('index');
                 $Next_index = $index + 1;
@@ -202,12 +204,13 @@ class QuizzesController extends Controller
                     'max_attemp' => $request->max_attemp,
                     'grading_method_id' => isset($request->grading_method_id)? json_encode((array)$request->grading_method_id) : null,
                     'grade' => isset($request->grade) ? $request->grade : 0,
-                    // 'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
+                    'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_time,
                     'index' => $Next_index,
                     'visible' => isset($request->visible)?$request->visible:1,
                     'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
                     'grade_by_user' => isset($request->grade) ? carbon::now() : null,
+                    'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
                 ]);
             }
             
@@ -333,6 +336,7 @@ class QuizzesController extends Controller
             'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
             'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id,
+            'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
             'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
         ]);
 

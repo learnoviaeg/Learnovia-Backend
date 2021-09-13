@@ -67,7 +67,7 @@ class QuestionCategoryController extends Controller
             'courses' => isset($request->courese) ? [$request->course_id] : null,
         ]);
 
-        $enrolls = $this->chain->getCourseSegmentByChain($chain_request);
+        $enrolls = $this->chain->getEnrollsByChain($request);
         
         if(!$request->user()->can('site/show-all-courses'))//teacher 
             $enrolls = $enrolls->where('user_id',Auth::id());
@@ -77,26 +77,26 @@ class QuestionCategoryController extends Controller
         $ques_cat=QuestionsCategory::where(function($q) use($request){
             if($request->filled('text'))
                 $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-        })->whereIn('course_id',$enrolls)->with(['course','CourseSegment.courses'])->get();
+        })->whereIn('course_id',$enrolls)->with(['course'])->get();
 
         if($request->filled('course_id'))
         {
             LastAction::lastActionInCourse($request->course_id);
 
-            $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
-            if($request->filled('class'))
-            {
-                $courses=[];
-                $course_seg=CourseSegment::GetWithClassAndCourse($request->class,$request->course_id);
-                // return $course_seg;
-                if(isset($course_seg))
-                    $courses[]=$course_seg->id;
-                $all_courses=$courses;
-            }
-            $ques_cat=QuestionsCategory::whereIn('course_segment_id',$all_courses)->where(function($q) use($request){
+            // $all_courses=CourseSegment::where('course_id',$request->course_id)->pluck('id');
+            // if($request->filled('class'))
+            // {
+            //     $courses=[];
+            //     $course_seg=CourseSegment::GetWithClassAndCourse($request->class,$request->course_id);
+            //     // return $course_seg;
+            //     if(isset($course_seg))
+            //         $courses[]=$course_seg->id;
+            //     $all_courses=$courses;
+            // }
+            $ques_cat=QuestionsCategory::where('course_id',$request->course_id)->where(function($q) use($request){
                 if($request->filled('text'))
                     $q->orWhere('name', 'LIKE' ,"%$request->text%" );
-            })->with('CourseSegment.courses')->get();
+            })->with('course')->get();
         }
         foreach($ques_cat as $cat)
             $cat->class= isset($cat->CourseSegment)  && count($cat->CourseSegment->segmentClasses) > 0  && count($cat->CourseSegment->segmentClasses[0]->classLevel) > 0 && count($cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes) > 0 ? $cat->CourseSegment->segmentClasses[0]->classLevel[0]->classes[0] : null;

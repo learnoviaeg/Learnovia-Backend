@@ -64,12 +64,14 @@ class MaterialsController extends Controller
             
         $material = Material::with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
 
-        if($request->user()->can('site/course/student')){
+        if($request->user()->can('site/course/student'))
             $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
-        }
 
+        $sort_in = 'desc';
         if($request->has('sort_in'))
-            $material->orderBy("publish_date",$request->sort_in);
+            $sort_in=$request->sort_in;
+
+        $material->orderBy('created_at',$sort_in);
 
         //copy this counts to count it before filteration
         $query=clone $material;

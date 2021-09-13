@@ -898,41 +898,59 @@ class AssigmentsController extends Controller
             if ($request->filled('visible'))
                 $assignment_lesson->visible = $request->visible;
 
-            // if ($request->filled('grade_category'))
-            // {
-            //     $lessonAll = Lesson::find($lesson);
-            //     $gradeCats = $lessonAll->courseSegment->GradeCategory;
-            //     $flag = false;
-            //     foreach ($gradeCats as $grade){
-            //         if($grade->id == $request->grade_category[$key]){
-            //             $flag =true;
-            //         }
-            //     }
-            //     if($flag==false){
-            //         return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
-            //     }
-            //     $assignment_lesson->grade_category = $request->grade_category[$key];
-            // }
-            // if($request->is_graded)
-            // { 
-            //     $grade_category=GradeCategory::find($request->grade_category[$key]);
-            //     $name_assignment = Assignment::find($request->assignment_id)->name;
-            //     $grade_category->GradeItems()->create([
-            //         'grademin' => 0,
-            //         'grademax' => $request->mark,
-            //         'item_no' => 1,
-            //         'scale_id' => (isset($request->scale)) ? $request->scale : 1,
-            //         'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
-            //         'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
-            //         'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
-            //         'item_type' => 2, // Assignment
-            //         'item_Entity' => $request->assignment_id,
-            //         'name' => $name_assignment,
-            //         'weight' => 0,
-            //     ]);
-            //     $assignment_lesson->save();
-            //     $assignment_lesson['grade_items']=$grade_category->GradeItems;
-            // }else{
+            if ($request->filled('grade_category'))
+            {
+                $lessonAll = Lesson::find($lesson);
+                $gradeCats = GradeCategory::where('course_id',$lessonAll->course_id);
+                $flag = false;
+                foreach ($gradeCats as $grade){
+                    if($grade->id == $request->grade_category[$key]){
+                        $flag =true;
+                    }
+                }
+
+                if($flag==false){
+                    return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
+                }
+                $assignment_lesson->grade_category = $request->grade_category[$key];
+            }
+            if($request->is_graded)
+            { 
+                $grade_category=GradeCategory::find($request->grade_category[$key]);
+                $name_assignment = Assignment::find($request->assignment_id)->name;
+
+                GradeItems::create([
+                    'grade_category_id' => $grade_category->id,
+                    'grademin' => 0,
+                    'grademax' => $request->mark,
+                    'item_no' => 1,
+                    'scale_id' => (isset($request->scale)) ? $request->scale : 1,
+                    'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
+                    'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
+                    'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
+                    // 'item_type' => 2, // Assignment
+                    'type' => 'Assignment',
+                    'item_Entity' => $request->assignment_id,
+                    'name' => $name_assignment,
+                    'weight' => 0,
+                ]);
+                // $grade_category->GradeItems()->create([
+                //     'grademin' => 0,
+                //     'grademax' => $request->mark,
+                //     'item_no' => 1,
+                //     'scale_id' => (isset($request->scale)) ? $request->scale : 1,
+                //     'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
+                //     'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
+                //     'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
+                //     'item_type' => 2, // Assignment
+                //     'item_Entity' => $request->assignment_id,
+                //     'name' => $name_assignment,
+                //     'weight' => 0,
+                // ]);
+                // $assignment_lesson->save();
+                // $assignment_lesson['grade_items']=$grade_category->GradeItems;
+            }
+            // else{
             // $assignment_lesson->save();
             // }
             $assignment_lesson->save();

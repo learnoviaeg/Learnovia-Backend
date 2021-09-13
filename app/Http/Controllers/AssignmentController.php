@@ -69,7 +69,7 @@ class AssignmentController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons);
 
         if($request->user()->can('site/course/student')){
             $assignment_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
@@ -85,14 +85,14 @@ class AssignmentController extends Controller
         $assignments = collect([]);
 
         foreach($assignment_lessons as $assignment_lesson){
-            $assignment=assignment::where('id',$assignment_lesson->assignment_id)->with('assignmentLesson')->first();
+            $assignment=assignment::where('id',$assignment_lesson->assignment_id)->orderBy('created_at',$sort_in)->with('assignmentLesson')->first();
             $lessonn = Lesson::find($assignment_lesson->lesson_id);
             $classesIDS = SecondaryChain::select('group_id')->distinct()->where('lesson_id',$lessonn->id)->pluck('group_id');
             $classes = Classes::whereIn('id',$classesIDS)->get();
             $assignment['lesson'] = $lessonn;
             $assignment['class'] = $classes;
-            $assignment['level'] = Course::whereId($lessonn->course_id)->first();
-            $assignment['course'] = $lessonn->course_id;
+            $assignment['course'] = Course::whereId($lessonn->course_id)->first();
+            $assignment['level'] = level::find($assignment['course']->level_id);
             $assignments[]=$assignment;
         }
 

@@ -4,7 +4,7 @@ Route::get('/materials/{id}', 'MaterialsController@show')->middleware(['getauth'
 Route::get('/interactive/{id}', 'InterActiveController@show')->middleware(['getauth','LastAction']);
 
 //install all permissions and roles of system Route
-Route::get('install', 'SpatieController@install');
+// Route::get('install', 'SpatieController@install');
 //Login and Signup
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
@@ -411,6 +411,10 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], fun
     Route::get('all-events', 'EventController@GetAllEvents')->name('allevent')->middleware('permission:event/all-events');
 });
 
+Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], function () {
+    Route::get('grade-cat-course', 'ScriptsController@CreateGradeCatForCourse');
+});
+
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
     Route::post('add', 'ContractController@create')->name('addcontract')->middleware(['permission:contract/add']);
     Route::post('update', 'ContractController@update')->name('updatecontract')->middleware('permission:contract/update');
@@ -427,7 +431,7 @@ Route::group(['prefix' => 'h5p', 'middleware' => ['auth:api','LastAction']], fun
     Route::group(['prefix' => 'lesson', 'middleware' => 'auth:api'], function () {
 
         Route::get('install', 'H5PLessonController@install')->name('installh5p');
-        Route::get('create', 'H5PLessonController@create')->name('createh5plesson')->middleware('permission:h5p/lesson/create');
+        Route::post('create', 'H5PLessonController@create')->name('createh5plesson')->middleware('permission:h5p/lesson/create');
         Route::get('toggle', 'H5PLessonController@toggleVisibility')->name('toggleh5p')->middleware('permission:h5p/lesson/toggle');
         Route::get('get', 'H5PLessonController@get')->name('geth5p')->middleware('permission:h5p/lesson/get-all');
         Route::get('delete', 'H5PLessonController@delete')->name('deleteh5p')->middleware('permission:h5p/lesson/delete');
@@ -505,8 +509,16 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('calendars', CalendarsController::class);
     Route::Resource('overall_seen', SeenReportController::class);
     Route::get('seen/{my_chain}', 'SeenReportController@index')->middleware('permission:reports/overall_seen_report');
+
+    Route::group(['prefix' => 'settings', 'middleware' => ['auth:api']], function () {
+        Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
+        Route::post('logo-update', 'SettingsController@updateLogo')->middleware('permission:settings/logo');
+        Route::get('logo-get', 'SettingsController@getLogo');
+        Route::get('logo-delete', 'SettingsController@deleteLogo')->middleware('permission:settings/logo');
+        Route::post('update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
+    });
     Route::Resource('settings', SettingsController::class);
-    Route::post('settings/update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
+
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grade-item', GradeItemsController::class);
     Route::Resource('grader-report', GraderReportController::class);
