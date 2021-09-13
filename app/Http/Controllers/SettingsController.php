@@ -296,7 +296,7 @@ class SettingsController extends Controller
         ]);
         $attachment=attachment::find($request->attachment_id);
         $attachment->description=$request->school_name;
-        $attchement->save();
+        $attachment->save();
 
         if(isset($request->school_logo))
             $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
