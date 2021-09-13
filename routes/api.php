@@ -512,6 +512,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
     Route::group(['prefix' => 'settings', 'middleware' => ['auth:api']], function () {
         Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
+        Route::post('logo-update', 'SettingsController@updateLogo')->middleware('permission:settings/logo');
         Route::get('logo-get', 'SettingsController@getLogo');
         Route::get('logo-delete', 'SettingsController@deleteLogo')->middleware('permission:settings/logo');
         Route::post('update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
