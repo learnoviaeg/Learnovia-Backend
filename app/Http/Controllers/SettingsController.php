@@ -291,10 +291,12 @@ class SettingsController extends Controller
     {
         $request->validate([
             'school_logo' => 'mimes:jpg,jpeg,png',
-            'school_name' => 'string',
+            'school_name' => 'required|string',
             'attachment_id' => 'required|exists:attachments,id'
         ]);
         $attachment=attachment::find($request->attachment_id);
+        $attachment->description=$request->school_name;
+        $attchement->save();
 
         if(isset($request->school_logo))
             $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
