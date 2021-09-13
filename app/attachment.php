@@ -31,7 +31,7 @@ class attachment extends Model
 
         $size = $singlefile->getSize();
         if($school_name != null)
-            $Name=$school_name;
+            $description=$school_name;
         $attachment->name = $Name;
         $attachment->path = $type . '/' . $fileName;
         $attachment->description = $description;
