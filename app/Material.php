@@ -41,7 +41,7 @@ class Material extends Model
 
     public function getLinkAttribute(){
 
-        $url= config('app.url').'api/materials/'.$this->id.'/?api_token='.Auth::user()->api_token;
+        $url= config('app.url').'api/materials/'.$this->id.'?api_token='.Auth::user()->api_token;
 
         return $url;
     }
