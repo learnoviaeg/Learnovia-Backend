@@ -15,12 +15,10 @@ class Questions extends Model
     protected $appends = ['count_quizzes'];
 
 
-    public function getCountQuizzesAttribute(){
-
+    public function getCountQuizzesAttribute()
+    {
         $count_quest = 0;
-        
         $count_quest = quiz_questions::where('question_id',$this->id)->count();
-            
         return $count_quest;  
     }
 
