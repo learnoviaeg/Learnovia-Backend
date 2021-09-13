@@ -589,9 +589,6 @@ class BigbluebuttonController extends Controller
 
         if($request->has('id'))
             $meeting->where('id',$request->id);
-
-        if($count == 'count')
-            return response()->json(['message' => 'Virtual classrooms count', 'body' => $meeting->count()], 200);
         
         $meetings = $meeting->get();
         
@@ -634,6 +631,9 @@ class BigbluebuttonController extends Controller
         if(!$request->has('status')){
             $meetings = $meetings->sortBy('status')->values();
         }
+
+        if($count == 'count')
+            return response()->json(['message' => 'Virtual classrooms count', 'body' => $meetings->count()], 200);
 
         if($request->has('pagination') && $request->pagination==true)
             return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),__('messages.virtual.list'));
