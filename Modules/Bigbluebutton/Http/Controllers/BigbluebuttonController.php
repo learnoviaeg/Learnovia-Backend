@@ -628,7 +628,7 @@ class BigbluebuttonController extends Controller
         }
 
         if($request->has('status')){
-            $meetings = $meetings->where('status',$request->status)->values();
+            $meetings = $meetings->where('status',ucfirst($request->status))->values();
         }
 
         if(!$request->has('status')){
