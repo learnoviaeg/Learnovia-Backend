@@ -309,6 +309,7 @@ class PermissionSeeder extends Seeder
         Permission::create(['guard_name' => 'api', 'name' => 'grade/report/user', 'title' => 'get user grades']);
         //Permission::create(['guard_name' => 'api', 'name' => 'grade/user/getallusersgrades', 'title' => 'get all users grades']);
         Permission::create(['guard_name' => 'api', 'name' => 'grade/report/over-all', 'title' => 'get all users grades in courses']);
+        
         //dashboard
         Permission::create(['guard_name' => 'api', 'name' => 'dashboard/toggle', 'title' => 'toggle dashboard']);
         // Permission::create(['guard_name' => 'api', 'name' => 'dashboard/dashboard', 'title' => 'show dashboard']);
@@ -349,33 +350,34 @@ class PermissionSeeder extends Seeder
         Permission::create(['guard_name' => 'api', 'name' => 'reports/seen_report', 'title' => 'Seen report']);
         Permission::create(['guard_name' => 'api', 'name' => 'reports/overall_seen_report', 'title' => 'Overall seen report','dashboard' => 1, 'icon'=> 'Report']);
         
-            //site internal permessions
-            Permission::create(['guard_name' => 'api', 'name' => 'site/user/search-all-users', 'title' => 'Search all users assigned to my course segments and search all site wide for users give permission to search site wide']);
-            Permission::create(['guard_name' => 'api', 'name' => 'site/show/real-password', 'title' => 'Show Real Password']);
-            Permission::create(['guard_name' => 'api', 'name' => 'site/course/teacher', 'title' => 'detect course\'s teacher']);
-            Permission::create(['guard_name' => 'api', 'name' => 'site/course/student', 'title' => 'detect course\'s student']);
-            Permission::create(['guard_name' => 'api', 'name' => 'site/show-all-courses', 'title' => 'admin permission']);
-            Permission::create(['guard_name' => 'api', 'name' => 'user/update-password', 'title' => 'update password']);
-            Permission::create(['guard_name' => 'api', 'name' => 'user/update-username', 'title' => 'update username']);
-            Permission::create(['guard_name' => 'api', 'name' => 'site/show/username', 'title' => 'show username']);
-            Permission::create(['guard_name' => 'api', 'name' => 'site/show/as-participant', 'title' => 'show as participant']);
+        //site internal permessions
+        Permission::create(['guard_name' => 'api', 'name' => 'site/user/search-all-users', 'title' => 'Search all users assigned to my course segments and search all site wide for users give permission to search site wide']);
+        Permission::create(['guard_name' => 'api', 'name' => 'site/show/real-password', 'title' => 'Show Real Password']);
+        Permission::create(['guard_name' => 'api', 'name' => 'site/course/teacher', 'title' => 'detect course\'s teacher']);
+        Permission::create(['guard_name' => 'api', 'name' => 'site/course/student', 'title' => 'detect course\'s student']);
+        Permission::create(['guard_name' => 'api', 'name' => 'site/show-all-courses', 'title' => 'admin permission']);
+        Permission::create(['guard_name' => 'api', 'name' => 'user/update-password', 'title' => 'update password']);
+        Permission::create(['guard_name' => 'api', 'name' => 'user/update-username', 'title' => 'update username']);
+        Permission::create(['guard_name' => 'api', 'name' => 'site/show/username', 'title' => 'show username']);
+        Permission::create(['guard_name' => 'api', 'name' => 'site/show/as-participant', 'title' => 'show as participant']);
 
 
-            //Timeline Resources Permissions
-            Permission::create(['guard_name' => 'api', 'name' => 'timeline/store', 'title' => 'Store Timeline']);
-            Permission::create(['guard_name' => 'api', 'name' => 'timeline/get', 'title' => 'Get Timeline']);
-                        
-            //Materials Resources Permissions
-            Permission::create(['guard_name' => 'api', 'name' => 'material/get', 'title' => 'Get Materials']);
+        //Timeline Resources Permissions
+        Permission::create(['guard_name' => 'api', 'name' => 'timeline/store', 'title' => 'Store Timeline']);
+        Permission::create(['guard_name' => 'api', 'name' => 'timeline/get', 'title' => 'Get Timeline']);
+                    
+        //Materials Resources Permissions
+        Permission::create(['guard_name' => 'api', 'name' => 'material/get', 'title' => 'Get Materials']);
 
-            //logs
-            Permission::create(['guard_name' => 'api', 'name' => 'user/logs', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'User']);
+        //logs
+        Permission::create(['guard_name' => 'api', 'name' => 'user/logs', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'User']);
 
-            //system settings
-            Permission::create(['guard_name' => 'api', 'name' => 'settings/general', 'title' => 'General Settings', 'dashboard' => 1 , 'icon'=> 'Settings']);
-            Permission::create(['guard_name' => 'api', 'name' => 'settings/create_assignment_extensions', 'title' => 'Manage create assignment extensions']);
-            Permission::create(['guard_name' => 'api', 'name' => 'settings/submit_assignment_extensions', 'title' => 'Manage submit assignment extensions']);
-            Permission::create(['guard_name' => 'api', 'name' => 'settings/upload_media_extensions', 'title' => 'Manage upload media extensions']);
-            Permission::create(['guard_name' => 'api', 'name' => 'settings/upload_file_extensions', 'title' => 'Manage upload file extensions']);
+        //system settings
+        Permission::create(['guard_name' => 'api', 'name' => 'settings/general', 'title' => 'General Settings', 'dashboard' => 1 , 'icon'=> 'Settings']);
+        Permission::create(['guard_name' => 'api', 'name' => 'settings/create_assignment_extensions', 'title' => 'Manage create assignment extensions']);
+        Permission::create(['guard_name' => 'api', 'name' => 'settings/submit_assignment_extensions', 'title' => 'Manage submit assignment extensions']);
+        Permission::create(['guard_name' => 'api', 'name' => 'settings/upload_media_extensions', 'title' => 'Manage upload media extensions']);
+        Permission::create(['guard_name' => 'api', 'name' => 'settings/upload_file_extensions', 'title' => 'Manage upload file extensions']);
+        Permission::create(['guard_name' => 'api', 'name' => 'settings/logo', 'title' => 'Set|Delete Logo']);
     }
 }

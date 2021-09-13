@@ -4,7 +4,7 @@ Route::get('/materials/{id}', 'MaterialsController@show')->middleware(['getauth'
 Route::get('/interactive/{id}', 'InterActiveController@show')->middleware(['getauth','LastAction']);
 
 //install all permissions and roles of system Route
-Route::get('install', 'SpatieController@install');
+// Route::get('install', 'SpatieController@install');
 //Login and Signup
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
@@ -509,11 +509,15 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('calendars', CalendarsController::class);
     Route::Resource('overall_seen', SeenReportController::class);
     Route::get('seen/{my_chain}', 'SeenReportController@index')->middleware('permission:reports/overall_seen_report');
+
+    Route::group(['prefix' => 'settings', 'middleware' => ['auth:api']], function () {
+        Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
+        Route::get('logo-get', 'SettingsController@getLogo');
+        Route::get('logo-delete', 'SettingsController@deleteLogo')->middleware('permission:settings/logo');
+        Route::post('update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
+    });
     Route::Resource('settings', SettingsController::class);
-    Route::post('settings/logo-set', 'SettingsController@setLogo');
-    Route::get('settings/logo-get', 'SettingsController@getLogo');
-    Route::get('settings/logo-delete', 'SettingsController@deleteLogo');
-    Route::post('settings/update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
+
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grade-item', GradeItemsController::class);
     Route::Resource('grader-report', GraderReportController::class);
