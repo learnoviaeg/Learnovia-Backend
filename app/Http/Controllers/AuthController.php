@@ -273,7 +273,7 @@ class AuthController extends Controller
         $attachment=attachment::where('type','Logo')->first();
         if($attachment){
             $path=$attachment->path;
-            $name =$attachment->name;
+            $name =$attachment->description;
         }
 
         $firebase=[

@@ -269,7 +269,7 @@ class SettingsController extends Controller
     public function deleteLogo(Request $request)
     {
         $request->validate([
-            'attachment_id' => 'required|exists::attachments,id',
+            'attachment_id' => 'required|exists:attachments,id',
         ]);
         $check=attachment::whereId($request->attachment_id)->first();
         if($check)
