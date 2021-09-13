@@ -78,7 +78,7 @@ class InterActiveController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->orderBy('created_at',$sort_in);
 
         if($request->user()->can('site/course/student')){
            $h5p_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());

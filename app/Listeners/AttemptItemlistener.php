@@ -51,7 +51,7 @@ class AttemptItemlistener
                     'grade_category_id' => $GradeCategory->id,
                 ]);
 
-                $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment',$GradeCategory->course_segment_id)->pluck('user_id');
+                $enrolled_students = Enroll::where('role_id' , 3)->where('course',$GradeCategory->course_id)->pluck('user_id');
                 foreach($enrolled_students as $student){
                     UserGrader::create([
                         'user_id'   => $student,

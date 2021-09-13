@@ -682,18 +682,19 @@ class GradeCategoryController extends Controller
     public function getgradecat(Request $request)
     {
         $request->validate([
-            'class_id' => 'required|exists:classes,id',
+            // 'class_id' => 'required|exists:classes,id',
             'course_id' => 'required|exists:courses,id'
         ]);
 
-        $coursesegment=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
-        if($coursesegment)
-        {
-            $gradeCategories=$coursesegment->GradeCategory()->whereNull('instance_type')->get();
+        // $coursesegment=CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
+        // if($coursesegment)
+        // {
+            // $gradeCategories=$coursesegment->GradeCategory()->whereNull('instance_type')->get();
+            $gradeCat=GradeCategory::where('course_id',$request->course_id)->whereNull('parent')->first();
             LastAction::lastActionInCourse($request->course_id);
             return HelperController::api_response_format(200, $gradeCategories);
-        }
-        return HelperController::api_response_format(200, null,'No available course segment');
+        // }
+        // return HelperController::api_response_format(200, null,'No available course segment');
     }
 
     public function getgradecatArray(Request $request)

@@ -848,7 +848,8 @@ class SpatieController extends Controller
         ]);
 
         $findrole = Role::find($request->roleid);
-        $findrole->permissions;
+        if(Auth::user()->can('site/show-all-courses'))
+            $findrole->permissions;
         return HelperController::api_response_format(200, $findrole);
     }
 

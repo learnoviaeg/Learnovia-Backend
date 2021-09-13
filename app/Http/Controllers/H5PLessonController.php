@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\h5pLesson;
 use App\Lesson;
 use App\User;
-use App\CourseSegment;
+// use App\CourseSegment;
 use App\Enroll;
 use App\Component;
 use Auth;
@@ -69,42 +69,47 @@ class H5PLessonController extends Controller
     {
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
-            'lesson_id' => 'required|exists:lessons,id',
+            'lesson_id' => 'required|exists:lessons,id|array',
             'visible'=>'in:0,1',
             'publish_date' => 'nullable|after:' . Carbon::now(),
         ]);
         
-        $h5p_lesson = h5pLesson::where('content_id',$request->content_id)->where('lesson_id',$request->lesson_id)->first();
-        if(!isset($h5p_lesson)){
+        // $h5p_lesson = h5pLesson::where('content_id',$request->content_id)->whereIn('lesson_id',$request->lesson_id)->first();
+        // if(!isset($h5p_lesson)){
+        foreach($request->lesson_id as $lesson_id){
             $h5p_lesson = h5pLesson::firstOrCreate([
                 'content_id' => $request->content_id,
-                'lesson_id' => $request->lesson_id,
+                'lesson_id' => $lesson_id,
                 'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
                 'start_date' => Carbon::now(),
                 'user_id' => Auth::id(),
                 'visible'=>isset($request->visible)?$request->visible:1
             ]);
-        }
+        // }
 
-        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
-        $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
-        $Lesson = Lesson::find($request->lesson_id);
-        $courseID = CourseSegment::where('id', $Lesson->courseSegment->id)->pluck('course_id')->first();
-        $class_id=$Lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $Lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
-        LastAction::lastActionInCourse($courseID);
-        User::notify([
-            'id' => $content->id,
-            'message' => $content->title.' interactive is added',
-            'from' => Auth::user()->id,
-            'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
-            'course_id' => $courseID,
-            'class_id' => $class_id,
-            'lesson_id' => $request->lesson_id,
-            'type' => 'h5p',
-            'link' => $url.'/api/h5p/'.$h5p_lesson->content_id,
-            'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
-        ]);
+            $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+            $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
+            $lesson = Lesson::find($lesson_id);
+            LastAction::lastActionInCourse($lesson->course_id);
+            // $class_id=$Lesson->shared_classes;
+            $usersIDs = User::whereIn('id' , Enroll::where('course', $lesson->course_id)->whereIn('group',$lesson->shared_classes->pluck('id'))
+                            ->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
+            
+            foreach($lesson->shared_classes->pluck('id') as $class_id){
+                User::notify([
+                    'id' => $content->id,
+                    'message' => $content->title.' interactive is added',
+                    'from' => Auth::user()->id,
+                    'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
+                    'course_id' => $lesson->course_id,
+                    'class_id' => $class_id,
+                    'lesson_id' => $lesson_id,
+                    'type' => 'h5p',
+                    'link' => $url.'/api/h5p/'.$h5p_lesson->content_id,
+                    'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
+                ]);
+            }
+        }
         
         return HelperController::api_response_format(200,$h5p_lesson, __('messages.interactive.add'));
     }
@@ -117,11 +122,11 @@ class H5PLessonController extends Controller
         ]);
 
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
-        if (!isset($h5pLesson)) {
+        if (!isset($h5pLesson))
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
-        }
+        
         $lesson = Lesson::find($request->lesson_id);
-        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($lesson->course_id);
         $h5pLesson->visible = ($h5pLesson->visible == 1) ? 0 : 1;
         $h5pLesson->save();
         return HelperController::api_response_format(200, $h5pLesson, __('messages.success.toggle'));
@@ -170,15 +175,14 @@ class H5PLessonController extends Controller
         ]);
 
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
-        if (!isset($h5pLesson)) {
+        if (!isset($h5pLesson))
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
-        }
+        
         $lesson = Lesson::find($request->lesson_id);
-        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($lesson->course_id);
 
-        if(!$request->user()->can('h5p/lesson/allow-delete') && $h5pLesson->user_id != Auth::id() ){
+        if(!$request->user()->can('h5p/lesson/allow-delete') && $h5pLesson->user_id != Auth::id() )
             return HelperController::api_response_format(400, null, __('messages.permissions.user_doesnot_has_permission'));
-        }
 
         $h5pLesson->delete();
         DB::table('h5p_contents')->where('id', $request->content_id)->delete();
@@ -201,13 +205,13 @@ class H5PLessonController extends Controller
         if(!isset($h5pLesson))
             return HelperController::api_response_format(500, null,__('messages.interactive.interactive_not_belong'));
         $lesson = Lesson::find($request->lesson_id);
-        LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+        LastAction::lastActionInCourse($lesson->course_id);
         if ($request->filled('updated_lesson_id')) {
             $h5pLesson->update([
                 'lesson_id' => $request->updated_lesson_id
             ]);
             $lesson = Lesson::find($request->updated_lesson_id);
-            LastAction::lastActionInCourse($lesson->courseSegment->course_id);
+            LastAction::lastActionInCourse($lesson->course_id);
             }
         if ($request->filled('visible')) {
             $h5pLesson->update([
