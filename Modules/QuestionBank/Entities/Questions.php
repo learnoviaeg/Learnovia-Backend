@@ -11,6 +11,19 @@ class Questions extends Model
         'created_at', 'updated_at','course_segment_id','category_id'
     ];
 
+    //count of all quizzes
+    protected $appends = ['count_quizzes'];
+
+
+    public function getCountQuizzesAttribute(){
+
+        $count_quest = 0;
+        
+        $count_quest = quiz_questions::where('question_id',$this->id)->count();
+            
+        return $count_quest;  
+    }
+
     public function question_type()
     {
         return $this->belongsTo('Modules\QuestionBank\Entities\QuestionsType', 'question_type_id', 'id');
