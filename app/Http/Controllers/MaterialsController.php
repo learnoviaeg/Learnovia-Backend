@@ -16,6 +16,7 @@ use App\SecondaryChain;
 use Carbon\Carbon;
 use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\media;
+use Modules\UploadFiles\Entities\page;
 
 class MaterialsController extends Controller
 {
@@ -153,6 +154,10 @@ class MaterialsController extends Controller
 
     public function Material_Details(Request $request)
     {
+        $request->validate([
+            'id' => 'required|exists:materials,id',
+        ]);
+
         $material = Material::find($request->id);
        
         if(!isset($material))
@@ -163,6 +168,9 @@ class MaterialsController extends Controller
 
         if($material->type == 'media')
             $result = media::find($material->item_id);
+        
+        if($material->type == 'page')
+            $result = page::find($material->item_id);
 
             return response()->json(['message' => __('messages.materials.list'), 'body' => $result], 200);        
     }
