@@ -395,4 +395,11 @@ class QuizzesController extends Controller
                                 );
         return HelperController::api_response_format(200, $grade_to_pass_setting,__('messages.quiz.grade_pass_settings'));
     }
+
+    public function Get_grade_pass_settings(Request $request)
+    {
+        $grade_to_pass_setting = SystemSetting::where('key' , 'Quiz grade to pass')->first();
+        return HelperController::api_response_format(200, $grade_to_pass_setting,__('messages.quiz.grade_pass_settings_list'));
+    }
+
 }
