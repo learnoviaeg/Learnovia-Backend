@@ -8,7 +8,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Level;
 use App\Course;
 use App\AcademicType;
-use Auth;
+// use Auth;
 use App\Classes;
 use App\Exports\LevelsExport;
 use Maatwebsite\Excel\Facades\Excel;
