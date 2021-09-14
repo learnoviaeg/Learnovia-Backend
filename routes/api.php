@@ -517,6 +517,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::get('logo-get', 'SettingsController@getLogo');
         Route::get('logo-delete', 'SettingsController@deleteLogo')->middleware('permission:settings/logo');
         Route::post('update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
+        Route::post('grade-pass', 'QuizzesController@Grade_pass_settings')->middleware('permission:settings/grade_pass');
     });
     Route::Resource('settings', SettingsController::class);
 
