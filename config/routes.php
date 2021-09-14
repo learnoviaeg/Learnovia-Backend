@@ -46,6 +46,7 @@ return [
         'api/quiz/get-single-quiz',
         'api/assignment/get',
         'api/page/get',
-        'api/interactive/{id}'
+        'api/interactive/{id}',
+        'api/announcement/{announcement}'
     ],
 ];
