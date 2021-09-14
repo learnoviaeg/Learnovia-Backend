@@ -38,7 +38,7 @@ class YearsController extends Controller
             return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $enrolls->whereIn('user_id',Auth::id());
+        $enrolls->where('user_id',Auth::id());
         $years->whereIn('id',$enrolls->pluck('year'));
         
         return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
