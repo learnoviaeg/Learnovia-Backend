@@ -65,8 +65,8 @@ class SegmentsController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $enrolls->whereIn('user_id',Auth::id());
-        $segments->whereIn('id',$enrolls->pluck('segment'));
+        $enrolls->where('user_id',Auth::id());
+        $segments->where('id',$enrolls->pluck('segment'));
 
         // foreach($segments->get() as $segment)
         // {
