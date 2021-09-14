@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Repositories\ChainRepositoryInterface;
 use App\Segment;
 use App\Level;
+use Auth;
 use App\Classes;
 use App\Course;
 use App\AcademicType;
