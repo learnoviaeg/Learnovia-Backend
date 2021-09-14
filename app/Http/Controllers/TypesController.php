@@ -44,6 +44,7 @@ class TypesController extends Controller
             return HelperController::api_response_format(201, $types->paginate(HelperController::GetPaginate($request)), __('messages.type.list'));
         
         $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls->whereIn('user_id',Auth::id());
         $types->whereIn('id',$enrolls->pluck('type'));
 
         return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)),__('messages.type.list'));
