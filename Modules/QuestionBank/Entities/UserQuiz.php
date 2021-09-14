@@ -116,7 +116,7 @@ class userQuiz extends Model
     public function getGradeAttribute($value)
     {
         if(!is_null($value))
-            $content = round($value , 2);
-        return $content;
+            return round($value , 2);
+        return $value;
     }
 }
