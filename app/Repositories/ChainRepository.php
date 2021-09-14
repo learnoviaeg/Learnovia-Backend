@@ -7,6 +7,7 @@ use App\CourseSegment;
 use App\AcademicYear;
 use App\YearLevel;
 use App\Level;
+use Auth;
 use App\Enroll;
 use App\Segment;
 use App\LastAction;
