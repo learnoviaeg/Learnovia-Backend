@@ -232,7 +232,7 @@ class UsersController extends Controller
             if (!in_array($id, $users->toArray()))
                 return response()->json(['message' => __('messages.error.not_allowed'), 'body' => null ], 404);
             if(!Auth::user()->can('allow-edit-profiles')){
-                unset($user->username);
+                // unset($user->username);
                 unset($user->real_password);
             }
         }
