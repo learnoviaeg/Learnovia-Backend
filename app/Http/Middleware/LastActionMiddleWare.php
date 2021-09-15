@@ -77,7 +77,7 @@ class LastActionMiddleWare
 
         //start seen report
         $route_seen = Config::get('routes.seen_report');
-
+       
         if(in_array($request->route()->uri,$route_seen) && $request->user()->can('site/course/student')){
 
             if(str_contains($request->route()->uri, 'material') || str_contains($request->route()->uri, 'page')){
@@ -95,10 +95,10 @@ class LastActionMiddleWare
                 }
             }
 
-            if(str_contains($request->route()->uri, 'quiz/get-single-quiz')){
+            if(str_contains($request->route()->uri, 'quizzes')){
 
-                $quiz = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
-
+                $quiz = QuizLesson::where('quiz_id',$request->route()->parameters()['quiz'])->where('lesson_id',$request->lesson_id)->first();
+                
                 if(isset($quiz)){
                     $quiz->seen_number = $quiz->seen_number + 1;
                     $quiz->save();
