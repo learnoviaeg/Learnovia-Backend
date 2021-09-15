@@ -330,7 +330,7 @@ return [
     'logo' => [
         'set' => 'logo added successfully',
         'delete' => 'logo deleted successfully',
-        'update' => 'logo updated successfully',
+        'update' => 'Updated Successfully',
         'faild' => 'there is no logo',
         'get' => 'logo is'
     ],
