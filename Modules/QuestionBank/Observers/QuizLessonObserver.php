@@ -137,7 +137,7 @@ class QuizLessonObserver
             $class_id = $lesson->shared_classes->pluck('id');
 
             $old_lesson = Lesson::find($quizLesson->getOriginal('lesson_id'));
-            $old_class_id = $old_lesson->sharedd_classes->pluck('id');
+            $old_class_id = $old_lesson->shared_classes->pluck('id');
             
             if($old_class_id != $class_id)
                 UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
