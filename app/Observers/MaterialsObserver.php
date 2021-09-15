@@ -42,10 +42,10 @@ class MaterialsObserver
         if($material->isDirty('lesson_id')){
 
             $lesson = Lesson::find($material->lesson_id);
-            $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            $class_id = $lesson->shared_classes->pluck('id');
 
             $old_lesson = Lesson::find($material->getOriginal('lesson_id'));
-            $old_class_id = $old_lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            $old_class_id = $old_lesson->shared_classes->pluck('id');
             
             if($old_class_id != $class_id)
                 UserSeen::where('lesson_id',$material->getOriginal('lesson_id'))->where('item_id',$material->item_id)->where('type',$material->type)->delete();
