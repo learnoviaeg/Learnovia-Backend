@@ -61,7 +61,7 @@ class SeenReportController extends Controller
 
         
         $enrollss = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
-
+      
         if($request->filled('role'))
             $enrollss->whereIn('role_id',$request->role);
 
@@ -70,8 +70,8 @@ class SeenReportController extends Controller
 
         // $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
 
-        $lessons = SecondaryChain::where('enroll_id', $enrollss->get()->pluck('id'))->get()->pluck('lesson_id');
-      
+        $lessons = SecondaryChain::whereIn('enroll_id', $enrollss->get()->pluck('id'))->pluck('lesson_id');
+       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
@@ -86,9 +86,9 @@ class SeenReportController extends Controller
         if($request->filled('lesson_id'))
             $lessons_object = collect([Lesson::find($request->lesson_id)]);
 
-        $lessons_object->map(function ($lesson) use ($lessons_enrolls,$lessons) {
-
-            $total = SecondaryChain::whereIn('lesson_id', $lessons)->where('role_id',3)->count();
+        $lessons_object->map(function ($lesson) use ($lessons_enrolls) {
+            
+            $total = SecondaryChain::where('lesson_id', $lesson->id)->where('role_id',3)->count();
             // $total = count(Enroll::where('course_segment',$lesson->course_segment_id)->where('role_id',3)->select('user_id')->distinct()->get());
 
             $lessons_enrolls->push([
