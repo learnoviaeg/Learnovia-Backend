@@ -47,6 +47,7 @@ return [
         'api/assignment/get',
         'api/page/get',
         'api/interactive/{id}',
-        'api/quizzes/{quiz}'
+        'api/quizzes/{quiz}',
+        'api/announcement/{announcement}'
     ],
 ];

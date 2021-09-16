@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Announcement;
 use Closure;
 use App\LastAction;
 
@@ -77,7 +78,7 @@ class LastActionMiddleWare
 
         //start seen report
         $route_seen = Config::get('routes.seen_report');
-       
+        
         if(in_array($request->route()->uri,$route_seen) && $request->user()->can('site/course/student')){
 
             if(str_contains($request->route()->uri, 'material') || str_contains($request->route()->uri, 'page')){
@@ -94,8 +95,25 @@ class LastActionMiddleWare
                     $object = $materials; 
                 }
             }
+            
+            if(str_contains($request->route()->uri, 'announcement')){
+
+                $announcement = Announcement::whereId($request->route()->parameters()['announcement'])->first();
+
+                if(isset($announcement)){
+                    $announcement->seen_number = $announcement->seen_number + 1;
+                    $announcement->save();
+                    $object = $announcement; 
+                    $object['type'] = 'announcement';
+                    $object['item_id'] = $announcement->id;
+                    $object['lesson_id'] = null;
+
+                }
+            }
 
             if(str_contains($request->route()->uri, 'quizzes')){
+
+                $quiz = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
 
                 $quiz = QuizLesson::where('quiz_id',$request->route()->parameters()['quiz'])->where('lesson_id',$request->lesson_id)->first();
                 
