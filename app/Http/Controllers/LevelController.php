@@ -8,6 +8,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Level;
 use App\Course;
 use App\AcademicType;
+// use Auth;
 use App\Classes;
 use App\Exports\LevelsExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -52,6 +53,7 @@ class LevelController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls->where('user_id',Auth::id());
         $levels->whereIn('id',$enrolls->pluck('level'));
 
         return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));

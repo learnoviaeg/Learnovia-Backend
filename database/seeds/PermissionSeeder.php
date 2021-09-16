@@ -379,5 +379,6 @@ class PermissionSeeder extends Seeder
         Permission::create(['guard_name' => 'api', 'name' => 'settings/upload_media_extensions', 'title' => 'Manage upload media extensions']);
         Permission::create(['guard_name' => 'api', 'name' => 'settings/upload_file_extensions', 'title' => 'Manage upload file extensions']);
         Permission::create(['guard_name' => 'api', 'name' => 'settings/logo', 'title' => 'Set|Delete Logo']);
+        Permission::create(['guard_name' => 'api', 'name' => 'settings/grade_pass', 'title' => 'Manage grade to pass percentage']);
     }
 }

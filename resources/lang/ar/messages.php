@@ -107,6 +107,8 @@ return [
         'quiz_object' => 'تفاصيل الاختبار',
         'quiz_hidden' => 'هذا الاختبار قد تم إخفاءه',
         'quiz_not_started' => 'هذا الاختبار لم يبدأ بعد',
+        'grade_pass_settings' => 'تم اضافه اعدادات درجه النجاح',
+        'grade_pass_settings_list' => ' اعدادات درجه النجاح'
     ],
     'permissions' => [
         'no_roles_assigned' => 'لا توجد وظائف معينة لهذا الإذن',

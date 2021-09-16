@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Repositories\ChainRepositoryInterface;
 use App\Segment;
 use App\Level;
+use Auth;
 use App\Classes;
 use App\Course;
 use App\AcademicType;
@@ -65,6 +66,7 @@ class SegmentsController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls->where('user_id',Auth::id());
         $segments->whereIn('id',$enrolls->pluck('segment'));
 
         // foreach($segments->get() as $segment)

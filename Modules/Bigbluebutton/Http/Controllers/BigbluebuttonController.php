@@ -583,18 +583,12 @@ class BigbluebuttonController extends Controller
 
         if($request->user()->can('site/course/student'))
             $meeting->where('show',1);
-            
-        if($request->has('status'))
-            $meeting->where('status',$request->status);
 
         if($request->has('start_date'))
             $meeting->where('start_date', '>=', $request->start_date)->where('start_date','<=',$request->due_date);
 
         if($request->has('id'))
             $meeting->where('id',$request->id);
-
-        if($count == 'count')
-            return response()->json(['message' => 'Virtual classrooms count', 'body' => $meeting->count()], 200);
         
         $meetings = $meeting->get();
         
@@ -630,8 +624,17 @@ class BigbluebuttonController extends Controller
 
         }
 
-        $meetings = $meetings->sortBy('status')->values();
-        
+        if($request->has('status')){
+            $meetings = $meetings->where('status',ucfirst($request->status))->values();
+        }
+
+        if(!$request->has('status')){
+            $meetings = $meetings->sortBy('status')->values();
+        }
+
+        if($count == 'count')
+            return response()->json(['message' => 'Virtual classrooms count', 'body' => $meetings->count()], 200);
+
         if($request->has('pagination') && $request->pagination==true)
             return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),__('messages.virtual.list'));
             

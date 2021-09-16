@@ -94,11 +94,11 @@ class AssignmentLessonObserver
         if($assignmentLesson->isDirty('lesson_id')){
 
             $lesson = Lesson::find($assignmentLesson->lesson_id);
-            $course_id = $lesson->courseSegment->course_id;
-            $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            $course_id = $lesson->course_id;
+            $class_id = $lesson->shared_classes->pluck('id');
 
             $old_lesson = Lesson::find($assignmentLesson->getOriginal('lesson_id'));
-            $old_class_id = $old_lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            $old_class_id = $old_lesson->shared_classes->pluck('id');
             
             if($old_class_id != $class_id)
                 UserSeen::where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
