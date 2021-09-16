@@ -140,8 +140,8 @@ class UsersController extends Controller
         
         //using in chat api new route { api/user/my_chain}
         if($my_chain=='my_chain'){
-            if(!$request->user()->can('site/show-all-courses')) //student
-                $enrolls=$enrolls->where('user_id',Auth::id());
+            // if(!$request->user()->can('site/show-all-courses')) //student
+            //     $enrolls=$enrolls->where('user_id',Auth::id());
 
             // $enrolls =  Enroll::whereIn('course_segment',$enrolls->pluck('course_segment'))->where('user_id' ,'!=' , Auth::id());
             if($request->user()->can('site/course/student'))
@@ -188,7 +188,7 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, Request $requ)
     {
         $user = User::find($id);
         if(isset($user->attachment))
@@ -232,7 +232,7 @@ class UsersController extends Controller
             if (!in_array($id, $users->toArray()))
                 return response()->json(['message' => __('messages.error.not_allowed'), 'body' => null ], 404);
             if(!Auth::user()->can('allow-edit-profiles')){
-                unset($user->username);
+                // unset($user->username);
                 unset($user->real_password);
             }
         }

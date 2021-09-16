@@ -109,6 +109,8 @@ return [
         'quiz_object' => 'Quiz details',
         'quiz_hidden' => 'This quiz is hidden',
         'quiz_not_started' => 'This quiz didnt start yet',
+        'grade_pass_settings' => 'Grade to pass settings added successfully',
+        'grade_pass_settings_list' => 'Grade to pass settings'
     ],
     'permissions' => [
         'no_roles_assigned' => 'There is no roles assigned to this permission',
@@ -328,7 +330,7 @@ return [
     'logo' => [
         'set' => 'logo added successfully',
         'delete' => 'logo deleted successfully',
-        'update' => 'logo updated successfully',
+        'update' => 'Updated Successfully',
         'faild' => 'there is no logo',
         'get' => 'logo is'
     ],

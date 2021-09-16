@@ -39,7 +39,6 @@ class GradeCategoriesController extends Controller
             'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
-            'class' => 'nullable|integer|exists:classes,id',
             'name' => 'string',
             'parent' => 'exists:grade_categories,id',
         ]);
@@ -49,9 +48,8 @@ class GradeCategoriesController extends Controller
                 $grade_categories->where('name','LIKE' , "%$request->name%");
             if($request->filled('parent'))
                 $grade_categories->where('parent' ,$request->parent);
-            if($request->filled('class') && $request->filled('courses')){
-                $course_segment_id = $this->chain->getCourseSegmentByChain($request)->first()->course_segment;
-                $grade_categories->where('course_segment_id' ,$course_segment_id);
+            if( $request->filled('courses')){
+                $grade_categories->whereIn('course_id' ,$request->courses);
             }
             
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories->with('Child.GradeItems','GradeItems')->get() ], 200);

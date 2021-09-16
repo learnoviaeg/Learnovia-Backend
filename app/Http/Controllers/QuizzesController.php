@@ -23,6 +23,7 @@ use Modules\QuestionBank\Entities\Questions;
 use App\LastAction;
 use Carbon\Carbon;
 use App\Timeline;
+use App\SystemSetting;
 
 class QuizzesController extends Controller
 {
@@ -381,4 +382,24 @@ class QuizzesController extends Controller
         
         return HelperController::api_response_format(200, null,__('messages.quiz.delete'));
     }
+
+    public function Grade_pass_settings(Request $request)
+    {
+        $request->validate([
+            'percentage' => 'required|integer|min:0|max:100',
+        ]);
+
+        $grade_to_pass_setting = SystemSetting::updateOrCreate(
+                                    ['key'=> 'Quiz grade to pass'],
+                                    ['data' =>  $request->percentage]
+                                );
+        return HelperController::api_response_format(200, $grade_to_pass_setting,__('messages.quiz.grade_pass_settings'));
+    }
+
+    public function Get_grade_pass_settings(Request $request)
+    {
+        $grade_to_pass_setting = SystemSetting::where('key' , 'Quiz grade to pass')->first();
+        return HelperController::api_response_format(200, $grade_to_pass_setting,__('messages.quiz.grade_pass_settings_list'));
+    }
+
 }

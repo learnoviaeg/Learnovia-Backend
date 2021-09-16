@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Announcement;
 use Illuminate\Http\Request;
 use App\Material;
 use App\h5pLesson;
@@ -17,6 +18,8 @@ use App\Lesson;
 use App\UserSeen;
 use App\CourseSegment;
 use App\SecondaryChain;
+use App\userAnnouncement;
+use Illuminate\Validation\Rule;
 
 class SeenReportController extends Controller
 {
@@ -61,7 +64,7 @@ class SeenReportController extends Controller
 
         
         $enrollss = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
-
+      
         if($request->filled('role'))
             $enrollss->whereIn('role_id',$request->role);
 
@@ -70,8 +73,8 @@ class SeenReportController extends Controller
 
         // $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
 
-        $lessons = SecondaryChain::where('enroll_id', $enrollss->get()->pluck('id'))->get()->pluck('lesson_id');
-      
+        $lessons = SecondaryChain::whereIn('enroll_id', $enrollss->get()->pluck('id'))->pluck('lesson_id');
+       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
@@ -86,9 +89,9 @@ class SeenReportController extends Controller
         if($request->filled('lesson_id'))
             $lessons_object = collect([Lesson::find($request->lesson_id)]);
 
-        $lessons_object->map(function ($lesson) use ($lessons_enrolls,$lessons) {
-
-            $total = SecondaryChain::whereIn('lesson_id', $lessons)->where('role_id',3)->count();
+        $lessons_object->map(function ($lesson) use ($lessons_enrolls) {
+            
+            $total = SecondaryChain::where('lesson_id', $lesson->id)->where('role_id',3)->count();
             // $total = count(Enroll::where('course_segment',$lesson->course_segment_id)->where('role_id',3)->select('user_id')->distinct()->get());
 
             $lessons_enrolls->push([
@@ -245,6 +248,49 @@ class SeenReportController extends Controller
         }
 
         return response()->json(['message' => 'Overall seen report', 'body' => $report->paginate(Paginate::GetPaginate($request))], 200);
+    }
+
+
+    public function announcementsSeenReport(Request $request,$option = null){
+
+        $request->validate([
+            'search' => 'nullable',
+            'paginate' => 'integer',
+            'id' => [Rule::requiredIf($option === 'users')],
+        ]);
+
+        $announcements = Announcement::orderBy('publish_date','desc');
+
+        if($request->has('search')){
+            $announcements->where('title', 'LIKE' , "%$request->search%");
+        }
+
+        $announcements = $announcements->get();
+
+        //get users who saw announcement
+        if($option == 'users'){
+            $users = UserSeen::where('type','announcement')->where('item_id',$request->id)->where('lesson_id',null)->with('user')->get()->pluck('user');
+            return response()->json(['message' => 'announcement seen users', 'body' => $users], 200);
+        }
+
+        //get user seen number and total, to calculate percentage for each announcement
+        foreach($announcements as $announcement){
+            $total_users = userAnnouncement::where('announcement_id',$announcement->id)->count();
+            $announcement->user_seen_number = UserSeen::where('type','announcement')->where('item_id',$announcement->id)->where('lesson_id',null)->count();
+            $announcement->percentage = $announcement->user_seen_number > 0 ? round(($announcement->user_seen_number/$total_users)*100,2) : 0;
+        }
+
+        //get chart percentage
+        if($option == 'chart'){
+            
+            $total = count($announcements);
+            $sum_percentage = array_sum($announcements->pluck('percentage')->toArray());
+            $final_percentage = round($sum_percentage/$total,1);
+
+            return response()->json(['message' => 'Total Percentage', 'body' => $final_percentage], 200);
+        }
+
+        return response()->json(['message' => 'Anouncements overall seen report', 'body' => $announcements->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

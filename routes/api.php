@@ -463,6 +463,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
+    Route::get('materials-details', 'MaterialsController@Material_Details');
     Route::get('GradeTree', 'UserGradeController@index');
 
     // Route::get('years/{export}', 'YearsController@index');
@@ -509,6 +510,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('calendars', CalendarsController::class);
     Route::Resource('overall_seen', SeenReportController::class);
     Route::get('seen/{my_chain}', 'SeenReportController@index')->middleware('permission:reports/overall_seen_report');
+    Route::get('announcement_overall_seen', 'SeenReportController@announcementsSeenReport')->middleware('permission:reports/overall_seen_report');
+    Route::get('announcement_overall_seen/{option}', 'SeenReportController@announcementsSeenReport')->middleware('permission:reports/overall_seen_report');
 
     Route::group(['prefix' => 'settings', 'middleware' => ['auth:api']], function () {
         Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
@@ -516,6 +519,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::get('logo-get', 'SettingsController@getLogo');
         Route::get('logo-delete', 'SettingsController@deleteLogo')->middleware('permission:settings/logo');
         Route::post('update', 'SettingsController@update')->middleware('permission:settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
+        Route::post('grade-pass', 'QuizzesController@Grade_pass_settings')->middleware('permission:settings/grade_pass');
+        Route::get('grade-pass', 'QuizzesController@Get_grade_pass_settings')->middleware('permission:settings/grade_pass');
     });
     Route::Resource('settings', SettingsController::class);
 

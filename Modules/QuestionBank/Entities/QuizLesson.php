@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\QuizOverride;
 use App\UserSeen;
+use App\SystemSetting;
 
 class QuizLesson extends Model
 {
@@ -98,4 +99,32 @@ class QuizLesson extends Model
             $content = [];
         return $content;
     }
+
+    // public function getGradePassAttribute($value)
+    // {
+    //     $grade_pass = SystemSetting::where('key','Quiz grade to pass')->first();
+    //     if(isset($grade_pass)){
+    //         $percentage = (float)$grade_pass->data;
+    //         $content= (float)$value;
+
+    //     }
+
+    //     if(is_null($value))
+    //         $content = [];
+    //     return $content;
+    // }
+
+    public function getGradePassAttribute()
+    {
+        $content = $this->attributes['grade_pass'];
+        $grade_pass = SystemSetting::where('key','Quiz grade to pass')->first();
+        if(isset($grade_pass)){
+            $percentage = (float)$grade_pass->data / 100;
+            if(isset($this->attributes['questions_mark']) && $this->attributes['questions_mark'] != 0)
+                $content = $this->attributes['questions_mark'] * $percentage;
+        }
+        
+        return $content;
+    }
 }
+

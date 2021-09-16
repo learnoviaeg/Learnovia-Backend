@@ -200,11 +200,11 @@ class EnrollUserToCourseController extends Controller
     {
         $request->validate([
             'users' => 'required|array|exists:users,id',
-            'year' => 'exists:academic_years,id',
+            'year' => 'required|exists:academic_years,id',
             'type' => 'required|exists:academic_types,id',
             'level' => 'required|exists:levels,id',
             'class' => 'required|exists:classes,id',
-            'segment' => 'exists:segments,id',
+            'segment' => 'required|exists:segments,id',
             'course' => 'array|exists:courses,id'
         ]);
 

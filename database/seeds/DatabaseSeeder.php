@@ -49,8 +49,5 @@ class DatabaseSeeder extends Seeder
         \App::call('App\Http\Controllers\H5PLessonController@install');
         
         \Artisan::call('storage:link', ['--env' => 'local']);
-
-   
-
     }
 }
