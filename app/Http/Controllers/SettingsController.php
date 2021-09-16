@@ -256,9 +256,9 @@ class SettingsController extends Controller
             'school_logo' => 'required|mimes:jpg,jpeg,png',
             'school_name' => 'required|string',
         ]);
-        $check=attachment::where('type','Logo')->first();
-        if($check)
-            $check->delete();
+        $check=attachment::where('type','Logo')->delete();
+        // if($check)
+        //     $check->delete();
 
         $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
 
@@ -280,7 +280,7 @@ class SettingsController extends Controller
 
     public function getLogo()
     {
-        $attachment=attachment::where('type','Logo')->first();
+        $attachment=attachment::where('type','Logo')->latest();
         if(!$attachment)
             return response()->json(['message' => __('messages.logo.faild'), 'body' => null], 200);
 
@@ -299,7 +299,13 @@ class SettingsController extends Controller
         $attachment->save();
 
         if(isset($request->school_logo))
+        {
+            $check=attachment::where('type','Logo')->delete();
+            // if($check)
+            //     $check->delete();
+
             $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
+        }
 
         // return $attachment;
         return response()->json(['message' => __('messages.logo.update'), 'body' => $attachment], 200);
