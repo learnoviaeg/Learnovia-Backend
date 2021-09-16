@@ -113,8 +113,6 @@ class LastActionMiddleWare
 
             if(str_contains($request->route()->uri, 'quizzes')){
 
-                $quiz = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
-
                 $quiz = QuizLesson::where('quiz_id',$request->route()->parameters()['quiz'])->where('lesson_id',$request->lesson_id)->first();
                 
                 if(isset($quiz)){
