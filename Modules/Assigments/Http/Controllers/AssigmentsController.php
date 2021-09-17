@@ -901,7 +901,7 @@ class AssigmentsController extends Controller
             if ($request->filled('grade_category'))
             {
                 $lessonAll = Lesson::find($lesson);
-                $gradeCats = GradeCategory::where('course_id',$lessonAll->course_id);
+                $gradeCats = GradeCategory::where('course_id',$lessonAll->course_id)->get();
                 $flag = false;
                 foreach ($gradeCats as $grade){
                     if($grade->id == $request->grade_category[$key]){
