@@ -93,7 +93,7 @@ class H5PLessonController extends Controller
             LastAction::lastActionInCourse($lesson->course_id);
             // $class_id=$Lesson->shared_classes;
             $usersIDs = User::whereIn('id' , Enroll::where('course', $lesson->course_id)->whereIn('group',$lesson->shared_classes->pluck('id'))
-                            ->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
+                            ->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray())->pluck('id');
             
             foreach($lesson->shared_classes->pluck('id') as $class_id){
                 User::notify([

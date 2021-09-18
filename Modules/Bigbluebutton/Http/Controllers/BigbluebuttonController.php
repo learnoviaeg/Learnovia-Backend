@@ -175,7 +175,7 @@ class BigbluebuttonController extends Controller
                     // if(count($course_segments_ids) <= 0)
                     //     return HelperController::api_response_format(404, null ,__('messages.error.no_active_segment'));
             
-                    $usersIDs=Enroll::where('group',$class)->where('course',$object['course_id'])->where('user_id','!=', Auth::id())->pluck('user_id')->unique()->values()->toarray();
+                    $usersIDs=Enroll::where('group',$class)->where('course',$object['course_id'])->where('user_id','!=', Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->unique()->values()->toarray();
                     foreach($request->start_date as $start_date){
                         $last_date = $start_date;
                         if(isset($request->last_day))
