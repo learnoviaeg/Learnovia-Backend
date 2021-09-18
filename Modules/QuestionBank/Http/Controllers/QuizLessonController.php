@@ -61,7 +61,7 @@ class QuizLessonController extends Controller
             $lesson = Lesson::find($lessons);
 
             //for notification
-            $users = Enroll::where('course_id',$lesson->course_id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
+            $users = Enroll::where('course_id',$lesson->course_id)->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray();
             $course = $lesson->course_id;
             LastAction::lastActionInCourse($course);
 
@@ -245,7 +245,7 @@ class QuizLessonController extends Controller
             $quizLesson->update(['publish_date' => $publish]);
 
         //for notification
-        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray();
+        $users = Enroll::where('course_segment',$lesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray();
         $course = $lesson->courseSegment->course_id;
         LastAction::lastActionInCourse($course);
 
