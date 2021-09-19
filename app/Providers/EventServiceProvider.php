@@ -61,6 +61,13 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\ManualCorrectionEvent' => [
             'App\Listeners\GradeManualListener',
         ],
+
+        'App\Events\TopicCreatedEvent' => [
+            'App\Listeners\LinkTopicEnrollListener',
+
+        ],
+
+    
     ];
 
     /**

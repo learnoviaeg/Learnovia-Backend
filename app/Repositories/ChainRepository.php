@@ -206,6 +206,7 @@ class ChainRepository implements ChainRepositoryInterface
         $types = $enrolls->pluck('type')->unique()->values();
 
         $active_segments = Segment::Get_current_by_many_types($types);
+        
 
         if($request->filled('period')){
             

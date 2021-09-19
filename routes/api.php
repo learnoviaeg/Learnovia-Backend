@@ -513,6 +513,12 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
 });
 
+Route::group(['middleware' => ['auth:api','LastAction']], function () {
+  Route::Resource('topic', TopicController::class);
+});
+
+
+
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);

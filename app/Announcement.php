@@ -24,8 +24,4 @@ class Announcement extends Model
         return $this->hasMany('App\AnnouncementsChain','announcement_id', 'id');
     }
 
-    public function topic()
-    {
-        return $this->belongsTo('App\TopicChain' , 'topic_id' , 'id'); 
-    }
 }

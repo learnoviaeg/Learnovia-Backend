@@ -104,4 +104,10 @@ class Enroll extends Model
     {
         return $this->hasManyThrough(Lesson::class, SecondaryChain::class);
     }
+
+
+    public function topics()
+    {
+        return $this->belongsToMany('App\Topic' , 'topic_id' , 'id');
+    }
 }
