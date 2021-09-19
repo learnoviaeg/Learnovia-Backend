@@ -177,7 +177,7 @@ class AnnouncementsController extends Controller
                 $enrolls->where('role_id','!=', 1 );
             }
 
-            $users->push($enrolls->with('user')->get()->pluck('user')->unique()->filter()->values()->pluck('id'));
+            $users->push($enrolls->whereHas('user')->select('user_id')->distinct()->pluck('user_id'));
 
             $announcement_chain = AnnouncementsChain::create([
                 'announcement_id' => $announcement->id,
