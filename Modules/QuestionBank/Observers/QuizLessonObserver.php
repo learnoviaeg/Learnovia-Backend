@@ -82,7 +82,7 @@ class QuizLessonObserver
             $quizLesson->save();
 
             $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
-                            ->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
+                            ->where('user_id','!=',Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->toArray();
 
             foreach($lesson->shared_classes->pluck('id') as $class){
                 $requ = ([
@@ -112,7 +112,7 @@ class QuizLessonObserver
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
 
         $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
-                    ->where('user_id','!=',Auth::id())->pluck('user_id')->toArray();
+                    ->where('user_id','!=',Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->toArray();
         // $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
         foreach($lesson->shared_classes->pluck('id') as $class){
