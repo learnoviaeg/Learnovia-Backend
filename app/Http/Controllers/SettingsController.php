@@ -280,7 +280,7 @@ class SettingsController extends Controller
 
     public function getLogo()
     {
-        $attachment=attachment::where('type','Logo')->latest();
+        $attachment=attachment::where('type','Logo')->first();
         if(!$attachment)
             return response()->json(['message' => __('messages.logo.faild'), 'body' => null], 200);
 

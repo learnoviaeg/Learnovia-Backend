@@ -140,10 +140,10 @@ class QuestionsController extends Controller
             $question['content']= json_encode($combined_content);
         }
         if($question['question_type_id'] == 2 ){
-                if(($quiz_question->grade_details != null)){
-                    $question->content = json_encode($quiz_question->grade_details->details);
-                    $question->mark = $quiz_question->grade_details->total_mark;
-                    $question->mcq_type = $quiz_question->grade_details->type;
+            if(($quiz_question->grade_details != null)){
+                $question->content = json_encode($quiz_question->grade_details->details);
+                $question->mark = $quiz_question->grade_details->total_mark;
+                $question->mcq_type = $quiz_question->grade_details->type;
             }
         }
     }
