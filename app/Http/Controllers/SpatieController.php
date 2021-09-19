@@ -1129,8 +1129,8 @@ class SpatieController extends Controller
             $request['ids']= Role::pluck('id');
 
         $filename = uniqid();
-        $file = Excel::store(new ExportRoleWithPermissions($request->ids), 'roles'.$filename.'.xls','public');
-        $file = url(Storage::url('roles'.$filename.'.xls'));
+        $file = Excel::store(new ExportRoleWithPermissions($request->ids), 'roles'.$filename.'.xlsx','public');
+        $file = url(Storage::url('roles'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

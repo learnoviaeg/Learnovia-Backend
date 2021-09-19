@@ -715,8 +715,8 @@ class EnrollUserToCourseController extends Controller
 
             // return $enrolls;
         $filename = uniqid();
-        $file = Excel::store(new teacherwithcourse($enrolls), 'tech'.$filename.'.xls','public');
-        $file = url(Storage::url('tech'.$filename.'.xls'));
+        $file = Excel::store(new teacherwithcourse($enrolls), 'tech'.$filename.'.xlsx','public');
+        $file = url(Storage::url('tech'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
         // return HelperController::api_response_format(201,$enrolls, 'enrolls');
     }
@@ -759,8 +759,8 @@ class EnrollUserToCourseController extends Controller
             
         $enrolls = Enroll::whereIn('course_segment',$CS_ids)->where('role_id',3)->with(['user','levels','classes'])->get()->groupBy(['levels.name','classes.name']);
         $filename = uniqid();
-        $file = Excel::store(new classeswithstudents($enrolls), 'students'.$filename.'.xls','public');
-        $file = url(Storage::url('students'.$filename.'.xls'));
+        $file = Excel::store(new classeswithstudents($enrolls), 'students'.$filename.'.xlsx','public');
+        $file = url(Storage::url('students'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
         // return HelperController::api_response_format(201,$enrolls, 'enrolls');
     }

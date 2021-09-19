@@ -189,8 +189,8 @@ class AcademicYearController extends Controller
     {
         $years = self::getall($request,1);
         $filename = uniqid();
-        $file = Excel::store(new YearsExport($years), 'Year'.$filename.'.xls','public');
-        $file = url(Storage::url('Year'.$filename.'.xls'));
+        $file = Excel::store(new YearsExport($years), 'Year'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Year'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

@@ -307,8 +307,8 @@ class LevelsController extends Controller
     {
         $levelsIDs = self::GetAllLevelsInYear($request,1);
         $filename = uniqid();
-        $file = Excel::store(new LevelsExport($levelsIDs), 'levels'.$filename.'.xls','public');
-        $file = url(Storage::url('levels'.$filename.'.xls'));
+        $file = Excel::store(new LevelsExport($levelsIDs), 'levels'.$filename.'.xlsx','public');
+        $file = url(Storage::url('levels'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }
