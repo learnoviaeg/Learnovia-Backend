@@ -1103,12 +1103,16 @@ class SpatieController extends Controller
     public function dashboard(Request $request)
     {
         $dashbordPermission = array();
+        $ids = array();
         $user = Auth::user();
         $allRole = $user->roles;
         foreach ($allRole as $role) {
             $pers = $role->getAllPermissions();
             foreach ($pers as $permission) {
                 if ($permission->dashboard) {
+                    if(in_array($permission->id , $ids))
+                        continue;
+                    array_push($ids , $permission->id);
                     $key = explode("/", $permission->name)[0];
                     $dashbordPermission[$key]['icon']= $permission->icon;
                     $dashbordPermission[$key]['routes'][] = ['route' => $permission->name, 'title' => $permission->title];
