@@ -49,24 +49,24 @@ class RoleSeeder extends Seeder
             'timeline/get', 'material/get', 'course/teachers', 'chat/add-room'
         ];
 
-        $Super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin', 'description' => 'System manager that can monitor everything.']);
+        $Super = \Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'api', 'name' => 'Super Admin', 'description' => 'System manager that can monitor everything.']);
         $Super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%user/parent-child%')->where('name', 'not like', '%site/course/student%')->where('name', 'not like', 'user/get-my-child')->where('name', 'not like', '%user/get-current-child%')->where('name', 'not like', '%site/show/as-participant%')->get());
 
-        \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'System Admin', 'description' => 'System admin.']);
+        \Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'api', 'name' => 'System Admin', 'description' => 'System admin.']);
 
-        $Student=  \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Student', 'description' => 'System student.']);
+        $Student=  \Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'api', 'name' => 'Student', 'description' => 'System student.']);
         $Student->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $student_permissions)->get());
 
-        $Teacher=\Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Teacher', 'description' => 'System teacher.']);
+        $Teacher=\Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'api', 'name' => 'Teacher', 'description' => 'System teacher.']);
         $Teacher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
 
-        \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Manager', 'description' => 'System Manager.']);
-        \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Supervisor', 'description' => 'System Supervisor.']);
+        \Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'api', 'name' => 'Manager', 'description' => 'System Manager.']);
+        \Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'api', 'name' => 'Supervisor', 'description' => 'System Supervisor.']);
 
-        $Parent=\Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Parent', 'description' => 'Students Parent.']);
+        $Parent=\Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'api', 'name' => 'Parent', 'description' => 'Students Parent.']);
         $Parent->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $parent_permissions)->get());
 
-        $Authenticated =\Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Authenticated', 'description' => 'Allow user to only login untill has another permissions.']);
+        $Authenticated =\Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'api', 'name' => 'Authenticated', 'description' => 'Allow user to only login untill has another permissions.']);
         $Authenticated->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%bulk%')->where('name', 'like', '%messages%')->get());
     }
 }
