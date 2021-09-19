@@ -941,8 +941,8 @@ class BigbluebuttonController extends Controller
         $bigbb=BigbluebuttonModel::find($request->id);
         LastAction::lastActionInCourse($bigbb->course_id);
         $filename = uniqid();
-        $file = Excel::store(new BigBlueButtonAttendance($bbb_object), 'bbb'.$filename.'.xls','public');
-        $file = url(Storage::url('bbb'.$filename.'.xls'));
+        $file = Excel::store(new BigBlueButtonAttendance($bbb_object), 'bbb'.$filename.'.xlsx','public');
+        $file = url(Storage::url('bbb'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
@@ -1210,8 +1210,8 @@ class BigbluebuttonController extends Controller
     {        
         $bbb_object = self::general_report($request,1);
         $filename = uniqid();
-        $file = Excel::store(new BigbluebuttonGeneralReport($bbb_object), 'bbbgeneral'.$filename.'.xls','public');
-        $file = url(Storage::url('bbbgeneral'.$filename.'.xls'));
+        $file = Excel::store(new BigbluebuttonGeneralReport($bbb_object), 'bbbgeneral'.$filename.'.xlsx','public');
+        $file = url(Storage::url('bbbgeneral'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
     

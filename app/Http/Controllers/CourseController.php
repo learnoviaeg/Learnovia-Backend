@@ -1155,8 +1155,8 @@ class CourseController extends Controller
     {
         $courses=self::get($request,1);
         $filename = uniqid();
-        $file = Excel::store(new CoursesExport($courses), 'Courses'.$filename.'.xls','public');
-        $file = url(Storage::url('Courses'.$filename.'.xls'));
+        $file = Excel::store(new CoursesExport($courses), 'Courses'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Courses'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 

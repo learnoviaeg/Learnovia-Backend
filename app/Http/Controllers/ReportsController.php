@@ -175,8 +175,8 @@ class ReportsController extends Controller
             if($request->filled('export')){
 
                 $filename = uniqid();
-                $file = Excel::store(new InactiveUsers($users_lastaction), 'reports'.$filename.'.xls','public');
-                $file = url(Storage::url('reports'.$filename.'.xls'));
+                $file = Excel::store(new InactiveUsers($users_lastaction), 'reports'.$filename.'.xlsx','public');
+                $file = url(Storage::url('reports'.$filename.'.xlsx'));
                 return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
 
             }
