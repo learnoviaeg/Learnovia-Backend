@@ -108,7 +108,6 @@ class h5p extends Command
         $this->info('Compiled services and packages files removed!');
         $this->info('Caches cleared successfully!');
     
-
         $this->info('Success installed');
         
 
