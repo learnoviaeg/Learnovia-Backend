@@ -92,7 +92,7 @@ class TopicController extends Controller
                'topic_id' => $topic->id,
            ]);
         }
-        return HelperController::api_response_format(200, $topics);
+        return HelperController::api_response_format(200, $topic);
 
     }
     /**
@@ -103,7 +103,7 @@ class TopicController extends Controller
      */
     public function show(Topic $topic)
     {
-        return HelperController::api_response_format(200, $topics);
+        return HelperController::api_response_format(200, $topic);
 
     }
 
@@ -149,7 +149,7 @@ class TopicController extends Controller
            ]);
         }
         // return new TopicResource($topic);
-        return HelperController::api_response_format(200, $topics);
+        return HelperController::api_response_format(200, $topic);
 
     }
     /**
