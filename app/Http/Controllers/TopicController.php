@@ -138,8 +138,5 @@ class TopicController extends Controller
         $topic->delete();         
     }  
     
-    public function getAllEnrollUsers(Topic $topic)
-    {
-        
-    }
+  
 }
