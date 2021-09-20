@@ -92,7 +92,8 @@ class TopicController extends Controller
                'topic_id' => $topic->id,
            ]);
         }
-        return new TopicResource($topic);
+        return HelperController::api_response_format(200, $topics);
+
     }
     /**
      * Display the specified resource.
@@ -102,7 +103,8 @@ class TopicController extends Controller
      */
     public function show(Topic $topic)
     {
-        return new TopicResource($topic);
+        return HelperController::api_response_format(200, $topics);
+
     }
 
     /**
@@ -146,7 +148,9 @@ class TopicController extends Controller
 
            ]);
         }
-        return new TopicResource($topic);
+        // return new TopicResource($topic);
+        return HelperController::api_response_format(200, $topics);
+
     }
     /**
      * Remove the specified resource from storage.
@@ -156,7 +160,9 @@ class TopicController extends Controller
      */
     public function destroy(Topic $topic)
     {
-        $topic->delete();         
+        $topic->delete();      
+        return HelperController::api_response_format(200, 'Deleted success');
+
     }  
     
   
