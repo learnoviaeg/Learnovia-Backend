@@ -400,8 +400,8 @@ class AttendanceSessionController extends Controller
         ]);
         $attendnace_object = self::get_users_in_sessions($request,1);
         $filename = uniqid();
-        $file = Excel::store(new AttendnaceExport($attendnace_object), 'attendance'.$filename.'.xls','public');
-        $file = url(Storage::url('attendance'.$filename.'.xls'));
+        $file = Excel::store(new AttendnaceExport($attendnace_object), 'attendance'.$filename.'.xlsx','public');
+        $file = url(Storage::url('attendance'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

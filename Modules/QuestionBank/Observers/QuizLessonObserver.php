@@ -132,23 +132,25 @@ class QuizLessonObserver
 
         if($quizLesson->isDirty('lesson_id')){
             
-            // $lesson = Lesson::find($quizLesson->lesson_id);
-            // $course_id = $lesson->course_id;
-            // $class_id = $lesson->shared_classes->pluck('id');
+            $lesson = Lesson::find($quizLesson->lesson_id);
+            $course_id = $lesson->course_id;
+            $old_class_id=null;
+            $class_id = $lesson->shared_classes->pluck('id');
 
-            // $old_lesson = Lesson::find($quizLesson->getOriginal('lesson_id'));
-            // $old_class_id = $old_lesson->shared_classes->pluck('id');
+            $old_lesson = Lesson::find($quizLesson->getOriginal('lesson_id'));
+            if($old_lesson)
+                $old_class_id = $old_lesson->shared_classes->pluck('id');
             
-            // if($old_class_id != $class_id)
-            //     UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
+            if($old_class_id != $class_id)
+                UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->delete();
 
-            // if($old_class_id == $class_id){
-            //     UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->update([
-            //         'lesson_id' => $quizLesson->lesson_id
-            //     ]);
-            // }
+            if($old_class_id == $class_id){
+                UserSeen::where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('item_id',$quizLesson->quiz_id)->where('type','quiz')->update([
+                    'lesson_id' => $quizLesson->lesson_id
+                ]);
+            }
 
-            // $this->report->calculate_course_progress($course_id);
+            $this->report->calculate_course_progress($course_id);
         }
     }
 

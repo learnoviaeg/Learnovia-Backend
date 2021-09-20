@@ -171,40 +171,42 @@ class UserController extends Controller
             $user->assignRole($role);
             // $Auth_role = Role::find(8);
             // $user->assignRole($Auth_role);
-            if ($request->role_id == 3) {
-                $option = new Request([
-                    'users' => [$user->id],
-                    'level' => $request->level[$key] ,
-                    'type' => $request->type[$key],
-                    'class' => $request->class_id[$key]
-                ]);
-                EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
+            // if ($request->role_id == 3) {
+            //     $option = new Request([
+            //         'users' => [$user->id],
+            //         'level' => $request->level[$key] ,
+            //         'type' => $request->type[$key],
+            //         'class' => $request->class_id[$key],
+            //         'year' => $request->year[$key],
+            //         'segment' => $request->segment[$key]
+            //     ]);
+            //     EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
 
-                $enrollcounter = 0;
-                while (isset($request->$enrollOptional[$key][$enrollcounter])) {
-                    $option = new Request([
-                        'course' => [$request->$enrollOptional[$key]],
-                        'class' =>$request->class_id[$key],
-                        'users' => array($user->id),
-                        'role_id' => array(3)
-                    ]);
-                    EnrollUserToCourseController::EnrollCourses($option);
-                    $enrollcounter++;
-                }
-            } else {
-                $teachercounter = 0;
+            //     $enrollcounter = 0;
+            //     while (isset($request->$enrollOptional[$key][$enrollcounter])) {
+            //         $option = new Request([
+            //             'course' => [$request->$enrollOptional[$key]],
+            //             'class' =>$request->class_id[$key],
+            //             'users' => array($user->id),
+            //             'role_id' => array(3)
+            //         ]);
+            //         EnrollUserToCourseController::EnrollCourses($option);
+            //         $enrollcounter++;
+            //     }
+            // } else {
+            //     $teachercounter = 0;
 
-                while (isset($request->$teacheroptional[$key][$teachercounter])) {
-                    $option = new Request([
-                        'course' => [$request->$teacheroptional[$key]],
-                        'class' =>$request->class_id[$key],
-                        'users' => array($user->id),
-                        'role_id' => array(4)
-                    ]);
-                    EnrollUserToCourseController::EnrollCourses($option);
-                    $teachercounter++;
-                }
-            }
+            //     while (isset($request->$teacheroptional[$key][$teachercounter])) {
+            //         $option = new Request([
+            //             'course' => [$request->$teacheroptional[$key]],
+            //             'class' =>$request->class_id[$key],
+            //             'users' => array($user->id),
+            //             'role_id' => array(4)
+            //         ]);
+            //         EnrollUserToCourseController::EnrollCourses($option);
+            //         $teachercounter++;
+            //     }
+            // }
             $users_is->push($user);
         }
         return HelperController::api_response_format(201, $users_is, __('messages.users.add'));
@@ -946,8 +948,8 @@ class UserController extends Controller
         $fields = ['username_parent', 'username_child'];
 
         $filename = uniqid();
-        $file = Excel::store(new ParentChildExport($fields), 'parent_child'.$filename.'.xls','public');
-        $file = url(Storage::url('parent_child'.$filename.'.xls'));
+        $file = Excel::store(new ParentChildExport($fields), 'parent_child'.$filename.'.xlsx','public');
+        $file = url(Storage::url('parent_child'.$filename.'.xlsx'));
 
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
@@ -972,8 +974,8 @@ class UserController extends Controller
 
         $userIDs = self::list($request,1);
         $filename = uniqid();
-        $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xls','public');
-        $file = url(Storage::url('users'.$filename.'.xls'));
+        $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+        $file = url(Storage::url('users'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
