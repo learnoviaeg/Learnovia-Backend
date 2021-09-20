@@ -7,6 +7,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Timeline;
 use App\Announcement;
 use App\userAnnouncement;
+use App\SecondaryChain;
 use Auth;
 
 class CalendarsController extends Controller
@@ -48,7 +49,7 @@ class CalendarsController extends Controller
         ]);
 
         $calendar['announcements'] = [];
-        $user_course_segments = $enrolls = $this->chain->getCourseSegmentByChain($request);
+        $user_course_segments = $enrolls = $this->chain->getEnrollsByChain($request);
 
         if(!$request->user()->can('site/show-all-courses'))//any other user enrolled
         {
@@ -75,8 +76,9 @@ class CalendarsController extends Controller
             }
 
         }
+        $calendar['lessons'] =SecondaryChain::where('enroll_id',$enrolls->pluck('id'))->get()->pluck('lesson_id');
 
-        $calendar['lessons'] = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+        // $calendar['lessons'] = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
         
         $timeline = Timeline::with(['class','course','level'])
                             ->where(function ($query) use ($calendar) {
