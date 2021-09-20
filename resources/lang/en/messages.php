@@ -144,7 +144,13 @@ return [
         'list' => 'Pages List',
         'page_not_belong' => 'This page does not belong to this lesson',
         'page_hidden' => 'This page is hidden'
+    ],
 
+    'topic' => [
+        'add' => 'Topic added successfully',
+        'update' => 'Topic updated successfully',
+        'delete' => 'Topic deleted successfully',
+        'list' => 'Topics List',
     ],
     'file' => [
         'add' => 'File uploaded successfully',

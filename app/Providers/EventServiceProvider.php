@@ -61,6 +61,7 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\ManualCorrectionEvent' => [
             'App\Listeners\GradeManualListener',
         ],
+    
     ];
 
     /**

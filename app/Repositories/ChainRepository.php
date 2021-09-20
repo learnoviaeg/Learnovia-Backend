@@ -9,10 +9,13 @@ use App\YearLevel;
 use App\Level;
 use Auth;
 use App\Enroll;
+use App\Topic;
 use App\Segment;
 use App\LastAction;
 use App\AcademicYearType;
 use Carbon\carbon;
+use Auth;
+
 
 class ChainRepository implements ChainRepositoryInterface
 {
@@ -192,11 +195,13 @@ class ChainRepository implements ChainRepositoryInterface
         if($request->filled('years'))
             $years = $request->years;
 
+
         if(count($years) == 0){
             throw new \Exception('There is no active year');
         }
 
         $enrolls =  Enroll::whereIn('year', $years);
+        //dd($enrolls->get());
 
         if(count($enrolls->pluck('year'))==0)
             throw new \Exception('Please enroll some users in any course of this year');
@@ -207,6 +212,7 @@ class ChainRepository implements ChainRepositoryInterface
         $types = $enrolls->pluck('type')->unique()->values();
 
         $active_segments = Segment::Get_current_by_many_types($types);
+        
 
         if($request->filled('period')){
             
@@ -247,5 +253,7 @@ class ChainRepository implements ChainRepositoryInterface
 
         return $enrolls;    
     }
+
+
 
 }
