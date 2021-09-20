@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Announcement extends Model
 {
     protected $fillable = ['title','description','attached_file','start_date','due_date','assign','class_id','level_id','course_id',
-        'year_id','type_id','segment_id','publish_date','created_by',
+        'year_id','type_id','segment_id','publish_date','created_by', 'topic_id',
     ];
 
     public function attachment()
@@ -23,4 +23,5 @@ class Announcement extends Model
     public  function chainAnnouncement(){
         return $this->hasMany('App\AnnouncementsChain','announcement_id', 'id');
     }
+
 }
