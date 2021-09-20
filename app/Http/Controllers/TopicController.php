@@ -47,10 +47,13 @@ class TopicController extends Controller
             'users' => 'array',
             'users.*' => 'nullable|exists:users,id',
         ]);
+
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $topic_ids =  EnrollTopic::whereIn('enroll_id' , $enrolls->pluck('id'))->pluck('topic_id');
         $topics = Topic::whereIn('id' , $topic_ids);
-        return HelperController::api_response_format(200, $topics->paginate(HelperController::GetPaginate($request)));
+        if($request->filled('search'))
+           $topics->where('title', 'LIKE' , "%$request->search%");
+        return HelperController::api_response_format(200, $topics->paginate(HelperController::GetPaginate($request)), __('messages.topic.list'));
     }
     /**
      * Store a newly created resource in storage.
@@ -92,7 +95,7 @@ class TopicController extends Controller
                'topic_id' => $topic->id,
            ]);
         }
-        return HelperController::api_response_format(200, $topic);
+        return HelperController::api_response_format(200, $topic , __('messages.topic.add'));
 
     }
     /**
@@ -103,8 +106,7 @@ class TopicController extends Controller
      */
     public function show(Topic $topic)
     {
-        return HelperController::api_response_format(200, $topic);
-
+        return HelperController::api_response_format(200, $topic );
     }
 
     /**
@@ -149,7 +151,7 @@ class TopicController extends Controller
            ]);
         }
         // return new TopicResource($topic);
-        return HelperController::api_response_format(200, $topic);
+        return HelperController::api_response_format(200, $topic,__('messages.topic.update'));
 
     }
     /**
@@ -161,7 +163,7 @@ class TopicController extends Controller
     public function destroy(Topic $topic)
     {
         $topic->delete();      
-        return HelperController::api_response_format(200, 'Deleted success');
+        return HelperController::api_response_format(200, __('messages.topic.delete'));
 
     }  
     
