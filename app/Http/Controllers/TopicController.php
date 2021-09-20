@@ -9,6 +9,7 @@ use App\Topic;
 use App\EnrollTopic;
 use Auth;
 use App\Repositories\ChainRepositoryInterface;
+use Illuminate\Support\Facades\Paginator;
 
 use App\Http\Resources\TopicResource;
 
@@ -26,10 +27,30 @@ class TopicController extends Controller
     {
         $this->chain = $chain;
     }
-    public function index()
+    public function index(Request $request)
     {
-        $topics = Topic::paginate(10);
-        return TopicResource::collection($topics);
+
+        $request->validate([
+            'search' => 'string',
+            'years' => 'array',
+            'years.*'  => 'nullable|exists:academic_years,id',
+            'types'  => 'array',
+            'types.*'  => 'nullable|exists:academic_types,id',
+            'levels' => 'array',
+            'levels.*' => 'nullable|exists:levels,id',
+            'segments'  => 'array',
+            'segments.*'  => 'nullable|exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'nullable|exists:courses,id',
+            'roles' => 'array',
+            'roles.*' => 'nullable|exists:roles,id',
+            'users' => 'array',
+            'users.*' => 'nullable|exists:users,id',
+        ]);
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $topic_ids =  EnrollTopic::whereIn('enroll_id' , $enrolls->pluck('id'))->pluck('topic_id');
+        $topics = Topic::whereIn('id' , $topic_ids);
+        return HelperController::api_response_format(200, $topics->paginate(HelperController::GetPaginate($request)));
     }
     /**
      * Store a newly created resource in storage.
