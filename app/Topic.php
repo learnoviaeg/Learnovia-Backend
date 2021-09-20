@@ -19,15 +19,10 @@ class Topic extends Model
         return json_decode($value);
     }
 
-    // protected $dispatchesEvents = [
-    //     'created' => \App\Events\TopicCreatedEvent::class,
-    // ];
 
     public function enrolls()
     {
         return $this->belongsToMany('App\Enroll' , 'enroll_id' , 'id');
     }
-
-
     
 }

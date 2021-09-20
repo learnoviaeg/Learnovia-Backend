@@ -6,7 +6,9 @@ use App\Events\TopicCreatedEvent;
 use Illuminate\Http\Request;
 use App\Enroll;
 use App\Topic;
+use App\EnrollTopic;
 use Auth;
+use App\Repositories\ChainRepositoryInterface;
 
 use App\Http\Resources\TopicResource;
 
@@ -19,13 +21,16 @@ class TopicController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+    }
     public function index()
     {
         $topics = Topic::paginate(10);
         return TopicResource::collection($topics);
-
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -36,7 +41,8 @@ class TopicController extends Controller
     {
           $request->validate([
             'title' => 'required',
-            'years' => 'required',
+            'years' => 'array',
+            'years.*'  => 'nullable|exists:academic_years,id',
             'types'  => 'array',
             'types.*'  => 'nullable|exists:academic_types,id',
             'levels' => 'array',
@@ -51,17 +57,22 @@ class TopicController extends Controller
             'users.*' => 'nullable|exists:users,id',
         ]);
 
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
         $filter = json_encode($request->all());
-        // print_r($filter);
         $topic = Topic::Create([
             'title' => $request->title,
             'filter' => $filter,
             //'created_by' =>  Auth::user()->id
         ]);
-         //TopicCreatedEvent::dispatch($topic);
-         return new TopicResource($topic);
+        foreach($enrolls->get() as $enroll)
+        {
+           EnrollTopic::Create([
+               'enroll_id' => $enroll->id,
+               'topic_id' => $topic->id,
+           ]);
+        }
+        return new TopicResource($topic);
     }
-
     /**
      * Display the specified resource.
      *
@@ -84,7 +95,8 @@ class TopicController extends Controller
     {
         $request->validate([
             'title' => 'required',
-            'years' => '',
+            'years' => 'array',
+            'years.*'  => 'nullable|exists:academic_years,id',
             'types'  => 'array',
             'types.*'  => 'nullable|exists:academic_types,id',
             'levels' => 'array',
@@ -97,15 +109,24 @@ class TopicController extends Controller
             'roles.*' => 'nullable|exists:roles,id',
             'users' => 'array',
             'users.*' => 'nullable|exists:users,id',
-
         ]);
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
         $topic->title = $request->title;
         $topic->filter = json_encode($request->all());
         $topic->save();
+
+        EnrollTopic::where('topic_id' , $topic->id)->delete();
+    
+        foreach($enrolls->get() as $enroll)
+        {
+           EnrollTopic::Create([
+               'enroll_id' => $enroll->id,
+               'topic_id' => $topic->id,
+
+           ]);
+        }
         return new TopicResource($topic);
-
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -114,7 +135,11 @@ class TopicController extends Controller
      */
     public function destroy(Topic $topic)
     {
-        $topic->delete();        
-         
+        $topic->delete();         
+    }  
+    
+    public function getAllEnrollUsers(Topic $topic)
+    {
+        
     }
 }
