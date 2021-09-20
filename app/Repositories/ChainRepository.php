@@ -14,8 +14,6 @@ use App\Segment;
 use App\LastAction;
 use App\AcademicYearType;
 use Carbon\carbon;
-use Auth;
-
 
 class ChainRepository implements ChainRepositoryInterface
 {
