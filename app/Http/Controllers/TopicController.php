@@ -35,7 +35,7 @@ class TopicController extends Controller
     public function store(Request $request)
     {
           $request->validate([
-            'title' => 'required ',
+            'title' => 'required',
             'years' => 'required',
             'types'  => 'array',
             'types.*'  => 'nullable|exists:academic_types,id',
@@ -58,8 +58,8 @@ class TopicController extends Controller
             'filter' => $filter,
             //'created_by' =>  Auth::user()->id
         ]);
-         TopicCreatedEvent::dispatch($topic);
-         //return new TopicResource($topic);
+         //TopicCreatedEvent::dispatch($topic);
+         return new TopicResource($topic);
     }
 
     /**
