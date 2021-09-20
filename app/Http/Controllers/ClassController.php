@@ -384,8 +384,8 @@ class ClassController extends Controller
     {
         $classesIDs = self::index($request,1);
         $filename = uniqid();
-        $file = Excel::store(new ClassesExport($classesIDs), 'Class'.$filename.'.xls','public');
-        $file = url(Storage::url('Class'.$filename.'.xls'));
+        $file = Excel::store(new ClassesExport($classesIDs), 'Class'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Class'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

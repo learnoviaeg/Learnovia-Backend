@@ -208,8 +208,8 @@ class AC_year_type extends Controller
         $typeIDs = self::get($request,1);
         
         $filename = uniqid();
-        $file = Excel::store(new TypesExport($typeIDs), 'Type'.$filename.'.xls','public');
-        $file = url(Storage::url('Type'.$filename.'.xls'));
+        $file = Excel::store(new TypesExport($typeIDs), 'Type'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Type'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }
