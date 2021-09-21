@@ -49,14 +49,7 @@ class MaterialsController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
 
-        if($request->user()->can('site/show-all-courses')){//admin
-            $lessons = $this->chain->getEnrollsByChain($request);
-        }
-
-        if(!$request->user()->can('site/show-all-courses')){//enrolled users
-            $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
-        }
-        
+        $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
         $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();  
 
         if($request->has('lesson')){
