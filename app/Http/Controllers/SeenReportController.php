@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Announcement;
+use App\AnnouncementsChain;
 use Illuminate\Http\Request;
 use App\Material;
 use App\h5pLesson;
@@ -254,12 +255,46 @@ class SeenReportController extends Controller
     public function announcementsSeenReport(Request $request,$option = null){
 
         $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+            'class' => 'nullable|integer|exists:classes,id',
             'search' => 'nullable',
             'paginate' => 'integer',
             'id' => [Rule::requiredIf($option === 'users')],
         ]);
 
-        $announcements = Announcement::orderBy('publish_date','desc');
+        $chains = AnnouncementsChain::query();
+
+        if($request->has('year')){
+            $chains->where('year',$request->year);
+        }
+
+        if($request->has('type')){
+            $chains->where('type',$request->type);
+        }
+
+        if($request->has('level')){
+            $chains->where('level',$request->level);
+        }
+
+        if($request->has('segment')){
+            $chains->where('segment',$request->segment);
+        }
+
+        if($request->has('class')){
+            $chains->where('class',$request->class);
+        }
+
+        if($request->has('courses')){
+            $chains->whereIn('course',$request->courses);
+        }
+
+
+        $announcements = Announcement::orderBy('publish_date','desc')->whereIn('id',$chains->pluck('announcement_id'));
 
         if($request->has('search')){
             $announcements->where('title', 'LIKE' , "%$request->search%");
@@ -269,8 +304,18 @@ class SeenReportController extends Controller
 
         //get users who saw announcement
         if($option == 'users'){
-            $users = UserSeen::where('type','announcement')->where('item_id',$request->id)->where('lesson_id',null)->with('user')->get()->pluck('user');
-            return response()->json(['message' => 'announcement seen users', 'body' => $users], 200);
+            $seenUsers = UserSeen::where('type','announcement')->where('item_id',$request->id)->where('lesson_id',null)->with('user')->get();//->pluck('user');
+
+            $seenUsers->map(function ($seenUser){
+
+                $seenUser->user['seen'] = 'yes';
+                $seenUser->user['seen_count'] = $seenUser->count;
+                $seenUser->user['seen_at'] = $seenUser->updated_at;
+                
+                return $seenUser;
+            });
+
+            return response()->json(['message' => 'announcement seen users', 'body' => $seenUsers->pluck('user')], 200);
         }
 
         //get user seen number and total, to calculate percentage for each announcement
