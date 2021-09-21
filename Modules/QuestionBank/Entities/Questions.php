@@ -77,14 +77,17 @@ class Questions extends Model
                 if(isset($con->is_true)){
                     if($con->is_true == 1){
                         $con->is_true=True;
-                        // $con->mark = null;
+                        if(!isset($con->mark))
+                            $con->mark = null;
                         continue;
                     }
                     $con->is_true=False;
-                    // $con->mark = null;
+                    if(!isset($con->mark))
+                        $con->mark = null;
                 }
             }
         }
         return $content;
     }
 }
+
