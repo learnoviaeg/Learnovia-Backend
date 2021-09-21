@@ -39,10 +39,10 @@ class QuestionBank implements ToModel , WithHeadingRow
     {
 
         
-            $course = Course::firstOrCreate([
-                'name' => isset($row['course_name']) ? $row['course_name'] : null ,
-            ]);
-            $course_id = Course::where('name' , $row['course_name'])->pluck('id')->first();
+            // $course = Course::firstOrCreate([
+            //     'name' => isset($row['course_name']) ? $row['course_name'] : null ,
+            // ]);
+            $course_id = Course::where('short_name' , $row['short_name'])->pluck('id')->first();
       
             $question_category = QuestionsCategory::firstOrCreate([
                 'name' => isset($row['category_name']) ? $row['category_name'] : null ,
@@ -50,8 +50,6 @@ class QuestionBank implements ToModel , WithHeadingRow
             ]);
 
             $question_category_id = QuestionsCategory::where('name' , $row['category_name'])->pluck('id')->first();
-
-             
 
 
         if( $row['qtype'] == 'multichoice' )
@@ -137,10 +135,6 @@ class QuestionBank implements ToModel , WithHeadingRow
 
 
           $this->flage = $row['question_id'] ;
-  
-            
-
-
 
     }
 
