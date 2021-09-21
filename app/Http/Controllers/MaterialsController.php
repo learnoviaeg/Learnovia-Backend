@@ -56,7 +56,8 @@ class MaterialsController extends Controller
         if(!$request->user()->can('site/show-all-courses')){//enrolled users
             $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
         }
-        $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();  
+        
+        $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();  
 
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
