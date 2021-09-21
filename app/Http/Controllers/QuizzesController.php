@@ -301,6 +301,7 @@ class QuizzesController extends Controller
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'grade_feedback' => 'in:After submission,After due_date,Never',
             'correct_feedback' => 'in:After submission,After due_date,Never',
+            'updated_lesson_id' => 'exists:lessons,id'
         ]);
         // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
         //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
@@ -315,8 +316,8 @@ class QuizzesController extends Controller
         if(!strtotime($quiz_lesson->start_date) < Carbon::now())
         {
             $quiz_lesson->update([
-                'start_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->opening_time,
-                'publish_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->opening_time,
+                'start_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->start_date,
+                'publish_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->publish_date,
             ]);
         }
          
@@ -348,10 +349,18 @@ class QuizzesController extends Controller
                 'grade_feedback' => isset($request->grade_feedback) ? $request->grade_feedback : $quiz->grade_feedback,
                 'correct_feedback' => isset($request->correct_feedback) ? $request->correct_feedback : $quiz->correct_feedback,
             ]);
+
+            if(isset($request->updated_lesson_id))
+            {
+                $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id',$quiz_lesson->lesson_id)
+                ->update(['lesson_id' => $request->updated_lesson_id]);
+            }
     
             $quiz_lesson->update([
                 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
                 'max_attemp' => isset($request->max_attemp) ? $request->max_attemp : $quiz_lesson->max_attemp,
+                'start_date' => $quiz_lesson->start_date,
+                'publish_date' => $quiz_lesson->publish_date,
                 'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : $quiz_lesson->getOriginal('grading_method_id'),
             ]);
         }
