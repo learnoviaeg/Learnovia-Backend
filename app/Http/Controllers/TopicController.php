@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Enroll;
 use App\Topic;
 use App\EnrollTopic;
+use App\AcademicYear;
 use Auth;
 use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Paginator;
@@ -52,7 +53,7 @@ class TopicController extends Controller
         $topic_ids =  EnrollTopic::whereIn('enroll_id' , $enrolls->pluck('id'))->pluck('topic_id');
         $topics = Topic::whereIn('id' , $topic_ids);
         if($request->filled('search'))
-           $topics->where('title', 'LIKE' , "%$request->search%");
+           $topics->where('title', 'LIKE' , "%$request->search%"); 
         return HelperController::api_response_format(200, $topics->paginate(HelperController::GetPaginate($request)), __('messages.topic.list'));
     }
     /**
@@ -163,7 +164,7 @@ class TopicController extends Controller
     public function destroy(Topic $topic)
     {
         $topic->delete();      
-        return HelperController::api_response_format(200, __('messages.topic.delete'));
+        return HelperController::api_response_format(200,[],__('messages.topic.delete'));
 
     }  
     
