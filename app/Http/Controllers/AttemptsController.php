@@ -270,12 +270,14 @@ class AttemptsController extends Controller
             //     dispatch($job);
             // }
 
-            if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp )
-            {                
-                $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
-                dispatch($job);
+            if((Auth::user()->can('site/course/student'))){
+                if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp )
+                {                
+                    $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
+                    dispatch($job);
 
-                return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
+                    return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
+                }
             }
         }
 
