@@ -6,6 +6,8 @@ use App\AcademicType;
 use App\Segment;
 use App\Level;
 use App\Course;
+use App\User;
+
 use Spatie\Permission\Models\Role;
 
 
