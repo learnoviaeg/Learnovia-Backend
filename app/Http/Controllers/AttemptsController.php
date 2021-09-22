@@ -289,8 +289,9 @@ class AttemptsController extends Controller
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
         ]);
-        if(!Auth::user()->can('site/show-all-courses') || !Auth::user()->can('site/course/teacher'))
-            $q=Quiz::whereId($quiz_lesson->quiz->id)->update(['allow_edit' => 0]);
+        if(!Auth::user()->can('site/show-all-courses'))
+            if(!Auth::user()->can('site/course/teacher'))
+                $q=Quiz::whereId($quiz_lesson->quiz->id)->update(['allow_edit' => 0]);
 
         $flag=true;
         foreach($quiz_lesson->quiz->Question as $question)
