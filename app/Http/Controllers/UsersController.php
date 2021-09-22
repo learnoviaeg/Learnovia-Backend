@@ -98,8 +98,8 @@ class UsersController extends Controller
             $roles = $roles->get();
             $users = User::with(['attachment','roles']);
 
-            if(count($enrolls->pluck('id')))
-                $users= $enrolls->pluck('id');
+            // if(count($enrolls->pluck('id')))
+            //     $users= $enrolls->pluck('id');
 
             $all_roles = Role::all();
 
