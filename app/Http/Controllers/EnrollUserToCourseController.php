@@ -532,7 +532,7 @@ class EnrollUserToCourseController extends Controller
         return HelperController::api_response_format(200, $userUnenrolls->paginate(HelperController::GetPaginate($request)), 'users that unenrolled in this chain  are ... ');
     }
 
-    public function EnrollAdmin(REquest $request)
+    public static function EnrollAdmin(REquest $request)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id'
