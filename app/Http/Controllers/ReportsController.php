@@ -273,8 +273,8 @@ class ReportsController extends Controller
                
                 $componentsHelper = new ComponentsHelper();
                 
-                $componentsHelper->setCourse($courseId);
                 $componentsHelper->setClass($groupId);
+                $componentsHelper->setCourse($courseId);
 
                 if($request->has('user_id')){
                     $componentsHelper->setTeacher($request->user_id);
