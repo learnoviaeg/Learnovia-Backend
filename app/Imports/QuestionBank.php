@@ -31,6 +31,7 @@ class QuestionBank implements ToModel , WithHeadingRow
 
     public $flage = 0;
     public $mcq = array();
+    public $key = 0;
 
     public function model(array $row )
     {
@@ -63,6 +64,8 @@ class QuestionBank implements ToModel , WithHeadingRow
                 ]; 
                 $choices['is_true'] = ( $row['fraction'] == 1 ) ? TRUE : FALSE;
                 $choices['content'] = $row['answer'];
+                $choices['content'] = $row['answer'];
+                $choices['key'] = ++$this->key;
                 $this->mcq[] = $choices;
                 $data['content'] = $this->mcq;
                 $data['content'] = json_encode($data['content'] );
@@ -81,6 +84,7 @@ class QuestionBank implements ToModel , WithHeadingRow
                 ]; 
                 $choices['is_true'] = ($row['fraction'] == 1 ) ? TRUE : FALSE;
                 $choices['content'] = $row['answer'];
+                $choices['key'] = ++$this->key;
                 $this->mcq[] = $choices;
                 $data['content'] = $this->mcq;
                 $data['content'] = json_encode($data['content']);
