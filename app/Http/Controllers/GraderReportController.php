@@ -14,7 +14,7 @@ class GraderReportController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:grader/report/get'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:grade/report/grader'],   ['only' => ['index','show']]);
     }
 
     /**
@@ -26,15 +26,9 @@ class GraderReportController extends Controller
     {
         $request->validate([
             'course_id' => 'required|exists:courses,id',
-            'class_id' => 'required|exists:classes,id',
-        ]);
-        $req = new Request([
-            'class'   => $request->class_id,
-            'courses' => array($request->course_id)
         ]);
 
-        $course_segment_id = $this->chain->getCourseSegmentByChain($req)->first()->course_segment;
-        $main_category = GradeCategory::where('course_segment_id' ,$course_segment_id)->whereNull('parent')->with('userGrades.user')->get();
+        $main_category = GradeCategory::where('course_id' ,$request->course_id)->whereNull('parent')->with('userGrades.user')->get();
         $main_category[0]['children'] = [];
         $cat = GradeCategory::where('parent',$main_category[0]->id)->get();
         $items = GradeItems::where('grade_category_id',$main_category[0]->id)->get();
