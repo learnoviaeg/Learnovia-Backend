@@ -14,7 +14,7 @@ class GraderReportController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        // $this->middleware(['permission:grader/report/get'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:grade/report/grader'],   ['only' => ['index','show']]);
     }
 
     /**
