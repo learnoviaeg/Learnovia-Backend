@@ -29,12 +29,8 @@ class QuestionBank implements ToModel , WithHeadingRow
     * @return \Illuminate\Database\Eloquent\Model|null
     */
 
-    // public $qArray= array();
     public $flage = 0;
-    // public $count= 0;
-    // public $content;
     public $mcq = array();
-
 
     public function model(array $row )
     {
@@ -50,8 +46,7 @@ class QuestionBank implements ToModel , WithHeadingRow
                 'course_id' => isset($course_id) ? $course_id : null,
             ]);
 
-            $question_category_id = QuestionsCategory::where('name' , $row['category_name'])->pluck('id')->first();
-
+            $question_category_id = QuestionsCategory::where('course_id' , $course_id)->pluck('id')->first();
 
         if( $row['qtype'] == 'multichoice' )
           {
@@ -64,20 +59,16 @@ class QuestionBank implements ToModel , WithHeadingRow
                     'course_id' => $course_id,
                     'question_type_id' => $question_type_id,
                     'question_category_id' => $question_category_id, 
-                    
+                    'mcq_type' => 1,
                 ]; 
                 $choices['is_true'] = ( $row['fraction'] == 1 ) ? TRUE : FALSE;
                 $choices['content'] = $row['answer'];
                 $this->mcq[] = $choices;
                 $data['content'] = $this->mcq;
-                // $data['content'] = $choices ;
-                // array_push($this->qArray , $data['content']);
-                // array_push( $this->qArray , $this->content);
                 $data['content'] = json_encode($data['content'] );
                 $question_id = Questions::where('text' , $row['question_text'] )->pluck('id')->first();
                 $question = Questions::find($question_id);
                 $question->update($data);
-                // $this->content = '';
             }
             else
             {
@@ -92,10 +83,8 @@ class QuestionBank implements ToModel , WithHeadingRow
                 $choices['content'] = $row['answer'];
                 $this->mcq[] = $choices;
                 $data['content'] = $this->mcq;
-                // $this->content = $choices;
                 $data['content'] = json_encode($data['content']);
                 $question = Questions::Create($data);
-                // $this->qArray= array();
             }
 
           }
@@ -114,13 +103,9 @@ class QuestionBank implements ToModel , WithHeadingRow
             {
                 $tru_false['is_true'] = $row['answer'];
                 $tru_false['and_why'] = null;
-            
                 $data['content'] = json_encode($tru_false); 
-               // print_r($data);
                 $question = Questions::firstOrCreate($data);
             }
-            
-
           }
           elseif($row['qtype'] == 'essay')
           {
