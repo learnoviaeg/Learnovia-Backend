@@ -78,8 +78,7 @@ class QuestionsController extends Controller
                         $question['content']= json_encode($re);
                     }
                 }
-            }
-            
+            }  
             return response()->json(['message' => __('messages.question.list'), 'body' => $questions], 200);
         }
 

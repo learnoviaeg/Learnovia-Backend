@@ -29,10 +29,11 @@ class QuestionBank implements ToModel , WithHeadingRow
     * @return \Illuminate\Database\Eloquent\Model|null
     */
 
-    public $qArray= array();
+    // public $qArray= array();
     public $flage = 0;
-    public $count= 0;
-    public $content;
+    // public $count= 0;
+    // public $content;
+    public $mcq = array();
 
 
     public function model(array $row )
@@ -67,17 +68,20 @@ class QuestionBank implements ToModel , WithHeadingRow
                 ]; 
                 $choices['is_true'] = ( $row['fraction'] == 1 ) ? TRUE : FALSE;
                 $choices['content'] = $row['answer'];
-                $data['content'] = $choices ;
-                array_push($this->qArray , $data['content']);
-                array_push( $this->qArray , $this->content);
-                $data['content'] = json_encode($this->qArray);
+                $this->mcq[] = $choices;
+                $data['content'] = $this->mcq;
+                // $data['content'] = $choices ;
+                // array_push($this->qArray , $data['content']);
+                // array_push( $this->qArray , $this->content);
+                $data['content'] = json_encode($data['content'] );
                 $question_id = Questions::where('text' , $row['question_text'] )->pluck('id')->first();
                 $question = Questions::find($question_id);
                 $question->update($data);
-                $this->content = '';
+                // $this->content = '';
             }
             else
             {
+                $this->mcq = array();
                 $data = [
                     'text' => $row['question_text'],
                     'course_id' => $course_id,
@@ -86,10 +90,12 @@ class QuestionBank implements ToModel , WithHeadingRow
                 ]; 
                 $choices['is_true'] = ($row['fraction'] == 1 ) ? TRUE : FALSE;
                 $choices['content'] = $row['answer'];
-                $this->content = $choices;
-                $data['content'] = json_encode($choices);
+                $this->mcq[] = $choices;
+                $data['content'] = $this->mcq;
+                // $this->content = $choices;
+                $data['content'] = json_encode($data['content']);
                 $question = Questions::Create($data);
-                $this->qArray= array();
+                // $this->qArray= array();
             }
 
           }
