@@ -60,9 +60,9 @@ class ComponentsHelper
     {
         $materials = Material::query();
         
-        if($this->course){
-            $materials->where('course_id',$this->course);
-        }
+        // if($this->course){
+        //     $materials->where('course_id',$this->course);
+        // }
 
         if($this->teacher){
             $materials->where('created_by', $this->teacher);
