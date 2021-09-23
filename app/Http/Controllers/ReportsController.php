@@ -318,8 +318,6 @@ class ReportsController extends Controller
                             ]);
                         }
                     }
-
-                    break;
                 }
             }
 
