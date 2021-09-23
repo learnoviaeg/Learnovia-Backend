@@ -21,12 +21,10 @@ class ComponentsHelper
 
     public function setCourse($course){
         $this->course = $course;
-        $this->getLessons();
     }
 
     public function setClass($class){
         $this->class = $class;
-        $this->getLessons();
     }
 
     public function setTeacher($teacher){
