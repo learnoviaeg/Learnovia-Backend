@@ -3,35 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\ChainRepositoryInterface;
-use Illuminate\Support\Facades\Auth;
+use App\Helpers\ComponentsHelper;
 use Illuminate\Http\Request;
-use App\User;
-use App\Enroll;
-use App\Paginate;
-use App\LAstAction;
 use App\Level;
 use App\Classes;
+use App\Course;
+use App\User;
+use App\Paginate;
+use App\LAstAction;
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
 use App\Log;
-use App\Lesson;
 use App\UserSeen;
-use App\GradeCategory;
-use App\Segment;
-use App\Parents;
-use App\AcademicYear;
-use App\AcademicType;
-use App\YearLevel;
-use App\AcademicYearType;
-use App\Course;
-use App\Contract;
-use App\CourseSegment;
-use App\ClassLevel;
-use Str;
-use Spatie\Permission\Models\Role;
-use DB;
-use App\attachment;
-use App\SegmentClass;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
@@ -240,4 +223,163 @@ class ReportsController extends Controller
 
         return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
     }
+
+
+    public function courseProgressReport(Request $request){
+
+        $types = ['materials','assignments','quizzes','interactives','virtuals'];
+
+        //validate the request
+        $request->validate([
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
+            'user_id' => 'exists:users,id',
+            'component' => 'in:'.implode(',',$types),
+            'details' => 'in:1'
+        ]);
+
+        if($request->has('component')){
+            $types = [$request->component];
+        }
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        
+        $mainObject = $enrolls->get()->groupBy(['level','group','course']);
+
+        $reportObjects = collect();
+
+        foreach($mainObject as $levelId =>  $groups){
+
+            $level = Level::whereId($levelId)->pluck('name')->first();
+
+            foreach($groups as $groupId => $courses){
+
+                $group = Classes::whereId($groupId)->pluck('name')->first();
+    
+                $courseId = $courses->keys()->first();
+                $course = Course::whereId($courseId)->pluck('name')->first();
+               
+                $componentsHelper = new ComponentsHelper();
+                
+                $componentsHelper->setCourse($courseId);
+                $componentsHelper->setClass($groupId);
+
+                if($request->has('user_id')){
+                    $componentsHelper->setTeacher($request->user_id);
+                }
+    
+                if($request->has('from') && $request->has('to')){
+                    $componentsHelper->setDate($request->from,$request->to);
+                }
+    
+                foreach($types as $type){
+
+                    //if we need the detailed report
+                    if($request->has('details') && $request->details){
+
+                        $items = $componentsHelper->$type()->with('user')->get();
+                    
+                        foreach($items as $item){
+    
+                            $reportObjects->push([
+                                'level' => $level,
+                                'course' => $course,
+                                'class' => $group,
+                                'type' => $type,
+                                'item_name' => $item->name,
+                                'created_at' => $item->created_at,
+                                'teacher' => $item->user? $item->user->full_name : null
+                            ]);
+                        }
+                    }
+
+                    //if just the counters
+                    if(!$request->has('details')){
+
+                        $reportObjects->push([
+                            'level' => $level,
+                            'course' => $course,
+                            'class' => $group,
+                            'type' => $type,
+                            'count' => $componentsHelper->$type()->count(),
+                        ]);
+                    }
+
+                }
+            }
+
+        }
+
+        return response()->json(['message' => 'Course progress', 'body' =>  $reportObjects->paginate(Paginate::GetPaginate($request))], 200);
+    }
+
+    public function CourseProgressCounters(Request $request){
+
+        $types = ['materials','assignments','quizzes','lessons','interactives','virtuals'];
+
+        //validate the request
+        $request->validate([
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
+            'user_id' => 'exists:users,id',
+            'component' => 'in:'.implode(',',$types)
+        ]);
+
+        //need to be refactored (line below)
+        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+
+        $componentsHelper = new ComponentsHelper();
+        $componentsHelper->setLessons($lessons);
+
+        if($request->has('user_id')){
+            $componentsHelper->setTeacher($request->user_id);
+        }
+
+        if($request->has('from') && $request->has('to')){
+            $componentsHelper->setDate($request->from,$request->to);
+        }
+
+        $counterObject = collect();
+
+        foreach($types as $type){
+
+            $count = $componentsHelper->$type()->count();
+
+            if($request->has('component') && $request->component != $type){
+                $count = 0;
+            }
+
+            $counterObject->push([
+                'type' =>$type,
+                'count' => $count
+            ]);
+        }
+
+        return response()->json(['message' => 'Course progress Counters', 'body' =>  $counterObject], 200);
+    }
+    
 }

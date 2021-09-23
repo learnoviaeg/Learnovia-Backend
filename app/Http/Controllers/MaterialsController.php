@@ -98,7 +98,7 @@ class MaterialsController extends Controller
         $AllMat=$material->with(['lesson.SecondaryChain.Class'])->get();
         foreach($AllMat as $one){
             $one->class = $one->lesson->SecondaryChain->pluck('class')->unique();
-            $one->level = Level::whereIn('id',$one->class->pluck('level_id'))->get();
+            $one->level = Level::whereIn('id',$one->class->pluck('level_id'))->first();
             unset($one->lesson->SecondaryChain);
         }
 
