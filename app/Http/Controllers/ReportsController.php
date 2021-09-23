@@ -322,7 +322,7 @@ class ReportsController extends Controller
 
         }
 
-        return response()->json(['message' => 'Course progress', 'body' =>  $reportObjects], 200);
+        return response()->json(['message' => 'Course progress', 'body' =>  $reportObjects->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     public function CourseProgressCounters(Request $request){

@@ -689,15 +689,11 @@ class AssigmentsController extends Controller
 
     public function GetAssignment(Request $request)
     {
-
-        $rules = [
+        $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
-            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'        ];
-        $customMessages = [
-            'assignment_id.exists' => __('messages.error.item_deleted') 
-        ];
-
-        $this->validate($request, $rules, $customMessages);
+            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'   
+        ]);
+        
         $user = Auth::user();
         $lesson=Lesson::find($request->lesson_id);
         $Course = Course::find($lesson->course_id);
@@ -904,7 +900,7 @@ class AssigmentsController extends Controller
                 $gradeCats = GradeCategory::where('course_id',$lessonAll->course_id)->get();
                 $flag = false;
                 foreach ($gradeCats as $grade){
-                    if($grade->id == $request->grade_category[$key]){
+                    if($grade->id == $request->grade_category[0]){
                         $flag =true;
                     }
                 }
@@ -912,11 +908,11 @@ class AssigmentsController extends Controller
                 if($flag==false){
                     return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
                 }
-                $assignment_lesson->grade_category = $request->grade_category[$key];
+                $assignment_lesson->grade_category = $request->grade_category[0];
             }
             if($request->is_graded)
             { 
-                $grade_category=GradeCategory::find($request->grade_category[$key]);
+                $grade_category=GradeCategory::find($request->grade_category[0]);
                 $name_assignment = Assignment::find($request->assignment_id)->name;
 
                 GradeItems::create([
