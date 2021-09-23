@@ -552,7 +552,6 @@ class EnrollUserToCourseController extends Controller
             ]);
 
         }
-        return 'Done';
     }
 
     /**
