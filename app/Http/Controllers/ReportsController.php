@@ -350,7 +350,7 @@ class ReportsController extends Controller
         ]);
 
         //need to be refactored (line below)
-        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();
 
         $componentsHelper = new ComponentsHelper();
         $componentsHelper->setLessons($lessons);
