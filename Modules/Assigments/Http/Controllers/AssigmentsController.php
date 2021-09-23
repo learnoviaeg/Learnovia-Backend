@@ -689,15 +689,11 @@ class AssigmentsController extends Controller
 
     public function GetAssignment(Request $request)
     {
-
-        $rules = [
+        $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
-            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'        ];
-        $customMessages = [
-            'assignment_id.exists' => __('messages.error.item_deleted') 
-        ];
-
-        $this->validate($request, $rules, $customMessages);
+            'lesson_id' => 'required|exists:assignment_lessons,lesson_id'   
+        ]);
+        
         $user = Auth::user();
         $lesson=Lesson::find($request->lesson_id);
         $Course = Course::find($lesson->course_id);
