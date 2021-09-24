@@ -16,6 +16,7 @@ class ComponentsHelper
 
     public function __construct()
     {
+        //this hepler mainly depends on lessons
         $this->getLessons();
     }
 
@@ -58,14 +59,10 @@ class ComponentsHelper
 
     public function materials()
     {
-        $materials = Material::query();
+        $materials = Material::whereIn('lesson_id', $this->lessons);
 
         if($this->teacher){
             $materials->where('created_by', $this->teacher);
-        }
-
-        if(count($this->lessons) > 0 ){
-            $materials->whereIn('lesson_id', $this->lessons);
         }
 
         if($this->from && $this->to){
@@ -79,9 +76,7 @@ class ComponentsHelper
     {
         $assignments = assignment::whereHas('assignmentLesson' , function($query){
 
-            if(count($this->lessons) > 0 ){
-                $query->whereIn('lesson_id', $this->lessons);
-            }
+            $query->whereIn('lesson_id', $this->lessons);
 
         });
 
@@ -100,9 +95,7 @@ class ComponentsHelper
     {
         $quizzes = quiz::whereHas('quizLesson' , function($query){
 
-            if(count($this->lessons) > 0 ){
-                $query->whereIn('lesson_id', $this->lessons);
-            }
+            $query->whereIn('lesson_id', $this->lessons);
 
         });
 
