@@ -55,7 +55,7 @@ class Quiz24Hreminder implements ShouldQueue
                 'type' => 'quiz',
                 'publish_date' => Carbon::now(),
                 'title' => $this->quiz->name,
-                'message' => 'Quiz '.$this->quiz->name.' will close after 24 hours.',
+                'message' => 'Quiz '.$this->quiz->name.' will be closed soon, Hurry up to solve it.',
                 'from' => $this->quiz->created_by,
                 'users' => $allUsers->toArray()
             ]);
