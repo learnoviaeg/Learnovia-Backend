@@ -203,7 +203,7 @@ class QuestionsController extends Controller
             $quiz->save();
            
             //calculte time
-            $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subSeconds(1); 
+            $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
                 
             if($endDate < Carbon::today()){
                 $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subHours(12);
