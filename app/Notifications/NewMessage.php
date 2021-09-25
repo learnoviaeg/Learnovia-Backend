@@ -68,10 +68,18 @@ class NewMessage extends Notification
                 'publish_date' => $this->mess['publish_date'],
                 'course_name' => $this->mess['course_name'],
             ];
-            if(isset($this->mess['link']))
-                $array['link'] = $this->mess['link'];
-            if(!isset($this->mess['title']))
-                $array['title'] = null;
+
+            try {
+                
+                if(isset($this->mess['link']))
+                    $array['link'] = $this->mess['link'];
+                if(!isset($this->mess['title']))
+                    $array['title'] = null;
+
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+           
             return $array;
         }
     }
