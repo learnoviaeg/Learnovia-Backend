@@ -42,7 +42,7 @@ class Quiz24Hreminder implements ShouldQueue
 
         $answeredUsers = userQuiz::whereIn('quiz_lesson_id',$this->quiz->quizLesson->pluck('id'))->select('user_id')->distinct()->pluck('user_id');
     
-        $allUsers = SecondaryChain::whereIn('lesson_id',$lessons)->whereNotIn('user_id',$answeredUsers)->whereHas('Teacher')->select('user_id')->distinct()->pluck('user_id');
+        $allUsers = SecondaryChain::whereIn('lesson_id',$lessons)->whereNotIn('user_id',$answeredUsers)->where('role_id',3)->whereHas('Teacher')->select('user_id')->distinct()->pluck('user_id');
         $parents = Parents::whereIn('child_id',$allUsers)->pluck('parent_id');
       
         $allUsers = $allUsers->merge($parents);
