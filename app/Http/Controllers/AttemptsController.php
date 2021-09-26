@@ -350,60 +350,58 @@ class AttemptsController extends Controller
             $question_type=Questions::whereId($one->question_id)->pluck('question_type_id')->first();
 
             //correct feedback
-            if($grade_feedback == 'After due_date')
-            {
-                if(Carbon::parse($due_date) > Carbon::now())
-                {
+            if(Auth::user()->can('site/course/student')){
+
+                if($grade_feedback == 'After due_date'){
+                    if(Carbon::parse($due_date) > Carbon::now()){
+                        $con->mark=null;
+                        if($question_type == 2)
+                            foreach($con->details as $detail)
+                                $detail->mark=null;
+        
+                        if($question_type == 3)
+                            if(property_exists($con,'stu_ans') && $con->stu_ans!=null)
+                                foreach($con->stu_ans as $ans)
+                                    $ans->grade=null;
+                    }
+                }
+                if($grade_feedback == 'Never'){
                     $con->mark=null;
                     if($question_type == 2)
                         foreach($con->details as $detail)
                             $detail->mark=null;
-    
+
                     if($question_type == 3)
                         if(property_exists($con,'stu_ans') && $con->stu_ans!=null)
                             foreach($con->stu_ans as $ans)
                                 $ans->grade=null;
                 }
-            }
 
-            if($grade_feedback == 'Never'){
-                $con->mark=null;
-                if($question_type == 2)
-                    foreach($con->details as $detail)
-                        $detail->mark=null;
-
-                if($question_type == 3)
-                    if(property_exists($con,'stu_ans') && $con->stu_ans!=null)
-                        foreach($con->stu_ans as $ans)
-                            $ans->grade=null;
-            }
-
-            //correct feedback
-            if($correct_feedback == 'After due_date')
-            {
-                if(Carbon::parse($due_date) > Carbon::now())
-                {
+                //correct feedback
+                if($correct_feedback == 'After due_date'){
+                    if(Carbon::parse($due_date) > Carbon::now()){
+                        $con->right=null;
+                        if($question_type == 2)
+                            foreach($con->details as $detail)
+                                $detail->right=null;
+        
+                        if($question_type == 3)
+                            if(property_exists($con,'stu_ans') && $con->stu_ans!=null)
+                                foreach($con->stu_ans as $ans)
+                                    $ans->right=null;
+                    }
+                }
+                if($correct_feedback == 'Never'){
                     $con->right=null;
                     if($question_type == 2)
                         foreach($con->details as $detail)
                             $detail->right=null;
-    
+
                     if($question_type == 3)
-                        if(property_exists($con,'stu_ans') && $con->stu_ans!=null)
+                        if(property_exists($con,'stu_ans')&& $con->stu_ans!=null)
                             foreach($con->stu_ans as $ans)
                                 $ans->right=null;
                 }
-            }
-            if($correct_feedback == 'Never'){
-                $con->right=null;
-                if($question_type == 2)
-                    foreach($con->details as $detail)
-                        $detail->right=null;
-
-                if($question_type == 3)
-                    if(property_exists($con,'stu_ans')&& $con->stu_ans!=null)
-                        foreach($con->stu_ans as $ans)
-                            $ans->right=null;
             }
             $one->correction = json_encode($con);
         }
