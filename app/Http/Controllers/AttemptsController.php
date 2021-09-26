@@ -240,7 +240,7 @@ class AttemptsController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        if(Carbon::parse($quiz_lesson->open_time) > Carbon::now())
+        if(Carbon::parse($quiz_lesson->start_date) > Carbon::now())
             return HelperController::api_response_format(200, null, __('messages.error.quiz_time'));
 
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
