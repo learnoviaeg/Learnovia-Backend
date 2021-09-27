@@ -146,14 +146,13 @@ class QuestionCategoryController extends Controller
         ]);
             
         $questioncat=QuestionsCategory::find($request->id);
-        $course_segment = CourseSegment::find($questioncat->course_segment_id);
-        if(isset($course_segment))
-            LastAction::lastActionInCourse($course_segment->course_id);        
+        if(isset($questioncat))
+            LastAction::lastActionInCourse($questioncat->course_id);        
         
         if(count($questioncat->questions)>0)
             return HelperController::api_response_format(200, null,__('messages.question_category.category_cannot_deleted'));
         
-        $check=$course_segment->courses[0]->name;
+        $check= $questioncat->course->name;
         if($check . ' Total' == $questioncat->name);
             return HelperController::api_response_format(200, $questioncat, __('messages.question_category.cannot_deleted'));
             
