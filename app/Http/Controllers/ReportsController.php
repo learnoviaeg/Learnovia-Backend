@@ -27,7 +27,6 @@ class ReportsController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
-        
     }
 
     public function index(Request $request,$option=null)
@@ -255,35 +254,32 @@ class ReportsController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        
-        $mainObject = $enrolls->get()->groupBy(['level','group','course']);
-
+   
+        $courses = $enrolls->orderBy('level')->select('course')->distinct()->with('courses')->get()->pluck('courses')->filter();
+       
         $reportObjects = collect();
 
-        foreach($mainObject as $levelId =>  $groups){
+        foreach($courses as $course){
 
-            $level = Level::whereId($levelId)->pluck('name')->first();
+            $level = $course->level->name;
 
-            foreach($groups as $groupId => $courses){
+            foreach($course->classes as $groupId){
 
                 $group = Classes::whereId($groupId)->pluck('name')->first();
-    
-                $courseId = $courses->keys()->first();
-                $course = Course::whereId($courseId)->pluck('name')->first();
-               
+
                 $componentsHelper = new ComponentsHelper();
-                
-                $componentsHelper->setCourse($courseId);
+
+                $componentsHelper->setCourse($course->id);
                 $componentsHelper->setClass($groupId);
 
                 if($request->has('user_id')){
                     $componentsHelper->setTeacher($request->user_id);
                 }
-    
+
                 if($request->has('from') && $request->has('to')){
                     $componentsHelper->setDate($request->from,$request->to);
                 }
-    
+
                 foreach($types as $type){
 
                     //if we need the detailed report
@@ -292,13 +288,14 @@ class ReportsController extends Controller
                         $items = $componentsHelper->$type()->with('user')->get();
                     
                         foreach($items as $item){
-    
+
                             $reportObjects->push([
                                 'level' => $level,
-                                'course' => $course,
+                                'course' => $course->name,
                                 'class' => $group,
                                 'type' => $type,
                                 'item_name' => $item->name,
+                                'item_id' => $item->id,
                                 'created_at' => $item->created_at,
                                 'teacher' => $item->user? $item->user->full_name : null
                             ]);
@@ -310,16 +307,15 @@ class ReportsController extends Controller
 
                         $reportObjects->push([
                             'level' => $level,
-                            'course' => $course,
+                            'course' => $course->name,
                             'class' => $group,
                             'type' => $type,
                             'count' => $componentsHelper->$type()->count(),
                         ]);
                     }
-
                 }
-            }
 
+            }
         }
 
         return response()->json(['message' => 'Course progress', 'body' =>  $reportObjects->paginate(Paginate::GetPaginate($request))], 200);
@@ -350,7 +346,7 @@ class ReportsController extends Controller
         ]);
 
         //need to be refactored (line below)
-        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();
 
         $componentsHelper = new ComponentsHelper();
         $componentsHelper->setLessons($lessons);
