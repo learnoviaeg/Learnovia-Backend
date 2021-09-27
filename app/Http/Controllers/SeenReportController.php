@@ -303,7 +303,7 @@ class SeenReportController extends Controller
         }
 
         if($request->filled('from') && $request->filled('to')){
-            $announcements->whereBetween('created_at',[$request->from,$request->to]);
+            $announcements->whereDate('created_at','>=',$request->from)->whereDate('created_at','<=',$request->to);
         }
         
         $announcements = $announcements->get();
