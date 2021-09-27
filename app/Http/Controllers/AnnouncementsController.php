@@ -114,6 +114,7 @@ class AnnouncementsController extends Controller
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|date',
+            'topic' => 'required|exists:topics,id',
             'chains' => 'required|array',
             'chains.*.roles' => 'array',
             'chains.*.roles.*' => 'exists:roles,id',
@@ -148,6 +149,7 @@ class AnnouncementsController extends Controller
             'attached_file' => isset($file) ? $file->id : null,
             'publish_date' => $publish_date,
             'created_by' => Auth::id(),
+            'topic' => $request->topic,
             'start_date' => isset($request->start_date) ? $request->start_date : null,
             'due_date' => isset($request->due_date) ? $request->due_date : null,
         ]);
@@ -270,6 +272,9 @@ class AnnouncementsController extends Controller
 
         if($request->filled('due_date'))
             $announcement->due_date = $request->due_date;
+
+        if($request->filled('topic'))
+            $announcement->topic = $request->topic;
 
         $file = $announcement->attachment;
         if(Input::hasFile('attached_file')){
