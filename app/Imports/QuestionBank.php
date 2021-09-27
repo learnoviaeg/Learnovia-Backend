@@ -125,7 +125,7 @@ class QuestionBank implements ToModel , WithHeadingRow
             $question = Questions::firstOrCreate($data);
         }
         else{
-           // die('Question Type not found');
+           // die('Question Type not found')
         }
 
           $this->flage = $row['question_id'] ;
