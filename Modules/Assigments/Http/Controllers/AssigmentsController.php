@@ -786,14 +786,15 @@ class AssigmentsController extends Controller
             $assignment['class'] = $classes;
 
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
-            $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
+            // $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
+            $assigned_users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('role_id',3)->get()->pluck('user_id');
+            $userassigments = User::whereIn('id',$assigned_users)
+                            ->with(['userAssignment'=> function($query)use ($assigLessonID){
+                                $query->where('assignment_lesson_id', $assigLessonID->id);
+                            }])->get();
             foreach($userassigments as $userAssignment)
             {
-                if(isset($userAssignment->user)){
-                    if ($userAssignment->user->can('site/course/student')) {
-                        $studentassigments[]=$userAssignment;
-                    }
-                }
+                $studentassigments[]=$userAssignment;
             }
             $images_path=collect([]);
             $assignment['user_submit'] = [];
@@ -821,7 +822,6 @@ class AssigmentsController extends Controller
                 $assignment['ended'] = false;
             else
                 $assignment['ended'] = true;
-            // return  $images_path;
             return HelperController::api_response_format(200, $body = $assignment, $message = []);
         }
     }
@@ -963,15 +963,15 @@ class AssigmentsController extends Controller
                 'index' => LessonComponent::getNextIndex($lesson),
             ]);
             $lesson = Lesson::find($lesson);
-            $data = array(
-                "lesson" => $lesson,
-                "assignment_lesson_id" => $assignment_lesson->id,
-                "submit_date" => Carbon::now(),
-                "publish_date" => Carbon::parse($request->publish_date),
-                "assignment_name" => Assignment::find($request->assignment_id)->name
-            );
+            // $data = array(
+            //     "lesson" => $lesson,
+            //     "assignment_lesson_id" => $assignment_lesson->id,
+            //     "submit_date" => Carbon::now(),
+            //     "publish_date" => Carbon::parse($request->publish_date),
+            //     "assignment_name" => Assignment::find($request->assignment_id)->name
+            // );
             LastAction::lastActionInCourse($lesson->course_id);
-            $this->assignAsstoUsers($data);
+            // $this->assignAsstoUsers($data);
 
         }
         // $all = AssignmentLesson::where('assignment_id','!=', $request->assignment_id)->get();
