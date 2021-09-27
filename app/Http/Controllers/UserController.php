@@ -444,7 +444,7 @@ class UserController extends Controller
             $enrolled_users=$enrolled_users->where('type',$request->type);
             $flag=true;
         }if ($request->filled('class')){ 
-            $enrolled_users=$enrolled_users->where('class',$request->class);
+            $enrolled_users=$enrolled_users->where('group',$request->class);
             $flag=true;
         }if ($request->filled('segment')){            
             $enrolled_users=$enrolled_users->where('segment',$request->segment);
