@@ -9,6 +9,7 @@ return [
         'user_not_assign' => 'This user is not assigned to this item',
         'cannot_edit' => 'you can\'t edit you submission',
         'submit_limit' => 'Sorry, you are not allowed to submit anymore',
+        'quiz_time' => 'Sorry, Quiz isn\'t started yet',
         'not_available_now' => 'Sorry, This item is not available for you at this moment',
         'try_again' => 'Something went wrong, please try again',
         'data_invalid' => 'This data is invalid',

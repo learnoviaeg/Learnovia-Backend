@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Topic;
+
 
 class Announcement extends Model
 {
@@ -22,6 +24,12 @@ class Announcement extends Model
 
     public  function chainAnnouncement(){
         return $this->hasMany('App\AnnouncementsChain','announcement_id', 'id');
+    }
+    public function getTopicAttribute($value)
+    {
+        $topic['id'] = Topic::find($value)->id;
+        $topic['name'] = Topic::find($value)->name;
+        return $topic;
     }
 
 }
