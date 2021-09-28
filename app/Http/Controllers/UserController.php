@@ -321,44 +321,49 @@ class UserController extends Controller
         // role is in all system
         $role = Role::find($request->role);
         $user->assignRole($role);
-
-        if ($request->role_id == 3) {
-            $oldChain=Enroll::where('user_id',$user->id)->where('role_id',$request->role_id)->get();
-            foreach($oldChain as $old)
-                $old->delete();
-            $option = new Request([
-                'users' => [$user->id],
-                'level' => $request->level ,
-                'type' => $request->type,
-                'class' => $request->class_id
-            ]);
-            EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
-
-            $enrollcounter = 0;
-            while (isset($request->$enrollOptional[$enrollcounter])) {
-                $option = new Request([
-                    'course' => [$request->$enrollOptional],
-                    'class' =>$request->class_id,
-                    'users' => array($user->id),
-                    'role_id' => array(3)
-                ]);
-                EnrollUserToCourseController::EnrollCourses($option);
-                $enrollcounter++;
-            }
-        } else {
-            $teachercounter = 0;
-
-            while (isset($request->$teacheroptional[$teachercounter])) {
-                $option = new Request([
-                    'course' => [$request->$teacheroptional],
-                    'class' =>$request->class_id,
-                    'users' => array($user->id),
-                    'role_id' => array(4)
-                ]);
-                EnrollUserToCourseController::EnrollCourses($option);
-                $teachercounter++;
-            }
+        if($request->role)
+        {
+            $request_user = new Request(['user_id' => $user->id]);
+            EnrollUserToCourseController::EnrollAdmin($request_user);
         }
+
+        // if ($request->role_id == 3) {
+        //     $oldChain=Enroll::where('user_id',$user->id)->where('role_id',$request->role_id)->get();
+        //     foreach($oldChain as $old)
+        //         $old->delete();
+        //     $option = new Request([
+        //         'users' => [$user->id],
+        //         'level' => $request->level ,
+        //         'type' => $request->type,
+        //         'class' => $request->class_id
+        //     ]);
+        //     EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
+
+        //     $enrollcounter = 0;
+        //     while (isset($request->$enrollOptional[$enrollcounter])) {
+        //         $option = new Request([
+        //             'course' => [$request->$enrollOptional],
+        //             'class' =>$request->class_id,
+        //             'users' => array($user->id),
+        //             'role_id' => array(3)
+        //         ]);
+        //         EnrollUserToCourseController::EnrollCourses($option);
+        //         $enrollcounter++;
+        //     }
+        // } else {
+        //     $teachercounter = 0;
+
+        //     while (isset($request->$teacheroptional[$teachercounter])) {
+        //         $option = new Request([
+        //             'course' => [$request->$teacheroptional],
+        //             'class' =>$request->class_id,
+        //             'users' => array($user->id),
+        //             'role_id' => array(4)
+        //         ]);
+        //         EnrollUserToCourseController::EnrollCourses($option);
+        //         $teachercounter++;
+        //     }
+        // }
         return HelperController::api_response_format(201, $user, __('messages.users.update'));
     }
 
