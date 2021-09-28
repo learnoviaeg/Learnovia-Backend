@@ -34,7 +34,7 @@ class Announcement extends Model
         $topic['title'] = $topicObject ? $topicObject->title : null;
         return $topic;
     }
-    public function getCreated_byAttribute($value)
+    public function getCreatedByAttribute($value)
     {
         $userObject = User::find($value);
 
