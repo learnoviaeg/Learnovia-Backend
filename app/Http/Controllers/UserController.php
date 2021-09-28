@@ -321,7 +321,7 @@ class UserController extends Controller
         // role is in all system
         $role = Role::find($request->role);
         $user->assignRole($role);
-        if($request->role)
+        if($request->role ==1)
         {
             $request_user = new Request(['user_id' => $user->id]);
             EnrollUserToCourseController::EnrollAdmin($request_user);

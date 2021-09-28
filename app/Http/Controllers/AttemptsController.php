@@ -282,6 +282,9 @@ class AttemptsController extends Controller
                     return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
                 }
             }
+
+            if((Auth::user()->can('site/quiz/unLimitedAttempts')))
+                return HelperController::api_response_format(200, $last_attempt, __('messages.quiz.continue_quiz'));
         }
 
         $userQuiz = userQuiz::create([
