@@ -114,7 +114,7 @@ class AnnouncementsController extends Controller
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|date',
-            'topic' => 'required|exists:topics,id',
+            'topic' => 'nullable | exists:topics,id',
             'chains' => 'required|array',
             'chains.*.roles' => 'array',
             'chains.*.roles.*' => 'exists:roles,id',
