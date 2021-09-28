@@ -53,25 +53,14 @@ class Sendnotify implements ShouldQueue
         $user_token=User::whereIn('id',$this->request['users'])->whereNotNull('token')->get();
         // dd($this->request['users']);
         // Log::debug(' users are '. $this->request['users']);
-
+     
         Log::debug('
         num of users is '. count($user_token));
         $count =0;
         foreach($user_token as $token)
         {
-             Log::debug('user number ' .($count+1).' is  '. $token->id);
+            Log::debug('user number ' .($count+1).' is  '. $token->id);
 
-            $notification_id = null;
-            $noti = DB::table('notifications')->where('notifiable_id', $token->id)->get();
-            foreach ($noti as $not) {
-                $not->data= json_decode($not->data, true);
-                if($not->data['type'] == $this->request['type'] && $not->data['id'] == $this->request['id'] && $not->data['message'] == $this->request['message'])
-                {
-                    $notification_id = $not->id;
-                }
-            }
-
-            // Log::debug('notifictaion id is' . $notification_id);
             if($this->request['type'] !='announcement'){
                 $fordata = array(
                         "id" => (string)$this->request['id'],
@@ -85,7 +74,7 @@ class Sendnotify implements ShouldQueue
                         "read_at" => null,
                         "link" => isset($this->request['link'])?$this->request['link']:null,
                         'deleted'=> "0",
-                        'notification_id' => $notification_id,
+                        'notification_id' => null,
                         "course_name" => (string)$this->request['course_name'],
                     );
 
@@ -108,7 +97,7 @@ class Sendnotify implements ShouldQueue
                         "due_date" => $this->request['due_date'],
                         "attached_file" => $att,
                         'deleted'=> '0',
-                        'notification_id' => $notification_id
+                        'notification_id' => null
                     );
             }
             $count++;
