@@ -4,12 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Topic;
+use App\User;
 
 
 class Announcement extends Model
 {
     protected $fillable = ['title','description','attached_file','start_date','due_date','assign','class_id','level_id','course_id',
-        'year_id','type_id','segment_id','publish_date','created_by', 'topic_id',
+        'year_id','type_id','segment_id','publish_date','created_by', 'topic',
     ];
 
     public function attachment()
@@ -30,6 +31,12 @@ class Announcement extends Model
         $topic['id'] = Topic::find($value)->id;
         $topic['name'] = Topic::find($value)->name;
         return $topic;
+    }
+    public function getCreated_byAttribute($value)
+    {
+        $user['id'] = User::find($value)->id;
+        $user['name'] = User::find($value)->name;
+        return $user;
     }
 
 }
