@@ -29,7 +29,7 @@ class Announcement extends Model
     public function getTopicAttribute($value)
     {
         $topic['id'] = Topic::find($value)->id;
-        $topic['name'] = Topic::find($value)->name;
+        $topic['title'] = Topic::find($value)->title;
         return $topic;
     }
     public function getCreated_byAttribute($value)
