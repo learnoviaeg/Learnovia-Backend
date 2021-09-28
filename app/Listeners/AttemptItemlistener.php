@@ -11,6 +11,7 @@ use App\GradeItems;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuiz;
 use App\User;
+use Auth;
 use App\Enroll;
 use App\UserGrader;
 use Illuminate\Http\Request;

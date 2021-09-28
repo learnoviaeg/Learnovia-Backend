@@ -284,7 +284,7 @@ class AttemptsController extends Controller
             }
 
             if((Auth::user()->can('site/quiz/unLimitedAttempts')))
-                return HelperController::api_response_format(200, $last_attempt, __('messages.quiz.continue_quiz'));
+                return HelperController::api_response_format(200, $last_attempt);
         }
 
         $userQuiz = userQuiz::create([
@@ -304,7 +304,8 @@ class AttemptsController extends Controller
         foreach($quiz_lesson->quiz->Question as $question)
         {
             // for update status of attempt
-            if($question->question_type_id == 4 || ($question->question_type_id == 1 && $question->content->and_why == true))
+            if($question->question_type_id == 4 || ($question->question_type_id == 1 && $question->content->and_why == true)
+                || $userQuiz==null)
                 $flag=false;
             
             if($question->question_type_id == 5)
