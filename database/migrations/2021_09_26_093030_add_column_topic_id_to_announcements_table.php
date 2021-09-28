@@ -14,7 +14,7 @@ class AddColumnTopicIdToAnnouncementsTable extends Migration
     public function up()
     {
         Schema::table('announcements', function (Blueprint $table) {
-            $table->unsignedBigInteger('topic');
+            $table->unsignedBigInteger('topic')->nullable();
             $table->foreign('topic')->references('id')->on('topics')->onDelete('cascade')->onUpdate('cascade');
         });
     }
