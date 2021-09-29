@@ -284,6 +284,7 @@ class AttemptsController extends Controller
             }
 
             if((Auth::user()->can('site/quiz/unLimitedAttempts')))
+            dd('ji');
                 return HelperController::api_response_format(200, $last_attempt);
         }
 
