@@ -56,15 +56,8 @@ class QuizzesController extends Controller
             'sort_in' => 'in:asc,desc',
         ]);
 
-        if($request->user()->can('site/show-all-courses')){//admin
-            $enrolls = $this->chain->getEnrollsByChain($request);
-            $lessons = $enrolls->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
-        }
-
-        if(!$request->user()->can('site/show-all-courses')){//enrolled users
            $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
            $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
-        }
 
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
