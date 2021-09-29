@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Topic;
-use App\User;
+use App\user;
 
 
 class Announcement extends Model

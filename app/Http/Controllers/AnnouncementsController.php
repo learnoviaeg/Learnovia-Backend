@@ -141,6 +141,7 @@ class AnnouncementsController extends Controller
         if($request->has('attached_file')){
             $file = attachment::upload_attachment($request->attached_file, 'Announcement');
         }
+        
 
         //create announcement
         $announcement = Announcement::create([
@@ -153,6 +154,11 @@ class AnnouncementsController extends Controller
             'start_date' => isset($request->start_date) ? $request->start_date : null,
             'due_date' => isset($request->due_date) ? $request->due_date : null,
         ]);
+
+     //return object of created by
+        $obj['id'] = $announcement->created_by;
+        $obj['name'] = User::find($announcement->created_by)->firstname;
+        $announcement['user'] = $obj;
 
 
         $users = collect();
