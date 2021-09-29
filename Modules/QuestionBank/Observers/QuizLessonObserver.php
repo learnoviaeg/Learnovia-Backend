@@ -36,22 +36,9 @@ class QuizLessonObserver
     {
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
         $lesson = Lesson::where('id',$quizLesson->lesson_id)->first();
-        // $course_id = $lesson->courseSegment->course_id;
-        // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        dd($quizLesson);
+       
         $this->report->calculate_course_progress($lesson->course_id);
 
-        // if($quiz->is_graded == 1){
-        //     $grade_category=GradeCategory::find($quizLesson->grade_category_id);
-        //     $grade_category->GradeItems()->create([
-        //         'type' => 'Quiz',
-        //         'item_id' => $quiz->id,
-        //         'name' => $quiz->name,
-        //     ]);
-        // }   
-        
-        // if($quiz->is_graded == 1){
             $grade_category=GradeCategory::find($quizLesson->grade_category_id);
             //creating grade category for quiz
             $categoryOfQuiz = GradeCategory::create([
