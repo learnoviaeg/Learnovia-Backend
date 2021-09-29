@@ -56,15 +56,8 @@ class QuizzesController extends Controller
             'sort_in' => 'in:asc,desc',
         ]);
 
-        if($request->user()->can('site/show-all-courses')){//admin
-            $enrolls = $this->chain->getEnrollsByChain($request);
-            $lessons = $enrolls->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
-        }
-
-        if(!$request->user()->can('site/show-all-courses')){//enrolled users
            $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
            $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
-        }
 
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
@@ -120,12 +113,6 @@ class QuizzesController extends Controller
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
             'lesson_id' => 'required|array|exists:lessons,id',
-            // 'type' => 'required|in:0,1,2',
-            /**
-             * type 0 => Old Question
-             * type 1 => New Questions
-             * type 2 => New & Old Questions
-             */
             'is_graded' => 'required|boolean',
             'grade_category_id' => 'required_if:is_graded,==,1',
             'duration' => 'required|integer|min:60', //by second
@@ -142,40 +129,13 @@ class QuizzesController extends Controller
             'visible'=>"in:1,0",
             'publish_date' => 'date|before_or_equal:opening_time'
         ]);
-        // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
-        //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
-
+  
         $course=  Course::where('id',$request->course_id)->first();
         LastAction::lastActionInCourse($request->course_id);
 
         $newQuestionsIDs=[];
         $oldQuestionsIDs=array();
 
-        /** if i return these comments to work again i must add type params in store of questions resource */
-
-        // if ($request->type == 1 || $request->type == 2) { // New
-        //     $request->validate([
-        //     //for request of creation multi type questions
-        //     'Question' => 'required|array',
-        //     'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
-        //     'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
-        //     'Question.*.question_type_id' => 'required|exists:questions_types,id', 
-        //     'Question.*.text' => 'required|string', //need in every type_question
-        //     ]);
-        //     $newQuestionsIDs=app('App\Http\Controllers\QuestionsController')->store($request,1);
-        // }
-        // if ($request->type == 0 ||$request->type == 2) { // old
-        //     $request->validate([
-        //         'oldQuestion' => 'required|array',
-        //         'oldQuestion.*' => 'required|integer|exists:questions,id',
-        //     ]);
-        //     $oldQuestionsIDs=($request->oldQuestion);
-        // }
-        // if(isset($newQuestionsIDs))
-        //     $newQuestionsIDs=$newQuestionsIDs->toArray();
-        // $questionsIDs = array_merge($newQuestionsIDs,$oldQuestionsIDs);
-
-        // if ($questionsIDs != null) {
             $quiz = quiz::create([
                 'name' => $request->name,
                 'course_id' => $request->course_id,
@@ -186,20 +146,22 @@ class QuizzesController extends Controller
                 'grade_feedback' => $request->grade_feedback,
                 'correct_feedback' => $request->correct_feedback,
             ]);
-            foreach($request->lesson_id as $lesson)
-            {
-                $leson=Lesson::find($lesson);
-                // dd($leson);
-                $grade_Cat=GradeCategory::where('course_id',$leson->course_id)->whereNull('parent')->first();
-                if(!isset($grade_Cat))
-                    return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
+            $lessons = Lesson::whereIn('id', $request->lesson_id) 
+                        ->with([
+                            'course.gradeCategory'=> function($query)use ($request){
+                                $query->whereNull('parent');
+                            },'QuizLesson'=>function($q){
+                                $q->orderBy('index','desc')->limit(1);
+                            }])->get();
 
-                $index = QuizLesson::where('lesson_id',$lesson)->get()->max('index');
-                $Next_index = $index + 1;
+            foreach($lessons as $key => $lesson)
+            {   
+                $grade_Cat = $lesson->course->gradeCategory[0];
+                $index = isset($lesson->QuizLesson[0]) ? $lesson->QuizLesson[0]->index :1;      
                 //add validations for all the feilds
-                $quizLesson = QuizLesson::create([
+                $data = [
                     'quiz_id' => $quiz->id,
-                    'lesson_id' => $lesson,
+                    'lesson_id' => $lesson->id,
                     'start_date' => $request->opening_time,
                     'due_date' => $request->closing_time,
                     'max_attemp' => $request->max_attemp,
@@ -207,83 +169,17 @@ class QuizzesController extends Controller
                     'grade' => isset($request->grade) ? $request->grade : 0,
                     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_time,
-                    'index' => $Next_index,
+                    'index' => ++$index,
                     'visible' => isset($request->visible)?$request->visible:1,
                     'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
                     'grade_by_user' => isset($request->grade) ? carbon::now() : null,
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
-                ]);
+                ];
             }
+            QuizLesson::insert($data);
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id,Request $request)
-    {
-        $request->validate([
-            'lesson_id' => 'required|exists:lessons,id',
-            'user_id' => 'exists:users,id',
-        ]);
-
-        $quiz = quiz::where('id',$id)->with('Question.children')->first();
-        $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
-        $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id);
-        if($request->user_id)
-            $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);
-
-        $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
-        if(isset($quiz_override))
-            $quizLesson->due_date = $quiz_override->due_date;
-
-        $query=clone $user_quiz;
-        $last_attempt=$query->latest()->first();
-        $remain_time = $quiz->duration;
-        $quiz->token_attempts = 0;
-
-        if(isset($last_attempt)){
-            if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
-                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
-
-            $check_time = ($remain_time) - (strtotime(Carbon::now())- strtotime(Carbon::parse($last_attempt->open_time)));
-            // dd($check_time);
-            if($check_time < 0)
-                $check_time= 0;
-
-            $quiz->remain_time = $check_time;
-            //case-->user_answer in new attempt
-            $answered=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->get()->count();
-            if($answered < 1)
-                $quiz->remain_time = $quiz->duration;
-        }
-        if(count($user_quiz->get())>0){
-            $quiz->attempt_index=$user_quiz->pluck('id');
-            $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$user_quiz->pluck('id'))->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
-            $quiz->token_attempts = $count_answered;
-            $quiz->Question;
-        }
-
-        $quiz->quiz_lesson=[$quizLesson];
-        foreach($quiz->Question as $question){
-            $children_mark = 0;
-            QuestionsController::mark_details_of_question_in_quiz($question ,$quiz);
-            if(isset($question->children)){
-                foreach($question->children as $child){
-                    $childd = QuestionsController::mark_details_of_question_in_quiz($child ,$quiz);
-                    $children_mark += $childd->mark;
-                }
-                $question->mark += $children_mark;
-            }
-        }
-        LastAction::lastActionInCourse($quiz->course_id);
-        return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
-    }
-
     /**
      * Update the specified resource in storage.
      *

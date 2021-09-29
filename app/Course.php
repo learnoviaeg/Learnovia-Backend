@@ -92,4 +92,9 @@ class Course extends Model
         }
         return $value;
     }
+
+    public function gradeCategory()
+    {
+        return $this->hasMany('App\GradeCategory','course_id','id');
+    }
 }
