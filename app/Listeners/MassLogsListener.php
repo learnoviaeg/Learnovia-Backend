@@ -6,7 +6,6 @@ use App\Events\MassLogsEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use App\Log;
 use App\User;
 use App\Repositories\EnrollmentRepositoryInterface;

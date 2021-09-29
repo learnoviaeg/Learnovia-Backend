@@ -16,6 +16,7 @@ use Modules\QuestionBank\Entities\quiz_questions;
 // use App\CourseSegment;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use Carbon\Carbon;
 
 class QuestionsController extends Controller
 {
@@ -200,6 +201,24 @@ class QuestionsController extends Controller
             event(new UpdatedQuizQuestionsEvent($quiz_id));            
             $quiz->draft=0;
             $quiz->save();
+           
+            //calculte time
+            $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
+                
+            if($endDate < Carbon::today()){
+                $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subHours(12);
+            }
+ 
+            $seconds = $endDate->diffInSeconds(Carbon::now());
+
+            if($seconds < 0) {
+                $seconds = 0 ;
+            }
+
+            $job = ( new \App\Jobs\Quiz24Hreminder($quiz))->delay($seconds);
+
+            dispatch($job);
+
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
     }

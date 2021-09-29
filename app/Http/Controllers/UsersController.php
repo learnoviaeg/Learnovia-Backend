@@ -98,13 +98,10 @@ class UsersController extends Controller
             $roles = $roles->get();
             $users = User::with(['attachment','roles']);
 
-            if(count($enrolls->pluck('id')))
-                $users= $enrolls->pluck('id');
-
             $all_roles = Role::all();
 
             foreach($all_roles as $role){
-                $count[Str::slug($role->name, '_')] = DB::table('model_has_roles')->whereIn('model_id',$users)->where('role_id',$role->id)->count();
+                $count[Str::slug($role->name, '_')] = DB::table('model_has_roles')->whereIn('model_id',$users->pluck('id'))->where('role_id',$role->id)->count();
             }
 
             return HelperController::api_response_format(200 ,$count,__('messages.users.count'));

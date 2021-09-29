@@ -27,6 +27,7 @@ Route::group(['prefix' => 'assignment', 'middleware' =>[ 'auth:api','LastAction'
     Route::post('grade', 'AssigmentsController@gradeAssigment')->middleware('permission:assignment/grade');
     Route::post('editgrade', 'AssigmentsController@editGradeAssignment')->middleware('permission:assignment/editgrade');
     Route::post('override', 'AssigmentsController@override')->middleware('permission:assignment/override');
+    Route::get('submission', 'AssigmentsController@assignmentSubmissions')->middleware(['permission:assignment/get' , 'ParentCheck']);
     // Route::post('delete', 'AssigmentsController@deleteAssignment')->middleware('permission:assignment/delete');
     // Route::post('delete-assign-lesson', 'AssigmentsController@deleteAssignmentLesson')->middleware('permission:assignment/delete-assign-lesson');
     Route::get('get','AssigmentsController@GetAssignment')->name('getAssignment')->middleware(['permission:assignment/get' , 'ParentCheck']);

@@ -186,7 +186,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/teachers', 'title' => 'view course teachers']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/participants', 'title' => 'view course participants']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/progress-bar', 'title' => 'view course progress bar']);
-
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/progress_report', 'title' => 'view course progress report' , 'dashboard' => 1]);
+            
             //Enroll Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/user', 'title' => 'Staff Enrollment' , 'dashboard' => 1, 'icon' => 'Star']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/un-enroll-single-user', 'title' => 'un-enroll user']);

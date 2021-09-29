@@ -70,13 +70,14 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/toggle','title' => 'toggle quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-attempts','title' => 'get all attempts of user']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/getStudentinQuiz','title' => 'get Student in Quiz']);
+        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/unLimitedAttempts','title' => 'unLimited Attempts']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/store_user_quiz','title' => 'store user quiz']);
         // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-users-all-attempts','title' => 'get all users attempts']);
         // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-fully-detailed-attempt','title' => 'get fully detailed attempts']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
 
-        $teacher_permissions=['question/category/add','quiz/view-drafts','question/category/delete','question/category/update','question/category/get','question/add','question/update',
+        $teacher_permissions=['question/category/add','site/quiz/unLimitedAttempts','quiz/view-drafts','question/category/delete','question/category/update','question/category/get','question/add','question/update',
         'question/get','question/delete','question/random','question/add-answer','question/delete-answer','quiz/add','quiz/update','quiz/delete','quiz/get',
         'quiz/add-quiz-lesson','quiz/grading-method','quiz/update-quiz-lesson','quiz/destroy-quiz-lesson','quiz/get-all-types','quiz/get-all-categories',
         'quiz/sort','quiz/get-quiz-lesson','quiz/get-all-quizes','quiz/get-student-in-quiz','quiz/get-student-answer-quiz','quiz/get-all-students-answer',
@@ -95,6 +96,7 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/view-drafts');
         $role->givePermissionTo('quiz/mark-field');
         $role->givePermissionTo('site/quiz/getStudentinQuiz');
+        $role->givePermissionTo('site/quiz/unLimitedAttempts');
         $role->givePermissionTo('site/quiz/store_user_quiz');
         $role->givePermissionTo('question/add');
         $role->givePermissionTo('question/category/add');

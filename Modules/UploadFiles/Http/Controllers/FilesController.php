@@ -718,4 +718,43 @@ class FilesController extends Controller
 
     }
 
+    public function store_file_chunks(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file',
+            'id' => 'exists:chunks,id',
+        ]);
+        $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension();
+        $name = uniqid() . '.' . $extension;
+        if(!$request->filled('id')){
+            Chunk::firstOrCreate([
+                'name' => $file->getClientOriginalName(),
+                'total_chunks' => $request->total_chunks,
+            ]);
+            Storage::disk('public')->putFileAs(
+                'chunks/',
+                $request->file,
+                $name
+            );
+        }
+        else{
+            $uncomplete_file = File::find($request->id);
+            $path = Storage::disk('public')->path("chunks/{$uncomplete_file->name}");
+            $storage = Storage::disk('public');
+            // File::append($path, $request->file);
+            file_put_contents($storage->path($path), $file->get(), FILE_APPEND);
+            
+            if ($request->has('is_last') && $request->boolean('is_last')) {
+                $name = basename($path, '.part');
+    
+                File::move($path, "public/$uncomplete_file->id/{$uncomplete_file->name}");
+            }
+    
+        }
+
+     
+        return response()->json(['message' => null ,'body' => null], 200);
+    }
+
 }

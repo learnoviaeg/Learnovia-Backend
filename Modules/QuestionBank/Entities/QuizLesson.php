@@ -100,20 +100,6 @@ class QuizLesson extends Model
         return $content;
     }
 
-    // public function getGradePassAttribute($value)
-    // {
-    //     $grade_pass = SystemSetting::where('key','Quiz grade to pass')->first();
-    //     if(isset($grade_pass)){
-    //         $percentage = (float)$grade_pass->data;
-    //         $content= (float)$value;
-
-    //     }
-
-    //     if(is_null($value))
-    //         $content = [];
-    //     return $content;
-    // }
-
     public function getGradePassAttribute()
     {
         $content = $this->attributes['grade_pass'];
@@ -124,7 +110,7 @@ class QuizLesson extends Model
                 $content = $this->attributes['questions_mark'] * $percentage;
         }
         
-        return $content;
+        return (double) $content;
     }
 }
 

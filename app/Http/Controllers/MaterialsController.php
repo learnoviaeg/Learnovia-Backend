@@ -49,14 +49,8 @@ class MaterialsController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
 
-        if($request->user()->can('site/show-all-courses')){//admin
-            $lessons = $this->chain->getEnrollsByChain($request);
-        }
-
-        if(!$request->user()->can('site/show-all-courses')){//enrolled users
-            $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
-        }
-        $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();  
+        $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
+        $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();  
 
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
@@ -104,7 +98,7 @@ class MaterialsController extends Controller
         $AllMat=$material->with(['lesson.SecondaryChain.Class'])->get();
         foreach($AllMat as $one){
             $one->class = $one->lesson->SecondaryChain->pluck('class')->unique();
-            $one->level = Level::whereIn('id',$one->class->pluck('level_id'))->get();
+            $one->level = Level::whereIn('id',$one->class->pluck('level_id'))->first();
             unset($one->lesson->SecondaryChain);
         }
 

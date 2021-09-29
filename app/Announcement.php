@@ -28,8 +28,10 @@ class Announcement extends Model
     }
     public function getTopicAttribute($value)
     {
-        $topic['id'] = Topic::find($value)->id;
-        $topic['title'] = Topic::find($value)->title;
+        $topicObject =  Topic::find($value);
+
+        $topic['id'] = $topicObject ? $topicObject->id : null;
+        $topic['title'] = $topicObject ? $topicObject->title : null;
         return $topic;
     }
     public function getCreatedByAttribute($value)
