@@ -164,11 +164,11 @@ class QuizzesController extends Controller
             foreach($lessons as $key => $lesson)
             {   
                 $grade_Cat = $lesson->course->gradeCategory[0];
-                $index = $lesson->QuizLesson[0] ? $lesson->QuizLesson[0]->index :1;      
+                $index = isset($lesson->QuizLesson[0]) ? $lesson->QuizLesson[0]->index :1;      
                 //add validations for all the feilds
                 $data = [
                     'quiz_id' => $quiz->id,
-                    'lesson_id' => $lesson,
+                    'lesson_id' => $lesson->id,
                     'start_date' => $request->opening_time,
                     'due_date' => $request->closing_time,
                     'max_attemp' => $request->max_attemp,
