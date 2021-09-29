@@ -700,7 +700,6 @@ class AssigmentsController extends Controller
         $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'class' => 'exists:classes,id',
         ]);
 
         $user = Auth::user();
@@ -794,7 +793,7 @@ class AssigmentsController extends Controller
             // // $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->with('user')->get();
             // $assigned_users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('role_id',3);
             // if($request->filled('class'))
-            //     $assigned_users->where('group_id', $request->group_id);
+            //     $assigned_users->where('group_id', $request->class);
             
             // $userassigments = User::whereIn('id',$assigned_users->get()->pluck('user_id'))
             //                 ->with(['userAssignment'=> function($query)use ($assigLessonID){
@@ -1249,7 +1248,7 @@ class AssigmentsController extends Controller
 
             $assigned_users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('role_id',3);
             if($request->filled('class'))
-                $assigned_users->where('group_id', $request->group_id);
+                $assigned_users->where('group_id', $request->class);
             
             $userassigments = User::whereIn('id',$assigned_users->get()->pluck('user_id'))
                             ->with(['userAssignment'=> function($query)use ($assigLessonID){
