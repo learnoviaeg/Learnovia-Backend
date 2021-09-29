@@ -32,11 +32,11 @@ class Announcement extends Model
         $topic['title'] = Topic::find($value)->title;
         return $topic;
     }
-    // public function getCreated_ByAttribute($value)
-    // {
-    //     $user['id'] = $value;
-    //     $user['name'] = User::find($value)->firstname;
-    //     return $user;
-    // }
+    public function getCreatedByAttribute($value)
+    {
+        $user['id'] = $value;
+        $user['name'] = User::find($value)->firstname;
+        return $user;
+    }
 
 }
