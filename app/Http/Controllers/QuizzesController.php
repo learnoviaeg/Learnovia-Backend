@@ -168,7 +168,7 @@ class QuizzesController extends Controller
                 //add validations for all the feilds
                 $data = [
                     'quiz_id' => $quiz->id,
-                    'lesson_id' => $lesson,
+                    'lesson_id' => $lesson->id,
                     'start_date' => $request->opening_time,
                     'due_date' => $request->closing_time,
                     'max_attemp' => $request->max_attemp,
