@@ -261,12 +261,13 @@ class AnnouncementsController extends Controller
     public function update(Request $request , Announcement $announcement)
     {
         $request->validate([
-            // 'id' => 'required|integer|exists:announcements,id',
+            'id' => 'required|integer|exists:announcements,id',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
         ]);
 
-        // $announcement = Announcement::where('id',$id)->with('attachment')->first();
+
+        $announcement = Announcement::where('id',$request->id)->with('attachment')->first();
         if($request->filled('title'))
             $announcement->title = $request->title;
 
@@ -279,8 +280,6 @@ class AnnouncementsController extends Controller
         if($request->filled('due_date'))
             $announcement->due_date = $request->due_date;
 
-        if($request->filled('topic'))
-            $announcement->topic = $request->topic;
 
         $file = $announcement->attachment;
         if(Input::hasFile('attached_file')){
