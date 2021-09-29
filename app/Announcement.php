@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Topic;
-use App\User;
+use App\user;
 
 
 class Announcement extends Model
@@ -32,11 +32,11 @@ class Announcement extends Model
         $topic['title'] = Topic::find($value)->title;
         return $topic;
     }
-    public function getCreated_byAttribute($value)
-    {
-        $user['id'] = User::find($value)->id;
-        $user['name'] = User::find($value)->name;
-        return $user;
-    }
+    // public function getCreated_ByAttribute($value)
+    // {
+    //     $user['id'] = $value;
+    //     $user['name'] = User::find($value)->firstname;
+    //     return $user;
+    // }
 
 }
