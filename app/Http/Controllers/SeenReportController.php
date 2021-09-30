@@ -264,6 +264,8 @@ class SeenReportController extends Controller
             'class' => 'nullable|integer|exists:classes,id',
             'search' => 'nullable',
             'paginate' => 'integer',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
             'id' => [Rule::requiredIf($option === 'users')],
         ]);
 
@@ -300,6 +302,10 @@ class SeenReportController extends Controller
             $announcements->where('title', 'LIKE' , "%$request->search%");
         }
 
+        if($request->filled('from') && $request->filled('to')){
+            $announcements->whereDate('created_at','>=',$request->from)->whereDate('created_at','<=',$request->to);
+        }
+        
         $announcements = $announcements->get();
 
         //get users who saw announcement

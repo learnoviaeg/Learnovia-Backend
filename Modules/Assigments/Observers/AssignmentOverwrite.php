@@ -9,6 +9,7 @@ use carbon\Carbon;
 use App\Timeline;
 use App\Lesson;
 use App\Course;
+use App\SecondaryChain;
 
 class AssignmentOverwrite
 {

@@ -204,6 +204,11 @@ class User extends Authenticatable
         return $this->hasMany('Modules\QuestionBank\Entities\userQuiz', 'user_id', 'id');
     }
 
+    public function userAssignment()
+    {
+        return $this->hasMany('Modules\Assigments\Entities\UserAssigment', 'user_id', 'id');
+    }
+
     public function UserGrade()
     {
         return $this->hasMany('App\UserGrade');

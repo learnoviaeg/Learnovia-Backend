@@ -27,10 +27,13 @@ class TopicController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
+        $this->middleware('auth');
+        $this->middleware('permission:topic/crud', ['only' => ['store' , 'update' , 'destroy']]);
+        $this->middleware(['permission:topic/get'],   ['only' => ['index' , 'show']]);
+  
     }
     public function index(Request $request)
     {
-
         $request->validate([
             'search' => 'string',
             'years' => 'array',
