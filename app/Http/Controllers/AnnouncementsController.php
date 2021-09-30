@@ -147,7 +147,6 @@ class AnnouncementsController extends Controller
         if($request->has('attached_file')){
             $file = attachment::upload_attachment($request->attached_file, 'Announcement');
         }
-        
 
         //create announcement
         $announcement = Announcement::create([
@@ -160,7 +159,6 @@ class AnnouncementsController extends Controller
             'start_date' => isset($request->start_date) ? $request->start_date : null,
             'due_date' => isset($request->due_date) ? $request->due_date : null,
         ]);
-
 
         $users = collect();
         foreach($request->chains as $chain){
@@ -176,7 +174,10 @@ class AnnouncementsController extends Controller
             ]);
 
             //get users that should receive the announcement
-            $enrolls = $this->chain->getEnrollsByChain($chain_request)->where('user_id','!=' ,Auth::id());
+            $enrolls = $this->chain->getEnrollsByChain($chain_request);
+            $query=clone $enrolls;
+            
+            $enrolls->where('user_id','!=' ,Auth::id());
 
             if(isset($chain['roles']) && count($chain['roles']) > 0){
                 $enrolls->whereIn('role_id',$chain['roles']);
@@ -185,6 +186,11 @@ class AnnouncementsController extends Controller
             if(!isset($chain['roles'])){
                 $enrolls->where('role_id','!=', 1 );
             }
+
+            // to get users that on my chain
+            $query_course=$query->where('user_id',Auth::id())->pluck('course');
+            if(isset($query_class))
+                $enrolls->whereIn('course',$query_course);
 
             $users->push($enrolls->whereHas('user')->select('user_id')->distinct()->pluck('user_id'));
 
