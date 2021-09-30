@@ -35,11 +35,10 @@ class QuizLessonObserver
     public function created(QuizLesson $quizLesson)
     {
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
-        $lesson = Lesson::find($quizLesson->lesson_id);
+        $lesson = Lesson::where('id',$quizLesson->lesson_id)->first();
         // $course_id = $lesson->courseSegment->course_id;
         // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        
         $this->report->calculate_course_progress($lesson->course_id);
 
         // if($quiz->is_graded == 1){
@@ -81,23 +80,23 @@ class QuizLessonObserver
             // $quizLesson->grade_category_id = $categoryOfQuiz->id;
             $quizLesson->save();
 
-            $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
-                            ->where('user_id','!=',Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->toArray();
+            // $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
+            //                 ->where('user_id','!=',Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->toArray();
 
-            foreach($lesson->shared_classes->pluck('id') as $class){
-                $requ = ([
-                    'message' => $quiz->name . ' quiz was added',
-                    'id' => $quiz->id,
-                    'users' => $users,
-                    'type' =>'quiz',
-                    'publish_date'=> Carbon::parse($quizLesson->publish_date),
-                    'course_id' => $lesson->course_id,
-                    'class_id'=> $class,
-                    'lesson_id'=> $lesson,
-                    'from' => Auth::id(),
-                ]);
-                user::notify($requ);
-            }
+            // foreach($lesson->shared_classes->pluck('id') as $class){
+            //     $requ = ([
+            //         'message' => $quiz->name . ' quiz was added',
+            //         'id' => $quiz->id,
+            //         'users' => $users,
+            //         'type' =>'quiz',
+            //         'publish_date'=> Carbon::parse($quizLesson->publish_date),
+            //         'course_id' => $lesson->course_id,
+            //         'class_id'=> $class,
+            //         'lesson_id'=> $lesson,
+            //         'from' => Auth::id(),
+            //     ]);
+            //     user::notify($requ);
+            // }
     }
 
     /**

@@ -120,12 +120,6 @@ class QuizzesController extends Controller
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
             'lesson_id' => 'required|array|exists:lessons,id',
-            // 'type' => 'required|in:0,1,2',
-            /**
-             * type 0 => Old Question
-             * type 1 => New Questions
-             * type 2 => New & Old Questions
-             */
             'is_graded' => 'required|boolean',
             'grade_category_id' => 'required_if:is_graded,==,1',
             'duration' => 'required|integer|min:60', //by second
@@ -142,40 +136,13 @@ class QuizzesController extends Controller
             'visible'=>"in:1,0",
             'publish_date' => 'date|before_or_equal:opening_time'
         ]);
-        // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
-        //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
-
+  
         $course=  Course::where('id',$request->course_id)->first();
         LastAction::lastActionInCourse($request->course_id);
 
         $newQuestionsIDs=[];
         $oldQuestionsIDs=array();
 
-        /** if i return these comments to work again i must add type params in store of questions resource */
-
-        // if ($request->type == 1 || $request->type == 2) { // New
-        //     $request->validate([
-        //     //for request of creation multi type questions
-        //     'Question' => 'required|array',
-        //     'Question.*.course_id' => 'required|integer|exists:courses,id', // because every question has course_id
-        //     'Question.*.question_category_id' => 'required|integer|exists:questions_categories,id',
-        //     'Question.*.question_type_id' => 'required|exists:questions_types,id', 
-        //     'Question.*.text' => 'required|string', //need in every type_question
-        //     ]);
-        //     $newQuestionsIDs=app('App\Http\Controllers\QuestionsController')->store($request,1);
-        // }
-        // if ($request->type == 0 ||$request->type == 2) { // old
-        //     $request->validate([
-        //         'oldQuestion' => 'required|array',
-        //         'oldQuestion.*' => 'required|integer|exists:questions,id',
-        //     ]);
-        //     $oldQuestionsIDs=($request->oldQuestion);
-        // }
-        // if(isset($newQuestionsIDs))
-        //     $newQuestionsIDs=$newQuestionsIDs->toArray();
-        // $questionsIDs = array_merge($newQuestionsIDs,$oldQuestionsIDs);
-
-        // if ($questionsIDs != null) {
             $quiz = quiz::create([
                 'name' => $request->name,
                 'course_id' => $request->course_id,
@@ -186,18 +153,20 @@ class QuizzesController extends Controller
                 'grade_feedback' => $request->grade_feedback,
                 'correct_feedback' => $request->correct_feedback,
             ]);
-            foreach($request->lesson_id as $lesson)
-            {
-                $leson=Lesson::find($lesson);
-                // dd($leson);
-                $grade_Cat=GradeCategory::where('course_id',$leson->course_id)->whereNull('parent')->first();
-                if(!isset($grade_Cat))
-                    return HelperController::api_response_format(200, null, __('messages.grade_category.not_found'));
+            $lessons = Lesson::whereIn('id', $request->lesson_id) 
+                        ->with([
+                            'course.gradeCategory'=> function($query)use ($request){
+                                $query->whereNull('parent');
+                            },'QuizLesson'=>function($q){
+                                $q->orderBy('index','desc')->limit(1);
+                            }])->get();
 
-                $index = QuizLesson::where('lesson_id',$lesson)->get()->max('index');
-                $Next_index = $index + 1;
+            foreach($lessons as $key => $lesson)
+            {   
+                $grade_Cat = $lesson->course->gradeCategory[0];
+                $index = $lesson->QuizLesson[0] ? $lesson->QuizLesson[0]->index :1;      
                 //add validations for all the feilds
-                $quizLesson = QuizLesson::create([
+                $data = [
                     'quiz_id' => $quiz->id,
                     'lesson_id' => $lesson,
                     'start_date' => $request->opening_time,
@@ -207,13 +176,14 @@ class QuizzesController extends Controller
                     'grade' => isset($request->grade) ? $request->grade : 0,
                     'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
                     'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_time,
-                    'index' => $Next_index,
+                    'index' => ++$index,
                     'visible' => isset($request->visible)?$request->visible:1,
                     'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
                     'grade_by_user' => isset($request->grade) ? carbon::now() : null,
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
-                ]);
+                ];
             }
+            QuizLesson::insert($data);
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
     }
