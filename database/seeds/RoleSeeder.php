@@ -28,7 +28,7 @@ class RoleSeeder extends Seeder
             'grade/category/get-gradecategories', 'grade/item/add', 'grade/item/get', 'grade/item/delete', 'grade/item/update', 'grade/user/add', 'grade/user/get', 'grade/user/update',
             'grade/user/delete', 'grade/report/grader', 'grade/report/user', 'grade/report/over-all', 'scale/add', 'scale/update', 'scale/delete', 'scale/get', 'scale/get-with-course',
             'letter/add', 'letter/update', 'letter/delete', 'letter/get', 'letter/assign', 'site/user/search-all-users', 'site/course/teacher', 'chat/add-room', 'timeline/get', 'material/get',
-            'course/teachers', 'course/participants', 'notifications/send', 'site/show/as-participant', 'course/progress-bar'
+            'course/teachers', 'course/participants', 'notifications/send', 'site/show/as-participant', 'course/progress-bar'  
         ];
         $student_permissions = [
             'notifications/get-all', 'notifications/get-unread', 'notifications/mark-as-read', 'notifications/seen', 'year/get-all', 'year/get-my-years',
@@ -36,7 +36,7 @@ class RoleSeeder extends Seeder
             'segment/get-my-segments', 'course/my-courses', 'course/layout', 'course/components', 'contact/add', 'contact/get', 'user/get-by-id', 'user/get-my-users',
             'component/get', 'announcements/get', 'announcements/getbyid', 'announcements/get-unread', 'announcements/mark-as-read', 'calendar/get', 'calendar/weekly',
             'languages/get', 'languages/update', 'languages/delete', 'languages/dictionary', 'user/language', 'languages/activate', 'languages/deactivate', 'languages/set-default',
-            'grade/user/course-grade', 'grade/report/user', 'site/course/student', 'chat/add-room', 'timeline/get', 'material/get', 'course/teachers', 'site/show/as-participant'
+            'grade/user/course-grade', 'grade/report/user', 'site/course/student', 'chat/add-room', 'timeline/get', 'material/get', 'course/teachers', 'site/show/as-participant',
         ];
 
         $parent_permissions = [
@@ -46,7 +46,7 @@ class RoleSeeder extends Seeder
             'component/get', 'announcements/get', 'announcements/getbyid', 'announcements/get-unread', 'announcements/mark-as-read', 'calendar/get', 'calendar/weekly',
             'languages/get', 'languages/update', 'languages/delete', 'languages/dictionary', 'user/language', 'languages/activate', 'languages/deactivate', 'languages/set-default',
             'grade/user/course-grade', 'grade/report/user', 'site/course/student', 'user/parent-child', 'user/current-child', 'user/get-someone-child', 'user/get-my-child', 'user/get-current-child',
-            'timeline/get', 'material/get', 'course/teachers', 'chat/add-room'
+            'timeline/get', 'material/get', 'course/teachers', 'chat/add-room' , 
         ];
 
         $Super = \Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'api', 'name' => 'Super Admin', 'description' => 'System manager that can monitor everything.']);

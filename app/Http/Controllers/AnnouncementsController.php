@@ -87,7 +87,6 @@ class AnnouncementsController extends Controller
                 return str_contains(strtolower($item->title), strtolower($request->search));
             });
         }
-
         return response()->json(['message' => __('messages.announcement.list'), 'body' => $announcements->filter()->values()->paginate($paginate)], 200);
     }
 
@@ -140,7 +139,7 @@ class AnnouncementsController extends Controller
         if($request->has('attached_file')){
             $file = attachment::upload_attachment($request->attached_file, 'Announcement');
         }
-
+        
         //create announcement
         $announcement = Announcement::create([
             'title' => $request->title,
@@ -257,7 +256,7 @@ class AnnouncementsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request , Announcement $announcement)
     {
         $request->validate([
             'id' => 'required|integer|exists:announcements,id',
@@ -266,7 +265,6 @@ class AnnouncementsController extends Controller
         ]);
 
         $announcement = Announcement::where('id',$request->id)->with('attachment')->first();
-
         if($request->filled('title'))
             $announcement->title = $request->title;
 
@@ -311,7 +309,7 @@ class AnnouncementsController extends Controller
                     'start_date' => $announcement->start_date,
                     'due_date' => $announcement->due_date,
                     'message' => $announcement->title.' announcement is updated',
-                    'from' => $announcement->created_by,
+                    'from' => $announcement->created_by['id'],
                     'users' => $users->toArray()
                 ]);
 
@@ -319,6 +317,7 @@ class AnnouncementsController extends Controller
                 $notify = (new NotificationsController)->store($notify_request);
             }
         }
+
 
         return response()->json(['message' => __('messages.announcement.update'), 'body' => $announcement], 200);
     }

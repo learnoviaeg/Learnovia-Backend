@@ -3,6 +3,9 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Topic;
+use App\user;
+
 
 class Announcement extends Model
 {
@@ -22,6 +25,20 @@ class Announcement extends Model
 
     public  function chainAnnouncement(){
         return $this->hasMany('App\AnnouncementsChain','announcement_id', 'id');
+    }
+    public function getTopicAttribute($value)
+    {
+        $topicObject =  Topic::find($value);
+
+        $topic['id'] = $topicObject ? $topicObject->id : null;
+        $topic['title'] = $topicObject ? $topicObject->title : null;
+        return $topic;
+    }
+    public function getCreatedByAttribute($value)
+    {
+        $user['id'] = $value;
+        $user['name'] = User::find($value)->firstname;
+        return $user;
     }
 
 }

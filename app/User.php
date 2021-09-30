@@ -101,59 +101,59 @@ class User extends Authenticatable
 
     public static function notify($request)
     {
-        $validater = Validator::make($request, [
-            'users'=>'required|array',
-            'users.*' => 'required|integer|exists:users,id',
-            'type' => 'required|string',
-            'publish_date' => 'required|date'
-        ]);
+        // $validater = Validator::make($request, [
+        //     'users'=>'required|array',
+        //     'users.*' => 'required|integer|exists:users,id',
+        //     'type' => 'required|string',
+        //     'publish_date' => 'required|date'
+        // ]);
 
-        if ($validater->fails()) {
-            $errors = $validater->errors();
-            return response()->json($errors, 400);
-        }
+        // if ($validater->fails()) {
+        //     $errors = $validater->errors();
+        //     return response()->json($errors, 400);
+        // }
 
-        if($request['type']!='announcement')
-        {
-            $validater = Validator::make($request, [
-                'message' => 'required',
-                'from' => 'required|integer|exists:users,id',
-                'course_id' => 'required|integer|exists:courses,id',
-                'class_id'=>'required|integer|exists:classes,id'
-            ]);
-            if ($validater->fails()) {
-                $errors = $validater->errors();
-                return response()->json($errors, 400);
-            }
+        // if($request['type']!='announcement')
+        // {
+        //     $validater = Validator::make($request, [
+        //         'message' => 'required',
+        //         'from' => 'required|integer|exists:users,id',
+        //         'course_id' => 'required|integer|exists:courses,id',
+        //         'class_id'=>'required|integer|exists:classes,id'
+        //     ]);
+        //     if ($validater->fails()) {
+        //         $errors = $validater->errors();
+        //         return response()->json($errors, 400);
+        //     }
 
-            $request['course_name'] = Course::whereId($request['course_id'])->pluck('name')->first();
-        }
-        $touserid = array();
-        foreach($request['users'] as $user)
-        {
-            $temp = User::find($user);
-            if($temp != null)
-                $touserid[] = $temp;
-        }
-        $date=$request['publish_date'];
-        $seconds = Carbon::parse($date)->diffInSeconds(Carbon::now());
-        if($seconds < 0) {
-            $seconds = 0 ;
-        }
+        //     $request['course_name'] = Course::whereId($request['course_id'])->pluck('name')->first();
+        // }
+        // $touserid = array();
+        // foreach($request['users'] as $user)
+        // {
+        //     $temp = User::find($user);
+        //     if($temp != null)
+        //         $touserid[] = $temp;
+        // }
+        // $date=$request['publish_date'];
+        // $seconds = Carbon::parse($date)->diffInSeconds(Carbon::now());
+        // if($seconds < 0) {
+        //     $seconds = 0 ;
+        // }
         
-        $request['publish_date']=Carbon::parse($request['publish_date'])->format('Y-m-d H:i:s');
+        // $request['publish_date']=Carbon::parse($request['publish_date'])->format('Y-m-d H:i:s');
 
-        $request['title']=null;
-        if($request['type']=='announcement'){
-            // $request['message']="A new announcement will be published";
-            $request['title']=Announcement::whereId($request['id'])->first()->title;
-        }
+        // $request['title']=null;
+        // if($request['type']=='announcement'){
+        //     // $request['message']="A new announcement will be published";
+        //     $request['title']=Announcement::whereId($request['id'])->first()->title;
+        // }
 
-        Notification::send( $touserid, new NewMessage($request));
+        // Notification::send( $touserid, new NewMessage($request));
 
-         $job = ( new \App\Jobs\Sendnotify(
-              $request))->delay($seconds);
-             dispatch($job);
+        //  $job = ( new \App\Jobs\Sendnotify(
+        //       $request))->delay($seconds);
+        //      dispatch($job);
         return 1;
     }
 
@@ -202,6 +202,11 @@ class User extends Authenticatable
     public function userQuiz()
     {
         return $this->hasMany('Modules\QuestionBank\Entities\userQuiz', 'user_id', 'id');
+    }
+
+    public function userAssignment()
+    {
+        return $this->hasMany('Modules\Assigments\Entities\UserAssigment', 'user_id', 'id');
     }
 
     public function UserGrade()
