@@ -56,15 +56,8 @@ class QuizzesController extends Controller
             'sort_in' => 'in:asc,desc',
         ]);
 
-        if($request->user()->can('site/show-all-courses')){//admin
-            $enrolls = $this->chain->getEnrollsByChain($request);
-            $lessons = $enrolls->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
-        }
-
-        if(!$request->user()->can('site/show-all-courses')){//enrolled users
            $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
            $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
-        }
 
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
@@ -164,11 +157,11 @@ class QuizzesController extends Controller
             foreach($lessons as $key => $lesson)
             {   
                 $grade_Cat = $lesson->course->gradeCategory[0];
-                $index = $lesson->QuizLesson[0] ? $lesson->QuizLesson[0]->index :1;      
+                $index = isset($lesson->QuizLesson[0]) ? $lesson->QuizLesson[0]->index :1;      
                 //add validations for all the feilds
                 $data = [
                     'quiz_id' => $quiz->id,
-                    'lesson_id' => $lesson,
+                    'lesson_id' => $lesson->id,
                     'start_date' => $request->opening_time,
                     'due_date' => $request->closing_time,
                     'max_attemp' => $request->max_attemp,
@@ -187,73 +180,6 @@ class QuizzesController extends Controller
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id,Request $request)
-    {
-        $request->validate([
-            'lesson_id' => 'required|exists:lessons,id',
-            'user_id' => 'exists:users,id',
-        ]);
-
-        $quiz = quiz::where('id',$id)->with('Question.children')->first();
-        $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
-        $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id);
-        if($request->user_id)
-            $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);
-
-        $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
-        if(isset($quiz_override))
-            $quizLesson->due_date = $quiz_override->due_date;
-
-        $query=clone $user_quiz;
-        $last_attempt=$query->latest()->first();
-        $remain_time = $quiz->duration;
-        $quiz->token_attempts = 0;
-
-        if(isset($last_attempt)){
-            if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
-                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
-
-            $check_time = ($remain_time) - (strtotime(Carbon::now())- strtotime(Carbon::parse($last_attempt->open_time)));
-            // dd($check_time);
-            if($check_time < 0)
-                $check_time= 0;
-
-            $quiz->remain_time = $check_time;
-            //case-->user_answer in new attempt
-            $answered=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->get()->count();
-            if($answered < 1)
-                $quiz->remain_time = $quiz->duration;
-        }
-        if(count($user_quiz->get())>0){
-            $quiz->attempt_index=$user_quiz->pluck('id');
-            $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$user_quiz->pluck('id'))->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
-            $quiz->token_attempts = $count_answered;
-            $quiz->Question;
-        }
-
-        $quiz->quiz_lesson=[$quizLesson];
-        foreach($quiz->Question as $question){
-            $children_mark = 0;
-            QuestionsController::mark_details_of_question_in_quiz($question ,$quiz);
-            if(isset($question->children)){
-                foreach($question->children as $child){
-                    $childd = QuestionsController::mark_details_of_question_in_quiz($child ,$quiz);
-                    $children_mark += $childd->mark;
-                }
-                $question->mark += $children_mark;
-            }
-        }
-        LastAction::lastActionInCourse($quiz->course_id);
-        return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
-    }
-
     /**
      * Update the specified resource in storage.
      *

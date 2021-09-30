@@ -70,11 +70,9 @@ class Lesson extends Model
         }
         return $value;
     }
-
+    
     public function course()
     {
         return $this->belongsTo('App\Course','course_id','id');
     }
-    
-
 }
