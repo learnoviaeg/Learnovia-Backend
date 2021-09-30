@@ -937,25 +937,8 @@ class AssigmentsController extends Controller
                     'name' => $name_assignment,
                     'weight' => 0,
                 ]);
-                // $grade_category->GradeItems()->create([
-                //     'grademin' => 0,
-                //     'grademax' => $request->mark,
-                //     'item_no' => 1,
-                //     'scale_id' => (isset($request->scale)) ? $request->scale : 1,
-                //     'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
-                //     'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
-                //     'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
-                //     'item_type' => 2, // Assignment
-                //     'item_Entity' => $request->assignment_id,
-                //     'name' => $name_assignment,
-                //     'weight' => 0,
-                // ]);
-                // $assignment_lesson->save();
-                // $assignment_lesson['grade_items']=$grade_category->GradeItems;
+   
             }
-            // else{
-            // $assignment_lesson->save();
-            // }
             $assignment_lesson->save();
             $assignmentLesson [] = $assignment_lesson;
             LessonComponent::create([
