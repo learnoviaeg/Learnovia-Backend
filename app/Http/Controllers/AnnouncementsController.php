@@ -189,7 +189,7 @@ class AnnouncementsController extends Controller
 
             // to get users that on my chain
             $query_course=$query->where('user_id',Auth::id())->pluck('course');
-            if(isset($query_class))
+            if(isset($query_course))
                 $enrolls->whereIn('course',$query_course);
 
             $users->push($enrolls->whereHas('user')->select('user_id')->distinct()->pluck('user_id'));
