@@ -99,7 +99,6 @@ class AnnouncementsController extends Controller
      */
     public function store(Request $request)
     {
-
         //check if user must filter with the whole chain
         $chain_filter = 0;
         if($request->user()->can('announcements/filter-chain')){
@@ -114,6 +113,7 @@ class AnnouncementsController extends Controller
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|date',
+            'topic' => 'nullable | exists:topics,id',
             'chains' => 'required|array',
             'chains.*.roles' => 'array',
             'chains.*.roles.*' => 'exists:roles,id',
@@ -148,10 +148,10 @@ class AnnouncementsController extends Controller
             'attached_file' => isset($file) ? $file->id : null,
             'publish_date' => $publish_date,
             'created_by' => Auth::id(),
+            'topic' => isset($request->topic) ? $request->topic : null,
             'start_date' => isset($request->start_date) ? $request->start_date : null,
             'due_date' => isset($request->due_date) ? $request->due_date : null,
         ]);
-
 
         $users = collect();
         foreach($request->chains as $chain){
@@ -167,7 +167,10 @@ class AnnouncementsController extends Controller
             ]);
 
             //get users that should receive the announcement
-            $enrolls = $this->chain->getEnrollsByChain($chain_request)->where('user_id','!=' ,Auth::id());
+            $enrolls = $this->chain->getEnrollsByChain($chain_request);
+            $query=clone $enrolls;
+            
+            $enrolls->where('user_id','!=' ,Auth::id());
 
             if(isset($chain['roles']) && count($chain['roles']) > 0){
                 $enrolls->whereIn('role_id',$chain['roles']);
@@ -176,6 +179,11 @@ class AnnouncementsController extends Controller
             if(!isset($chain['roles'])){
                 $enrolls->where('role_id','!=', 1 );
             }
+
+            // to get users that on my chain
+            $query_course=$query->where('user_id',Auth::id())->pluck('course');
+            if(isset($query_course))
+                $enrolls->whereIn('course',$query_course);
 
             $users->push($enrolls->whereHas('user')->select('user_id')->distinct()->pluck('user_id'));
 
@@ -215,7 +223,7 @@ class AnnouncementsController extends Controller
                 'start_date' => $announcement->start_date,
                 'due_date' => $announcement->due_date,
                 'message' => $request->title.' announcement is added',
-                'from' => $announcement->created_by,
+                'from' => $announcement->created_by['id'],
                 'users' => $users->toArray()
             ]);
 
