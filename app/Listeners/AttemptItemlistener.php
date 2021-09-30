@@ -11,6 +11,7 @@ use App\GradeItems;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuiz;
 use App\User;
+use Auth;
 use App\Enroll;
 use App\UserGrader;
 use Illuminate\Http\Request;
@@ -43,6 +44,10 @@ class AttemptItemlistener
             $QuizID=$QuizLesson->quiz->id;
             $max_attempt=$QuizLesson->max_attemp;
             $GradeCategory = GradeCategory::where('instance_id' , $QuizID)->first();
+            
+            if((Auth::user()->can('site/quiz/unLimitedAttempts')))
+                $max_attempt=1;
+
             for($key =1; $key<=$max_attempt; $key++){
                 $gradeItem = GradeItems::create([
                     'type' => 'Attempt',
