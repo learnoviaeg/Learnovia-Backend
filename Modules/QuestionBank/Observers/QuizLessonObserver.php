@@ -39,7 +39,6 @@ class QuizLessonObserver
         // $course_id = $lesson->courseSegment->course_id;
         // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-        dd($quizLesson);
         $this->report->calculate_course_progress($lesson->course_id);
 
         // if($quiz->is_graded == 1){
