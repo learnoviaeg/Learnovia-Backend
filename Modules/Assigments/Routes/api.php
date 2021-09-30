@@ -35,5 +35,4 @@ Route::group(['prefix' => 'assignment', 'middleware' =>[ 'auth:api','LastAction'
     Route::post('assignment-override', 'AssigmentsController@overrideAssignment')->middleware('permission:assignment/assignment-override');
     Route::post('annotate', 'AssigmentsController@AnnotatePDF')->middleware('permission:assignment/grade');
     Route::get('overwrite-script', 'AssigmentsController@overwriteScript')->middleware('permission:site/show-all-courses');
-    // Route::get('get-all', 'AssigmentsController@getAllAssigment')->middleware('permission:assignment/get-all');
 });

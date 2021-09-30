@@ -54,10 +54,7 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-types','title' => 'get all quiz types']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-categories','title' => 'get all quiz categories']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sort','title' => 'sort quiz']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sortup','title' => 'sort up quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-quiz-lesson','title' => 'get quiz lesson']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/store-user-quiz','title' => 'store user quiz']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/store-user-quiz-answer','title' => 'store user quiz answer']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-quizes','title' => 'get all quizes']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-in-quiz','title' => 'get student in quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-answer-quiz','title' => 'get student answer quiz']);
@@ -72,8 +69,6 @@ class QuestionBankController extends Controller
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/getStudentinQuiz','title' => 'get Student in Quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/unLimitedAttempts','title' => 'unLimited Attempts']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/store_user_quiz','title' => 'store user quiz']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-users-all-attempts','title' => 'get all users attempts']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-fully-detailed-attempt','title' => 'get fully detailed attempts']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
 
@@ -113,7 +108,6 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/add');
         $role->givePermissionTo('quiz/update');
         $role->givePermissionTo('quiz/sort');
-        // $role->givePermissionTo('quiz/sortup');
         $role->givePermissionTo('quiz/delete');
         $role->givePermissionTo('quiz/add-quiz-lesson');
         $role->givePermissionTo('quiz/update-quiz-lesson');
@@ -121,8 +115,6 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/get-all-types');
         $role->givePermissionTo('quiz/get-all-categories');
         $role->givePermissionTo('quiz/get-quiz-lesson');
-        // $role->givePermissionTo('quiz/store-user-quiz');
-        // $role->givePermissionTo('quiz/store-user-quiz-answer');
         $role->givePermissionTo('quiz/get-all-quizes');
         $role->givePermissionTo('quiz/get-student-in-quiz');
         $role->givePermissionTo('quiz/get-student-answer-quiz');
@@ -155,15 +147,6 @@ class QuestionBankController extends Controller
 
         );
         QuestionsType::insert($QuesTypes);
-
-        // $QuesCateg=array(
-        //     array('name' => 'Lesson One'),
-        //     array('name' => 'Lesson Two'),
-        //     array('name' => 'Lesson Three'),
-        //     array('name' => 'Lesson Four'),
-        //     array('name' => 'Lesson Five'),
-        // );
-        // QuestionsCategory::insert($QuesCateg);
 
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
