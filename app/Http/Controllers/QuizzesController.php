@@ -159,7 +159,7 @@ class QuizzesController extends Controller
                 $grade_Cat = $lesson->course->gradeCategory[0];
                 $index = isset($lesson->QuizLesson[0]) ? $lesson->QuizLesson[0]->index :1;      
                 //add validations for all the feilds
-                $data = [
+                QuizLesson::create([
                     'quiz_id' => $quiz->id,
                     'lesson_id' => $lesson->id,
                     'start_date' => $request->opening_time,
@@ -174,9 +174,8 @@ class QuizzesController extends Controller
                     'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
                     'grade_by_user' => isset($request->grade) ? carbon::now() : null,
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
-                ];
+                ]);
             }
-            QuizLesson::insert($data);
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
     }
