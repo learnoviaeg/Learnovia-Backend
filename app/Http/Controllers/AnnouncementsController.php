@@ -202,32 +202,30 @@ class AnnouncementsController extends Controller
 
         //check if there's a students to send for them or skip that part
         if(count($users) > 0){
-
-            //add user announcements
-            $users->map(function ($user) use ($announcement) {
-                userAnnouncement::create([
+            foreach($users as $user){
+                $data[] = [
                     'announcement_id' => $announcement->id,
-                    'user_id' => $user
-                ]);
-            });
-
+                    'user_id' => $user,
+                ]; 
+            }
+            userAnnouncement::insert($data);
             //notification object
-            $notify_request = new Request ([
-                'id' => $announcement->id,
-                'type' => 'announcement',
-                'publish_date' => $publish_date,
-                'title' => $request->title,
-                'description' => $request->description,
-                'attached_file' => $file,
-                'start_date' => $announcement->start_date,
-                'due_date' => $announcement->due_date,
-                'message' => $request->title.' announcement is added',
-                'from' => $announcement->created_by['id'],
-                'users' => $users->toArray()
-            ]);
+            // $notify_request = new Request ([
+            //     'id' => $announcement->id,
+            //     'type' => 'announcement',
+            //     'publish_date' => $publish_date,
+            //     'title' => $request->title,
+            //     'description' => $request->description,
+            //     'attached_file' => $file,
+            //     'start_date' => $announcement->start_date,
+            //     'due_date' => $announcement->due_date,
+            //     'message' => $request->title.' announcement is added',
+            //     'from' => $announcement->created_by['id'],
+            //     'users' => $users->toArray()
+            // ]);
 
-            // use notify store function to notify users with the announcement
-            $notify = (new NotificationsController)->store($notify_request);
+            // // use notify store function to notify users with the announcement
+            // $notify = (new NotificationsController)->store($notify_request);
         }
 
         return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);
