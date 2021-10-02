@@ -58,13 +58,9 @@ class TimelineController extends Controller
             'start_date' => 'date',
             'due_date' => 'date',
         ]);
-        $enrolls = $this->chain->getEnrollsByChain($request)->get()->pluck('id');
-        $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->get()->pluck('lesson_id')->unique();
-        if(!$request->user()->can('site/show-all-courses'))//student and teacher
-            {
-                $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
-                $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
-            }
+
+        $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
+        $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id');
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$lessons)
                             ->where('visible',1)

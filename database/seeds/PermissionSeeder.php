@@ -380,5 +380,12 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/upload_file_extensions', 'title' => 'Manage upload file extensions']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/logo', 'title' => 'Set|Delete Logo']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/grade_pass', 'title' => 'Manage grade to pass percentage']);
+
+
+        //Topic Permissions
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'topic/crud', 'title' => 'Topic Crud']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'topic/get', 'title' => 'Get Topic']);        
+
+
     }
 }

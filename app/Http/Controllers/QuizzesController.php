@@ -159,7 +159,7 @@ class QuizzesController extends Controller
                 $grade_Cat = $lesson->course->gradeCategory[0];
                 $index = isset($lesson->QuizLesson[0]) ? $lesson->QuizLesson[0]->index :1;      
                 //add validations for all the feilds
-                $data = [
+                QuizLesson::create([
                     'quiz_id' => $quiz->id,
                     'lesson_id' => $lesson->id,
                     'start_date' => $request->opening_time,
@@ -174,9 +174,8 @@ class QuizzesController extends Controller
                     'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
                     'grade_by_user' => isset($request->grade) ? carbon::now() : null,
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
-                ];
+                ]);
             }
-            QuizLesson::insert($data);
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
     }
@@ -305,6 +304,72 @@ class QuizzesController extends Controller
     {
         $grade_to_pass_setting = SystemSetting::where('key' , 'Quiz grade to pass')->first();
         return HelperController::api_response_format(200, $grade_to_pass_setting,__('messages.quiz.grade_pass_settings_list'));
+    }
+
+        /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id,Request $request)
+    {
+        $request->validate([
+            'lesson_id' => 'required|exists:lessons,id',
+            'user_id' => 'exists:users,id',
+        ]);
+
+        $quiz = quiz::where('id',$id)->with('Question.children')->first();
+        $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
+        $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id);
+        if($request->user_id)
+            $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);
+
+        $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
+        if(isset($quiz_override))
+            $quizLesson->due_date = $quiz_override->due_date;
+
+        $query=clone $user_quiz;
+        $last_attempt=$query->latest()->first();
+        $remain_time = $quiz->duration;
+        $quiz->token_attempts = 0;
+
+        if(isset($last_attempt)){
+            if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
+                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
+
+            $check_time = ($remain_time) - (strtotime(Carbon::now())- strtotime(Carbon::parse($last_attempt->open_time)));
+            // dd($check_time);
+            if($check_time < 0)
+                $check_time= 0;
+
+            $quiz->remain_time = $check_time;
+            //case-->user_answer in new attempt
+            $answered=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->get()->count();
+            if($answered < 1)
+                $quiz->remain_time = $quiz->duration;
+        }
+        if(count($user_quiz->get())>0){
+            $quiz->attempt_index=$user_quiz->pluck('id');
+            $count_answered=UserQuizAnswer::whereIn('user_quiz_id',$user_quiz->pluck('id'))->where('force_submit','1')->pluck('user_quiz_id')->unique()->count();
+            $quiz->token_attempts = $count_answered;
+            $quiz->Question;
+        }
+
+        $quiz->quiz_lesson=[$quizLesson];
+        foreach($quiz->Question as $question){
+            $children_mark = 0;
+            QuestionsController::mark_details_of_question_in_quiz($question ,$quiz);
+            if(isset($question->children)){
+                foreach($question->children as $child){
+                    $childd = QuestionsController::mark_details_of_question_in_quiz($child ,$quiz);
+                    $children_mark += $childd->mark;
+                }
+                $question->mark += $children_mark;
+            }
+        }
+        LastAction::lastActionInCourse($quiz->course_id);
+        return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
     }
 
 }

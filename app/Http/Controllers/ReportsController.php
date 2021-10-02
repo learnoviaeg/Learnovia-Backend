@@ -323,7 +323,7 @@ class ReportsController extends Controller
 
     public function CourseProgressCounters(Request $request){
 
-        $types = ['materials','assignments','quizzes','lessons','interactives','virtuals'];
+        $types = ['materials','assignments','quizzes','interactives','virtuals'];
 
         //validate the request
         $request->validate([
