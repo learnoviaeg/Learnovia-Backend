@@ -14,8 +14,8 @@ class AalterGradeCategories extends Migration
     public function up()
     {
         Schema::table('grade_categories', function (Blueprint $table) {
-            $table->string('instance_type')->nullable();
-            $table->integer('instance_id')->nullable();
+            // $table->string('instance_type')->nullable();
+            // $table->integer('instance_id')->nullable();
         });
     }
 

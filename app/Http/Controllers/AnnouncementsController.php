@@ -75,13 +75,11 @@ class AnnouncementsController extends Controller
                                             ->pluck('announcements')
                                             ->sortByDesc('publish_date')
                                             ->unique()->values();
- 
 
         if($request->user()->can('site/show-all-courses')){ //admin
 
             $announcements = Announcement::orderBy('publish_date','desc')->get();
         }
-
 
         if($request->filled('search')){
 
@@ -89,11 +87,6 @@ class AnnouncementsController extends Controller
                 return str_contains(strtolower($item->title), strtolower($request->search));
             });
         }
-
-        
-        
-
-
         return response()->json(['message' => __('messages.announcement.list'), 'body' => $announcements->filter()->values()->paginate($paginate)], 200);
     }
 
@@ -105,7 +98,6 @@ class AnnouncementsController extends Controller
      */
     public function store(Request $request)
     {
-
         //check if user must filter with the whole chain
         $chain_filter = 0;
         if($request->user()->can('announcements/filter-chain')){
@@ -155,7 +147,7 @@ class AnnouncementsController extends Controller
             'attached_file' => isset($file) ? $file->id : null,
             'publish_date' => $publish_date,
             'created_by' => Auth::id(),
-            'topic' => $request->topic,
+            'topic' => isset($request->topic) ? $request->topic : null,
             'start_date' => isset($request->start_date) ? $request->start_date : null,
             'due_date' => isset($request->due_date) ? $request->due_date : null,
         ]);
@@ -210,32 +202,30 @@ class AnnouncementsController extends Controller
 
         //check if there's a students to send for them or skip that part
         if(count($users) > 0){
-
-            //add user announcements
-            $users->map(function ($user) use ($announcement) {
-                userAnnouncement::create([
+            foreach($users as $user){
+                $data[] = [
                     'announcement_id' => $announcement->id,
-                    'user_id' => $user
-                ]);
-            });
-
+                    'user_id' => $user,
+                ]; 
+            }
+            userAnnouncement::insert($data);
             //notification object
-            $notify_request = new Request ([
-                'id' => $announcement->id,
-                'type' => 'announcement',
-                'publish_date' => $publish_date,
-                'title' => $request->title,
-                'description' => $request->description,
-                'attached_file' => $file,
-                'start_date' => $announcement->start_date,
-                'due_date' => $announcement->due_date,
-                'message' => $request->title.' announcement is added',
-                'from' => $announcement->created_by['id'],
-                'users' => $users->toArray()
-            ]);
+            // $notify_request = new Request ([
+            //     'id' => $announcement->id,
+            //     'type' => 'announcement',
+            //     'publish_date' => $publish_date,
+            //     'title' => $request->title,
+            //     'description' => $request->description,
+            //     'attached_file' => $file,
+            //     'start_date' => $announcement->start_date,
+            //     'due_date' => $announcement->due_date,
+            //     'message' => $request->title.' announcement is added',
+            //     'from' => $announcement->created_by['id'],
+            //     'users' => $users->toArray()
+            // ]);
 
-            // use notify store function to notify users with the announcement
-            $notify = (new NotificationsController)->store($notify_request);
+            // // use notify store function to notify users with the announcement
+            // $notify = (new NotificationsController)->store($notify_request);
         }
 
         return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);
@@ -272,7 +262,6 @@ class AnnouncementsController extends Controller
             'due_date' => 'after:' . Carbon::now(),
         ]);
 
-
         $announcement = Announcement::where('id',$request->id)->with('attachment')->first();
         if($request->filled('title'))
             $announcement->title = $request->title;
@@ -285,7 +274,6 @@ class AnnouncementsController extends Controller
 
         if($request->filled('due_date'))
             $announcement->due_date = $request->due_date;
-
 
         $file = $announcement->attachment;
         if(Input::hasFile('attached_file')){

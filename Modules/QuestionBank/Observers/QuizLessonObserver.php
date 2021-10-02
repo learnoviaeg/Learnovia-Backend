@@ -36,25 +36,12 @@ class QuizLessonObserver
     {
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
         $lesson = Lesson::where('id',$quizLesson->lesson_id)->first();
-        // $course_id = $lesson->courseSegment->course_id;
-        // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
+       
         $this->report->calculate_course_progress($lesson->course_id);
 
-        // if($quiz->is_graded == 1){
-        //     $grade_category=GradeCategory::find($quizLesson->grade_category_id);
-        //     $grade_category->GradeItems()->create([
-        //         'type' => 'Quiz',
-        //         'item_id' => $quiz->id,
-        //         'name' => $quiz->name,
-        //     ]);
-        // }   
-        
-        // if($quiz->is_graded == 1){
             $grade_category=GradeCategory::find($quizLesson->grade_category_id);
             //creating grade category for quiz
             $categoryOfQuiz = GradeCategory::create([
-                // 'course_segment_id' => $lesson->courseSegment->id,
                 'course_id' => $lesson->course_id,
                 'parent' => $grade_category->id,
                 'name' => $quiz->name,
@@ -65,38 +52,21 @@ class QuizLessonObserver
                 'lesson_id' => $lesson->id
             ]);
             ///add user grader to each enrolled student in course segment of this grade category
-            // dd($lesson->shared_classes->pluck('id')->toArray());
             $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->shared_classes->pluck('id'))
                                         ->where('course',$lesson->course_id)->pluck('user_id');
             foreach($enrolled_students as $student){
-                UserGrader::create([
+                $data[] = [
                     'user_id'   => $student,
                     'item_type' => 'Category',
                     'item_id'   => $categoryOfQuiz->id,
                     'grade'     => null
-                ]);
-            }
+                ];
+            };
+            UserGrader::insert($data);
+
             //update quiz lesson with the id of grade categoey created for quiz
-            // $quizLesson->grade_category_id = $categoryOfQuiz->id;
+            $quizLesson->grade_category_id = $categoryOfQuiz->id;
             $quizLesson->save();
-
-            // $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
-            //                 ->where('user_id','!=',Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->toArray();
-
-            // foreach($lesson->shared_classes->pluck('id') as $class){
-            //     $requ = ([
-            //         'message' => $quiz->name . ' quiz was added',
-            //         'id' => $quiz->id,
-            //         'users' => $users,
-            //         'type' =>'quiz',
-            //         'publish_date'=> Carbon::parse($quizLesson->publish_date),
-            //         'course_id' => $lesson->course_id,
-            //         'class_id'=> $class,
-            //         'lesson_id'=> $lesson,
-            //         'from' => Auth::id(),
-            //     ]);
-            //     user::notify($requ);
-            // }
     }
 
     /**
