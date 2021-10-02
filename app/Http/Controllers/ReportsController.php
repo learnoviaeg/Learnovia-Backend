@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Level;
 use App\Classes;
 use App\Course;
+use App\Exports\CourseProgressReport;
 use App\User;
 use App\Paginate;
 use App\LAstAction;
@@ -246,7 +247,8 @@ class ReportsController extends Controller
             'to' => 'date|required_with:from',
             'user_id' => 'exists:users,id',
             'component' => 'in:'.implode(',',$types),
-            'details' => 'in:1'
+            'details' => 'in:1',
+            'export' => 'in:1'
         ]);
 
         if($request->has('component')){
@@ -316,6 +318,22 @@ class ReportsController extends Controller
                 }
 
             }
+        }
+
+        if($request->filled('export')){
+
+            $exportDetails = 0;
+            $fields = ['level','course','class','type','count'];
+
+            if($request->has('details')){
+                $exportDetails = 1;
+                $fields = ['level','course','class','type','item_name','item_id','created_at','teacher'];
+            }
+
+            $filename = uniqid();
+            $file = Excel::store(new CourseProgressReport($reportObjects,$exportDetails,$fields), 'reports'.$filename.'.xlsx','public');
+            $file = url(Storage::url('reports'.$filename.'.xlsx'));
+            return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
         }
 
         return response()->json(['message' => 'Course progress', 'body' =>  $reportObjects->paginate(Paginate::GetPaginate($request))], 200);
