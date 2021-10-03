@@ -8,6 +8,7 @@ use Modules\QuestionBank\Entities\Quiz;
 use App\Lesson;
 use App\Timeline;
 use Carbon\Carbon;
+use App\SecondaryChain;
 
 class QuizOverwrite
 {
@@ -23,23 +24,24 @@ class QuizOverwrite
         if(isset($quizLesson)){
             $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
             $lesson = Lesson::find($quizLesson->lesson_id);
-            $course_id = $lesson->courseSegment->course_id;
-            $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-            $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-            if(isset($quiz)){
-                Timeline::firstOrCreate([
-                    'item_id' => $quizLesson->quiz_id,
-                    'name' => $quiz->name,
-                    'start_date' => $quizOverride->start_date,
-                    'due_date' => $quizOverride->due_date,
-                    'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
-                    'course_id' => $course_id,
-                    'class_id' => $class_id,
-                    'lesson_id' => $quizLesson->lesson_id,
-                    'level_id' => $level_id,
-                    'type' => 'quiz',
-                    'overwrite_user_id' => $quizOverride->user_id
-                ]);
+            $secondary_chains = SecondaryChain::where('lesson_id',$quizLesson->lesson_id)
+                                ->where('user_id',$quizOverride->user_id)->get()->keyBy('group_id');
+            foreach($secondary_chains as $secondary_chain){
+                if(isset($quiz)){
+                    Timeline::firstOrCreate([
+                        'item_id' => $quizLesson->quiz_id,
+                        'name' => $quiz->name,
+                        'start_date' => $quizOverride->start_date,
+                        'due_date' => $quizOverride->due_date,
+                        'publish_date' => isset($quizLesson->publish_date)? $quizLesson->publish_date : Carbon::now(),
+                        'course_id' => $secondary_chain->course_id,
+                        'class_id' => $secondary_chain->group_id,
+                        'lesson_id' => $quizLesson->lesson_id,
+                        'level_id' => $secondary_chain->Enroll->level,
+                        'type' => 'quiz',
+                        'overwrite_user_id' => $quizOverride->user_id
+                    ]);
+                }
             }
         }
     }
