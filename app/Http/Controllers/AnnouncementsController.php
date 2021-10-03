@@ -139,7 +139,7 @@ class AnnouncementsController extends Controller
         if($request->has('attached_file')){
             $file = attachment::upload_attachment($request->attached_file, 'Announcement');
         }
-        
+
         //create announcement
         $announcement = Announcement::create([
             'title' => $request->title,
