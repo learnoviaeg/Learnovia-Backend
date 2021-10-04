@@ -339,10 +339,10 @@ class QuizLessonController extends Controller
         return HelperController::api_response_format(400,null, __('messages.quiz.quiz_not_belong'));
 
     }
-    $lesson= Lesson::find( $quizLesson->lesson_id);
-    $course_segment = $lesson->courseSegment;
-    if($course_segment->end_date < Carbon::parse($request->due_date))
-            return HelperController::api_response_format(400, null , __('messages.date.end_before').$course_segment->end_date);
+    $lesson= Lesson::find($quizLesson->lesson_id);
+    $segment_due_date =  $lesson->SecondaryChain[0]->Enroll->Segment->end_date;
+    if($segment_due_date < Carbon::parse($request->due_date))
+            return HelperController::api_response_format(400, null , __('messages.date.end_before').$segment_due_date);
 
     $usersOverride =array();
     foreach ($request->users_id as $user_id) {
@@ -354,20 +354,6 @@ class QuizLessonController extends Controller
         'attemps' => $quizLesson->max_attemp]
         );
     }
-        $course = $lesson->courseSegment->course_id;
-        $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        $quiz_name = Quiz::find($quizLesson->quiz_id)->name;
-            user::notify([
-                'message' => 'you can answer '.$quiz_name.' quiz now',
-                'id' => $quizLesson->quiz_id,
-                'users' => $request->users_id,
-                'type' =>'quiz',
-                'publish_date'=> Carbon::parse($request->start_date),
-                'course_id' => $course,
-                'class_id'=> $class,
-                'lesson_id'=> $quizLesson->lesson_id,
-                'from' => Auth::id(),
-            ]);
     return HelperController::api_response_format(201, $usersOverride, __('messages.quiz.override'));
 
     }

@@ -80,9 +80,9 @@ class Enroll extends Model
     {
         return $this->belongsTo('App\Course','type','id');
     }
-    public function segment()
+    public function Segment()
     {
-        return $this->belongsTo('App\Level','segment','id');
+        return $this->belongsTo('App\Segment','segment','id');
     }
 
     public function roles()
