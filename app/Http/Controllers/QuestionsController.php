@@ -569,7 +569,17 @@ class QuestionsController extends Controller
                 break;
 
             case 2: // MCQ
-                $data['content'] = isset($request->MCQ_Choices) ? json_encode($request->MCQ_Choices) : $question->MCQ_Choices;
+                $data['content'] = $question->MCQ_Choices;
+                if(isset($request->MCQ_Choices)){
+                    foreach($request->MCQ_Choices as $key=>$mcq){
+                        $mcq['key']=++$key;
+                        unset($mcq['mark']);
+                        $arr[]=$mcq;
+                    }
+                    $data['content'] = json_encode($arr);
+                }
+
+                // $data['content'] = isset($request->MCQ_Choices) ? json_encode($request->MCQ_Choices) : $question->MCQ_Choices;
                 $data['mcq_type'] = isset($request->mcq_type) ? json_encode($request->mcq_type) : $question->mcq_type;
                 $question->mcq_type=$data['mcq_type'];
                 break;
