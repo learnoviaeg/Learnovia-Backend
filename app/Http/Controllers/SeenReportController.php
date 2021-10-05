@@ -336,7 +336,12 @@ class SeenReportController extends Controller
             
             $total = count($announcements);
             $sum_percentage = array_sum($announcements->pluck('percentage')->toArray());
-            $final_percentage = round($sum_percentage/$total,1);
+
+            $final_percentage = 0;
+            
+            if($total > 0){
+                $final_percentage = round($sum_percentage/$total,1);
+            }
 
             return response()->json(['message' => 'Total Percentage', 'body' => $final_percentage], 200);
         }
