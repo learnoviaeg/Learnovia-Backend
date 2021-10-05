@@ -25,4 +25,34 @@ class SecondaryChain extends Model
     {
         return $this->hasOne('App\Enroll','id','enroll_id');
     }
+
+    public function Lesson()
+    {
+        return $this->hasOne('App\Lesson','id','lesson_id');
+    }
+
+    public function materials()
+    {
+        return $this->hasMany('App\Material','lesson_id' , 'lesson_id');
+    }
+
+    public function QuizLesson()
+    {
+        return $this->hasMany('Modules\QuestionBank\Entities\QuizLesson', 'lesson_id', 'lesson_id');
+    }
+
+    public function AssignmentLesson()
+    {
+        return $this->hasMany('Modules\Assigments\Entities\AssignmentLesson', 'lesson_id', 'lesson_id');
+    }
+    
+    public function H5PLesson()
+    {
+        return $this->hasMany('App\h5pLesson', 'lesson_id', 'lesson_id');
+    }
+
+    public function virtual()
+    {
+        return $this->hasMany('Modules\Bigbluebutton\Entities\BigbluebuttonModel', 'class_id', 'group_id');
+    }
 }

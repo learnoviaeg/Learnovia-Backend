@@ -20,6 +20,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\InactiveUsers;
+use App\SecondaryChain;
 
 class ReportsController extends Controller
 {
@@ -226,6 +227,14 @@ class ReportsController extends Controller
 
 
     public function courseProgressReport(Request $request){
+
+        $secoundry = SecondaryChain::withCount(['materials','QuizLesson','AssignmentLesson','H5PLesson','virtual'])
+        ->orderBy('course_id')
+        ->with(['Courses.level','Class','Lesson'])
+        ->get()
+        ->groupBy(['Courses.level.name','Courses.name','Class.name']);
+
+        return $secoundry;
 
         $types = ['materials','assignments','quizzes','interactives','virtuals'];
 
