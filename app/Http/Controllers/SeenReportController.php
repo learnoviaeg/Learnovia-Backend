@@ -131,7 +131,7 @@ class SeenReportController extends Controller
                     'seen_number' => $assignment->seen_number,
                     'user_seen_number' => $assignment->user_seen_number,
                     'lesson_id' => $assignment->lesson_id,
-                    'percentage' => isset($total) && $total != 0 && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total['total_enrolls'])*100,2) : 0,
+                    'percentage' => isset($total) && $total['total_enrolls'] != 0 && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total['total_enrolls'])*100,2) : 0,
                     'course' => Course::find($lesson->course_id),
                     'class' => $lesson->shared_classes
                 ]);
@@ -161,7 +161,7 @@ class SeenReportController extends Controller
                     'seen_number' => $quiz->seen_number,
                     'user_seen_number' => $quiz->user_seen_number,
                     'lesson_id' => $quiz->lesson_id,
-                    'percentage' => isset($total) && $total != 0 && $quiz->user_seen_number != 0 ? round(($quiz->user_seen_number/$total['total_enrolls'])*100,2) : 0,
+                    'percentage' => isset($total) && $total['total_enrolls'] != 0 && $quiz->user_seen_number != 0 ? round(($quiz->user_seen_number/$total['total_enrolls'])*100,2) : 0,
                     'course' => Course::find($lesson->course_id),
                     'class' => $lesson->shared_classes
                 ]);
@@ -189,7 +189,7 @@ class SeenReportController extends Controller
                     'seen_number' => $h5p->seen_number,
                     'user_seen_number' => $h5p->user_seen_number,
                     'lesson_id' => $h5p->lesson_id,
-                    'percentage' => isset($total) && $total != 0 && $h5p->user_seen_number != 0 ? round(($h5p->user_seen_number/$total['total_enrolls'])*100,2) : 0,
+                    'percentage' => isset($total) && $total['total_enrolls'] != 0 && $h5p->user_seen_number != 0 ? round(($h5p->user_seen_number/$total['total_enrolls'])*100,2) : 0,
                     'course' => Course::find($lesson->course_id),
                     'class' => $lesson->shared_classes
                 ]);
@@ -220,7 +220,7 @@ class SeenReportController extends Controller
                     'seen_number' => $material->seen_number,
                     'user_seen_number' => $material->user_seen_number,
                     'lesson_id' => $material->lesson_id,
-                    'percentage' => isset($total) && $total != 0 && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total['total_enrolls'])*100,2) : 0,
+                    'percentage' => isset($total) && $total['total_enrolls'] != 0 && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total['total_enrolls'])*100,2) : 0,
                     'course' => Course::find($lesson->course_id),
                     'class' => $lesson->shared_classes
                 ]);
