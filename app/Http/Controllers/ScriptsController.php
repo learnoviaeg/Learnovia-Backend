@@ -7,7 +7,7 @@ use app\Course;
 use app\GradeCategory;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
-use App\Events\QuizAttemptEvent;
+use App\Events\UpdatedAttemptEvent;
 
 class ScriptsController extends Controller
 {
@@ -33,7 +33,8 @@ class ScriptsController extends Controller
         ]);
         $user_quizzes = QuizLesson::where('lesson_id', $request->lesson_id)->where('quiz_id', $request->quiz_id)->with('user_quiz.UserQuizAnswer')->first();
         foreach($user_quizzes->user_quiz as $user_quiz){
-            event(new QuizAttemptEvent($user_quiz));
+            event(new UpdatedAttemptEvent($user_quiz));
+
         }
         return 'done';
     }

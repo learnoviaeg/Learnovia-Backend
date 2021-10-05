@@ -11,6 +11,7 @@ use App\Grader\TypeGrader;
 use App\UserGrader;
 use App\GradeCategory;
 use Auth;
+use App\User;
 use App\ItemDetail;
 use App\ItemDetailsUser;
 use Modules\QuestionBank\Entities\Quiz;
@@ -31,19 +32,15 @@ class GradeAttemptItemlistener
         $this->gradeinterface=$typeGrader; // for calculation
     }
 
-    public function handle(UpdatedAttemptEvent $event){
-        // dd($event->attempt);
-        
+    public function handle(UpdatedAttemptEvent $event){        
         $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$event->attempt->id)->get();
-        // dd($user_quiz_answers);
 
         $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$event->attempt->quiz_lesson->quiz_id)->where('lesson_id',$event->attempt->quiz_lesson->lesson_id)->first();
-        //grade item ( attempt_item )
         $gradeitem=GradeItems::where('index',$event->attempt->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
         if(isset($gradeitem)){ // this check for roles(ex. teacher, admin, ...) that open more attempts more than max_attemp
             $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->get();
             $total_grade_attempt=0;
-            // dd($item_details);
+
             foreach($item_details as $item_detail)
             {
                 foreach($user_quiz_answers as $stud_quest_ans)
@@ -52,7 +49,6 @@ class GradeAttemptItemlistener
                     if($item_detail->item_id == $stud_quest_ans->question_id){
                         $correction_answer['student_answer']=$stud_quest_ans->user_answers;
                         $correction_answer['correct_answer']=$item_detail->weight_details;
-                        // dd($correction_answer['correct_answer']);
 
                         if($item_detail->weight_details->exclude_mark){
                             $stud_quest_ans->update(['correction'=>json_encode($correction_answer['correct_answer'])]);
@@ -61,7 +57,6 @@ class GradeAttemptItemlistener
 
                         $question_type=Questions::whereId($item_detail['item_id'])->pluck('question_type_id')->first();
             
-                        // dd($question_type);
                         if($question_type == 1)
                             $grade=$this->gradeinterface->True_False($correction_answer);
 
@@ -71,9 +66,8 @@ class GradeAttemptItemlistener
                         if($question_type == 3)
                             $grade=$this->gradeinterface->Match($correction_answer);
                     
-                            // dd($grade);
                         ItemDetailsUser::firstOrCreate([
-                            'user_id' => Auth::id(),
+                            'user_id' => $event->attempt->user_id,
                             'item_details_id' => $item_detail->id,
                             'grade' => ($grade) ? $grade->mark:null,
                             'Answers_Correction' => json_encode($correction_answer)
@@ -89,16 +83,15 @@ class GradeAttemptItemlistener
             $actual_mark = ($total_grade_attempt * $event->attempt->quiz_lesson->grade) / $event->attempt->quiz_lesson->questions_mark;
             
             UserGrader::updateOrCreate(
-                ['item_id'=>$gradeitem->id, 'item_type' => 'item', 'user_id' => Auth::id()],
+                ['item_id'=>$gradeitem->id, 'item_type' => 'item', 'user_id' => $event->attempt->user_id],
                 ['grade' =>  $actual_mark]
             );
             
             UserQuiz::whereId($event->attempt->id)->update([
                 'grade'=> $actual_mark
             ]);
-            event(new RefreshGradeTreeEvent(Auth::user() ,$grade_cat));
+            event(new RefreshGradeTreeEvent(User::find($event->attempt->user_id) ,$grade_cat));
         }
 
-        // return $total_grade_attempt;
     }
 }
