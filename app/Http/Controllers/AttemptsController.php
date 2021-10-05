@@ -107,6 +107,7 @@ class AttemptsController extends Controller
         }
         
         $Submitted_users=0;
+        $countEss_TF=0;
         foreach ($users as $user_id){
             $i=0;
             $All_attemp=[];
@@ -128,6 +129,9 @@ class AttemptsController extends Controller
                     $user_Attemp["grade"]= $attem->grade;
                     // continue;
                 }
+                if($attem->status != 'Graded')
+                    $countEss_TF++;
+
                 // dd($attem->status);
                 
                 // $gradeNotWeight=0;

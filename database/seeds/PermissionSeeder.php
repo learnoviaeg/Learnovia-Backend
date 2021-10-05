@@ -362,7 +362,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/username', 'title' => 'show username']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/as-participant', 'title' => 'show as participant']);
 
-
         //Timeline Resources Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'timeline/store', 'title' => 'Store Timeline']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'timeline/get', 'title' => 'Get Timeline']);
@@ -376,17 +375,15 @@ class PermissionSeeder extends Seeder
         //system settings
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/general', 'title' => 'General Settings', 'dashboard' => 1 , 'icon'=> 'Settings']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/create_assignment_extensions', 'title' => 'Manage create assignment extensions']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/extensions', 'title' => 'general extension']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/submit_assignment_extensions', 'title' => 'Manage submit assignment extensions']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/upload_media_extensions', 'title' => 'Manage upload media extensions']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/upload_file_extensions', 'title' => 'Manage upload file extensions']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/logo', 'title' => 'Set|Delete Logo']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/grade_pass', 'title' => 'Manage grade to pass percentage']);
 
-
         //Topic Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'topic/crud', 'title' => 'Topic Crud']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'topic/get', 'title' => 'Get Topic']);        
-
-
     }
 }
