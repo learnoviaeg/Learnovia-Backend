@@ -298,7 +298,7 @@ class ReportsController extends Controller
                                 'type' => $type,
                                 'item_name' => $item->name,
                                 'item_id' => $item->id,
-                                'created_at' => $item->created_at,
+                                'created_at' => Carbon::parse($item->created_at)->format('Y-m-d h:i:s'),
                                 'teacher' => $item->user? $item->user->full_name : null
                             ]);
                         }
