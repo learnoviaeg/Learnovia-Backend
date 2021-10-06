@@ -507,9 +507,4 @@ class AttemptsController extends Controller
     {
         //
     }
-
-    public function get_all_users_quiz_attempts(Request $request)
-    {
-
-    }
 }

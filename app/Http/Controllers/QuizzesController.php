@@ -201,12 +201,12 @@ class QuizzesController extends Controller
         // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
         //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
 
-        LastAction::lastActionInCourse($request->course_id);
-
         $quiz=Quiz::find($id);
         $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
         // if(isset($request->opening_time) && $request->opening_time > $quiz_lesson->start_date )
         //     return HelperController::api_response_format(200, null,__('messages.quiz.NotUpdate'));   
+
+        LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
 
         if(!strtotime($quiz_lesson->start_date) < Carbon::now())
         {
@@ -336,7 +336,10 @@ class QuizzesController extends Controller
 
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
+            {
                 UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
+                UserQuiz::find($last_attempt->id)->update(['submit_time'=>Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s')]);
+            }
 
             $check_time = ($remain_time) - (strtotime(Carbon::now())- strtotime(Carbon::parse($last_attempt->open_time)));
             // dd($check_time);
@@ -372,4 +375,17 @@ class QuizzesController extends Controller
         return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
     }
 
+    public function closeAttempts(Request $request)
+    {
+        $user_quizzes=userQuiz::whereNull('submit_time')->get();
+        foreach($user_quizzes as $userQuiz)
+        {
+            if(Carbon::parse($userQuiz->open_time)->addSeconds($userQuiz->quiz_lesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
+            {
+                UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->update(['force_submit'=>'1']);
+                userQuiz::find($userQuiz->id)->update(['submit_time'=>Carbon::parse($userQuiz->open_time)->addSeconds($userQuiz->quiz_lesson->quiz->duration)->format('Y-m-d H:i:s')]);
+            }            
+        }
+        return 'Done';
+    }
 }
