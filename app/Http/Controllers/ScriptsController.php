@@ -39,4 +39,14 @@ class ScriptsController extends Controller
         return 'done';
     }
 
+
+    public function quiz_total_mark(Request $request)
+    {
+          foreach(QuizLesson::cursor() as $quiz_lesson){
+            $quiz_lesson->grade = $quiz_lesson->questions_mark;
+            $quiz_lesson->save();
+        }
+        return 'done';
+    }
+
 }

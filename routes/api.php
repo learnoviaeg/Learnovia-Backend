@@ -414,6 +414,7 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], fun
 Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], function () {
     Route::get('grade-cat-course', 'ScriptsController@CreateGradeCatForCourse');
     Route::get('grade-attempts', 'ScriptsController@gradeAttemptsInQuizlesson');
+    Route::get('quiz-mark', 'ScriptsController@quiz_total_mark');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
