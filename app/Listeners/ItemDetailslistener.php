@@ -33,7 +33,7 @@ class ItemDetailslistener
     public function handle(GradeItemEvent $event)
     {
         // $event->grade_item is attempt of quiz (type=>attempt)
-        if($event->grade_item->type == 'Attempt'){
+        if($event->grade_item->type == 'Attempts'){
             
             $gradeCat=GradeCategory::find($event->grade_item->grade_category_id);
             $quiz=Quiz::find($gradeCat->instance_id);

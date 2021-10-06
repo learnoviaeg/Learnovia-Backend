@@ -8,6 +8,12 @@ use app\GradeCategory;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Events\UpdatedAttemptEvent;
+use Modules\QuestionBank\Entities\userQuiz;
+use App\GradeItems;
+use Auth;
+use App\UserGrader;
+use App\Enroll;
+use App\Events\GradeItemEvent;
 
 class ScriptsController extends Controller
 {
@@ -27,14 +33,8 @@ class ScriptsController extends Controller
 
     public function gradeAttemptsInQuizlesson(Request $request)
     {
-        $request->validate([
-            'lesson_id' => 'required|exists:lessons,id',
-            'quiz_id' => 'required|exists:quizzes,id',
-        ]);
-        $user_quizzes = QuizLesson::where('lesson_id', $request->lesson_id)->where('quiz_id', $request->quiz_id)->with('user_quiz.UserQuizAnswer')->first();
-        foreach($user_quizzes->user_quiz as $user_quiz){
+        foreach(userQuiz::cursor() as $user_quiz){
             event(new UpdatedAttemptEvent($user_quiz));
-
         }
         return 'done';
     }
@@ -45,6 +45,53 @@ class ScriptsController extends Controller
           foreach(QuizLesson::cursor() as $quiz_lesson){
             $quiz_lesson->grade = $quiz_lesson->questions_mark;
             $quiz_lesson->save();
+        }
+        return 'done';
+    }
+
+    public function grade_details_of_questions(Request $request)
+    {
+        foreach(QuizLesson::cursor() as $quiz_lesson){
+            $grade_cat = GradeCategory::firstOrCreate(
+                [
+                    'instance_type'=>'Quiz',
+                    'instance_id'=> $quiz_lesson->quiz_id,
+                    'lesson_id'=> $quiz_lesson->lesson_id,
+                    'course_id'=>$quiz_lesson->lesson->course_id,
+
+                ],[
+                    'parent' => $quiz_lesson->grade_category_id,
+                    'calculation_type' => json_encode($quiz_lesson->grading_method_id),
+                    'hidden' => 0 ,
+                ]);
+                $quiz_lesson->grade_category_id = $grade_cat->id;
+                $quiz_lesson->save();
+                $max_attempt=$quiz_lesson->max_attemp;                
+                if((Auth::user()->can('site/quiz/unLimitedAttempts')))
+                    $max_attempt=1;
+    
+                for($key =1; $key<=$max_attempt; $key++){
+                    $gradeItem = GradeItems::updateOrCreate([
+                        'index' => $key,
+                        'grade_category_id' => $grade_cat->id,
+                        'name' => 'Attempt number ' .$key,
+                    ],
+                    [
+                        'type' => 'Attempts',
+                    ]
+                );    
+                    $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quiz_lesson->lesson->course_id)->pluck('user_id');
+                    foreach($enrolled_students as $student){
+                        $data = [
+                            'user_id'   => $student,
+                            'item_type' => 'Item',
+                            'item_id'   => $gradeItem->id,
+                            'grade'     => null
+                        ];
+                        UserGrader::firstOrcreate($data);
+                    }
+                    event(new GradeItemEvent($gradeItem));
+                }
         }
         return 'done';
     }

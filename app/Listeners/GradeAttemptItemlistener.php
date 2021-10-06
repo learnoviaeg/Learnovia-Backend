@@ -80,17 +80,19 @@ class GradeAttemptItemlistener
                 }
             }
             //Scale grade of user attempt to actual total mark of quiz
-            $actual_mark = ($total_grade_attempt * $event->attempt->quiz_lesson->grade) / $event->attempt->quiz_lesson->questions_mark;
+            if($event->attempt->quiz_lesson->questions_mark != 0){
+                $actual_mark = ($total_grade_attempt * $event->attempt->quiz_lesson->grade) / $event->attempt->quiz_lesson->questions_mark;
             
-            UserGrader::updateOrCreate(
-                ['item_id'=>$gradeitem->id, 'item_type' => 'item', 'user_id' => $event->attempt->user_id],
-                ['grade' =>  $actual_mark]
-            );
-            
-            UserQuiz::whereId($event->attempt->id)->update([
-                'grade'=> $actual_mark
-            ]);
-            event(new RefreshGradeTreeEvent(User::find($event->attempt->user_id) ,$grade_cat));
+                UserGrader::updateOrCreate(
+                    ['item_id'=>$gradeitem->id, 'item_type' => 'item', 'user_id' => $event->attempt->user_id],
+                    ['grade' =>  $actual_mark]
+                );
+                
+                UserQuiz::whereId($event->attempt->id)->update([
+                    'grade'=> $actual_mark
+                ]);
+                event(new RefreshGradeTreeEvent(User::find($event->attempt->user_id) ,$grade_cat));
+            }
         }
 
     }

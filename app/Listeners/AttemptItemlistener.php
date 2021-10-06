@@ -50,7 +50,7 @@ class AttemptItemlistener
 
             for($key =1; $key<=$max_attempt; $key++){
                 $gradeItem = GradeItems::firstOrcreate([
-                    'type' => 'Attempt',
+                    'type' => 'Attempts',
                     'index' => $key,
                     'name' => 'Attempt number ' .$key,
                     'grade_category_id' => $GradeCategory->id,
