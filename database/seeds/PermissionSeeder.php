@@ -346,6 +346,7 @@ class PermissionSeeder extends Seeder
 
         //report
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'reports/active_users', 'title' => 'Active users report', 'dashboard' => 1, 'icon'=> 'Report']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'reports/course_progress', 'title' => 'view course progress report' , 'dashboard' => 1, 'icon'=> 'Report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'reports/in_active_users', 'title' => 'In active users report', 'dashboard' => 1, 'icon'=> 'Report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'reports/seen_report', 'title' => 'Seen report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'reports/overall_seen_report', 'title' => 'Overall seen report','dashboard' => 1, 'icon'=> 'Report']);
