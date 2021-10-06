@@ -45,10 +45,11 @@ class ItemDetailslistener
                     foreach($quest as $child){
                         $child_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$child)->first();
 
-                        $item=ItemDetail::firstOrCreate([
+                        $item=ItemDetail::updateOrCreate([
                             'type' => 'Question',
                             'item_id' => $child,
-                            'parent_item_id' => $event->grade_item->id,
+                            'parent_item_id' => $event->grade_item->id,],
+                            [
                             'weight_details' => json_encode($child_question->grade_details),
                         ]);
                     }
@@ -58,10 +59,11 @@ class ItemDetailslistener
                     $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
                     
                     // dd($quiz_question->grade_details);
-                    $item=ItemDetail::firstOrCreate([
+                    $item=ItemDetail::updateOrCreate([
                         'type' => 'Question',
                         'item_id' => $question->id,
-                        'parent_item_id' => $event->grade_item->id,
+                        'parent_item_id' => $event->grade_item->id,],
+                        [
                         'weight_details' => json_encode($quiz_question->grade_details),
                     ]);
                 }
