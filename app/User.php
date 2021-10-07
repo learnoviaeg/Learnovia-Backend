@@ -242,4 +242,9 @@ class User extends Authenticatable
 
         return $status;
     }
+
+    public function notifications()
+    {
+        return $this->hasMany('App\Notification');
+    }
 }
