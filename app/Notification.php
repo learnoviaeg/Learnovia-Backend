@@ -5,6 +5,7 @@ namespace App;
 use App\Jobs\SendNotifications;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,14 +13,21 @@ class Notification extends Model
 {
     protected $fillable = ['item_id','item_type','message','created_by','course_id','class_id','lesson_id','type','publish_date','link'];
 
-    public function users()
+    protected $appends = ['course_name'];
+
+    public function users():BelongsToMany
     {
-        return $this->belongsToMany('App\User');
+        return $this->BelongsToMany(User::class)->withPivot('read_at');
     }
 
     public function course()
     {
         return $this->belongsTo('App\Course');
+    }
+
+    public function getCourseNameAttribute()
+    {
+        return $this->course ? $this->course->name : null;
     }
     
     public function send(Request $request){
