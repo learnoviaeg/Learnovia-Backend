@@ -43,6 +43,7 @@ class Notification extends Model
             'lesson_id'=>'integer|exists:lessons,id',
             'link' => 'string',
             'publish_date' => 'date',
+            'from' => 'integer|exists:users,id',
         ]);
 
         //Start storing notifications object
@@ -58,7 +59,10 @@ class Notification extends Model
 
         $notification->publish_date = $request->publish_date ? $request->publish_date : Carbon::now();
 
-        $notification->created_by = Auth::id();
+        $notification->created_by = Auth::id() ? Auth::id() : 1;
+        if($request->from){
+            $notification->created_by = $request->from;
+        }
 
         if($request->lesson_id){
             $notification->lesson_id = $request->lesson_id;

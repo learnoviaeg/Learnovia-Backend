@@ -7,6 +7,7 @@ use App\userAnnouncement;
 use App\AnnouncementsChain;
 use App\Announcement;
 use App\attachment;
+use App\Notification;
 use Auth;
 use App\user;
 use Carbon\Carbon;
@@ -210,22 +211,16 @@ class AnnouncementsController extends Controller
             }
             userAnnouncement::insert($data);
             //notification object
-            // $notify_request = new Request ([
-            //     'id' => $announcement->id,
-            //     'type' => 'announcement',
-            //     'publish_date' => $publish_date,
-            //     'title' => $request->title,
-            //     'description' => $request->description,
-            //     'attached_file' => $file,
-            //     'start_date' => $announcement->start_date,
-            //     'due_date' => $announcement->due_date,
-            //     'message' => $request->title.' announcement is added',
-            //     'from' => $announcement->created_by['id'],
-            //     'users' => $users->toArray()
-            // ]);
+            $notify_request = new Request ([
+                'id' => $announcement->id,
+                'type' => 'announcement',
+                'publish_date' => $publish_date,
+                'message' => $request->title.' announcement is added',
+                'users' => $users->toArray()
+            ]);
 
-            // // use notify store function to notify users with the announcement
-            // $notify = (new NotificationsController)->store($notify_request);
+            // use notify store function to notify users with the announcement
+            $notify = (new Notification())->send($notify_request);
         }
 
         return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);
@@ -301,18 +296,12 @@ class AnnouncementsController extends Controller
                     'id' => $announcement->id,
                     'type' => 'announcement',
                     'publish_date' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'title' => $announcement->title,
-                    'description' => $announcement->description,
-                    'attached_file' => $file,
-                    'start_date' => $announcement->start_date,
-                    'due_date' => $announcement->due_date,
                     'message' => $announcement->title.' announcement is updated',
-                    'from' => $announcement->created_by['id'],
                     'users' => $users->toArray()
                 ]);
 
                 // use notify store function to notify users with the announcement
-                $notify = (new NotificationsController)->store($notify_request);
+                $notify = (new Notification())->send($notify_request);
             }
         }
 

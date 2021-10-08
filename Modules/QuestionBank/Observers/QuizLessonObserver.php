@@ -16,7 +16,9 @@ use App\Enroll;
 use App\UserGrader;
 use App\User;
 use App\LessonComponent;
+use App\Notification;
 use App\UserSeen;
+use Illuminate\Http\Request;
 
 class QuizLessonObserver
 {
@@ -88,7 +90,7 @@ class QuizLessonObserver
         // $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
         foreach($lesson->shared_classes->pluck('id') as $class){
-            $requ = ([
+            $requ = new Request([
                 'message' => $quiz->name . ' quiz was updated',
                 'id' => $quiz->id,
                 'users' => $users,
@@ -97,9 +99,9 @@ class QuizLessonObserver
                 'course_id' => $lesson->course_id,
                 'class_id'=> $class,
                 'lesson_id'=> $lesson,
-                'from' => Auth::id(),
             ]);
-            user::notify($requ);
+    
+            (new Notification())->send($requ);
         }
 
         if($quizLesson->isDirty('lesson_id')){

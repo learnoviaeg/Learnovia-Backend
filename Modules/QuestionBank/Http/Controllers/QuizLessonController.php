@@ -22,6 +22,7 @@ use App\LessonComponent;
 use App\User;
 use Carbon\Carbon;
 use App\LastAction;
+use App\Notification;
 use Auth;
 
 class QuizLessonController extends Controller
@@ -112,7 +113,7 @@ class QuizLessonController extends Controller
             // $class = Second$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
             $classes = SecondaryChain::whereIn('lesson_id', $lessons)->get()->pluck('group_id')->unique();
             foreach($classes as $class){
-                $requ = ([
+                $requ = new Request([
                     'message' => $quiz->name.' quiz is added',
                     'id' => $request->quiz_id,
                     'users' => $users,
@@ -121,9 +122,9 @@ class QuizLessonController extends Controller
                     'course_id' => $course,
                     'class_id'=> $class,
                     'lesson_id'=> $lessons,
-                    'from' => Auth::id(),
                 ]);
-                user::notify($requ);
+    
+                (new Notification())->send($requ);
             }
 
              if($request->graded == true){
@@ -252,7 +253,7 @@ class QuizLessonController extends Controller
         $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
         if(carbon::parse($quizLesson->publish_date)->isPast())
             $publish=Carbon::now();
-        $requ = ([
+        $requ = new Request([
             'message' => $quiz->name . ' quiz is updated',
             'id' => $request->quiz_id,
             'users' => $users,
@@ -261,9 +262,10 @@ class QuizLessonController extends Controller
             'course_id' => $course,
             'class_id'=> $class,
             'lesson_id'=> $request->updated_lesson_id,
-            'from' => Auth::id(),
         ]);
-        user::notify($requ);
+
+        (new Notification())->send($requ);
+        
         $all = Lesson::find($request->updated_lesson_id)->module('QuestionBank', 'quiz')->get();
         return HelperController::api_response_format(200, $all,__('messages.quiz.update'));
     }

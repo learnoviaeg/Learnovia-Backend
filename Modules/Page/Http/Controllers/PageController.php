@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
 use App\Component;
 use App\LessonComponent;
 use App\LastAction;
+use App\Notification;
 use App\SecondaryChain;
 
 class PageController extends Controller
@@ -121,17 +122,19 @@ class PageController extends Controller
                 $class_id = $secondary_chain->group_id;
                 $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
                 LastAction::lastActionInCourse($courseID);
-                User::notify([
+
+                $notify_request = new Request([
                     'id' => $page->id,
                     'message' => $page->title . ' page is added',
-                    'from' => Auth::user()->id,
                     'users' => $usersIDs->toArray(),
                     'course_id' => $courseID,
                     'class_id' => $class_id,
                     'lesson_id' => $lesson,
-                    'type' => 'Page',
+                    'type' => 'page',
                     'publish_date' => $publishdate,
                 ]);
+    
+                (new Notification())->send($notify_request);
             }
 
         }
@@ -213,18 +216,20 @@ class PageController extends Controller
             $courseID = $secondary_chain->course_id;
             $class_id = $secondary_chain->group_id;
             $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
-            User::notify([
+
+            $notify_request = new Request([
                 'id' => $request->id,
                 'message' => $pagename.' page is updated',
-                'from' => Auth::user()->id,
                 'users' => $usersIDs->toArray(),
                 'course_id' => $courseID,
                 'class_id' => $class_id,
                 'lesson_id' => $request->updated_lesson_id,
-                'type' => 'Page',
+                'type' => 'page',
                 'link' => url(route('getPage')) . '?id=' . $request->id,
                 'publish_date' => Carbon::now()
             ]);
+
+            (new Notification())->send($notify_request);
         }
         return HelperController::api_response_format(200, $page, __('messages.page.update'));
         
