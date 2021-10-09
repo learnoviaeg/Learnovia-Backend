@@ -61,7 +61,7 @@ class SendNotifications implements ShouldQueue
         if($this->notification->type == 'notification'){
 
             $notificationObject = [
-                "id" => (string) $this->notification->item_id,
+                "item_id" => (string) $this->notification->item_id,
                 "message" => $this->notification->message,
                 "fromm" => $this->notification->created_by,
                 "type" => $this->notification->item_type,
@@ -72,7 +72,7 @@ class SendNotifications implements ShouldQueue
                 "read_at" => null,
                 "link" => $this->notification->link,
                 'deleted'=> "0",
-                'notification_id' => $this->notification->id,
+                'id' => $this->notification->id,
                 "course_name" => $this->notification->course ? $this->notification->course->name : null,
             ];
         }
@@ -82,20 +82,19 @@ class SendNotifications implements ShouldQueue
             $announcement = Announcement::find($this->notification->item_id);
 
             $notificationObject = [
-                "id" => (string) $this->notification->item_id,
+                "item_id" => (string) $this->notification->item_id,
                 "message" => $this->notification->message,
                 "fromm" => $this->notification->created_by,
                 "type" => $this->notification->item_type,
                 "publish_date" => Carbon::parse($this->notification->publish_date)->format('Y-m-d H:i:s'),
                 "read_at" => null,
                 'deleted'=> "0",
-                'notification_id' => $this->notification->id,
+                'id' => $this->notification->id,
                 "title" => $announcement->title,
                 "description" => $announcement->description,
                 "start_date" => $announcement->start_date,
                 "due_date" => $announcement->due_date,
                 "attached_file" => $announcement->attachment ? $announcement->attachment->path : null,
-
             ];
         }
         //end preparing notifications object 
