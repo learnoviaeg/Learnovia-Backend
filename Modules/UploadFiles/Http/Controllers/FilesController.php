@@ -266,25 +266,20 @@ class FilesController extends Controller
                         $class_id = $secondary_chain->group_id;
                         $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
                         LastAction::lastActionInCourse($courseID);
-
-                        if(count($usersIDs) > 0){
-
-                            $notify_request = new Request([
-                                'id' => $file->id,
-                                'message' => $file->name.' file is added',
-                                'users' => $usersIDs,
-                                'course_id' => $courseID,
-                                'class_id' => $class_id,
-                                'lesson_id' => $lesson,
-                                'type' => 'file',
-                                'link' => $file->url,
-                                'publish_date' => Carbon::parse($publishdate),
-                            ]);
-                
-                            (new Notification())->send($notify_request);
-
-                        }
-
+                     
+                        $notify_request = new Request([
+                            'id' => $file->id,
+                            'message' => $file->name.' file is added',
+                            'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
+                            'course_id' => $courseID,
+                            'class_id' => $class_id,
+                            'lesson_id' => $lesson,
+                            'type' => 'file',
+                            'link' => $file->url,
+                            'publish_date' => Carbon::parse($publishdate),
+                        ]);
+            
+                        (new Notification())->send($notify_request);
                     }
 
                         if ($check) {
@@ -496,22 +491,20 @@ class FilesController extends Controller
             $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
             LastAction::lastActionInCourse($courseID);
 
-            if(count($usersIDs) > 0){
+            $notify_request = new Request([
+                'id' => $file->id,
+                'message' => $file->name.' file is updated',
+                'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
+                'course_id' => $courseID,
+                'class_id' => $class_id,
+                'lesson_id' => $request->updated_lesson_id,
+                'type' => 'file',
+                'link' => $file->url,
+                'publish_date' => carbon::parse($publish_date),
+            ]);
 
-                $notify_request = new Request([
-                    'id' => $file->id,
-                    'message' => $file->name.' file is updated',
-                    'users' => $usersIDs,
-                    'course_id' => $courseID,
-                    'class_id' => $class_id,
-                    'lesson_id' => $request->updated_lesson_id,
-                    'type' => 'file',
-                    'link' => $file->url,
-                    'publish_date' => carbon::parse($publish_date),
-                ]);
-
-                (new Notification())->send($notify_request);
-            }
+            (new Notification())->send($notify_request);
+            
         }
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, __('messages.file.update'));

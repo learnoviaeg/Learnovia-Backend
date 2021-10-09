@@ -122,23 +122,20 @@ class PageController extends Controller
                 $class_id = $secondary_chain->group_id;
                 $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
                 LastAction::lastActionInCourse($courseID);
-
-                if(count($usersIDs) > 0){
                     
-                    $notify_request = new Request([
-                        'id' => $page->id,
-                        'message' => $page->title . ' page is added',
-                        'users' => $usersIDs->toArray(),
-                        'course_id' => $courseID,
-                        'class_id' => $class_id,
-                        'lesson_id' => $lesson,
-                        'type' => 'page',
-                        'publish_date' => $publishdate,
-                    ]);
-        
-                    (new Notification())->send($notify_request);
-                }
-
+                $notify_request = new Request([
+                    'id' => $page->id,
+                    'message' => $page->title . ' page is added',
+                    'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
+                    'course_id' => $courseID,
+                    'class_id' => $class_id,
+                    'lesson_id' => $lesson,
+                    'type' => 'page',
+                    'publish_date' => $publishdate,
+                ]);
+    
+                (new Notification())->send($notify_request);
+                
             }
 
         }
@@ -221,22 +218,19 @@ class PageController extends Controller
             $class_id = $secondary_chain->group_id;
             $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
 
-            if(count($usersIDs) > 0){
+            $notify_request = new Request([
+                'id' => $request->id,
+                'message' => $pagename.' page is updated',
+                'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
+                'course_id' => $courseID,
+                'class_id' => $class_id,
+                'lesson_id' => $request->updated_lesson_id,
+                'type' => 'page',
+                'link' => url(route('getPage')) . '?id=' . $request->id,
+                'publish_date' => Carbon::now()
+            ]);
 
-                $notify_request = new Request([
-                    'id' => $request->id,
-                    'message' => $pagename.' page is updated',
-                    'users' => $usersIDs->toArray(),
-                    'course_id' => $courseID,
-                    'class_id' => $class_id,
-                    'lesson_id' => $request->updated_lesson_id,
-                    'type' => 'page',
-                    'link' => url(route('getPage')) . '?id=' . $request->id,
-                    'publish_date' => Carbon::now()
-                ]);
-    
-                (new Notification())->send($notify_request);
-            }
+            (new Notification())->send($notify_request);
 
         }
         return HelperController::api_response_format(200, $page, __('messages.page.update'));

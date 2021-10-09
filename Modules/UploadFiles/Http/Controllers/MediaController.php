@@ -228,22 +228,19 @@ class MediaController extends Controller
                         $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
                         LastAction::lastActionInCourse($courseID);
 
-                        if(count($usersIDs) > 0){
+                        $notify_request = new Request([
+                            'id' => $media->id,
+                            'message' => $media->name.' media is added',
+                            'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : [],
+                            'course_id' => $courseID,
+                            'class_id' => $class_id,
+                            'lesson_id' => $mediaLesson->lesson_id,
+                            'type' => 'media',
+                            'publish_date' => Carbon::parse($publishdate),
+                        ]);
+            
+                        (new Notification())->send($notify_request);
 
-                            $notify_request = new Request([
-                                'id' => $media->id,
-                                'message' => $media->name.' media is added',
-                                'users' => $usersIDs->toArray(),
-                                'course_id' => $courseID,
-                                'class_id' => $class_id,
-                                'lesson_id' => $mediaLesson->lesson_id,
-                                'type' => 'media',
-                                'publish_date' => Carbon::parse($publishdate),
-                            ]);
-                
-                            (new Notification())->send($notify_request);
-
-                        }
                     }
 
                 LessonComponent::firstOrCreate([
@@ -388,22 +385,19 @@ class MediaController extends Controller
             $courseID = $secondary_chain->course_id;
             $class_id = $secondary_chain->group_id;
             $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
- 
-            if(count($usersIDs) > 0){
                 
-                $notify_request = new Request([
-                    'id' => $media->id,
-                    'message' => $media->name.' media is updated',
-                    'users' => $usersIDs->toArray(),
-                    'course_id' => $courseID,
-                    'class_id' => $class_id,
-                    'lesson_id' => $mediaLesson->lesson_id,
-                    'type' => 'media',
-                    'publish_date' => carbon::parse($publish_date),
-                ]);
-    
-                (new Notification())->send($notify_request);
-            }
+            $notify_request = new Request([
+                'id' => $media->id,
+                'message' => $media->name.' media is updated',
+                'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : [],
+                'course_id' => $courseID,
+                'class_id' => $class_id,
+                'lesson_id' => $mediaLesson->lesson_id,
+                'type' => 'media',
+                'publish_date' => carbon::parse($publish_date),
+            ]);
+
+            (new Notification())->send($notify_request);
             
         }
         if($media->type != null)

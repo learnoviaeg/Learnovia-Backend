@@ -375,23 +375,20 @@ class AssigmentsController extends Controller
             if(carbon::parse($publish_date)->isPast())
                 $publish_date=Carbon::now();
 
-            if(count($users_ids) > 0){
+            $notify_request = new Request([
+                'id' => $request->assignment_id,
+                'message' => $assignment->name .' assignment is updated',
+                'users' => count($users_ids) > 0 ? $users_ids : null,
+                'course_id' => $courseID,
+                'class_id' => $class_id,
+                'lesson_id' => $lessonId,
+                'type' => 'assignment',
+                'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
+                'publish_date' => Carbon::parse($publish_date)
+            ]);
 
-                $notify_request = new Request([
-                    'id' => $request->assignment_id,
-                    'message' => $assignment->name .' assignment is updated',
-                    'users' => $users_ids,
-                    'course_id' => $courseID,
-                    'class_id' => $class_id,
-                    'lesson_id' => $lessonId,
-                    'type' => 'assignment',
-                    'link' => url(route('getAssignment')) . '?assignment_id=' . $request->id,
-                    'publish_date' => Carbon::parse($publish_date)
-                ]);
-    
-                (new Notification())->send($notify_request);
-            }
-   
+            (new Notification())->send($notify_request);
+        
         }
             // $all[] = Lesson::find($lesson_id)->module('Assigments', 'assignment')->get();
         $all = AssignmentLesson::all();
@@ -424,22 +421,19 @@ class AssigmentsController extends Controller
             $assignment_id = AssignmentLesson::where('id',$request['assignment_lesson_id'])->pluck('assignment_id')->first();
             LastAction::lastActionInCourse($courseID);
 
-            if(count($usersIDs) > 0){
+            $notify_request = new Request([
+                'id' => $assignment_id,
+                'message' => $request['assignment_name'].' assignment is added',
+                'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
+                'course_id' => $courseID,
+                'class_id' => $class_id,
+                'lesson_id' => $lesson_id,
+                'type' => 'assignment',
+                'link' => url(route('getAssignment')) . '?assignment_id=' . $request["assignment_lesson_id"],
+                'publish_date' => $request['publish_date'],
+            ]);
 
-                $notify_request = new Request([
-                    'id' => $assignment_id,
-                    'message' => $request['assignment_name'].' assignment is added',
-                    'users' => $usersIDs->toArray(),
-                    'course_id' => $courseID,
-                    'class_id' => $class_id,
-                    'lesson_id' => $lesson_id,
-                    'type' => 'assignment',
-                    'link' => url(route('getAssignment')) . '?assignment_id=' . $request["assignment_lesson_id"],
-                    'publish_date' => $request['publish_date'],
-                ]);
-    
-                (new Notification())->send($notify_request);
-            }
+            (new Notification())->send($notify_request);
         }
         // event(new GradeItemEvent(Assignment::find($assignment_id),'Assignment'));
     }

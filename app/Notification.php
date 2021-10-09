@@ -39,8 +39,8 @@ class Notification extends Model
 
         $request->validate([
             'id' => 'required',
-            'users'=>'required|array',
-            'users.*' => 'required|integer|exists:users,id',
+            'users'=>'nullable|array',
+            'users.*' => 'integer|exists:users,id',
             'type' => 'required|string',
             'message' => 'required',
             'course_id' => 'integer|exists:courses,id',
@@ -95,14 +95,18 @@ class Notification extends Model
         //assign notification to given users
         $notification->users()->attach($request->users);
 
-        //calculate time the job should fire at
-        $notificationDelaySeconds = Carbon::parse($notification->publish_date)->diffInSeconds(Carbon::now()); 
-        if($notificationDelaySeconds < 0) {
-            $notificationDelaySeconds = 0;
-        }
+        if($request->filled('users')){
+            
+            //calculate time the job should fire at
+            $notificationDelaySeconds = Carbon::parse($notification->publish_date)->diffInSeconds(Carbon::now()); 
+            if($notificationDelaySeconds < 0) {
+                $notificationDelaySeconds = 0;
+            }
 
-        //this job is for sending firebase notifications 
-        $notificationJob = (new SendNotifications($notification))->delay($notificationDelaySeconds);
-        dispatch($notificationJob);
+            //this job is for sending firebase notifications 
+            $notificationJob = (new SendNotifications($notification))->delay($notificationDelaySeconds);
+            dispatch($notificationJob);
+
+        }
     }
 }

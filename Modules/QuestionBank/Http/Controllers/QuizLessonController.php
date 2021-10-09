@@ -113,23 +113,21 @@ class QuizLessonController extends Controller
             // $class = Second$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
             $classes = SecondaryChain::whereIn('lesson_id', $lessons)->get()->pluck('group_id')->unique();
 
-            if(count($users) > 0){
-                //ask salma what is the use of loop?
-                foreach($classes as $class){
-                    $requ = new Request([
-                        'message' => $quiz->name.' quiz is added',
-                        'id' => $request->quiz_id,
-                        'users' => $users,
-                        'type' =>'quiz',
-                        'publish_date'=> Carbon::parse($request->publish_date),
-                        'course_id' => $course,
-                        'class_id'=> $class,
-                        'lesson_id'=> $lessons,
-                    ]);
-        
-                    (new Notification())->send($requ);
-                }
+            foreach($classes as $class){
+                $requ = new Request([
+                    'message' => $quiz->name.' quiz is added',
+                    'id' => $request->quiz_id,
+                    'users' => count($users) > 0 ? $users : null,
+                    'type' =>'quiz',
+                    'publish_date'=> Carbon::parse($request->publish_date),
+                    'course_id' => $course,
+                    'class_id'=> $class,
+                    'lesson_id'=> $lessons,
+                ]);
+    
+                (new Notification())->send($requ);
             }
+            
 
              if($request->graded == true){
                  $grade_category=GradeCategory::find($request->grade_category_id[$key]);
@@ -258,21 +256,18 @@ class QuizLessonController extends Controller
         if(carbon::parse($quizLesson->publish_date)->isPast())
             $publish=Carbon::now();
 
-        if(count($users) > 0){
+        $requ = new Request([
+            'message' => $quiz->name . ' quiz is updated',
+            'id' => $request->quiz_id,
+            'users' => count($users) > 0 ? $users : null,
+            'type' =>'quiz',
+            'publish_date'=> Carbon::parse($publish),
+            'course_id' => $course,
+            'class_id'=> $class,
+            'lesson_id'=> $request->updated_lesson_id,
+        ]);
 
-            $requ = new Request([
-                'message' => $quiz->name . ' quiz is updated',
-                'id' => $request->quiz_id,
-                'users' => $users,
-                'type' =>'quiz',
-                'publish_date'=> Carbon::parse($publish),
-                'course_id' => $course,
-                'class_id'=> $class,
-                'lesson_id'=> $request->updated_lesson_id,
-            ]);
-    
-            (new Notification())->send($requ);
-        }
+        (new Notification())->send($requ);
         
         $all = Lesson::find($request->updated_lesson_id)->module('QuestionBank', 'quiz')->get();
         return HelperController::api_response_format(200, $all,__('messages.quiz.update'));
