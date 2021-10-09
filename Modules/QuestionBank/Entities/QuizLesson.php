@@ -112,5 +112,10 @@ class QuizLesson extends Model
         
         return (double) $content;
     }
+
+    public function user_quiz()
+    {
+        return  $this->hasMany('Modules\QuestionBank\Entities\userQuiz','quiz_lesson_id', 'id');
+    }
 }
 
