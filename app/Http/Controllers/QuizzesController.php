@@ -379,7 +379,7 @@ class QuizzesController extends Controller
         return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
     }
 
-    public function closeAttempts(Request $request)
+    public static function closeAttempts()
     {
         $user_quizzes=userQuiz::whereNull('submit_time')->get();
         foreach($user_quizzes as $userQuiz)
@@ -392,8 +392,8 @@ class QuizzesController extends Controller
 
                 UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->update(['force_submit'=>'1']);
                 userQuiz::find($userQuiz->id)->update(['submit_time'=>$quiz_time]);
-            }            
+            }
         }
-        return 'Done';
+        // return 'Done';
     }
 }
