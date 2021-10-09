@@ -25,6 +25,11 @@ class Notification extends Model
         return $this->belongsTo('App\Course');
     }
 
+    public function lesson()
+    {
+        return $this->belongsTo('App\Lesson');
+    }
+
     public function getCourseNameAttribute()
     {
         return $this->course ? $this->course->name : null;

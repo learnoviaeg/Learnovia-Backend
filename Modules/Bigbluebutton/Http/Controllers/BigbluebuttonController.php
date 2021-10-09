@@ -222,18 +222,22 @@ class BigbluebuttonController extends Controller
                                     $bigbb['join'] = true; //startmeeting has arrived but meeting didn't start yet
                             }
 
-                            $notify_request = new Request([
-                                'id' => $bigbb->id,
-                                'message' => $request->name.' meeting is created',
-                                'users' => $usersIDs,
-                                'course_id' => $object['course_id'],
-                                'class_id'=>$class,
-                                'type' => 'meeting',
-                                'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
-                                'publish_date'=> $temp_start,
-                            ]);
-                
-                            (new Notification())->send($notify_request);
+                            if(count($usersIDs) > 0){
+                                
+                                $notify_request = new Request([
+                                    'id' => $bigbb->id,
+                                    'message' => $request->name.' meeting is created',
+                                    'users' => $usersIDs,
+                                    'course_id' => $object['course_id'],
+                                    'class_id'=>$class,
+                                    'type' => 'meeting',
+                                    'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
+                                    'publish_date'=> $temp_start,
+                                ]);
+                    
+                                (new Notification())->send($notify_request);
+                            }
+                         
 
                             $created_meetings->push($bigbb);
                             

@@ -89,19 +89,22 @@ class QuizLessonObserver
                     ->where('user_id','!=',Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->toArray();
         // $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
-        foreach($lesson->shared_classes->pluck('id') as $class){
-            $requ = new Request([
-                'message' => $quiz->name . ' quiz was updated',
-                'id' => $quiz->id,
-                'users' => $users,
-                'type' =>'quiz',
-                'publish_date'=> Carbon::parse($quizLesson->publish_date),
-                'course_id' => $lesson->course_id,
-                'class_id'=> $class,
-                'lesson_id'=> $lesson,
-            ]);
-    
-            (new Notification())->send($requ);
+        if(count($users) > 0){
+            //ask hend why looping while users is same every cycle? 
+            foreach($lesson->shared_classes->pluck('id') as $class){
+                $requ = new Request([
+                    'message' => $quiz->name . ' quiz was updated',
+                    'id' => $quiz->id,
+                    'users' => $users,
+                    'type' =>'quiz',
+                    'publish_date'=> Carbon::parse($quizLesson->publish_date),
+                    'course_id' => $lesson->course_id,
+                    'class_id'=> $class,
+                    'lesson_id'=> $lesson,
+                ]);
+        
+                (new Notification())->send($requ);
+            }
         }
 
         if($quizLesson->isDirty('lesson_id')){

@@ -74,6 +74,7 @@ class SendNotifications implements ShouldQueue
                 'deleted'=> "0",
                 'id' => $this->notification->id,
                 "course_name" => $this->notification->course ? $this->notification->course->name : null,
+                "lesson" => $this->notification->lesson ? (string) $this->notification->lesson : null
             ];
         }
 

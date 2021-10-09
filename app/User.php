@@ -247,6 +247,6 @@ class User extends Authenticatable
 
     public function notifications()
     {
-        return $this->belongsToMany('App\Notification')->orderByDesc('publish_date')->withPivot('read_at');
+        return $this->belongsToMany('App\Notification')->with('lesson')->orderByDesc('publish_date')->withPivot('read_at');
     }
 }
