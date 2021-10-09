@@ -22,6 +22,7 @@ use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\Questions;
 use App\LastAction;
 use Carbon\Carbon;
+use App\Events\updateQuizAndQuizLessonEvent;
 use App\Timeline;
 use App\SystemSetting;
 
@@ -263,7 +264,10 @@ class QuizzesController extends Controller
         $quiz->save();
         $quiz_lesson->save();
         $quiz->quizLesson;
-            
+        
+        // dd($
+        event(new updateQuizAndQuizLessonEvent($quiz_lesson));
+
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
 

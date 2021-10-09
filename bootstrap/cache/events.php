@@ -29,7 +29,7 @@
     'App\\Events\\UpdatedQuizQuestionsEvent' => 
     array (
       0 => 'App\\Listeners\\UpdateQuizGradeListener',
-      1 => 'App\\Listeners\\UpdateTimelineListener',
+      1 => 'App\\Listeners\\createTimelineListener',
     ),
     'App\\Events\\UserEnrolledEvent' => 
     array (
@@ -46,6 +46,10 @@
     'App\\Events\\ManualCorrectionEvent' => 
     array (
       0 => 'App\\Listeners\\GradeManualListener',
+    ),
+    'App\\Events\\updateQuizAndQuizLessonEvent' => 
+    array (
+      0 => 'App\\Listeners\\updateTimelineListener',
     ),
   ),
 );
