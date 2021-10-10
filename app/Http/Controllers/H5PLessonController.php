@@ -101,7 +101,7 @@ class H5PLessonController extends Controller
                 $notify_request = new Request([
                     'id' => $content->id,
                     'message' => $content->title.' interactive is added',
-                    'users' => count($usersIDs) > 0 ? $usersIDs : null,
+                    'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
                     'course_id' => $lesson->course_id,
                     'class_id' => $class_id,
                     'lesson_id' => $lesson_id,
