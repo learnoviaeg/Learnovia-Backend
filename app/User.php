@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Validator;
 use Modules\Attendance\Entities\AttendanceLog;
 use App\Course;
 use App\Log;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 
 class User extends Authenticatable
 {
@@ -245,6 +247,6 @@ class User extends Authenticatable
 
     public function notifications()
     {
-        return $this->belongsToMany('App\Notification');
+        return $this->belongsToMany('App\Notification')->with('lesson')->orderByDesc('publish_date')->withPivot('read_at');
     }
 }

@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use DB;
 use App\LastAction;
 use App\Http\Controllers\Controller;
+use App\Notification;
 
 class H5PLessonController extends Controller
 {
@@ -94,13 +95,13 @@ class H5PLessonController extends Controller
             // $class_id=$Lesson->shared_classes;
             $usersIDs = User::whereIn('id' , Enroll::where('course', $lesson->course_id)->whereIn('group',$lesson->shared_classes->pluck('id'))
                             ->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray())->pluck('id');
-            
+
             foreach($lesson->shared_classes->pluck('id') as $class_id){
-                User::notify([
+
+                $notify_request = new Request([
                     'id' => $content->id,
                     'message' => $content->title.' interactive is added',
-                    'from' => Auth::user()->id,
-                    'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
+                    'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
                     'course_id' => $lesson->course_id,
                     'class_id' => $class_id,
                     'lesson_id' => $lesson_id,
@@ -108,7 +109,10 @@ class H5PLessonController extends Controller
                     'link' => $url.'/api/h5p/'.$h5p_lesson->content_id,
                     'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
                 ]);
+
+                (new Notification)->send($notify_request);
             }
+            
         }
         
         return HelperController::api_response_format(200,$h5p_lesson, __('messages.interactive.add'));

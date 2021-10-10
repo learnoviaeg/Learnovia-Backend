@@ -25,7 +25,7 @@ class CreateUserNotificationsTable extends Migration
 
             $table->dateTime('read_at')->nullable();
             
-            $table->string('status')->default('offline');
+            $table->string('real_time_status')->default('offline');
 
         });
     }
