@@ -64,7 +64,7 @@ class SendNotifications implements ShouldQueue
             $notificationObject = [
                 "item_id" => (string) $this->notification->item_id,
                 "message" => $this->notification->message,
-                "fromm" => $this->notification->created_by,
+                "fromm" => (string) $this->notification->created_by,
                 "type" => $this->notification->item_type,
                 "course_id" => (string) $this->notification->course_id,
                 "class_id" => (string) $this->notification->class_id,
@@ -73,7 +73,7 @@ class SendNotifications implements ShouldQueue
                 "read_at" => null,
                 "link" => $this->notification->link,
                 'deleted'=> "0",
-                'id' => $this->notification->id,
+                'id' => (string) $this->notification->id,
                 "course_name" => $this->notification->course ? $this->notification->course->name : null,
                 "lesson" => $this->notification->lesson ? (string) $this->notification->lesson : null
             ];
@@ -86,12 +86,12 @@ class SendNotifications implements ShouldQueue
             $notificationObject = [
                 "item_id" => (string) $this->notification->item_id,
                 "message" => $this->notification->message,
-                "fromm" => $this->notification->created_by,
+                "fromm" => (string) $this->notification->created_by,
                 "type" => $this->notification->item_type,
                 "publish_date" => Carbon::parse($this->notification->publish_date)->format('Y-m-d H:i:s'),
                 "read_at" => null,
                 'deleted'=> "0",
-                'id' => $this->notification->id,
+                'id' => (string) $this->notification->id,
                 "title" => $announcement->title,
                 "description" => $announcement->description,
                 "start_date" => $announcement->start_date,
@@ -101,8 +101,9 @@ class SendNotifications implements ShouldQueue
         }
         //end preparing notifications object 
 
+        $failedIds = array();
         //start loopong users to send them firebase notifications
-        foreach($users as $user)
+        foreach($users as $key => $user)
         {
 
             //open link when notification arrives to device
@@ -153,11 +154,21 @@ class SendNotifications implements ShouldQueue
                 ]);     
 
             } catch (\Exception $e) {
-
-               Log::debug( $e->getMessage());
+                Log::debug( $e->getMessage());
+                array_push($failedIds,$user->id);
+                unset($users[$key]);
             }
             //end sending realtime notification
         }
+
+        $this->notification->users()->whereIn('user_id',$users->pluck('id'))->update([
+            'status' => 'sent'
+        ]);
+
+        $this->notification->users()->whereIn('user_id',$failedIds)->update([
+            'status' => 'failed'
+        ]);
+        
         //end sending firebase notifications
     }
 }
