@@ -49,8 +49,8 @@ class AttemptItemlistener
                 $max_attempt=1;
 
             for($key =1; $key<=$max_attempt; $key++){
-                $gradeItem = GradeItems::create([
-                    'type' => 'Attempt',
+                $gradeItem = GradeItems::firstOrcreate([
+                    'type' => 'Attempts',
                     'index' => $key,
                     'name' => 'Attempt number ' .$key,
                     'grade_category_id' => $GradeCategory->id,
@@ -58,7 +58,7 @@ class AttemptItemlistener
 
                 $enrolled_students = Enroll::where('role_id' , 3)->where('course',$GradeCategory->course_id)->pluck('user_id');
                 foreach($enrolled_students as $student){
-                    UserGrader::create([
+                    UserGrader::firstOrcreate([
                         'user_id'   => $student,
                         'item_type' => 'Item',
                         'item_id'   => $gradeItem->id,

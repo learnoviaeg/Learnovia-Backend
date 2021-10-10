@@ -413,6 +413,9 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], fun
 
 Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], function () {
     Route::get('grade-cat-course', 'ScriptsController@CreateGradeCatForCourse');
+    Route::get('quiz-mark', 'ScriptsController@quiz_total_mark');
+    Route::get('grade_items', 'ScriptsController@grade_details_of_questions');
+    Route::get('grade-attempts', 'ScriptsController@gradeAttemptsInQuizlesson');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -452,6 +455,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@assign');//->middleware(['permission:quiz/add' , 'ParentCheck']);
     Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
 
+    Route::get('close_attempts', 'QuizzesController@closeAttempts');
     Route::Resource('attempts', AttemptsController::class);
     Route::post('attempts/{id}', 'AttemptsController@update');
     // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);
