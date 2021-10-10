@@ -38,8 +38,9 @@ class SendNotifications implements ShouldQueue
         //get list of users that should recieve this notification and has firebase token
         $users = $this->notification->users()->whereNotNull('token')->get();
 
-        //create a new google clinet
+        //create a new google clinet and guzzle client
         $googleClient = new \Google_Client();
+        $client = new Client();
 
         //generate access token to firebase API
         $googleClient->setAuthConfig(base_path('learnovia-notifications-firebase-adminsdk-z4h24-17761b3fe7.json'));
@@ -139,7 +140,6 @@ class SendNotifications implements ShouldQueue
             //end preparing notifications request body
 
             //start sending realtime notifications
-            $client = new Client();
             try {
 
                 $client->request('POST', 'https://fcm.googleapis.com/v1/projects/learnovia-notifications/messages:send', [
@@ -157,9 +157,7 @@ class SendNotifications implements ShouldQueue
                Log::debug( $e->getMessage());
             }
             //end sending realtime notification
-
         }
-
         //end sending firebase notifications
     }
 }
