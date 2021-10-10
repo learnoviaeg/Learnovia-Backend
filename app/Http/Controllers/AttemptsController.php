@@ -250,25 +250,24 @@ class AttemptsController extends Controller
         if(Carbon::parse($quiz_lesson->start_date) > Carbon::now())
             return HelperController::api_response_format(200, null, __('messages.error.quiz_time'));
 
+        if(Carbon::parse($quiz_lesson->due_date) < Carbon::now())
+            return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
+
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
         $user_quiz = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id);
         
         $last_attempt=$user_quiz->latest()->first();
         $index=0;
             
-        if(isset($last_attempt)) // first attempt
+        if(isset($last_attempt))
         {
             $index=$last_attempt->attempt_index;
-            $last_attempt->left_time=$quiz_lesson->quiz->duration;
-            $end_date = Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration);
-            $seconds = $end_date->diffInSeconds(Carbon::now());
-            if($seconds < 0) 
-                $seconds = 0;
+            $last_attempt->left_time=self::leftTime($last_attempt);
 
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration) > Carbon::now()
                  && UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->count() > 0)
             {
-                $last_attempt->left_time=(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration))->diffInSeconds(Carbon::now());
+                // $last_attempt->left_time=self::leftTime($last_attempt);
                 foreach($last_attempt->UserQuizAnswer as $answers)
                     $answers->Question;
                 return HelperController::api_response_format(200, $last_attempt, __('messages.quiz.continue_quiz'));
@@ -337,6 +336,32 @@ class AttemptsController extends Controller
         }
         
         return HelperController::api_response_format(200, $userQuiz);
+    }
+
+    public function leftTime($attempt)
+    {
+        $end_date = Carbon::parse($attempt->open_time)->addSeconds($attempt->quiz_lesson->quiz->duration);
+        // dd($end_date);
+
+        // if attempt opened and quiz ended before attempt closed
+        // dd(Carbon::parse($attempt->quiz_lesson->due_date));
+        if($end_date > Carbon::parse($attempt->quiz_lesson->due_date)){
+            $taken_time=Carbon::parse($attempt->open_time)->diffInSeconds(Carbon::now());
+            // dd($taken_time);
+            $allowed=Carbon::parse($attempt->quiz_lesson->due_date)->diffInSeconds(Carbon::parse($attempt->open_time));
+            // dd($allowed);
+            $seconds=$allowed-$taken_time;
+            // dd($seconds);
+        }
+        else
+            $seconds = $end_date->diffInSeconds(Carbon::now());
+            
+        if($seconds < 0) 
+            $seconds = 0;
+
+            // dd($seconds);
+
+        return $seconds;
     }
 
     /**
