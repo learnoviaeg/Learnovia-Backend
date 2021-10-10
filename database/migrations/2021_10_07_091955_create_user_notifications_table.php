@@ -24,6 +24,8 @@ class CreateUserNotificationsTable extends Migration
             $table->foreign('notification_id')->references('id')->on('notifications')->onDelete('cascade')->onUpdate('cascade');
 
             $table->dateTime('read_at')->nullable();
+            
+            $table->string('status')->default('offline');
 
         });
     }
