@@ -162,11 +162,11 @@ class SendNotifications implements ShouldQueue
         }
 
         $this->notification->users()->whereIn('user_id',$users->pluck('id'))->update([
-            'status' => 'sent'
+            'real_time_status' => 'sent'
         ]);
 
         $this->notification->users()->whereIn('user_id',$failedIds)->update([
-            'status' => 'failed'
+            'real_time_status' => 'failed'
         ]);
         
         //end sending firebase notifications
