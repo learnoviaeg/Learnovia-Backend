@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class AcademicYear extends Model
 {
     use SoftDeletes;
-
     protected $fillable = ['id','name','current'];
     public function AC_Type()
     {
