@@ -61,6 +61,9 @@ class AttemptsController extends Controller
 
         // return HelperController::api_response_format(200, $attempts->with('UserQuizAnswer','user','quiz_lesson')->get());
 
+        //to close opend attempts
+        QuizzesController::closeAttempts();
+
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
