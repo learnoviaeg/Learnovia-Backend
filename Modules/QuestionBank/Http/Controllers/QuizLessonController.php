@@ -61,8 +61,6 @@ class QuizLessonController extends Controller
         {
             $lesson = Lesson::find($lessons);
 
-            //for notification
-            $users = Enroll::where('course_id',$lesson->course_id)->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray();
             $course = $lesson->course_id;
             LastAction::lastActionInCourse($course);
 
@@ -114,6 +112,9 @@ class QuizLessonController extends Controller
             $classes = SecondaryChain::whereIn('lesson_id', $lessons)->get()->pluck('group_id')->unique();
 
             foreach($classes as $class){
+
+                $users = Enroll::where('group',$class)->where('course_id',$lesson->course_id)->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray();
+
                 $requ = new Request([
                     'message' => $quiz->name.' quiz is added',
                     'id' => $request->quiz_id,
