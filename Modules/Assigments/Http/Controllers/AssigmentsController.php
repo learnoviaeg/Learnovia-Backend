@@ -557,7 +557,7 @@ class AssigmentsController extends Controller
     public function gradeAssigment(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:user_assigments,user_id',
+            'user_id' => 'required|exists:users,id',
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'grade' => 'required|numeric',
@@ -571,7 +571,12 @@ class AssigmentsController extends Controller
         $lesson=Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->course_id);
 
-        $userassigment = UserAssigment::where('user_id', $request->user_id)->where('assignment_lesson_id', $assilesson->id)->first();
+        $userassigment = UserAssigment::firstOrCreate([
+                         'user_id' => $request->user_id,
+                         'assignment_lesson_id' => $assilesson->id,],
+                        ['status_id' => 2,
+                        'override' => 0, ]);
+
         if ($assilesson->mark < $request->grade) {
             return HelperController::api_response_format(400, $body = [], $message = __('messages.error.grade_less_than') . $assilesson->mark);
         }
