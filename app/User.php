@@ -242,4 +242,9 @@ class User extends Authenticatable
 
         return $status;
     }
+
+    public function assignmentOverride()
+    { 
+        return $this->hasMany('Modules\Assigments\Entities\assignmentOverride','user_id','id');
+    }
 }
