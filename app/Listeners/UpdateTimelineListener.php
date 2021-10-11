@@ -35,17 +35,18 @@ class updateTimelineListener
 
         foreach($lesson->shared_classes->pluck('id') as $class){
             $timeLine=Timeline::where('item_id',$event->quizLesson->quiz_id)->where('type','quiz')->first();
-            $timeLine->update([
-                'name' => $event->quizLesson->quiz->name,
-                'start_date' => $event->quizLesson->start_date,
-                'due_date' => $event->quizLesson->due_date,
-                'publish_date' => $event->quizLesson->publish_date,
-                'course_id' => $course_id,
-                'class_id' => $class,
-                'lesson_id' => $event->quizLesson->lesson_id,
-                'level_id' => Course::find($lesson->course_id)->level_id,
-                'visible' => $event->quizLesson->visible
-            ]);
+            if(isset($timeLine)) // in case quiz was drafted
+                $timeLine->update([
+                    'name' => $event->quizLesson->quiz->name,
+                    'start_date' => $event->quizLesson->start_date,
+                    'due_date' => $event->quizLesson->due_date,
+                    'publish_date' => $event->quizLesson->publish_date,
+                    'course_id' => $course_id,
+                    'class_id' => $class,
+                    'lesson_id' => $event->quizLesson->lesson_id,
+                    'level_id' => Course::find($lesson->course_id)->level_id,
+                    'visible' => $event->quizLesson->visible
+                ]);
             // dd($timeLine);
         } 
     }
