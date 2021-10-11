@@ -27,6 +27,7 @@ use  Modules\Page\Entities\pageLesson;
 use  Modules\Page\Entities\page;
 use App\Material;
 use  App\LastAction;
+use App\Notification;
 use App\SecondaryChain;
 use App\Repositories\SettingsReposiotryInterface;
 
@@ -265,12 +266,11 @@ class FilesController extends Controller
                         $class_id = $secondary_chain->group_id;
                         $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
                         LastAction::lastActionInCourse($courseID);
-
-                        User::notify([
+                     
+                        $notify_request = new Request([
                             'id' => $file->id,
                             'message' => $file->name.' file is added',
-                            'from' => Auth::user()->id,
-                            'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
+                            'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
                             'course_id' => $courseID,
                             'class_id' => $class_id,
                             'lesson_id' => $lesson,
@@ -278,6 +278,8 @@ class FilesController extends Controller
                             'link' => $file->url,
                             'publish_date' => Carbon::parse($publishdate),
                         ]);
+            
+                        (new Notification())->send($notify_request);
                     }
 
                         if ($check) {
@@ -488,18 +490,21 @@ class FilesController extends Controller
             $class_id = $secondary_chain->group_id;
             $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
             LastAction::lastActionInCourse($courseID);
-            User::notify([
-                    'id' => $file->id,
-                    'message' => $file->name.' file is updated',
-                    'from' => Auth::user()->id,
-                    'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
-                    'course_id' => $courseID,
-                    'class_id' => $class_id,
-                    'lesson_id' => $request->updated_lesson_id,
-                    'type' => 'file',
-                    'link' => $file->url,
-                    'publish_date' => carbon::parse($publish_date),
+
+            $notify_request = new Request([
+                'id' => $file->id,
+                'message' => $file->name.' file is updated',
+                'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
+                'course_id' => $courseID,
+                'class_id' => $class_id,
+                'lesson_id' => $request->updated_lesson_id,
+                'type' => 'file',
+                'link' => $file->url,
+                'publish_date' => carbon::parse($publish_date),
             ]);
+
+            (new Notification())->send($notify_request);
+            
         }
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, __('messages.file.update'));

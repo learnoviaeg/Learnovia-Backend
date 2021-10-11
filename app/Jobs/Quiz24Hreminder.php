@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Controllers\NotificationsController;
+use App\Notification;
 use App\Parents;
 use App\SecondaryChain;
 use Illuminate\Bus\Queueable;
@@ -54,7 +55,6 @@ class Quiz24Hreminder implements ShouldQueue
                 'id' => $this->quiz->id,
                 'type' => 'quiz',
                 'publish_date' => Carbon::now(),
-                'title' => $this->quiz->name,
                 'message' => 'Quiz '.$this->quiz->name.' will be closed soon, Hurry up to solve it.',
                 'from' => $this->quiz->created_by,
                 'users' => $allUsers->toArray()
@@ -62,7 +62,7 @@ class Quiz24Hreminder implements ShouldQueue
             
             // use notify store function to notify users with the announcement
             try {
-                $notify = (new NotificationsController)->store($notify_request);
+                $notify = (new Notification())->send($notify_request);
             } catch (\Throwable $th) {
                 //throw $th;
             }
