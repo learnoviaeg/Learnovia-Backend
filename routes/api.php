@@ -491,14 +491,16 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 });
 
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
-    Route::get('prime/year-type', 'MigratePrimeController@yearType');
+    Route::get('prime-type', 'MigratePrimeController@type');
     Route::get('prime-level', 'MigratePrimeController@level');
     Route::get('prime-segment', 'MigratePrimeController@segment');
     Route::get('prime-class', 'MigratePrimeController@class');
+    Route::get('prime-lesson', 'MigratePrimeController@lesson');
     Route::get('prime-course', 'MigratePrimeController@course');
     Route::get('prime-enrolls', 'MigratePrimeController@enrolls');
     Route::get('prime-gradeCategory', 'MigratePrimeController@gradeCategory');
     Route::get('prime-announcement', 'MigratePrimeController@announcement');
+    Route::get('prime-questionCateory', 'MigratePrimeController@questionCateory');
 });
 
 Route::group(['middleware' => ['auth:api']], function () {

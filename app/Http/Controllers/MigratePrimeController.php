@@ -17,22 +17,17 @@ use App\Enroll;
 use App\Lesson;
 use App\Announcement;
 use App\GradeCategory;
+use Modules\QuestionBank\Entities\QuestionsCategory;
+
 
 
 use Illuminate\Http\Request;
 
 class MigratePrimeController extends Controller
 {
-    public function yearType()
+    public function type()
     {
-        // insert years
-        $years = AcademicYear::get();
-        foreach($years as $year)
-        {
-            DB::connection('mysql2')->insert('insert into academic_years (id , name , current , created_at , updated_at ) 
-            values ( ? ,? ,?, ? ,? )', [$year->id , $year->name , $year->current , $year->created_at , $year->updated_at]);
-        }
-
+      
         $academicYearTypes = AcademicYearType::get();
         foreach($academicYearTypes as $academicYearType)
         {
@@ -125,6 +120,32 @@ class MigratePrimeController extends Controller
 
     }
 
+    public function lesson()
+    {
+        $lessons = Lesson::get();
+        foreach($lessons as $lesson)
+        {
+
+            $classes = array();
+            $courseSegment = CourseSegment::find($lesson->course_segment_id);
+            // $courseSegment = CourseSegment::where('course_id', $course->id)->first();
+            $segmentClass = SegmentClass::find($courseSegment->segment_class_id);
+            $segment = $segmentClass->segment_id;
+            $classLevel = ClassLevel::find($segmentClass->class_level_id);
+            $yearLevel = YearLevel::find($classLevel->year_level_id);
+            $classLevels= ClassLevel::where('year_level_id' , $yearLevel->id)->get();
+            foreach($classLevels as $classLevel)
+            {
+                $classes[] = $classLevel->class_id;
+            }
+            $classes = json_encode($classes);
+
+            DB::connection('mysql2')->insert('insert into lessons(id,name,index,image,description,course_id,created_at,updated_at,shared_classess)
+             values(?,?,?,?,?,?,?,?,?)'
+            ,[$lesson->id,$lesson->name,$lesson->index,$lesson->image,$lesson->description,$courseSegment->course_id,$lesson->created_at,$lesson->updated_at,$classes]);
+        }
+    }
+
 
     public function enrolls()
     {
@@ -159,7 +180,6 @@ class MigratePrimeController extends Controller
         
         }
         echo 'Done';
-
     }
 
     public function gradeCategory()
@@ -180,14 +200,27 @@ class MigratePrimeController extends Controller
     public function announcement()
     {
         $announcements = Announcement::get();
-        DB::connection('mysql2')->insert('insert into topics (id ,title) values(?)',[1,'topic1']);
         foreach($announcements as $announcement)
         {
-            DB::connection('mysql2')->insert('insert into announcements (id,title,attached_file,start_date,end_date,created_at,updated_at,publish_date,created_by,description,topic)
-             values(?,?,?,?,?,?,?,?,?,?,?)',
-             [$announcement->id,$announcement->title,$announcement->attached_file,$announcement->start_date,$announcement->end_date,$announcement->created_at,
-             $announcement->updated_at,$announcement->publish_date,$announcement->created_by,$announcement->description,1]);
+            DB::connection('mysql2')->insert('insert into announcements (id,title,attached_file,start_date,due_date,created_at,updated_at,publish_date,created_by,description)
+             values(?,?,?,?,?,?,?,?,?,?)',
+             [$announcement->id,$announcement->title,$announcement->attached_file,$announcement->start_date,$announcement->due_date,$announcement->created_at,
+             $announcement->updated_at,$announcement->publish_date,$announcement->created_by,$announcement->description]);
         }
 
+        echo 'Done';
+
+    }
+    public function questionCateory()
+    {
+        $questionCategories = QuestionCategory::get();
+        foreach($questionCategories as $questionCategory)
+        {
+            $courseSegment = CourseSegment::find($lesson->course_segment_id);
+            DB::connection('mysql2')->insert('insert into question_categories (id,name,created_at,updated_at,course_id)
+             values(?,?,?,?,?)',
+             [$questionCategory->id,$questionCategory->name,$questionCategory->created_at,$questionCategory->updated_at,$courseSegment->course_id]);
+        }
+      echo 'Done';
     }
 }
