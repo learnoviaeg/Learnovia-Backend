@@ -1177,6 +1177,8 @@ class AssigmentsController extends Controller
             $studentassigment = User::where('id',Auth::id())
             ->with(['userAssignment'=> function($query)use ($assigLessonID){
                 $query->where('assignment_lesson_id', $assigLessonID->id);
+            }])->with(['assignmentOverride'=> function($query)use ($assigLessonID){
+                $query->where('assignment_lesson_id', $assigLessonID->id);
             }])->get();
             return HelperController::api_response_format(200,  AssignmentSubmissionResource::collection($studentassigment), $message = []);
         }
@@ -1192,6 +1194,8 @@ class AssigmentsController extends Controller
             
             $userassigments = User::whereIn('id',$assigned_users->get()->pluck('user_id'))
                             ->with(['userAssignment'=> function($query)use ($assigLessonID){
+                                $query->where('assignment_lesson_id', $assigLessonID->id);
+                            }])->with(['assignmentOverride'=> function($query)use ($assigLessonID){
                                 $query->where('assignment_lesson_id', $assigLessonID->id);
                             }])->get();
 

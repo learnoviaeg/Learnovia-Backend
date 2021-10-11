@@ -60,9 +60,10 @@ class TimelineController extends Controller
         ]);
 
         $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
-        $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id');
+        $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get();
         $timeline = Timeline::with(['class','course','level'])
-                            ->whereIn('lesson_id',$lessons)
+                            ->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))
+                            ->whereIn('class_id',$sec_chain->pluck('group_id'))
                             ->where('visible',1)
                             ->where('start_date','<=',Carbon::now())
                             ->where('due_date','>=',Carbon::now())

@@ -32,7 +32,8 @@ class AssignmentSubmissionResource extends JsonResource
             'assignment_lesson_id' => isset($this['userAssignment'][0]['assignment_lesson_id']) ? $this['userAssignment'][0]['assignment_lesson_id'] : null,
             'corrected_file' => isset($this['userAssignment'][0]['corrected_file']) ? attachment::find($this['userAssignment'][0]['corrected_file']) : null,
             'allow_edit_answer' => isset($this['userAssignment'][0]['assignment_lesson_id']) ? AssignmentLesson::find($this['userAssignment'][0]['assignment_lesson_id'])->allow_edit_answer : null,
-
+            'overridden_start_date'=> isset($this['assignmentOverride'][0]['start_date']) ? $this['assignmentOverride'][0]['start_date'] : null,
+            'overridden_end_date'=> isset($this['assignmentOverride'][0]['due_date']) ? $this['assignmentOverride'][0]['due_date'] : null,
         ];
     }
 }

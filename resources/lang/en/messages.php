@@ -10,6 +10,7 @@ return [
         'cannot_edit' => 'you can\'t edit you submission',
         'submit_limit' => 'Sorry, you are not allowed to submit anymore',
         'quiz_time' => 'Sorry, Quiz isn\'t started yet',
+        'quiz_ended' => 'Sorry, Quiz ended',
         'not_available_now' => 'Sorry, This item is not available for you at this moment',
         'try_again' => 'Something went wrong, please try again',
         'data_invalid' => 'This data is invalid',

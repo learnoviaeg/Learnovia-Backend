@@ -249,4 +249,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany('App\Notification')->with('lesson')->orderByDesc('publish_date')->withPivot('read_at');
     }
+    
+    public function assignmentOverride()
+    { 
+        return $this->hasMany('Modules\Assigments\Entities\assignmentOverride','user_id','id');
+    }
 }
