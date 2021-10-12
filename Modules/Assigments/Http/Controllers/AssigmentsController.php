@@ -959,6 +959,14 @@ class AssigmentsController extends Controller
                 ['start_date' =>  $request->start_date,
                 'due_date' => $request->due_date,]
             );
+            
+            UserAssigment:: updateOrCreate(
+                ['user_id' => $user,
+                'assignment_lesson_id' => $assigmentlesson],
+                [
+                'override' => 1,
+                ]
+            );
         }
         $course = $lesson->course_id;
         LastAction::lastActionInCourse($course);
