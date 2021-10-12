@@ -257,6 +257,12 @@ class AttemptsController extends Controller
                 return HelperController::api_response_format(200, $last_attempt, __('messages.quiz.continue_quiz'));
             }
 
+            if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration) < Carbon::now())
+            {
+                $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
+                dispatch($job);
+            }
+
             if(Auth::user()->can('site/course/student')){
                 if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp )
                 {                
