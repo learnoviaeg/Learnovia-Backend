@@ -247,10 +247,10 @@ class AttemptsController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        if(Carbon::parse($quiz_lesson->start_date) > Carbon::now())
+        if(Carbon::parse($quiz_lesson->start_date) > Carbon::now() && Auth::user()->can('site/course/student'))
             return HelperController::api_response_format(200, null, __('messages.error.quiz_time'));
 
-        if(Carbon::parse($quiz_lesson->due_date) < Carbon::now())
+        if(Carbon::parse($quiz_lesson->due_date) < Carbon::now() && Auth::user()->can('site/course/student'))
             return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
 
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
@@ -279,7 +279,7 @@ class AttemptsController extends Controller
             //     dispatch($job);
             // }
 
-            if((Auth::user()->can('site/course/student'))){
+            if(Auth::user()->can('site/course/student')){
                 if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp )
                 {                
                     $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
@@ -465,8 +465,11 @@ class AttemptsController extends Controller
             // 2 => question answered partilly
         ]);
 
-        // check that question exist in the Quiz
         $user_quiz = userQuiz::find($id);
+
+        if(Carbon::parse($user_quiz->quiz_lesson->due_date) < Carbon::now() && Auth::user()->can('site/course/student'))
+            return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
+
         LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
 
         $allData = collect([]);

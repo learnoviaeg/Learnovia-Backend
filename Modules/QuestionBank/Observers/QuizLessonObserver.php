@@ -87,6 +87,8 @@ class QuizLessonObserver
 
         // $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
 
+        event(new MassLogsEvent([$quizLesson],'updated'));
+
         foreach($lesson->shared_classes->pluck('id') as $class){
 
             $users = Enroll::where('group',$class)->where('course',$lesson->course_id)

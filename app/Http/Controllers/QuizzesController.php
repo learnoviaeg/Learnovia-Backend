@@ -197,7 +197,10 @@ class QuizzesController extends Controller
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'grade_feedback' => 'in:After submission,After due_date,Never',
             'correct_feedback' => 'in:After submission,After due_date,Never',
-            'updated_lesson_id' => 'exists:lessons,id'
+            'updated_lesson_id' => 'exists:lessons,id',
+            'opening_time' => 'date',
+            'closing_time' => 'date|after:opening_time',
+            'publish_date' => 'date|before_or_equal:opening_time'
         ]);
         // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
         //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
@@ -227,8 +230,10 @@ class QuizzesController extends Controller
             'shuffle' => isset($request->shuffle)?$request->shuffle:$quiz->shuffle,
         ]);
 
+        if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
+            return HelperController::api_response_format(200, $quiz,__('messages.quiz.wrong_date'));
+
         $quiz_lesson->update([
-            'quiz_id' => $quiz->id,
             'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
             'grade' => isset($request->grade) ? $request->grade : $quiz_lesson->grade,
             'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,

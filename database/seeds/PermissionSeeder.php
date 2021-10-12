@@ -385,5 +385,8 @@ class PermissionSeeder extends Seeder
         //Topic Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'topic/crud', 'title' => 'Topic Crud']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'topic/get', 'title' => 'Get Topic']);        
+
+        //Attempts
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/quiz/unLimitedAttempts', 'title' => 'unLimited Attempts']);
     }
 }
