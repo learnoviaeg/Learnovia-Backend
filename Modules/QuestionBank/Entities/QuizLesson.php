@@ -2,6 +2,7 @@
 
 namespace Modules\QuestionBank\Entities;
 
+use App\Scopes\OverrideQuizScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -27,27 +28,35 @@ class QuizLesson extends Model
     protected $appends = ['started','user_seen_number','Status', 'ended'];
 
     public function getStartedAttribute(){
+
         $started = true;
-        $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$this->id)->first();
-        if($override != null){
+
+        if(count($this->override) > 0){
+
+            $override = $this->override->first();
             $this->start_date = $override->start_date;
-            $this->due_date = $override->due_date;
         }
-        if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now()))
+
+        if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now())){
             $started = false;
+        }
+        
         return $started;  
     }
 
     public function getEndedAttribute(){
+
         $ended = false;
-        $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$this->id)->first();
-        if($override != null){
-            $this->start_date = $override->start_date;
+
+        if(count($this->override) > 0){
+            $override = $this->override->first();
             $this->due_date = $override->due_date;
         }
-        // dd($this->due_date);
-        if((Auth::user()->can('site/course/student') && $this->due_date < Carbon::now()))
+        
+        if((Auth::user()->can('site/course/student') && $this->due_date < Carbon::now())){
             $ended = true;
+        }
+
         return $ended;  
     }
 
@@ -129,6 +138,17 @@ class QuizLesson extends Model
     public function user_quiz()
     {
         return  $this->hasMany('Modules\QuestionBank\Entities\userQuiz','quiz_lesson_id', 'id');
+    }
+
+    public function override()
+    {
+        return  $this->hasMany('Modules\QuestionBank\Entities\QuizOverride','quiz_lesson_id', 'id');
+    }
+    
+    public static function boot() 
+    {
+        parent::boot();
+        static::addGlobalScope(new OverrideQuizScope);
     }
 }
 
