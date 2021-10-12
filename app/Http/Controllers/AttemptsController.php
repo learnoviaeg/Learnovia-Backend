@@ -46,21 +46,6 @@ class AttemptsController extends Controller
      */
     public function index(Request $request)
     {
-        // $request->validate([
-        //     'quiz_id' => 'required|integer|exists:quizzes,id',
-        //     'lesson_id' => 'required|integer|exists:lessons,id',
-        //     'attempt_index'=>'integer|exists:user_quizzes,id',
-        //     'user_id' => 'integer|exists:users,id',
-        // ]);
-        // $user_id=($request->user_id) ? $request->user_id : Auth::id();
-        // $quiz=Quiz::find($request->quiz_id);
-        // $attempts=UserQuiz::where('user_id',$user_id)->where('quiz_lesson_id',$quiz->quizLesson[0]->id);
-
-        // if(isset($request->attempt_index))
-        //     $attempts->whereId($request->attempt_index);
-
-        // return HelperController::api_response_format(200, $attempts->with('UserQuizAnswer','user','quiz_lesson')->get());
-
         //to close opend attempts
         QuizzesController::closeAttempts();
 
@@ -247,10 +232,10 @@ class AttemptsController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        if(Carbon::parse($quiz_lesson->start_date) > Carbon::now())
+        if(Carbon::parse($quiz_lesson->start_date) > Carbon::now() && Auth::user()->can('site/course/student'))
             return HelperController::api_response_format(200, null, __('messages.error.quiz_time'));
 
-        if(Carbon::parse($quiz_lesson->due_date) < Carbon::now())
+        if(Carbon::parse($quiz_lesson->due_date) < Carbon::now() && Auth::user()->can('site/course/student'))
             return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
 
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
@@ -267,19 +252,12 @@ class AttemptsController extends Controller
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration) > Carbon::now()
                  && UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->count() > 0)
             {
-                // $last_attempt->left_time=self::leftTime($last_attempt);
                 foreach($last_attempt->UserQuizAnswer as $answers)
                     $answers->Question;
                 return HelperController::api_response_format(200, $last_attempt, __('messages.quiz.continue_quiz'));
             }
 
-            // if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration) < Carbon::now())
-            // {
-            //     $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
-            //     dispatch($job);
-            // }
-
-            if((Auth::user()->can('site/course/student'))){
+            if(Auth::user()->can('site/course/student')){
                 if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp )
                 {                
                     $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
@@ -455,7 +433,6 @@ class AttemptsController extends Controller
     public function update(Request $request, $id) //it's answer_api because we do make update really ^_^ 
     {
         $request->validate([
-            // 'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
             'Questions' => 'array',
             'Questions.*.id' => 'integer|exists:questions,id',
             'forced' => 'boolean',
@@ -465,8 +442,11 @@ class AttemptsController extends Controller
             // 2 => question answered partilly
         ]);
 
-        // check that question exist in the Quiz
         $user_quiz = userQuiz::find($id);
+
+        if(Carbon::parse($user_quiz->quiz_lesson->due_date) < Carbon::now() && Auth::user()->can('site/course/student'))
+            return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
+
         LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
 
         $allData = collect([]);

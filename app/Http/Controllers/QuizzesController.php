@@ -197,16 +197,14 @@ class QuizzesController extends Controller
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'grade_feedback' => 'in:After submission,After due_date,Never',
             'correct_feedback' => 'in:After submission,After due_date,Never',
-            'updated_lesson_id' => 'exists:lessons,id'
+            'updated_lesson_id' => 'exists:lessons,id',
+            'opening_time' => 'date',
+            'closing_time' => 'date|after:opening_time',
+            'publish_date' => 'date|before_or_equal:opening_time'
         ]);
-        // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
-        //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
 
         $quiz=Quiz::find($id);
         $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
-        // if(isset($request->opening_time) && $request->opening_time > $quiz_lesson->start_date )
-        //     return HelperController::api_response_format(200, null,__('messages.quiz.NotUpdate'));   
-
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
 
         if(!strtotime($quiz_lesson->start_date) < Carbon::now())
@@ -216,10 +214,6 @@ class QuizzesController extends Controller
                 'publish_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->publish_date,
             ]);
         }
-         
-        // if(isset($request->course_id))
-        //     if($quiz->course_id != $request->course_id)
-        //         quiz_questions::where('quiz_id',$request->quiz_id)->delete(); //delete assigned questions
         
         $quiz->update([
             'name' => isset($request->name) ? $request->name : $quiz->name,
@@ -227,8 +221,10 @@ class QuizzesController extends Controller
             'shuffle' => isset($request->shuffle)?$request->shuffle:$quiz->shuffle,
         ]);
 
+        if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
+            return HelperController::api_response_format(200, $quiz,__('messages.quiz.wrong_date'));
+
         $quiz_lesson->update([
-            'quiz_id' => $quiz->id,
             'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
             'grade' => isset($request->grade) ? $request->grade : $quiz_lesson->grade,
             'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
@@ -265,7 +261,6 @@ class QuizzesController extends Controller
         $quiz_lesson->save();
         $quiz->quizLesson;
         
-        // dd($
         event(new updateQuizAndQuizLessonEvent($quiz_lesson));
 
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
