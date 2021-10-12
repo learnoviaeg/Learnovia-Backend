@@ -85,7 +85,7 @@ class UserQuizController extends Controller
                 //When Time finish, he can't enter on same attempt
                 if(Carbon::parse($userQuiz->open_time)->addSeconds($duration)->format('Y-m-d H:i:s') <= Carbon::now()->format('Y-m-d H:i:s'))
                 {
-                    userQuizAnswer::where('user_quiz_id',$max_id)->update(['force_submit'=>'1']);
+                    userQuizAnswer::where('user_quiz_id',$max_id)->update(['force_submit'=>'1','answered' => 1]);
 
                     //create one more then continue api
                     $attempt_index = ++$max_attempt_index;

@@ -336,7 +336,7 @@ class QuizzesController extends Controller
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
             {
-                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
+                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1','answered' => 1]);
                 UserQuiz::find($last_attempt->id)->update(['submit_time'=>Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s')]);
             }
 
@@ -385,7 +385,7 @@ class QuizzesController extends Controller
                 if($quiz_time > Carbon::parse($userQuiz->quiz_lesson->due_date)->format('Y-m-d H:i:s'))
                     $quiz_time=$userQuiz->quiz_lesson->due_date;
 
-                UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->update(['force_submit'=>'1']);
+                UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->update(['force_submit'=>'1','answered' => 1]);
                 userQuiz::find($userQuiz->id)->update(['submit_time'=>$quiz_time]);
             }
         }
