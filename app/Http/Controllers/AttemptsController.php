@@ -46,21 +46,6 @@ class AttemptsController extends Controller
      */
     public function index(Request $request)
     {
-        // $request->validate([
-        //     'quiz_id' => 'required|integer|exists:quizzes,id',
-        //     'lesson_id' => 'required|integer|exists:lessons,id',
-        //     'attempt_index'=>'integer|exists:user_quizzes,id',
-        //     'user_id' => 'integer|exists:users,id',
-        // ]);
-        // $user_id=($request->user_id) ? $request->user_id : Auth::id();
-        // $quiz=Quiz::find($request->quiz_id);
-        // $attempts=UserQuiz::where('user_id',$user_id)->where('quiz_lesson_id',$quiz->quizLesson[0]->id);
-
-        // if(isset($request->attempt_index))
-        //     $attempts->whereId($request->attempt_index);
-
-        // return HelperController::api_response_format(200, $attempts->with('UserQuizAnswer','user','quiz_lesson')->get());
-
         //to close opend attempts
         QuizzesController::closeAttempts();
 
@@ -455,7 +440,6 @@ class AttemptsController extends Controller
     public function update(Request $request, $id) //it's answer_api because we do make update really ^_^ 
     {
         $request->validate([
-            // 'user_quiz_id' => 'required|integer|exists:user_quizzes,id',
             'Questions' => 'array',
             'Questions.*.id' => 'integer|exists:questions,id',
             'forced' => 'boolean',
