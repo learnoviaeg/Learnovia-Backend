@@ -340,12 +340,8 @@ class QuizzesController extends Controller
                 UserQuiz::find($last_attempt->id)->update(['submit_time'=>Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s')]);
             }
 
-            $check_time = ($remain_time) - (strtotime(Carbon::now())- strtotime(Carbon::parse($last_attempt->open_time)));
-            // dd($check_time);
-            if($check_time < 0)
-                $check_time= 0;
-
-            $quiz->remain_time = $check_time;
+            $left_time=AttemptsController::leftTime($last_attempt);
+            $quiz->remain_time = $left_time;
             //case-->user_answer in new attempt
             $answered=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->get()->count();
             if($answered < 1)
