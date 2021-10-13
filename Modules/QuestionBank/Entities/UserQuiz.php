@@ -119,4 +119,18 @@ class userQuiz extends Model
             return round($value , 2);
         return $value;
     }
+
+    public function getBrowserDataAttribute() {
+        if($this->attributes['browser_data'])
+            return json_decode($this->attributes['browser_data']);
+
+        return null;
+    }
+
+    public function getDeviceDataAttribute() {
+        if($this->attributes['device_data'])
+            return json_decode($this->attributes['device_data']);
+
+        return null;
+    }
 }

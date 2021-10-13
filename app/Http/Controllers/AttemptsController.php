@@ -6,6 +6,7 @@ use App\GradeCategory;
 use App\GradeItems;
 use App\User;
 use App\Enroll;
+use Browser;
 use App\Grader\TypeGrader;
 use App\Lesson;
 use App\UserGrade;
@@ -239,6 +240,26 @@ class AttemptsController extends Controller
             return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
 
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
+
+        $deviceData = collect([]);
+        $deviceData->put('isDesktop', Browser::isDesktop());
+        $deviceData->put('isMobile', Browser::isMobile());
+        $deviceData->put('isTablet', Browser::isTablet());
+        $deviceData->put('isBot', Browser::isBot());
+        $deviceData->put('platformName', Browser::platformName());
+        $deviceData->put('platformFamily', Browser::platformFamily());
+        $deviceData->put('platformVersion', Browser::platformVersion());
+        $deviceData->put('deviceFamily', Browser::deviceFamily());
+        $deviceData->put('deviceModel', Browser::deviceModel());
+        $deviceData->put('mobileGrade', Browser::mobileGrade());
+
+        $browserData = collect([]);
+        $browserData->put('browserName', Browser::browserName());
+        $browserData->put('browserFamily', Browser::browserFamily());
+        $browserData->put('browserVersion', Browser::browserVersion());
+        $browserData->put('browserEngine', Browser::browserEngine());
+
+
         $user_quiz = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id);
         
         $last_attempt=$user_quiz->latest()->first();
@@ -286,6 +307,9 @@ class AttemptsController extends Controller
             'attempt_index' => (Auth::user()->can('site/quiz/store_user_quiz')) ? $index+1 : 0, // this permission because if these admin don't count his attempts
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
+            'ip' => $request->ip(),
+            'device_data' => json_encode($deviceData),
+            'browser_data' => json_encode($browserData),
         ]);
         if(Auth::user()->can('site/course/student'))
             $q=Quiz::whereId($quiz_lesson->quiz->id)->update(['allow_edit' => 0]);
