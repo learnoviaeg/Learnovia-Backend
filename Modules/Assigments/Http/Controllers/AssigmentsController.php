@@ -728,7 +728,7 @@ class AssigmentsController extends Controller
         if( $request->user()->can('site/course/student') && $assigLessonID->visible==0)
             return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
-        $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assigLessonID->id)->first();
+        $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assigLessonID->id);
         if (count($userassigments) > 0) {
             $assignment['allow_edit'] = false;
         } else {
@@ -739,10 +739,13 @@ class AssigmentsController extends Controller
             $assignment_lesson = Lesson::where('id',$request->lesson_id)->with(['AssignmentLesson'=> function($query)use ($request){
                 $query->where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id);
             }])->first();
+            $assignment['override'] = false;
+            $override_details = $override->where('user_id',Auth::user()->id)->first();
 
-            if($override != null){
-                $assignment_lesson->AssignmentLesson[0]->start_date = $override->start_date;
-                $assignment_lesson->AssignmentLesson[0]->due_date = $override->due_date;
+            if($override_details != null){
+                $assignment['override'] = true;
+                $assignment_lesson->AssignmentLesson[0]->start_date = $override_details->start_date;
+                $assignment_lesson->AssignmentLesson[0]->due_date = $override_details->due_date;
             }
             $assignment['lesson'] =  $assignment_lesson;
             $assignment['course_id'] = $Course->id;
@@ -779,6 +782,12 @@ class AssigmentsController extends Controller
             $assignment['course_id'] = $Course->id;
             $assignment['course_name'] = $Course->name;
             $assignment['class'] = $classes;
+
+            $assignment['override'] = false;
+
+            if($override->first() != null){
+                $assignment['override'] = true;
+            }
 
             if($start > Carbon::now())
                 $assignment['started'] = false;
