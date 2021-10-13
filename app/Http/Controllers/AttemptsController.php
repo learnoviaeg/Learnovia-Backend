@@ -259,14 +259,14 @@ class AttemptsController extends Controller
 
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration) < Carbon::now())
             {
-                $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
+                $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($last_attempt->left_time);
                 dispatch($job);
             }
 
             if(Auth::user()->can('site/course/student')){
                 if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp )
                 {                
-                    $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($seconds);
+                    $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($last_attempt->left_time);
                     dispatch($job);
 
                     return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
@@ -322,28 +322,21 @@ class AttemptsController extends Controller
         return HelperController::api_response_format(200, $userQuiz);
     }
 
-    public function leftTime($attempt)
+    public static function leftTime($attempt)
     {
         $end_date = Carbon::parse($attempt->open_time)->addSeconds($attempt->quiz_lesson->quiz->duration);
-        // dd($end_date);
 
         // if attempt opened and quiz ended before attempt closed
-        // dd(Carbon::parse($attempt->quiz_lesson->due_date));
         if($end_date > Carbon::parse($attempt->quiz_lesson->due_date)){
             $taken_time=Carbon::parse($attempt->open_time)->diffInSeconds(Carbon::now());
-            // dd($taken_time);
             $allowed=Carbon::parse($attempt->quiz_lesson->due_date)->diffInSeconds(Carbon::parse($attempt->open_time));
-            // dd($allowed);
             $seconds=$allowed-$taken_time;
-            // dd($seconds);
         }
         else
             $seconds = $end_date->diffInSeconds(Carbon::now());
             
         if($seconds < 0) 
             $seconds = 0;
-
-            // dd($seconds);
 
         return $seconds;
     }
