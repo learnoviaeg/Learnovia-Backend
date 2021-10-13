@@ -728,7 +728,7 @@ class AssigmentsController extends Controller
         if( $request->user()->can('site/course/student') && $assigLessonID->visible==0)
             return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
-        $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assigLessonID->id);//->first();
+        $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assigLessonID->id);
         if (count($userassigments) > 0) {
             $assignment['allow_edit'] = false;
         } else {
