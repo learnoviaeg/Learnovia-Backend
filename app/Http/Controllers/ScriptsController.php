@@ -103,7 +103,21 @@ class ScriptsController extends Controller
         foreach($user_quizzes as $userQuiz)
         {
             if(Carbon::parse($userQuiz->open_time) > Carbon::parse($userQuiz->quiz_lesson->due_date))
-                $userQuiz->delete();
+            {
+                if(count($userQuiz->quiz_lesson->override) > 0)
+                {
+                    foreach($userQuiz->quiz_lesson->override as $overwrite)
+                    {
+                        if(Carbon::parse($userQuiz->open_time) > $overwrite->due_date)
+                        {
+                            $userQuiz->delete();
+                            continue;
+                        }
+                    }
+                }
+                else
+                    $userQuiz->delete();
+            }
         }
         return 'done';
     }
