@@ -113,7 +113,7 @@ class QuizLessonController extends Controller
 
             foreach($classes as $class){
 
-                $users = Enroll::where('group',$class)->where('course_id',$lesson->course_id)->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray();
+                $users = Enroll::where('group',$class)->where('course',$lesson->course_id)->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray();
 
                 $requ = new Request([
                     'message' => $quiz->name.' quiz is added',

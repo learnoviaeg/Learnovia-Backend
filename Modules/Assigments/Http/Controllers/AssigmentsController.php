@@ -876,10 +876,12 @@ class AssigmentsController extends Controller
                 }
                 $assignment_lesson->grade_category = $request->grade_category[0];
             }
+
+            $name_assignment = Assignment::find($request->assignment_id)->name;
+
             if($request->is_graded)
             {
                 $grade_category=GradeCategory::find($request->grade_category[0]);
-                $name_assignment = Assignment::find($request->assignment_id)->name;
 
                 GradeItems::create([
                     'grade_category_id' => $grade_category->id,
@@ -918,6 +920,25 @@ class AssigmentsController extends Controller
             LastAction::lastActionInCourse($lesson->course_id);
             // $this->assignAsstoUsers($data);
 
+            foreach($lesson_obj->shared_classes as $class){
+               
+                $users = Enroll::where('group',$class->id)->where('course',$lesson_obj->course_id)->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray();
+                
+                $notify_request = new Request([
+                    'id' => $assignment_lesson->assignment_id,
+                    'message' => $name_assignment.' assignment is added',
+                    'users' => count($users) > 0 ? $users : null,
+                    'course_id' => $lesson_obj->course_id,
+                    'class_id' => $class->id,
+                    'lesson_id' => $assignment_lesson->lesson_id,
+                    'type' => 'assignment',
+                    'link' => url(route('getAssignment')) . '?assignment_id=' . $assignment_lesson->assignment_id,
+                    'publish_date' => Carbon::parse($assignment_lesson->publish_date),
+                ]);
+    
+                (new Notification())->send($notify_request);
+            }
+      
         }
         // $all = AssignmentLesson::where('assignment_id','!=', $request->assignment_id)->get();
 
