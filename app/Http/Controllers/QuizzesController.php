@@ -330,8 +330,12 @@ class QuizzesController extends Controller
 
         $query=clone $user_quiz;
         $last_attempt=$query->latest()->first();
-        $remain_time = $quiz->duration;
+        $quiz->remain_time = $quiz->duration;
+        if(carbon::now()->diffInSeconds(carbon::parse($quizLesson->due_date)) < $quiz->duration)
+            $quiz->remain_time= carbon::now()->diffInSeconds(carbon::parse($quizLesson->due_date));
+
         $quiz->token_attempts = 0;
+        $quiz->last_attempt_status = 'newOne';
 
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
@@ -342,10 +346,15 @@ class QuizzesController extends Controller
 
             $left_time=AttemptsController::leftTime($last_attempt);
             $quiz->remain_time = $left_time;
+            $quiz->last_attempt_status = 'continue';
+
             //case-->user_answer in new attempt
             $answered=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->get()->count();
             if($answered < 1)
+            {
                 $quiz->remain_time = $quiz->duration;
+                $quiz->last_attempt_status = 'newOne';
+            }
         }
         if(count($user_quiz->get())>0){
             $quiz->attempt_index=$user_quiz->pluck('id');
