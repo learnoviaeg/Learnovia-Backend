@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\Assigments\Entities;
-
+use App\Scopes\overrideAssignmentScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -12,7 +12,7 @@ class AssignmentLesson extends Model
 {
     protected $fillable = ['assignment_id','lesson_id','allow_edit_answer','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment','seen_number'];
 
-    protected $appends = ['started','user_seen_number','Status', 'override'];
+    protected $appends = ['started','user_seen_number','Status'];
 
     public function getStartedAttribute(){
         $started = true;
@@ -73,12 +73,15 @@ class AssignmentLesson extends Model
         return $this->hasMany('Modules\Assigments\Entities\UserAssigment', 'id', 'assignment_lesson_id');
     }
 
-    public function getOverrideAttribute(){
-        $overriden = false;
-        $override = assignmentOverride::where('assignment_lesson_id',$this->id)->count();
-        if($override > 0)
-            $overriden = true;
-        return $overriden;  
+    public function assignmentOverride()
+    {
+        return  $this->hasMany('Modules\Assigments\Entities\assignmentOverride','assignment_lesson_id', 'id');
+    }
+
+    public static function boot() 
+    {
+        parent::boot();
+        static::addGlobalScope(new overrideAssignmentScope);
     }
 }
 
