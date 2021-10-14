@@ -90,7 +90,13 @@ class QuizzesController extends Controller
         $quizzes = collect([]);
 
         foreach($quiz_lessons as $quiz_lesson){
+            $flag=false;
             $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
+            $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
+            if(isset($userQuiz->submit_time) && $userQuiz->submit_time !=null)
+                $flag=true;
+
+            $quiz['closed_attempt']=$flag;
             // $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::whereIn('id',$quiz['lesson']->shared_classes->pluck('id'))->get();
