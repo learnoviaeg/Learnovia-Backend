@@ -12,7 +12,7 @@ class AssignmentLesson extends Model
 {
     protected $fillable = ['assignment_id','lesson_id','allow_edit_answer','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment','seen_number'];
 
-    protected $appends = ['started','user_seen_number','Status'];
+    protected $appends = ['started','user_seen_number','Status', 'override'];
 
     public function getStartedAttribute(){
         $started = true;
@@ -71,6 +71,14 @@ class AssignmentLesson extends Model
     public function UserAssignment()
     {
         return $this->hasMany('Modules\Assigments\Entities\UserAssigment', 'id', 'assignment_lesson_id');
+    }
+
+    public function getOverrideAttribute(){
+        $overriden = false;
+        $override = assignmentOverride::where('assignment_lesson_id',$this->id)->count();
+        if($override > 0)
+            $overriden = true;
+        return $overriden;  
     }
 }
 
