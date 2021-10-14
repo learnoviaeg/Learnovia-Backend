@@ -920,14 +920,19 @@ class AssigmentsController extends Controller
             LastAction::lastActionInCourse($lesson->course_id);
             // $this->assignAsstoUsers($data);
 
+            $users = Enroll::whereIn('group',$lesson_obj->shared_classes->pluck('id'))
+                            ->where('course',$lesson_obj->course_id)
+                            ->where('user_id','!=',Auth::user()->id)
+                            ->where('role_id','!=', 1 )->get()->groupBy('group');
+          
             foreach($lesson_obj->shared_classes as $class){
                
-                $users = Enroll::where('group',$class->id)->where('course',$lesson_obj->course_id)->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray();
-                
+                $classUsers = $users[$class->id]->pluck('user_id');
+
                 $notify_request = new Request([
                     'id' => $assignment_lesson->assignment_id,
                     'message' => $name_assignment.' assignment is added',
-                    'users' => count($users) > 0 ? $users : null,
+                    'users' => count($classUsers) > 0 ? $classUsers->toArray() : null,
                     'course_id' => $lesson_obj->course_id,
                     'class_id' => $class->id,
                     'lesson_id' => $assignment_lesson->lesson_id,

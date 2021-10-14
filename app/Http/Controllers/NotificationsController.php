@@ -51,7 +51,7 @@ class NotificationsController extends Controller
         }
 
         $user = Auth::user();
-        $notifications = $user->notifications;
+        $notifications = $user->notifications->where('publish_date' ,'<=',Carbon::now());
       
         // for route api/notifications/{types} 
         if($types=='types'){
