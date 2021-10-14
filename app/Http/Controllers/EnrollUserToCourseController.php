@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\AcademicYear;
+use App\AcademicType;
 use App\AcademicYearType;
 use App\Http\Controllers\HelperController;
 use App\YearLevel;
@@ -552,6 +553,39 @@ class EnrollUserToCourseController extends Controller
             ]);
 
         }
+    }
+
+    public function EnrollAdminPrime(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        $courses = Course::get();
+
+        foreach($courses as $course)
+        {
+        //   dd($course);
+         $level = Level::find($course->level_id);
+         $type= $level->academic_type_id;
+         $academicType = AcademicType::find($type);
+         $year = $academicType->academic_year_id;
+          foreach($course->classes as $class)
+          {
+            Enroll::firstOrCreate([
+                'user_id' => $request->user_id,
+                'role_id' => 1,
+                'year' => $year,
+                'type' => $type,
+                'level' => $level->id,
+                'group' => $class,
+                'segment' => $course->segment_id,
+                'course' => $course->id,
+            ]);
+          }
+        }
+        echo 'Done';
+
     }
 
     /**

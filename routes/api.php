@@ -288,6 +288,7 @@ Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api','LastAction']], 
     Route::get('students-enroll', 'EnrollUserToCourseController@exportstudentsenrolls')->middleware('permission:site/show-all-courses');
     Route::post('StudentdInLevels', 'EnrollUserToCourseController@StudentdInLevels');
     Route::post('admin', 'EnrollUserToCourseController@EnrollAdmin');
+    Route::post('EnrollAdminPrime', 'EnrollUserToCourseController@EnrollAdminPrime');
     Route::post('update_enrolls', 'EnrollUserToCourseController@updateenrolls')->middleware('permission:site/show-all-courses');
 });
 
@@ -535,6 +536,12 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('topic', TopicController::class);
    // Route::get('topic-enrolls/{topic}', 'TopicController@getAllEnrollUsers');
+});
+
+Route::group(['middleware' => ['auth:api','LastAction']], function () {
+    Route::get('prime/year-type', 'MigratePrimeController@yearType');
+    Route::get('prime-level', 'MigratePrimeController@level');
+    Route::get('prime-segment', 'MigratePrimeController@segment');
 });
 
 
