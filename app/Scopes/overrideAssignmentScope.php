@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 
-class OverrideQuizScope implements Scope
+class overrideAssignmentScope implements Scope
 {
     /**
      * Apply the scope to a given Eloquent query builder.
@@ -18,7 +18,7 @@ class OverrideQuizScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $builder->with(['override' => function ($query){
+        $builder->with(['assignmentOverride' => function ($query){
             if(Auth::user()->can('site/course/student'))
                 $query->where('user_id', Auth::id());
         }]);
