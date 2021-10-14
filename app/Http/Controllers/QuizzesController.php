@@ -222,7 +222,7 @@ class QuizzesController extends Controller
         ]);
 
         if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
-            return HelperController::api_response_format(200, $quiz,__('messages.quiz.wrong_date'));
+            return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
 
         $quiz_lesson->update([
             'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
@@ -320,6 +320,9 @@ class QuizzesController extends Controller
 
         $quiz = quiz::where('id',$id)->with('Question.children')->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
+        if(!isset($quizLesson))
+            return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
+
         $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id);
         if($request->user_id)
             $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);

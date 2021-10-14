@@ -721,9 +721,12 @@ class AssigmentsController extends Controller
         LastAction::lastActionInCourse($Course->id);
 
         $assignment = assignment::where('id', $request->assignment_id)->first();
+        if(!isset($assignment))
+            return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
+
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($assigLessonID))
-            return HelperController::api_response_format(200, null, __('messages.assignment.assignment_not_belong'));
+            return HelperController::api_response_format(404, null, __('messages.assignment.not_found'));
 
         if( $request->user()->can('site/course/student') && $assigLessonID->visible==0)
             return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
