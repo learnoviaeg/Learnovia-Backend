@@ -64,13 +64,15 @@ class TimelineController extends Controller
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))
                             ->whereIn('class_id',$sec_chain->pluck('group_id'))
-                            ->where('visible',1)
                             ->where('start_date','<=',Carbon::now())
                             ->where('due_date','>=',Carbon::now())
                             ->whereIn('type', ['quiz','assignment'])
                             ->where(function ($query) {
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });
+
+        if(Auth::user()->can('site/course/student'))
+            $timeline->where('visible',1);
 
         if($request->has('item_type'))
             $timeline->where('type',$request->item_type);
