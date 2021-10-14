@@ -38,7 +38,8 @@ class MigratePrimeController extends Controller
             foreach($types as $type)
             {
              $year = AcademicYearType::where('academic_type_id' , $type->id)->first();
-             DB::connection('mysql2')->table('academic_types')->update(
+            //  dd($year);
+             DB::connection('mysql2')->table('academic_types')->where('id', $type->id)->update(
                 array(
                        'id'     =>   $type->id, 
                        'name'   =>   $type->name,
@@ -70,18 +71,15 @@ class MigratePrimeController extends Controller
               foreach($yearTypes as $yearType)
               {
                 $type = $yearType->academictype->first();
-                DB::connection('mysql2')->table('levels')->update(
+                DB::connection('mysql2')->table('levels')->where('id', $level->id)->update(
                     array(
-                           'id'     =>   $class->id, 
-                           'name'   =>   $class->name,
+                           'id'     =>   $level->id, 
+                           'name'   =>   $level->name,
                            'academic_type_id'  =>  $type->id ,
                            'created_at'   =>   $level->created_at,
                            'updated_at'   =>   $level->updated_at,
                     )
                );
-
-                // DB::connection('mysql2')->insert('insert into levels (id , name , academic_type_id ,created_at , updated_at ) 
-                // values ( ? ,? ,? ,? ,?  )', [$level->id , $level->name , $type->id ,$level->created_at , $level->updated_at ]);
               }
             }
         }
@@ -96,18 +94,16 @@ class MigratePrimeController extends Controller
         {
             $type = $oldSegment->academicType;
             $year = AcademicYearType::find($type->id);
-            DB::connection('mysql2')->table('segments')->update(
+            DB::connection('mysql2')->table('segments')->where('id', $oldSegment->id)->update(
                 array(
-                       'id'     =>   $class->id, 
-                       'name'   =>   $class->name,
+                       'id'     =>   $oldSegment->id, 
+                       'name'   =>   $oldSegment->name,
                        'academic_type_id'  =>  $type->id ,
                        'academic_year_id'   =>   $year->id ,
                        'created_at'   =>   $oldSegment->created_at,
                        'updated_at'   =>   $oldSegment->updated_at,
                 )
            );
-            // DB::connection('mysql2')->insert('insert into segments (id , name , academic_type_id , academic_year_id ,created_at , updated_at ) 
-            // values ( ? ,? ,? ,?,?,? )', [$oldSegment->id , $oldSegment->name , $type->id , $year->id ,$oldSegment->created_at , $oldSegment->updated_at ]);
         }
         echo 'Done';
 
@@ -120,7 +116,7 @@ class MigratePrimeController extends Controller
         {
             $class = Classes::find($oldClassLevel->class_id);
             $yearLevel = YearLevel::find($oldClassLevel->year_level_id);
-            DB::connection('mysql2')->table('classes')->update(
+            DB::connection('mysql2')->table('classes')->where('id', $class->id)->update(
                 array(
                        'id'     =>   $class->id, 
                        'name'   =>   $class->name,
@@ -130,9 +126,6 @@ class MigratePrimeController extends Controller
                        'updated_at'   =>   $class->updated_at,
                 )
            );
-
-            // DB::connection('mysql2')->insert('insert into classes (id , name , level_id  ,type , created_at , updated_at ) 
-            // values ( ? ,? ,? , ? ,? ,? )', [$class->id , $class->name , $yearLevel->level_id , 'class' ,$class->created_at , $class->updated_at ]);
         }
         echo 'Done';
 
@@ -155,7 +148,7 @@ class MigratePrimeController extends Controller
             }
             $classes = json_encode($classes);
             $level = $yearLevel->level_id;
-            DB::connection('mysql2')->table('courses')->update(
+            DB::connection('mysql2')->table('courses')->where('id', $course->id)->update(
                 array(
                        'id'     =>   $course->id, 
                        'name'   =>   $course->name,
@@ -165,8 +158,8 @@ class MigratePrimeController extends Controller
                        'short_name'   =>   $course->short_name  ,
                        'progress'   =>   $course->progress  ,
                        'classes'   =>   $classes,
-                       'created_at'   =>   $lesson->created_at,
-                       'updated_at'   =>   $lesson->updated_at,
+                       'created_at'   =>   $course->created_at,
+                       'updated_at'   =>   $course->updated_at,
                 )
            );
             // DB::connection('mysql2')->insert('insert into courses (id,name ,mandatory, level_id , segment_id , short_name , progress , classes, created_at , updated_at ) 
@@ -195,7 +188,7 @@ class MigratePrimeController extends Controller
                 $classes[] = $classLevel->class_id;
             }
             $classes = json_encode($classes);
-            DB::connection('mysql2')->table('lessons')->update(
+            DB::connection('mysql2')->table('lessons')->where('id', $lesson->id)->update(
                 array(
                        'id'     =>   $lesson->id, 
                        'name'   =>   $lesson->name,
@@ -209,30 +202,76 @@ class MigratePrimeController extends Controller
                 )
            );
         }
+        echo 'Done';
     }
 
 
     public function enrolls()
     {
+        $courses = Course::get();
+        // dd($courses);
+        foreach($courses as $course)
+        {
+            // dd($course);
+
+            $classes = array();
+            $courseSegment = CourseSegment::where('course_id', $course->id)->first();
+            $segmentClass = SegmentClass::find($courseSegment->segment_class_id);
+            $segment = $segmentClass->segment_id;
+            $classLevel = ClassLevel::find($segmentClass->class_level_id);
+            $yearLevel = YearLevel::find($classLevel->year_level_id);
+            $classLevels= ClassLevel::where('year_level_id' , $yearLevel->id)->get();
+            $yearType = AcademicYearType::find($yearLevel->academic_year_type_id);
+            // dd($segment);
+            $year = $yearType->academic_year_id;
+            $type = $yearType->academic_type_id;
+            $level = $yearLevel->level_id;
+
+            foreach($classLevels as $classLevel)
+            {
+
+                $classes[] = $classLevel->class_id;
+            } 
+            foreach($classes as $class)   
+            {
+               $enroll_id = DB::connection('mysql2')->table('enrolls')->insertGetId(
+                    array(
+                        // 'id'     =>   $enroll->id, 
+                        'user_id'   =>   1,
+                        'role_id'   =>   1,
+                        'created_at'   =>   $course->created_at,
+                        'updated_at'   => $course->updated_at,
+                        'level'   =>   $level  ,
+                        'type'   =>   $type,
+                        'group'   =>   $class,
+                        'year'   =>   $year,
+                        'course'   =>   $course->id,
+                        'segment'   =>   $segment,
+                    )
+                );
+                $lessons = Lesson::where('course_segment_id' , $courseSegment->id)->get();
+                foreach($lessons as $lesson)
+                {
+                   DB::connection('mysql2')->table('secondary_chains')->insert(
+                       array(
+                              'enroll_id'   =>   $enroll_id,
+                              'course_id'   =>   $course->id,
+                              'group_id'   =>   $class,
+                              'lesson_id'   =>  $lesson->id,
+                              'user_id'   =>   1 ,
+                              'role_id'   =>   1 ,
+                              'created_at' => $course->created_at,
+                              'updated_at' => $course->updated_at,
+                       )
+                  );
+                }
+            }
+        }
         $enrolls = Enroll::get();
         // dd($enrolls);
         foreach($enrolls as $enroll)
         {
-            DB::connection('mysql2')->table('enrolls')->insert(
-                array(
-                       'id'     =>   $enroll->id, 
-                       'user_id'   =>   $enroll->user_id,
-                       'role_id'   =>   $enroll->role_id,
-                       'created_at'   =>   $enroll->created_at,
-                       'updated_at'   => $enroll->updated_at,
-                       'level'   =>   $enroll->level  ,
-                       'type'   =>   $enroll->type,
-                       'group'   =>   $enroll->class,
-                       'year'   =>   $enroll->year,
-                       'course'   =>   $enroll->course,
-                       'segment'   =>   $enroll->segment,
-                )
-           );
+     
              $classes = array();
              $courseSegment = CourseSegment::where('course_id', $enroll->course)->first();
              $segmentClass = SegmentClass::find($courseSegment->segment_class_id);
@@ -265,6 +304,7 @@ class MigratePrimeController extends Controller
              }
         
         }
+
         echo 'Done';
     }
 
@@ -275,11 +315,11 @@ class MigratePrimeController extends Controller
         {
             $course_id = $gradeCategory->CourseSegment->course_id;
 
-            DB::connection('mysql2')->table('grade_categories')->update(
+            DB::connection('mysql2')->table('grade_categories')->where('id', $gradeCategory->id)->update(
                 array(
                        'id'   =>   $gradeCategory->id ,
                        'name'   =>   $gradeCategory->name ,
-                       'course_id'   =>   $gradeCategory->course,
+                       'course_id'   =>   $course_id,
                        'created_at' => $gradeCategory->created_at,
                        'updated_at' => $gradeCategory->updated_at,
                 )
@@ -314,7 +354,7 @@ class MigratePrimeController extends Controller
         {
             $courseSegment = CourseSegment::find($questionCategory->course_segment_id);
 
-            DB::connection('mysql2')->table('grade_categories')->update(
+            DB::connection('mysql2')->table('grade_categories')->where('id', $questionCategory->id)->update(
                 array(
                        'id'   =>   $questionCategory->id ,
                        'name'   =>   $questionCategory->name ,
@@ -323,10 +363,6 @@ class MigratePrimeController extends Controller
                        'course_id'   =>  $courseSegment->course_id
                 )
            );
-
-            // DB::connection('mysql2')->insert('insert into questions_categories (id,name,created_at,updated_at,course_id)
-            //  values(?,?,?,?,?)',
-            //  [$questionCategory->id,$questionCategory->name,$questionCategory->created_at,$questionCategory->updated_at,$courseSegment->course_id]);
         }
       echo 'Done';
     }
