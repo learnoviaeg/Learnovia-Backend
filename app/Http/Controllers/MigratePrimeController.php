@@ -38,7 +38,6 @@ class MigratePrimeController extends Controller
             foreach($types as $type)
             {
              $year = AcademicYearType::where('academic_type_id' , $type->id)->first();
-            //  dd($year);
              DB::connection('mysql2')->table('academic_types')->where('id', $type->id)->update(
                 array(
                        'id'     =>   $type->id, 
@@ -50,8 +49,6 @@ class MigratePrimeController extends Controller
                 )
            );
            
-            //  DB::connection('mysql2')->insert('insert into academic_types (id , name , academic_year_id ,segment_no , created_at , updated_at) 
-            //  values ( ? ,? ,? ,? ,? ,?)', [$type->id , $type->name , $year->academic_year_id , $type->segment_no ,$year->created_at , $year->updated_at ]);
             }
         }
         echo 'Done';
@@ -162,9 +159,6 @@ class MigratePrimeController extends Controller
                        'updated_at'   =>   $course->updated_at,
                 )
            );
-            // DB::connection('mysql2')->insert('insert into courses (id,name ,mandatory, level_id , segment_id , short_name , progress , classes, created_at , updated_at ) 
-            // values (?, ? ,? , ? ,? ,? ,?,?,?,?)',
-            //  [$course->id ,$course->name  ,$course->mandatory, $level , $segment , $course->short_name , $course->progress , $classes ,$course->created_at , $course->updated_at]);
         }
         echo 'Done';
 
@@ -209,10 +203,8 @@ class MigratePrimeController extends Controller
     public function enrolls()
     {
         $courses = Course::get();
-        // dd($courses);
         foreach($courses as $course)
         {
-            // dd($course);
 
             $classes = array();
             $courseSegment = CourseSegment::where('course_id', $course->id)->first();
@@ -222,7 +214,6 @@ class MigratePrimeController extends Controller
             $yearLevel = YearLevel::find($classLevel->year_level_id);
             $classLevels= ClassLevel::where('year_level_id' , $yearLevel->id)->get();
             $yearType = AcademicYearType::find($yearLevel->academic_year_type_id);
-            // dd($segment);
             $year = $yearType->academic_year_id;
             $type = $yearType->academic_type_id;
             $level = $yearLevel->level_id;
@@ -236,7 +227,6 @@ class MigratePrimeController extends Controller
             {
                $enroll_id = DB::connection('mysql2')->table('enrolls')->insertGetId(
                     array(
-                        // 'id'     =>   $enroll->id, 
                         'user_id'   =>   1,
                         'role_id'   =>   1,
                         'created_at'   =>   $course->created_at,
@@ -267,8 +257,8 @@ class MigratePrimeController extends Controller
                 }
             }
         }
+
         $enrolls = Enroll::get();
-        // dd($enrolls);
         foreach($enrolls as $enroll)
         {
      
@@ -324,10 +314,6 @@ class MigratePrimeController extends Controller
                        'updated_at' => $gradeCategory->updated_at,
                 )
            );
-            // DB::connection('mysql2')->insert('insert into grade_categories (id,name , course_id , created_at , updated_at ) 
-            // values ( ?,? ,? ,? , ?)',
-            //  [$gradeCategory->id ,$gradeCategory->name  ,$course_id, $gradeCategory->created_at , $gradeCategory->updated_at ]);
-
         }
         echo 'Done';
 
@@ -366,29 +352,5 @@ class MigratePrimeController extends Controller
         }
       echo 'Done';
     }
-    public function logs()
-    {
-        $logs = Log::get();
-        foreach($logs as $log)
-        {
-            DB::connection('mysql2')->table('logs')->insert(
-                array(
-                       'id'=>   $log->id,
-                       'user'=>  $log->user,
-                       'action'=>  $log->action,
-                       'model'=> $log->model,
-                       'data'=> $log->data,
-                       'created_at'=> $log->created_at,
-                       'updated_at'=> $log->updated_at,
-                )
-           );
-        }
-
-        echo 'Done';
-
-    }
-
-
-
     
 }
