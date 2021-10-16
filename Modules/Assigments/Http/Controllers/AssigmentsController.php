@@ -378,7 +378,7 @@ class AssigmentsController extends Controller
             $notify_request = new Request([
                 'id' => $request->assignment_id,
                 'message' => $assignment->name .' assignment is updated',
-                'users' => count($users_ids) > 0 ? $users_ids : null,
+                'users' => count($users_ids) > 0 ? $users_ids->toArray() : null,
                 'course_id' => $courseID,
                 'class_id' => $class_id,
                 'lesson_id' => $lessonId,
