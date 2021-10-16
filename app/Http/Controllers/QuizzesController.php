@@ -187,25 +187,20 @@ class QuizzesController extends Controller
                 $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))
                                 ->where('course',$lesson->course_id)
                                 ->where('user_id','!=',Auth::user()->id)
-                                ->where('role_id','!=', 1 )->get()->groupBy('group');
+                                ->where('role_id','!=', 1 )->select('user_id')->distinct()->pluck('user_id')->toArray();
 
-                foreach($lesson->shared_classes->pluck('id') as $class){
+                $requ = new Request([
+                    'message' => $quiz->name . ' quiz is added',
+                    'id' => $quiz->id,
+                    'users' => count($users) > 0 ? $users : null,
+                    'type' =>'quiz',
+                    'publish_date'=> Carbon::parse($newQuizLesson->publish_date),
+                    'course_id' => $lesson->course_id,
+                    'classes'=> $lesson->shared_classes->pluck('id')->toArray(),
+                    'lesson_id'=> $lesson->id,
+                ]);
 
-                    $classUsers = $users[$class]->pluck('user_id');
-                    
-                    $requ = new Request([
-                        'message' => $quiz->name . ' quiz is added',
-                        'id' => $quiz->id,
-                        'users' => count($classUsers) > 0 ? $classUsers->toArray() : null,
-                        'type' =>'quiz',
-                        'publish_date'=> Carbon::parse($newQuizLesson->publish_date),
-                        'course_id' => $lesson->course_id,
-                        'class_id'=> $class,
-                        'lesson_id'=> $lesson->id,
-                    ]);
-
-                    (new Notification())->send($requ);
-                }
+                (new Notification())->send($requ);
             }
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));

@@ -44,7 +44,8 @@ class Notification extends Model
             'type' => 'required|string',
             'message' => 'required',
             'course_id' => 'integer|exists:courses,id',
-            'class_id'=>'integer|exists:classes,id',
+            'classes'=>'array',
+            'classes.*'=>'exists:classes,id',
             'lesson_id'=>'integer|exists:lessons,id',
             'link' => 'string',
             'publish_date' => 'date',
@@ -81,8 +82,8 @@ class Notification extends Model
             LastAction::lastActionInCourse($request->course_id);
         }
 
-        if($request->class_id){
-            $notification->class_id = $request->class_id;
+        if($request->has('classes')){
+            $notification->classes = json_encode($request->classes);
         }
 
         if($request->link){

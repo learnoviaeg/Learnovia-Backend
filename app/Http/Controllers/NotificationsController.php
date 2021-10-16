@@ -120,6 +120,10 @@ class NotificationsController extends Controller
             'from' => 'integer|exists:users,id',
         ]);
 
+        if($request->class_id){
+            $request['classes'] = [$request->class_id];
+        }
+
         (new Notification)->send($request);
 
         return response()->json(['message' => 'Notification sent.','body' => null], 200);

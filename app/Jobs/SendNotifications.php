@@ -68,7 +68,7 @@ class SendNotifications implements ShouldQueue
                 "item_type" => $this->notification->item_type,
                 "type" => $this->notification->type,
                 "course_id" => (string) $this->notification->course_id,
-                "class_id" => (string) $this->notification->class_id,
+                "classes" => (string) $this->notification->classes,
                 "lesson_id"=> (string) $this->notification->lesson_id,
                 "publish_date" => Carbon::parse($this->notification->publish_date)->format('Y-m-d H:i:s'),
                 "read_at" => null,
