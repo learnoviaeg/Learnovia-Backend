@@ -87,25 +87,6 @@ class QuizLessonObserver
 
         event(new MassLogsEvent([$quizLesson],'updated'));
 
-        foreach($lesson->shared_classes->pluck('id') as $class){
-
-            $users = Enroll::where('group',$class)->where('course',$lesson->course_id)
-                            ->where('user_id','!=',Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->toArray();
-            
-            $requ = new Request([
-                'message' => $quiz->name . ' quiz was updated',
-                'id' => $quiz->id,
-                'users' => count($users) > 0 ? $users : null,
-                'type' =>'quiz',
-                'publish_date'=> Carbon::parse($quizLesson->publish_date),
-                'course_id' => $lesson->course_id,
-                'class_id'=> $class,
-                'lesson_id'=> $quizLesson->lesson_id,
-            ]);
-    
-            (new Notification())->send($requ);
-        }
-
         if($quizLesson->isDirty('lesson_id')){
             
             $lesson = Lesson::find($quizLesson->lesson_id);

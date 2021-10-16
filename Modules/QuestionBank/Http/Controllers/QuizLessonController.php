@@ -111,25 +111,6 @@ class QuizLessonController extends Controller
             // $class = Second$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
             $classes = SecondaryChain::whereIn('lesson_id', $lessons)->get()->pluck('group_id')->unique();
 
-            foreach($classes as $class){
-
-                $users = Enroll::where('group',$class)->where('course_id',$lesson->course_id)->where('user_id','!=',Auth::user()->id)->where('role_id','!=', 1 )->pluck('user_id')->toArray();
-
-                $requ = new Request([
-                    'message' => $quiz->name.' quiz is added',
-                    'id' => $request->quiz_id,
-                    'users' => count($users) > 0 ? $users : null,
-                    'type' =>'quiz',
-                    'publish_date'=> Carbon::parse($request->publish_date),
-                    'course_id' => $course,
-                    'class_id'=> $class,
-                    'lesson_id'=> $lessons,
-                ]);
-    
-                (new Notification())->send($requ);
-            }
-            
-
              if($request->graded == true){
                  $grade_category=GradeCategory::find($request->grade_category_id[$key]);
                  $grade_category->GradeItems()->create([

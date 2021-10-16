@@ -23,6 +23,7 @@ use Modules\QuestionBank\Entities\Questions;
 use App\LastAction;
 use Carbon\Carbon;
 use App\Events\updateQuizAndQuizLessonEvent;
+use App\Notification;
 use App\Timeline;
 use App\SystemSetting;
 
@@ -166,7 +167,7 @@ class QuizzesController extends Controller
                 $grade_Cat = $lesson->course->gradeCategory[0];
                 $index = isset($lesson->QuizLesson[0]) ? $lesson->QuizLesson[0]->index :1;      
                 //add validations for all the feilds
-                QuizLesson::create([
+                $newQuizLesson = QuizLesson::create([
                     'quiz_id' => $quiz->id,
                     'lesson_id' => $lesson->id,
                     'start_date' => $request->opening_time,
@@ -182,6 +183,29 @@ class QuizzesController extends Controller
                     'grade_by_user' => isset($request->grade) ? carbon::now() : null,
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
                 ]);
+
+                $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))
+                                ->where('course',$lesson->course_id)
+                                ->where('user_id','!=',Auth::user()->id)
+                                ->where('role_id','!=', 1 )->get()->groupBy('group');
+
+                foreach($lesson->shared_classes->pluck('id') as $class){
+
+                    $classUsers = $users[$class]->pluck('user_id');
+                    
+                    $requ = new Request([
+                        'message' => $quiz->name . ' quiz is added',
+                        'id' => $quiz->id,
+                        'users' => count($classUsers) > 0 ? $classUsers->toArray() : null,
+                        'type' =>'quiz',
+                        'publish_date'=> Carbon::parse($newQuizLesson->publish_date),
+                        'course_id' => $lesson->course_id,
+                        'class_id'=> $class,
+                        'lesson_id'=> $lesson->id,
+                    ]);
+
+                    (new Notification())->send($requ);
+                }
             }
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -267,6 +291,7 @@ class QuizzesController extends Controller
         $quiz_lesson->save();
         $quiz->quizLesson;
         
+        // update timeline object and sending notifications
         event(new updateQuizAndQuizLessonEvent($quiz_lesson));
 
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));

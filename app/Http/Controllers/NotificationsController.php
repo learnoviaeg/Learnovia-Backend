@@ -51,7 +51,7 @@ class NotificationsController extends Controller
         }
 
         $user = Auth::user();
-        $notifications = $user->notifications;
+        $notifications = $user->notifications->where('publish_date' ,'<=',Carbon::now());
       
         // for route api/notifications/{types} 
         if($types=='types'){
@@ -162,18 +162,15 @@ class NotificationsController extends Controller
     {
         $user = User::findOrFail(Auth::id());
 
-        $userNotifications = $user->notifications();
-        
-        if($read && $read == 'notify'){
-            $userNotifications->where('type', 'notification')->withPivot('read_at')->update([
-                'read_at' => Carbon::now()
-            ]);
-        }
-        
+        $type = 'notification';
         if($read && $read == 'announce'){
-            $userNotifications->where('type', 'announcement')->withPivot('read_at')->update([
-                'read_at' => Carbon::now()
-            ]);
+            $type = 'announcement';
+        }
+
+        $userNotifications = $user->notifications->where('pivot.read_at',null)->where('type',$type);
+    
+        foreach($userNotifications as $notificaton){
+            $user->notifications()->updateExistingPivot($notificaton->id,['read_at' => Carbon::now()]);
         }
             
         return response()->json(['message' => $read .' was read','body' => null], 200);        
