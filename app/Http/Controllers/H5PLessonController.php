@@ -152,6 +152,8 @@ class H5PLessonController extends Controller
 
         if($request->filled('content_id') && $request->filled('lesson_id')){
             $h5p_lesson =  h5pLesson::where('lesson_id',$request->lesson_id)->where('content_id',$request->content_id)->first();
+            if(!isset($h5p_lesson))
+                return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
 
             if($request->user()->can('site/course/student')  && ($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()) ){
                 return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));

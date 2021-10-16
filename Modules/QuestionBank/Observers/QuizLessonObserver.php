@@ -85,7 +85,7 @@ class QuizLessonObserver
         $lesson=Lesson::find($quizLesson->lesson_id);
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
 
-        // $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+        event(new MassLogsEvent([$quizLesson],'updated'));
 
         if($quizLesson->isDirty('lesson_id')){
             

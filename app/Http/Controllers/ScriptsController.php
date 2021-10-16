@@ -11,6 +11,7 @@ use App\Events\UpdatedAttemptEvent;
 use Modules\QuestionBank\Entities\userQuiz;
 use App\GradeItems;
 use Auth;
+use Carbon\Carbon;
 use App\UserGrader;
 use App\Enroll;
 use App\Events\GradeItemEvent;
@@ -92,6 +93,31 @@ class ScriptsController extends Controller
                     }
                     event(new GradeItemEvent($gradeItem));
                 }
+        }
+        return 'done';
+    }
+
+    public function deleteWrongAttempts()
+    {
+        $user_quizzes=userQuiz::all();
+        foreach($user_quizzes as $userQuiz)
+        {
+            if(Carbon::parse($userQuiz->open_time) > Carbon::parse($userQuiz->quiz_lesson->due_date))
+            {
+                if(count($userQuiz->quiz_lesson->override) > 0)
+                {
+                    foreach($userQuiz->quiz_lesson->override as $overwrite)
+                    {
+                        if(Carbon::parse($userQuiz->open_time) > $overwrite->due_date)
+                        {
+                            $userQuiz->delete();
+                            continue;
+                        }
+                    }
+                }
+                else
+                    $userQuiz->delete();
+            }
         }
         return 'done';
     }
