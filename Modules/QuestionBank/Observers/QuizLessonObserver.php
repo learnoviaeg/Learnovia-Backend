@@ -16,7 +16,9 @@ use App\Enroll;
 use App\UserGrader;
 use App\User;
 use App\LessonComponent;
+use App\Notification;
 use App\UserSeen;
+use Illuminate\Http\Request;
 
 class QuizLessonObserver
 {
@@ -83,24 +85,7 @@ class QuizLessonObserver
         $lesson=Lesson::find($quizLesson->lesson_id);
         $quiz = Quiz::where('id',$quizLesson->quiz_id)->first();
 
-        $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))->where('course',$lesson->course_id)
-                    ->where('user_id','!=',Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->toArray();
-        // $class = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-
-        foreach($lesson->shared_classes->pluck('id') as $class){
-            $requ = ([
-                'message' => $quiz->name . ' quiz was updated',
-                'id' => $quiz->id,
-                'users' => $users,
-                'type' =>'quiz',
-                'publish_date'=> Carbon::parse($quizLesson->publish_date),
-                'course_id' => $lesson->course_id,
-                'class_id'=> $class,
-                'lesson_id'=> $lesson,
-                'from' => Auth::id(),
-            ]);
-            user::notify($requ);
-        }
+        event(new MassLogsEvent([$quizLesson],'updated'));
 
         if($quizLesson->isDirty('lesson_id')){
             

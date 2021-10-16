@@ -140,12 +140,14 @@ class SegmentsController extends Controller
             'name' => 'required',
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id|required_with:year',
+            // 'start_date'      => 'required|date|before_or_equal:end_date',
+            // 'end_date'      => 'required|date',
         ]);
 
         $segment = Segment::find($id);
         $segment->name = $request->name;
-        $segment->start_date = $request->start_date;
-        $segment->end_date = $request->end_date;
+        $segment->start_date = $segment->start_date;
+        $segment->end_date = $segment->end_date;
         $segment->save();
 
         if ($request->filled('year') && $request->filled('type'))

@@ -23,6 +23,7 @@ use Modules\QuestionBank\Entities\Questions;
 use App\LastAction;
 use Carbon\Carbon;
 use App\Events\updateQuizAndQuizLessonEvent;
+use App\Notification;
 use App\Timeline;
 use App\SystemSetting;
 
@@ -90,7 +91,13 @@ class QuizzesController extends Controller
         $quizzes = collect([]);
 
         foreach($quiz_lessons as $quiz_lesson){
+            $flag=false;
             $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
+            $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
+            if(isset($userQuiz->submit_time) && $userQuiz->submit_time !=null)
+                $flag=true;
+
+            $quiz['closed_attempt']=$flag;
             // $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::whereIn('id',$quiz['lesson']->shared_classes->pluck('id'))->get();
@@ -160,7 +167,7 @@ class QuizzesController extends Controller
                 $grade_Cat = $lesson->course->gradeCategory[0];
                 $index = isset($lesson->QuizLesson[0]) ? $lesson->QuizLesson[0]->index :1;      
                 //add validations for all the feilds
-                QuizLesson::create([
+                $newQuizLesson = QuizLesson::create([
                     'quiz_id' => $quiz->id,
                     'lesson_id' => $lesson->id,
                     'start_date' => $request->opening_time,
@@ -176,6 +183,29 @@ class QuizzesController extends Controller
                     'grade_by_user' => isset($request->grade) ? carbon::now() : null,
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
                 ]);
+
+                $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))
+                                ->where('course',$lesson->course_id)
+                                ->where('user_id','!=',Auth::user()->id)
+                                ->where('role_id','!=', 1 )->get()->groupBy('group');
+
+                foreach($lesson->shared_classes->pluck('id') as $class){
+
+                    $classUsers = $users[$class]->pluck('user_id');
+                    
+                    $requ = new Request([
+                        'message' => $quiz->name . ' quiz is added',
+                        'id' => $quiz->id,
+                        'users' => count($classUsers) > 0 ? $classUsers->toArray() : null,
+                        'type' =>'quiz',
+                        'publish_date'=> Carbon::parse($newQuizLesson->publish_date),
+                        'course_id' => $lesson->course_id,
+                        'class_id'=> $class,
+                        'lesson_id'=> $lesson->id,
+                    ]);
+
+                    (new Notification())->send($requ);
+                }
             }
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -197,16 +227,14 @@ class QuizzesController extends Controller
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'grade_feedback' => 'in:After submission,After due_date,Never',
             'correct_feedback' => 'in:After submission,After due_date,Never',
-            'updated_lesson_id' => 'exists:lessons,id'
+            'updated_lesson_id' => 'exists:lessons,id',
+            'opening_time' => 'date',
+            'closing_time' => 'date|after:opening_time',
+            'publish_date' => 'date|before_or_equal:opening_time'
         ]);
-        // if($request->is_graded==1 && $request->feedback == 1)//should be 2 or 3
-        //     return HelperController::api_response_format(200, null, __('messages.quiz.invaled_feedback'));
 
         $quiz=Quiz::find($id);
         $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
-        // if(isset($request->opening_time) && $request->opening_time > $quiz_lesson->start_date )
-        //     return HelperController::api_response_format(200, null,__('messages.quiz.NotUpdate'));   
-
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
 
         if(!strtotime($quiz_lesson->start_date) < Carbon::now())
@@ -216,10 +244,6 @@ class QuizzesController extends Controller
                 'publish_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->publish_date,
             ]);
         }
-         
-        // if(isset($request->course_id))
-        //     if($quiz->course_id != $request->course_id)
-        //         quiz_questions::where('quiz_id',$request->quiz_id)->delete(); //delete assigned questions
         
         $quiz->update([
             'name' => isset($request->name) ? $request->name : $quiz->name,
@@ -227,8 +251,10 @@ class QuizzesController extends Controller
             'shuffle' => isset($request->shuffle)?$request->shuffle:$quiz->shuffle,
         ]);
 
+        if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
+            return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
+
         $quiz_lesson->update([
-            'quiz_id' => $quiz->id,
             'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
             'grade' => isset($request->grade) ? $request->grade : $quiz_lesson->grade,
             'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
@@ -265,7 +291,7 @@ class QuizzesController extends Controller
         $quiz_lesson->save();
         $quiz->quizLesson;
         
-        // dd($
+        // update timeline object and sending notifications
         event(new updateQuizAndQuizLessonEvent($quiz_lesson));
 
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
@@ -325,6 +351,9 @@ class QuizzesController extends Controller
 
         $quiz = quiz::where('id',$id)->with('Question.children')->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
+        if(!isset($quizLesson))
+            return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
+
         $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id);
         if($request->user_id)
             $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);
@@ -335,26 +364,31 @@ class QuizzesController extends Controller
 
         $query=clone $user_quiz;
         $last_attempt=$query->latest()->first();
-        $remain_time = $quiz->duration;
+        $quiz->remain_time = $quiz->duration;
+        if(carbon::now()->diffInSeconds(carbon::parse($quizLesson->due_date)) < $quiz->duration)
+            $quiz->remain_time= carbon::now()->diffInSeconds(carbon::parse($quizLesson->due_date));
+
         $quiz->token_attempts = 0;
+        $quiz->last_attempt_status = 'newOne';
 
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
             {
-                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1']);
+                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1','answered' => 1]);
                 UserQuiz::find($last_attempt->id)->update(['submit_time'=>Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s')]);
             }
 
-            $check_time = ($remain_time) - (strtotime(Carbon::now())- strtotime(Carbon::parse($last_attempt->open_time)));
-            // dd($check_time);
-            if($check_time < 0)
-                $check_time= 0;
+            $left_time=AttemptsController::leftTime($last_attempt);
+            $quiz->remain_time = $left_time;
+            $quiz->last_attempt_status = 'continue';
 
-            $quiz->remain_time = $check_time;
             //case-->user_answer in new attempt
             $answered=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->get()->count();
             if($answered < 1)
+            {
                 $quiz->remain_time = $quiz->duration;
+                $quiz->last_attempt_status = 'newOne';
+            }
         }
         if(count($user_quiz->get())>0){
             $quiz->attempt_index=$user_quiz->pluck('id');
@@ -390,7 +424,7 @@ class QuizzesController extends Controller
                 if($quiz_time > Carbon::parse($userQuiz->quiz_lesson->due_date)->format('Y-m-d H:i:s'))
                     $quiz_time=$userQuiz->quiz_lesson->due_date;
 
-                UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->update(['force_submit'=>'1']);
+                UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->update(['force_submit'=>'1','answered' => 1]);
                 userQuiz::find($userQuiz->id)->update(['submit_time'=>$quiz_time]);
             }
         }

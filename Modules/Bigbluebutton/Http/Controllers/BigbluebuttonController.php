@@ -37,6 +37,7 @@ use App\Paginate;
 use App\Http\Controllers\Controller;
 use App\LastAction;
 use App\Exports\BigbluebuttonGeneralReport;
+use App\Notification;
 
 class BigbluebuttonController extends Controller
 {
@@ -220,19 +221,20 @@ class BigbluebuttonController extends Controller
                                 if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0)
                                     $bigbb['join'] = true; //startmeeting has arrived but meeting didn't start yet
                             }
-                    
-                            User::notify([
+
+                            $notify_request = new Request([
                                 'id' => $bigbb->id,
                                 'message' => $request->name.' meeting is created',
-                                'from' => Auth::user()->id,
-                                'users' => $usersIDs,
+                                'users' => count($usersIDs) > 0 ? $usersIDs : null,
                                 'course_id' => $object['course_id'],
                                 'class_id'=>$class,
-                                'lesson_id'=> null,
                                 'type' => 'meeting',
                                 'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
                                 'publish_date'=> $temp_start,
                             ]);
+                
+                            (new Notification())->send($notify_request);
+
                             $created_meetings->push($bigbb);
                             
                             $end_date = Carbon::parse($temp_start)->addMinutes($request->duration);
