@@ -920,6 +920,7 @@ class AssigmentsController extends Controller
             LastAction::lastActionInCourse($lesson->course_id);
             // $this->assignAsstoUsers($data);
 
+            //sending notification
             $users = Enroll::whereIn('group',$lesson_obj->shared_classes->pluck('id'))
                             ->where('course',$lesson_obj->course_id)
                             ->where('user_id','!=',Auth::user()->id)
