@@ -90,13 +90,15 @@ class TopicController extends Controller
         $topic = Topic::Create([
             'title' => $request->title,
             'filter' => $filter,
-            //'created_by' =>  Auth::user()->id
+            'created_by' => Auth::id(),
+
         ]);
         foreach($enrolls->get() as $enroll)
         {
            EnrollTopic::Create([
                'enroll_id' => $enroll->id,
                'topic_id' => $topic->id,
+               
            ]);
         }
         return HelperController::api_response_format(200, $topic , __('messages.topic.add'));

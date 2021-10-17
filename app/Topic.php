@@ -21,6 +21,7 @@ class Topic extends Model
     protected $fillable = [
         'title',
         'filter',
+        'created_by',
     ];
 
     public function getFilterAttribute($value)
@@ -91,6 +92,13 @@ class Topic extends Model
         $filter=$names;
         return $filter;
 
+    }
+
+    public function getCreatedByAttribute($value)
+    {
+        $user['id'] = $value;
+        $user['name'] = User::find($value)->firstname;
+        return $user;
     }
 
 
