@@ -33,7 +33,8 @@ class EnrollStaff implements ToModel, WithHeadingRow
         $optional='course';
         $count=1;
         while(isset($row[$optional.$count])){
-            $course_id=Course::where('short_name',$row[$optional.$count])->pluck('id')->first();
+            $coursess=Course::where('short_name',$row[$optional.$count])->first();
+            $course_id=$coursess->id;
             if(!isset($course_id))
             // break;
                 die('shortname '.$row[$optional.$count].' doesn\'t exist');
@@ -41,6 +42,9 @@ class EnrollStaff implements ToModel, WithHeadingRow
             $userId =User::FindByName($row['username'])->id;
 
             $level=Classes::find($row['class_id'])->level_id;
+            if($coursess->level_id != $level)
+                die('Level on class and this course isn\'t not the same');
+
             $segment=Segment::find($row['segment_id']);
             $segment_id=$segment->id;
             $type=$segment->academic_type_id;
