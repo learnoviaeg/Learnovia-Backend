@@ -54,7 +54,7 @@ class TopicController extends Controller
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $topic_ids =  EnrollTopic::whereIn('enroll_id' , $enrolls->pluck('id'))->pluck('topic_id');
-        $topics = Topic::whereIn('id' , $topic_ids);
+        $topics = Topic::with('created_by')->whereIn('id' , $topic_ids);
         if($request->filled('search'))
            $topics->where('title', 'LIKE' , "%$request->search%"); 
         return HelperController::api_response_format(200, $topics->paginate(HelperController::GetPaginate($request)), __('messages.topic.list'));
@@ -112,7 +112,8 @@ class TopicController extends Controller
      */
     public function show(Topic $topic)
     {
-        return HelperController::api_response_format(200, $topic );
+        $topic = Topic::with('created_by')->find($topic);
+        return HelperController::api_response_format(200, $topic);
     }
 
     /**

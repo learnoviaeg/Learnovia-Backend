@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Modules\Attendance\Entities\AttendanceLog;
 use App\Course;
+use App\Topic;
 use App\Log;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -253,5 +254,10 @@ class User extends Authenticatable
     public function assignmentOverride()
     { 
         return $this->hasMany('Modules\Assigments\Entities\assignmentOverride','user_id','id');
+    }
+
+    public function topics()
+    {
+        return $this->belongsToMany('App\Topic');
     }
 }

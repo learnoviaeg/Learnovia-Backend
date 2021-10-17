@@ -539,7 +539,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('topic', TopicController::class);
-   // Route::get('topic-enrolls/{topic}', 'TopicController@getAllEnrollUsers');
 });
 
 

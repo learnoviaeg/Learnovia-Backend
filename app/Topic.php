@@ -94,17 +94,15 @@ class Topic extends Model
 
     }
 
-    public function getCreatedByAttribute($value)
-    {
-        $user['id'] = $value;
-        $user['name'] = User::find($value)->firstname;
-        return $user;
-    }
-
-
     public function enrolls()
     {
         return $this->belongsToMany('App\Enroll' , 'enroll_id' , 'id');
+    }
+
+    public function created_by()
+    {
+        return $this->belongsTo('App\User' , 'created_by' , 'id');
+        
     }
     
 }
