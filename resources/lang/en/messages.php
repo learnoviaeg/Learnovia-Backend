@@ -127,6 +127,7 @@ return [
         'add' => 'User added successfully',
         'update' => 'User updated successfully',
         'delete' => 'User/s deleted successfully',
+        'cannot_delete' => 'You can\'t delete this user',
         'list' => 'Users list',
         'all_list' => 'All users list',
         'count' => 'Users roles count',
