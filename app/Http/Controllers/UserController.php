@@ -385,10 +385,11 @@ class UserController extends Controller
         {
             $user=User::find($user_id);
 
-            // user can't delete himself, delete admin and other super admins except learnovia company
+            // user can't delete himself
             if(Auth::id() == $user_id)
                 return HelperController::api_response_format(201, $user->username , __('messages.users.cannot_delete'));
             
+            // user can't delete admin and other super admins except learnovia company
             if(Auth::id() != 1)
                 if(in_array(1,$user->roles->pluck('id')->toArray()))
                     return HelperController::api_response_format(201, $user->username , __('messages.users.cannot_delete'));
