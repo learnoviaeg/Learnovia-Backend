@@ -381,10 +381,20 @@ class UserController extends Controller
             'users_id.*' => 'exists:users,id',
         ]);
 
-        $enrolls=Enroll::whereIn('user_id',$request->users_id)->get();
+        foreach($request->users_id as $user_id)
+        {
+            $user=User::find($user_id);
+
+            // user can't delete himself, delete admin and other super admins except learnovia company
+            if(Auth::id() == $user_id)
+                return HelperController::api_response_format(201, $user->username , __('messages.users.cannot_delete'));
+            
+            if(Auth::id() != 1)
+                if(in_array(1,$user->roles->pluck('id')->toArray()))
+                    return HelperController::api_response_format(201, $user->username , __('messages.users.cannot_delete'));
+        }
         $all=Enroll::whereIn('user_id',$request->users_id)->delete();
-        if($all > 0)
-            event(new MassLogsEvent($enrolls,'deleted'));
+
         $user = User::whereIn('id',$request->users_id)->delete();
 
         return HelperController::api_response_format(201, null, __('messages.users.delete'));
