@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class Notification extends Model
 {
-    protected $fillable = ['item_id','item_type','message','created_by','course_id','class_id','lesson_id','type','publish_date','link'];
+    protected $fillable = ['item_id','item_type','message','created_by','course_id','classes','lesson_id','type','publish_date','link'];
 
     protected $appends = ['course_name'];
 
@@ -34,80 +34,24 @@ class Notification extends Model
     {
         return $this->course ? $this->course->name : null;
     }
-    
-    public function send(Request $request){
 
-        $request->validate([
-            'id' => 'required',
-            'users'=>'nullable|array',
-            'users.*' => 'integer|exists:users,id',
-            'type' => 'required|string',
-            'message' => 'required',
-            'course_id' => 'integer|exists:courses,id',
-            'classes'=>'array',
-            'classes.*'=>'exists:classes,id',
-            'lesson_id'=>'integer|exists:lessons,id',
-            'link' => 'string',
-            'publish_date' => 'date',
-            'from' => 'integer|exists:users,id',
-        ]);
+    public static function toFirebase($notification){
 
-        //Start storing notifications object
-        $notification = new Notification;
-
-        $notification->type = $request->type != 'announcement' ? 'notification' : 'announcement';
-
-        $notification->item_id = $request->id;
-
-        $notification->item_type = $request->type;
-
-        $notification->message = $request->message;
-
-        $notification->publish_date = $request->publish_date ? $request->publish_date : Carbon::now();
-
-        $notification->created_by = Auth::id() ? Auth::id() : 1;
-        if($request->from){
-            $notification->created_by = $request->from;
+        //calculate time the job should fire at
+        $notificationDelaySeconds = Carbon::parse($notification->publish_date)->diffInSeconds(Carbon::now()); 
+        if($notificationDelaySeconds < 0) {
+            $notificationDelaySeconds = 0;
         }
 
-        if($request->lesson_id){
-            $notification->lesson_id = $request->lesson_id;
-        }
+        //this job is for sending firebase notifications 
+        $notificationJob = (new SendNotifications($notification))->delay($notificationDelaySeconds);
+        dispatch($notificationJob);
+    }
 
-        if($request->course_id){
+    public static function toDatabase($notification,$users){
 
-            $notification->course_id = $request->course_id;
-
-            //storing course last action
-            LastAction::lastActionInCourse($request->course_id);
-        }
-
-        if($request->has('classes')){
-            $notification->classes = json_encode($request->classes);
-        }
-
-        if($request->link){
-            $notification->link = $request->link;
-        }
-
-        $notification->save();
-        //End storing notification object
-
-        //assign notification to given users
-        $notification->users()->attach($request->users);
-
-        if($request->filled('users')){
-            
-            //calculate time the job should fire at
-            $notificationDelaySeconds = Carbon::parse($notification->publish_date)->diffInSeconds(Carbon::now()); 
-            if($notificationDelaySeconds < 0) {
-                $notificationDelaySeconds = 0;
-            }
-
-            //this job is for sending firebase notifications 
-            $notificationJob = (new SendNotifications($notification))->delay($notificationDelaySeconds);
-            dispatch($notificationJob);
-
-        }
+        $createdNotification = Notification::create($notification);
+        $createdNotification->users()->attach($users);
+        return $createdNotification;
     }
 }

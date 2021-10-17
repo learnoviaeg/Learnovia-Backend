@@ -21,7 +21,6 @@ use App\LessonComponent;
 use Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Lesson;
-use App\Notification;
 use Modules\Page\Entities\pageLesson;
 use App\Repositories\SettingsReposiotryInterface;
 use App\SecondaryChain;
@@ -223,25 +222,6 @@ class MediaController extends Controller
 
                     $mediaLesson->save();
 
-                    //sending notifications
-                    $users = Enroll::whereIn('group',$tempLesson->shared_classes->pluck('id'))
-                                    ->where('course',$tempLesson->course_id)
-                                    ->where('user_id','!=',Auth::user()->id)
-                                    ->where('role_id','!=', 1 )->select('user_id')->distinct()->pluck('user_id')->toArray();
-
-                    $requ = new Request([
-                    'id' => $media->id,
-                    'message' => $media->name.' media is added',
-                    'users' => count($users) > 0 ? $users : null,
-                    'course_id' => $tempLesson->course_id,
-                    'classes' => $tempLesson->shared_classes->pluck('id')->toArray(),
-                    'lesson_id' => $tempLesson->id,
-                    'type' => 'media',
-                    'publish_date' => Carbon::parse($publishdate),
-                    ]);
-
-                    (new Notification())->send($requ);
-
                 LessonComponent::firstOrCreate([
                         'lesson_id' => $mediaLesson->lesson_id,
                         'comp_id'   => $mediaLesson->media_id,
@@ -375,28 +355,6 @@ class MediaController extends Controller
         $lesson = Lesson::find($request->updated_lesson_id);
         $courseID = $lesson->course_id;
         LastAction::lastActionInCourse($courseID);
-        $publish_date=$mediaLesson->publish_date;
-        if(carbon::parse($publish_date)->isPast())
-            $publish_date=Carbon::now();
-
-        //sending notifications
-        $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))
-                        ->where('course',$lesson->course_id)
-                        ->where('user_id','!=',Auth::user()->id)
-                        ->where('role_id','!=', 1 )->select('user_id')->distinct()->pluck('user_id')->toArray();
-
-        $requ = new Request([
-            'id' => $media->id,
-            'message' => $media->name.' media is updated',
-            'users' => count($users) > 0 ? $users : null,
-            'course_id' => $lesson->course_id,
-            'classes' => $lesson->shared_classes->pluck('id')->toArray(),
-            'lesson_id' => $lesson->id,
-            'type' => 'media',
-            'publish_date' => Carbon::parse($publish_date),
-        ]);
-
-        (new Notification())->send($requ);
 
         if($media->type != null)
         {

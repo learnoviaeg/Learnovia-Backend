@@ -27,7 +27,6 @@ use  Modules\Page\Entities\pageLesson;
 use  Modules\Page\Entities\page;
 use App\Material;
 use  App\LastAction;
-use App\Notification;
 use App\SecondaryChain;
 use App\Repositories\SettingsReposiotryInterface;
 
@@ -261,50 +260,30 @@ class FilesController extends Controller
                     $file->url2 = 'files/' . $name;
                     $check = $file->save();
 
-                    //sending notifications
-                    $users = Enroll::whereIn('group',$tempLesson->shared_classes->pluck('id'))
-                                    ->where('course',$tempLesson->course_id)
-                                    ->where('user_id','!=',Auth::user()->id)
-                                    ->where('role_id','!=', 1 )->select('user_id')->distinct()->pluck('user_id')->toArray();
+                    if ($check) {
+                        $fileLesson = new FileLesson;
+                        $fileLesson->lesson_id = $lesson;
+                        $fileLesson->file_id = $file->id;
+                        $fileLesson->index = FileLesson::getNextIndex($lesson);
+                        $fileLesson->publish_date = $publishdate;
+                        $fileLesson->visible = isset($request->visible)?$request->visible:1;
 
-                    $requ = new Request([
-                        'id' => $file->id,
-                        'message' => $file->name.' file is added',
-                        'users' => count($users) > 0 ? $users : null,
-                        'course_id' => $tempLesson->course_id,
-                        'classes' => $tempLesson->shared_classes->pluck('id')->toArray(),
-                        'lesson_id' => $lesson,
-                        'type' => 'file',
-                        'link' => $file->url,
-                        'publish_date' => Carbon::parse($publishdate),
-                    ]);
+                        $fileLesson->save();
 
-                    (new Notification())->send($requ);
-
-                        if ($check) {
-                            $fileLesson = new FileLesson;
-                            $fileLesson->lesson_id = $lesson;
-                            $fileLesson->file_id = $file->id;
-                            $fileLesson->index = FileLesson::getNextIndex($lesson);
-                            $fileLesson->publish_date = $publishdate;
-                            $fileLesson->visible = isset($request->visible)?$request->visible:1;
-
-                            $fileLesson->save();
-
-                            LessonComponent::firstOrCreate([
-                                'lesson_id' => $fileLesson->lesson_id,
-                                'comp_id'   => $fileLesson->file_id,
-                                'module'    => 'UploadFiles',
-                                'model'     => 'file',
-                            ], [
-                                'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
-                                ]);
-                            Storage::disk('public')->putFileAs(
-                                'files/' . $request->$lesson,
-                                $singlefile,
-                                $name
-                            );
-                        }
+                        LessonComponent::firstOrCreate([
+                            'lesson_id' => $fileLesson->lesson_id,
+                            'comp_id'   => $fileLesson->file_id,
+                            'module'    => 'UploadFiles',
+                            'model'     => 'file',
+                        ], [
+                            'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                            ]);
+                        Storage::disk('public')->putFileAs(
+                            'files/' . $request->$lesson,
+                            $singlefile,
+                            $name
+                        );
+                    }
             }
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
@@ -474,36 +453,11 @@ class FilesController extends Controller
         $file->save();
         $fileLesson->save();
         $course_seg_drag = Lesson::where('id',$request->lesson_id)->first();
-        // $courseID_drag = CourseSegment::where('id', $course_seg_drag)->pluck('course_id')->first();
+
         LastAction::lastActionInCourse($course_seg_drag->course_id);
-        $fileLesson->save();
-        $lesson = Lesson::find($request->updated_lesson_id);
-        // $course_seg = Lesson::where('id',$request->updated_lesson_id)->pluck('course_segment_id')->first();
-        $publish_date=$fileLesson->publish_date;
-        if(carbon::parse($publish_date)->isPast())
-            $publish_date=Carbon::now();
-
-        //sending notifications
-        $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))
-                        ->where('course',$lesson->course_id)
-                        ->where('user_id','!=',Auth::user()->id)
-                        ->where('role_id','!=', 1 )->select('user_id')->distinct()->pluck('user_id')->toArray();
-
-        $requ = new Request([
-            'id' => $file->id,
-            'message' => $file->name.' file is updated',
-            'users' => count($users) > 0 ? $users : null,
-            'course_id' => $lesson->course_id,
-            'classes' => $lesson->shared_classes->pluck('id')->toArray(),
-            'lesson_id' => $lesson->id,
-            'type' => 'file',
-            'link' => $file->url,
-            'publish_date' => Carbon::parse($publish_date),
-        ]);
-
-        (new Notification())->send($requ);
 
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'file')->get();
+
         return HelperController::api_response_format(200, $tempReturn, __('messages.file.update'));
     }
 
