@@ -820,6 +820,7 @@ class AssigmentsController extends Controller
             }
 
             $assigment->visible = ($assigment->visible == 1) ? 0 : 1;
+            $assigment->update(['visible' => $visible]);
             $assigment->save();
             $lesson=Lesson::find($request->lesson_id);
             LastAction::lastActionInCourse($lesson->course_id);
