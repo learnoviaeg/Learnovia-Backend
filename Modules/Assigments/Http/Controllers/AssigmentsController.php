@@ -819,8 +819,7 @@ class AssigmentsController extends Controller
                 return HelperController::api_response_format(400, null, __('messages.error.not_found'));
             }
 
-            $visible = ($assigment->visible == 1) ? 0 : 1;
-            $assigment->update(['visible' => $visible]);
+            $assigment->visible = ($assigment->visible == 1) ? 0 : 1;
             $assigment->save();
             $lesson=Lesson::find($request->lesson_id);
             LastAction::lastActionInCourse($lesson->course_id);
@@ -1198,6 +1197,7 @@ class AssigmentsController extends Controller
             'assignment_id' => 'required|exists:assignments,id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'class' => 'exists:classes,id',
+            'filter' => 'in:submitted,not_submitted', 
         ]);
 
         $user = Auth::user();
@@ -1213,7 +1213,6 @@ class AssigmentsController extends Controller
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($assigLessonID))
             return HelperController::api_response_format(200, null, __('messages.assignment.assignment_not_belong'));
-
         if( $request->user()->can('site/course/student') && $assigLessonID->visible==0)
             return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
@@ -1244,15 +1243,35 @@ class AssigmentsController extends Controller
             $assigned_users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('role_id',3);
             if($request->filled('class'))
                 $assigned_users->where('group_id', $request->class);
-            
-            $userassigments = User::whereIn('id',$assigned_users->get()->pluck('user_id'))
-                            ->with(['userAssignment'=> function($query)use ($assigLessonID){
-                                $query->where('assignment_lesson_id', $assigLessonID->id);
-                            }])->with(['assignmentOverride'=> function($query)use ($assigLessonID){
-                                $query->where('assignment_lesson_id', $assigLessonID->id);
-                            }])->get();
+            $userassigments = User::whereIn('id',$assigned_users->get()->pluck('user_id'));
 
-            return HelperController::api_response_format(200,  AssignmentSubmissionResource::collection($userassigments), $message = []);
+
+            if(!$request->filled('filter'))
+            $userassigments->with(['userAssignment'=> function($query)use ($assigLessonID){
+                $query->where('assignment_lesson_id', $assigLessonID->id);
+            }]);
+
+            if($request->filter == 'submitted'){
+                $callback = function ($query) use ($assigLessonID) {
+                    $query->where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('submit_date');
+                };
+                $userassigments->whereHas('userAssignment', $callback)
+                    ->with(['userAssignment'=> $callback]);
+            } 
+            
+            if($request->filter == 'not_submitted'){
+                $callback = function ($query) use ($assigLessonID) {
+                    $query->where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('submit_date');
+                };
+                $userassigments->whereDoesntHave('userAssignment', $callback)
+                ->with(['userAssignment'=> $callback]);
+            } 
+
+            $result = $userassigments->with(['assignmentOverride'=> function($query)use ($assigLessonID){
+                    $query->where('assignment_lesson_id', $assigLessonID->id);
+                }])->get();
+
+            return HelperController::api_response_format(200,  AssignmentSubmissionResource::collection($result), $message = []);
 
         }
     }
