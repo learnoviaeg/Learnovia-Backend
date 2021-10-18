@@ -78,6 +78,11 @@ class AssignmentLesson extends Model
         return  $this->hasMany('Modules\Assigments\Entities\assignmentOverride','assignment_lesson_id', 'id');
     }
 
+    public function lesson()
+    {
+        return $this->belongsTo('App\Lesson', 'lesson_id', 'id');
+    }
+    
     public static function boot() 
     {
         parent::boot();

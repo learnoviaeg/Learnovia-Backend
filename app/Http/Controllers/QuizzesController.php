@@ -24,6 +24,7 @@ use App\LastAction;
 use Carbon\Carbon;
 use App\Events\updateQuizAndQuizLessonEvent;
 use App\Notification;
+use App\Notifications\QuizNotification;
 use App\Timeline;
 use App\SystemSetting;
 
@@ -184,23 +185,9 @@ class QuizzesController extends Controller
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
                 ]);
 
-                $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))
-                                ->where('course',$lesson->course_id)
-                                ->where('user_id','!=',Auth::user()->id)
-                                ->where('role_id','!=', 1 )->select('user_id')->distinct()->pluck('user_id')->toArray();
-
-                $requ = new Request([
-                    'message' => $quiz->name . ' quiz is added',
-                    'id' => $quiz->id,
-                    'users' => count($users) > 0 ? $users : null,
-                    'type' =>'quiz',
-                    'publish_date'=> Carbon::parse($newQuizLesson->publish_date),
-                    'course_id' => $lesson->course_id,
-                    'classes'=> $lesson->shared_classes->pluck('id')->toArray(),
-                    'lesson_id'=> $lesson->id,
-                ]);
-
-                (new Notification())->send($requ);
+                //sending notifications
+                $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
+                $notification->send();         
             }
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));

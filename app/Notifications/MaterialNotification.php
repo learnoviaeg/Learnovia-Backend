@@ -4,11 +4,10 @@ namespace App\Notifications;
 
 use App\Enroll;
 use App\Material;
-use App\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-class MaterialNotification extends Notification
+class MaterialNotification extends SendNotification
 {
 
     public $material, $message;
@@ -57,9 +56,9 @@ class MaterialNotification extends Notification
         
 
         //assign notification to given users
-        $createdNotification = Notification::toDatabase($notification,$users);
-
+        $createdNotification = $this->toDatabase($notification,$users);
+        
         //firebase Notifications
-        Notification::toFirebase($createdNotification);
+        $this->toFirebase($createdNotification);
     }
 }
