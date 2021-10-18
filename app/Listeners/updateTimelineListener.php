@@ -44,19 +44,21 @@ class updateTimelineListener
                         ->where('role_id','!=', 1 )->get()->groupBy('group');
                         
         foreach($lesson->shared_classes->pluck('id') as $class){
-            $timeLine=Timeline::where('item_id',$event->quizLesson->quiz_id)->where('type','quiz')->first();
-            if(isset($timeLine)) // in case quiz was drafted
-                $timeLine->update([
-                    'name' => $event->quizLesson->quiz->name,
-                    'start_date' => $event->quizLesson->start_date,
-                    'due_date' => $event->quizLesson->due_date,
-                    'publish_date' => $event->quizLesson->publish_date,
-                    'course_id' => $course_id,
-                    'class_id' => $class,
-                    'lesson_id' => $event->quizLesson->lesson_id,
-                    'level_id' => Course::find($lesson->course_id)->level_id,
-                    'visible' => $event->quizLesson->visible
-                ]);
+            $timeLines=Timeline::where('item_id',$event->quizLesson->quiz_id)->where('type','quiz')->get();
+            //not Mass update for logs
+            if(isset($timeLines)) // in case quiz was drafted
+                foreach($timeLines as $timeLine)
+                    $timeLine->update([
+                        'name' => $event->quizLesson->quiz->name,
+                        'start_date' => $event->quizLesson->start_date,
+                        'due_date' => $event->quizLesson->due_date,
+                        'publish_date' => $event->quizLesson->publish_date,
+                        'course_id' => $course_id,
+                        'class_id' => $class,
+                        'lesson_id' => $event->quizLesson->lesson_id,
+                        'level_id' => Course::find($lesson->course_id)->level_id,
+                        'visible' => $event->quizLesson->visible
+                    ]);
             // dd($timeLine);
 
             //sending notifications
