@@ -10,6 +10,7 @@ use App\Lesson;
 use App\Course;
 use App\Enroll;
 use App\Notification;
+use App\Notifications\QuizNotification;
 use App\Timeline;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -38,10 +39,9 @@ class updateTimelineListener
         $lesson = Lesson::find($event->quizLesson->lesson_id);
         $course_id = $lesson->course_id;
 
-        $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))
-                        ->where('course',$lesson->course_id)
-                        ->where('user_id','!=',Auth::user()->id)
-                        ->where('role_id','!=', 1 )->get()->groupBy('group');
+        //sending notifications     
+        $notification = new QuizNotification($event->quizLesson,$event->quizLesson->quiz->name.' quiz is updated.');
+        $notification->send();
                         
         foreach($lesson->shared_classes->pluck('id') as $class){
             $timeLines=Timeline::where('item_id',$event->quizLesson->quiz_id)->where('type','quiz')->get();
@@ -60,22 +60,6 @@ class updateTimelineListener
                         'visible' => $event->quizLesson->visible
                     ]);
             // dd($timeLine);
-
-            //sending notifications
-            $classUsers = $users[$class]->pluck('user_id');
-            
-            $requ = new Request([
-                'message' => $event->quizLesson->quiz->name . ' quiz was updated',
-                'id' => $event->quizLesson->quiz->id,
-                'users' => count($classUsers) > 0 ? $classUsers->toArray() : null,
-                'type' =>'quiz',
-                'publish_date'=> Carbon::parse($event->quizLesson->publish_date),
-                'course_id' => $lesson->course_id,
-                'class_id'=> $class,
-                'lesson_id'=> $lesson->id,
-            ]);
-    
-            (new Notification())->send($requ);
         } 
     }
 }

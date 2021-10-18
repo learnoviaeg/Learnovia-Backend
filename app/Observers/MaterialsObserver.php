@@ -6,6 +6,7 @@ use App\Material;
 use App\Repositories\RepportsRepositoryInterface;
 use App\UserSeen;
 use App\Lesson;
+use App\Notifications\MaterialNotification;
 use Illuminate\Support\Facades\Auth;
 class MaterialsObserver
 {
@@ -23,6 +24,9 @@ class MaterialsObserver
      */
     public function created(Material $material)
     {
+        $notification = new MaterialNotification($material,$material->name.' '.$material->type.' is added.');
+        $notification->send();
+
         $this->report->calculate_course_progress($material->course_id);
     }
 
@@ -59,6 +63,9 @@ class MaterialsObserver
 
             $this->report->calculate_course_progress($material->course_id);
         }
+
+        $notification = new MaterialNotification($material,$material->name.' '.$material->type.' is updated.');
+        $notification->send();
     }
 
     /**

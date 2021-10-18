@@ -8,6 +8,7 @@ use App\AnnouncementsChain;
 use App\Announcement;
 use App\attachment;
 use App\Notification;
+use App\Notifications\AnnouncementNotification;
 use Auth;
 use App\user;
 use Carbon\Carbon;
@@ -210,17 +211,10 @@ class AnnouncementsController extends Controller
                 ]; 
             }
             userAnnouncement::insert($data);
-            //notification object
-            $notify_request = new Request ([
-                'id' => $announcement->id,
-                'type' => 'announcement',
-                'publish_date' => $publish_date,
-                'message' => $request->title.' announcement is added',
-                'users' => $users->toArray()
-            ]);
-
-            // use notify store function to notify users with the announcement
-            $notify = (new Notification())->send($notify_request);
+        
+            //sending Notification
+            $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
+            $notification->send();
         }
 
         return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);
@@ -286,23 +280,9 @@ class AnnouncementsController extends Controller
         //check if announcement has already been sent to send the update
         if($announcement->publish_date < Carbon::now()){
 
-            $users = userAnnouncement::where('announcement_id', $announcement->id)->pluck('user_id')->unique('user_id');
-
-            //check if there's a students to send for them or skip that part
-            if(count($users) > 0){
-
-                //notification object
-                $notify_request = new Request ([
-                    'id' => $announcement->id,
-                    'type' => 'announcement',
-                    'publish_date' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'message' => $announcement->title.' announcement is updated',
-                    'users' => $users->toArray()
-                ]);
-
-                // use notify store function to notify users with the announcement
-                $notify = (new Notification())->send($notify_request);
-            }
+            //sending Notification
+            $notification = new AnnouncementNotification($announcement, $announcement->title.' announcement is updated');
+            $notification->send();
         }
 
 

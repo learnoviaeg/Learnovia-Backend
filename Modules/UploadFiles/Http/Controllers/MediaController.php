@@ -21,7 +21,6 @@ use App\LessonComponent;
 use Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Lesson;
-use App\Notification;
 use Modules\Page\Entities\pageLesson;
 use App\Repositories\SettingsReposiotryInterface;
 use App\SecondaryChain;
@@ -165,7 +164,7 @@ class MediaController extends Controller
             $publishdate = Carbon::now();
         }
         foreach ($request->lesson_id as $lesson) {
-            $secondary_chains = SecondaryChain::where('lesson_id',$lesson)->get()->keyBy('group_id');
+
                 $tempLesson = Lesson::find($lesson);
                 if ($request->type == 0)
                     $array = $request->Imported_file;
@@ -222,26 +221,6 @@ class MediaController extends Controller
                     $mediaLesson->visible = isset($request->visible)?$request->visible:1;
 
                     $mediaLesson->save();
-                    foreach($secondary_chains as $secondary_chain){
-                        $courseID = $secondary_chain->course_id;
-                        $class_id = $secondary_chain->group_id;
-                        $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
-                        LastAction::lastActionInCourse($courseID);
-
-                        $notify_request = new Request([
-                            'id' => $media->id,
-                            'message' => $media->name.' media is added',
-                            'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : [],
-                            'course_id' => $courseID,
-                            'class_id' => $class_id,
-                            'lesson_id' => $mediaLesson->lesson_id,
-                            'type' => 'media',
-                            'publish_date' => Carbon::parse($publishdate),
-                        ]);
-            
-                        (new Notification())->send($notify_request);
-
-                    }
 
                 LessonComponent::firstOrCreate([
                         'lesson_id' => $mediaLesson->lesson_id,
@@ -376,30 +355,7 @@ class MediaController extends Controller
         $lesson = Lesson::find($request->updated_lesson_id);
         $courseID = $lesson->course_id;
         LastAction::lastActionInCourse($courseID);
-        $publish_date=$mediaLesson->publish_date;
-        if(carbon::parse($publish_date)->isPast())
-            $publish_date=Carbon::now();
 
-        $secondary_chains = SecondaryChain::where('lesson_id',$lesson)->get()->keyBy('group_id');
-        foreach($secondary_chains as $secondary_chain){
-            $courseID = $secondary_chain->course_id;
-            $class_id = $secondary_chain->group_id;
-            $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
-                
-            $notify_request = new Request([
-                'id' => $media->id,
-                'message' => $media->name.' media is updated',
-                'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : [],
-                'course_id' => $courseID,
-                'class_id' => $class_id,
-                'lesson_id' => $mediaLesson->lesson_id,
-                'type' => 'media',
-                'publish_date' => carbon::parse($publish_date),
-            ]);
-
-            (new Notification())->send($notify_request);
-            
-        }
         if($media->type != null)
         {
             if(str_contains($media->type , 'image'))

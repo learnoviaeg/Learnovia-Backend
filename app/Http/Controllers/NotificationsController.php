@@ -10,6 +10,7 @@ use DB;
 use App\LastAction;
 use App\Course;
 use App\Notification;
+use App\Notifications\SendNotification;
 use App\Paginate;
 use Illuminate\Support\Facades\Auth;
 
@@ -120,7 +121,46 @@ class NotificationsController extends Controller
             'from' => 'integer|exists:users,id',
         ]);
 
-        (new Notification)->send($request);
+        $notification = [
+            'item_id' => $request->id,
+            'item_type' => $request->type,
+            'message' => $request->message,
+            'type' => 'notification'
+        ];
+
+        if($request->class_id){
+            $notification['classes'] = json_encode([$request->class_id]);
+        }
+
+        if($request->course_id){
+            $notification['course_id'] = $request->course_id;
+        }
+
+        if($request->lesson_id){
+            $notification['lesson_id'] = $request->lesson_id;
+        }
+
+        if($request->link){
+            $notification['link'] = $request->link;
+        }
+
+        $from = Auth::id();
+        if($request->from){
+            $from = $request->from;
+        }
+        $notification['created_by'] = $from;
+
+        $publish_date = Carbon::now();
+        if($request->publish_date){
+            $publish_date = $request->publish_date;
+        }
+        $notification['publish_date'] = $publish_date;
+
+        //assign notification to given users
+        $createdNotification = (new SendNotification)->toDatabase($notification,$request->users);
+            
+        //firebase Notifications
+        (new SendNotification)->toFirebase($createdNotification);
 
         return response()->json(['message' => 'Notification sent.','body' => null], 200);
     }
