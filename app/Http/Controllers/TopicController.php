@@ -48,13 +48,13 @@ class TopicController extends Controller
             'courses.*' => 'nullable|exists:courses,id',
             'roles' => 'array',
             'roles.*' => 'nullable|exists:roles,id',
-            'users' => 'array',
-            'users.*' => 'nullable|exists:users,id',
+            'user_id' => 'array',
+            'user_id.*' => 'nullable|exists:users,id',
         ]);
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $topic_ids =  EnrollTopic::whereIn('enroll_id' , $enrolls->pluck('id'))->pluck('topic_id');
-        $topics = Topic::whereIn('id' , $topic_ids);
+        $topics = Topic::with('created_by')->whereIn('id' , $topic_ids);
         if($request->filled('search'))
            $topics->where('title', 'LIKE' , "%$request->search%"); 
         return HelperController::api_response_format(200, $topics->paginate(HelperController::GetPaginate($request)), __('messages.topic.list'));
@@ -81,8 +81,8 @@ class TopicController extends Controller
             'courses.*' => 'nullable|exists:courses,id',
             'roles' => 'array',
             'roles.*' => 'nullable|exists:roles,id',
-            'users' => 'array',
-            'users.*' => 'nullable|exists:users,id',
+            'user_id' => 'array',
+            'user_id.*' => 'nullable|exists:users,id',
         ]);
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
@@ -90,7 +90,7 @@ class TopicController extends Controller
         $topic = Topic::Create([
             'title' => $request->title,
             'filter' => $filter,
-            //'created_by' =>  Auth::user()->id
+            'created_by' => Auth::id(),
         ]);
         foreach($enrolls->get() as $enroll)
         {
@@ -108,9 +108,10 @@ class TopicController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Topic $topic)
+    public function show($id)
     {
-        return HelperController::api_response_format(200, $topic );
+        $topic = Topic::with('created_by')->find($id);
+        return HelperController::api_response_format(200, $topic);
     }
 
     /**
@@ -136,8 +137,8 @@ class TopicController extends Controller
             'courses.*' => 'nullable|exists:courses,id',
             'roles' => 'array',
             'roles.*' => 'nullable|exists:roles,id',
-            'users' => 'array',
-            'users.*' => 'nullable|exists:users,id',
+            'user_id' => 'array',
+            'user_id.*' => 'nullable|exists:users,id',
         ]);
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $topic->title = $request->title;
@@ -154,7 +155,6 @@ class TopicController extends Controller
 
            ]);
         }
-        // return new TopicResource($topic);
         return HelperController::api_response_format(200, $topic,__('messages.topic.update'));
 
     }
