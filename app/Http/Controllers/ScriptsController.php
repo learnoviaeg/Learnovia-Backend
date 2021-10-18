@@ -68,9 +68,7 @@ class ScriptsController extends Controller
                 $quiz_lesson->grade_category_id = $grade_cat->id;
                 $quiz_lesson->save();
                 $max_attempt=$quiz_lesson->max_attemp;                
-                if((Auth::user()->can('site/quiz/unLimitedAttempts')))
-                    $max_attempt=1;
-    
+                    
                 for($key =1; $key<=$max_attempt; $key++){
                     $gradeItem = GradeItems::updateOrCreate([
                         'index' => $key,

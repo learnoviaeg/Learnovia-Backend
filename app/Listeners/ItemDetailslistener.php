@@ -32,7 +32,6 @@ class ItemDetailslistener
      */
     public function handle(GradeItemEvent $event)
     {
-        // $event->grade_item is attempt of quiz (type=>attempt)
         if($event->grade_item->type == 'Attempts'){
             
             $gradeCat=GradeCategory::find($event->grade_item->grade_category_id);
@@ -58,7 +57,6 @@ class ItemDetailslistener
                 {
                     $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
                     
-                    // dd($quiz_question->grade_details);
                     $item=ItemDetail::updateOrCreate([
                         'type' => 'Question',
                         'item_id' => $question->id,
