@@ -35,7 +35,6 @@ class MaterialsController extends Controller
      */
     public function index(Request $request,$count = null)
     {
-    
         $request->validate([
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id',
@@ -64,11 +63,9 @@ class MaterialsController extends Controller
         if($request->user()->can('site/course/student'))
             $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
 
-        $sort_in = 'desc';
-        if($request->has('sort_in'))
-            $sort_in=$request->sort_in;
-
-        $material->orderBy('created_at',$sort_in);
+        // $sort_in = 'desc';
+        // if($request->has('sort_in'))
+        //     $sort_in=$request->sort_in;
 
         //copy this counts to count it before filteration
         $query=clone $material;
@@ -102,7 +99,7 @@ class MaterialsController extends Controller
             unset($one->lesson->SecondaryChain);
         }
 
-        return response()->json(['message' => __('messages.materials.list'), 'body' => $AllMat->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.materials.list'), 'body' => $AllMat->sortByDesc('created_at')->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

@@ -78,17 +78,20 @@ class AssignmentLessonObserver
     {
         $assignment = Assignment::where('id',$assignmentLesson->assignment_id)->first();
         if(isset($assignment)){
-            $forLogs=Timeline::where('item_id',$assignmentLesson->assignment_id)->where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('type' , 'assignment')->first();
-            $forLogs->update([
-                'item_id' => $assignmentLesson->assignment_id,
-                'name' => $assignment->name,
-                'start_date' => $assignmentLesson->start_date,
-                'due_date' => $assignmentLesson->due_date,
-                'publish_date' => isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
-                'lesson_id' => $assignmentLesson->lesson_id,
-                'type' => 'assignment',
-                'visible' => $assignmentLesson->visible
-            ]);
+            $timeLines=Timeline::where('item_id',$assignmentLesson->assignment_id)->where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('type' , 'assignment')->get();
+            //not Mass update for logs
+            if(isset($timeLines))
+                foreach($timeLines as $timeLine)
+                    $timeLine->update([
+                        'item_id' => $assignmentLesson->assignment_id,
+                        'name' => $assignment->name,
+                        'start_date' => $assignmentLesson->start_date,
+                        'due_date' => $assignmentLesson->due_date,
+                        'publish_date' => isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
+                        'lesson_id' => $assignmentLesson->lesson_id,
+                        'type' => 'assignment',
+                        'visible' => $assignmentLesson->visible
+                    ]);
         }
 
         if($assignmentLesson->isDirty('lesson_id')){
