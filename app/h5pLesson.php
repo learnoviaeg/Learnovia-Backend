@@ -35,4 +35,9 @@ class h5pLesson extends Model
         return DB::table('h5p_contents')->whereId($this->content_id)->first()->title;
     }
 
+    public function lesson()
+    {
+        return $this->belongsTo('App\Lesson', 'lesson_id', 'id');
+    }
+
 }

@@ -47,6 +47,7 @@ use App\SecondaryChain;
 use App\Segment;
 use App\Http\Resources\AssignmentSubmissionResource;
 use App\Notification;
+use App\Notifications\AssignmentNotification;
 
 class AssigmentsController extends Controller
 {
@@ -357,30 +358,9 @@ class AssigmentsController extends Controller
             }
         }
 
-        //sending notifications        
-        $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))
-                        ->where('course',$lesson->course_id)
-                        ->where('user_id','!=',Auth::user()->id)
-                        ->where('role_id','!=', 1 )->select('user_id')->distinct()->pluck('user_id')->toArray();
-
-        $publish_date=$AssignmentLesson->publish_date;
-        if(carbon::parse($publish_date)->isPast()){
-            $publish_date=Carbon::now();
-        }
-        
-        $requ = new Request([
-            'message' => $AssignmentLesson->Assignment[0]->name .' assignment is updated',
-            'id' => $request->assignment_id,
-            'users' => count($users) > 0 ? $users : null,
-            'type' => 'assignment',
-            'publish_date'=>  Carbon::parse($publish_date),
-            'course_id' => $lesson->course_id,
-            'classes'=> $lesson->shared_classes->pluck('id')->toArray(),
-            'lesson_id'=> $lesson->id,
-            'link' => url(route('getAssignment')) . '?assignment_id=' . $request->assignment_id,
-        ]);
-
-        (new Notification())->send($requ);
+        //sending notifications
+        $notification = new AssignmentNotification($AssignmentLesson, $AssignmentLesson->Assignment[0]->name .' assignment is updated');
+        $notification->send();
 
         $all = AssignmentLesson::all();
 
@@ -927,26 +907,9 @@ class AssigmentsController extends Controller
             // );
             LastAction::lastActionInCourse($lesson->course_id);
 
-            //sending notifications        
-            $users = Enroll::whereIn('group',$lesson_obj->shared_classes->pluck('id'))
-                            ->where('course',$lesson_obj->course_id)
-                            ->where('user_id','!=',Auth::user()->id)
-                            ->where('role_id','!=', 1 )->select('user_id')->distinct()->pluck('user_id')->toArray();
-
-            $requ = new Request([
-                'message' => $name_assignment.' assignment is added',
-                'id' => $assignment_lesson->assignment_id,
-                'users' => count($users) > 0 ? $users : null,
-                'type' => 'assignment',
-                'publish_date'=>  Carbon::parse($assignment_lesson->publish_date),
-                'course_id' => $lesson_obj->course_id,
-                'classes'=> $lesson_obj->shared_classes->pluck('id')->toArray(),
-                'lesson_id'=> $lesson_obj->id,
-                'link' => url(route('getAssignment')) . '?assignment_id=' . $assignment_lesson->assignment_id,
-            ]);
-
-            (new Notification())->send($requ);
-      
+            //sending notifications    
+            $notification = new AssignmentNotification($assignment_lesson, $name_assignment.' assignment is added');
+            $notification->send();      
         }
         // $all = AssignmentLesson::where('assignment_id','!=', $request->assignment_id)->get();
 
@@ -994,19 +957,11 @@ class AssigmentsController extends Controller
         }
         $course = $lesson->course_id;
         LastAction::lastActionInCourse($course);
-        $notify_request = new Request([
-            'id' => $assignment->assignment_id,
-            'message' => 'You can answer '.$assignment->Assignment[0]->name.' assignment now',
-            'users' => $request->user_id,
-            'course_id' => $lesson->course_id,
-            'classes' => $lesson->shared_classes->pluck('id')->toArray(),
-            'lesson_id' => $assignment->lesson_id,
-            'type' => 'assignment',
-            'link' => url(route('getAssignment')) . '?assignment_id=' . $assignment->assignment_id,
-            'publish_date' => Carbon::parse($request->start_date),
-        ]);
 
-        (new Notification())->send($notify_request);
+        //sending Notification
+        $notification = new AssignmentNotification($assignment, 'You can answer '.$assignment->Assignment[0]->name.' assignment now');
+        $notification->setUsers($request->user_id);
+        $notification->send();
 
         return HelperController::api_response_format(200, $assignmentOerride, __('messages.assignment.override'));
     }
