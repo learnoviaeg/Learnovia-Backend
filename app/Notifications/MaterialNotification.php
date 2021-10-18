@@ -35,7 +35,12 @@ class MaterialNotification extends SendNotification
             $publish_date = Carbon::now();
         }
 
-        $link = $this->material->getAttributes()['link'];
+
+        $link = null;
+        if(isset($this->material->getAttributes()['link'])){
+            $link = $this->material->getAttributes()['link'];
+        }
+
         if($this->material->type == 'page'){
             $link = url(route('getPage')) . '?id=' . $this->material->item_id;
         }
