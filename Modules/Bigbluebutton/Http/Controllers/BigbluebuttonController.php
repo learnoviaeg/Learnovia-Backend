@@ -553,35 +553,18 @@ class BigbluebuttonController extends Controller
         if($request->filled('course'))
             LastAction::lastActionInCourse($request->course);
 
-        $sort_in = 'desc';
-        if($request->has('sort_in'))
-            $sort_in = $request->sort_in;
+        // $sort_in = 'desc';
+        // if($request->has('sort_in'))
+        //     $sort_in = $request->sort_in;
 
         self::clear(); 
 
         $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
-        // $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
-
-        // $CS_ids=GradeCategoryController::getCourseSegment($request);
-
-        // $CourseSeg = Enroll::where('user_id', Auth::id())->pluck('course_segment');
-
-        // $CourseSeg = array_intersect($CS_ids->toArray(),$CourseSeg->toArray());
-
-        // if($request->user()->can('site/show-all-courses')){
-        //     $CourseSeg = $CS_ids;
-        //     $classes = count($classes) == 0? Classes::pluck('id') : $classes;
-        // }
 
         $classes = $enrolls->pluck('group')->unique()->values();
-        
-        // $courses=CourseSegment::whereIn('id',$CourseSeg)->where('end_date','>',Carbon::now())
-        //                                                 ->where('start_date','<',Carbon::now())
-        //                                                 ->pluck('course_id')->unique()->values();
-
         $courses=$enrolls->pluck('course')->unique()->values();
 
-        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->orderBy('created_at',$sort_in);
+        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes);
 
         if($request->user()->can('site/course/student'))
             $meeting->where('show',1);
@@ -638,12 +621,12 @@ class BigbluebuttonController extends Controller
             return response()->json(['message' => 'Virtual classrooms count', 'body' => $meetings->count()], 200);
 
         if($request->has('pagination') && $request->pagination==true)
-            return HelperController::api_response_format(200 , $meetings->paginate(Paginate::GetPaginate($request)),__('messages.virtual.list'));
+            return HelperController::api_response_format(200 , $meetings->sortByDesc('created_at')->paginate(Paginate::GetPaginate($request)),__('messages.virtual.list'));
             
         if(count($meetings) == 0)
             return HelperController::api_response_format(200 , [] , __('messages.error.not_found'));
 
-        return HelperController::api_response_format(200 , $meetings,__('messages.virtual.list'));
+        return HelperController::api_response_format(200 , $meetings->sortByDesc('created_at')->values(),__('messages.virtual.list'));
     }
 
     /**

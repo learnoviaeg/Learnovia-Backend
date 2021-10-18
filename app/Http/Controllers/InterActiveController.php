@@ -44,25 +44,12 @@ class InterActiveController extends Controller
             'sort_in' => 'in:asc,desc', 
         ]);
 
-        // if($request->user()->can('site/show-all-courses')){//admin
-        //     $course_segments = collect($this->chain->getAllByChainRelation($request));
-        //     $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
-        // }
-        
-        // if(!$request->user()->can('site/show-all-courses')){//enrolled users
-
-        //     $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        //     $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-        //     $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
-        // }
-
         if($request->user()->can('site/show-all-courses')){//admin
             $enrolls = $this->chain->getEnrollsByChain($request);
             $lessons = $enrolls->with('SecondaryChain')->where('user_id',Auth::id())->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
         }
 
         if(!$request->user()->can('site/show-all-courses')){//enrolled users
-
            $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
            $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
         }
@@ -74,11 +61,11 @@ class InterActiveController extends Controller
             $lessons  = [$request->lesson];
         }
 
-        $sort_in = 'desc';
-        if($request->has('sort_in'))
-            $sort_in = $request->sort_in;
+        // $sort_in = 'desc';
+        // if($request->has('sort_in'))
+        //     $sort_in = $request->sort_in;
 
-        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->orderBy('created_at',$sort_in);
+        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons);
 
         if($request->user()->can('site/course/student')){
            $h5p_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
@@ -116,7 +103,7 @@ class InterActiveController extends Controller
 
             $h5p_contents[]=$content->original;
         }
-        return response()->json(['message' => __('messages.interactive.list'), 'body' => collect($h5p_contents)->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.interactive.list'), 'body' => collect($h5p_contents)->sortByDesc('created_at')->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
