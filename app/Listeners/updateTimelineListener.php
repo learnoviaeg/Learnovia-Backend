@@ -38,10 +38,6 @@ class updateTimelineListener
     {
         $lesson = Lesson::find($event->quizLesson->lesson_id);
         $course_id = $lesson->course_id;
-
-        //sending notifications     
-        $notification = new QuizNotification($event->quizLesson,$event->quizLesson->quiz->name.' quiz is updated.');
-        $notification->send();
                         
         foreach($lesson->shared_classes->pluck('id') as $class){
             $timeLines=Timeline::where('item_id',$event->quizLesson->quiz_id)->where('type','quiz')->get();
