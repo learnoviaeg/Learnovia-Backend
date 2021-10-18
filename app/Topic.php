@@ -21,6 +21,7 @@ class Topic extends Model
     protected $fillable = [
         'title',
         'filter',
+        'created_by'
     ];
 
     public function getFilterAttribute($value)
@@ -81,8 +82,8 @@ class Topic extends Model
             $names['roles'][] =$object;
 
         }}
-        if(property_exists($filter, 'users')){
-        foreach($filter->users as $user)
+        if(property_exists($filter, 'user_id')){
+        foreach($filter->user_id as $user)
         {
             $object['id'] = User::find($user)->id;
             $object['name'] = User::find($user)->firstname;
@@ -90,13 +91,18 @@ class Topic extends Model
         }}
         $filter=$names;
         return $filter;
-
     }
 
 
     public function enrolls()
     {
         return $this->belongsToMany('App\Enroll' , 'enroll_id' , 'id');
+    }
+
+    public function created_by()
+    {
+        return $this->belongsTo('App\User' , 'created_by' , 'id');
+
     }
     
 }

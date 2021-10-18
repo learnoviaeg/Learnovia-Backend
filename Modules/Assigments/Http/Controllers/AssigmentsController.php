@@ -790,7 +790,8 @@ class AssigmentsController extends Controller
                 return HelperController::api_response_format(400, null, __('messages.error.not_found'));
             }
 
-            $assigment->visible = ($assigment->visible == 1) ? 0 : 1;
+            $visible = ($assigment->visible == 1) ? 0 : 1;
+            $assigment->update(['visible' => $visible]);
             $assigment->save();
             $lesson=Lesson::find($request->lesson_id);
             LastAction::lastActionInCourse($lesson->course_id);

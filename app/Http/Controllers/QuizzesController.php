@@ -73,7 +73,7 @@ class QuizzesController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('created_at',$sort_in);
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons);
 
         if($request->user()->can('site/course/student'))
             $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
@@ -107,7 +107,7 @@ class QuizzesController extends Controller
             $quizzes[]=$quiz;
         }
 
-        return response()->json(['message' => __('messages.quiz.list'), 'body' => $quizzes->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.quiz.list'), 'body' => $quizzes->sortByDesc('created_at')->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

@@ -819,7 +819,8 @@ class QuizController extends Controller
                 return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
             }
 
-            $Quiz_lesson->visible = ($Quiz_lesson->visible == 1) ? 0 : 1;
+            $visible = ($Quiz_lesson->visible == 1) ? 0 : 1;
+            $Quiz_lesson->update(['visible' => $visible]);
             $Quiz_lesson->save();
 
             return HelperController::api_response_format(200, $Quiz_lesson, __('messages.success.toggle'));
