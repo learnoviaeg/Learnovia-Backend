@@ -48,8 +48,8 @@ class TopicController extends Controller
             'courses.*' => 'nullable|exists:courses,id',
             'roles' => 'array',
             'roles.*' => 'nullable|exists:roles,id',
-            'users' => 'array',
-            'users.*' => 'nullable|exists:users,id',
+            'user_id' => 'array',
+            'user_id.*' => 'nullable|exists:users,id',
         ]);
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
@@ -81,8 +81,8 @@ class TopicController extends Controller
             'courses.*' => 'nullable|exists:courses,id',
             'roles' => 'array',
             'roles.*' => 'nullable|exists:roles,id',
-            'users' => 'array',
-            'users.*' => 'nullable|exists:users,id',
+            'user_id' => 'array',
+            'user_id.*' => 'nullable|exists:users,id',
         ]);
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
@@ -91,14 +91,12 @@ class TopicController extends Controller
             'title' => $request->title,
             'filter' => $filter,
             'created_by' => Auth::id(),
-
         ]);
         foreach($enrolls->get() as $enroll)
         {
            EnrollTopic::Create([
                'enroll_id' => $enroll->id,
                'topic_id' => $topic->id,
-               
            ]);
         }
         return HelperController::api_response_format(200, $topic , __('messages.topic.add'));
@@ -139,8 +137,8 @@ class TopicController extends Controller
             'courses.*' => 'nullable|exists:courses,id',
             'roles' => 'array',
             'roles.*' => 'nullable|exists:roles,id',
-            'users' => 'array',
-            'users.*' => 'nullable|exists:users,id',
+            'user_id' => 'array',
+            'user_id.*' => 'nullable|exists:users,id',
         ]);
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $topic->title = $request->title;
@@ -157,7 +155,6 @@ class TopicController extends Controller
 
            ]);
         }
-        // return new TopicResource($topic);
         return HelperController::api_response_format(200, $topic,__('messages.topic.update'));
 
     }
