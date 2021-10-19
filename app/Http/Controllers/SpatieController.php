@@ -818,7 +818,8 @@ class SpatieController extends Controller
     public function List_Roles_With_Permission(Request $request)
     {
         $request->validate([
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'permission' => 'nullable'
         ]);
 
         if ($request->filled('search')) {
@@ -826,6 +827,13 @@ class SpatieController extends Controller
                 ->paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(202, $roles);
         }
+
+        if ($request->filled('permission')) {
+            $roles = Permission::with('roles')->where('name', 'LIKE', "%$request->permission%")->get()
+                  ->paginate(HelperController::GetPaginate($request));
+            return HelperController::api_response_format(202, $roles);
+        }
+
         $roles = Role::all();
         foreach ($roles as $role) {
             $role->count = User::role($role)->count();
