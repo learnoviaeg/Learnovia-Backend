@@ -53,6 +53,7 @@ class AttemptsController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
             'user_id' => 'integer|exists:users,id',
+            'filter' => 'in:submitted,not_submitted', 
         ]);
 
         $final= collect([]);
@@ -66,7 +67,6 @@ class AttemptsController extends Controller
         $quetions=$quiz->Question->pluck('id');
         $questions=array_merge($quetions->toArray(),$childs);
         $essay=0;
-        // $t_f_Quest=0;
         $t_f_Quest_check=0;
         $t_f_Quest_count = 0;
         $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
@@ -115,77 +115,16 @@ class AttemptsController extends Controller
                 if($attem->status == 'Graded')
                 {
                     $user_Attemp["grade"]= $attem->grade;
-                    // continue;
                 }
+
+
                 if($attem->status != 'Graded')
                     $countEss_TF++;
-
-                // dd($attem->status);
-                
-                // $gradeNotWeight=0;
-                // $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$attem->quiz_lesson->quiz_id)
-                //                             ->where('lesson_id',$attem->quiz_lesson->lesson_id)->first();
-                // //grade item ( attempt_item )user
-                // $gradeitem=GradeItems::where('index',$attem->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
-                // $grade=UserGrader::where('user_id',$user_id)->where('item_id',$gradeitem->id)->where('item_type','item')->pluck('grade')->first();
-                // $gradeNotWeight+=$grade;
-                // dd($grade);
-
-                //7esab daragat el true_false questions
-                // $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest->pluck('id'))->get();
-                // if(count($userEssayCheckAnswerTF) > 0)
-                // {
-                //     foreach($userEssayCheckAnswerTF as $TF){
-                //         if($TF->correction->and_why == true){
-                //             if(isset($TF->correction->grade)){
-                //                 $gradeNotWeight+= $TF->correction->and_why_mark;
-                //                 if(($TF->correction->and_why_right == 1 && $TF->correction->mark < 1) ||
-                //                     $TF->correction->and_why_right == 0 && $TF->correction->mark >= 1){
-                //                     $tes=$TF->correction;
-                //                     $tes->right=2;
-                //                     // $tes->user_quest_grade=$TF->correction->and_why_mark + $TF->correction->mark; // daraget el taleb fel so2al koloh
-                //                     $tes->user_quest_grade=$TF->correction->grade; // daraget el taleb fel so2al koloh
-                //                     $TF->update(['correction'=>json_encode($tes)]); //because it doesn't read update
-                //                 }
-                //             }
-                //             else{
-                //                 $user_Attemp["grade"]= null;
-                //                 $user_Attemp["feedback"] =null;
-                //             }
-                //         }
-                //     }
-                // }
-
-                //7esab daragat el essay questions
-                // $userEssayCheckAnswerE=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$essayQues)->get();
-                // if(count($userEssayCheckAnswerE) > 0)
-                // {
-                //     foreach($userEssayCheckAnswerE as $esay){
-                //         if(isset($esay->correction)){
-                //             $gradeNotWeight+= $esay->correction->grade;
-                //         }
-                //         else{
-                //             $user_Attemp["grade"]= null;
-                //             $user_Attemp["feedback"] =null;
-                //         }
-                //     }
-                // }
-
                 $user_Attemp['id']= $attem->id;
 
-                //check if grade is null so, there is and_why and essay not graded
-                // if(array_key_exists('grade',$user_Attemp)){
-                //     if(!is_null($user_Attemp['grade']))
-                //         $user_Attemp['grade']= $gradeNotWeight;
-                // }
-                // else
-                //     $user_Attemp['grade']= $gradeNotWeight;
-
-                // $grade->grade=$user_Attemp['grade'];
                 $user_Attemp["open_time"]= $attem->open_time;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $user_Attemp["taken_duration"]= Carbon::parse($attem->open_time)->diffInSeconds(Carbon::parse($attem->submit_time),false);
-                // $user_Attemp["status"]= ($user_Attemp["grade"]==null) ? 'Not Graded' : 'Graded';
                 $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question')->first();
                 foreach($user_Attemp['details']->UserQuizAnswer as $answ)
                     $answ->Question->grade_details=quiz_questions::where('quiz_id',$request->quiz_id)->where('question_id',$answ->question_id)->pluck('grade_details')->first();
@@ -196,6 +135,15 @@ class AttemptsController extends Controller
                     $i++;
                 }
             }
+            if($request->filter == 'submitted'){
+                if(count($All_attemp) == 0 )
+                    continue;
+            } 
+            
+            if($request->filter == 'not_submitted'){
+                if(count($All_attemp) != 0 )
+                    continue;
+            } 
 
             $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
