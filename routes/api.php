@@ -535,6 +535,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
     Route::get('courseProgressReport' , 'ReportsController@courseProgressReport')->middleware('permission:reports/course_progress');
     Route::get('courseProgressCounter' , 'ReportsController@CourseProgressCounters')->middleware('permission:reports/course_progress');
+    Route::get('quizStatusReport' , 'ReportsController@quizStatusReport');//->middleware('permission:reports/quizzes_status');
 });
 
 Route::group(['middleware' => ['auth:api','LastAction']], function () {

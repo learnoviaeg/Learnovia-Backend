@@ -25,7 +25,7 @@ class QuizLesson extends Model
         'visible','index','seen_number', 'grade_pass' , 'questions_mark', 'grade_by_user'
     ];
     protected $table = 'quiz_lessons';
-    protected $appends = ['started','user_seen_number','Status', 'ended'];
+    protected $appends = ['started','user_seen_number','Status', 'ended','days'];
 
     protected $dispatchesEvents = [
         'updated' => \App\Events\updateQuizAndQuizLessonEvent::class,
@@ -154,5 +154,15 @@ class QuizLesson extends Model
         parent::boot();
         static::addGlobalScope(new OverrideQuizScope);
     }
+
+    public function getDaysAttribute(){
+
+        $start_date = Carbon::createFromFormat('Y-m-d H:i:s', $this->start_date);
+        $end_date = Carbon::createFromFormat('Y-m-d H:i:s', $this->due_date);
+        $different_days = $start_date->diffInDays($end_date);
+
+        return $different_days;
+    }
+
 }
 

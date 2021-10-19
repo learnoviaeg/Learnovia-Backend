@@ -20,6 +20,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\InactiveUsers;
+use Modules\QuestionBank\Entities\QuizLesson;
 
 class ReportsController extends Controller
 {
@@ -394,6 +395,20 @@ class ReportsController extends Controller
         }
 
         return response()->json(['message' => 'Course progress Counters', 'body' =>  $counterObject], 200);
+    }
+
+    public function quizStatusReport(){
+        
+        $quizzes = QuizLesson::with(['quiz','lesson.course','lesson' => function($query){
+                                    $query->withCount(['SecondaryChain as students_number'=> function($q){
+                                        $q->where('role_id',3);
+                                    }]);
+                                }])
+                                ->withCount(['user_quiz as solved_students','user_quiz as full_mark' => function($q){
+                                    $q->where('user_quizzes.grade', 'quiz_lessons.grade');
+                                }])
+                                ->get();
+        return $quizzes;
     }
     
 }
