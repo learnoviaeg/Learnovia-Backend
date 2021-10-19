@@ -9,6 +9,8 @@ use App\Enroll;
 use App\Grader\TypeGrader;
 use App\Lesson;
 use App\UserGrade;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use App\UserGrader;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -518,14 +520,11 @@ class AttemptsController extends Controller
 
     public function exportAttempts(Request $request)
     {
-
-        $typeIDs = self::get($request,1);
-        
-
         $attempts = new AttemptsController();
         $all_attempts=$attempts->index($request);
+        $body = json_decode(json_encode($all_attempts), true);
         $filename = uniqid();
-        $file = Excel::store(new AttemptsExport($all_attempts), 'Attempt'.$filename.'.xlsx','public');
+        $file = Excel::store(new AttemptsExport($body['original']['body']['users']), 'Attempt'.$filename.'.xlsx','public');
         $file = url(Storage::url('Attempt'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
