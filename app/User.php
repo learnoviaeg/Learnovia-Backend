@@ -260,4 +260,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany('App\Topic');
     }
+    
+    public function quizOverride()
+    { 
+        return $this->hasMany('Modules\QuestionBank\Entities\QuizOverride','user_id','id');
+    }
 }
