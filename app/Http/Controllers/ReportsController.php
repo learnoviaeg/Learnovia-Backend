@@ -20,6 +20,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\InactiveUsers;
+use Illuminate\Support\Facades\DB;
 use Modules\QuestionBank\Entities\QuizLesson;
 
 class ReportsController extends Controller
@@ -397,18 +398,103 @@ class ReportsController extends Controller
         return response()->json(['message' => 'Course progress Counters', 'body' =>  $counterObject], 200);
     }
 
-    public function quizStatusReport(){
-        
-        $quizzes = QuizLesson::with(['quiz','lesson.course','lesson' => function($query){
+    public function totalAttemptsReport(Request $request){
+
+         //validate the request
+         $request->validate([
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
+            'created_by' => 'exists:users,id',
+
+            //for single quiz
+            'quiz_id' => 'exists:quizzes,id|required_with:lesson_id',
+            'lesson_id' => 'exists:lessons,id|required_with:quiz_id',  
+            
+            //for pagination
+            'page' => 'required|integer',
+            'paginate' => 'required|integer',
+        ]);
+
+    
+        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+
+        //viewed_without_action = user_seen_number - solved_students && student_not_olved = students_number - solved_students;
+        $quizzes = QuizLesson::whereIn('lesson_id',$lessons)
+
+                                ->with(['quiz','lesson.course','lesson' => function($query){
+
                                     $query->withCount(['SecondaryChain as students_number'=> function($q){
                                         $q->where('role_id',3);
                                     }]);
+
                                 }])
-                                ->withCount(['user_quiz as solved_students','user_quiz as full_mark' => function($q){
-                                    $q->where('user_quizzes.grade', 'quiz_lessons.grade');
-                                }])
-                                ->get();
-        return $quizzes;
+
+                                ->withCount(['user_quiz as solved_students' => function($q){
+
+                                    $q->select(DB::raw('count(distinct(user_id))'));
+
+                                },'user_quiz as got_zero' => function($q){
+
+                                    $q->where('grade', 0)->select(DB::raw('count(distinct(user_id))'));
+
+                                },'user_quiz as full_mark' => function($q){
+
+                                    $q->whereColumn('grade','quiz_lessons.grade')->select(DB::raw('count(distinct(user_id))'));
+                                }
+                                ,'user_quiz as ‌equals‌_‌grading‌_‌pass' => function($q){
+
+                                    $q->whereColumn('grade','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                }
+                                ,'user_quiz as ‌more‌_than‌_grading‌_‌pass' => function($q){
+
+                                    $q->whereColumn('grade','>','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                }
+                                ,'user_quiz as less‌_than_‌grading‌_‌pass' => function($q){
+
+                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->where('grade','!=', 0)->select(DB::raw('count(distinct(user_id))'));
+                                }
+                            ]);
+
+        if($request->has('quiz_id') && $request->has('lesson_id')){
+            $quizzes->where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id);
+        }
+
+        if($request->has('created_by')){
+
+            $quizzes->whereHas('quiz',function($q) use ($request){
+                $q->where('created_by',$request->created_by);
+            });
+        }
+
+        if($request->has('from') && $request->has('to')){
+            $quizzes->whereBetween('created_at', [$request->from,$request->to]);
+        }
+
+        $allQuizzes = clone $quizzes;
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $attemptsReport['data'] =  $quizzes->skip(($page)*$paginate)->take($paginate)->get();
+ 
+        //pagination object
+        $attemptsReport['current_page']= $page + 1;
+        $attemptsReport['last_page'] = Paginate::allPages($allQuizzes->count(),$paginate);
+        $attemptsReport['total']= $allQuizzes->count();
+        $attemptsReport['per_page']= $attemptsReport['data']->count();
+
+        return response()->json(['message' => 'Quiz attempts report', 'body' =>  $attemptsReport], 200);
     }
     
 }
