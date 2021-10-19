@@ -16,6 +16,7 @@ use Illuminate\Routing\Controller;
 use App\Grader\gradingMethodsInterface;
 use App\Events\RefreshGradeTreeEvent;
 use Auth;
+use App\Exports\AttemptsExport;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\quiz;
@@ -513,5 +514,19 @@ class AttemptsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function exportAttempts(Request $request)
+    {
+
+        $typeIDs = self::get($request,1);
+        
+
+        $attempts = new AttemptsController();
+        $all_attempts=$attempts->index($request);
+        $filename = uniqid();
+        $file = Excel::store(new AttemptsExport($all_attempts), 'Attempt'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Attempt'.$filename.'.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }
