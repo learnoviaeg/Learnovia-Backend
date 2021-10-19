@@ -149,6 +149,7 @@ class AttemptsController extends Controller
             $attemps['username'] = $user->username;
             $attemps['fullname'] =ucfirst($user->firstname) . ' ' . ucfirst($user->lastname);
             $attemps['picture'] = $user->attachment;
+            $attemps['override'] = $user->quizOverride()->where('quiz_lesson_id', $quiz_lesson->id)->first();
             $attemps['Attempts'] = $All_attemp;
             array_push($user_attempts, $attemps);
             if($i>0)
