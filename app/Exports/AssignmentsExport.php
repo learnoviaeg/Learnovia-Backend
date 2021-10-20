@@ -21,26 +21,26 @@ class AssignmentsExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
+        $subsCollect=collect();
         foreach($this->submissions as $submission)
         {
-            // $submission=UserAssigment::where('user_id',$submission['user_id'])->where('assignment_lesson_id',$submission['assignment_lesson_id'])->first();
-            $submission['grade_status']='Graded';
+            $subs['fullname'] = $submission['fullname'];
+            $subs['grade_status']='Graded';
             if($submission['grade'] == null)
-                $submission['grade_status']='Not Graded';
+                $subs['grade_status']='Not Graded';
 
-            $submission['override']=False;
+            $subs['override']='False';
             if($submission['override'] == 1)
-                $submission['override']=True;
+                $subs['override']='True';
 
-            if($submission['grade'] == null)
-                $submission['grade']='-';
+            $subs['grade']=$submission['grade'];
+            if($subs['grade'] == null)
+                $subs['grade']='-';
 
-            $submission=(object) $submission;
-
-            $submission->setHidden([])->setVisible($this->fields);
+            $subsCollect->push($subs);
         }
 
-        return $logs;
+        return $subsCollect;
     }
 
     public function headings(): array
