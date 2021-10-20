@@ -113,7 +113,8 @@ return [
         'quiz_not_started' => 'This quiz didnt start yet',
         'grade_pass_settings' => 'Grade to pass settings added successfully',
         'grade_pass_settings_list' => 'Grade to pass settings',
-        'wrong_date' => 'You can\'t update with these date please, Revision duration and end_date'
+        'wrong_date' => 'You can\'t update with these date please, Revision duration and end_date',
+        'quiz_notify' => 'You have a new quiz :quizName in course :courseName'
     ],
     'permissions' => [
         'no_roles_assigned' => 'There is no roles assigned to this permission',
