@@ -154,6 +154,5 @@ class QuizLesson extends Model
         parent::boot();
         static::addGlobalScope(new OverrideQuizScope);
     }
-
 }
 
