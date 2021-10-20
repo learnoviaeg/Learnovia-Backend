@@ -453,11 +453,11 @@ class ReportsController extends Controller
 
                                     $q->whereColumn('grade','quiz_lessons.grade')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌equals‌_‌grading‌_‌pass' => function($q){
+                                ,'user_quiz as ‌equals‌_‌grading‌_‌grade_to_pass' => function($q){
 
                                     $q->whereColumn('grade','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌more‌_than‌_grading‌_‌pass' => function($q){
+                                ,'user_quiz as ‌more‌_than‌_grade_to_pass' => function($q){
 
                                     $q->whereColumn('grade','>','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
@@ -498,6 +498,7 @@ class ReportsController extends Controller
 
                                                 return [
                                                     'id'             => $quizLesson->quiz->id,
+                                                    'lesson_id'             => $quizLesson->lesson_id,
                                                     'name'           => $quizLesson->quiz->name,
                                                     'course_name'    => $quizLesson->lesson->course->name,
                                                     'classes'        => $quizLesson->lesson->shared_classes,
@@ -513,8 +514,8 @@ class ReportsController extends Controller
                                                     'got_full_mark'    => $quizLesson->full_mark,
                                                     'got_zero'    => $quizLesson->got_zero,
                                                     'viewed_without_action' => $quizLesson->user_seen_number - $quizLesson->solved_students,
-                                                    'equals‌_‌grading‌_‌pass' => $quizLesson->equals‌_‌grading‌_‌pass,
-                                                    'more‌_than‌_grading‌_‌pass' => $quizLesson->more‌_than‌_grading‌_‌pass,
+                                                    'equals‌_‌grading‌_‌pass' => $quizLesson->‌equals‌_‌grading‌_‌grade_to_pass,
+                                                    'more‌_than‌_grading‌_‌pass' => $quizLesson->‌more‌_than‌_grade_to_pass,
                                                     'less‌_than_‌grading‌_‌pass' => $quizLesson->less‌_than_‌grading‌_‌pass,
                                                 ];
                                             });;
