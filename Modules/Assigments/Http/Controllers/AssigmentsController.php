@@ -7,6 +7,8 @@ use App\CourseSegment;
 use App\Course;
 use App\Enroll;
 use App\User;
+use App\Exports\AssignmentsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Lesson;
 use App\SegmentClass;
 use App\ClassLevel;
@@ -1208,5 +1210,15 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(200,  AssignmentSubmissionResource::collection($result), $message = []);
 
         }
+    }
+
+    public function submissionExport(Request $request)
+    {
+        $all_attempts=self::assignmentSubmissions($request);
+        $body = json_decode(json_encode($all_attempts), true);
+        $filename = uniqid();
+        $file = Excel::store(new AssignmentsExport($body['original']['body']), 'Assignment'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Assignment'.$filename.'.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }
