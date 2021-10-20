@@ -8,7 +8,7 @@ use Modules\QuestionBank\Entities\userQuiz;
 
 class AttemptsExport implements FromCollection, WithHeadings
 {
-    protected $fields = ['fullname','username','attempt_index','status','open_time','submit_time','number of attempts'];
+    protected $fields = ['attempt_index','open_time','submit_time','status','username','fullname','taken_duration_min'];
 
     function __construct($attempts) {
         $this->attempts=$attempts;
@@ -19,26 +19,20 @@ class AttemptsExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
+        $forSetExport=collect();
         foreach($this->attempts as $user)
         {    
             foreach($user['Attempts'] as $attempt)
-                {
-                    // dd($attempt);
-                    $forSetExport=UserQuiz::find($attempt['id']);
-                    $forSetExport['username']= $user['username'];
-                    $forSetExport['fullname'] = $user['fullname'];
-                    // $forSetExport['attempt_index'] = $attempt['details']['attempt_index'];
-                    // dd(($forSetExport));
-                    // $forSetExport['status'] = $user['fullname'];
-                    // $forSetExport['open_time'] = $user['fullname'];
-                    // $forSetExport['submit_time'] = $user['fullname'];
-                    // $forSetExport['number of attempts'] = $user['fullname'];
-
-                    // $oo=(object)$forSetExport;
-                }
-                $forSetExport->setHidden(['id'])->setVisible($this->fields);
+            {
+                $forExport=UserQuiz::find($attempt['id']);
+                $forExport['username']= $user['username'];
+                $forExport['fullname'] = $user['fullname'];
+                $forExport['taken_duration_min'] = $attempt['taken_duration']/60;
+                $forSetExport->push($forExport);
+            }
+            $forExport->setHidden([])->setVisible($this->fields);
         }
-        return collect($this->attempts);
+        return collect($forSetExport);
     }
 
     public function headings(): array
