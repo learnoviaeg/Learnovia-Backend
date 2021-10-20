@@ -490,6 +490,12 @@ class ReportsController extends Controller
                                             ->take($paginate)
                                             ->get()
                                             ->map(function ($quizLesson){
+
+                                                //calculate days number between two dates
+                                                $start_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->start_date);
+                                                $end_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->due_date);
+                                                $different_days = $start_date->diffInDays($end_date);
+
                                                 return [
                                                     'id'             => $quizLesson->quiz->id,
                                                     'name'           => $quizLesson->quiz->name,
@@ -498,7 +504,7 @@ class ReportsController extends Controller
                                                     'start_date'     => $quizLesson->start_date,
                                                     'due_date'       => $quizLesson->due_date,
                                                     'duration'       => round($quizLesson->quiz->duration/60,0),
-                                                    'period'         => $quizLesson->days,
+                                                    'period'         => $different_days,
                                                     'attempts_number'    => $quizLesson->max_attemp,
                                                     'gradeing_method'    => $quizLesson->grading_method_id,
                                                     'students_number'    => $quizLesson->lesson->students_number,
