@@ -53,6 +53,8 @@ class TopicController extends Controller
         ]);
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
+        if(!Auth::user()->can('site/show-all-courses'))
+            $enrolls->where('user_id',Auth::id());
         $topic_ids =  EnrollTopic::whereIn('enroll_id' , $enrolls->pluck('id'))->pluck('topic_id');
         $topics = Topic::with('created_by')->whereIn('id' , $topic_ids);
         if($request->filled('search'))
