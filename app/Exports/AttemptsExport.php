@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\Exportable;
 class AttemptsExport implements FromCollection, WithHeadings
 {
     use Exportable;
-    protected $fields = ['attempt_index','open_time','submit_time','status','username','fullname','taken_duration_min'];
+    protected $fields = ['username','fullname','attempt_index','open_time','submit_time','status','taken_duration_min'];
 
     function __construct($attempts) {
         $this->attempts=$attempts;
@@ -26,13 +26,15 @@ class AttemptsExport implements FromCollection, WithHeadings
         {    
             foreach($user['Attempts'] as $attempt)
             {
-                $forExport=UserQuiz::find($attempt['id']);
                 $forExport['username']= $user['username'];
                 $forExport['fullname'] = $user['fullname'];
+                $forExport['attempt_index'] = $attempt['details']['attempt_index'];
+                $forExport['open_time'] = $attempt['details']['open_time'];
+                $forExport['submit_time'] = $attempt['details']['submit_time'];
+                $forExport['status'] = $attempt['details']['status'];
                 $forExport['taken_duration_min'] = $attempt['taken_duration']/60;
                 $forSetExport->push($forExport);
             }
-            $forExport->setHidden([])->setVisible($this->fields);
         }
         return $forSetExport;
     }
