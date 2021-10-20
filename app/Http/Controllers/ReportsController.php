@@ -20,6 +20,8 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\InactiveUsers;
+use Illuminate\Support\Facades\DB;
+use Modules\QuestionBank\Entities\QuizLesson;
 
 class ReportsController extends Controller
 {
@@ -394,6 +396,136 @@ class ReportsController extends Controller
         }
 
         return response()->json(['message' => 'Course progress Counters', 'body' =>  $counterObject], 200);
+    }
+
+    public function totalAttemptsReport(Request $request){
+
+         //validate the request
+         $request->validate([
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
+            'created_by' => 'exists:users,id',
+
+            //for single quiz
+            'quiz_id' => 'exists:quizzes,id|required_with:lesson_id',
+            'lesson_id' => 'exists:lessons,id|required_with:quiz_id',  
+            
+            //for pagination
+            'page' => 'required|integer',
+            'paginate' => 'required|integer',
+        ]);
+
+    
+        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+
+        //starting report  query
+        $quizLessons = QuizLesson::whereIn('lesson_id',$lessons)
+
+                                ->with(['quiz','lesson.course','lesson' => function($query){
+
+                                    $query->withCount(['SecondaryChain as students_number'=> function($q){
+                                        $q->where('role_id',3);
+                                    }]);
+
+                                }])
+
+                                ->withCount(['user_quiz as solved_students' => function($q){
+
+                                    $q->select(DB::raw('count(distinct(user_id))'));
+
+                                },'user_quiz as got_zero' => function($q){
+
+                                    $q->where('grade', 0)->select(DB::raw('count(distinct(user_id))'));
+
+                                },'user_quiz as full_mark' => function($q){
+
+                                    $q->whereColumn('grade','quiz_lessons.grade')->select(DB::raw('count(distinct(user_id))'));
+                                }
+                                ,'user_quiz as ‌equals‌_‌grading‌_‌pass' => function($q){
+
+                                    $q->whereColumn('grade','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                }
+                                ,'user_quiz as ‌more‌_than‌_grading‌_‌pass' => function($q){
+
+                                    $q->whereColumn('grade','>','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                }
+                                ,'user_quiz as less‌_than_‌grading‌_‌pass' => function($q){
+
+                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->where('grade','!=', 0)->select(DB::raw('count(distinct(user_id))'));
+                                }
+                            ]);
+
+        if($request->has('quiz_id') && $request->has('lesson_id')){
+            $quizLessons->where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id);
+        }
+
+        if($request->has('created_by')){
+
+            $quizLessons->whereHas('quiz',function($q) use ($request){
+                $q->where('created_by',$request->created_by);
+            });
+        }
+
+        if($request->has('from') && $request->has('to')){
+            $quizLessons->whereBetween('created_at', [$request->from,$request->to]);
+        }
+
+        $allQuizzes = clone $quizLessons;
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $attemptsReport['data'] =  $quizLessons->skip(($page)*$paginate)
+                                            ->take($paginate)
+                                            ->get()
+                                            ->map(function ($quizLesson){
+
+                                                //calculate days number between two dates
+                                                $start_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->start_date);
+                                                $end_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->due_date);
+                                                $different_days = $start_date->diffInDays($end_date);
+
+                                                return [
+                                                    'id'             => $quizLesson->quiz->id,
+                                                    'name'           => $quizLesson->quiz->name,
+                                                    'course_name'    => $quizLesson->lesson->course->name,
+                                                    'classes'        => $quizLesson->lesson->shared_classes,
+                                                    'start_date'     => $quizLesson->start_date,
+                                                    'due_date'       => $quizLesson->due_date,
+                                                    'duration'       => round($quizLesson->quiz->duration/60,0),
+                                                    'period'         => $different_days,
+                                                    'attempts_number'    => $quizLesson->max_attemp,
+                                                    'gradeing_method'    => $quizLesson->grading_method_id,
+                                                    'students_number'    => $quizLesson->lesson->students_number,
+                                                    'solved_students'    => $quizLesson->solved_students,
+                                                    'not_solved_students'    => $quizLesson->lesson->students_number - $quizLesson->solved_students,
+                                                    'got_full_mark'    => $quizLesson->full_mark,
+                                                    'got_zero'    => $quizLesson->got_zero,
+                                                    'viewed_without_action' => $quizLesson->user_seen_number - $quizLesson->solved_students,
+                                                    'equals‌_‌grading‌_‌pass' => $quizLesson->equals‌_‌grading‌_‌pass,
+                                                    'more‌_than‌_grading‌_‌pass' => $quizLesson->more‌_than‌_grading‌_‌pass,
+                                                    'less‌_than_‌grading‌_‌pass' => $quizLesson->less‌_than_‌grading‌_‌pass,
+                                                ];
+                                            });;
+ 
+        //pagination object
+        $attemptsReport['current_page']= $page + 1;
+        $attemptsReport['last_page'] = Paginate::allPages($allQuizzes->count(),$paginate);
+        $attemptsReport['total']= $allQuizzes->count();
+        $attemptsReport['per_page']= $attemptsReport['data']->count();
+
+        return response()->json(['message' => 'Quiz attempts report', 'body' =>  $attemptsReport], 200);
     }
     
 }
