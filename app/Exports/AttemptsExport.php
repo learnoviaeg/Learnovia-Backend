@@ -5,9 +5,11 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Modules\QuestionBank\Entities\userQuiz;
+use Maatwebsite\Excel\Concerns\Exportable;
 
 class AttemptsExport implements FromCollection, WithHeadings
 {
+    use Exportable;
     protected $fields = ['attempt_index','open_time','submit_time','status','username','fullname','taken_duration_min'];
 
     function __construct($attempts) {
@@ -32,7 +34,7 @@ class AttemptsExport implements FromCollection, WithHeadings
             }
             $forExport->setHidden([])->setVisible($this->fields);
         }
-        return collect($forSetExport);
+        return $forSetExport;
     }
 
     public function headings(): array
