@@ -616,25 +616,23 @@ class ReportsController extends Controller
         }
 
         $userStatus = $userStatus->orderBy('created_at','desc')
-                                  ->groupBy('user');
+                                ->groupBy('user')
+                                ->get()
+                                ->map(function ($userLog){
 
+                                    $status = 'offline';
+                                    if($userLog->created_at >= Carbon::now()->subMinutes(1) && $userLog->created_at <= Carbon::now()){
+                                        $status = 'online';
+                                    }
 
-        $userStatus = $userStatus->get()
-                   ->map(function ($userLog){
-
-                    $status = 'offline';
-                    if($userLog->created_at >= Carbon::now()->subMinutes(1) && $userLog->created_at <= Carbon::now()){
-                        $status = 'online';
-                    }
-
-                    return [
-                        'fullname' => $userLog->users->fullname,
-                        'username' => $userLog->users->username,
-                        'lastaction' => $userLog->users->lastaction,
-                        'status' => $status
-                    ];
-                                        
-                });
+                                    return [
+                                        'fullname' => $userLog->users->fullname,
+                                        'username' => $userLog->users->username,
+                                        'lastaction' => $userLog->users->lastaction,
+                                        'status' => $status
+                                    ];
+                                                        
+                                });
 
         if($request->filled('export')){
 
