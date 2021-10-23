@@ -57,21 +57,6 @@ class AttendanceLogController extends Controller
                 $courseSeg= CourseSegment::GetWithClassAndCourse($classID,$courseID->course_id);
                 if(!isset($courseSeg))
                     continue;
-
-                if($courseSeg->id==$attendance_sessions->course_segment_id)
-                {
-                    User::notify([
-                        'id' => isset($AttendanceLog) ? $AttendanceLog[0]->id : null,
-                        'message' => 'Attendance is taken with status '. AttendanceStatus::find($user['status_id'])->letter,
-                        'from' => Auth::User()->id,
-                        'users' => array($user['id']),
-                        'course_id' => $courseID->course_id,
-                        'class_id' => (int)$classID[0],
-                        'lesson_id' => null,
-                        'type' => 'Attendance',
-                        'publish_date' => $date,
-                    ]);
-                }
             }
         }
         if(count($result['users']) == 0)
