@@ -90,8 +90,9 @@ class AttemptsController extends Controller
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
         
         $user_class=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3);
-        if($request->filled('class'))
+        if($request->filled('class')){
             $user_class->where('group',$request->class);
+        }
         
         $users=$user_class->pluck('user_id')->toArray();
 
