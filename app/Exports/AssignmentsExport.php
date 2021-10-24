@@ -11,7 +11,7 @@ class AssignmentsExport implements FromCollection, WithHeadings
 {
     use Exportable;
 
-    protected $fields = ['fullname','status','override','grade_status'];
+    protected $fields = ['fullname','grade_status','grade','override','status'];
 
     function __construct($submissions) {
         $this->submissions=$submissions;
@@ -25,17 +25,22 @@ class AssignmentsExport implements FromCollection, WithHeadings
         foreach($this->submissions as $submission)
         {
             $subs['fullname'] = $submission['fullname'];
-            $subs['grade_status']='Graded';
-            if($submission['grade'] == null)
-                $subs['grade_status']='Not Graded';
+            $subs['grade status']='Graded';
+            $subs['grade']=$submission['grade'];
+            if($submission['grade'] == null){
+                $subs['grade status']='Not Graded';
+                $subs['grade']='-';
+            }
 
             $subs['override']='False';
             if($submission['override'] == 1)
                 $subs['override']='True';
 
-            $subs['grade']=$submission['grade'];
-            if($subs['grade'] == null)
-                $subs['grade']='-';
+            $subs['status']='Submitted';
+            if($submission['submit_date'] == null)
+                $subs['status']='Not Submitted';
+
+            dd($subs);
 
             $subsCollect->push($subs);
         }
