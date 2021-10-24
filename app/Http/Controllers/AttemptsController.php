@@ -93,7 +93,7 @@ class AttemptsController extends Controller
         if($request->filled('class'))
             $user_class->where('group',$request->class);
         
-        $users->pluck('user_id')->toArray();
+        $users=$user_class->pluck('user_id')->toArray();
 
         if($request->filled('user_id')){
             unset($users);
