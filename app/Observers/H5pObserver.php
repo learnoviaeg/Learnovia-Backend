@@ -67,7 +67,7 @@ class H5pObserver
     public function deleted(h5pLesson $h5pLesson)
     {
         $lesson = Lesson::find($h5pLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
+        $course_id = $lesson->course_id;
         UserSeen::where('lesson_id',$h5pLesson->lesson_id)->where('item_id',$h5pLesson->content_id)->where('type','h5p')->delete();
         $this->report->calculate_course_progress($course_id);
     }
