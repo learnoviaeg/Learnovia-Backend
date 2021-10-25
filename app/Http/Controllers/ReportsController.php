@@ -528,5 +528,125 @@ class ReportsController extends Controller
 
         return response()->json(['message' => 'Quiz attempts report', 'body' =>  $attemptsReport], 200);
     }
+
+    public function usersStatusReport(Request $request,$option=null)
+    {
+        //validate the request
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
+            'class' => 'exists:classes,id',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
+            'search' => 'string',
+            'report_year' => 'required|integer',
+            'report_month' => 'integer|required_with:report_day',
+            'report_day' => 'integer',
+            'never' => 'in:1',
+            'since' => 'in:1,5,10',
+            'export' => 'in:1'
+        ]);
+
+        $since = 10;
+        if($request->filled('since')){
+            $since = $request->since;
+        }
+
+        $enrolledUsers = $this->chain->getEnrollsByChain($request)->select('user_id')->distinct()->with('user')->get()->pluck('user');
+
+        //users who doesnt have any logs in system
+        if($request->filled('never')){
+
+            $userStatus = User::whereDoesntHave('logs');
+
+            if($request->filled('year')){
+                $userStatus->whereIn('id',$enrolledUsers->pluck('id'));
+            }
+
+            $userStatus = $userStatus->get()
+                                    ->map(function ($user){
+
+                                        return [
+                                            'fullname' => $user->fullname,
+                                            'username' => $user->username,
+                                            'lastaction' => null,
+                                            'status' => 'offline'
+                                        ];
+                                                            
+                                    });
+                
+            if($request->filled('export')){
+
+                $file = $this->exportUserStatusReport($userStatus);                
+                return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
+            }
+            
+            return response()->json(['message' => 'User status report', 'body' =>  $userStatus], 200);
+        }
+
+        //users who has logs during the given time
+        $userStatus = Log::whereYear('created_at', $request->report_year)->whereIn('user',$enrolledUsers->pluck('username'))->with('users');
+            
+        if($request->filled('report_month')){
+            $userStatus->whereMonth('created_at',$request->report_month);
+        }
+        
+        if($request->filled('report_day')){
+            $userStatus->whereDay('created_at',$request->report_day);
+        }
+
+        if($request->filled('from') && $request->filled('to')){
+            $userStatus->whereBetween('created_at', [$request->from, $request->to]);
+        }
+
+        if($option == 'active'){
+            $userStatus->where('created_at','>=' ,Carbon::now()->subMinutes($since))->where('created_at','<=' ,Carbon::now());
+        }
+
+        if($option == 'in_active'){
+            $activeUsers = clone $userStatus;
+
+            $activeUsers->where('created_at','>=' ,Carbon::now()->subMinutes($since))->where('created_at','<=' ,Carbon::now());
+            
+            $userStatus->whereBetween('created_at',[Carbon::now()->subHours(1),Carbon::now()])->whereNotIn('user',$activeUsers->pluck('user'));
+        }
+
+        $userStatus = $userStatus->orderBy('created_at','desc')
+                                ->groupBy('user')
+                                ->get()
+                                ->map(function ($userLog){
+
+                                    $status = 'offline';
+                                    if($userLog->created_at >= Carbon::now()->subMinutes(1) && $userLog->created_at <= Carbon::now()){
+                                        $status = 'online';
+                                    }
+
+                                    return [
+                                        'fullname' => $userLog->users->fullname,
+                                        'username' => $userLog->users->username,
+                                        'lastaction' => $userLog->users->lastaction,
+                                        'status' => $status
+                                    ];
+                                                        
+                                });
+
+        if($request->filled('export')){
+
+            $file = $this->exportUserStatusReport($userStatus);                
+            return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
+        }
+
+        return response()->json(['message' => 'User status report', 'body' =>  $userStatus], 200);
+    }
     
+    public function exportUserStatusReport($report){
+        $filename = uniqid();
+        $file = Excel::store(new InactiveUsers($report), 'reports'.$filename.'.xlsx','public');
+        $file = url(Storage::url('reports'.$filename.'.xlsx'));
+        return $file;
+    }
 }
