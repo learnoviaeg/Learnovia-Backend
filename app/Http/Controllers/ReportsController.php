@@ -561,7 +561,7 @@ class ReportsController extends Controller
         //users who doesnt have any logs in system
         if($request->filled('never')){
 
-            $userStatus = User::whereDoesntHave('logs');
+            $userStatus = User::whereDoesntHave('lastactionincourse');
 
             if($request->filled('year')){
                 $userStatus->whereIn('id',$enrolledUsers->pluck('id'));
@@ -589,46 +589,46 @@ class ReportsController extends Controller
         }
 
         //users who has logs during the given time
-        $userStatus = Log::whereYear('created_at', $request->report_year)->whereIn('user',$enrolledUsers->pluck('username'))->with('users');
+        $userStatus = LAstAction::whereYear('date', $request->report_year)->whereIn('user_id',$enrolledUsers->pluck('id'))->with('user');
             
         if($request->filled('report_month')){
-            $userStatus->whereMonth('created_at',$request->report_month);
+            $userStatus->whereMonth('date',$request->report_month);
         }
         
         if($request->filled('report_day')){
-            $userStatus->whereDay('created_at',$request->report_day);
+            $userStatus->whereDay('date',$request->report_day);
         }
 
         if($request->filled('from') && $request->filled('to')){
-            $userStatus->whereBetween('created_at', [$request->from, $request->to]);
+            $userStatus->whereBetween('date', [$request->from, $request->to]);
         }
 
         if($option == 'active'){
-            $userStatus->where('created_at','>=' ,Carbon::now()->subMinutes($since))->where('created_at','<=' ,Carbon::now());
+            $userStatus->where('date','>=' ,Carbon::now()->subMinutes($since))->where('date','<=' ,Carbon::now());
         }
 
         if($option == 'in_active'){
             $activeUsers = clone $userStatus;
 
-            $activeUsers->where('created_at','>=' ,Carbon::now()->subMinutes($since))->where('created_at','<=' ,Carbon::now());
+            $activeUsers->where('date','>=' ,Carbon::now()->subMinutes($since))->where('date','<=' ,Carbon::now());
             
-            $userStatus->whereBetween('created_at',[Carbon::now()->subHours(1),Carbon::now()])->whereNotIn('user',$activeUsers->pluck('user'));
+            $userStatus->whereBetween('date',[Carbon::now()->subHours(1),Carbon::now()])->whereNotIn('user_id',$activeUsers->pluck('user_id'));
         }
 
-        $userStatus = $userStatus->orderBy('created_at','desc')
-                                ->groupBy('user')
+        $userStatus = $userStatus->orderBy('date','desc')
+                                ->groupBy('user_id')
                                 ->get()
                                 ->map(function ($userLog){
 
                                     $status = 'offline';
-                                    if($userLog->created_at >= Carbon::now()->subMinutes(1) && $userLog->created_at <= Carbon::now()){
+                                    if($userLog->date >= Carbon::now()->subMinutes(1) && $userLog->date <= Carbon::now()){
                                         $status = 'online';
                                     }
 
                                     return [
-                                        'fullname' => $userLog->users->fullname,
-                                        'username' => $userLog->users->username,
-                                        'lastaction' => $userLog->users->lastaction,
+                                        'fullname' => $userLog->user->fullname,
+                                        'username' => $userLog->user->username,
+                                        'lastaction' => $userLog->user->lastaction,
                                         'status' => $status
                                     ];
                                                         
