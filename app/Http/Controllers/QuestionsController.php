@@ -281,7 +281,6 @@ class QuestionsController extends Controller
         $total_mark = 0;
         foreach($question['MCQ_Choices'] as $key=>$mcq)
         {
-            $mcq['key']=++$key;
             $mark_details['type']=$question['mcq_type'];
             $mark_details['details'][]=$mcq;
             $total_mark += $mcq['mark'];
