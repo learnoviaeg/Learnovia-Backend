@@ -31,6 +31,7 @@ class VideoStream
                 'seekable' => true
             )
         ));
+		dd($this->path);
 
 		if (!($this->stream = fopen($this->path, 'rb'))) {
 			die('Could not open stream for reading');
