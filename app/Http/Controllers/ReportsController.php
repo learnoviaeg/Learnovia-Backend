@@ -20,6 +20,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\InactiveUsers;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\QuestionBank\Entities\QuizLesson;
 
@@ -259,7 +260,13 @@ class ReportsController extends Controller
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
    
-        $courses = $enrolls->orderBy('level')->select('course')->distinct()->with('courses')->get()->pluck('courses')->filter();
+        $courses = $enrolls->orderBy('level')->select('course')->distinct()->with('courses');
+
+        if(!$request->has('user_id')){
+            $courses->where('user_id',Auth::id());
+        }
+        
+        $courses = $courses->get()->pluck('courses')->filter();
        
         $reportObjects = collect();
 
@@ -366,7 +373,13 @@ class ReportsController extends Controller
         ]);
 
         //need to be refactored (line below)
-        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();
+        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain');
+        
+        if(!$request->has('user_id')){
+            $lessons->where('user_id',Auth::id());
+        }
+        
+        $lessons = $lessons->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();
 
         $componentsHelper = new ComponentsHelper();
         $componentsHelper->setLessons($lessons);
@@ -428,7 +441,7 @@ class ReportsController extends Controller
         ]);
 
     
-        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+        $lessons = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
 
         //starting report  query
         $quizLessons = QuizLesson::whereIn('lesson_id',$lessons)
