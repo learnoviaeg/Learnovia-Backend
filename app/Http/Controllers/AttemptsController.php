@@ -157,7 +157,7 @@ class AttemptsController extends Controller
             }
             
             if($request->filter == 'notGraded'){
-                if(count($countEss_TF) == 0 )
+                if($countEss_TF == 0 )
                     continue;
             }
 
