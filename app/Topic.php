@@ -94,7 +94,7 @@ class Topic extends Model
             $user_details = User::find($user);
             $object['id'] = $user_details->id;
             $object['name'] = $user_details->firstname;
-            $object['image'] = $user_details->image;
+            $object['image'] = $user_details->picture;
             $names['users'][] =$object;
         }}
         $filter=$names;
