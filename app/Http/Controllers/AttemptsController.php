@@ -56,7 +56,7 @@ class AttemptsController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
             'user_id' => 'integer|exists:users,id',
-            'filter' => 'in:submitted,not_submitted', 
+            'filter' => 'in:submitted,not_submitted,notGraded', 
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
         ]);
@@ -119,7 +119,6 @@ class AttemptsController extends Controller
             
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
 
-            $countEss_TF=0;
             $user_grade=null;
             foreach($attems as $key=>$attem){
                 $user_Attemp["grade"]=null;
@@ -155,7 +154,12 @@ class AttemptsController extends Controller
             if($request->filter == 'not_submitted'){
                 if(count($All_attemp) != 0 )
                     continue;
-            } 
+            }
+            
+            if($request->filter == 'notGraded'){
+                if($countEss_TF == 0 )
+                    continue;
+            }
 
             $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
@@ -171,9 +175,27 @@ class AttemptsController extends Controller
 
         $all_users['essay']=$essay;
         $all_users['T_F']=$t_f_Quest_count;
+        $all_users['all']=count($users);
         $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
         $all_users['submitted_users'] = $Submitted_users ;
         $all_users['notGraded'] = $countEss_TF ;
+        if($request->filter == 'submitted'){
+            $all_users['unsubmitted_users'] = 0 ;
+            $all_users['submitted_users'] = count($user_attempts) ;
+            $all_users['notGraded'] = 0 ;
+        } 
+        
+        if($request->filter == 'not_submitted'){
+            $all_users['unsubmitted_users'] = count($user_attempts);
+            $all_users['submitted_users'] = 0;
+            $all_users['notGraded'] = 0 ;
+        }
+        
+        if($request->filter == 'notGraded'){
+            $all_users['unsubmitted_users'] = 0 ;
+            $all_users['submitted_users'] =0 ;
+            $all_users['notGraded'] = count($user_attempts) ;
+        }
         $final->put('submittedAndNotSub',$all_users);
         $final->put('users',$user_attempts);
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
