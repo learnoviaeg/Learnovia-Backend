@@ -18,6 +18,8 @@ Route::get('h5p_protect', function(Request $request)
 
     if(str_contains($video_name,'jpg') || str_contains($video_name,'jpeg') || str_contains($video_name,'png'))
         $filePath =ltrim( Storage::url('images/'.$video_name), '/');
+    else if(str_contains($video_name,'mp3'))
+        $filePath =ltrim( Storage::url('audios/'.$video_name), '/');
     else
         $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
 

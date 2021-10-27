@@ -113,11 +113,13 @@ class AttemptsController extends Controller
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
 
             $countEss_TF=0;
+            $user_grade=null;
             foreach($attems as $key=>$attem){
                 $user_Attemp["grade"]=null;
                 if($attem->status == 'Graded')
                 {
                     $user_Attemp["grade"]= $attem->grade;
+                    $user_grade=$quiz_lesson->grade;
                 }
 
 
@@ -151,6 +153,7 @@ class AttemptsController extends Controller
             $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
             $attemps['fullname'] =ucfirst($user->firstname) . ' ' . ucfirst($user->lastname);
+            $attemps['grade'] = $user_grade;
             $attemps['picture'] = $user->attachment;
             $attemps['override'] = $user->quizOverride()->where('quiz_lesson_id', $quiz_lesson->id)->first();
             $attemps['Attempts'] = $All_attemp;
