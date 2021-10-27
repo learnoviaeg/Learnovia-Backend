@@ -31,62 +31,70 @@ class Topic extends Model
         if(property_exists($filter, 'years')){
         foreach($filter->years as $year)
         {
-            $object['id'] = AcademicYear::find($year)->id;
-            $object['name'] = AcademicYear::find($year)->name;
+            $year_details = AcademicYear::find($year);
+            $object['id'] =$year_details->id;
+            $object['name'] =$year_details->name;
             $names['years'][] =$object;
 
         }}
         if(property_exists($filter, 'types')){
         foreach($filter->types as $type)
         {
-            $object['id'] = AcademicType::find($type)->id;
-            $object['name'] = AcademicType::find($type)->name;
+            $type_details = AcademicType::find($type);
+            $object['id'] = $type_details->id;
+            $object['name'] = $type_details->name;
             $names['types'][] =$object;
         }}
         if(property_exists($filter, 'segments')){
         foreach($filter->segments as $segment)
         {
-            $object['id'] = Segment::find($segment)->id;
-            $object['name'] = Segment::find($segment)->name;
+            $segment_details = Segment::find($segment);
+            $object['id'] = $segment_details->id;
+            $object['name'] =$segment_details->name;
             $names['segments'][] =$object;
         }}
 
         if(property_exists($filter, 'levels')){
             foreach($filter->levels as $level)
             {
-                $object['id'] = Level::find($level)->id;
-                $object['name'] = Level::find($level)->name;
+                $level_details = Level::find($level);
+                $object['id'] =$level_details->id;
+                $object['name'] =$level_details->name;
                 $names['levels'][] =$object;         
             }
         }
         if(property_exists($filter, 'classes')){
             foreach($filter->classes as $class)
             {
-                $object['id'] = Classes::find($class)->id;
-                $object['name'] = Classes::find($class)->name;
+                $class_details = Classes::find($class);
+                $object['id'] =$class_details->id;
+                $object['name'] =$class_details->name;
                 $names['classes'][] =$object;
             }
         }
         if(property_exists($filter, 'courses')){
           foreach($filter->courses as $course)
             {
-                $object['id'] = Course::find($course)->id;
-                $object['name'] = Course::find($course)->name;
+                $course_details = Course::find($course);
+                $object['id'] = $course_details->id;
+                $object['name'] = $course_details->name;
                 $names['courses'][] =$object;
             }}        
         if(property_exists($filter, 'roles')){
         foreach($filter->roles as $role)
         {
-            $object['id'] = Role::find($role)->id;
-            $object['name'] = Role::find($role)->name;
+            $role_details= Role::find($role);
+            $object['id'] =$role_details->id;
+            $object['name'] =$role_details->name;
             $names['roles'][] =$object;
-
         }}
         if(property_exists($filter, 'user_id')){
         foreach($filter->user_id as $user)
         {
-            $object['id'] = User::find($user)->id;
-            $object['name'] = User::find($user)->firstname;
+            $user_details = User::find($user);
+            $object['id'] = $user_details->id;
+            $object['name'] = $user_details->firstname;
+            $object['image'] = $user_details->image;
             $names['users'][] =$object;
         }}
         $filter=$names;
