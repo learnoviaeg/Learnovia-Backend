@@ -57,32 +57,30 @@ class MaterialsController extends Controller
 
             $lessons = [$request->lesson];
         }
-            
-        $material = Material::with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
 
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $materials_query =  Material::orderBy('created_at','desc');
+        $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons)->skip(($page)*$paginate)->take($paginate);
         if($request->user()->can('site/course/student'))
             $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
 
-        // $sort_in = 'desc';
-        // if($request->has('sort_in'))
-        //     $sort_in=$request->sort_in;
-
-        //copy this counts to count it before filteration
-        $query=clone $material;
-        $all=$query->select(DB::raw
-                        (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
-                            COUNT(case `type` when 'media' then 1 else null end) as media ,
-                            COUNT(case `type` when 'page' then 1 else null end) as page" 
-                        ))->first()->only(['file','media','page']);
-        $cc['all']=$all['file']+$all['media']+$all['page'];
-        //
 
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
 
         if($count == 'count'){
-
-            $counts = $material->select(DB::raw
+             //copy this counts to count it before filteration
+            $query=clone $materials_query;
+            $all=$query->select(DB::raw
+                            (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
+                                COUNT(case `type` when 'media' then 1 else null end) as media ,
+                                COUNT(case `type` when 'page' then 1 else null end) as page" 
+                            ))->first()->only(['file','media','page']);
+            $cc['all']=$all['file']+$all['media']+$all['page'];
+        
+            $counts = $materials_query->select(DB::raw
                 (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
                     COUNT(case `type` when 'media' then 1 else null end) as media ,
                     COUNT(case `type` when 'page' then 1 else null end) as page" 
@@ -99,7 +97,13 @@ class MaterialsController extends Controller
             unset($one->lesson->SecondaryChain);
         }
 
-        return response()->json(['message' => __('messages.materials.list'), 'body' => $AllMat->sortByDesc('created_at')->paginate(Paginate::GetPaginate($request))], 200);
+        $result['data'] =  $AllMat;
+        $result['current_page']= $page + 1;
+        $result['last_page'] = Paginate::allPages($materials_query->count(),$paginate);
+        $result['total']= $materials_query->count();
+        $result['per_page']= count($result['data']);
+
+        return response()->json(['message' => __('messages.materials.list'), 'body' =>$result], 200);
     }
 
     /**
