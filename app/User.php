@@ -167,6 +167,10 @@ class User extends Authenticatable
         
     }
 
+    public function getStatusAttribute(){
+        return;
+    }
+
     public function notifications()
     {
         return $this->belongsToMany('App\Notification')->with('lesson')->orderByDesc('publish_date')->withPivot('read_at');
