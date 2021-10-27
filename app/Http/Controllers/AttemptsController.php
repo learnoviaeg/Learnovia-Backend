@@ -57,6 +57,8 @@ class AttemptsController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
             'user_id' => 'integer|exists:users,id',
             'filter' => 'in:submitted,not_submitted', 
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
         ]);
 
         $final= collect([]);
@@ -88,7 +90,12 @@ class AttemptsController extends Controller
         if(!$quiz_lesson)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
         
-        $users=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3)->pluck('user_id')->toArray();
+        $user_class=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3);
+        if($request->filled('classes')){
+            $user_class->whereIn('group',$request->classes);
+        }
+        
+        $users=$user_class->pluck('user_id')->toArray();
 
         if($request->filled('user_id')){
             unset($users);
