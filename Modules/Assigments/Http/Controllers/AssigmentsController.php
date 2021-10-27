@@ -1132,7 +1132,8 @@ class AssigmentsController extends Controller
         $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
-            'class' => 'exists:classes,id',
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
             'filter' => 'in:submitted,not_submitted', 
         ]);
 
@@ -1177,8 +1178,8 @@ class AssigmentsController extends Controller
             }])->first();
 
             $assigned_users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('role_id',3);
-            if($request->filled('class'))
-                $assigned_users->where('group_id', $request->class);
+            if($request->filled('classes'))
+                $assigned_users->where('group_id', $request->classes);
             $userassigments = User::whereIn('id',$assigned_users->get()->pluck('user_id'));
 
 
