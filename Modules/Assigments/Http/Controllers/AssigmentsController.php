@@ -1179,9 +1179,8 @@ class AssigmentsController extends Controller
 
             $assigned_users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('role_id',3);
             if($request->filled('classes'))
-                $assigned_users->where('group_id', $request->classes);
+                $assigned_users->whereIn('group_id', $request->classes);
             $userassigments = User::whereIn('id',$assigned_users->get()->pluck('user_id'));
-
 
             if(!$request->filled('filter'))
             $userassigments->with(['userAssignment'=> function($query)use ($assigLessonID){
