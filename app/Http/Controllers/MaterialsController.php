@@ -62,7 +62,9 @@ class MaterialsController extends Controller
         $paginate = Paginate::GetPaginate($request);
 
         $materials_query =  Material::orderBy('created_at','desc');
-        $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons)->skip(($page)*$paginate)->take($paginate);
+
+
+        $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
         if($request->user()->can('site/course/student'))
             $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
 
@@ -89,18 +91,18 @@ class MaterialsController extends Controller
 
             return response()->json(['message' => __('messages.materials.count'), 'body' => $counts], 200);
         }
+        $result['last_page'] = Paginate::allPages($material->count(),$paginate);
+        $result['total']= $material->count();
 
-        $AllMat=$material->with(['lesson.SecondaryChain.Class'])->get();
+        $AllMat=$material->skip(($page)*$paginate)->take($paginate)->with(['lesson.SecondaryChain.Class'])->get();
+        
         foreach($AllMat as $one){
             $one->class = $one->lesson->SecondaryChain->pluck('class')->unique();
             $one->level = Level::whereIn('id',$one->class->pluck('level_id'))->first();
             unset($one->lesson->SecondaryChain);
         }
-
         $result['data'] =  $AllMat;
         $result['current_page']= $page + 1;
-        $result['last_page'] = Paginate::allPages($materials_query->count(),$paginate);
-        $result['total']= $materials_query->count();
         $result['per_page']= count($result['data']);
 
         return response()->json(['message' => __('messages.materials.list'), 'body' =>$result], 200);
