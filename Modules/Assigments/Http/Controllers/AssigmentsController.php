@@ -1134,7 +1134,7 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
-            'filter' => 'in:submitted,not_submitted', 
+            'filter' => 'in:submitted,not_submitted,notGraded', 
         ]);
 
         $user = Auth::user();
@@ -1199,6 +1199,14 @@ class AssigmentsController extends Controller
             if($request->filter == 'not_submitted'){
                 $callback = function ($query) use ($assigLessonID) {
                     $query->where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('submit_date');
+                };
+                $userassigments->whereDoesntHave('userAssignment', $callback)
+                ->with(['userAssignment'=> $callback]);
+            } 
+
+            if($request->filter == 'notGraded'){
+                $callback = function ($query) use ($assigLessonID) {
+                    $query->where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('grade');
                 };
                 $userassigments->whereDoesntHave('userAssignment', $callback)
                 ->with(['userAssignment'=> $callback]);
