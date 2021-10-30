@@ -125,7 +125,8 @@ class AttemptsController extends Controller
                 if($attem->status == 'Graded')
                 {
                     $user_Attemp["grade"]= $attem->grade;
-                    $user_grade=$quiz_lesson->grade;
+                    $usergrader = UserGrader::where('user_id',$user_id)->where('item_id', $quiz_lesson->grade_category_id)->first();
+                    $user_grade=$usergrader->grade;
                 }
 
 
