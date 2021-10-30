@@ -10,8 +10,11 @@ use DB;
 use App\LastAction;
 use App\Course;
 use App\Notification;
+use App\Notifications\QuizNotification;
+use App\Notifications\SendNotification;
 use App\Paginate;
 use Illuminate\Support\Facades\Auth;
+use Modules\QuestionBank\Entities\QuizLesson;
 
 class NotificationsController extends Controller
 {
@@ -108,19 +111,78 @@ class NotificationsController extends Controller
     {
         $request->validate([
             'id' => 'required',
-            'users'=>'required|array',
-            'users.*' => 'required|integer|exists:users,id',
+            'users'=>'array',
+            'users.*' => 'integer|exists:users,id',
             'type' => 'required|string',
-            'message' => 'required',
-            'course_id' => 'integer|exists:courses,id',
+            'message' => 'string|required_if:message_type,==,customized',
+            'course_id' => 'integer|exists:courses,id|required_if:message_type,==,quiz_notify',
             'class_id'=>'integer|exists:classes,id',
-            'lesson_id'=>'integer|exists:lessons,id',
+            'lesson_id'=>'integer|exists:lessons,id|required_if:message_type,==,quiz_notify',
             'link' => 'string',
             'publish_date' => 'date',
             'from' => 'integer|exists:users,id',
+            'message_type' => 'required|in:customized,quiz_notify'
         ]);
 
-        (new Notification)->send($request);
+        //sending static notification when teacher click notify students button
+        if($request->has('message_type') && $request->message_type == 'quiz_notify'){
+
+            $quizLesson = QuizLesson::where('quiz_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
+        
+            $message = __('messages.quiz.quiz_notify', ['quizName' => $quizLesson->quiz->name, 'courseName' => $quizLesson->lesson->course->name]);
+
+            //sending notifications     
+            $notification = new QuizNotification($quizLesson,$message);
+
+            if($request->filled('users')){
+                $notification->setUsers($request->users);
+            }
+
+            $notification->send();
+
+            return response()->json(['message' => 'Notification sent.','body' => null], 200);           
+        }
+
+        $notification = [
+            'item_id' => $request->id,
+            'item_type' => $request->type,
+            'message' => $request->message,
+            'type' => 'notification'
+        ];
+
+        if($request->class_id){
+            $notification['classes'] = json_encode([$request->class_id]);
+        }
+
+        if($request->course_id){
+            $notification['course_id'] = $request->course_id;
+        }
+
+        if($request->lesson_id){
+            $notification['lesson_id'] = $request->lesson_id;
+        }
+
+        if($request->link){
+            $notification['link'] = $request->link;
+        }
+
+        $from = Auth::id();
+        if($request->from){
+            $from = $request->from;
+        }
+        $notification['created_by'] = $from;
+
+        $publish_date = Carbon::now();
+        if($request->publish_date){
+            $publish_date = $request->publish_date;
+        }
+        $notification['publish_date'] = $publish_date;
+
+        //assign notification to given users
+        $createdNotification = (new SendNotification)->toDatabase($notification,$request->users);
+            
+        //firebase Notifications
+        (new SendNotification)->toFirebase($createdNotification);
 
         return response()->json(['message' => 'Notification sent.','body' => null], 200);
     }

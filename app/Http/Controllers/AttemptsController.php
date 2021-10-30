@@ -9,6 +9,8 @@ use App\Enroll;
 use App\Grader\TypeGrader;
 use App\Lesson;
 use App\UserGrade;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use App\UserGrader;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,6 +18,7 @@ use Illuminate\Routing\Controller;
 use App\Grader\gradingMethodsInterface;
 use App\Events\RefreshGradeTreeEvent;
 use Auth;
+use App\Exports\AttemptsExport;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\quiz;
@@ -53,6 +56,9 @@ class AttemptsController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
             'user_id' => 'integer|exists:users,id',
+            'filter' => 'in:submitted,not_submitted,notGraded', 
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
         ]);
 
         $final= collect([]);
@@ -66,7 +72,6 @@ class AttemptsController extends Controller
         $quetions=$quiz->Question->pluck('id');
         $questions=array_merge($quetions->toArray(),$childs);
         $essay=0;
-        // $t_f_Quest=0;
         $t_f_Quest_check=0;
         $t_f_Quest_count = 0;
         $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
@@ -85,7 +90,12 @@ class AttemptsController extends Controller
         if(!$quiz_lesson)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
         
-        $users=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3)->pluck('user_id')->toArray();
+        $user_class=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3);
+        if($request->filled('classes')){
+            $user_class->whereIn('group',$request->classes);
+        }
+        
+        $users=$user_class->pluck('user_id')->toArray();
 
         if($request->filled('user_id')){
             unset($users);
@@ -109,83 +119,24 @@ class AttemptsController extends Controller
             
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
 
-            $countEss_TF=0;
+            $user_grade=null;
             foreach($attems as $key=>$attem){
                 $user_Attemp["grade"]=null;
                 if($attem->status == 'Graded')
                 {
                     $user_Attemp["grade"]= $attem->grade;
-                    // continue;
+                    $usergrader = UserGrader::where('user_id',$user_id)->where('item_id', $quiz_lesson->grade_category_id)->first();
+                    $user_grade=$usergrader->grade;
                 }
+
+
                 if($attem->status != 'Graded')
                     $countEss_TF++;
-
-                // dd($attem->status);
-                
-                // $gradeNotWeight=0;
-                // $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$attem->quiz_lesson->quiz_id)
-                //                             ->where('lesson_id',$attem->quiz_lesson->lesson_id)->first();
-                // //grade item ( attempt_item )user
-                // $gradeitem=GradeItems::where('index',$attem->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
-                // $grade=UserGrader::where('user_id',$user_id)->where('item_id',$gradeitem->id)->where('item_type','item')->pluck('grade')->first();
-                // $gradeNotWeight+=$grade;
-                // dd($grade);
-
-                //7esab daragat el true_false questions
-                // $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$t_f_Quest->pluck('id'))->get();
-                // if(count($userEssayCheckAnswerTF) > 0)
-                // {
-                //     foreach($userEssayCheckAnswerTF as $TF){
-                //         if($TF->correction->and_why == true){
-                //             if(isset($TF->correction->grade)){
-                //                 $gradeNotWeight+= $TF->correction->and_why_mark;
-                //                 if(($TF->correction->and_why_right == 1 && $TF->correction->mark < 1) ||
-                //                     $TF->correction->and_why_right == 0 && $TF->correction->mark >= 1){
-                //                     $tes=$TF->correction;
-                //                     $tes->right=2;
-                //                     // $tes->user_quest_grade=$TF->correction->and_why_mark + $TF->correction->mark; // daraget el taleb fel so2al koloh
-                //                     $tes->user_quest_grade=$TF->correction->grade; // daraget el taleb fel so2al koloh
-                //                     $TF->update(['correction'=>json_encode($tes)]); //because it doesn't read update
-                //                 }
-                //             }
-                //             else{
-                //                 $user_Attemp["grade"]= null;
-                //                 $user_Attemp["feedback"] =null;
-                //             }
-                //         }
-                //     }
-                // }
-
-                //7esab daragat el essay questions
-                // $userEssayCheckAnswerE=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)->whereIn('question_id',$essayQues)->get();
-                // if(count($userEssayCheckAnswerE) > 0)
-                // {
-                //     foreach($userEssayCheckAnswerE as $esay){
-                //         if(isset($esay->correction)){
-                //             $gradeNotWeight+= $esay->correction->grade;
-                //         }
-                //         else{
-                //             $user_Attemp["grade"]= null;
-                //             $user_Attemp["feedback"] =null;
-                //         }
-                //     }
-                // }
-
                 $user_Attemp['id']= $attem->id;
 
-                //check if grade is null so, there is and_why and essay not graded
-                // if(array_key_exists('grade',$user_Attemp)){
-                //     if(!is_null($user_Attemp['grade']))
-                //         $user_Attemp['grade']= $gradeNotWeight;
-                // }
-                // else
-                //     $user_Attemp['grade']= $gradeNotWeight;
-
-                // $grade->grade=$user_Attemp['grade'];
                 $user_Attemp["open_time"]= $attem->open_time;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $user_Attemp["taken_duration"]= Carbon::parse($attem->open_time)->diffInSeconds(Carbon::parse($attem->submit_time),false);
-                // $user_Attemp["status"]= ($user_Attemp["grade"]==null) ? 'Not Graded' : 'Graded';
                 $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question')->first();
                 foreach($user_Attemp['details']->UserQuizAnswer as $answ)
                     $answ->Question->grade_details=quiz_questions::where('quiz_id',$request->quiz_id)->where('question_id',$answ->question_id)->pluck('grade_details')->first();
@@ -196,11 +147,27 @@ class AttemptsController extends Controller
                     $i++;
                 }
             }
+            if($request->filter == 'submitted'){
+                if(count($All_attemp) == 0 )
+                    continue;
+            } 
+            
+            if($request->filter == 'not_submitted'){
+                if(count($All_attemp) != 0 )
+                    continue;
+            }
+            
+            if($request->filter == 'notGraded'){
+                if($countEss_TF == 0 )
+                    continue;
+            }
 
             $attemps['id'] = $user->id;
             $attemps['username'] = $user->username;
             $attemps['fullname'] =ucfirst($user->firstname) . ' ' . ucfirst($user->lastname);
+            $attemps['grade'] = $user_grade;
             $attemps['picture'] = $user->attachment;
+            $attemps['override'] = $user->quizOverride()->where('quiz_lesson_id', $quiz_lesson->id)->first();
             $attemps['Attempts'] = $All_attemp;
             array_push($user_attempts, $attemps);
             if($i>0)
@@ -209,9 +176,27 @@ class AttemptsController extends Controller
 
         $all_users['essay']=$essay;
         $all_users['T_F']=$t_f_Quest_count;
+        $all_users['all']=count($users);
         $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
         $all_users['submitted_users'] = $Submitted_users ;
         $all_users['notGraded'] = $countEss_TF ;
+        if($request->filter == 'submitted'){
+            $all_users['unsubmitted_users'] = 0 ;
+            $all_users['submitted_users'] = count($user_attempts) ;
+            $all_users['notGraded'] = 0 ;
+        } 
+        
+        if($request->filter == 'not_submitted'){
+            $all_users['unsubmitted_users'] = count($user_attempts);
+            $all_users['submitted_users'] = 0;
+            $all_users['notGraded'] = 0 ;
+        }
+        
+        if($request->filter == 'notGraded'){
+            $all_users['unsubmitted_users'] = 0 ;
+            $all_users['submitted_users'] =0 ;
+            $all_users['notGraded'] = count($user_attempts) ;
+        }
         $final->put('submittedAndNotSub',$all_users);
         $final->put('users',$user_attempts);
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
@@ -513,5 +498,16 @@ class AttemptsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function exportAttempts(Request $request)
+    {
+        $attempts = new AttemptsController();
+        $all_attempts=$attempts->index($request);
+        $body = json_decode(json_encode($all_attempts), true);
+        $filename = uniqid();
+        $file = Excel::store(new AttemptsExport($body['original']['body']['users']), 'Attempt'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Attempt'.$filename.'.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

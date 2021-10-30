@@ -45,9 +45,6 @@ class AttemptItemlistener
             $max_attempt=$QuizLesson->max_attemp;
             $GradeCategory = GradeCategory::where('instance_id' , $QuizID)->first();
             
-            // if((Auth::user()->can('site/quiz/unLimitedAttempts')))
-            //     $max_attempt=1;
-
             for($key =1; $key<=$max_attempt; $key++){
                 $gradeItem = GradeItems::firstOrcreate([
                     'type' => 'Attempts',

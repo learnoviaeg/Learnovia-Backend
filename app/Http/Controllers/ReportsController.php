@@ -20,6 +20,9 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\InactiveUsers;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Modules\QuestionBank\Entities\QuizLesson;
 
 class ReportsController extends Controller
 {
@@ -257,7 +260,13 @@ class ReportsController extends Controller
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
    
-        $courses = $enrolls->orderBy('level')->select('course')->distinct()->with('courses')->get()->pluck('courses')->filter();
+        $courses = $enrolls->orderBy('level')->select('course')->distinct()->with('courses');
+
+        if(!$request->has('user_id')){
+            $courses->where('user_id',Auth::id());
+        }
+        
+        $courses = $courses->get()->pluck('courses')->filter();
        
         $reportObjects = collect();
 
@@ -364,7 +373,13 @@ class ReportsController extends Controller
         ]);
 
         //need to be refactored (line below)
-        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();
+        $lessons = $this->chain->getEnrollsByManyChain($request)->with('SecondaryChain');
+        
+        if(!$request->has('user_id')){
+            $lessons->where('user_id',Auth::id());
+        }
+        
+        $lessons = $lessons->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();
 
         $componentsHelper = new ComponentsHelper();
         $componentsHelper->setLessons($lessons);
@@ -395,5 +410,256 @@ class ReportsController extends Controller
 
         return response()->json(['message' => 'Course progress Counters', 'body' =>  $counterObject], 200);
     }
+
+    public function totalAttemptsReport(Request $request){
+
+         //validate the request
+         $request->validate([
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
+            'created_by' => 'exists:users,id',
+
+            //for single quiz
+            'quiz_id' => 'exists:quizzes,id|required_with:lesson_id',
+            'lesson_id' => 'exists:lessons,id|required_with:quiz_id',  
+            
+            //for pagination
+            'page' => 'required|integer',
+            'paginate' => 'required|integer',
+        ]);
+
     
+        $lessons = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+
+        //starting report  query
+        $quizLessons = QuizLesson::whereIn('lesson_id',$lessons)
+
+                                ->with(['quiz','lesson.course','lesson' => function($query){
+
+                                    $query->withCount(['SecondaryChain as students_number'=> function($q){
+                                        $q->where('role_id',3);
+                                    }]);
+
+                                }])
+
+                                ->withCount(['user_quiz as solved_students' => function($q){
+
+                                    $q->select(DB::raw('count(distinct(user_id))'));
+
+                                },'user_quiz as got_zero' => function($q){
+
+                                    $q->where('grade', 0)->select(DB::raw('count(distinct(user_id))'));
+
+                                },'user_quiz as full_mark' => function($q){
+
+                                    $q->whereColumn('grade','quiz_lessons.grade')->select(DB::raw('count(distinct(user_id))'));
+                                }
+                                ,'user_quiz as ‌equals‌_to_‌pass_grade' => function($q){
+
+                                    $q->whereColumn('grade','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                }
+                                ,'user_quiz as ‌more‌_than‌_grade_to_pass' => function($q){
+
+                                    $q->whereColumn('grade','>','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                }
+                                ,'user_quiz as less‌_than_‌grading‌_‌pass' => function($q){
+
+                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->where('grade','!=', 0)->select(DB::raw('count(distinct(user_id))'));
+                                }
+                            ]);
+
+        if($request->has('quiz_id') && $request->has('lesson_id')){
+            $quizLessons->where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id);
+        }
+
+        if($request->has('created_by')){
+
+            $quizLessons->whereHas('quiz',function($q) use ($request){
+                $q->where('created_by',$request->created_by);
+            });
+        }
+
+        if($request->has('from') && $request->has('to')){
+            $quizLessons->whereBetween('created_at', [$request->from,$request->to]);
+        }
+
+        $allQuizzes = clone $quizLessons;
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $attemptsReport['data'] =  $quizLessons->skip(($page)*$paginate)
+                                            ->take($paginate)
+                                            ->get()
+                                            ->map(function ($quizLesson){
+
+                                                //calculate days number between two dates
+                                                $start_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->start_date);
+                                                $end_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->due_date);
+                                                $different_days = $start_date->diffInDays($end_date);
+
+                                                return [
+                                                    'id'             => $quizLesson->quiz->id,
+                                                    'lesson_id'             => $quizLesson->lesson_id,
+                                                    'name'           => $quizLesson->quiz->name,
+                                                    'course_name'    => $quizLesson->lesson->course->name,
+                                                    'classes'        => $quizLesson->lesson->shared_classes,
+                                                    'start_date'     => $quizLesson->start_date,
+                                                    'due_date'       => $quizLesson->due_date,
+                                                    'duration'       => round($quizLesson->quiz->duration/60,0),
+                                                    'period'         => $different_days,
+                                                    'attempts_number'    => $quizLesson->max_attemp,
+                                                    'gradeing_method'    => $quizLesson->grading_method_id,
+                                                    'students_number'    => $quizLesson->lesson->students_number,
+                                                    'solved_students'    => $quizLesson->solved_students,
+                                                    'not_solved_students'    => $quizLesson->lesson->students_number - $quizLesson->solved_students,
+                                                    'got_full_mark'    => $quizLesson->full_mark,
+                                                    'got_zero'    => $quizLesson->got_zero,
+                                                    'viewed_without_action' => $quizLesson->user_seen_number - $quizLesson->solved_students,
+                                                    'equals‌_‌grading‌_‌pass' => $quizLesson->‌equals‌_to_‌pass_grade,
+                                                    'more‌_than‌_grading‌_‌pass' => $quizLesson->‌more‌_than‌_grade_to_pass,
+                                                    'less‌_than_‌grading‌_‌pass' => $quizLesson->less‌_than_‌grading‌_‌pass,
+                                                ];
+                                            });;
+ 
+        //pagination object
+        $attemptsReport['current_page']= $page + 1;
+        $attemptsReport['last_page'] = Paginate::allPages($allQuizzes->count(),$paginate);
+        $attemptsReport['total']= $allQuizzes->count();
+        $attemptsReport['per_page']= $attemptsReport['data']->count();
+
+        return response()->json(['message' => 'Quiz attempts report', 'body' =>  $attemptsReport], 200);
+    }
+
+    public function usersStatusReport(Request $request,$option=null)
+    {
+        //validate the request
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
+            'class' => 'exists:classes,id',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
+            'search' => 'string',
+            'report_year' => 'required|integer',
+            'report_month' => 'integer|required_with:report_day',
+            'report_day' => 'integer',
+            'never' => 'in:1',
+            'since' => 'in:1,5,10',
+            'export' => 'in:1'
+        ]);
+
+        $since = 10;
+        if($request->filled('since')){
+            $since = $request->since;
+        }
+
+        $enrolledUsers = $this->chain->getEnrollsByChain($request)->select('user_id')->distinct()->with('user')->get()->pluck('user');
+
+        //users who doesnt have any logs in system
+        if($request->filled('never')){
+
+            $userStatus = User::whereDoesntHave('lastactionincourse');
+
+            if($request->filled('year')){
+                $userStatus->whereIn('id',$enrolledUsers->pluck('id'));
+            }
+
+            $userStatus = $userStatus->get()
+                                    ->map(function ($user){
+
+                                        return [
+                                            'fullname' => $user->fullname,
+                                            'username' => $user->username,
+                                            'lastaction' => null,
+                                            'status' => 'offline'
+                                        ];
+                                                            
+                                    });
+                
+            if($request->filled('export')){
+
+                $file = $this->exportUserStatusReport($userStatus);                
+                return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
+            }
+            
+            return response()->json(['message' => 'User status report', 'body' =>  $userStatus], 200);
+        }
+
+        //users who has logs during the given time
+        $userStatus = LAstAction::whereYear('date', $request->report_year)->whereIn('user_id',$enrolledUsers->pluck('id'))->with('user');
+            
+        if($request->filled('report_month')){
+            $userStatus->whereMonth('date',$request->report_month);
+        }
+        
+        if($request->filled('report_day')){
+            $userStatus->whereDay('date',$request->report_day);
+        }
+
+        if($request->filled('from') && $request->filled('to')){
+            $userStatus->whereBetween('date', [$request->from, $request->to]);
+        }
+
+        if($option == 'active'){
+            $userStatus->where('date','>=' ,Carbon::now()->subMinutes($since))->where('date','<=' ,Carbon::now());
+        }
+
+        if($option == 'in_active'){
+            $activeUsers = clone $userStatus;
+
+            $activeUsers->where('date','>=' ,Carbon::now()->subMinutes($since))->where('date','<=' ,Carbon::now());
+            
+            $userStatus->whereBetween('date',[Carbon::now()->subHours(1),Carbon::now()])->whereNotIn('user_id',$activeUsers->pluck('user_id'));
+        }
+
+        $userStatus = $userStatus->orderBy('date','desc')
+                                ->groupBy('user_id')
+                                ->get()
+                                ->map(function ($userLog){
+
+                                    $status = 'offline';
+                                    if($userLog->date >= Carbon::now()->subMinutes(1) && $userLog->date <= Carbon::now()){
+                                        $status = 'online';
+                                    }
+
+                                    return [
+                                        'fullname' => $userLog->user->fullname,
+                                        'username' => $userLog->user->username,
+                                        'lastaction' => $userLog->user->lastaction,
+                                        'status' => $status
+                                    ];
+                                                        
+                                });
+
+        if($request->filled('export')){
+
+            $file = $this->exportUserStatusReport($userStatus);                
+            return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
+        }
+
+        return response()->json(['message' => 'User status report', 'body' =>  $userStatus], 200);
+    }
+    
+    public function exportUserStatusReport($report){
+        $filename = uniqid();
+        $file = Excel::store(new InactiveUsers($report), 'reports'.$filename.'.xlsx','public');
+        $file = url(Storage::url('reports'.$filename.'.xlsx'));
+        return $file;
+    }
 }

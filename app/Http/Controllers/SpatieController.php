@@ -383,6 +383,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/seen_report', 'title' => 'Seen report']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/course_progress', 'title' => 'view course progress report' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/overall_seen_report', 'title' => 'Overall seen report','dashboard' => 1, 'icon'=> 'Report']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/total_attempts_report', 'title' => 'Total Attempts Report','dashboard' => 1, 'icon'=> 'Report']);
+
 
             //Add Roles
             $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin' , 'description' => 'System manager that can monitor everything.']);
@@ -818,7 +820,8 @@ class SpatieController extends Controller
     public function List_Roles_With_Permission(Request $request)
     {
         $request->validate([
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'permission' => 'nullable'
         ]);
 
         if ($request->filled('search')) {
@@ -826,6 +829,13 @@ class SpatieController extends Controller
                 ->paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(202, $roles);
         }
+
+        if ($request->filled('permission')) {
+            $roles = Permission::with('roles')->where('name', 'LIKE', "%$request->permission%")->get()
+                  ->paginate(HelperController::GetPaginate($request));
+            return HelperController::api_response_format(202, $roles);
+        }
+
         $roles = Role::all();
         foreach ($roles as $role) {
             $role->count = User::role($role)->count();

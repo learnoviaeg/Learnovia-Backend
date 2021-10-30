@@ -2,8 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\NotificationsController;
-use App\Notification;
+use App\Notifications\SendNotification;
 use App\Parents;
 use App\SecondaryChain;
 use Illuminate\Bus\Queueable;
@@ -11,7 +10,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Http\Request;
 use Modules\QuestionBank\Entities\userQuiz;
 use Carbon\Carbon;
 
@@ -51,21 +49,20 @@ class Quiz24Hreminder implements ShouldQueue
         if(count($allUsers) > 0){
 
             //notification object
-            $notify_request = new Request ([
-                'id' => $this->quiz->id,
-                'type' => 'quiz',
+            $notification = [
+                'item_id' => $this->quiz->id,
+                'item_type' => 'quiz',
                 'publish_date' => Carbon::now(),
                 'message' => 'Quiz '.$this->quiz->name.' will be closed soon, Hurry up to solve it.',
-                'from' => $this->quiz->created_by,
-                'users' => $allUsers->toArray()
-            ]);
+                'created_by' => $this->quiz->created_by,
+                'type' => 'notification'
+            ];
+
+            //assign notification to given users
+            $createdNotification = (new SendNotification)->toDatabase($notification,$allUsers->toArray());
             
-            // use notify store function to notify users with the announcement
-            try {
-                $notify = (new Notification())->send($notify_request);
-            } catch (\Throwable $th) {
-                //throw $th;
-            }
+            //firebase Notifications
+            (new SendNotification)->toFirebase($createdNotification);
         }
     }
 }

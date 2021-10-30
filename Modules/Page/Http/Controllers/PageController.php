@@ -8,12 +8,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
 use App\Enroll;
-use App\Course;
-use App\CourseSegment;
-use App\SegmentClass;
-use App\ClassLevel;
-use App\User;
-// use Illuminate\Routing\Controller;
 use App\Http\Controllers\Controller;
 use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
@@ -21,8 +15,7 @@ use Illuminate\Support\Carbon;
 use App\Component;
 use App\LessonComponent;
 use App\LastAction;
-use App\Notification;
-use App\SecondaryChain;
+use Exception;
 
 class PageController extends Controller
 {
@@ -114,31 +107,11 @@ class PageController extends Controller
                 'model' => 'page',
                 'index' => LessonComponent::getNextIndex($request->Lesson_id)
             ]);
-            $TempLesson = Lesson::find($lesson);
-            //getting secondary chain of each lesson
-            $secondary_chains = SecondaryChain::where('lesson_id',$lesson)->get()->keyBy('group_id');
-            foreach($secondary_chains as $secondary_chain){
-                $courseID = $secondary_chain->course_id;
-                $class_id = $secondary_chain->group_id;
-                $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
-                LastAction::lastActionInCourse($courseID);
-                    
-                $notify_request = new Request([
-                    'id' => $page->id,
-                    'message' => $page->title . ' page is added',
-                    'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
-                    'course_id' => $courseID,
-                    'class_id' => $class_id,
-                    'lesson_id' => $lesson,
-                    'type' => 'page',
-                    'publish_date' => $publishdate,
-                ]);
-    
-                (new Notification())->send($notify_request);
-                
-            }
 
+            $TempLesson = Lesson::find($lesson);
+            LastAction::lastActionInCourse($TempLesson->course_id);
         }
+
         $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
         return HelperController::api_response_format(200, $tempReturn, __('messages.page.add'));
 
@@ -207,32 +180,8 @@ class PageController extends Controller
         
         $page_lesson->updated_at = Carbon::now();
         $page_lesson->save();
-        $pagename = $page->title;
-        // $page = Lesson::find($request->updated_lesson_id)->module('Page', 'page')->get();
         $page['lesson'] =  $page->Lesson;
-        $lesson = Lesson::find($request->updated_lesson_id);
-        LastAction::lastActionInCourse($lesson_drag->course_id);
-        $secondary_chains = SecondaryChain::where('lesson_id',$lesson)->get()->keyBy('group_id');
-        foreach($secondary_chains as $secondary_chain){
-            $courseID = $secondary_chain->course_id;
-            $class_id = $secondary_chain->group_id;
-            $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('group_id',$secondary_chain->group_id)->where('course_id',$secondary_chain->course_id)->pluck('user_id');
-
-            $notify_request = new Request([
-                'id' => $request->id,
-                'message' => $pagename.' page is updated',
-                'users' => count($usersIDs) > 0 ? $usersIDs->toArray() : null,
-                'course_id' => $courseID,
-                'class_id' => $class_id,
-                'lesson_id' => $request->updated_lesson_id,
-                'type' => 'page',
-                'link' => url(route('getPage')) . '?id=' . $request->id,
-                'publish_date' => Carbon::now()
-            ]);
-
-            (new Notification())->send($notify_request);
-
-        }
+            
         return HelperController::api_response_format(200, $page, __('messages.page.update'));
         
     }

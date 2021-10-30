@@ -977,6 +977,11 @@ class UserController extends Controller
 
     public function export(Request $request)
     {
+        $request->validate([
+            'user_ids' => 'array',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
         $fields = ['id', 'firstname', 'lastname'];
 
         if (Auth::user()->can('site/show/username')) {
@@ -994,6 +999,9 @@ class UserController extends Controller
         'class_id','level', 'type','second language','role','last_action'] );
 
         $userIDs = self::list($request,1);
+        if(isset($request->user_ids))
+            $userIDs=$request->user_ids;
+
         $filename = uniqid();
         $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
         $file = url(Storage::url('users'.$filename.'.xlsx'));

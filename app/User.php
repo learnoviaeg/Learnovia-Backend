@@ -7,17 +7,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use DB;
-use GuzzleHttp\Client;
 use Spatie\Permission\Traits\HasRoles;
-use App\Notifications\NewMessage;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Validator;
-use Modules\Attendance\Entities\AttendanceLog;
-use App\Course;
-use App\Log;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
 
 class User extends Authenticatable
 {
@@ -54,7 +45,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ['fullname','lastaction','status'];
+    protected $appends = ['fullname','lastaction'];
 
     private static function getUserCounter($lastid)
     {
@@ -99,64 +90,6 @@ class User extends Authenticatable
     public static function FindByName($username)
     {
         return self::where('username', $username)->first();
-    }
-
-    public static function notify($request)
-    {
-        // $validater = Validator::make($request, [
-        //     'users'=>'required|array',
-        //     'users.*' => 'required|integer|exists:users,id',
-        //     'type' => 'required|string',
-        //     'publish_date' => 'required|date'
-        // ]);
-
-        // if ($validater->fails()) {
-        //     $errors = $validater->errors();
-        //     return response()->json($errors, 400);
-        // }
-
-        // if($request['type']!='announcement')
-        // {
-        //     $validater = Validator::make($request, [
-        //         'message' => 'required',
-        //         'from' => 'required|integer|exists:users,id',
-        //         'course_id' => 'required|integer|exists:courses,id',
-        //         'class_id'=>'required|integer|exists:classes,id'
-        //     ]);
-        //     if ($validater->fails()) {
-        //         $errors = $validater->errors();
-        //         return response()->json($errors, 400);
-        //     }
-
-        //     $request['course_name'] = Course::whereId($request['course_id'])->pluck('name')->first();
-        // }
-        // $touserid = array();
-        // foreach($request['users'] as $user)
-        // {
-        //     $temp = User::find($user);
-        //     if($temp != null)
-        //         $touserid[] = $temp;
-        // }
-        // $date=$request['publish_date'];
-        // $seconds = Carbon::parse($date)->diffInSeconds(Carbon::now());
-        // if($seconds < 0) {
-        //     $seconds = 0 ;
-        // }
-        
-        // $request['publish_date']=Carbon::parse($request['publish_date'])->format('Y-m-d H:i:s');
-
-        // $request['title']=null;
-        // if($request['type']=='announcement'){
-        //     // $request['message']="A new announcement will be published";
-        //     $request['title']=Announcement::whereId($request['id'])->first()->title;
-        // }
-
-        // Notification::send( $touserid, new NewMessage($request));
-
-        //  $job = ( new \App\Jobs\Sendnotify(
-        //       $request))->delay($seconds);
-        //      dispatch($job);
-        return 1;
     }
 
     public static function GetUsersByClass_id($class_id){
@@ -230,19 +163,12 @@ class User extends Authenticatable
     public function getLastActionAttribute() {
        $last_action  = LastAction :: where('user_id',$this->id)->where('course_id',null)->first();
        if (isset($last_action))
-            return Carbon::Parse($last_action->date);
+            return Carbon::Parse($last_action->date)->format('Y-m-d H:i:s');
         
     }
 
-    public function getStatusAttribute() {
-        $status = 'offline';
-
-        // $active_user  = Log::where('user',$this->username)->where('created_at','>=' ,Carbon::now()->subMinutes(1))
-        //                                                       ->where('created_at','<=' ,Carbon::now())->first();
-        if(isset($active_user))
-            $status = 'online';
-
-        return $status;
+    public function getStatusAttribute(){
+        return;
     }
 
     public function notifications()
@@ -253,5 +179,20 @@ class User extends Authenticatable
     public function assignmentOverride()
     { 
         return $this->hasMany('Modules\Assigments\Entities\assignmentOverride','user_id','id');
+    }
+
+    public function topics()
+    {
+        return $this->belongsToMany('App\Topic');
+    }
+    
+    public function quizOverride()
+    { 
+        return $this->hasMany('Modules\QuestionBank\Entities\QuizOverride','user_id','id');
+    }
+
+    public function logs()
+    {
+        return $this->hasMany('App\Log','user','username');
     }
 }

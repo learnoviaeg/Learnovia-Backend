@@ -38,6 +38,7 @@ use App\Http\Controllers\Controller;
 use App\LastAction;
 use App\Exports\BigbluebuttonGeneralReport;
 use App\Notification;
+use App\Notifications\VirtualNotification;
 
 class BigbluebuttonController extends Controller
 {
@@ -175,8 +176,6 @@ class BigbluebuttonController extends Controller
 
                     // if(count($course_segments_ids) <= 0)
                     //     return HelperController::api_response_format(404, null ,__('messages.error.no_active_segment'));
-            
-                    $usersIDs=Enroll::where('group',$class)->where('course',$object['course_id'])->where('user_id','!=', Auth::id())->where('role_id','!=', 1 )->pluck('user_id')->unique()->values()->toarray();
                     foreach($request->start_date as $start_date){
                         $last_date = $start_date;
                         if(isset($request->last_day))
@@ -222,18 +221,9 @@ class BigbluebuttonController extends Controller
                                     $bigbb['join'] = true; //startmeeting has arrived but meeting didn't start yet
                             }
 
-                            $notify_request = new Request([
-                                'id' => $bigbb->id,
-                                'message' => $request->name.' meeting is created',
-                                'users' => count($usersIDs) > 0 ? $usersIDs : null,
-                                'course_id' => $object['course_id'],
-                                'class_id'=>$class,
-                                'type' => 'meeting',
-                                'link' => url(route('getmeeting')) . '?id=' . $bigbb->id,
-                                'publish_date'=> $temp_start,
-                            ]);
-                
-                            (new Notification())->send($notify_request);
+                            //sending Notification
+                            $notification = new VirtualNotification($bigbb, $request->name.' meeting is created');
+                            $notification->send();
 
                             $created_meetings->push($bigbb);
                             
@@ -250,7 +240,9 @@ class BigbluebuttonController extends Controller
                         }
                     }
                 }
+
             }
+
         }
         return HelperController::api_response_format(200, $created_meetings ,__('messages.virtual.add'));
     }
