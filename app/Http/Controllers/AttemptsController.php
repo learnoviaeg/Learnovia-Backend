@@ -49,9 +49,6 @@ class AttemptsController extends Controller
      */
     public function index(Request $request)
     {
-        //to close opend attempts
-        QuizzesController::closeAttempts();
-
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
@@ -89,6 +86,9 @@ class AttemptsController extends Controller
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if(!$quiz_lesson)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
+
+        //to close opend attempts
+        QuizzesController::closeAttempts($quiz_lesson);
         
         $user_class=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3);
         if($request->filled('classes')){

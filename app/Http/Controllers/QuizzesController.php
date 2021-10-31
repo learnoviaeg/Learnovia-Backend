@@ -399,9 +399,9 @@ class QuizzesController extends Controller
         return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
     }
 
-    public static function closeAttempts()
+    public static function closeAttempts($quiz_lesson)
     {
-        $user_quizzes=userQuiz::whereNull('submit_time')->get();
+        $user_quizzes=userQuiz::where('quiz_lesson_id',$quiz_lesson->id)->whereNull('submit_time')->get();
         foreach($user_quizzes as $userQuiz)
         {
             $quiz_time=Carbon::parse($userQuiz->open_time)->addSeconds($userQuiz->quiz_lesson->quiz->duration)->format('Y-m-d H:i:s');
