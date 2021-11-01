@@ -38,7 +38,7 @@ class AttemptItemlistener
     public function handle(QuizAttemptEvent $event)
     {
         // $event->item ---> Attempt
-        $user_quiz=UserQuiz::where('quiz_lesson_id',$event->attempt->quiz_lesson_id)->get();
+        $user_quiz=UserQuiz::where('quiz_lesson_id',$event->attempt->quiz_lesson_id)->where('user_id',Auth::id())->get();
         if(count($user_quiz) == 1 ){
             $QuizLesson = QuizLesson::find($event->attempt->quiz_lesson_id);
             $QuizID=$QuizLesson->quiz->id;
