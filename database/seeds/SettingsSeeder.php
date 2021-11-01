@@ -16,14 +16,14 @@ class SettingsSeeder extends Seeder
         Settings::create([
             'key' => 'create_assignment_extensions',
             'title' => 'Create/Edit Assignment Supported Extensions',
-            'value' => 'txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpeg,png,gif,csv,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls',
+            'value' => 'txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpeg,png,gif,csv,mp3,mpeg,odp,ppt,pptx,rar,rtf,zip,xlsx,xls',
             'type' => 'extensions'
         ]);
 
         Settings::create([
             'key' => 'submit_assignment_extensions',
             'title' => 'Submit Assignment Supported Extensions',
-            'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,mp3,wav,amr',
+            'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,odp,mp3,wav,amr',
             'type' => 'extensions'
         ]);
 
