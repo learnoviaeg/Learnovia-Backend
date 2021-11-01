@@ -15,6 +15,8 @@ use Carbon\Carbon;
 use App\UserGrader;
 use App\Enroll;
 use App\Events\GradeItemEvent;
+use Modules\QuestionBank\Entities\quiz_questions;
+use Modules\QuestionBank\Entities\Questions;
 
 class ScriptsController extends Controller
 {
@@ -120,4 +122,33 @@ class ScriptsController extends Controller
         return 'done';
     }
 
+    public function reassign_shuffled_questions(){
+        $quizzes =  Quiz::select('id')->whereIn('shuffle', ['Answers' , 'Questions and Answers']);
+        $callback = function ($query)  {
+                        $query->where('question_type_id' , 2);
+                    };
+        $quizzes_questions = $quizzes->whereHas('Question', $callback)->with(['Question'=> $callback])->get();
+        foreach($quizzes_questions as $quiz_questions){
+                foreach($quiz_questions->Question as $question){
+                    $question_with_wrong_content = quiz_questions::where('question_id' , $question->id)->first();
+                    $choices = [];
+                    if(!isset($question_with_wrong_content->grade_details->details))
+                        return $question_with_wrong_content;
+                    foreach($question_with_wrong_content->grade_details->details as $wrong_q){
+                        $choices['type'] = $question_with_wrong_content->grade_details->type;
+                        foreach($question->content as $right_quest){
+                            if($right_quest->content == $wrong_q->content){
+                                $wrong_q->key = $right_quest->key;
+                                $choices['details'][] = $wrong_q;
+                            }
+                        }
+                    }
+                    $choices['total_mark'] = $question_with_wrong_content->grade_details->total_mark;
+                    $choices['exclude_mark'] = $question_with_wrong_content->grade_details->exclude_mark;
+                    $choices['exclude_shuffle'] = $question_with_wrong_content->grade_details->exclude_shuffle;
+                    $question_with_wrong_content->update(['grade_details' => json_encode($choices)]);
+            }
+        }
+        return 'done';
+    }
 }
