@@ -93,11 +93,11 @@ class QuizzesController extends Controller
         $result['last_page'] = Paginate::allPages($quiz_lessons->count(),$paginate);
         $result['total']= $quiz_lessons->count();
 
-        $quiz_lessons = $quiz_lessons->skip(($page)*$paginate)->take($paginate)->get();
+        $quiz_lessons = $quiz_lessons->skip(($page)*$paginate)->take($paginate);
 
         $quizzes = collect([]);
 
-        foreach($quiz_lessons as $quiz_lesson){
+        foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
             $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
