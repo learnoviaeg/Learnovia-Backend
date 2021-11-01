@@ -248,8 +248,13 @@ class AttemptsController extends Controller
                 dispatch($job);
             }
 
+            $extra=0;
+            $extra_attempts=Auth::user()->quizOverride()->where('quiz_lesson_id', $quiz_lesson->id)->first();
+            if(isset($extra_attempts))
+                $extra=$extra_attempts->attemps;
+
             if(Auth::user()->can('site/course/student')){
-                if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp )
+                if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp + $extra )
                 {                
                     $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($last_attempt->left_time);
                     dispatch($job);

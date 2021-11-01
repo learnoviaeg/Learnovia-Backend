@@ -345,8 +345,10 @@ class QuizzesController extends Controller
             $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);
 
         $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
-        if(isset($quiz_override))
+        if(isset($quiz_override)){
             $quizLesson->due_date = $quiz_override->due_date;
+            $quizLesson->max_attemp+=$quiz_override->attemps;
+        }
 
         $query=clone $user_quiz;
         $last_attempt=$query->latest()->first();
@@ -356,6 +358,8 @@ class QuizzesController extends Controller
 
         $quiz->token_attempts = 0;
         $quiz->last_attempt_status = 'newOne';
+        $usergrader = UserGrader::where('user_id',Auth::id())->where('item_id', $quizLesson->grade_category_id)->first();
+        $quiz->user_grade=$usergrader->grade;
 
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
