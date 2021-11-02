@@ -213,7 +213,6 @@ class AnnouncementController extends Controller
                                                 return HelperController::api_response_format(201,'No User');
                                         }
                                         $requ['users'] = $userr->pluck('user_id')->toArray();
-                                        $notificatin = User::notify($requ);
                                         // return $notificatin;
                                     }
                                 }
@@ -350,7 +349,6 @@ class AnnouncementController extends Controller
                 'message' => $announce->title.' announcement is updated'
             ]);
         }
-        User::notify($requ);
 
         return HelperController::api_response_format(201,  ['notify' => $anounce , 'created'=>$myAnnouncements , 'assigned' => $anouncenew],'Announcement Updated Successfully');
 

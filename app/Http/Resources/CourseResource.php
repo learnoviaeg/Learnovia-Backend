@@ -25,7 +25,7 @@ class CourseResource extends JsonResource
             'id' => $this->courses['id'],
             'name' => $this->courses['name'] ,
             'short_name' => $this->courses['short_name'] ,
-            'image' => isset($this->courses['image']) ? $this->courses->attachment->path : null,
+            'image' => isset($this->courses['image']) ? $this->courses['image'] : null,
             'description' => $this->courses['description'] ,
             'mandatory' => $this->courses['mandatory'] ,
             'is_template' => $this->courses['is_template'] ,

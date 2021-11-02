@@ -38,16 +38,13 @@ class AttemptItemlistener
     public function handle(QuizAttemptEvent $event)
     {
         // $event->item ---> Attempt
-        $user_quiz=UserQuiz::where('quiz_lesson_id',$event->attempt->quiz_lesson_id)->get();
+        $user_quiz=UserQuiz::where('quiz_lesson_id',$event->attempt->quiz_lesson_id)->where('user_id',Auth::id())->get();
         if(count($user_quiz) == 1 ){
             $QuizLesson = QuizLesson::find($event->attempt->quiz_lesson_id);
             $QuizID=$QuizLesson->quiz->id;
             $max_attempt=$QuizLesson->max_attemp;
             $GradeCategory = GradeCategory::where('instance_id' , $QuizID)->first();
             
-            // if((Auth::user()->can('site/quiz/unLimitedAttempts')))
-            //     $max_attempt=1;
-
             for($key =1; $key<=$max_attempt; $key++){
                 $gradeItem = GradeItems::firstOrcreate([
                     'type' => 'Attempts',

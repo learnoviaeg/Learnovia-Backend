@@ -18,6 +18,8 @@ Route::get('h5p_protect', function(Request $request)
 
     if(str_contains($video_name,'jpg') || str_contains($video_name,'jpeg') || str_contains($video_name,'png'))
         $filePath =ltrim( Storage::url('images/'.$video_name), '/');
+    else if(str_contains($video_name,'mp3'))
+        $filePath =ltrim( Storage::url('audios/'.$video_name), '/');
     else
         $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
 
@@ -417,6 +419,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('grade_items', 'ScriptsController@grade_details_of_questions');
     Route::get('grade-attempts', 'ScriptsController@gradeAttemptsInQuizlesson');
     Route::get('delete-wrong-attempts', 'ScriptsController@deleteWrongAttempts');
+    Route::get('shuffled_quizzes', 'ScriptsController@reassign_shuffled_questions');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -457,6 +460,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
 
     Route::get('close_attempts', 'QuizzesController@closeAttempts');
+    Route::get('attempts/export', 'AttemptsController@exportAttempts');
     Route::Resource('attempts', AttemptsController::class);
     Route::post('attempts/{id}', 'AttemptsController@update');
     // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);
@@ -535,6 +539,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
     Route::get('courseProgressReport' , 'ReportsController@courseProgressReport')->middleware('permission:reports/course_progress');
     Route::get('courseProgressCounter' , 'ReportsController@CourseProgressCounters')->middleware('permission:reports/course_progress');
+    Route::get('totalAttemptsReport' , 'ReportsController@totalAttemptsReport')->middleware('permission:reports/total_attempts_report');
+    Route::get('userStatus/{option}' , 'ReportsController@usersStatusReport')->middleware('permission:reports/active_users|reports/in_active_users');
 });
 
 Route::group(['middleware' => ['auth:api','LastAction']], function () {

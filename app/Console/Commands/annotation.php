@@ -36,21 +36,16 @@ class annotation extends Command
      * @return mixed
      */
     public function handle()
-    {
-       // $this->info(base_path());
-
-     
+    {     
         shell_exec('apt-get install ghostscript -y');
         $this->info('ghostscript installed successfully'); 
         shell_exec('sudo apt-get install php-imagick');
         $this->info('php-imagick installed successfully'); 
         shell_exec('php -m | grep imagick');
         shell_exec('service apache2 restart');
-        $this->info('apache restart successfully'); 
-        //shell_exec('composer remove '.base_path().'Vendor/spatie/pdf-to-image');
-        //$this->info('Vendor/spatie/pdf-to-image removed successfully'); 
-        //shell_exec('composer require spatie/pdf-to-image');
-        //$this->info('spatie/pdf-to-image installed successfully');
+        $this->info('apache restart successfully');  
+        shell_exec('composer update spatie/pdf-to-image');
+        $this->info('spatie/pdf-to-image installed successfully');
         shell_exec('composer dump-autoload');
         $this->info('dump-autoload successfully');
         shell_exec('ln -s /usr/local/bin/gs /usr/bin/gs');

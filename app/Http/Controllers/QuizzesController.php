@@ -24,6 +24,7 @@ use App\LastAction;
 use Carbon\Carbon;
 use App\Events\updateQuizAndQuizLessonEvent;
 use App\Notification;
+use App\Notifications\QuizNotification;
 use App\Timeline;
 use App\SystemSetting;
 
@@ -184,28 +185,9 @@ class QuizzesController extends Controller
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
                 ]);
 
-                $users = Enroll::whereIn('group',$lesson->shared_classes->pluck('id'))
-                                ->where('course',$lesson->course_id)
-                                ->where('user_id','!=',Auth::user()->id)
-                                ->where('role_id','!=', 1 )->get()->groupBy('group');
-
-                foreach($lesson->shared_classes->pluck('id') as $class){
-
-                    $classUsers = $users[$class]->pluck('user_id');
-                    
-                    $requ = new Request([
-                        'message' => $quiz->name . ' quiz is added',
-                        'id' => $quiz->id,
-                        'users' => count($classUsers) > 0 ? $classUsers->toArray() : null,
-                        'type' =>'quiz',
-                        'publish_date'=> Carbon::parse($newQuizLesson->publish_date),
-                        'course_id' => $lesson->course_id,
-                        'class_id'=> $class,
-                        'lesson_id'=> $lesson->id,
-                    ]);
-
-                    (new Notification())->send($requ);
-                }
+                //sending notifications
+                $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
+                $notification->send();         
             }
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -290,7 +272,11 @@ class QuizzesController extends Controller
         $quiz->save();
         $quiz_lesson->save();
         $quiz->quizLesson;
-        
+
+        //sending notifications     
+        $notification = new QuizNotification($quiz_lesson,$quiz->name.' quiz is updated.');
+        $notification->send();
+
         // update timeline object and sending notifications
         event(new updateQuizAndQuizLessonEvent($quiz_lesson));
 
@@ -413,9 +399,9 @@ class QuizzesController extends Controller
         return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
     }
 
-    public static function closeAttempts()
+    public static function closeAttempts($quiz_lesson)
     {
-        $user_quizzes=userQuiz::whereNull('submit_time')->get();
+        $user_quizzes=userQuiz::where('quiz_lesson_id',$quiz_lesson->id)->whereNull('submit_time')->get();
         foreach($user_quizzes as $userQuiz)
         {
             $quiz_time=Carbon::parse($userQuiz->open_time)->addSeconds($userQuiz->quiz_lesson->quiz->duration)->format('Y-m-d H:i:s');

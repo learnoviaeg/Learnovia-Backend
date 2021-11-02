@@ -383,6 +383,8 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/seen_report', 'title' => 'Seen report']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/course_progress', 'title' => 'view course progress report' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/overall_seen_report', 'title' => 'Overall seen report','dashboard' => 1, 'icon'=> 'Report']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/total_attempts_report', 'title' => 'Total Attempts Report','dashboard' => 1, 'icon'=> 'Report']);
+
 
             //Add Roles
             $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin' , 'description' => 'System manager that can monitor everything.']);
