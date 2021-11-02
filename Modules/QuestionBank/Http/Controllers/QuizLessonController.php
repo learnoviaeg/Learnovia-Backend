@@ -309,40 +309,39 @@ class QuizLessonController extends Controller
         }
         return HelperController::api_response_format(200, $quizLesson);
     }
+    
     public function overrideQuiz(Request $request)
     {
-
         $request->validate([
-        'users_id' => 'required|array',
-        'users_id.*' => 'required|integer|exists:users,id',
-        'quiz_id' => 'required|integer|exists:quizzes,id',
-        'lesson_id' => 'required|integer|exists:lessons,id',
-        'start_date' => 'required|before:due_date',
-        'due_date' => 'required',//|after:' . Carbon::now(),
-    ]);
+            'users_id' => 'required|array',
+            'users_id.*' => 'required|integer|exists:users,id',
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'start_date' => 'required|before:due_date',
+            'due_date' => 'required',//|after:' . Carbon::now(),
+            'extra_attempts' => 'required|integer'
+        ]);
     
-    $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-    if(!isset($quizLesson)){
-        return HelperController::api_response_format(400,null, __('messages.quiz.quiz_not_belong'));
-
-    }
-    $lesson= Lesson::find($quizLesson->lesson_id);
-    $segment_due_date =  $lesson->SecondaryChain[0]->Enroll->Segment->end_date;
-    if($segment_due_date < Carbon::parse($request->due_date))
+        $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!isset($quizLesson)){
+            return HelperController::api_response_format(400,null, __('messages.quiz.quiz_not_belong'));
+        }
+        $lesson= Lesson::find($quizLesson->lesson_id);
+        $segment_due_date =  $lesson->SecondaryChain[0]->Enroll->Segment->end_date;
+        if($segment_due_date < Carbon::parse($request->due_date))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
             return HelperController::api_response_format(400, null , __('messages.date.end_before').$segment_due_date);
 
-    $usersOverride =array();
-    foreach ($request->users_id as $user_id) {
-        $usersOverride [] =  QuizOverride::updateOrCreate(
-        ['user_id'=> $user_id,
-        'quiz_lesson_id'=> $quizLesson->id,],
-        ['start_date' => $request->start_date,
-        'due_date'=>$request->due_date ,
-        'attemps' => $quizLesson->max_attemp]
-        );
-    }
-    return HelperController::api_response_format(201, $usersOverride, __('messages.quiz.override'));
-
+        $usersOverride =array();
+        foreach ($request->users_id as $user_id) {
+            $usersOverride [] =  QuizOverride::updateOrCreate([
+                'user_id'=> $user_id,
+                'quiz_lesson_id'=> $quizLesson->id,
+                'start_date' => $request->start_date,
+                'due_date'=>$request->due_date ,
+                'attemps' => $request->extra_attempts
+            ]);
+        }
+        return HelperController::api_response_format(201, $usersOverride, __('messages.quiz.override'));
     }
 
 }
