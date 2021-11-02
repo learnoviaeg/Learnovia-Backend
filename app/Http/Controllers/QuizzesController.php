@@ -73,7 +73,7 @@ class QuizzesController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons);
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('created_at','desc');;
 
         if($request->user()->can('site/course/student'))
             $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
@@ -86,12 +86,18 @@ class QuizzesController extends Controller
 
         if($count == 'count')
             return response()->json(['message' => __('messages.quiz.count'), 'body' => $quiz_lessons->count() ], 200);
-        
-        $quiz_lessons = $quiz_lessons->get();
+
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $result['last_page'] = Paginate::allPages($quiz_lessons->count(),$paginate);
+        $result['total']= $quiz_lessons->count();
+
+        $quiz_lessons = $quiz_lessons->skip(($page)*$paginate)->take($paginate);
 
         $quizzes = collect([]);
 
-        foreach($quiz_lessons as $quiz_lesson){
+        foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
             $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
@@ -99,15 +105,16 @@ class QuizzesController extends Controller
                 $flag=true;
 
             $quiz['closed_attempt']=$flag;
-            // $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::whereIn('id',$quiz['lesson']->shared_classes->pluck('id'))->get();
             $quiz['level'] = Level::find(Course::find($quiz['lesson']->course_id)->level_id);
-            // unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
+        $result['data'] =  $quizzes;
+        $result['current_page']= $page + 1;
+        $result['per_page']= count($result['data']);
 
-        return response()->json(['message' => __('messages.quiz.list'), 'body' => $quizzes->sortByDesc('created_at')->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.quiz.list'), 'body' => $result], 200);
     }
 
     /**

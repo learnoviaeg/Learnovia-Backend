@@ -38,11 +38,12 @@ class GradeAttemptItemlistener
         $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$event->attempt->quiz_lesson->quiz_id)->where('lesson_id',$event->attempt->quiz_lesson->lesson_id)->first();
         $gradeitem=GradeItems::where('index',$event->attempt->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
         if(isset($gradeitem)){ // this check for roles(ex. teacher, admin, ...) that open more attempts more than max_attemp
-            $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->get();
+            $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->get()->unique('item_id');
+
             $total_grade_attempt=0;
 
             foreach($item_details as $item_detail)
-            {
+            {   
                 foreach($user_quiz_answers as $stud_quest_ans)
                 {
                     $grade = null ;

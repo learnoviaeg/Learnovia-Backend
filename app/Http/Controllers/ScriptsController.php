@@ -132,8 +132,6 @@ class ScriptsController extends Controller
                 foreach($quiz_questions->Question as $question){
                     $question_with_wrong_content = quiz_questions::where('question_id' , $question->id)->first();
                     $choices = [];
-                    if(!isset($question_with_wrong_content->grade_details->details))
-                        return $question_with_wrong_content;
                     foreach($question_with_wrong_content->grade_details->details as $wrong_q){
                         $choices['type'] = $question_with_wrong_content->grade_details->type;
                         foreach($question->content as $right_quest){
