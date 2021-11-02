@@ -15,6 +15,7 @@ use App\SecondaryChain;
 use App\Classes;
 use App\Course;
 use App\Level;
+use App\UserGrader;
 use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuiz;
@@ -365,8 +366,10 @@ class QuizzesController extends Controller
 
         $quiz->token_attempts = 0;
         $quiz->last_attempt_status = 'newOne';
+        $quiz->user_grade=null;
         $usergrader = UserGrader::where('user_id',Auth::id())->where('item_id', $quizLesson->grade_category_id)->first();
-        $quiz->user_grade=$usergrader->grade;
+        if(isset($usergrader))
+            $quiz->user_grade=$usergrader->grade;
 
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
