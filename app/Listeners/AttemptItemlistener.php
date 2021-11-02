@@ -58,9 +58,11 @@ class AttemptItemlistener
                     UserGrader::firstOrcreate([
                         'user_id'   => $student,
                         'item_type' => 'Item',
-                        'item_id'   => $gradeItem->id,
-                        'grade'     => null
-                    ]);
+                        'item_id'   => $gradeItem->id,],
+                        [
+                            'grade'     => null
+                        ]
+                    );
                 }
                 event(new GradeItemEvent($gradeItem));
             }
