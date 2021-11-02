@@ -277,15 +277,6 @@ class AnnouncementsController extends Controller
 
         $announcement->save();
 
-        //check if announcement has already been sent to send the update
-        if($announcement->publish_date < Carbon::now()){
-
-            //sending Notification
-            $notification = new AnnouncementNotification($announcement, $announcement->title.' announcement is updated');
-            $notification->send();
-        }
-
-
         return response()->json(['message' => __('messages.announcement.update'), 'body' => $announcement], 200);
     }
 

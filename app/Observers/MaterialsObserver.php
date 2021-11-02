@@ -63,9 +63,6 @@ class MaterialsObserver
 
             $this->report->calculate_course_progress($material->course_id);
         }
-
-        $notification = new MaterialNotification($material,$material->name.' '.$material->type.' is updated.');
-        $notification->send();
     }
 
     /**
