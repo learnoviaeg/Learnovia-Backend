@@ -221,9 +221,6 @@ class AttemptsController extends Controller
         if(Carbon::parse($quiz_lesson->start_date) > Carbon::now() && Auth::user()->can('site/course/student'))
             return HelperController::api_response_format(200, null, __('messages.error.quiz_time'));
 
-        if(Carbon::parse($quiz_lesson->due_date) < Carbon::now() && Auth::user()->can('site/course/student'))
-            return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
-
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
         $user_quiz = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id);
         
@@ -437,10 +434,6 @@ class AttemptsController extends Controller
         ]);
 
         $user_quiz = userQuiz::find($id);
-
-        if(Carbon::parse($user_quiz->quiz_lesson->due_date) < Carbon::now() && Auth::user()->can('site/course/student'))
-            return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
-
         LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
 
         $allData = collect([]);
