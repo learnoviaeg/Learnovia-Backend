@@ -42,6 +42,8 @@ class TopicController extends Controller
             'types.*'  => 'nullable|exists:academic_types,id',
             'levels' => 'array',
             'levels.*' => 'nullable|exists:levels,id',
+            'classes' => 'array',
+            'classes.*' => 'nullable|exists:classes,id',
             'segments'  => 'array',
             'segments.*'  => 'nullable|exists:segments,id',
             'courses' => 'array',
@@ -53,6 +55,11 @@ class TopicController extends Controller
         ]);
 
         $topic_ids =  EnrollTopic::Query();
+        if(Auth::user()->can('site/show-all-courses') && $request->filled('years')){
+            $enrolls = $this->chain->getEnrollsByManyChain($request);
+            $enrolls->where('user_id',Auth::id());
+            $topic_ids->whereIn('enroll_id' , $enrolls->pluck('id'));
+        }
         if(!Auth::user()->can('site/show-all-courses')){
             $enrolls = $this->chain->getEnrollsByManyChain($request);
             $enrolls->where('user_id',Auth::id());
@@ -80,6 +87,8 @@ class TopicController extends Controller
             'types.*'  => 'nullable|exists:academic_types,id',
             'levels' => 'array',
             'levels.*' => 'nullable|exists:levels,id',
+            'classes' => 'array',
+            'classes.*' => 'nullable|exists:classes,id',
             'segments'  => 'array',
             'segments.*'  => 'nullable|exists:segments,id',
             'courses' => 'array',
@@ -89,7 +98,22 @@ class TopicController extends Controller
             'user_id' => 'array',
             'user_id.*' => 'nullable|exists:users,id',
         ]);
+        //Enroll admin if not exist in request
+        if($request->filled('roles') && !in_array(1,$request->roles))
+        {  
+            $role = array();
+            $role = $request->roles;
+            $role[] = "1";
+            $request->merge(['roles' => $role]);
 
+            if($request->filled('user_id') && !in_array(1,$request->user_id)){
+                $users = array();
+                $users = $request->user_id;
+                $users[] = "1";
+                $request->merge(['user_id' => $users]);
+            }
+        }
+        //Get enrolls by chain filteration
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $filter = json_encode($request->all());
         $topic = Topic::Create([
@@ -136,6 +160,8 @@ class TopicController extends Controller
             'types.*'  => 'nullable|exists:academic_types,id',
             'levels' => 'array',
             'levels.*' => 'nullable|exists:levels,id',
+            'classes' => 'array',
+            'classes.*' => 'nullable|exists:classes,id',
             'segments'  => 'array',
             'segments.*'  => 'nullable|exists:segments,id',
             'courses' => 'array',

@@ -15,6 +15,7 @@ use App\SecondaryChain;
 use App\Classes;
 use App\Course;
 use App\Level;
+use App\UserGrader;
 use App\Paginate;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuiz;
@@ -73,7 +74,7 @@ class QuizzesController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons);
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('created_at','desc');;
 
         if($request->user()->can('site/course/student'))
             $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
@@ -86,12 +87,18 @@ class QuizzesController extends Controller
 
         if($count == 'count')
             return response()->json(['message' => __('messages.quiz.count'), 'body' => $quiz_lessons->count() ], 200);
-        
-        $quiz_lessons = $quiz_lessons->get();
+
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $result['last_page'] = Paginate::allPages($quiz_lessons->count(),$paginate);
+        $result['total']= $quiz_lessons->count();
+
+        $quiz_lessons = $quiz_lessons->skip(($page)*$paginate)->take($paginate);
 
         $quizzes = collect([]);
 
-        foreach($quiz_lessons as $quiz_lesson){
+        foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
             $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
@@ -99,15 +106,16 @@ class QuizzesController extends Controller
                 $flag=true;
 
             $quiz['closed_attempt']=$flag;
-            // $quiz['quizlesson'] = $quiz_lesson;
             $quiz['lesson'] = Lesson::find($quiz_lesson->lesson_id);
             $quiz['class'] = Classes::whereIn('id',$quiz['lesson']->shared_classes->pluck('id'))->get();
             $quiz['level'] = Level::find(Course::find($quiz['lesson']->course_id)->level_id);
-            // unset($quiz['lesson']->courseSegment);
             $quizzes[]=$quiz;
         }
+        $result['data'] =  $quizzes;
+        $result['current_page']= $page + 1;
+        $result['per_page']= count($result['data']);
 
-        return response()->json(['message' => __('messages.quiz.list'), 'body' => $quizzes->sortByDesc('created_at')->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.quiz.list'), 'body' => $result], 200);
     }
 
     /**
@@ -273,10 +281,6 @@ class QuizzesController extends Controller
         $quiz_lesson->save();
         $quiz->quizLesson;
 
-        //sending notifications     
-        $notification = new QuizNotification($quiz_lesson,$quiz->name.' quiz is updated.');
-        $notification->send();
-
         // update timeline object and sending notifications
         event(new updateQuizAndQuizLessonEvent($quiz_lesson));
 
@@ -345,8 +349,10 @@ class QuizzesController extends Controller
             $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);
 
         $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
-        if(isset($quiz_override))
+        if(isset($quiz_override)){
             $quizLesson->due_date = $quiz_override->due_date;
+            $quizLesson->max_attemp+=$quiz_override->attemps;
+        }
 
         $query=clone $user_quiz;
         $last_attempt=$query->latest()->first();
@@ -356,6 +362,10 @@ class QuizzesController extends Controller
 
         $quiz->token_attempts = 0;
         $quiz->last_attempt_status = 'newOne';
+        $quiz->user_grade=null;
+        $usergrader = UserGrader::where('user_id',Auth::id())->where('item_id', $quizLesson->grade_category_id)->first();
+        if(isset($usergrader))
+            $quiz->user_grade=$usergrader->grade;
 
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))

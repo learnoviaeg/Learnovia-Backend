@@ -44,13 +44,15 @@ class ItemDetailslistener
                     foreach($quest as $child){
                         $child_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$child)->first();
 
-                        $item=ItemDetail::updateOrCreate([
-                            'type' => 'Question',
-                            'item_id' => $child,
-                            'parent_item_id' => $event->grade_item->id,],
-                            [
-                            'weight_details' => json_encode($child_question->grade_details),
-                        ]);
+                        if(isset($child_question->grade_details)){ //because if there is a probelm in assign paragraph question 
+                            $item=ItemDetail::updateOrCreate([
+                                'type' => 'Question',
+                                'item_id' => $child,
+                                'parent_item_id' => $event->grade_item->id,],
+                                [
+                                'weight_details' => json_encode($child_question->grade_details),
+                            ]);
+                        }
                     }
                 }
                 else // because parent question(comprehension) not have answer

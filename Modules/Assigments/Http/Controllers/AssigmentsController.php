@@ -360,10 +360,6 @@ class AssigmentsController extends Controller
             }
         }
 
-        //sending notifications
-        $notification = new AssignmentNotification($AssignmentLesson, $AssignmentLesson->Assignment[0]->name .' assignment is updated');
-        $notification->send();
-
         $all = AssignmentLesson::all();
 
         return HelperController::api_response_format(200, $all, $message = __('messages.assignment.update'));
