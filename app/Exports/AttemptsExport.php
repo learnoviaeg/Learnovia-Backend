@@ -31,15 +31,19 @@ class AttemptsExport implements FromCollection, WithHeadings
             $forExport['submit_time'] = '-';
             $forExport['status'] = 'Not Submitted';
             $forExport['taken_duration_min'] = '-';
-            foreach($user['Attempts'] as $attempt)
-            {
-                $forExport['attempt_index'] = $attempt['details']['attempt_index'];
-                $forExport['open_time'] = $attempt['details']['open_time'];
-                $forExport['submit_time'] = $attempt['details']['submit_time'];
-                $forExport['status'] = $attempt['details']['status'];
-                $forExport['taken_duration_min'] = $attempt['taken_duration']/60;
-                $forSetExport->push($forExport);
+            if(count($user['Attempts']) > 0){
+                foreach($user['Attempts'] as $attempt)
+                {
+                    $forExport['attempt_index'] = $attempt['details']['attempt_index'];
+                    $forExport['open_time'] = $attempt['details']['open_time'];
+                    $forExport['submit_time'] = $attempt['details']['submit_time'];
+                    $forExport['status'] = $attempt['details']['status'];
+                    $forExport['taken_duration_min'] = $attempt['taken_duration']/60;
+                    $forSetExport->push($forExport);
+                }
             }
+            else
+                $forSetExport->push($forExport);
         }
         return $forSetExport;
     }
