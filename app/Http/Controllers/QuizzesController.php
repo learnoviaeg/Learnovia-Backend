@@ -281,10 +281,6 @@ class QuizzesController extends Controller
         $quiz_lesson->save();
         $quiz->quizLesson;
 
-        //sending notifications     
-        $notification = new QuizNotification($quiz_lesson,$quiz->name.' quiz is updated.');
-        $notification->send();
-
         // update timeline object and sending notifications
         event(new updateQuizAndQuizLessonEvent($quiz_lesson));
 
