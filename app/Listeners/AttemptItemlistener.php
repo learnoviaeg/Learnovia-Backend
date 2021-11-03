@@ -59,6 +59,8 @@ class AttemptItemlistener
                         'user_id'   => $student,
                         'item_type' => 'Item',
                         'item_id'   => $gradeItem->id,
+                    ],
+                    [   
                         'grade'     => null
                     ]);
                 }
