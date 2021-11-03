@@ -11,6 +11,9 @@ use App\Http\Controllers\HelperController;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuiz;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
+use App\GradeItems;
+use App\UserGrader;
+use App\Events\GradeItemEvent;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\quiz;
 use App\Lesson;
@@ -309,40 +312,78 @@ class QuizLessonController extends Controller
         }
         return HelperController::api_response_format(200, $quizLesson);
     }
+    
     public function overrideQuiz(Request $request)
     {
-
         $request->validate([
-        'users_id' => 'required|array',
-        'users_id.*' => 'required|integer|exists:users,id',
-        'quiz_id' => 'required|integer|exists:quizzes,id',
-        'lesson_id' => 'required|integer|exists:lessons,id',
-        'start_date' => 'required|before:due_date',
-        'due_date' => 'required',//|after:' . Carbon::now(),
-    ]);
+            'users_id' => 'required|array',
+            'users_id.*' => 'required|integer|exists:users,id',
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'start_date' => 'required|before:due_date',
+            'due_date' => 'required',//|after:' . Carbon::now(),
+            'extra_attempts' => 'required|integer'
+        ]);
     
-    $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-    if(!isset($quizLesson)){
-        return HelperController::api_response_format(400,null, __('messages.quiz.quiz_not_belong'));
-
-    }
-    $lesson= Lesson::find($quizLesson->lesson_id);
-    $segment_due_date =  $lesson->SecondaryChain[0]->Enroll->Segment->end_date;
-    if($segment_due_date < Carbon::parse($request->due_date))
+        $quizLesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!isset($quizLesson)){
+            return HelperController::api_response_format(400,null, __('messages.quiz.quiz_not_belong'));
+        }
+        $lesson= Lesson::find($quizLesson->lesson_id);
+        $segment_due_date =  $lesson->SecondaryChain[0]->Enroll->Segment->end_date;
+        if($segment_due_date < Carbon::parse($request->due_date))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
             return HelperController::api_response_format(400, null , __('messages.date.end_before').$segment_due_date);
 
-    $usersOverride =array();
-    foreach ($request->users_id as $user_id) {
-        $usersOverride [] =  QuizOverride::updateOrCreate(
-        ['user_id'=> $user_id,
-        'quiz_lesson_id'=> $quizLesson->id,],
-        ['start_date' => $request->start_date,
-        'due_date'=>$request->due_date ,
-        'attemps' => $quizLesson->max_attemp]
-        );
-    }
-    return HelperController::api_response_format(201, $usersOverride, __('messages.quiz.override'));
+        $usersOverride =array();
+        foreach ($request->users_id as $user_id) {
+            $start=$quizLesson->max_attemp;
+            $end = $quizLesson->max_attemp + $request->extra_attempts;
+            $oldOverride=QuizOverride::where('user_id',$user_id)->where('quiz_lesson_id',$quizLesson->id)->first();
+            if(isset($oldOverride)){
+                $start=$quizLesson->max_attemp + $oldOverride->attemps;
+                $end = $quizLesson->max_attemp + $oldOverride->attemps + $request->extra_attempts;
+                // continue;
+            }
+            if($request->extra_attempts > 0)
+            {
+                for($key =$start; $key<=$end; $key++){
+                    $gradeItem = GradeItems::updateOrCreate([
+                        'index' => $key,
+                        'grade_category_id' => $quizLesson->grade_category_id,
+                        'name' => 'Attempt number ' .$key,
+                    ],
+                    [
+                        'type' => 'Attempts',
+                    ]
+                );    
+                    $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quizLesson->lesson->course_id)->pluck('user_id');
+                    foreach($enrolled_students as $student){
+                        $data = [
+                            'user_id'   => $student,
+                            'item_type' => 'Item',
+                            'item_id'   => $gradeItem->id,
+                            'grade'     => null
+                        ];
+                        UserGrader::firstOrcreate($data);
+                    }
+                    event(new GradeItemEvent($gradeItem));
+                }
+            }
 
+            if(isset($oldOverride)){
+                $oldOverride->attemps=$request->extra_attempts + $oldOverride->attemps;
+                $oldOverride->save();
+                continue;
+            }
+            $usersOverride [] =  QuizOverride::updateOrCreate([
+                'user_id'=> $user_id,
+                'quiz_lesson_id'=> $quizLesson->id,
+                'start_date' => $request->start_date,
+                'due_date'=>$request->due_date ,
+                'attemps' => $request->extra_attempts
+            ]);
+        }
+        return HelperController::api_response_format(201, $usersOverride, __('messages.quiz.override'));
     }
 
 }
