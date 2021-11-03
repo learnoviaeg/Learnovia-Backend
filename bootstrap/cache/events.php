@@ -30,6 +30,7 @@
     array (
       0 => 'App\\Listeners\\UpdateQuizGradeListener',
       1 => 'App\\Listeners\\createTimelineListener',
+      2 => 'App\\Listeners\\updateWeightDetailsListener',
     ),
     'App\\Events\\UserEnrolledEvent' => 
     array (
