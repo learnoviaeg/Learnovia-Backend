@@ -38,8 +38,8 @@ class AttemptsExport implements FromCollection, WithHeadings
                 $forExport['submit_time'] = $attempt['details']['submit_time'];
                 $forExport['status'] = $attempt['details']['status'];
                 $forExport['taken_duration_min'] = $attempt['taken_duration']/60;
+                $forSetExport->push($forExport);
             }
-            $forSetExport->push($forExport);
         }
         return $forSetExport;
     }
