@@ -67,7 +67,19 @@ class ScriptsController extends Controller
 
     public function grade_details_of_questions(Request $request)
     {
-        foreach(QuizLesson::cursor() as $quiz_lesson){
+        $request->validate([
+            'quiz_id' => 'exists:quizzes,id',
+            'lesson_id' => 'required_with:quiz_id|exists:quiz_lessons,lesson_id'
+        ]);
+
+        if(isset($request->quiz_id)){
+            $Quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+            $quizLessons=[$Quiz_lesson];
+        }
+        if(!isset($Quiz_lesson)){
+            $quizLessons=QuizLesson::cursor();
+        }
+        foreach($quizLessons as $quiz_lesson){
             $grade_cat = GradeCategory::firstOrCreate(
                 [
                     'instance_type'=>'Quiz',
