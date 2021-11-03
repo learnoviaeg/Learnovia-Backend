@@ -333,37 +333,43 @@ class QuizLessonController extends Controller
         $segment_due_date =  $lesson->SecondaryChain[0]->Enroll->Segment->end_date;
         if($segment_due_date < Carbon::parse($request->due_date))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
             return HelperController::api_response_format(400, null , __('messages.date.end_before').$segment_due_date);
-        
-        if($request->extra_attempts > 0)
-        {
-            for($key =$quizLesson->max_attemp; $key<=$quizLesson->max_attemp + $request->extra_attempts; $key++){
-                $gradeItem = GradeItems::updateOrCreate([
-                    'index' => $key,
-                    'grade_category_id' => $quizLesson->grade_category_id,
-                    'name' => 'Attempt number ' .$key,
-                ],
-                [
-                    'type' => 'Attempts',
-                ]
-            );    
-                $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quizLesson->lesson->course_id)->pluck('user_id');
-                foreach($enrolled_students as $student){
-                    $data = [
-                        'user_id'   => $student,
-                        'item_type' => 'Item',
-                        'item_id'   => $gradeItem->id,
-                        'grade'     => null
-                    ];
-                    UserGrader::firstOrcreate($data);
-                }
-                event(new GradeItemEvent($gradeItem));
-            }
-        }
 
         $usersOverride =array();
         foreach ($request->users_id as $user_id) {
-            $attemptsss=$request->extra_attempts;
+            $start=$quizLesson->max_attemp;
+            $end = $quizLesson->max_attemp + $request->extra_attempts;
             $oldOverride=QuizOverride::where('user_id',$user_id)->where('quiz_lesson_id',$quizLesson->id)->first();
+            if(isset($oldOverride)){
+                $start=$quizLesson->max_attemp + $oldOverride->attemps;
+                $end = $quizLesson->max_attemp + $oldOverride->attemps + $request->extra_attempts;
+                // continue;
+            }
+            if($request->extra_attempts > 0)
+            {
+                for($key =$start; $key<=$end; $key++){
+                    $gradeItem = GradeItems::updateOrCreate([
+                        'index' => $key,
+                        'grade_category_id' => $quizLesson->grade_category_id,
+                        'name' => 'Attempt number ' .$key,
+                    ],
+                    [
+                        'type' => 'Attempts',
+                    ]
+                );    
+                    $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quizLesson->lesson->course_id)->pluck('user_id');
+                    foreach($enrolled_students as $student){
+                        $data = [
+                            'user_id'   => $student,
+                            'item_type' => 'Item',
+                            'item_id'   => $gradeItem->id,
+                            'grade'     => null
+                        ];
+                        UserGrader::firstOrcreate($data);
+                    }
+                    event(new GradeItemEvent($gradeItem));
+                }
+            }
+
             if(isset($oldOverride)){
                 $oldOverride->attemps=$request->extra_attempts + $oldOverride->attemps;
                 $oldOverride->save();
@@ -374,7 +380,7 @@ class QuizLessonController extends Controller
                 'quiz_lesson_id'=> $quizLesson->id,
                 'start_date' => $request->start_date,
                 'due_date'=>$request->due_date ,
-                'attemps' => $attemptsss
+                'attemps' => $request->extra_attempts
             ]);
         }
         return HelperController::api_response_format(201, $usersOverride, __('messages.quiz.override'));
