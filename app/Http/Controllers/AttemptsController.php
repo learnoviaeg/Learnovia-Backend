@@ -341,6 +341,10 @@ class AttemptsController extends Controller
     public function show($id)
     {
         $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson')->first();
+        // to prevent any user except auth to review this attempt
+        if($attempt->user_id != Auth::id())
+            return HelperController::api_response_format(201, __('messages.error.data_invalid'));
+
         $due_date=$attempt->quiz_lesson->due_date;
         $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
         $correct_feedback=$attempt->quiz_lesson->quiz->correct_feedback;
