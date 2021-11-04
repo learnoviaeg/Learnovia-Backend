@@ -510,4 +510,44 @@ class AttemptsController extends Controller
         $file = url(Storage::url('Attempt'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
+
+    public function newExportAttempts(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+        ]);
+
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!$quiz_lesson){
+            return HelperController::api_response_format(200, null, __('messages.error.not_found'));
+        }
+        $user_class=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3)->pluck('user_id');
+        $allAttempt =array();
+        foreach ($user_class as $user_id){
+            $user = User::find($user_id);
+            if($user == null){
+                unset($user);
+                continue;
+            }
+            if(!$user->can('site/quiz/store_user_quiz')) 
+                continue;
+            
+            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->first();
+           if(!$attems)
+           continue;
+            $user_Attemp['username'] = $user->username;
+            $user_Attemp['fullname'] = $user->fullname;
+            $user_Attemp["status"]=$attems->status;
+            $user_Attemp["grade"]=$attems->grade;
+            $user_Attemp["attempt_index"]=$attems->attempt_index;
+            $user_Attemp["last_att_date"]=$attems->submit_time;
+            $allAttempt[] = $user_Attemp;
+        }
+        $body = json_decode(json_encode($allAttempt), true);
+        $filename = uniqid();
+        $file = Excel::store(new AttemptsExport($body), 'Attempt'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Attempt'.$filename.'.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+    }
 }
