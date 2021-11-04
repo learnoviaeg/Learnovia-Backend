@@ -546,7 +546,7 @@ class AttemptsController extends Controller
         }
         $body = json_decode(json_encode($allAttempt), true);
         $filename = uniqid();
-        $file = Excel::store(new AttemptsExport($body), 'Attempt'.$filename.'.xlsx','public');
+        $file = Excel::store(new NewAttemptsExport($body), 'Attempt'.$filename.'.xlsx','public');
         $file = url(Storage::url('Attempt'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
