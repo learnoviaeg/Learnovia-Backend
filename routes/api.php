@@ -420,6 +420,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('grade-attempts', 'ScriptsController@gradeAttemptsInQuizlesson');
     Route::get('delete-wrong-attempts', 'ScriptsController@deleteWrongAttempts');
     Route::get('shuffled_quizzes', 'ScriptsController@reassign_shuffled_questions');
+    Route::get('full-mark', 'ScriptsController@Full_Mark');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {

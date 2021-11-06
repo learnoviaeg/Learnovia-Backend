@@ -174,4 +174,35 @@ class ScriptsController extends Controller
         }
         return 'done';
     }
+
+    public function Full_Mark(Request $request)
+    {
+        $request->validate([
+            'course' => 'required|exists:courses,short_name',
+            'quiz_id' => 'exists:quizzes,id',
+            'lesson_id' => 'required_with:quiz_id|exists:quiz_lessons,lesson_id'
+        ]);
+
+        if(isset($request->course))
+        {
+            $course=Course::where('short_name',$request->course)->first();
+            $quizzesLessId=QuizLesson::whereIn('quiz_id',Quiz::where('course_id',$course->id)->pluck('id'))->pluck('id');
+            if(isset($request->quiz_id)){
+                $Quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+                $users_quiz=userQuiz::where('quiz_lesson_id',$Quiz_lesson->id)->get();
+            }
+            if(!isset($Quiz_lesson)){
+                $users_quiz=userQuiz::whereIn('quiz_lesson_id',$quizzesLessId)->get();
+            }
+            foreach($users_quiz as $user_quiz){
+                $user_quiz->grade=$user_quiz->quiz_lesson->grade;
+                $user_grader=UserGrader::where('item_type','category')->where('item_id',$user_quiz->quiz_lesson->grade_category_id)->
+                                    where('user_id',$user_quiz->user_id)->first();
+                $user_grader->update(['grade' => $user_quiz->quiz_lesson->grade]);
+                $user_quiz->save();
+                $user_grader->save();
+            }
+        }
+        return 'done';
+    }
 }
