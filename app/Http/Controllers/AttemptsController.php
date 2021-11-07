@@ -586,7 +586,6 @@ class AttemptsController extends Controller
     {
         $attempts = new AttemptsController();
         $allAttempt=$attempts->filterExportAttempts($request);
-        dd($allAttempt);
         $body = json_decode(json_encode($allAttempt), true);
         $filename = uniqid();
         $file = Excel::store(new NewAttemptsExport($body), 'Attempt'.$filename.'.xlsx','public');
