@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\GradeCategory;
 use App\GradeItems;
 use App\User;
+use App\Course;
 use App\Enroll;
 use App\Grader\TypeGrader;
 use App\Lesson;
@@ -19,6 +20,7 @@ use App\Grader\gradingMethodsInterface;
 use App\Events\RefreshGradeTreeEvent;
 use Auth;
 use App\Exports\AttemptsExport;
+use App\Exports\NewAttemptsExport;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\quiz;
@@ -545,18 +547,20 @@ class AttemptsController extends Controller
             if(!$attems){
                 $notSubmittedUser['username'] = $user->username;
                 $notSubmittedUser['fullname'] = $user->fullname;
-                $notSubmittedUser['id'] = $user->id;
                 $notSubmittedUser["status"] = 'Not Submitted';
+                $notSubmittedUser["grade"] = '-';
+                $notSubmittedUser["attempt_index"] = '-';
+                $notSubmittedUser["last_att_date"] = '-';
                 $notSubmitted[] = $notSubmittedUser;
                 $allSubmitted[] = $notSubmittedUser;
                continue;
             }
             $user_Attemp['username'] = $user->username;
             $user_Attemp['fullname'] = $user->fullname;
-            $user_Attemp["status"]=$attems->status;
-            $user_Attemp["grade"]=$attems->grade;
-            $user_Attemp["attempt_index"]=$attems->attempt_index;
-            $user_Attemp["last_att_date"]=$attems->submit_time;
+            $user_Attemp["status"] = $attems->status;
+            $user_Attemp["grade"] = $attems->grade;
+            $user_Attemp["attempt_index"] = $attems->attempt_index;
+            $user_Attemp["last_att_date"] = $attems->submit_time;
             $Submitted[] = $user_Attemp;
             $allSubmitted[] = $user_Attemp;
             if($attems->status == 'Not Graded')
@@ -586,10 +590,16 @@ class AttemptsController extends Controller
     {
         $attempts = new AttemptsController();
         $allAttempt=$attempts->filterExportAttempts($request);
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!$quiz_lesson){
+            return HelperController::api_response_format(200, null, __('messages.error.not_found'));
+        }
+        $course = Course::find($quiz_lesson->lesson->course_id);
+        $quiz = Quiz::find($request->quiz_id);
+        $filename = $quiz->name.'_'.$course->short_name;
         $body = json_decode(json_encode($allAttempt), true);
-        $filename = uniqid();
-        $file = Excel::store(new NewAttemptsExport($body), 'Attempt'.$filename.'.xlsx','public');
-        $file = url(Storage::url('Attempt'.$filename.'.xlsx'));
+        $file = Excel::store(new NewAttemptsExport($body), $filename.'.xlsx','public');
+        $file = url(Storage::url($filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }
