@@ -11,7 +11,7 @@ use Carbon\CarbonInterval;
 class AttemptsExport implements FromCollection, WithHeadings
 {
     use Exportable;
-    protected $fields = ['username','fullname','attempt_index','open_time','submit_time','status','taken_duration_min','grade'];
+    protected $fields = ['username','fullname','attempt_index','open_time','submit_time','status','taken_duration','grade'];
 
     function __construct($attempts) {
         $this->attempts=$attempts;
@@ -31,7 +31,7 @@ class AttemptsExport implements FromCollection, WithHeadings
             $forExport['open_time'] = '-';
             $forExport['submit_time'] = '-';
             $forExport['status'] = 'Not Submitted';
-            $forExport['taken_duration_min'] = '-';
+            $forExport['taken_duration'] = '-';
             $forExport['grade'] = '-';
             if(count($user['Attempts']) > 0){
                 foreach($user['Attempts'] as $attempt)
@@ -40,7 +40,7 @@ class AttemptsExport implements FromCollection, WithHeadings
                     $forExport['open_time'] = $attempt['details']['open_time'];
                     $forExport['submit_time'] = $attempt['details']['submit_time'];
                     $forExport['status'] = $attempt['details']['status'];
-                    $forExport['taken_duration_min'] = CarbonInterval::seconds($attempt['taken_duration'])->cascade()->forHumans();
+                    $forExport['taken_duration'] = CarbonInterval::seconds($attempt['taken_duration'])->cascade()->forHumans();
                     $forExport['grade'] = $attempt['details']['grade'];
                     
                     $forSetExport->push($forExport);
