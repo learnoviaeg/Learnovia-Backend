@@ -6,6 +6,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Modules\QuestionBank\Entities\userQuiz;
 use Maatwebsite\Excel\Concerns\Exportable;
+use Carbon\CarbonInterval;
 
 class AttemptsExport implements FromCollection, WithHeadings
 {
@@ -39,7 +40,7 @@ class AttemptsExport implements FromCollection, WithHeadings
                     $forExport['open_time'] = $attempt['details']['open_time'];
                     $forExport['submit_time'] = $attempt['details']['submit_time'];
                     $forExport['status'] = $attempt['details']['status'];
-                    $forExport['taken_duration_min'] = $attempt['taken_duration']/60;
+                    $forExport['taken_duration_min'] = CarbonInterval::seconds($attempt['taken_duration'])->cascade()->forHumans();
                     $forExport['grade'] = $attempt['details']['grade'];
                     
                     $forSetExport->push($forExport);
