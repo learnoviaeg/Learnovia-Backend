@@ -6,9 +6,12 @@ use App\Events\UpdatedQuizQuestionsEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\GradeCategory;
+use App\Http\Controllers\ScriptsController;
+use Illuminate\Http\Request;
 use App\ItemDetail;
 use App\GradeItems;
 use Modules\QuestionBank\Entities\quiz_questions;
+use Modules\QuestionBank\Entities\QuizLesson;
 
 class updateWeightDetailsListener
 {
@@ -41,6 +44,19 @@ class updateWeightDetailsListener
                 $item_detail->weight_details=json_encode($question['grade_details']);
                 $item_detail->save();
             }
+        }
+
+        //to reAutoCorrect for this quiz
+        $Quiz_lessons = QuizLesson::where('quiz_id',$event->Quiz);
+        foreach($Quiz_lessons->cursor() as $quiz_lesson)
+        {
+            $rq=new Request([
+                'quiz_id' => $quiz_lesson->quiz_id,
+                'lesson_id' => $quiz_lesson->lesson_id
+            ]);
+
+            $sc=new ScriptsController();
+            $sc->gradeAttemptsInQuizlesson($rq);
         }
     }
 }

@@ -34,7 +34,7 @@ class ScriptsController extends Controller
         return 'done';
     }
 
-    public function gradeAttemptsInQuizlesson(Request $request)
+    public function gradeAttemptsInQuizlesson(Request $request) //auto correction
     {
         $request->validate([
             'quiz_id' => 'exists:quizzes,id',
