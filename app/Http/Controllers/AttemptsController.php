@@ -125,7 +125,7 @@ class AttemptsController extends Controller
                 if($attem->status == 'Graded')
                 {
                     $user_Attemp["grade"]= $attem->grade;
-                    $usergrader = UserGrader::where('user_id',$user_id)->where('item_id', $quiz_lesson->grade_category_id)->first();
+                    $usergrader = UserGrader::where('user_id',$user_id)->where('item_type','category')->where('item_id', $quiz_lesson->grade_category_id)->first();
                     if(isset($usergrader))
                         $user_grade=$usergrader->grade;
                 }
@@ -219,7 +219,7 @@ class AttemptsController extends Controller
         ]);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if(Carbon::parse($quiz_lesson->start_date) > Carbon::now() && Auth::user()->can('site/course/student'))
-            return HelperController::api_response_format(200, null, __('messages.error.quiz_time'));
+            return HelperController::api_response_format(400, null, __('messages.error.quiz_time'));
 
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
         $user_quiz = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id);
@@ -339,8 +339,11 @@ class AttemptsController extends Controller
     {
         $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson')->first();
         // to prevent any user except auth to review this attempt
-        if($attempt->user_id != Auth::id())
-            return HelperController::api_response_format(201, __('messages.error.data_invalid'));
+
+        if(Auth::user()->can('site/course/student')){
+            if($attempt->user_id != Auth::id())
+                return HelperController::api_response_format(404, __('messages.error.data_invalid'));
+        }
 
         $due_date=$attempt->quiz_lesson->due_date;
         $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
