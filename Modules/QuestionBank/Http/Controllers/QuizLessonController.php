@@ -356,16 +356,16 @@ class QuizLessonController extends Controller
                         'type' => 'Attempts',
                     ]
                 );    
-                    $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quizLesson->lesson->course_id)->pluck('user_id');
-                    foreach($enrolled_students as $student){
+                    // $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quizLesson->lesson->course_id)->pluck('user_id');
+                    // foreach($enrolled_students as $student){
                         $data = [
-                            'user_id'   => $student,
+                            'user_id'   => $user_id,
                             'item_type' => 'Item',
                             'item_id'   => $gradeItem->id,
                             'grade'     => null
                         ];
                         UserGrader::firstOrcreate($data);
-                    }
+                    // }
                     event(new GradeItemEvent($gradeItem));
                 }
             }
