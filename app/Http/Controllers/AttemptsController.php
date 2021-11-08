@@ -342,7 +342,7 @@ class AttemptsController extends Controller
 
         if(Auth::user()->can('site/course/student')){
             if($attempt->user_id != Auth::id())
-                return HelperController::api_response_format(201, __('messages.error.data_invalid'));
+                return HelperController::api_response_format(404, __('messages.error.data_invalid'));
         }
 
         $due_date=$attempt->quiz_lesson->due_date;

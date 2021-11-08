@@ -339,6 +339,12 @@ class QuizzesController extends Controller
             'user_id' => 'exists:users,id',
         ]);
 
+        if(Auth::user()->can('site/course/student')){
+            $users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('course_id',Lesson::find($request->lesson_id)->course_id)->pluck('user_id')->unique();
+            if(!in_array(Auth::id(),$users->toArray()))
+                return HelperController::api_response_format(404, __('messages.error.data_invalid'));
+        }
+
         $quiz = quiz::where('id',$id)->with('Question.children')->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
         if(!isset($quizLesson))
