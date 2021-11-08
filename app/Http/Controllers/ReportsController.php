@@ -514,6 +514,7 @@ class ReportsController extends Controller
                                                     'lesson_id'             => $quizLesson->lesson_id,
                                                     'name'           => $quizLesson->quiz->name,
                                                     'course_name'    => $quizLesson->lesson->course->name,
+                                                    'level_name'    => $quizLesson->lesson->course->level->name,
                                                     'classes'        => $quizLesson->lesson->shared_classes,
                                                     'start_date'     => $quizLesson->start_date,
                                                     'due_date'       => $quizLesson->due_date,
