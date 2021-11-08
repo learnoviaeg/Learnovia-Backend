@@ -461,6 +461,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
     Route::get('close_attempts', 'QuizzesController@closeAttempts');
     Route::get('attempts/export', 'AttemptsController@exportAttempts');
+    Route::get('attempts/new-export', 'AttemptsController@newExportAttempts');
     Route::Resource('attempts', AttemptsController::class);
     Route::post('attempts/{id}', 'AttemptsController@update');
     // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);
