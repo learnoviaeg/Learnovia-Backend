@@ -562,6 +562,7 @@ class AttemptsController extends Controller
             }
             $user_Attemp['username'] = $user->username;
             $user_Attemp['fullname'] = $user->fullname;
+            $user_Attemp['level'] = $level->name;
             $user_Attemp["status"] = $attems->status;
             $user_Attemp["grade"] = $attems->grade;
             $user_Attemp["attempt_index"] = $attems->attempt_index;
