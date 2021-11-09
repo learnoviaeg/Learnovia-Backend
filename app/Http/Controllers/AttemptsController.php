@@ -130,7 +130,6 @@ class AttemptsController extends Controller
                         $user_grade=$usergrader->grade;
                 }
 
-
                 if($attem->status != 'Graded')
                     $countEss_TF++;
                 $user_Attemp['id']= $attem->id;
