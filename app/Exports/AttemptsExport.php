@@ -6,8 +6,9 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Modules\QuestionBank\Entities\userQuiz;
 use Maatwebsite\Excel\Concerns\Exportable;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 
-class AttemptsExport implements FromCollection, WithHeadings
+class AttemptsExport implements FromCollection, WithHeadings, WithStrictNullComparison
 {
     use Exportable;
     protected $fields = ['username','fullname','attempt_index','open_time','submit_time','status','taken_duration_min','grade'];
