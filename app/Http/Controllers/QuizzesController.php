@@ -363,7 +363,7 @@ class QuizzesController extends Controller
         $quiz->token_attempts = 0;
         $quiz->last_attempt_status = 'newOne';
         $quiz->user_grade=null;
-        $usergrader = UserGrader::where('user_id',Auth::id())->where('item_id', $quizLesson->grade_category_id)->first();
+        $usergrader = UserGrader::where('user_id',Auth::id())->where('item_id', $quizLesson->grade_category_id)->where('iem_type','category')->first();
         if(isset($usergrader))
             $quiz->user_grade=$usergrader->grade;
 
