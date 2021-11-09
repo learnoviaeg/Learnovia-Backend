@@ -51,10 +51,10 @@ class GradeAttemptItemlistener
                         $correction_answer['student_answer']=$stud_quest_ans->user_answers;
                         $correction_answer['correct_answer']=$item_detail->weight_details;
 
-                        if($item_detail->weight_details->exclude_mark){
-                            $stud_quest_ans->update(['correction'=>json_encode($correction_answer['correct_answer'])]);
-                            continue;
-                        }
+                        // if($item_detail->weight_details->exclude_mark){
+                        //     $stud_quest_ans->update(['correction'=>json_encode($correction_answer['correct_answer'])]);
+                        //     continue;
+                        // }
 
                         $question_type=Questions::whereId($item_detail['item_id'])->pluck('question_type_id')->first();
             
@@ -75,8 +75,10 @@ class GradeAttemptItemlistener
                         ]);
 
                         $stud_quest_ans->update(['correction'=>json_encode($grade)]);
-                        if(isset($grade))
-                            $total_grade_attempt+=$grade->mark;
+                        if(isset($grade)){
+                            if(!$item_detail->weight_details->exclude_mark)
+                                $total_grade_attempt+=$grade->mark;
+                        }
                     }
                 }
             }
