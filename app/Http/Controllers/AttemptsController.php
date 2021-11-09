@@ -24,6 +24,7 @@ use App\Exports\NewAttemptsExport;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\quiz;
+use App\Repositories\ChainRepositoryInterface;
 use App\Grader\QuizGrader;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\QuizOverride;
@@ -44,6 +45,10 @@ class AttemptsController extends Controller
     // {
     //     $this->typegrader = $typegrader;
     // }
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -529,18 +534,17 @@ class AttemptsController extends Controller
             'classes.*' => 'exists:classes,id',
         ]);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        if(!$quiz_lesson){
-            return HelperController::api_response_format(200, null, __('messages.error.not_found'));
-        }
-        $user_class=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3);
-        if($request->filled('classes')){
-            $user_class->whereIn('group',$request->classes);
-        }
+        $course = Course::where('id' ,$quiz_lesson->lesson->course_id )->first();
+        $level = $course->level;
+        $course = [$quiz_lesson->lesson->course_id];
+        $request->merge(["courses" => $course]);
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls->where('role_id' , 3);
         $Submitted =array();
         $notSubmitted = array();
         $notGraded = array();
         $allSubmitted = array();
-        foreach ($user_class->pluck('user_id') as $user_id){
+        foreach ($enrolls->pluck('user_id') as $user_id){
             $user = User::find($user_id);
             if($user == null){
                 unset($user);
@@ -553,6 +557,7 @@ class AttemptsController extends Controller
             if(!$attems){
                 $notSubmittedUser['username'] = $user->username;
                 $notSubmittedUser['fullname'] = $user->fullname;
+                $notSubmittedUser['level'] = $level->name;
                 $notSubmittedUser["status"] = 'Not Submitted';
                 $notSubmittedUser["grade"] = '-';
                 $notSubmittedUser["attempt_index"] = '-';
@@ -563,6 +568,7 @@ class AttemptsController extends Controller
             }
             $user_Attemp['username'] = $user->username;
             $user_Attemp['fullname'] = $user->fullname;
+            $user_Attemp['level'] = $level->name;
             $user_Attemp["status"] = $attems->status;
             $user_Attemp["grade"] = $attems->grade;
             $user_Attemp["attempt_index"] = $attems->attempt_index;
@@ -594,12 +600,8 @@ class AttemptsController extends Controller
 
     public function newExportAttempts(Request $request)
     {
-        $attempts = new AttemptsController();
-        $allAttempt=$attempts->filterExportAttempts($request);
+        $allAttempt = $this->filterExportAttempts($request);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        if(!$quiz_lesson){
-            return HelperController::api_response_format(200, null, __('messages.error.not_found'));
-        }
         $course = Course::find($quiz_lesson->lesson->course_id);
         $quiz = Quiz::find($request->quiz_id);
         $filename = $quiz->name.'_'.$course->short_name;

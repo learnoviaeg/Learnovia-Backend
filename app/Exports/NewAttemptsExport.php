@@ -26,6 +26,7 @@ class NewAttemptsExport implements FromCollection, WithHeadings
         {                    
             $forExport['Username']= $user['username'];
             $forExport['Fullname'] = $user['fullname'];
+            $forExport['level'] = $user['level'];
             $forExport['Status'] = $user['status'];
             $forExport['Quiz_Grade'] = $user['grade'] ;
             $forExport['Number_Of_Attempts'] = $user['attempt_index'];
