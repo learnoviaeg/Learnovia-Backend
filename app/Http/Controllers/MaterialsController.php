@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\page;
+use Illuminate\Support\Facades\Storage;
 
 class MaterialsController extends Controller
 {
@@ -168,6 +169,14 @@ class MaterialsController extends Controller
         
         if($material->type == 'page')
             $result = page::find($material->item_id);
+        // dd($result);
+        $headers = ['Content-Type' => $result->type];
+        $storagePath = base_path();
+        $path = Storage::url('files/'.$result->description);
+        dd($storagePath.$path);
+        // dd(Storage::url('files/'.$result->description));
+        // dd(base_path());
+        return response()->download($storagePath . $path, 'new name', $headers, 'inline');
 
             return response()->json(['message' => __('messages.materials.list'), 'body' => $result], 200);        
     }

@@ -534,7 +534,6 @@ class AttemptsController extends Controller
             'classes.*' => 'exists:classes,id',
         ]);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        $gradeCategory = GradeCategory::where('id' , $quiz_lesson->grade_category_id)->pluck('id');
         $course = Course::where('id' ,$quiz_lesson->lesson->course_id )->first();
         $level = $course->level;
         $course = [$quiz_lesson->lesson->course_id];
@@ -547,7 +546,7 @@ class AttemptsController extends Controller
         $allSubmitted = array();
         foreach ($enrolls->pluck('user_id') as $user_id){
             $grade = UserGrader::where('user_id' , $user_id)
-            ->where('item_id' , $gradeCategory)
+            ->where('item_id' , $$quiz_lesson->grade_category_id)
             ->where('item_type' ,'category')->pluck('grade');
             $user = User::find($user_id);
             if($user == null){
