@@ -545,6 +545,9 @@ class AttemptsController extends Controller
         $notGraded = array();
         $allSubmitted = array();
         foreach ($enrolls->pluck('user_id') as $user_id){
+            $grade = UserGrader::where('user_id' , $user_id)
+            ->where('item_id' , $$quiz_lesson->grade_category_id)
+            ->where('item_type' ,'category')->pluck('grade');
             $user = User::find($user_id);
             if($user == null){
                 unset($user);
@@ -570,7 +573,7 @@ class AttemptsController extends Controller
             $user_Attemp['fullname'] = $user->fullname;
             $user_Attemp['level'] = $level->name;
             $user_Attemp["status"] = $attems->status;
-            $user_Attemp["grade"] = $attems->grade;
+            $user_Attemp["grade"] = $grade;
             $user_Attemp["attempt_index"] = $attems->attempt_index;
             $user_Attemp["last_att_date"] = $attems->submit_time;
             $Submitted[] = $user_Attemp;
