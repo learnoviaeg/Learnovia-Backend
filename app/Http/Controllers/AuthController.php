@@ -123,8 +123,7 @@ class AuthController extends Controller
             if ($language['default'])
                 $result = $language;
         }
-        // $job=(new \App\Jobs\MessageDelivered(Auth::User()->id));
-        // dispatch($job);
+        
         $user->last_login = Carbon::now();
         $user->api_token = $tokenResult->accessToken;
         $user->save();
