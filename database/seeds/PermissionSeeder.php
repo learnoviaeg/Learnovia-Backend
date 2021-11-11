@@ -350,6 +350,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'reports/in_active_users', 'title' => 'In active users report', 'dashboard' => 1, 'icon'=> 'Report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'reports/seen_report', 'title' => 'Seen report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'reports/overall_seen_report', 'title' => 'Overall seen report','dashboard' => 1, 'icon'=> 'Report']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'reports/total_attempts_report', 'title' => 'Quiz Attempts Report','dashboard' => 1, 'icon'=> 'Report']);
         
         //site internal permessions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/user/search-all-users', 'title' => 'Search all users assigned to my course segments and search all site wide for users give permission to search site wide']);
