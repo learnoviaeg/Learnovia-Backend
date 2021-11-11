@@ -8,9 +8,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\GradeCategory;
 use App\GradeItems;
 use App\UserGrader;
+use App\User;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\UserQuiz;
+use App\Events\RefreshGradeTreeEvent;
 
 class GradeManualListener
 {
@@ -41,6 +43,10 @@ class GradeManualListener
         $allcorrection=UserQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$all_quest_without)->pluck('correction');
         foreach($allcorrection as $oneAuto)
             $gradeAuto+=$oneAuto->mark;
+
+        // $autocorrect=UserQuiz::find($attem->id);
+        // $gradeAuto=$autocorrect->grade;
+        // dd($gradeAuto);
 
         //7esab daragat el true_false questions
         $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)
@@ -79,5 +85,6 @@ class GradeManualListener
         $gradeitem=GradeItems::where('index',$attem->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
         UserGrader::where('user_id',$attem->user_id)->where('item_id',$gradeitem->id)->where('item_type','item')->update(['grade' => $gradeNotWeight+$gradeAuto]);
         UserQuiz::whereId($attem->id)->update(['grade' => $gradeNotWeight+$gradeAuto]);
+        event(new RefreshGradeTreeEvent(User::find($attem->user_id) ,$grade_cat));
     }
 }
