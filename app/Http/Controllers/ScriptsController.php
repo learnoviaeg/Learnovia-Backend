@@ -43,6 +43,7 @@ class ScriptsController extends Controller
 
         if(isset($request->quiz_id)){
             $Quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+            $gradeCat=GradeCategory::whereId($Quiz_lesson->grade_category_id)->update(['calculation_type' => json_encode($Quiz_lesson->grading_method_id)] );
             $users_quiz=userQuiz::where('quiz_lesson_id',$Quiz_lesson->id)->get();
         }
         if(!isset($Quiz_lesson)){
