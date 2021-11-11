@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\updateQuizAndQuizLessonEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\GradeCategory;
 
 class updateGradeCatListener
 {
@@ -26,10 +27,10 @@ class updateGradeCatListener
      */
     public function handle(updateQuizAndQuizLessonEvent $event)
     {
-        $gradeCat=GradeCategory::whereId($event->quiz_lesson->grade_category_id)->update([
+        $gradeCat=GradeCategory::whereId($event->quizLesson->grade_category_id)->update([
             'hidden' => $event->quizLesson->visible,
             'lesson_id' => $event->quizLesson->lesson_id,
-            'calculation_type' => json_encode($event->quizLesson->grading_method_id),
+            'calculation_type' => $event->quizLesson->max_attemp == 1 ? json_encode(["Last"]) : json_encode($event->quizLesson->grading_method_id),
         ]);
     }
 }

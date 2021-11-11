@@ -48,7 +48,7 @@ class QuizLessonObserver
                 'parent' => $grade_category->id,
                 'name' => $quiz->name,
                 'hidden' => $quizLesson->visible,
-                'calculation_type' => (count($quizLesson->grading_method_id) > 0) ? json_encode($quizLesson->grading_method_id) : json_encode(["Last"]),
+                'calculation_type' => $quizLesson->max_attemp == 1 ? json_encode(["Last"]) : json_encode($quizLesson->grading_method_id),
                 'instance_type' => 'Quiz',
                 'instance_id' => $quiz->id,
                 'lesson_id' => $lesson->id
