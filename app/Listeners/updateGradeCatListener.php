@@ -29,7 +29,7 @@ class updateGradeCatListener
         $gradeCat=GradeCategory::whereId($event->quiz_lesson->grade_category_id)->update([
             'hidden' => $event->quizLesson->visible,
             'lesson_id' => $event->quizLesson->lesson_id,
-            'caculation_type' => json_encode($event->quizLesson->grading_method_id),
+            'calculation_type' => json_encode($event->quizLesson->grading_method_id),
         ]);
     }
 }
