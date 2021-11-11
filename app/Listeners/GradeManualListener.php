@@ -44,10 +44,6 @@ class GradeManualListener
         foreach($allcorrection as $oneAuto)
             $gradeAuto+=$oneAuto->mark;
 
-        // $autocorrect=UserQuiz::find($attem->id);
-        // $gradeAuto=$autocorrect->grade;
-        // dd($gradeAuto);
-
         //7esab daragat el true_false questions
         $userEssayCheckAnswerTF=UserQuizAnswer::where('user_quiz_id',$attem->id)->where('answered',1)->where('force_submit',1)
                                 ->whereIn('question_id',$t_f_Quest)->get();
