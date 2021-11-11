@@ -137,7 +137,6 @@ class AttemptsController extends Controller
                         $user_grade=$usergrader->grade;
                 }
 
-
                 if($attem->status != 'Graded')
                     $countEss_TF++;
                 $user_Attemp['id']= $attem->id;
@@ -268,8 +267,10 @@ class AttemptsController extends Controller
                 }
             }
 
-            if((Auth::user()->can('site/quiz/unLimitedAttempts')))
+            if((Auth::user()->can('site/quiz/unLimitedAttempts'))){
+                $empty=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['user_answers' => null]);
                 return HelperController::api_response_format(200, $last_attempt);
+            }
         }
 
         $userQuiz = userQuiz::create([
