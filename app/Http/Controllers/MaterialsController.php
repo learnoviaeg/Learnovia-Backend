@@ -138,7 +138,6 @@ class MaterialsController extends Controller
         if(isset($material->getOriginal()['link'])){
 
             $url = $material->getOriginal()['link'];
-            dd($url = $material->getOriginal()['link']);
             if(str_contains($material->getOriginal()['link'],'youtube') && $material->media_type != 'Link'){
                 if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i',$material->getOriginal()['link'], $match)){
                     $url = 'https://www.youtube.com/embed/'.$match[1];
