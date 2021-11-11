@@ -251,7 +251,7 @@ class QuizzesController extends Controller
             'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id,
             'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
-            'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
+            'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : json_encode($quiz_lesson->grading_method_id) ,
         ]);
 
         if($quiz->allow_edit)
@@ -273,7 +273,6 @@ class QuizzesController extends Controller
                 'max_attemp' => isset($request->max_attemp) ? $request->max_attemp : $quiz_lesson->max_attemp,
                 'start_date' => $quiz_lesson->start_date,
                 'publish_date' => $quiz_lesson->publish_date,
-                'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : $quiz_lesson->getOriginal('grading_method_id'),
             ]);
         }
 
@@ -369,7 +368,7 @@ class QuizzesController extends Controller
         $quiz->token_attempts = 0;
         $quiz->last_attempt_status = 'newOne';
         $quiz->user_grade=null;
-        $usergrader = UserGrader::where('user_id',Auth::id())->where('item_id', $quizLesson->grade_category_id)->first();
+        $usergrader = UserGrader::where('user_id',Auth::id())->where('item_id', $quizLesson->grade_category_id)->where('item_type','category')->first();
         if(isset($usergrader))
             $quiz->user_grade=$usergrader->grade;
 

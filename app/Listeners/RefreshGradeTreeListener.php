@@ -32,7 +32,7 @@ class RefreshGradeTreeListener
         // if(is_null($event->grade_category->calculation_type)){
         //     throw new \Exception('Missing calculation type');
         // }
-        if(is_null($event->grade_category->calculation_type)) //in case quiz has just one attempt
+        if(count($event->grade_category->calculation_type) < 1) //in case quiz has just one attempt
             $event->grade_category->calculation_type=["Last"];
 
         else{

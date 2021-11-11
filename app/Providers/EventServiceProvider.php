@@ -65,6 +65,7 @@ class EventServiceProvider extends ServiceProvider
 
         'App\Events\updateQuizAndQuizLessonEvent' => [
             'App\Listeners\updateTimelineListener',
+            'App\Listeners\updateGradeCatListener',
         ],    
     ];
 
