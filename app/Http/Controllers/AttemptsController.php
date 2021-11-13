@@ -518,9 +518,11 @@ class AttemptsController extends Controller
     {
         $all_attempts=$this->index($request);
         $body = json_decode(json_encode($all_attempts), true);
-        $filename = uniqid();
-        $file = Excel::store(new AttemptsExport($body['original']['body']['users']), 'Attempt'.$filename.'.xlsx','public');
-        $file = url(Storage::url('Attempt'.$filename.'.xlsx'));
+        $quiz = Quiz::find($request->quiz_id);
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        $filename = $quiz->name.' IN '.$quiz_lesson->lesson->course->short_name .' Attempts Details';
+        $file = Excel::store(new AttemptsExport($body['original']['body']['users']), $filename.'.xlsx','public');
+        $file = url(Storage::url($filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
