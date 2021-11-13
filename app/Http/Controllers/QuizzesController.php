@@ -368,9 +368,6 @@ class QuizzesController extends Controller
         $quiz->token_attempts = 0;
         $quiz->last_attempt_status = 'newOne';
         $quiz->user_grade=null;
-        $usergrader = UserGrader::where('user_id',$user_quiz->user_id)->where('item_id', $quizLesson->grade_category_id)->where('item_type','category')->first();
-        if(isset($usergrader))
-            $quiz->user_grade=$usergrader->grade;
 
         if(isset($last_attempt)){
             if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
@@ -379,6 +376,10 @@ class QuizzesController extends Controller
                 UserQuiz::find($last_attempt->id)->update(['submit_time'=>Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s')]);
             }
 
+            $usergrader = UserGrader::where('user_id',$last_attempt->user_id)->where('item_id', $quizLesson->grade_category_id)->where('item_type','category')->first();
+            if(isset($usergrader))
+                $quiz->user_grade=$usergrader->grade;
+                
             $left_time=AttemptsController::leftTime($last_attempt);
             $quiz->remain_time = $left_time;
             $quiz->last_attempt_status = 'continue';
