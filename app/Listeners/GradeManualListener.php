@@ -35,12 +35,18 @@ class GradeManualListener
     public function handle(ManualCorrectionEvent $event)
     {
         $attem=$event->attempt;
-        $essayQues = Questions::whereIn('id',$attem->quiz_lesson->quiz->Question->pluck('id'))->where('question_type_id',4)->pluck('id');
-        $t_f_Quest = Questions::whereIn('id',$attem->quiz_lesson->quiz->Question->pluck('id'))->where('question_type_id',1)->pluck('id');
+        $essayQues=array();
+        $t_f_Quest=array();
         foreach($attem->UserQuizAnswer as $ans){
-            if(in_array($ans->question_id,$essayQues->toArray()))
+            $qq=Questions::find($ans->question_id);
+            if($qq->question_type_id == 4)
+                $essayQues[] = $ans->question_id;
+            if($qq->question_type_id == 1)
+                $t_f_Quest[] = $ans->question_id;
+            if(in_array($ans->question_id,$essayQues))
                 continue;
-            $all_quest_without[]=$ans->question_id;
+            else
+                $all_quest_without[]=$ans->question_id;
         }
         $gradeNotWeight=0;
         $gradeAuto=0;
