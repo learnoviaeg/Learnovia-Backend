@@ -59,10 +59,10 @@ class Quiz24Hreminder implements ShouldQueue
             ];
 
             //assign notification to given users
-            $createdNotification = (new SendNotification)->toDatabase($notification,$allUsers->toArray());
+            // $createdNotification = (new SendNotification)->toDatabase($notification,$allUsers->toArray());
             
             //firebase Notifications
-            (new SendNotification)->toFirebase($createdNotification);
+            // (new SendNotification)->toFirebase($createdNotification);
         }
     }
 }
