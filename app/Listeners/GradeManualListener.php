@@ -37,7 +37,11 @@ class GradeManualListener
         $attem=$event->attempt;
         $essayQues = Questions::whereIn('id',$attem->quiz_lesson->quiz->Question->pluck('id'))->where('question_type_id',4)->pluck('id');
         $t_f_Quest = Questions::whereIn('id',$attem->quiz_lesson->quiz->Question->pluck('id'))->where('question_type_id',1)->pluck('id');
-        $all_quest_without = Questions::whereIn('id',$attem->quiz_lesson->quiz->Question->pluck('id'))->whereIn('question_type_id',[1,2,3])->pluck('id');
+        foreach($attem->UserQuizAnswer as $ans){
+            if(in_array($ans->question_id,$essayQues->toArray()))
+                continue;
+            $all_quest_without[]=$ans->question_id;
+        }
         $gradeNotWeight=0;
         $gradeAuto=0;
         $allcorrection=UserQuizAnswer::where('user_quiz_id',$attem->id)->whereIn('question_id',$all_quest_without)->pluck('correction');
