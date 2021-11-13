@@ -8,9 +8,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\GradeCategory;
 use App\GradeItems;
 use App\UserGrader;
+use App\User;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\UserQuiz;
+use App\Events\RefreshGradeTreeEvent;
 
 class GradeManualListener
 {
@@ -79,5 +81,6 @@ class GradeManualListener
         $gradeitem=GradeItems::where('index',$attem->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
         UserGrader::where('user_id',$attem->user_id)->where('item_id',$gradeitem->id)->where('item_type','item')->update(['grade' => $gradeNotWeight+$gradeAuto]);
         UserQuiz::whereId($attem->id)->update(['grade' => $gradeNotWeight+$gradeAuto]);
+        event(new RefreshGradeTreeEvent(User::find($attem->user_id) ,$grade_cat));
     }
 }
