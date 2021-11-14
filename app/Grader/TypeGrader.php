@@ -145,8 +145,17 @@ class TypeGrader implements GraderInterface
             }
         }
         else{
-            foreach($answer['student_answer'] as $kk=>$ans)
+            foreach($answer['correct_answer']->match_a as $key=>$ans){
                 $ans->right=0;
+                $ans->grade=0;
+
+                $collection = collect($ans);
+                $filtered = $collection->reject(function ($value, $key) {
+                    return is_numeric($key);
+                });
+                $dd = $filtered->toJson();
+                $answer['student_answer'][]=json_decode($dd);
+            }
         }
 
         if($mark > 0 && $mark < $answer['correct_answer']->total_mark)
@@ -157,6 +166,7 @@ class TypeGrader implements GraderInterface
         $grade->mark=$mark;
         $grade->right=$right;
         $grade->stu_ans=$answer['student_answer'];
+        // dd($grade);
         return $grade;
     }
 }
