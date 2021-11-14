@@ -38,6 +38,9 @@ class EventServiceProvider extends ServiceProvider
 
         'App\Events\UpdatedAttemptEvent' => [
             'App\Listeners\FireAutoCorrectionEventListener',
+        ],
+
+        'App\Events\GradeAttemptEvent' => [
             'App\Listeners\GradeAttemptItemlistener',
         ],
 
