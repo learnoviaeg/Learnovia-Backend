@@ -154,7 +154,7 @@ class TypeGrader implements GraderInterface
                     return is_numeric($key);
                 });
                 $dd = $filtered->toJson();
-                $answer['student_answer'][]=json_decode($dd);
+                // $answer['student_answer'][]=json_decode($dd);
             }
         }
 
@@ -166,7 +166,6 @@ class TypeGrader implements GraderInterface
         $grade->mark=$mark;
         $grade->right=$right;
         $grade->stu_ans=$answer['student_answer'];
-        // dd($grade);
         return $grade;
     }
 }
