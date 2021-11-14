@@ -41,7 +41,7 @@ class updateWeightDetailsListener
             $gradeitemIDS=GradeItems::whereIn('grade_category_id',$grade_cat_ids)->pluck('id');
             if(count($gradeitemIDS) > 0){
                 $item_detail=ItemDetail::whereIn('parent_item_id',$gradeitemIDS)->where('item_id',$question['question_id'])->where('type','Question')->first();
-                if(isset($$item_detail)){ //if these update before any one open an attempt
+                if(isset($item_detail)){ //if these update before any one open an attempt
                     $item_detail->weight_details=json_encode($question['grade_details']);
                     $item_detail->save();
                 }

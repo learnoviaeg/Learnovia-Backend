@@ -33,18 +33,11 @@ use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use App\Events\QuizAttemptEvent;
-use App\Events\GradeAttemptEvent;
 use App\LastAction;
 use Log;
 
 class AttemptsController extends Controller
 {
-    // protected $typegrader;
-
-    // public function __construct(TypeGrader $typegrader)
-    // {
-    //     $this->typegrader = $typegrader;
-    // }
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;

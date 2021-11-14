@@ -426,7 +426,7 @@ class QuizzesController extends Controller
                 if($quiz_time > Carbon::parse($userQuiz->quiz_lesson->due_date)->format('Y-m-d H:i:s'))
                     $quiz_time=$userQuiz->quiz_lesson->due_date;
 
-                UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->update(['force_submit'=>'1','answered' => 1]);
+                UserQuizAnswer::where('user_quiz_id',$userQuiz->id)->update(['force_submit'=> 1,'answered' => 1]);
                 userQuiz::find($userQuiz->id)->update(['submit_time'=>$quiz_time]);
             }
         }
