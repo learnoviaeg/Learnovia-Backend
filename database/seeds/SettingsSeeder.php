@@ -16,21 +16,21 @@ class SettingsSeeder extends Seeder
         Settings::create([
             'key' => 'create_assignment_extensions',
             'title' => 'Create/Edit Assignment Supported Extensions',
-            'value' => 'txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpeg,png,gif,csv,mp3,mpeg,odp,ppt,pptx,rar,rtf,zip,xlsx,xls',
+            'value' => 'txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpeg,png,gif,csv,mp3,mpeg,odp,ppt,pptx,rar,rtf,zip,xlsx,xls,ppsx',
             'type' => 'extensions'
         ]);
 
         Settings::create([
             'key' => 'submit_assignment_extensions',
             'title' => 'Submit Assignment Supported Extensions',
-            'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,odp,mp3,wav,amr',
+            'value' => 'pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,odp,mp3,wav,amr,ppsx',
             'type' => 'extensions'
         ]);
 
         Settings::create([
             'key' => 'upload_file_extensions',
             'title' => 'Upload File Supported Extensions',
-            'value' => 'pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss',
+            'value' => 'pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss,ppsx',
             'type' => 'extensions'
         ]);
 
