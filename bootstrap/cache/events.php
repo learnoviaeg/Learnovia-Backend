@@ -24,7 +24,10 @@
     'App\\Events\\UpdatedAttemptEvent' => 
     array (
       0 => 'App\\Listeners\\FireAutoCorrectionEventListener',
-      1 => 'App\\Listeners\\GradeAttemptItemlistener',
+    ),
+    'App\\Events\\GradeAttemptEvent' => 
+    array (
+      0 => 'App\\Listeners\\GradeAttemptItemlistener',
     ),
     'App\\Events\\UpdatedQuizQuestionsEvent' => 
     array (
@@ -51,6 +54,7 @@
     'App\\Events\\updateQuizAndQuizLessonEvent' => 
     array (
       0 => 'App\\Listeners\\updateTimelineListener',
+      1 => 'App\\Listeners\\updateGradeCatListener',
     ),
   ),
 );
