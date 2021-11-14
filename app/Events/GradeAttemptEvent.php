@@ -19,9 +19,9 @@ class GradeAttemptEvent
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($user_quiz)
     {
-        //
+        $this->attempt=$user_quiz;
     }
 
     /**

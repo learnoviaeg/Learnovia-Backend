@@ -31,7 +31,7 @@ class FireAutoCorrectionEventListener
     {
         if($event->attempt->isDirty('submit_time'))
         {
-            event(new GradeAttemptEvent());
+            event(new GradeAttemptEvent($event->attempt));
         }
     }
 }
