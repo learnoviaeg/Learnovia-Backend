@@ -370,9 +370,10 @@ class QuizzesController extends Controller
         $quiz->user_grade=null;
 
         if(isset($last_attempt)){
-            if(Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
+            $count=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->count();
+            if($count > 0 && Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s') < Carbon::now()->format('Y-m-d H:i:s'))
             {
-                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>'1','answered' => 1]);
+                UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['force_submit'=>1,'answered' => 1]);
                 UserQuiz::find($last_attempt->id)->update(['submit_time'=>Carbon::parse($last_attempt->open_time)->addSeconds($quizLesson->quiz->duration)->format('Y-m-d H:i:s')]);
             }
 
