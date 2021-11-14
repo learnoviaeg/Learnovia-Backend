@@ -15,6 +15,7 @@ class Course extends Model
         'created' => \App\Events\CourseCreatedEvent::class,
     ];
 
+    // protected $appends =['shared_classes'];
     public function level()
     {
         return $this->belongsTo('App\Level','level_id','id');
@@ -39,6 +40,17 @@ class Course extends Model
     {
         return $this->hasMany('App\Letter');
     }
+
+    public function SecondaryChain(){
+        return $this->hasMany('App\SecondaryChain','course_id' , 'id');
+
+    }
+
+    public function lessons()
+    {
+        return $this->hasMany('App\Lesson');
+    }
+
     protected $hidden = [
         'created_at', 'updated_at',
     ];
@@ -92,6 +104,14 @@ class Course extends Model
         }
         return $value;
     }
+
+    // public function getSharedClassesAttribute()
+    // {   if($this->classes != null){
+    //         $content= json_decode($this->classes);
+    //         return Classes::whereIn('id',$content)->get();
+    //     }
+    //     return $this->classes;
+    // }
 
     public function gradeCategory()
     {

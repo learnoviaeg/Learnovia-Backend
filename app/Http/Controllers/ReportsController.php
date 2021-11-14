@@ -20,6 +20,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\InactiveUsers;
+use App\Lesson;
 use App\SecondaryChain;
 
 class ReportsController extends Controller
@@ -228,14 +229,88 @@ class ReportsController extends Controller
 
     public function courseProgressReport(Request $request){
 
-        $secoundry = SecondaryChain::withCount(['materials','QuizLesson','AssignmentLesson','H5PLesson','virtual'])
-        ->orderBy('course_id')
-        ->with(['Courses.level','Class','Lesson'])
-        ->get()
-        ->groupBy(['Courses.level.name','Courses.name','Class.name']);
+        // $secoundry = SecondaryChain::withCount(['materials','QuizLesson','AssignmentLesson','H5PLesson','virtual'])
+        // ->orderBy('course_id')
+        // ->with(['Courses.level','Class','Lesson'])
+        // ->groupBy('group_id')
+        // ->get();
+
+        $cousres = Course::with('level')->with(['SecondaryChain'=>function($q){
+            $q->groupBy(['lesson_id'])->withCount(['materials','QuizLesson','AssignmentLesson','H5PLesson','virtual']);
+        }])->get()->map(function ($course) use ($request){
+            return[
+                'course' => $course->name,
+                'level' => $course->level->name,
+                'classes' => $course->classes,
+                'materials_count' => $course->SecondaryChain->sum('materials_count'),
+                'quiz_lesson_count' => $course->SecondaryChain->sum('quiz_lesson_count'),
+                'assignment_lesson_count' => $course->SecondaryChain->sum('assignment_lesson_count'),
+                'h5_p_lesson_count' => $course->SecondaryChain->sum('h5_p_lesson_count'),
+                'virtual_count' => $course->SecondaryChain->sum('virtual_count'),
+            ];
+        });
+
+        // then on click, we got the details
+        return $cousres;
+
+        //1- count for each lesson, and on click only get items in that lesson.
+        //2- level, course, 
+
+
+
+        // ->groupBy(['Courses.level.name','Courses.name','Class.name']);
+
+        // $secoundry = Course::with('level')->withCount()
+
+        // $class = SecondaryChain::withCount(['materials','QuizLesson','AssignmentLesson','H5PLesson','virtual']) 
+        //                         ->->get();
+                
 
         return $secoundry;
 
+        // $lessons = Lesson::withCount(['materials','QuizLesson','AssignmentLesson','H5PLesson'])->with('course.level')->get();
+        // return $lessons;
+
+        // $courses = Course::with(['level','lessons' => function($q) use($request){
+        //     if($request->details){
+        //         $q->withCount(['materials','QuizLesson','AssignmentLesson','H5PLesson']);
+        //     }
+
+        //     if(!$request->details){
+        //         $q->with(['materials','QuizLesson','AssignmentLesson','H5PLesson']);
+        //     }
+
+        // }]);
+
+        // return $courses->get()
+        // ->map(function ($course) use ($request){
+
+        //     $progressReport = [
+        //         'level' => $course->level->name,
+        //         'course' => $course->name,
+        //         'classes' => $course->lessons->pluck('shared_classes')->collapse()->unique()
+        //     ];
+
+        //     if($request->details){
+        //         $progressReport['all_materials_counts'] = $course->lessons->sum('materials_count');
+        //         $progressReport['all_quizzes_counts'] = $course->lessons->sum('quiz_lesson_count');
+        //         $progressReport['all_assignments_counts'] = $course->lessons->sum('assignment_lesson_count');
+        //         $progressReport['all_h5p_counts'] = $course->lessons->sum('h5_p_lesson_count');
+        //     }
+
+        //     if(!$request->details){
+        //         $progressReport['all_materials'] = $course->lessons->pluck('materials')->collapse();
+        //         $progressReport['all_quizzes'] = $course->lessons->pluck('QuizLesson')->collapse();
+        //         $progressReport['all_assignments'] = $course->lessons->pluck('AssignmentLesson')->collapse();
+        //         $progressReport['all_h5p'] = $course->lessons->pluck('H5PLesson')->collapse();
+        //     }
+
+        //     return $progressReport;
+        // });
+
+        $classes = Classes::with('level')->get();
+
+        return $classes;
         $types = ['materials','assignments','quizzes','interactives','virtuals'];
 
         //validate the request

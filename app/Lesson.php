@@ -63,6 +63,11 @@ class Lesson extends Model
 
     }
 
+    public function materials()
+    {
+        return $this->hasMany('App\Material','lesson_id' , 'id');
+    }
+
     public function getSharedClassesAttribute($value)
     {   if($value != null){
             $content= json_decode($value);
