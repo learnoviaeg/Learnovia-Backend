@@ -32,7 +32,7 @@ class GradeAttemptItemlistener
         $this->gradeinterface=$typeGrader; // for calculation
     }
 
-    public function handle(UpdatedAtGradeAttemptEventtemptEvent $event){        
+    public function handle(GradeAttemptEvent $event){        
         $user_quiz_answers=UserQuizAnswer::where('user_quiz_id',$event->attempt->id)->get();
 
         $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$event->attempt->quiz_lesson->quiz_id)->where('lesson_id',$event->attempt->quiz_lesson->lesson_id)->first();
