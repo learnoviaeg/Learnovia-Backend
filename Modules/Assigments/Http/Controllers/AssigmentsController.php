@@ -233,6 +233,7 @@ class AssigmentsController extends Controller
             'name' => 'required|string',
             'content' => 'string|required_without:file',
             'file' => 'file|distinct|required_without:content|mimes:'.$settings,
+            'model_answer' => 'file|distinct|mimes:'.$settings,
         ];
 
         $customMessages = [
@@ -245,6 +246,10 @@ class AssigmentsController extends Controller
         $assignment = new assignment;
         if ($request->hasFile('file')) {
             $assignment->attachment_id = attachment::upload_attachment($request->file, 'assignment', null)->id;
+        }
+
+        if ($request->hasFile('model_answer')) {
+            $assignment->model_answer_id = attachment::upload_attachment($request->model_answer, 'assignment', null)->id;
         }
         if ($request->filled('content'))
             $assignment->content = $request->content;
@@ -263,12 +268,25 @@ class AssigmentsController extends Controller
             'id' => 'required|exists:assignments,id',
             'name' => 'string',
             'file_description' => 'string',
+            'model_answer_description' => 'string',
             'content'  => 'string',
         ]);
 
         $assigment = assignment::find($request->id);
         $assigmentLessons = AssignmentLesson::where('assignment_id',$request->id)->pluck('id');
         $CheckIfAnswered = UserAssigment::whereIn('assignment_lesson_id', $assigmentLessons)->where('submit_date', '!=', null)->get();
+        
+        if ($request->hasFile('model_answer')) {
+
+            $settings = $this->setting->get_value('create_assignment_extensions');
+
+            $request->validate([
+                'model_answer' => 'file|distinct|mimes:'.$settings,
+            ]);
+
+            $description = (isset($request->model_answer_description))? $request->model_answer_description :null;
+            $assigment->model_answer_id = attachment::upload_attachment($request->model_answer, 'assigment', $model_answer_description)->id;
+        }
 
         if (count($CheckIfAnswered) > 0)
             return HelperController::api_response_format(400, null, __('messages.assignment.cant_update'));
@@ -818,8 +836,6 @@ class AssigmentsController extends Controller
             'scale' => 'exists:scales,id',
             'visible' => 'boolean',
         ]);
-        // $assignmentLesson =AssignmentLesson::all();
-
         foreach($request->lesson_id as $key => $lesson){
 
             $assignment_lesson = new AssignmentLesson;
@@ -832,7 +848,6 @@ class AssigmentsController extends Controller
             $assignment_lesson->is_graded = $request->is_graded;
             $assignment_lesson->allow_attachment = $request->allow_attachment;
             $lesson_obj = Lesson::find($lesson);
-            // $course_segment =  CourseSegment::find($lesson_obj->course_segment_id);
 
         $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
         foreach($secondary_chains as $secondary_chain){
@@ -879,7 +894,6 @@ class AssigmentsController extends Controller
                     'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
                     'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
                     'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
-                    // 'item_type' => 2, // Assignment
                     'type' => 'Assignment',
                     'item_Entity' => $request->assignment_id,
                     'name' => $name_assignment,
@@ -897,21 +911,12 @@ class AssigmentsController extends Controller
                 'index' => LessonComponent::getNextIndex($lesson),
             ]);
             $lesson = Lesson::find($lesson);
-            // $data = array(
-            //     "lesson" => $lesson,
-            //     "assignment_lesson_id" => $assignment_lesson->id,
-            //     "submit_date" => Carbon::now(),
-            //     "publish_date" => Carbon::parse($request->publish_date),
-            //     "assignment_name" => Assignment::find($request->assignment_id)->name
-            // );
             LastAction::lastActionInCourse($lesson->course_id);
 
             //sending notifications    
             $notification = new AssignmentNotification($assignment_lesson, $name_assignment.' assignment is added');
             $notification->send();      
         }
-        // $all = AssignmentLesson::where('assignment_id','!=', $request->assignment_id)->get();
-
         return HelperController::api_response_format(200, $assignmentLesson, __('messages.assignment.add'));
     }
 

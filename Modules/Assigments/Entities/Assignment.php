@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class assignment extends Model
 {
     protected $fillable = ['name', 'content', 'attachment_id','created_by'];
-    protected $appends = ['url' , 'url2'];
+    protected $appends = ['url' , 'url2' , 'modelAnswerUrl', 'modelAnswerUrl2'];
     public function attachment()
     {
         return $this->belongsTo('App\attachment', 'attachment_id', 'id');
@@ -41,5 +41,24 @@ class assignment extends Model
         
     public function user(){
         return $this->belongsTo('App\User','created_by');
+    }
+
+    public function modelAnswer()
+    {
+        return $this->belongsTo('App\attachment', 'model_answer_id', 'id');
+    }
+
+    public function getModelAnswerUrlAttribute()
+    {
+        if (isset($this->modelAnswer)) {
+            return 'https://docs.google.com/viewer?url=' . $this->modelAnswer->path;
+        }
+    }
+
+    public function getModelAnswerUrl2Attribute()
+    {
+        if (isset($this->modelAnswer)) {
+            return $this->modelAnswer->path;
+        }
     }
 }
