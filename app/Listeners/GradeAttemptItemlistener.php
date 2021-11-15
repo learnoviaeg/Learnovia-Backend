@@ -58,14 +58,28 @@ class GradeAttemptItemlistener
 
                         $question_type=Questions::whereId($item_detail['item_id'])->pluck('question_type_id')->first();
             
-                        if($question_type == 1)
+                        if($question_type == 1){
                             $grade=$this->gradeinterface->True_False($correction_answer);
+                            if($stud_quest_ans->correction != null){
+                                $gradeOld= $stud_quest_ans->correction; //old
+                                $grade->and_why_right = $gradeOld->and_why_right;
+                                $grade->grade = $gradeOld->grade;
+                                $grade->feedback = $gradeOld->feedback;
+                                $grade->and_why_mark = $gradeOld->and_why_mark;
+                            }
+                        }
+
 
                         if($question_type == 2)
                             $grade=$this->gradeinterface->MCQ($correction_answer);
 
                         if($question_type == 3)
                             $grade=$this->gradeinterface->Match($correction_answer);
+
+                        if($question_type == 4 && $stud_quest_ans->correction != null){
+                            $grade= $stud_quest_ans->correction;
+                            $grade->mark=$grade->grade;
+                        }
                     
                         ItemDetailsUser::firstOrCreate([
                             'user_id' => $event->attempt->user_id,
