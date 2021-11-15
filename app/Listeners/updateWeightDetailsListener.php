@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\UpdatedQuizQuestionsEvent;
+use App\Events\GradeAttemptEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\GradeCategory;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 use App\ItemDetail;
 use App\GradeItems;
 use Modules\QuestionBank\Entities\quiz_questions;
+use Modules\QuestionBank\Entities\UserQuiz;
 use Modules\QuestionBank\Entities\QuizLesson;
 
 class updateWeightDetailsListener
@@ -57,8 +59,12 @@ class updateWeightDetailsListener
                 'lesson_id' => $quiz_lesson->lesson_id
             ]);
 
-            $sc=new ScriptsController();
-            $sc->gradeAttemptsInQuizlesson($rq);
+            $attempt=UserQuiz::where('quiz_lesson_id',$quiz_lesson->id)->get();
+            foreach($attempt as $one)
+                event(new GradeAttemptEvent($one));
+
+            // $sc=new ScriptsController();
+            // $sc->gradeAttemptsInQuizlesson($rq);
         }
     }
 }

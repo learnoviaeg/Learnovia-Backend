@@ -262,6 +262,7 @@ class AttemptsController extends Controller
 
             if((Auth::user()->can('site/quiz/unLimitedAttempts'))){
                 $empty=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['user_answers' => null]);
+                $last_attempt->UserQuizAnswer;
                 return HelperController::api_response_format(200, $last_attempt);
             }
         }
