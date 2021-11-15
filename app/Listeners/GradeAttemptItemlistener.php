@@ -60,12 +60,13 @@ class GradeAttemptItemlistener
             
                         if($question_type == 1){
                             $grade=$this->gradeinterface->True_False($correction_answer);
-                            if($stud_quest_ans->correction != null){
-                                $gradeOld= $stud_quest_ans->correction; //old
+                            $gradeOld= $stud_quest_ans->correction; //old
+                            if(isset($gradeOld->and_why_right)){
                                 $grade->and_why_right = $gradeOld->and_why_right;
                                 $grade->grade = $gradeOld->grade;
                                 $grade->feedback = $gradeOld->feedback;
                                 $grade->and_why_mark = $gradeOld->and_why_mark;
+                                $grade->mark=$grade->grade;
                             }
                         }
 

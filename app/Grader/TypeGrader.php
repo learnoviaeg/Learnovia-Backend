@@ -146,8 +146,8 @@ class TypeGrader implements GraderInterface
         }
         else{
             foreach($answer['correct_answer']->match_a as $key=>$ans){
-                $ans->right=0;
-                $ans->grade=0;
+                // $ans->right=0;
+                // $ans->grade=0;
 
                 $collection = collect($ans);
                 $filtered = $collection->reject(function ($value, $key) {
