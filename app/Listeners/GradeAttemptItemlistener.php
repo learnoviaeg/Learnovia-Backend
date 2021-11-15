@@ -66,7 +66,6 @@ class GradeAttemptItemlistener
                                 $grade->grade = $gradeOld->grade;
                                 $grade->feedback = $gradeOld->feedback;
                                 $grade->and_why_mark = $gradeOld->and_why_mark;
-                                $grade->mark=$grade->grade;
                             }
                         }
 
