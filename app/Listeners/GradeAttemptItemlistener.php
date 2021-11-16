@@ -76,9 +76,8 @@ class GradeAttemptItemlistener
                         if($question_type == 3)
                             $grade=$this->gradeinterface->Match($correction_answer);
 
-                        if($question_type == 4 && $stud_quest_ans->correction != null){
+                        if($question_type == 4 && $stud_quest_ans->correction != null)
                             $grade= $stud_quest_ans->correction;
-                        }
                     
                         ItemDetailsUser::firstOrCreate([
                             'user_id' => $event->attempt->user_id,
@@ -92,9 +91,8 @@ class GradeAttemptItemlistener
                             if(!$item_detail->weight_details->exclude_mark){
                                 if(isset($grade->mark))
                                     $total_grade_attempt+=$grade->mark;
-                                if(isset($grade->grade)){
-                                        $total_grade_attempt+=$grade->grade;
-                                }
+                                if(isset($grade->grade))
+                                    $total_grade_attempt+=$grade->grade;
                             }
                         }
                     }
