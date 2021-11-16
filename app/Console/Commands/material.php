@@ -45,10 +45,8 @@ class material extends Command
             $q->with('file');
             $q->with('media');
         }, 'level'])->get();
-        // dd($courses);
 
         foreach ($courses as $course) {
-            // dd($course->short_name);
             $name = Str::snake($course->short_name);
             $name = str_replace("(", "_", $name);
             $name = str_replace(")", "_", $name);
@@ -62,17 +60,20 @@ class material extends Command
                 if ($material->mime_type == 'media link' || $material->mime_type == Null) continue;
 
                 if ($material->type == "media") {
-                    // dd($material->link);
-                    $path = public_path('/') . substr($material->getOriginal()['link'], 33);
+
+                    $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
+                    strrpos($material->getOriginal()['link'],"/"));
+
                     $zipCommand .= " {$path}";
                 }
 
                 if ($material->type == "file") {
-                    $path = public_path('/storage') . substr($material->getOriginal()['link'], 75);
+
+                    $path=public_path('/storage')."/file".substr($material->getOriginal()['link'],
+                    strrpos($material->getOriginal()['link'],"/"));
+
                     $zipCommand .= " {$path}.";
                 }
-                // dd($zipCommand);
-
             }
 
             $this->info("calling :=> {$zipCommand}");
