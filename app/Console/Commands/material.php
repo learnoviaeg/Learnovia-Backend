@@ -72,7 +72,7 @@ class material extends Command
                     $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
                     strrpos($material->getOriginal()['link'],"/"));
 
-                    $zipCommand .= " {$path}.";
+                    $zipCommand .= " {$path}";
                 }
             }
 
