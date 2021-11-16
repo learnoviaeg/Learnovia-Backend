@@ -16,13 +16,13 @@ class LogsObserver
      */
     public function created($req)
     {
-        $user = User::find(Auth::id());
-        $log=Log::create([
-            'user' => isset($user) ? $user->username : 'installer',
-            'action' => 'created',
-            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
-            'data' => serialize($req),
-        ]);
+        // $user = User::find(Auth::id());
+        // $log=Log::create([
+        //     'user' => isset($user) ? $user->username : 'installer',
+        //     'action' => 'created',
+        //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
+        //     'data' => serialize($req),
+        // ]);
     }
 
     /**
@@ -32,16 +32,16 @@ class LogsObserver
      */
     public function updated($req)
     {
-        $arr=array();
-        $arr['before']=$req->getOriginal();
-        $arr['after']=$req;
+        // $arr=array();
+        // $arr['before']=$req->getOriginal();
+        // $arr['after']=$req;
 
-        Log::create([
-            'user' => isset($user) ? $user->username : 'installer',
-            'action' => 'updated',
-            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
-            'data' => serialize($arr),
-        ]);
+        // Log::create([
+        //     'user' => isset($user) ? $user->username : 'installer',
+        //     'action' => 'updated',
+        //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
+        //     'data' => serialize($arr),
+        // ]);
     }
 
     /**

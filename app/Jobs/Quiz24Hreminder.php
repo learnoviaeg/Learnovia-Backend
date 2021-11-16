@@ -52,11 +52,10 @@ class Quiz24Hreminder implements ShouldQueue
             if(count($allUsers) > 0){
                
                 //sending notifications
-                $notification = new QuizNotification($quizLesson,'Quiz '.$this->quiz->name.' will be closed soon, Hurry up to solve it.');
-                $notification->send();    
+                // $notification = new QuizNotification($quizLesson,'Quiz '.$this->quiz->name.' will be closed soon, Hurry up to solve it.');
+                // $notification->send();    
 
             }
-
         }
     }
 }

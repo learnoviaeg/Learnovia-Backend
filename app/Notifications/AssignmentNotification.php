@@ -32,29 +32,29 @@ class AssignmentNotification extends SendNotification
 
     public function send(){
 
-        $publish_date = $this->assignmentLesson->publish_date;
-        if(Carbon::parse($publish_date)->isPast()){
-            $publish_date = Carbon::now();
-        }
+        // $publish_date = $this->assignmentLesson->publish_date;
+        // if(Carbon::parse($publish_date)->isPast()){
+        //     $publish_date = Carbon::now();
+        // }
 
-        //Start preparing notifications object
-        $notification = [
-            'type' => 'notification',
-            'item_id' => $this->assignmentLesson->assignment_id,
-            'item_type' => 'assignment',
-            'message' => $this->message,
-            'publish_date' => $publish_date,
-            'created_by' => $this->assignmentLesson->Assignment[0]->created_by,
-            'lesson_id' => $this->lesson->id,
-            'course_id' => $this->lesson->course_id,
-            'classes' => json_encode($this->lesson->shared_classes->pluck('id')),
-            'link' => url(route('getAssignment')) . '?assignment_id=' . $this->assignmentLesson->assignment_id,
-        ];
+        // //Start preparing notifications object
+        // $notification = [
+        //     'type' => 'notification',
+        //     'item_id' => $this->assignmentLesson->assignment_id,
+        //     'item_type' => 'assignment',
+        //     'message' => $this->message,
+        //     'publish_date' => $publish_date,
+        //     'created_by' => $this->assignmentLesson->Assignment[0]->created_by,
+        //     'lesson_id' => $this->lesson->id,
+        //     'course_id' => $this->lesson->course_id,
+        //     'classes' => json_encode($this->lesson->shared_classes->pluck('id')),
+        //     'link' => url(route('getAssignment')) . '?assignment_id=' . $this->assignmentLesson->assignment_id,
+        // ];
 
-        //assign notification to given users
-        $createdNotification = $this->toDatabase($notification,$this->users);
+        // //assign notification to given users
+        // $createdNotification = $this->toDatabase($notification,$this->users);
         
-        //firebase Notifications
-        $this->toFirebase($createdNotification);
+        // //firebase Notifications
+        // $this->toFirebase($createdNotification);
     }
 }
