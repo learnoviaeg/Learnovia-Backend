@@ -100,6 +100,6 @@ class Course extends Model
 
     public function materials()
     {
-        return $this->hasMany('App\Material');
+        return $this->hasMany('App\Material','course_id','id');
     }
 }
