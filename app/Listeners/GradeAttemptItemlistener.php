@@ -78,20 +78,24 @@ class GradeAttemptItemlistener
 
                         if($question_type == 4 && $stud_quest_ans->correction != null){
                             $grade= $stud_quest_ans->correction;
-                            $grade->mark=$grade->grade;
                         }
                     
                         ItemDetailsUser::firstOrCreate([
                             'user_id' => $event->attempt->user_id,
                             'item_details_id' => $item_detail->id,
-                            'grade' => ($grade) ? $grade->mark:null,
+                            'grade' => isset($grade->mark) ? $grade->mark:null,
                             'Answers_Correction' => json_encode($correction_answer)
                         ]);
 
                         $stud_quest_ans->update(['correction'=>json_encode($grade)]);
                         if(isset($grade)){
-                            if(!$item_detail->weight_details->exclude_mark)
-                                $total_grade_attempt+=$grade->mark;
+                            if(!$item_detail->weight_details->exclude_mark){
+                                if(isset($grade->mark))
+                                    $total_grade_attempt+=$grade->mark;
+                                if(isset($grade->grade)){
+                                        $total_grade_attempt+=$grade->grade;
+                                }
+                            }
                         }
                     }
                 }
