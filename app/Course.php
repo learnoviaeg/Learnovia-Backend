@@ -97,4 +97,9 @@ class Course extends Model
     {
         return $this->hasMany('App\GradeCategory','course_id','id');
     }
+
+    public function materials()
+    {
+        return $this->hasMany('App\Material','course_id','id');
+    }
 }

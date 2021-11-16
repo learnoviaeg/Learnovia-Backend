@@ -57,4 +57,11 @@ class Material extends Model
         return $this->belongsTo('App\User','created_by');
     }
 
+    public function file(){
+        return $this->belongsTo('Modules\UploadFiles\Entities\File','item_id');
+    }
+
+    public function media(){
+        return $this->belongsTo('Modules\UploadFiles\Entities\Media','item_id')->where('type', 'media');
+    }
 }
