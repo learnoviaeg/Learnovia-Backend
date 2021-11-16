@@ -354,6 +354,10 @@ class QuizzesController extends Controller
             $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);
 
         $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
+       
+        if($request->user_id)
+            $quiz_override = QuizOverride::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
+
         if(isset($quiz_override)){
             $quizLesson->due_date = $quiz_override->due_date;
             $quizLesson->max_attemp+=$quiz_override->attemps;
