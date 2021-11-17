@@ -11,6 +11,7 @@ use App\UserGrader;
 use App\User;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
+use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\UserQuiz;
 use App\Events\RefreshGradeTreeEvent;
 
@@ -62,7 +63,10 @@ class GradeManualListener
             foreach($userEssayCheckAnswerTF as $TF){
                 if($TF->correction->and_why == true){
                     if(isset($TF->correction->grade)){
-                        $gradeNotWeight+= $TF->correction->and_why_mark;
+                        $QQ=quiz_questions::where('quiz_id',$attem->quiz_lesson->quiz_id)->where('question_id',$TF->question_id)->first();
+                        if(!$QQ->grade_details->exclude_mark)
+                            $gradeNotWeight+= $TF->correction->and_why_mark;
+
                         if(($TF->correction->and_why_right == 1 && $TF->correction->mark < 1) ||
                             $TF->correction->and_why_right == 0 && $TF->correction->mark >= 1){
                             $tes=$TF->correction;
@@ -82,7 +86,10 @@ class GradeManualListener
         {
             foreach($userEssayCheckAnswerE as $esay){
                 if(isset($esay->correction)){
-                    $gradeNotWeight+= $esay->correction->grade;
+                    $QQ=quiz_questions::where('quiz_id',$attem->quiz_lesson->quiz_id)->where('question_id',$esay->question_id)->first();
+                    if(!$QQ->grade_details->exclude_mark){
+                        $gradeNotWeight+= $esay->correction->grade;
+                    }
                 }
             }
         }
