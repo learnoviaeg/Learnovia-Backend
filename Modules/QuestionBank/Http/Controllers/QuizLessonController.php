@@ -358,13 +358,15 @@ class QuizLessonController extends Controller
                 );    
                     // $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quizLesson->lesson->course_id)->pluck('user_id');
                     // foreach($enrolled_students as $student){
-                        $data = [
+                        UserGrader::updateOrCreate([
                             'user_id'   => $user_id,
                             'item_type' => 'Item',
-                            'item_id'   => $gradeItem->id,
+                            'item_id'   => $gradeItem->id
+                        ],
+                        [
                             'grade'     => null
-                        ];
-                        UserGrader::firstOrcreate($data);
+                        ]);
+                        // UserGrader::firstOrcreate($data);
                     // }
                     event(new GradeItemEvent($gradeItem));
                 }
