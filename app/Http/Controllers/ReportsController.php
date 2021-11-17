@@ -586,8 +586,8 @@ class ReportsController extends Controller
                                                     'got_zero'    => $quizLesson->got_zero,
                                                     'viewed_without_action' => $quizLesson->user_seen_number - $quizLesson->solved_students,
                                                     'equals‌_‌grading‌_‌pass' => $quizLesson->‌equals‌_to_‌pass_grade,
-                                                    'more‌_than‌_grading‌_‌pass' => $quizLesson->‌more‌_than‌_grade_to_pass,
-                                                    'less‌_than_‌grading‌_‌pass' => $quizLesson->less‌_than_‌grading‌_‌pass,
+                                                    'more_than_grading_pass' => $quizLesson->‌more‌_than‌_grade_to_pass,
+                                                    'less_than_grading_pass' => $quizLesson->less‌_than_‌grading‌_‌pass,
                                                 ];
                                             });;
  
