@@ -61,7 +61,9 @@ class QuizLessonObserver
                     UserGrader::firstOrCreate([
                         'user_id'   => $student,
                         'item_type' => 'Category',
-                        'item_id'   => $categoryOfQuiz->id,
+                        'item_id'   => $categoryOfQuiz->id
+                    ],
+                    [
                         'grade'     => null
                     ]);
                 };  
