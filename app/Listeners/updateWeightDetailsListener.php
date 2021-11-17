@@ -44,7 +44,7 @@ class updateWeightDetailsListener
             if(count($gradeitemIDS) > 0){
                 $item_detail=ItemDetail::whereIn('parent_item_id',$gradeitemIDS)->where('item_id',$question['question_id'])->where('type','Question')->get();
                 if(isset($item_detail)){ //if these update before any one open an attempt
-                    foreach($item_detail as $ItmDtl){}
+                    foreach($item_detail as $ItmDtl){
                         $ItmDtl->weight_details=json_encode($question['grade_details']);
                         $ItmDtl->save();
                     }
