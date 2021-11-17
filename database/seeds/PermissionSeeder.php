@@ -389,5 +389,132 @@ class PermissionSeeder extends Seeder
 
         //Attempts
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/quiz/unLimitedAttempts', 'title' => 'unLimited Attempts']);
+        
+
+        //Assignments permessions
+
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/add', 'title' => 'add assignment']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/update', 'title' => 'update assignment']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/update-assignemnt-lesson', 'title' => 'update assignemnt lesson']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/submit', 'title' => 'submit assignment']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/grade', 'title' => 'grade assignment']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/override', 'title' => 'override assignment']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/delete', 'title' => 'delete assignment']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/get', 'title' => 'get assignment']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/toggle', 'title' => 'toggle assignment']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/get-all', 'title' => 'get all assignments']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/assign', 'title' => 'Assign assignment to lesson']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/editgrade', 'title' => 'edit assignment\'s grades']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/assignment/assigned-users', 'title' => 'assign assignment to users']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/assignment/getAssignment', 'title' => 'get assignment for student']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/delete-assign-lesson', 'title' => 'Delete assigned lesson']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/assignment-override', 'title' => 'assignment override']);
+
+
+
+        //Attendance permessions
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'Add Sessions']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'Take attendnace']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-attendance', 'title' => 'All Sessions','dashboard' => 1,'icon'=> 'Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-daily', 'title' => 'Daily','dashboard' => 1,'icon'=> 'Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/delete-attendance', 'title' => 'Delete Session']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/edit-attendance', 'title' => 'Edit Session']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'Get students in session']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/export', 'title' => 'Export attendnace']);
+
+        //Bigbluebutton permessions
+
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/create','title' => 'create meeting']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/join','title' => 'join meeting']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/get','title' => 'get meeting']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/getRecord','title' => 'get Record']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/delete','title' => 'Delete Record']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/toggle','title' => 'Toggle Record']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/attendance','title' => 'Bigbluebutton Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/get-attendance','title' => 'Bigbluebutton get Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/export','title' => 'Bigbluebutton Export Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/get-all','title' => 'Bigbluebutton Get All']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/session-moderator','title' => 'Bigbluebutton session moderator']);
+
+        //Page permessions
+
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/add', 'title' => 'add page']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/update', 'title' => 'update page']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/delete', 'title' => 'delete page']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/toggle', 'title' => 'toggle page']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/link-lesson', 'title' => 'link page to lesson']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/get', 'title' => 'get page']);
+
+        //QuestionBank permessions
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/category/add','title' => 'add question category']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/category/delete','title' => 'delete question category']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/category/update','title' => 'update question category']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/category/get','title' => 'get question categories']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/add','title' => 'add question']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/update','title' => 'update question']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/get','title' => 'get question']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/delete','title' => 'delete question']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/random','title' => 'get random questions']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/add-answer','title' => 'add question answer']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/delete-answer','title' => 'delete question answer']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/add','title' => 'add quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/update','title' => 'update quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/delete','title' => 'delete quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/mark-field','title' => 'Mark Field']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get','title' => 'get quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/add-quiz-lesson','title' => 'add quiz lesson']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/grading-method','title' => 'get grading method']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/update-quiz-lesson','title' => 'update quiz lesson']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson','title' => 'destroy quiz lesson']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-all-types','title' => 'get all quiz types']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-all-categories','title' => 'get all quiz categories']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/sort','title' => 'sort quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-quiz-lesson','title' => 'get quiz lesson']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-all-quizes','title' => 'get all quizes']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-student-in-quiz','title' => 'get student in quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-student-answer-quiz','title' => 'get student answer quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-all-students-answer','title' => 'get all students answer']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/answer','title' => 'Answer quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/detailes','title' => 'Quiz Details']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/view-drafts','title' => 'Quiz Drafts']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/correct-user-quiz','title' => 'correct user quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-grade-category','title' => 'get quiz grade category']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/toggle','title' => 'toggle quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-attempts','title' => 'get all attempts of user']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/quiz/getStudentinQuiz','title' => 'get Student in Quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/quiz/store_user_quiz','title' => 'store user quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
+
+        //Survey permessions
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/add','title' => 'add survey']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/submit','title' => 'submit']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/my-surveys','title' => 'get my surveys', 'dashboard' => 1, 'icon' => 'statistics']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/view-all-submissions','title' => 'view all submissions']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'template/get','title' => 'get template']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/assigned-surveys','title' => 'get assigned surveys']);
+
+        //Files permessions
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'file/add', 'title' => 'add file']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'file/assign', 'title' => 'assign file']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'file/update', 'title' => 'update file']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'file/delete', 'title' => 'delete file']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'file/toggle', 'title' => 'toggle file']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'media/add', 'title' => 'add media']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'media/update', 'title' => 'update media']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'media/delete', 'title' => 'delete media']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'media/toggle', 'title' => 'toggle media']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'file/media/get', 'title' => 'get file and media']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'link/add', 'title' => 'add link']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'link/update', 'title' => 'update link']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'file/sort', 'title' => 'sort file']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'media/sort', 'title' => 'sort media']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'file/get-all', 'title' => 'get all files']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'media/get-all', 'title' => 'get all media']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'media/get', 'title' => 'get media']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'file/get', 'title' => 'get file']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/file/edit', 'title' => 'update file']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/media/edit', 'title' => 'update media']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'media/assign', 'title' => 'assign media']);
     }
 }
