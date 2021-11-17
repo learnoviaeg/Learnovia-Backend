@@ -91,8 +91,12 @@ class GradeAttemptItemlistener
                             if(!$item_detail->weight_details->exclude_mark){
                                 if(isset($grade->mark))
                                     $total_grade_attempt+=$grade->mark;
-                                if(isset($grade->grade))
-                                    $total_grade_attempt+=$grade->grade;
+                                if($stud_quest_ans->correction != null){
+                                    if($question_type == 1)
+                                        $total_grade_attempt+=$grade->and_why_mark;
+                                    if($question_type == 4)
+                                        $total_grade_attempt+=$grade->grade;
+                                }
                             }
                         }
                     }
