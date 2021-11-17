@@ -346,7 +346,7 @@ class QuizLessonController extends Controller
             }
             if($request->extra_attempts > 0)
             {
-                for($key =$start; $key<=$end; $key++){
+                for($key =$start+1; $key<=$end; $key++){
                     $gradeItem = GradeItems::updateOrCreate([
                         'index' => $key,
                         'grade_category_id' => $quizLesson->grade_category_id,
@@ -358,7 +358,7 @@ class QuizLessonController extends Controller
                 );    
                     // $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quizLesson->lesson->course_id)->pluck('user_id');
                     // foreach($enrolled_students as $student){
-                        UserGrader::updateOrCreate([
+                        UserGrader::firstOrCreate([
                             'user_id'   => $user_id,
                             'item_type' => 'Item',
                             'item_id'   => $gradeItem->id
