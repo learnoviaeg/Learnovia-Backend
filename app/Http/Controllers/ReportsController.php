@@ -589,7 +589,7 @@ class ReportsController extends Controller
                                                     'more_than_grading_pass' => $quizLesson->‌more‌_than‌_grade_to_pass,
                                                     'less_than_grading_pass' => $quizLesson->less‌_than_‌grading‌_‌pass,
                                                 ];
-                                            });;
+                                            });
  
         //pagination object
         $attemptsReport['current_page']= $page + 1;
