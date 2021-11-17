@@ -109,13 +109,14 @@ class ScriptsController extends Controller
                 );    
                     $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quiz_lesson->lesson->course_id)->pluck('user_id');
                     foreach($enrolled_students as $student){
-                        $data = [
-                            'user_id'   => $student,
+                        UserGrader::firstOrUpdate([
+                            'user_id'   => $user_id,
                             'item_type' => 'Item',
-                            'item_id'   => $gradeItem->id,
+                            'item_id'   => $gradeItem->id
+                        ],
+                        [
                             'grade'     => null
-                        ];
-                        UserGrader::firstOrcreate($data);
+                        ]);
                     }
                     event(new GradeItemEvent($gradeItem));
                 }
