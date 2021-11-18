@@ -30,19 +30,21 @@ class QuizAttemptReport implements FromCollection, WithHeadings
             //calculate days number between two dates
             $start_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->start_date);
             $end_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->due_date);
-            $different_days = $start_date->diffInDays($end_date);
-            
+            $different_days = $start_date->diff($end_date);
+
+            $classes = $quizLesson->lesson->shared_classes->pluck('name');
+
             $quizLessons->push([
                 'id'             => $quizLesson->quiz->id,
                 'lesson_id'             => $quizLesson->lesson_id,
                 'name'           => $quizLesson->quiz->name,
                 'course_name'    => $quizLesson->lesson->course->name,
                 'level_name'    => $quizLesson->lesson->course->level->name,
-                'classes'        => $quizLesson->lesson->shared_classes->pluck('name'),
+                'classes'        => implode(',',$classes->toArray()),
                 'start_date'     => $quizLesson->start_date,
                 'due_date'       => $quizLesson->due_date,
                 'duration'       => round($quizLesson->quiz->duration/60,0),
-                'period'         => $different_days,
+                'period'         => $different_days->d.' Day/s, '.$different_days->h.' Hour/s',
                 'attempts_number'    => $quizLesson->max_attemp,
                 'gradeing_method'    => count($quizLesson->grading_method_id) > 0 ? $quizLesson->grading_method_id[0] : '-',
                 'students_number'    => ' '.$quizLesson->lesson->students_number,
@@ -51,10 +53,11 @@ class QuizAttemptReport implements FromCollection, WithHeadings
                 'got_full_mark'    => ' '.$quizLesson->full_mark,
                 'got_zero'    => ' '.$quizLesson->got_zero,
                 'viewed_without_action' => ' '.($quizLesson->user_seen_number - $quizLesson->solved_students),
-                'equals‌_‌grading‌_‌pass' => ' '.$quizLesson->‌equals‌_to_‌pass_grade,
-                'more‌_than‌_grading‌_‌pass' => ' '.$quizLesson->‌more‌_than‌_grade_to_pass,
-                'less‌_than_‌grading‌_‌pass' => ' '.$quizLesson->less‌_than_‌grading‌_‌pass,
+                'equals_grading_pass' => ' '.$quizLesson->‌equals‌_to_‌pass_grade,
+                'more_than_grading_pass' => ' '.$quizLesson->‌more‌_than‌_grade_to_pass,
+                'less_than_grading_pass' => ' '.$quizLesson->less‌_than_‌grading‌_‌pass,
             ]);
+        
         }
 
         return $quizLessons;

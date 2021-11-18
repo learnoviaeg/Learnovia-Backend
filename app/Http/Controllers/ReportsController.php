@@ -528,7 +528,7 @@ class ReportsController extends Controller
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->where('grade','!=', 0)->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
                             ]);
 
@@ -564,7 +564,7 @@ class ReportsController extends Controller
                                                 //calculate days number between two dates
                                                 $start_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->start_date);
                                                 $end_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->due_date);
-                                                $different_days = $start_date->diffInDays($end_date);
+                                                $different_days = $start_date->diff($end_date);
 
                                                 return [
                                                     'id'             => $quizLesson->quiz->id,
@@ -576,7 +576,7 @@ class ReportsController extends Controller
                                                     'start_date'     => $quizLesson->start_date,
                                                     'due_date'       => $quizLesson->due_date,
                                                     'duration'       => round($quizLesson->quiz->duration/60,0),
-                                                    'period'         => $different_days,
+                                                    'period'         => $different_days->d.' Day/s, '.$different_days->h.' Hour/s',
                                                     'attempts_number'    => $quizLesson->max_attemp,
                                                     'gradeing_method'    => $quizLesson->grading_method_id,
                                                     'students_number'    => $quizLesson->lesson->students_number,
