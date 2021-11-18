@@ -14,6 +14,7 @@ use Illuminate\Routing\Controller;
 use Auth;
 use Browser;
 use App\Events\ManualCorrectionEvent;
+use App\Events\GradeAttemptEvent;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\quiz;
@@ -364,11 +365,11 @@ class UserQuizController extends Controller
                 $userAnswer->correction = $data['correction'];
             $userAnswer->save();
         }
-        event(new ManualCorrectionEvent($attemp));
+        event(new GradeAttemptEvent($attemp));
+        // event(new ManualCorrectionEvent($attemp));
 
         return response()->json(['message' =>__('messages.grade.graded'), 'body' => $Corrected_answers ], 200);
     }
-
 
     public function gradeUserQuiz(Request $request)
     {

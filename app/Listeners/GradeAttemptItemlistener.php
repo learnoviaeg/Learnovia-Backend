@@ -61,14 +61,13 @@ class GradeAttemptItemlistener
                         if($question_type == 1){
                             $grade=$this->gradeinterface->True_False($correction_answer);
                             $gradeOld= $stud_quest_ans->correction; //old
-                            if(isset($gradeOld->and_why_right)){
+                            if(isset($gradeOld->grade)){
                                 $grade->and_why_right = $gradeOld->and_why_right;
                                 $grade->grade = $gradeOld->grade;
                                 $grade->feedback = $gradeOld->feedback;
                                 $grade->and_why_mark = $gradeOld->and_why_mark;
                             }
                         }
-
 
                         if($question_type == 2)
                             $grade=$this->gradeinterface->MCQ($correction_answer);
@@ -119,6 +118,5 @@ class GradeAttemptItemlistener
             ]);
             event(new RefreshGradeTreeEvent(User::find($event->attempt->user_id) ,$grade_cat));
         }
-
     }
 }
