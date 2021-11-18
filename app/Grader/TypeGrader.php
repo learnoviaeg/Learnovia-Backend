@@ -25,19 +25,21 @@ class TypeGrader implements GraderInterface
         $mark=0;
         $right=0;
         $grade=$answer['correct_answer'];
-        if(isset($answer['student_answer'])){
+        // if(isset($answer['student_answer'])){
             switch($answer['correct_answer']->type){
                 case 1 : //single
                     foreach($answer['correct_answer']->details as $detail){
                         $detail->stu_ans=0;
                         $detail->right=0;
-                        if($detail->key == (int)$answer['student_answer'][0] && $detail->is_true==1){
-                            $mark+=$detail->mark;
-                            $right=1;
-                            $detail->right=$right;
+                        if(isset($answer['student_answer'])){
+                            if($detail->key == (int)$answer['student_answer'][0] && $detail->is_true==1){
+                                $mark+=$detail->mark;
+                                $right=1;
+                                $detail->right=$right;
+                            }
+                            if($detail->key == (int)$answer['student_answer'][0])
+                                $detail->stu_ans=1;
                         }
-                        if($detail->key == (int)$answer['student_answer'][0])
-                            $detail->stu_ans=1;
                     }
                     break;
 
@@ -45,13 +47,15 @@ class TypeGrader implements GraderInterface
                     foreach($answer['correct_answer']->details as $detail){
                         $detail->stu_ans=0;
                         $detail->right=0;
-                        for($i=0;$i<count($answer['student_answer']);$i++){
-                            if($detail->key == $answer['student_answer'][$i]){
-                                if($detail->is_true == 1){
-                                    $mark+=$detail->mark;
-                                    $detail->right=1;
+                        if(isset($answer['student_answer'])){
+                            for($i=0;$i<count($answer['student_answer']);$i++){
+                                if($detail->key == $answer['student_answer'][$i]){
+                                    if($detail->is_true == 1){
+                                        $mark+=$detail->mark;
+                                        $detail->right=1;
+                                    }
+                                    $detail->stu_ans=1;
                                 }
-                                $detail->stu_ans=1;
                             }
                         }
                     }
@@ -65,13 +69,15 @@ class TypeGrader implements GraderInterface
                     foreach($answer['correct_answer']->details as $detail){
                         $detail->stu_ans=0;
                         $detail->right=0;
-                        for($i=0;$i<count($answer['student_answer']);$i++){
-                            if($detail->key == $answer['student_answer'][$i]){
-                                if($detail->is_true == 1){
-                                    $mark+=$detail->mark;
-                                    $detail->right=1;
+                        if(isset($answer['student_answer'])){
+                            for($i=0;$i<count($answer['student_answer']);$i++){
+                                if($detail->key == $answer['student_answer'][$i]){
+                                    if($detail->is_true == 1){
+                                        $mark+=$detail->mark;
+                                        $detail->right=1;
+                                    }
+                                    $detail->stu_ans=1;
                                 }
-                                $detail->stu_ans=1;
                             }
                         }
                     }
@@ -81,7 +87,7 @@ class TypeGrader implements GraderInterface
                         $right=1;
                     break;
             }
-        }
+        // }
         $grade->mark=$mark;
         $grade->right=$right;
         return $grade;
@@ -119,7 +125,7 @@ class TypeGrader implements GraderInterface
         $right=0;
         $mark=0;
         $grade=$answer['correct_answer'];
-        if(isset(($answer['student_answer'])))
+        if(isset($answer['student_answer'])){
             foreach($answer['student_answer'] as $kk=>$ans){
                 $ans->right=0;
                 $ans->grade=0;
@@ -137,6 +143,20 @@ class TypeGrader implements GraderInterface
                     }
                 }
             }
+        }
+        else{
+            foreach($answer['correct_answer']->match_a as $key=>$ans){
+                // $ans->right=0;
+                // $ans->grade=0;
+
+                $collection = collect($ans);
+                $filtered = $collection->reject(function ($value, $key) {
+                    return is_numeric($key);
+                });
+                $dd = $filtered->toJson();
+                // $answer['student_answer'][]=json_decode($dd);
+            }
+        }
 
         if($mark > 0 && $mark < $answer['correct_answer']->total_mark)
             $right=2;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\GradeCategory;
 use App\GradeItems;
 use App\User;
+use App\Course;
 use App\Enroll;
 use App\Grader\TypeGrader;
 use App\Lesson;
@@ -19,9 +20,11 @@ use App\Grader\gradingMethodsInterface;
 use App\Events\RefreshGradeTreeEvent;
 use Auth;
 use App\Exports\AttemptsExport;
+use App\Exports\NewAttemptsExport;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\quiz;
+use App\Repositories\ChainRepositoryInterface;
 use App\Grader\QuizGrader;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\QuizOverride;
@@ -30,18 +33,15 @@ use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use App\Events\QuizAttemptEvent;
-use App\Events\GradeAttemptEvent;
 use App\LastAction;
 use Log;
 
 class AttemptsController extends Controller
 {
-    // protected $typegrader;
-
-    // public function __construct(TypeGrader $typegrader)
-    // {
-    //     $this->typegrader = $typegrader;
-    // }
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -125,11 +125,10 @@ class AttemptsController extends Controller
                 if($attem->status == 'Graded')
                 {
                     $user_Attemp["grade"]= $attem->grade;
-                    $usergrader = UserGrader::where('user_id',$user_id)->where('item_id', $quiz_lesson->grade_category_id)->first();
+                    $usergrader = UserGrader::where('user_id',$user_id)->where('item_type','category')->where('item_id', $quiz_lesson->grade_category_id)->first();
                     if(isset($usergrader))
                         $user_grade=$usergrader->grade;
                 }
-
 
                 if($attem->status != 'Graded')
                     $countEss_TF++;
@@ -219,10 +218,7 @@ class AttemptsController extends Controller
         ]);
         $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         if(Carbon::parse($quiz_lesson->start_date) > Carbon::now() && Auth::user()->can('site/course/student'))
-            return HelperController::api_response_format(200, null, __('messages.error.quiz_time'));
-
-        if(Carbon::parse($quiz_lesson->due_date) < Carbon::now() && Auth::user()->can('site/course/student'))
-            return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
+            return HelperController::api_response_format(400, null, __('messages.error.quiz_time'));
 
         LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
         $user_quiz = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id);
@@ -264,8 +260,11 @@ class AttemptsController extends Controller
                 }
             }
 
-            if((Auth::user()->can('site/quiz/unLimitedAttempts')))
+            if((Auth::user()->can('site/quiz/unLimitedAttempts'))){
+                $empty=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['user_answers' => null]);
+                $last_attempt->UserQuizAnswer;
                 return HelperController::api_response_format(200, $last_attempt);
+            }
         }
 
         $userQuiz = userQuiz::create([
@@ -274,7 +273,7 @@ class AttemptsController extends Controller
             'status_id' => 2,
             'feedback' => null,
             'grade' => null,
-            'attempt_index' => (Auth::user()->can('site/quiz/store_user_quiz')) ? $index+1 : 0, // this permission because if these admin don't count his attempts
+            'attempt_index' => (Auth::user()->can('site/quiz/store_user_quiz')) ? $index+1 : 1, // this permission because if these admin don't count his attempts
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
         ]);
@@ -341,6 +340,13 @@ class AttemptsController extends Controller
     public function show($id)
     {
         $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson')->first();
+        // to prevent any user except auth to review this attempt
+
+        if(Auth::user()->can('site/course/student')){
+            if($attempt->user_id != Auth::id())
+                return HelperController::api_response_format(404, __('messages.error.data_invalid'));
+        }
+
         $due_date=$attempt->quiz_lesson->due_date;
         $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
         $correct_feedback=$attempt->quiz_lesson->quiz->correct_feedback;
@@ -433,10 +439,6 @@ class AttemptsController extends Controller
         ]);
 
         $user_quiz = userQuiz::find($id);
-
-        if(Carbon::parse($user_quiz->quiz_lesson->due_date) < Carbon::now() && Auth::user()->can('site/course/student'))
-            return HelperController::api_response_format(200, null, __('messages.error.quiz_ended'));
-
         LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
 
         $allData = collect([]);
@@ -508,12 +510,103 @@ class AttemptsController extends Controller
 
     public function exportAttempts(Request $request)
     {
-        $attempts = new AttemptsController();
-        $all_attempts=$attempts->index($request);
+        $all_attempts=$this->index($request);
         $body = json_decode(json_encode($all_attempts), true);
-        $filename = uniqid();
-        $file = Excel::store(new AttemptsExport($body['original']['body']['users']), 'Attempt'.$filename.'.xlsx','public');
-        $file = url(Storage::url('Attempt'.$filename.'.xlsx'));
+        $quiz = Quiz::find($request->quiz_id);
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        $filename = $quiz->name.' IN '.$quiz_lesson->lesson->course->short_name .' Attempts Details';
+        $file = Excel::store(new AttemptsExport($body['original']['body']['users']), $filename.'.xlsx','public');
+        $file = url(Storage::url($filename.'.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+    }
+
+    public function filterExportAttempts(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'filter' => 'in:submitted,not_submitted,notGraded', 
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
+        ]);
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        $course = Course::where('id' ,$quiz_lesson->lesson->course_id )->first();
+        $level = $course->level;
+        $course = [$quiz_lesson->lesson->course_id];
+        $request->merge(["courses" => $course]);
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls->where('role_id' , 3);
+        $Submitted =array();
+        $notSubmitted = array();
+        $notGraded = array();
+        $allSubmitted = array();
+        foreach ($enrolls->pluck('user_id') as $user_id){
+            $grade = UserGrader::where('user_id', $user_id)
+            ->where('item_id' ,$quiz_lesson->grade_category_id)
+            ->where('item_type' ,'category')->pluck('grade');
+            $user = User::find($user_id);
+            if($user == null){
+                unset($user);
+                continue;
+            }
+            if(!$user->can('site/quiz/store_user_quiz')){
+                continue;
+            } 
+            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->first();
+            if(!$attems){
+                $notSubmittedUser['username'] = $user->username;
+                $notSubmittedUser['fullname'] = $user->fullname;
+                $notSubmittedUser['level'] = $level->name;
+                $notSubmittedUser["status"] = 'Not Submitted';
+                $notSubmittedUser["grade"] = '-';
+                $notSubmittedUser["attempt_index"] = '-';
+                $notSubmittedUser["last_att_date"] = '-';
+                $notSubmitted[] = $notSubmittedUser;
+                $allSubmitted[] = $notSubmittedUser;
+               continue;
+            }
+            $user_Attemp['username'] = $user->username;
+            $user_Attemp['fullname'] = $user->fullname;
+            $user_Attemp['level'] = $level->name;
+            $user_Attemp["status"] = $attems->status;
+            $user_Attemp["grade"] = $grade;
+            $user_Attemp["attempt_index"] = $attems->attempt_index;
+            $user_Attemp["last_att_date"] = $attems->submit_time;
+            $Submitted[] = $user_Attemp;
+            $allSubmitted[] = $user_Attemp;
+            if($attems->status == 'Not Graded')
+            {
+                $notGraded[] = $user_Attemp;
+            }
+        }
+        if(isset($request->filter)){
+            if($request->filter == 'not_submitted'){
+                return $notSubmitted;
+        }}
+        if(isset($request->filter)){
+            if($request->filter == 'submitted'){
+                return $Submitted;
+        }}
+        if(isset($request->filter)){
+            if($request->filter == 'notGraded'){
+                return $notGraded;
+        }}
+        if(!$request->filter)
+        {
+            return $allSubmitted;
+        }
+    }
+
+    public function newExportAttempts(Request $request)
+    {
+        $allAttempt = $this->filterExportAttempts($request);
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        $course = Course::find($quiz_lesson->lesson->course_id);
+        $quiz = Quiz::find($request->quiz_id);
+        $filename = $quiz->name.'_'.$course->short_name;
+        $body = json_decode(json_encode($allAttempt), true);
+        $file = Excel::store(new NewAttemptsExport($body), $filename.'.xlsx','public');
+        $file = url(Storage::url($filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

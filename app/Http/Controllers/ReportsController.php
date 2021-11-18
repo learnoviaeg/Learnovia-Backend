@@ -20,6 +20,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\InactiveUsers;
+use App\Exports\QuizAttemptReport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\QuestionBank\Entities\QuizLesson;
@@ -432,63 +433,111 @@ class ReportsController extends Controller
             'created_by' => 'exists:users,id',
 
             //for single quiz
-            'quiz_id' => 'exists:quizzes,id|required_with:lesson_id',
-            'lesson_id' => 'exists:lessons,id|required_with:quiz_id',  
+            'quiz_id' => 'exists:quizzes,id',
+            'lesson_id' => 'exists:lessons,id',  
             
             //for pagination
-            'page' => 'required|integer',
-            'paginate' => 'required|integer',
+            'page' => 'integer|required_without:export',
+            'paginate' => 'integer|required_without:export',
+
+            'export'=> 'in:1',
+            'search'=> 'string',
         ]);
 
     
-        $lessons = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+
+        $usersIds = [];
+        if($request->filled('classes')){
+            $usersEnroll = clone $enrolls;
+            $usersIds = $usersEnroll->where('role_id',3)->select('user_id')->distinct()->pluck('user_id');
+        }
+
+        $lessons = $enrolls->where('user_id',Auth::id())->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
 
         //starting report  query
         $quizLessons = QuizLesson::whereIn('lesson_id',$lessons)
+    
+                                ->with(['quiz','lesson.course','lesson' => function($query) use ($usersIds){
 
-                                ->with(['quiz','lesson.course','lesson' => function($query){
+                                    $query->withCount(['SecondaryChain as students_number'=> function($q) use ($usersIds){
 
-                                    $query->withCount(['SecondaryChain as students_number'=> function($q){
+                                        if(count($usersIds) > 0){
+                                            $q->whereIn('user_id',$usersIds);
+                                        }
+
                                         $q->where('role_id',3);
+
                                     }]);
 
                                 }])
+                                ->whereHas('quiz',function($q) use ($request){
 
-                                ->withCount(['user_quiz as solved_students' => function($q){
+                                    if($request->has('created_by')){
+                                        $q->where('created_by',$request->created_by);
+                                    }
+                        
+                                    if($request->has('search')){
+                                        $q->where('name','LIKE',"%$request->search%");
+                                    }
+                        
+                                })
+                                ->withCount(['user_quiz as solved_students' => function($q) use ($usersIds){
+
+                                    if(count($usersIds) > 0){
+                                        $q->whereIn('user_id',$usersIds);
+                                    }
 
                                     $q->select(DB::raw('count(distinct(user_id))'));
 
-                                },'user_quiz as got_zero' => function($q){
+                                },'user_quiz as got_zero' => function($q) use ($usersIds){
+
+                                    if(count($usersIds) > 0){
+                                        $q->whereIn('user_id',$usersIds);
+                                    }
 
                                     $q->where('grade', 0)->select(DB::raw('count(distinct(user_id))'));
 
-                                },'user_quiz as full_mark' => function($q){
+                                },'user_quiz as full_mark' => function($q) use ($usersIds){
+
+                                    if(count($usersIds) > 0){
+                                        $q->whereIn('user_id',$usersIds);
+                                    }
 
                                     $q->whereColumn('grade','quiz_lessons.grade')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌equals‌_to_‌pass_grade' => function($q){
+                                ,'user_quiz as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
+
+                                    if(count($usersIds) > 0){
+                                        $q->whereIn('user_id',$usersIds);
+                                    }
 
                                     $q->whereColumn('grade','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌more‌_than‌_grade_to_pass' => function($q){
+                                ,'user_quiz as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
+
+                                    if(count($usersIds) > 0){
+                                        $q->whereIn('user_id',$usersIds);
+                                    }
 
                                     $q->whereColumn('grade','>','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as less‌_than_‌grading‌_‌pass' => function($q){
+                                ,'user_quiz as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
 
-                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->where('grade','!=', 0)->select(DB::raw('count(distinct(user_id))'));
+                                    if(count($usersIds) > 0){
+                                        $q->whereIn('user_id',$usersIds);
+                                    }
+
+                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
                             ]);
 
-        if($request->has('quiz_id') && $request->has('lesson_id')){
-            $quizLessons->where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id);
+        if($request->has('quiz_id')){
+            $quizLessons->where('quiz_id',$request->quiz_id);
         }
 
-        if($request->has('created_by')){
-
-            $quizLessons->whereHas('quiz',function($q) use ($request){
-                $q->where('created_by',$request->created_by);
-            });
+        if($request->has('lesson_id')){
+            $quizLessons->where('lesson_id',$request->lesson_id);
         }
 
         if($request->has('from') && $request->has('to')){
@@ -499,6 +548,14 @@ class ReportsController extends Controller
         $page = Paginate::GetPage($request);
         $paginate = Paginate::GetPaginate($request);
 
+        if($request->has('export')){
+
+            $filename = uniqid();
+            $file = Excel::store(new QuizAttemptReport($quizLessons->get()), 'reports'.$filename.'.xlsx','public');
+            $file = url(Storage::url('reports'.$filename.'.xlsx'));
+            return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);              
+        }
+
         $attemptsReport['data'] =  $quizLessons->skip(($page)*$paginate)
                                             ->take($paginate)
                                             ->get()
@@ -507,18 +564,19 @@ class ReportsController extends Controller
                                                 //calculate days number between two dates
                                                 $start_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->start_date);
                                                 $end_date = Carbon::createFromFormat('Y-m-d H:i:s', $quizLesson->due_date);
-                                                $different_days = $start_date->diffInDays($end_date);
+                                                $different_days = $start_date->diff($end_date);
 
                                                 return [
                                                     'id'             => $quizLesson->quiz->id,
                                                     'lesson_id'             => $quizLesson->lesson_id,
                                                     'name'           => $quizLesson->quiz->name,
                                                     'course_name'    => $quizLesson->lesson->course->name,
+                                                    'level_name'    => $quizLesson->lesson->course->level->name,
                                                     'classes'        => $quizLesson->lesson->shared_classes,
                                                     'start_date'     => $quizLesson->start_date,
                                                     'due_date'       => $quizLesson->due_date,
                                                     'duration'       => round($quizLesson->quiz->duration/60,0),
-                                                    'period'         => $different_days,
+                                                    'period'         => $different_days->d.' Day/s, '.$different_days->h.' Hour/s',
                                                     'attempts_number'    => $quizLesson->max_attemp,
                                                     'gradeing_method'    => $quizLesson->grading_method_id,
                                                     'students_number'    => $quizLesson->lesson->students_number,
@@ -526,12 +584,12 @@ class ReportsController extends Controller
                                                     'not_solved_students'    => $quizLesson->lesson->students_number - $quizLesson->solved_students,
                                                     'got_full_mark'    => $quizLesson->full_mark,
                                                     'got_zero'    => $quizLesson->got_zero,
-                                                    'viewed_without_action' => $quizLesson->user_seen_number - $quizLesson->solved_students,
-                                                    'equals‌_‌grading‌_‌pass' => $quizLesson->‌equals‌_to_‌pass_grade,
-                                                    'more‌_than‌_grading‌_‌pass' => $quizLesson->‌more‌_than‌_grade_to_pass,
-                                                    'less‌_than_‌grading‌_‌pass' => $quizLesson->less‌_than_‌grading‌_‌pass,
+                                                    'viewed_without_action' => $quizLesson->user_seen_number != 0 ? abs($quizLesson->user_seen_number - $quizLesson->solved_students) : 0,
+                                                    'equals_grading_pass' => $quizLesson->‌equals‌_to_‌pass_grade,
+                                                    'more_than_grading_pass' => $quizLesson->‌more‌_than‌_grade_to_pass,
+                                                    'less_than_grading_pass' => $quizLesson->less‌_than_‌grading‌_‌pass,
                                                 ];
-                                            });;
+                                            });
  
         //pagination object
         $attemptsReport['current_page']= $page + 1;

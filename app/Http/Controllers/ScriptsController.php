@@ -34,9 +34,23 @@ class ScriptsController extends Controller
         return 'done';
     }
 
-    public function gradeAttemptsInQuizlesson(Request $request)
+    public function gradeAttemptsInQuizlesson(Request $request) //auto correction
     {
-        foreach(userQuiz::cursor() as $user_quiz){
+        $request->validate([
+            'quiz_id' => 'exists:quizzes,id',
+            'lesson_id' => 'required_with:quiz_id|exists:quiz_lessons,lesson_id'
+        ]);
+
+        if(isset($request->quiz_id)){
+            $Quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+            $gradeCat=GradeCategory::whereId($Quiz_lesson->grade_category_id)->update(['calculation_type' => json_encode($Quiz_lesson->grading_method_id)] );
+            $users_quiz=userQuiz::where('quiz_lesson_id',$Quiz_lesson->id)->get();
+        }
+        if(!isset($Quiz_lesson)){
+            $users_quiz=userQuiz::cursor();
+        }
+
+        foreach($users_quiz as $user_quiz){
             event(new UpdatedAttemptEvent($user_quiz));
         }
         return 'done';
@@ -54,7 +68,19 @@ class ScriptsController extends Controller
 
     public function grade_details_of_questions(Request $request)
     {
-        foreach(QuizLesson::cursor() as $quiz_lesson){
+        $request->validate([
+            'quiz_id' => 'exists:quizzes,id',
+            'lesson_id' => 'required_with:quiz_id|exists:quiz_lessons,lesson_id'
+        ]);
+
+        if(isset($request->quiz_id)){
+            $Quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+            $quizLessons=[$Quiz_lesson];
+        }
+        if(!isset($Quiz_lesson)){
+            $quizLessons=QuizLesson::cursor();
+        }
+        foreach($quizLessons as $quiz_lesson){
             $grade_cat = GradeCategory::firstOrCreate(
                 [
                     'instance_type'=>'Quiz',
@@ -83,13 +109,14 @@ class ScriptsController extends Controller
                 );    
                     $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quiz_lesson->lesson->course_id)->pluck('user_id');
                     foreach($enrolled_students as $student){
-                        $data = [
-                            'user_id'   => $student,
+                        UserGrader::firstOrUpdate([
+                            'user_id'   => $user_id,
                             'item_type' => 'Item',
-                            'item_id'   => $gradeItem->id,
+                            'item_id'   => $gradeItem->id
+                        ],
+                        [
                             'grade'     => null
-                        ];
-                        UserGrader::firstOrcreate($data);
+                        ]);
                     }
                     event(new GradeItemEvent($gradeItem));
                 }
@@ -145,6 +172,37 @@ class ScriptsController extends Controller
                     $choices['exclude_mark'] = $question_with_wrong_content->grade_details->exclude_mark;
                     $choices['exclude_shuffle'] = $question_with_wrong_content->grade_details->exclude_shuffle;
                     $question_with_wrong_content->update(['grade_details' => json_encode($choices)]);
+            }
+        }
+        return 'done';
+    }
+
+    public function Full_Mark(Request $request)
+    {
+        $request->validate([
+            'course' => 'required|exists:courses,short_name',
+            'quiz_id' => 'exists:quizzes,id',
+            'lesson_id' => 'required_with:quiz_id|exists:quiz_lessons,lesson_id'
+        ]);
+
+        if(isset($request->course))
+        {
+            $course=Course::where('short_name',$request->course)->first();
+            $quizzesLessId=QuizLesson::whereIn('quiz_id',Quiz::where('course_id',$course->id)->pluck('id'))->pluck('id');
+            if(isset($request->quiz_id)){
+                $Quiz_lesson = QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+                $users_quiz=userQuiz::where('quiz_lesson_id',$Quiz_lesson->id)->get();
+            }
+            if(!isset($Quiz_lesson)){
+                $users_quiz=userQuiz::whereIn('quiz_lesson_id',$quizzesLessId)->get();
+            }
+            foreach($users_quiz as $user_quiz){
+                $user_quiz->grade=$user_quiz->quiz_lesson->grade;
+                $user_grader=UserGrader::where('item_type','category')->where('item_id',$user_quiz->quiz_lesson->grade_category_id)->
+                                    where('user_id',$user_quiz->user_id)->first();
+                $user_grader->update(['grade' => $user_quiz->quiz_lesson->grade]);
+                $user_quiz->save();
+                $user_grader->save();
             }
         }
         return 'done';

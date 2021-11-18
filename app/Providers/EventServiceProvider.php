@@ -38,12 +38,16 @@ class EventServiceProvider extends ServiceProvider
 
         'App\Events\UpdatedAttemptEvent' => [
             'App\Listeners\FireAutoCorrectionEventListener',
+        ],
+
+        'App\Events\GradeAttemptEvent' => [
             'App\Listeners\GradeAttemptItemlistener',
         ],
 
         'App\Events\UpdatedQuizQuestionsEvent' => [
             'App\Listeners\UpdateQuizGradeListener',
             'App\Listeners\createTimelineListener',
+            'App\Listeners\updateWeightDetailsListener',
         ],
 
          'App\Events\UserEnrolledEvent' => [
@@ -64,6 +68,7 @@ class EventServiceProvider extends ServiceProvider
 
         'App\Events\updateQuizAndQuizLessonEvent' => [
             'App\Listeners\updateTimelineListener',
+            'App\Listeners\updateGradeCatListener',
         ],    
     ];
 

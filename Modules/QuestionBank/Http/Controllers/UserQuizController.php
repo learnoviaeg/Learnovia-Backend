@@ -14,6 +14,7 @@ use Illuminate\Routing\Controller;
 use Auth;
 use Browser;
 use App\Events\ManualCorrectionEvent;
+use App\Events\GradeAttemptEvent;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\quiz;
@@ -289,6 +290,9 @@ class UserQuizController extends Controller
                 return HelperController::api_response_format(400, null, __('messages.error.not_found'));
                 
             if (isset($question_type_id)) {
+                $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
+                $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
+                $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->where('item_id',$question['id'])->where('type','Question')->first();
                 switch ($question_type_id) {
                     case 1: // True_false
                         if ($currentQuestion->content->and_why == true) {
@@ -308,9 +312,6 @@ class UserQuizController extends Controller
                                     'feedback' => isset($question['feedback']) ? $question['feedback'] : null
                                 ]);
                             }
-                            $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
-                            $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
-                            $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->where('item_id',$question['id'])->where('type','Question')->first();
                             ItemDetailsUser::updateOrCreate([
                                 'user_id'=>Auth::id(),
                                 'item_details_id' => $item_details->id,
@@ -330,9 +331,6 @@ class UserQuizController extends Controller
                         $correct['grade'] = isset($question['mark']) ? $question['mark'] : null;
                         $correct['feedback'] = isset($question['feedback']) ? $question['feedback'] : null;
                         $data['correction'] =  json_encode($correct);
-                        $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$user_quiz->quiz_lesson->quiz_id)->where('lesson_id',$user_quiz->quiz_lesson->lesson_id)->first();
-                        $gradeitem=GradeItems::where('index',$user_quiz->attempt_index)->where('grade_category_id',$grade_cat->id)->first();
-                        $item_details=ItemDetail::where('parent_item_id',$gradeitem->id)->where('item_id',$question['id'])->where('type','Question')->first();
 
                         ItemDetailsUser::updateOrCreate([
                             'user_id'=>Auth::id(),
@@ -367,11 +365,11 @@ class UserQuizController extends Controller
                 $userAnswer->correction = $data['correction'];
             $userAnswer->save();
         }
-        event(new ManualCorrectionEvent($attemp));
+        event(new GradeAttemptEvent($attemp));
+        // event(new ManualCorrectionEvent($attemp));
 
         return response()->json(['message' =>__('messages.grade.graded'), 'body' => $Corrected_answers ], 200);
     }
-
 
     public function gradeUserQuiz(Request $request)
     {

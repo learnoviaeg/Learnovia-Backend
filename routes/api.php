@@ -420,6 +420,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('grade-attempts', 'ScriptsController@gradeAttemptsInQuizlesson');
     Route::get('delete-wrong-attempts', 'ScriptsController@deleteWrongAttempts');
     Route::get('shuffled_quizzes', 'ScriptsController@reassign_shuffled_questions');
+    Route::get('full-mark', 'ScriptsController@Full_Mark');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -461,6 +462,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
     Route::get('close_attempts', 'QuizzesController@closeAttempts');
     Route::get('attempts/export', 'AttemptsController@exportAttempts');
+    Route::get('attempts/new-export', 'AttemptsController@newExportAttempts');
     Route::Resource('attempts', AttemptsController::class);
     Route::post('attempts/{id}', 'AttemptsController@update');
     // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);

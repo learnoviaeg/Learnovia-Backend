@@ -20,6 +20,7 @@ use App\GradeItems;
 use App\GradeCategory;
 use App\Observers\GradeItemObserver;
 use App\UserGrade;
+use App\UserGrader;
 use App\Observers\UserGradeObserver;
 use App\Observers\MaterialsObserver;
 use App\h5pLesson;
@@ -116,6 +117,7 @@ class AppServiceProvider extends ServiceProvider
         // UserGrade::observe(UserGradeObserver::class);
         GradeItems::observe(GradeItemObserver::class);
         GradeCategory::observe(LogsObserver::class);
+        UserGrader::observe(LogsObserver::class);
         Announcement::observe(LogsObserver::class);
         Timeline::observe(LogsObserver::class);
         Material::observe(LogsObserver::class);

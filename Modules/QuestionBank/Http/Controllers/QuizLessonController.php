@@ -346,7 +346,7 @@ class QuizLessonController extends Controller
             }
             if($request->extra_attempts > 0)
             {
-                for($key =$start; $key<=$end; $key++){
+                for($key =$start+1; $key<=$end; $key++){
                     $gradeItem = GradeItems::updateOrCreate([
                         'index' => $key,
                         'grade_category_id' => $quizLesson->grade_category_id,
@@ -356,29 +356,29 @@ class QuizLessonController extends Controller
                         'type' => 'Attempts',
                     ]
                 );    
-                    $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quizLesson->lesson->course_id)->pluck('user_id');
-                    foreach($enrolled_students as $student){
-                        $data = [
-                            'user_id'   => $student,
+                        UserGrader::firstOrCreate([
+                            'user_id'   => $user_id,
                             'item_type' => 'Item',
-                            'item_id'   => $gradeItem->id,
+                            'item_id'   => $gradeItem->id
+                        ],
+                        [
                             'grade'     => null
-                        ];
-                        UserGrader::firstOrcreate($data);
-                    }
+                        ]);
                     event(new GradeItemEvent($gradeItem));
                 }
             }
-
             if(isset($oldOverride)){
                 $oldOverride->attemps=$request->extra_attempts + $oldOverride->attemps;
+                $oldOverride->start_date=$request->start_date;
+                $oldOverride->due_date=$request->due_date;
                 $oldOverride->save();
                 continue;
             }
+
             $usersOverride [] =  QuizOverride::updateOrCreate([
                 'user_id'=> $user_id,
-                'quiz_lesson_id'=> $quizLesson->id,
-                'start_date' => $request->start_date,
+                'quiz_lesson_id'=> $quizLesson->id,],                
+                ['start_date' => $request->start_date,
                 'due_date'=>$request->due_date ,
                 'attemps' => $request->extra_attempts
             ]);

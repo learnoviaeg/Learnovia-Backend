@@ -41,10 +41,13 @@ class AttemptItemlistener
         $user_quiz=UserQuiz::where('quiz_lesson_id',$event->attempt->quiz_lesson_id)->where('user_id',Auth::id())->get();
         if(count($user_quiz) == 1 ){
             $QuizLesson = QuizLesson::find($event->attempt->quiz_lesson_id);
-            $QuizID=$QuizLesson->quiz->id;
+            $QuizID=$QuizLesson->quiz_id;
             $max_attempt=$QuizLesson->max_attemp;
-            $GradeCategory = GradeCategory::where('instance_id' , $QuizID)->first();
+            $GradeCategory = GradeCategory::where('instance_id' , $QuizID)->where('instance_type','Quiz')->where('lesson_id',$QuizLesson->lesson_id)->first();
             
+            if((Auth::user()->can('site/quiz/unLimitedAttempts')))
+                $max_attempt=1;
+
             for($key =1; $key<=$max_attempt; $key++){
                 $gradeItem = GradeItems::firstOrcreate([
                     'type' => 'Attempts',
@@ -59,6 +62,8 @@ class AttemptItemlistener
                         'user_id'   => $student,
                         'item_type' => 'Item',
                         'item_id'   => $gradeItem->id,
+                    ],
+                    [   
                         'grade'     => null
                     ]);
                 }

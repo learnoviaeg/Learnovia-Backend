@@ -47,7 +47,7 @@ class QuizLessonObserver
                 'course_id' => $lesson->course_id,
                 'parent' => $grade_category->id,
                 'name' => $quiz->name,
-                'hidden' => 1,
+                'hidden' => $quizLesson->visible,
                 'calculation_type' => json_encode($quizLesson->grading_method_id),
                 'instance_type' => 'Quiz',
                 'instance_id' => $quiz->id,
@@ -58,15 +58,14 @@ class QuizLessonObserver
                                         ->where('course',$lesson->course_id)->pluck('user_id');
             if(count($enrolled_students) > 0){
                 foreach($enrolled_students as $student){
-                    $data[] = [
+                    UserGrader::firstOrCreate([
                         'user_id'   => $student,
                         'item_type' => 'Category',
-                        'item_id'   => $categoryOfQuiz->id,
+                        'item_id'   => $categoryOfQuiz->id
+                    ],[
                         'grade'     => null
-                    ];
-                };
-                if(count($data) > 0)
-                    UserGrader::insert($data);    
+                    ]);
+                };  
             }
       
             //update quiz lesson with the id of grade categoey created for quiz
