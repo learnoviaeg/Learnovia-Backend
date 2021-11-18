@@ -365,7 +365,7 @@ class UserQuizController extends Controller
                 $userAnswer->correction = $data['correction'];
             $userAnswer->save();
         }
-        event(new GradeAttemptEvent($user_quiz));
+        event(new GradeAttemptEvent($attemp));
         // event(new ManualCorrectionEvent($attemp));
 
         return response()->json(['message' =>__('messages.grade.graded'), 'body' => $Corrected_answers ], 200);
