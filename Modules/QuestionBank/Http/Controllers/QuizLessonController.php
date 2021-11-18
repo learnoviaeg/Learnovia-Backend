@@ -356,8 +356,6 @@ class QuizLessonController extends Controller
                         'type' => 'Attempts',
                     ]
                 );    
-                    // $enrolled_students = Enroll::where('role_id' , 3)->where('course',$quizLesson->lesson->course_id)->pluck('user_id');
-                    // foreach($enrolled_students as $student){
                         UserGrader::firstOrCreate([
                             'user_id'   => $user_id,
                             'item_type' => 'Item',
@@ -366,21 +364,21 @@ class QuizLessonController extends Controller
                         [
                             'grade'     => null
                         ]);
-                        // UserGrader::firstOrcreate($data);
-                    // }
                     event(new GradeItemEvent($gradeItem));
                 }
             }
-
             if(isset($oldOverride)){
                 $oldOverride->attemps=$request->extra_attempts + $oldOverride->attemps;
+                $oldOverride->start_date=$request->start_date;
+                $oldOverride->due_date=$request->due_date;
                 $oldOverride->save();
                 continue;
             }
+
             $usersOverride [] =  QuizOverride::updateOrCreate([
                 'user_id'=> $user_id,
-                'quiz_lesson_id'=> $quizLesson->id,
-                'start_date' => $request->start_date,
+                'quiz_lesson_id'=> $quizLesson->id,],                
+                ['start_date' => $request->start_date,
                 'due_date'=>$request->due_date ,
                 'attemps' => $request->extra_attempts
             ]);
