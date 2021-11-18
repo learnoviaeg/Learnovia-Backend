@@ -584,7 +584,7 @@ class ReportsController extends Controller
                                                     'not_solved_students'    => $quizLesson->lesson->students_number - $quizLesson->solved_students,
                                                     'got_full_mark'    => $quizLesson->full_mark,
                                                     'got_zero'    => $quizLesson->got_zero,
-                                                    'viewed_without_action' => $quizLesson->user_seen_number - $quizLesson->solved_students,
+                                                    'viewed_without_action' => $quizLesson->user_seen_number != 0 ? abs($quizLesson->user_seen_number - $quizLesson->solved_students) : 0,
                                                     'equals_grading_pass' => $quizLesson->‌equals‌_to_‌pass_grade,
                                                     'more_than_grading_pass' => $quizLesson->‌more‌_than‌_grade_to_pass,
                                                     'less_than_grading_pass' => $quizLesson->less‌_than_‌grading‌_‌pass,
