@@ -499,6 +499,7 @@ class BigbluebuttonController extends Controller
             // $bigbb->save();
         }
 
+        $user=ZoomAccount::where('user_id',$bigbb->host_id)->first();
         $updatedUser=ZoomAccount::refresh_jwt_token($user);
         $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
         if(Auth::id() == $bigbb->host_id)
