@@ -345,11 +345,11 @@ class BigbluebuttonController extends Controller
         $bigbb->status = 'current';
         $bigbb->started = 1;
         $bigbb->actutal_start_date = Carbon::now();
-        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
-        if(Auth::id() == $bigbb->host_id)
-            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
+        // $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
+        // if(Auth::id() == $bigbb->host_id)
+        //     $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
 
-        $bigbb->signature=$signature;
+        // $bigbb->signature=$signature;
         $bigbb->save();
         return $response;
     }
@@ -496,9 +496,17 @@ class BigbluebuttonController extends Controller
 
         if($bigbb->type=='teams'){
             $bigbb->started=1;
-            $bigbb->save();
+            // $bigbb->save();
         }
-        
+
+        $updatedUser=ZoomAccount::refresh_jwt_token($user);
+        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
+        if(Auth::id() == $bigbb->host_id)
+            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
+
+        $bigbb->signature=$signature;
+        $bigbb->save();
+
         $output = array(
             'name' => $bigbb->name,
             'duration' => $bigbb->duration,
