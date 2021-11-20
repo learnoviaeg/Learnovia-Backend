@@ -174,8 +174,9 @@ class MaterialsController extends Controller
             $extension = explode('.' , $uniqueName[1]);
         }
         
-        if($material->type == 'page')
+        if($material->type == 'page'){
             $result = page::find($material->item_id);
+        }
         
         $headers = ['Content-Type' => $result->type];
         $file = $result->name.'.'.$extension[1];
