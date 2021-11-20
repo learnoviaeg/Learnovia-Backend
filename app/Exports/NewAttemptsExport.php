@@ -29,7 +29,7 @@ class NewAttemptsExport implements FromCollection, WithHeadings , WithStrictNull
             $forExport['Fullname'] = $user['fullname'];
             $forExport['Level'] = $user['level'];
             $forExport['Status'] = $user['status'];
-            $forExport['Quiz_Grade'] = $user['grade'][0] ;
+            $forExport['Quiz_Grade'] = $user['grade'];
             $forExport['Number_Of_Attempts'] = $user['attempt_index'];
             $forExport['Last_Attempt_Date'] = $user['last_att_date'];
             $forSetExport->push($forExport);
