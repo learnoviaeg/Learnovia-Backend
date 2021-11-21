@@ -2,6 +2,7 @@
 
 namespace Modules\QuestionBank\Entities;
 
+use App\GradeCategory;
 use App\Scopes\OverrideQuizScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -9,6 +10,7 @@ use Carbon\Carbon;
 use Modules\QuestionBank\Entities\QuizOverride;
 use App\UserSeen;
 use App\SystemSetting;
+use App\UserGrader;
 
 class QuizLesson extends Model
 {
@@ -116,6 +118,11 @@ class QuizLesson extends Model
     public function grading_method()
     {
         return $this->belongsTo('App\GradingMethod', 'grading_method_id', 'id');
+    }
+
+    public function userGrader()
+    {
+        return $this->hasManyThrough(UserGrader::class, GradeCategory::class, 'instance_id','item_id')->where('item_type','category');
     }
 
     public function getGradingMethodIdAttribute($value)

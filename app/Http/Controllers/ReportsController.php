@@ -482,7 +482,7 @@ class ReportsController extends Controller
                                     }
                         
                                 })
-                                ->withCount(['user_quiz as solved_students' => function($q) use ($usersIds){
+                                ->withCount(['userGrader as solved_students' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
@@ -490,7 +490,7 @@ class ReportsController extends Controller
 
                                     $q->select(DB::raw('count(distinct(user_id))'));
 
-                                },'user_quiz as got_zero' => function($q) use ($usersIds){
+                                },'userGrader as got_zero' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
@@ -498,7 +498,7 @@ class ReportsController extends Controller
 
                                     $q->where('grade', 0)->select(DB::raw('count(distinct(user_id))'));
 
-                                },'user_quiz as full_mark' => function($q) use ($usersIds){
+                                },'userGrader as full_mark' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
@@ -506,7 +506,7 @@ class ReportsController extends Controller
 
                                     $q->whereColumn('grade','quiz_lessons.grade')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
+                                ,'userGrader as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
@@ -514,7 +514,7 @@ class ReportsController extends Controller
 
                                     $q->whereColumn('grade','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
+                                ,'userGrader as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
@@ -522,7 +522,7 @@ class ReportsController extends Controller
 
                                     $q->whereColumn('grade','>','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
+                                ,'userGrader as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
