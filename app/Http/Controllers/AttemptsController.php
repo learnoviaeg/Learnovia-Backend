@@ -56,6 +56,7 @@ class AttemptsController extends Controller
             'filter' => 'in:submitted,not_submitted,notGraded', 
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
+            'search' => 'nullable'
         ]);
 
         $final= collect([]);
@@ -102,6 +103,14 @@ class AttemptsController extends Controller
             $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$request->user_id)->pluck('user_id')->unique();
             if(count ($users) == 0)
                 return HelperController::api_response_format(200, __('messages.error.user_not_assign'));
+        }
+
+        if ($request->filled('search')){
+            $users = User::whereIn('id',$users)->where(function ($query) use ($request) {
+                $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")
+                ->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                ->orWhere('username', 'LIKE', "%$request->search%");
+            })->pluck('id');
         }
         
         $Submitted_users=0;
