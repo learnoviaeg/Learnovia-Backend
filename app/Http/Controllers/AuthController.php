@@ -288,6 +288,7 @@ class AuthController extends Controller
         $config=[
             'production'=> env('APP_DEBUG'),
             'apiUrl'=> env('APP_URL'),
+            'domain'=> str_replace('api.','.',request()->getSchemeAndHttpHost()),
             'firebase'=> $firebase,
             'school_logo' => $path,
             'school_name' => $name
