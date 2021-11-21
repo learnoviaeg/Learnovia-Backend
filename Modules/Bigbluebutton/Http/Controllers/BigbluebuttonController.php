@@ -512,7 +512,7 @@ class BigbluebuttonController extends Controller
             'name' => $bigbb->name,
             'duration' => $bigbb->duration,
             'link'=> $url,
-            'signature' => BigbluebuttonModel::find($request->id)->signature,
+            'signature' => $signature,
             'api_key' => ZoomAccount::where('user_id',BigbluebuttonModel::find($request->id)->host_id)->pluck('api_key')->first()
         );
         return HelperController::api_response_format(200, $output,__('messages.virtual.join'));
