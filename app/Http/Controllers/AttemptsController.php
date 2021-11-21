@@ -543,7 +543,7 @@ class AttemptsController extends Controller
         foreach ($enrolls->pluck('user_id') as $user_id){
             $grade = UserGrader::where('user_id', $user_id)
             ->where('item_id' ,$quiz_lesson->grade_category_id)
-            ->where('item_type' ,'category')->pluck('grade');
+            ->where('item_type' ,'category')->pluck('grade')->first();
             $user = User::find($user_id);
             if($user == null){
                 unset($user);

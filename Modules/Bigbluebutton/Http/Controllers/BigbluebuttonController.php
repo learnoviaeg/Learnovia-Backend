@@ -345,11 +345,11 @@ class BigbluebuttonController extends Controller
         $bigbb->status = 'current';
         $bigbb->started = 1;
         $bigbb->actutal_start_date = Carbon::now();
-        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
-        if($request->user()->can('site/show-all-courses'))
-            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
+        // $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
+        // if(Auth::id() == $bigbb->host_id)
+        //     $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
 
-        $bigbb->signature=$signature;
+        // $bigbb->signature=$signature;
         $bigbb->save();
         return $response;
     }
@@ -496,15 +496,24 @@ class BigbluebuttonController extends Controller
 
         if($bigbb->type=='teams'){
             $bigbb->started=1;
-            $bigbb->save();
+            // $bigbb->save();
         }
-        
+
+        $user=ZoomAccount::where('user_id',$bigbb->host_id)->first();
+        $updatedUser=ZoomAccount::refresh_jwt_token($user);
+        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
+        if(Auth::id() == $bigbb->host_id)
+            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
+
+        $bigbb->signature=$signature;
+        $bigbb->save();
+
         $output = array(
             'name' => $bigbb->name,
             'duration' => $bigbb->duration,
             'link'=> $url,
             'signature' => BigbluebuttonModel::find($request->id)->signature,
-            'api_key' => ZoomAccount::where('user_id',BigbluebuttonModel::find($request->id)->host_id)->api_key
+            'api_key' => ZoomAccount::where('user_id',BigbluebuttonModel::find($request->id)->host_id)->pluck('api_key')->first()
         );
         return HelperController::api_response_format(200, $output,__('messages.virtual.join'));
     }
