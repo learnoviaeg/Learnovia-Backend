@@ -106,7 +106,7 @@ class AttemptsController extends Controller
         }
 
         if ($request->filled('search')){
-            $users = User::where(function ($query) use ($request) {
+            $users = User::whereIn('id',$users)->where(function ($query) use ($request) {
                 $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")
                 ->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                 ->orWhere('username', 'LIKE', "%$request->search%");
