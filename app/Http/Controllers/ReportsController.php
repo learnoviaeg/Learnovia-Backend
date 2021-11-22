@@ -488,7 +488,7 @@ class ReportsController extends Controller
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereNotNull('grade')->select(DB::raw('count(distinct(user_id))'));
 
                                 },'userGrader as got_zero' => function($q) use ($usersIds){
 
