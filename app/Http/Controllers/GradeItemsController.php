@@ -51,36 +51,42 @@ class GradeItemsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'items' => 'required|array',
-            'items.*.name' => 'required|string',
-            'items.*.grade_category_id' => 'required|exists:grade_categories,id',
-            'items.*.min'=>'between:0,99.99',
-            'items.*.max'=>'between:0,99.99',
-            'items.*.weight_adjust' => 'boolean',
-            'items.*.locked' => 'boolean',
-            'items.*.hidden' => 'boolean',
+            'course'    => 'required_without:grade_category_id|exists:courses,id',
+            'item_name' => 'required|string',
+            'grade_category_id' => 'required_without:course|exists:grade_categories,id',
+            'min'=>'between:0,99.99',
+            'max'=>'between:0,99.99',
+            'weight_adjust' => 'boolean',
+            'locked' => 'boolean',
+            'hidden' => 'boolean',
         ]);
 
-        foreach($request->items as $key=>$item){
-            $item = GradeItems::firstOrCreate([
-                'name' => $item['name'],
-                'grade_category_id' => isset($item['grade_category_id']) ? $item['grade_category_id'] : null,
-                'type' => 'Manual',
-                'locked' =>isset($item['locked']) ? $item['locked'] : 0,
-                'min' =>isset($item['min']) ? $item['min'] : 0,
-                'max' =>isset($item['max']) ? $item['max'] : null,
-                'weight_adjust' =>isset($item['weight_adjust']) ? $item['weight_adjust'] : 0,
-                'hidden' =>isset($item['hidden']) ? $item['hidden'] : 0,
+        if($request->filled('grade_category_id'))
+        $course = GradeCategory::find($request->grade_category_id)->course_id;
+    
+        if($request->filled('course')){
+            $course = $request->course;
+            $category = GradeCategory::whereNull('parent')->where('course_id',$request->course)->first();
+        }
+
+        $item = GradeItems::firstOrCreate([
+            'name' => $request->name,
+            'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $category->id,
+            'type' => 'Manual',
+            'locked' =>isset($request->locked) ? $request->locked : 0,
+            'min' =>isset($request->min) ? $request->min : 0,
+            'max' =>isset($request->max) ? $request->max : null,
+            'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : 0,
+            'hidden' =>isset($request->hidden) ? $request->hidden : 0,
+        ]);    
+        $enrolled_students = Enroll::select('user_id')->distinct()->where('course',$course)->where('role_id',3)->get()->pluck('user_id');
+        foreach($enrolled_students as $student){
+            UserGrader::create([
+                'user_id'   => $student,
+                'item_type' => 'Item',
+                'item_id'   => $item->id,
+                'grade'     => null
             ]);
-            $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment',GradeCategory::whereId($item['grade_category_id'])->first()->course_segment_id)->pluck('user_id');
-            foreach($enrolled_students as $student){
-                UserGrader::create([
-                    'user_id'   => $student,
-                    'item_type' => 'Item',
-                    'item_id'   => $item->id,
-                    'grade'     => null
-                ]);
-            }
         }
         return response()->json(['message' => __('messages.grade_item.add'), 'body' => null ], 200);
     }
@@ -130,6 +136,9 @@ class GradeItemsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $grade_item = GradeItems::findOrFail($id);
+        $grade_item->delete();
+        $user_graders = UserGrader::where('item_type' , 'Item')->where('item_id' , $grade_item->id)->delete();
+        return response()->json(['message' => __('messages.grade_item.delete'), 'body' => null ], 200);
     }
 }
