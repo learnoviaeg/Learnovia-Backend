@@ -273,11 +273,11 @@ class ReportsController extends Controller
 
         foreach($courses as $course){
 
-            $level = $course->level->name;
+            $level = $course->level;
 
             foreach($course->classes as $groupId){
 
-                $group = Classes::whereId($groupId)->pluck('name')->first();
+                $group = Classes::whereId($groupId)->first();
 
                 $componentsHelper = new ComponentsHelper();
 
@@ -302,9 +302,12 @@ class ReportsController extends Controller
                         foreach($items as $item){
 
                             $reportObjects->push([
-                                'level' => $level,
+                                'level' => $level->name,
+                                'level_id' => $level->id,
                                 'course' => $course->name,
-                                'class' => $group,
+                                'course_id' => $course->id,
+                                'class' => $group->name,
+                                'class_id' => $group->id,
                                 'type' => $type,
                                 'item_name' => $item->name,
                                 'item_id' => $item->id,
@@ -318,9 +321,12 @@ class ReportsController extends Controller
                     if(!$request->has('details')){
 
                         $reportObjects->push([
-                            'level' => $level,
+                            'level' => $level->name,
+                            'level_id' => $level->id,
                             'course' => $course->name,
-                            'class' => $group,
+                            'course_id' => $course->id,
+                            'class' => $group->name,
+                            'class_id' => $group->id,
                             'type' => $type,
                             'count' => $componentsHelper->$type()->count(),
                         ]);
@@ -482,15 +488,15 @@ class ReportsController extends Controller
                                     }
                         
                                 })
-                                ->withCount(['user_quiz as solved_students' => function($q) use ($usersIds){
+                                ->withCount(['userGrader as solved_students' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereNotNull('grade')->select(DB::raw('count(distinct(user_id))'));
 
-                                },'user_quiz as got_zero' => function($q) use ($usersIds){
+                                },'userGrader as got_zero' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
@@ -498,7 +504,7 @@ class ReportsController extends Controller
 
                                     $q->where('grade', 0)->select(DB::raw('count(distinct(user_id))'));
 
-                                },'user_quiz as full_mark' => function($q) use ($usersIds){
+                                },'userGrader as full_mark' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
@@ -506,7 +512,7 @@ class ReportsController extends Controller
 
                                     $q->whereColumn('grade','quiz_lessons.grade')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
+                                ,'userGrader as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
@@ -514,7 +520,7 @@ class ReportsController extends Controller
 
                                     $q->whereColumn('grade','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
+                                ,'userGrader as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
@@ -522,7 +528,7 @@ class ReportsController extends Controller
 
                                     $q->whereColumn('grade','>','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
+                                ,'userGrader as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);

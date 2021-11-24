@@ -63,7 +63,7 @@ class AnnouncementsController extends Controller
 
         if($created == 'created'){
 
-            $announcements = Announcement::where('created_by',Auth::id())->orderBy('publish_date','desc');
+            $announcements = Announcement::with('chainAnnouncement.level' , 'chainAnnouncement.course')->where('created_by',Auth::id())->orderBy('publish_date','desc');
 
             if(isset($request->search))
                 $announcements->where('title', 'LIKE' , "%$request->search%");
@@ -71,7 +71,7 @@ class AnnouncementsController extends Controller
             return response()->json(['message' => __('messages.announcement.created_list'), 'body' => $announcements->get()->paginate($paginate)], 200);
         }
 
-        $announcements =  userAnnouncement::with('announcements')
+        $announcements =  userAnnouncement::with('announcements.chainAnnouncement.level' ,'announcements.chainAnnouncement.course' )
                                             ->where('user_id', Auth::id())
                                             ->get()
                                             ->pluck('announcements')
@@ -80,7 +80,7 @@ class AnnouncementsController extends Controller
 
         if($request->user()->can('site/show-all-courses')){ //admin
 
-            $announcements = Announcement::orderBy('publish_date','desc')->get();
+            $announcements = Announcement::with('chainAnnouncement.level' , 'chainAnnouncement.course')->orderBy('publish_date','desc')->get();
         }
 
         if($request->filled('search')){

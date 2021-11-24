@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\page;
+use Illuminate\Support\Facades\Storage;
 
 class MaterialsController extends Controller
 {
@@ -158,17 +159,30 @@ class MaterialsController extends Controller
        
         if(!isset($material))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
-
-        if($material->type == 'file')
-            $result = file::find($material->item_id);
-
-        if($material->type == 'media')
-            $result = media::find($material->item_id);
         
-        if($material->type == 'page')
-            $result = page::find($material->item_id);
+            if ($material->type == "media") {
 
-            return response()->json(['message' => __('messages.materials.list'), 'body' => $result], 200);        
+                $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
+                strrpos($material->getOriginal()['link'],"/"));
+                $result = media::find($material->item_id);
+                $extension=substr(strstr($result->type, '/'), 1);
+                $file = $result->name.'.'.$extension;
+            }
+            if ($material->type == "file") {
+
+                $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
+                strrpos($material->getOriginal()['link'],"/"));
+                $result = file::find($material->item_id);
+                $extension = $result->type;
+                $file = $result->name.'.'.$extension;
+            }
+            if($material->type == 'page'){
+                $result = page::find($material->item_id);
+            }
+    
+    return response()->download($path ,$file);
+
+
     }
 
     /**

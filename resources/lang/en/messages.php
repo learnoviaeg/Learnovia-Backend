@@ -315,7 +315,7 @@ return [
         'no_courses_belong_to_class' => 'No courses belong to this class',
     ],
     'zoom' => [
-        'zoom_account' => 'user haven\'t account on zoom',
+        'zoom_account' => 'user hasn\'t account on zoom',
         'Invalid' => 'Invalid Access Token',
     ],
     'status' => [
