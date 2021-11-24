@@ -49,6 +49,19 @@ class updateWeightDetailsListener
                         $ItmDtl->save();
                     }
                 }
+                else{
+                    foreach($gradeitemIDS as $gradeitm){
+                        $item=ItemDetail::updateOrCreate(
+                        [
+                            'type' => 'Question',
+                            'item_id' => $question['question_id'],
+                            'parent_item_id' => $gradeitm->id
+                        ],
+                        [
+                            'weight_details' => json_encode($question['grade_details']),
+                        ]);
+                    }
+                }
             }
         }
 
