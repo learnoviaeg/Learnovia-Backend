@@ -44,7 +44,7 @@ class QuizAttemptReport implements FromCollection, WithHeadings
                 'start_date'     => $quizLesson->start_date,
                 'due_date'       => $quizLesson->due_date,
                 'duration'       => round($quizLesson->quiz->duration/60,0),
-                'period'         => $different_days->d.' Day/s, '.$different_days->h.' Hour/s',
+                'period'         => $different_days->d.' Day/s, '.$different_days->h.' Hour/s, '.$different_days->i.' Minute/s',
                 'attempts_number'    => $quizLesson->max_attemp,
                 'gradeing_method'    => count($quizLesson->grading_method_id) > 0 ? $quizLesson->grading_method_id[0] : '-',
                 'students_number'    => ' '.$quizLesson->lesson->students_number,

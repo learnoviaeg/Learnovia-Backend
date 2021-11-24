@@ -15,6 +15,13 @@ class UserGrader extends Model
         return $this->belongsTo('App\User', 'user_id', 'id');
     }
 
+    public function student()
+    {
+        return $this->belongsTo('App\User', 'user_id', 'id')->whereHas('roles', function($q){
+            $q->where('role_id',3);
+        });
+    }
+
     public function getGradeAttribute($value)
     {
         $content= json_decode($value);
