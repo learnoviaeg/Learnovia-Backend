@@ -99,4 +99,13 @@ class GraderReportController extends Controller
     {
         //
     }
+
+    public function grade_setup(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+        ]);
+        $categories = GradeCategory::where('course_id' ,$request->course_id)->with('Children')->get();
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $categories ], 200);
+    }
 }
