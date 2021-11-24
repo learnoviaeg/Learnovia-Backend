@@ -273,11 +273,11 @@ class ReportsController extends Controller
 
         foreach($courses as $course){
 
-            $level = $course->level->name;
+            $level = $course->level;
 
             foreach($course->classes as $groupId){
 
-                $group = Classes::whereId($groupId)->pluck('name')->first();
+                $group = Classes::whereId($groupId)->first();
 
                 $componentsHelper = new ComponentsHelper();
 
@@ -302,9 +302,12 @@ class ReportsController extends Controller
                         foreach($items as $item){
 
                             $reportObjects->push([
-                                'level' => $level,
+                                'level' => $level->name,
+                                'level_id' => $level->id,
                                 'course' => $course->name,
-                                'class' => $group,
+                                'course_id' => $course->id,
+                                'class' => $group->name,
+                                'class_id' => $group->id,
                                 'type' => $type,
                                 'item_name' => $item->name,
                                 'item_id' => $item->id,
@@ -318,9 +321,12 @@ class ReportsController extends Controller
                     if(!$request->has('details')){
 
                         $reportObjects->push([
-                            'level' => $level,
+                            'level' => $level->name,
+                            'level_id' => $level->id,
                             'course' => $course->name,
-                            'class' => $group,
+                            'course_id' => $course->id,
+                            'class' => $group->name,
+                            'class_id' => $group->id,
                             'type' => $type,
                             'count' => $componentsHelper->$type()->count(),
                         ]);

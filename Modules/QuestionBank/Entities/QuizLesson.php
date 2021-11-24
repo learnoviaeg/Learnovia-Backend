@@ -122,7 +122,7 @@ class QuizLesson extends Model
 
     public function userGrader()
     {
-        return $this->hasManyThrough(UserGrader::class, GradeCategory::class, 'instance_id','item_id')->where('item_type','category');
+        return $this->hasManyThrough(UserGrader::class, GradeCategory::class, 'instance_id','item_id','quiz_id')->where('item_type','category');
     }
 
     public function getGradingMethodIdAttribute($value)
