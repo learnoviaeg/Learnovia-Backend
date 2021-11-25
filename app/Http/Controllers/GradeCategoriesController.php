@@ -10,6 +10,7 @@ use App\GradeItems;
 use App\UserGrader;
 use App\Enroll;
 use App\Course;
+// use App\Events\GraderSetupEvent;
 
 class GradeCategoriesController extends Controller
 {
@@ -74,9 +75,9 @@ class GradeCategoriesController extends Controller
             'levels.*'  => 'nullable|integer|exists:levels,id',
             'category.*.name' => 'required|string',
             'category.*.parent' => 'exists:grade_categories,id',
-            'category.*.aggregation' => 'in:Natural,Simple weighted mean',
+            'category.*.aggregation' => 'in:Value,Scale',
             'category.*.hidden' => 'boolean',
-            'category.*.calculation_type' => 'nullable|in:Value,Scale',
+            'category.*.calculation_type' => 'nullable|in:Natural,Simple_weighted_mean',
             'category.*.locked' => 'boolean',
             'category.*.min'=>'between:0,99.99',
             'category.*.max'=>'between:0,99.99',
@@ -123,7 +124,7 @@ class GradeCategoriesController extends Controller
      */
     public function show($id)
     {
-        $grade_categories = GradeCategory::where('id', $id)->with('Child.GradeItems','GradeItems')->first();
+        $grade_categories = GradeCategory::where('id', $id)->whereNull('parent')->with('Child.GradeItems','GradeItems')->first();
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
     }
 
@@ -147,13 +148,15 @@ class GradeCategoriesController extends Controller
             'name'   => isset($request->name) ? $request->name : $grade_category->name,
             'parent' => isset($request->parent) ? $request->parent : $grade_category->parent,
             'hidden' => isset($request->hidden) ? $request->hidden : $grade_category->hidden,
-            'calculation_type' =>isset($request->calculation_type) ? $request->calculation_type : $category['calculation_type'],
+            'calculation_type' =>isset($request->calculation_type) ? $request->calculation_type : json_encode($grade_category['calculation_type']),
             'locked' =>isset($request->locked) ? $request->locked  : $grade_category['locked'],
             'min' =>isset($request->min) ? $request->min : $grade_category['min'],
             'max' =>isset($request->max) ? $request->max : $grade_category['max'],
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_category['weight_adjust'],
             'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : $grade_category['exclude_empty_grades'],
         ]);
+
+        // event(new GraderSetupEvent($grade_category));
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
 
