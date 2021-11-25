@@ -10,7 +10,7 @@ use App\GradeItems;
 use App\UserGrader;
 use App\Enroll;
 use App\Course;
-// use App\Events\GraderSetupEvent;
+use App\Events\GraderSetupEvent;
 
 class GradeCategoriesController extends Controller
 {
@@ -156,7 +156,7 @@ class GradeCategoriesController extends Controller
             'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : $grade_category['exclude_empty_grades'],
         ]);
 
-        // event(new GraderSetupEvent($grade_category));
+        event(new GraderSetupEvent($grade_category));
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
 
