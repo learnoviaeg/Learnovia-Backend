@@ -33,32 +33,32 @@ class H5PNotification extends SendNotification
 
     public function send(){
 
-        $publish_date = $this->H5PLesson->publish_date;
-        if(Carbon::parse($publish_date)->isPast()){
-            $publish_date = Carbon::now();
-        }
+        // $publish_date = $this->H5PLesson->publish_date;
+        // if(Carbon::parse($publish_date)->isPast()){
+        //     $publish_date = Carbon::now();
+        // }
 
-        $url= substr(request()->url(), 0, strpos(request()->url(), "/api"));
+        // $url= substr(request()->url(), 0, strpos(request()->url(), "/api"));
 
-        //Start preparing notifications object
-        $notification = [
-            'type' => 'notification',
-            'item_id' => $this->H5PLesson->content_id,
-            'item_type' => 'h5p',
-            'message' => $this->message,
-            'publish_date' => $publish_date,
-            'created_by' => $this->H5PLesson->user_id,
-            'lesson_id' => $this->lesson->id,
-            'course_id' => $this->lesson->course_id,
-            'classes' => json_encode($this->lesson->shared_classes->pluck('id')),
-            'link' => $url.'/api/h5p/'.$this->H5PLesson->content_id,
-        ];
+        // //Start preparing notifications object
+        // $notification = [
+        //     'type' => 'notification',
+        //     'item_id' => $this->H5PLesson->content_id,
+        //     'item_type' => 'h5p',
+        //     'message' => $this->message,
+        //     'publish_date' => $publish_date,
+        //     'created_by' => $this->H5PLesson->user_id,
+        //     'lesson_id' => $this->lesson->id,
+        //     'course_id' => $this->lesson->course_id,
+        //     'classes' => json_encode($this->lesson->shared_classes->pluck('id')),
+        //     'link' => $url.'/api/h5p/'.$this->H5PLesson->content_id,
+        // ];
 
-        //assign notification to given users
-        $createdNotification = $this->toDatabase($notification,$this->users);
+        // //assign notification to given users
+        // $createdNotification = $this->toDatabase($notification,$this->users);
         
-        //firebase Notifications
-        $this->toFirebase($createdNotification);
+        // //firebase Notifications
+        // $this->toFirebase($createdNotification);
     }
 
   
