@@ -68,12 +68,12 @@ class LastActionMiddleWare
             if(str_contains($Model, '/'))
                 $Model = substr($Model, 0, strpos($Model, "/"));
     
-            Log::create([
-                'user' => $request->user()->username,
-                'action' => 'viewed',
-                'model' => ucfirst(Str::singular($Model)),
-                'data' => serialize($request->route()->uri),
-            ]);
+            // Log::create([
+            //     'user' => $request->user()->username,
+            //     'action' => 'viewed',
+            //     'model' => ucfirst(Str::singular($Model)),
+            //     'data' => serialize($request->route()->uri),
+            // ]);
         }
 
         //start seen report
