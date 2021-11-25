@@ -10,7 +10,7 @@ use App\GradeItems;
 use App\UserGrader;
 use App\Enroll;
 use App\Course;
-use App\Events\GraderSetupEvent;
+// use App\Events\GraderSetupEvent;
 
 class GradeCategoriesController extends Controller
 {
