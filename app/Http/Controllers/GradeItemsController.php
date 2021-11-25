@@ -52,7 +52,7 @@ class GradeItemsController extends Controller
     {
         $request->validate([
             'course'    => 'required_without:grade_category_id|exists:courses,id',
-            'item_name' => 'required|string',
+            'name' => 'required|string',
             'grade_category_id' => 'required_without:course|exists:grade_categories,id',
             'min'=>'between:0,99.99',
             'max'=>'between:0,99.99',
