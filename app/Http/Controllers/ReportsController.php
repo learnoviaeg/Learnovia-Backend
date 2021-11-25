@@ -494,7 +494,7 @@ class ReportsController extends Controller
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereNotNull('grade')->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereNotNull('grade')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
 
                                 },'userGrader as got_zero' => function($q) use ($usersIds){
 
@@ -502,7 +502,7 @@ class ReportsController extends Controller
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->where('grade', 0)->select(DB::raw('count(distinct(user_id))'));
+                                    $q->where('grade', 0)->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
 
                                 },'userGrader as full_mark' => function($q) use ($usersIds){
 
@@ -510,7 +510,7 @@ class ReportsController extends Controller
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereColumn('grade','quiz_lessons.grade')->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereColumn('grade','quiz_lessons.grade')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                 }
                                 ,'userGrader as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
 
@@ -518,7 +518,7 @@ class ReportsController extends Controller
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereColumn('grade','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereColumn('grade','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                 }
                                 ,'userGrader as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
 
@@ -526,7 +526,7 @@ class ReportsController extends Controller
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereColumn('grade','>','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereColumn('grade','>','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                 }
                                 ,'userGrader as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
 
@@ -534,7 +534,7 @@ class ReportsController extends Controller
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                 }
                             ]);
 
@@ -582,7 +582,7 @@ class ReportsController extends Controller
                                                     'start_date'     => $quizLesson->start_date,
                                                     'due_date'       => $quizLesson->due_date,
                                                     'duration'       => round($quizLesson->quiz->duration/60,0),
-                                                    'period'         => $different_days->d.' Day/s, '.$different_days->h.' Hour/s',
+                                                    'period'         => $different_days->d.' Day/s, '.$different_days->h.' Hour/s, '.$different_days->i.' Minute/s',
                                                     'attempts_number'    => $quizLesson->max_attemp,
                                                     'gradeing_method'    => $quizLesson->grading_method_id,
                                                     'students_number'    => $quizLesson->lesson->students_number,
