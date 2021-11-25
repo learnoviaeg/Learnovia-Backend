@@ -42,12 +42,15 @@ class updateWeightDetailsListener
             $grade_cat_ids=GradeCategory::where('instance_type','Quiz')->where('instance_id',$event->Quiz)->pluck('id');
             $gradeitemIDS=GradeItems::whereIn('grade_category_id',$grade_cat_ids)->pluck('id');
             if(count($gradeitemIDS) > 0){
-                $item_detail=ItemDetail::whereIn('parent_item_id',$gradeitemIDS)->where('item_id',$question['question_id'])->where('type','Question')->get();
-                if(isset($item_detail)){ //if these update before any one open an attempt
-                    foreach($item_detail as $ItmDtl){
-                        $ItmDtl->weight_details=json_encode($question['grade_details']);
-                        $ItmDtl->save();
-                    }
+                foreach($gradeitemIDS as $gradeitm){
+                    $item = ItemDetail::updateOrCreate([
+                        'type' => 'Question',
+                        'item_id' => $question['question_id'],
+                        'parent_item_id' => $gradeitm
+                    ],
+                    [
+                        'weight_details' => json_encode($question['grade_details']),
+                    ]);
                 }
             }
         }
