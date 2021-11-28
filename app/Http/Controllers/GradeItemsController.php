@@ -99,7 +99,8 @@ class GradeItemsController extends Controller
      */
     public function show($id)
     {
-        //
+        $grade_item = GradeItems::findOrFail($id);
+        return response()->json(['message' => __('messages.grade_items.list'), 'body' => $grade_item ], 200);
     }
 
     /**
