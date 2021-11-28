@@ -166,7 +166,6 @@ class MaterialsController extends Controller
                 strrpos($material->getOriginal()['link'],"/"));
                 $result = media::find($material->item_id);
                 $extension=substr(strstr($result->type, '/'), 1);
-                $file = $result->name.'.'.$extension;
             }
             if ($material->type == "file") {
 
@@ -174,13 +173,14 @@ class MaterialsController extends Controller
                 strrpos($material->getOriginal()['link'],"/"));
                 $result = file::find($material->item_id);
                 $extension = $result->type;
-                $file = $result->name.'.'.$extension;
             }
             if($material->type == 'page'){
                 $result = page::find($material->item_id);
             }
+         $fileName = $result->name.'.'.$extension;
+         $headers = ['Content-Type' => 'application/'.$extension];
     
-    return response()->download($path ,$file);
+    return response()->download($path , $fileName , $headers);
 
 
     }
