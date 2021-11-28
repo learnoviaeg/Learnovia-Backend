@@ -47,6 +47,7 @@ use App\Segment;
 use App\Observers\SecodaryChainObserver;
 use App\Timeline;
 use App\Material;
+use DB;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -98,6 +99,11 @@ class AppServiceProvider extends ServiceProvider
                 ]
             );
         });
+
+        DB::connection()
+        ->getDoctrineSchemaManager()
+        ->getDatabasePlatform()
+        ->registerDoctrineTypeMapping('enum', 'string');
 
         h5pLesson::observe(LogsObserver::class);
 
