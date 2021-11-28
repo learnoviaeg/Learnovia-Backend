@@ -743,22 +743,19 @@ class UserController extends Controller
                 foreach($students as $student){
 
                     Enroll::firstOrCreate([
-                        'course_segment' => $student->course_segment,
+                        // 'course_segment' => $student->course_segment,
                         'user_id' => $parent,
                         'role_id'=> 7,
                         'year' => $student->year,
                         'type' => $student->type,
                         'level' => $student->level,
-                        'class' => $student->class,
+                        'class' => $student->group,
                         'segment' => $student->segment,
                         'course' => $student->course
                     ]);
                 }
-
             }
         }
-            
-
         return HelperController::api_response_format(201,null,__('messages.users.parent_assign_child'));
     }
 
