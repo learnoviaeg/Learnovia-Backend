@@ -14,6 +14,7 @@ use App\Grader\TypeGrader;
 use App\Grader\LowestGrade;
 use App\Grader\FirstGrade;
 use App\Grader\LastGrade;
+use App\GradesSetup\NaturalMethod;
 use App\Enroll;
 use App\Observers\EnrollObserver;
 use App\GradeItems;
@@ -74,6 +75,9 @@ class AppServiceProvider extends ServiceProvider
         $AverageGrade = new AverageGrade();
         $this->app->instance('Average', $AverageGrade);
 
+        $NaturalMethod = new NaturalMethod();
+        $this->app->instance('Natural', $NaturalMethod);
+        
         $TypeGrader = new TypeGrader();
         $this->app->instance(TypeGrader::class, $TypeGrader);        
     }
