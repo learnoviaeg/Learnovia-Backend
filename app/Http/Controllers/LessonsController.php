@@ -46,13 +46,14 @@ class LessonsController extends Controller
         if($request->filled('classes'))
             $lessons->whereIn('group_id',$request->classes);
         $result_lessons = $lessons->get()->groupBy('lesson_id');
-        if($request->filled('classes')){
+        /*if($request->filled('classes')){
             foreach($result_lessons as $key=>$lesson){
                 if(count($lesson) != count($request->classes)){
                     unset($result_lessons[$lesson[0]->lesson_id]);
                 }
             }
         }
+        */
         $result = Lesson::whereIn('id',$result_lessons->keys());
         if($request->filled('shared'))
             $result->where('shared_lesson', $request->shared);
