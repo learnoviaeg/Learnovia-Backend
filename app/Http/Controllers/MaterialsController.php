@@ -146,7 +146,6 @@ class MaterialsController extends Controller
             }
             return redirect($url);
         }
-        
     }
 
     public function Material_Details(Request $request)
@@ -160,29 +159,27 @@ class MaterialsController extends Controller
         if(!isset($material))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
         
-            if ($material->type == "media") {
+        if ($material->type == "media") {
 
-                $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
-                strrpos($material->getOriginal()['link'],"/"));
-                $result = media::find($material->item_id);
-                $extension=substr(strstr($result->type, '/'), 1);
-                $file = $result->name.'.'.$extension;
-            }
-            if ($material->type == "file") {
+            $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
+            strrpos($material->getOriginal()['link'],"/"));
+            $result = media::find($material->item_id);
+            // $extension=substr(strstr($result->type, '/'), 1);
+            // $file = $result->name.'.'.$extension;
+        }
+        if ($material->type == "file") {
 
-                $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
-                strrpos($material->getOriginal()['link'],"/"));
-                $result = file::find($material->item_id);
-                $extension = $result->type;
-                $file = $result->name.'.'.$extension;
-            }
-            if($material->type == 'page'){
-                $result = page::find($material->item_id);
-            }
+            $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
+            strrpos($material->getOriginal()['link'],"/"));
+            $result = file::find($material->item_id);
+            // $extension = $result->type;
+            // $file = $result->name.'.'.$extension;
+        }
+        if($material->type == 'page'){
+            $result = page::find($material->item_id);
+        }
     
-    return response()->download($path ,$file);
-
-
+        return response()->json(['message' => '', 'body' => $result], 200);
     }
 
     /**
