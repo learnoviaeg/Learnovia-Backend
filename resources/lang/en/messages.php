@@ -96,7 +96,7 @@ return [
     'quiz' => [
         'add' => 'Quiz added successfully',
         'update' => 'Quiz updated successfully',
-        'NotUpdate' => 'you cann\'t update this quiz',
+        'NotUpdate' => 'you can\'t update this quiz',
         'delete' => 'Quiz deleted successfully',
         'assign' => 'Quiz assigned successfully',
         'unAssign' => 'Quiz unAssigned successfully',
@@ -330,7 +330,8 @@ return [
         'update' => 'Grade category is updated successfully',
         'list' => 'Grade Categories List',
         'delete' => 'Grade category deleted successfully',
-        'not_found' => 'Cann\'t find grade category'
+        'not_found' => 'Can\'t find grade category',
+        'CannotUpdate' => 'you can\'t update this category',
     ],
     'grade_item' => [
         'add'    => 'Grade item added successfully',
