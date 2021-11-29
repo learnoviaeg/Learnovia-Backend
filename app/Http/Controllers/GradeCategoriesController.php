@@ -111,6 +111,7 @@ class GradeCategoriesController extends Controller
                         'grade'     => null
                     ]);
                 }
+                event(new GraderSetupEvent($cat));
             }
         }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
@@ -169,6 +170,7 @@ class GradeCategoriesController extends Controller
     public function destroy($id)
     {
         $grade_category = GradeCategory::find($id);
+        event(new GraderSetupEvent($grade_category));
         if(!isset($grade_category))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 404);
 
