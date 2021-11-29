@@ -108,4 +108,79 @@ class GraderReportController extends Controller
         $categories = GradeCategory::where('course_id' ,$request->course_id)->whereNull('parent')->with('Children')->get();
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $categories ], 200);
     }
+
+    public function weight_adjust(Request $request)
+    {
+        $request->validate([
+            'instance' => 'required|array',
+            'instance.*.id' => 'required',
+            'instance.*.type' => 'required|in:GradeCategory,GradeItems',
+            // 'instance.*.weight' => 'required',
+            // 'instance.*.mark' => 'required',
+            'instance.*.weight_adjust' => 'boolean',
+
+        ]);
+
+        foreach($request->instance as $instance)
+        {
+            $total_grade = 0;
+            $total_weight = 100;
+            if($instance['type'] == 'GradeCategory'){
+                $category = GradeCategory::find($instance['id']);
+                $category->weight_adjust = isset($instance['weight_adjust']) ? $instance['weight_adjust'] : $category->weight_adjust;
+                $category->weight = isset($instance['weight']) ? $instance['weight'] : $category->weight;
+                $category->save();
+            }
+            if($instance['type'] == 'GradeItems'){
+                $category = GradeItems::find($instance['id']);
+                $category->weight_adjust = isset($instance['weight_adjust']) ? $instance['weight_adjust'] : $category->weight_adjust;
+                $category->weight = isset($instance['weight']) ? $instance['weight'] : $category->weight;
+                $category->save();
+            }
+            if($category->parent == null)
+                return response()->json(['message' => __('messages.grade_category.CannotUpdate'), 'body' => null ], 400);
+
+            $parent = GradeCategory::where('id',$category->parent)->with('Child','GradeItems')->first();
+            foreach($parent->child as $cats)
+            {
+                if($cats->weight != 0){
+                    $total_grade += $cats->max;
+                }
+                if($cats->weight_adjust	 == 1){
+                    $total_weight -= $cats->weight;
+                }
+            }
+            foreach($parent->GradeItems as $item)
+            {
+                if($item->weight != 0){
+                    $total_grade += $item->max;
+                }
+                if($item->weight_adjust	 == 1){
+                    $total_weight -= $item->weight;
+                }
+            }
+
+            foreach($parent->child as $cats)
+            {
+                if($cats->weight_adjust	 != 1){
+                    $cats->weight = ($cats->max / $total_grade) *$total_weight;
+                    $cats->save();
+                }
+            }
+
+            foreach($parent->GradeItems as $item)
+            {
+                if($item->weight_adjust	 != 1){
+                    $item->weight = ($item->max / $total_grade) *$total_weight;
+                    $item->save();
+                }
+            }
+
+    
+        }
+        return 'done';
+
+
+
+    }
 }
