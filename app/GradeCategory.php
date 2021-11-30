@@ -147,4 +147,11 @@ class GradeCategory extends Model
         return $content;
     }
 
+    public function getWeightAttribute($value)
+    {
+        if($value != null)
+            $content= round($value , 2) ;
+        return $content;
+    }
+
 }

@@ -31,9 +31,8 @@ class RefreshGraderSetupListener
             foreach($event->grade_category->calculation_type as $calculation_type){
                 $calculator = resolve($calculation_type);
                 $grade = $calculator->calculateMark($event->grade_category);
-
-                $weight = $calculator->calculateWeight($event->grade_category);
                 $event->grade_category->update(['max' => $grade]);
+                $weight = $calculator->calculateWeight($event->grade_category);
                 if($event->grade_category->parent != null)
                     event(new GraderSetupEvent(GradeCategory::find($event->grade_category->parent)));
             }

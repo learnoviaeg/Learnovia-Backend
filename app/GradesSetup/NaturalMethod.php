@@ -25,46 +25,48 @@ class NaturalMethod implements GradeSetupInterface
     {
         $total_grade = 0;
         $total_weight = 100;
-        $category = GradeCategory::find($grade_category->id);
 
-        foreach($category->child as $cats)
+        foreach($grade_category->child as $cats)
         {
             if($cats->weight_adjust	 === 1){
                 $total_weight -= $cats->weights;
             }
-            if($cats->weights > 0 || $cats->weights == null){
+            if($cats->weights > 0 || $cats->weights === null){
                 $total_grade += $cats->max;
             }
         }
-        foreach($category->GradeItems as $item)
+        foreach($grade_category->GradeItems as $item)
         {
 
             if($item->weight_adjust	 === 1){
-                $total_weight -= $item->weights;
+                $total_weight -= $item->weight;
             }
-            if($item->weights > 0 || $item->weights == null){
+            if($item->weight > 0 || $item->weight === null){
                 $total_grade += $item->max;
             }
 
         }
-
-        foreach($category->child as $cats)
+        foreach($grade_category->child as $cats)
         {
             if($cats->weight_adjust	 != 1){
-                $cats->weights = ($cats->max / $total_grade) *$total_weight;
+                if($total_grade == 0)
+                    $cats->weights =0;
+                else
+                    $cats->weights = ($cats->max / $total_grade) *$total_weight;
                 $cats->save();
             }
         }
 
-        foreach($category->GradeItems as $item)
+        foreach($grade_category->GradeItems as $item)
         {
             if($item->weight_adjust	 != 1){
-                $item->weights = ($item->max / $total_grade) *$total_weight;
+                if($total_grade == 0)
+                    $item->weight =0;
+                else
+                    $item->weight = ($item->max / $total_grade) *$total_weight;
                 $item->save();
             }
         }
-
-    
     }
 
 }

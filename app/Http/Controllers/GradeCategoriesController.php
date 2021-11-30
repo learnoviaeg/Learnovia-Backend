@@ -155,7 +155,7 @@ class GradeCategoriesController extends Controller
             'min' =>isset($request->min) ? $request->min : $grade_category['min'],
             'max' =>isset($request->max) ? $request->max : $grade_category['max'],
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_category['weight_adjust'],
-            'weight' =>isset($request->weight) ? $request->weight : $grade_category['weight'],
+            'weights' =>isset($request->weight) ? $request->weight : $grade_category['weights'],
             'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : $grade_category['exclude_empty_grades'],
         ]);
         if($grade_category->parent != null)
