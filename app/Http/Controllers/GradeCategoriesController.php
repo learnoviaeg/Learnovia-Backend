@@ -65,10 +65,6 @@ class GradeCategoriesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // 'year' => 'exists:academic_years,id',
-            // 'type' => 'exists:academic_types,id',
-            // 'level' => 'exists:levels,id',
-            // 'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array|required_without:levels',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'levels'    => 'nullable|array|required_without:courses',
@@ -88,20 +84,23 @@ class GradeCategoriesController extends Controller
         $courses = $enrolls->get()->pluck('course')->unique(); 
 
         foreach($courses as $course){
+            $course_total_category = GradeCategory::select('id')->whereNull('parent')->where('course_id',$course)->first();
             foreach($request->category as $key=>$category){
-                $cat = GradeCategory::firstOrCreate([
+                $cat = GradeCategory::create([
                     'course_id'=> $course,
                     'name' => $category['name'],
-                    'parent' => isset($category['parent']) ? $category['parent'] : null,
+                    'parent' => isset($category['parent']) ? $category['parent'] : $course_total_category->id,
                     'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
-                    'calculation_type' =>isset($category['calculation_type']) ? $category['calculation_type'] : null,
+                    'calculation_type' =>isset($category['calculation_type']) ? $category['calculation_type'] : json_encode(['Natural']),
                     'locked' =>isset($category['locked']) ? $category['locked'] : 0,
                     'min' =>isset($category['min']) ? $category['min'] : 0,
                     'max' =>isset($category['max']) ? $category['max'] : null,
-                    'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Natural',
+                    'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
                     'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
+                    'weights' =>isset($category['weight']) ? $category['weight'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                 ]);
+
                 $enrolled_students = Enroll::where('course',$course)->where('role_id',3)->get()->pluck('user_id')->unique();
                 foreach($enrolled_students as $student){
                     UserGrader::create([
@@ -111,8 +110,9 @@ class GradeCategoriesController extends Controller
                         'grade'     => null
                     ]);
                 }
-                event(new GraderSetupEvent($cat));
-            }
+                if($cat->parent != null)
+                    event(new GraderSetupEvent($cat->Parents));
+                }
         }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
     }
@@ -142,6 +142,7 @@ class GradeCategoriesController extends Controller
             'name' => 'string',
             'parent' => 'exists:grade_categories,id',
             'hidden' => 'boolean',
+            'weight_adjust' => 'required|boolean'
 
         ]);
         $grade_category = GradeCategory::findOrFail($id);
@@ -154,10 +155,11 @@ class GradeCategoriesController extends Controller
             'min' =>isset($request->min) ? $request->min : $grade_category['min'],
             'max' =>isset($request->max) ? $request->max : $grade_category['max'],
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_category['weight_adjust'],
+            'weights' =>isset($request->weight) ? $request->weight : $grade_category['weights'],
             'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : $grade_category['exclude_empty_grades'],
         ]);
-
-        event(new GraderSetupEvent($grade_category));
+        if($grade_category->parent != null)
+            event(new GraderSetupEvent($grade_category->Parents));
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
 
@@ -170,7 +172,9 @@ class GradeCategoriesController extends Controller
     public function destroy($id)
     {
         $grade_category = GradeCategory::find($id);
-        event(new GraderSetupEvent($grade_category));
+        if($grade_category->parent != null)
+            event(new GraderSetupEvent($grade_category->Parents));
+
         if(!isset($grade_category))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 404);
 
