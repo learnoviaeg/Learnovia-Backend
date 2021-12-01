@@ -118,9 +118,13 @@ class GradeItemsController extends Controller
     {
         $request->validate([
             'name' => 'string',
-            'grade_category_id' => 'exists:grade_category_id,id',
+            'grade_category_id' => 'exists:grade_categories,id',
         ]);
         $grade_items = GradeItems::findOrFail($id);
+        
+        if($request->filled('grade_category_id'))
+            event(new GraderSetupEvent(GradeCategory::find($grade_items['grade_category_id']))); 
+
         $grade_items->update([
             'name'   => isset($request->name) ? $request->name : $grade_items['name'],
             'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $grade_items['grade_category_id'],
@@ -132,7 +136,7 @@ class GradeItemsController extends Controller
             'weight' =>isset($request->weight) ? $request->weight : $grade_items['weight'],
         ]);
         $grade_category = GradeCategory::find($grade_items['grade_category_id']);
-        event(new GraderSetupEvent($grade_category));
+        event(new GraderSetupEvent($grade_category));            
         return response()->json(['message' => __('messages.grade_item.update'), 'body' => null ], 200);
     }
 
