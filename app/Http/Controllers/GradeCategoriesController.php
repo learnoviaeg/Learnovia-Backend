@@ -44,7 +44,7 @@ class GradeCategoriesController extends Controller
             'parent' => 'exists:grade_categories,id',
         ]);
 
-        $grade_categories = GradeCategory::whereNull('instance_type');
+        $grade_categories = GradeCategory::whereNull('instance_type')->where('type', 'category');
             if($request->filled('name'))
                 $grade_categories->where('name','LIKE' , "%$request->name%");
             if($request->filled('parent'))
@@ -91,7 +91,7 @@ class GradeCategoriesController extends Controller
                     'name' => $category['name'],
                     'parent' => isset($category['parent']) ? $category['parent'] : $course_total_category->id,
                     'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
-                    'calculation_type' =>isset($category['calculation_type']) ? $category['calculation_type'] : json_encode(['Natural']),
+                    'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
                     'locked' =>isset($category['locked']) ? $category['locked'] : 0,
                     'min' =>isset($category['min']) ? $category['min'] : 0,
                     'max' =>isset($category['max']) ? $category['max'] : null,
