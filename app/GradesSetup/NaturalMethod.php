@@ -23,16 +23,14 @@ class NaturalMethod implements GradeSetupInterface
 
     public function calculateWeight($grade_category)
     {
-        $total_grade = 0;
+        $total_grade = $grade_category->max;
         $total_weight = 100;
 
         foreach($grade_category->child as $cats)
         {
             if($cats->weight_adjust	 === 1){
                 $total_weight -= $cats->weights;
-            }
-            if($cats->weights > 0 || $cats->weights === null){
-                $total_grade += $cats->max;
+                $total_grade -= $cats->max;
             }
         }
         foreach($grade_category->GradeItems as $item)
@@ -40,11 +38,8 @@ class NaturalMethod implements GradeSetupInterface
 
             if($item->weight_adjust	 === 1){
                 $total_weight -= $item->weight;
+                $total_grade -= $item->max;
             }
-            if($item->weight > 0 || $item->weight === null){
-                $total_grade += $item->max;
-            }
-
         }
         foreach($grade_category->child as $cats)
         {
