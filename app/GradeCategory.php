@@ -30,6 +30,12 @@ class GradeCategory extends Model
     { 
         return $this->Child()->with(['Children','GradeItems']); 
     } 
+
+    public function categories_items()
+    {
+        return $this->hasMany('App\GradeCategory', 'parent', 'id');
+    }
+
     public function total()
     {
         $result = 0;
