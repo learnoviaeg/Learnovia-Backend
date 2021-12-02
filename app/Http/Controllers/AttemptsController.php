@@ -41,7 +41,7 @@ class AttemptsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:site/quiz/store_user_quiz'],   ['only' => ['index','store']]);
+        $this->middleware(['permission:site/quiz/store_user_quiz'],   ['only' => ['store']]);
         $this->middleware(['ParentCheck'],   ['only' => ['index','show']]);
     }
 
@@ -296,7 +296,7 @@ class AttemptsController extends Controller
             'status_id' => 2,
             'feedback' => null,
             'grade' => null,
-            'attempt_index' => (!Auth::user()->can('site/quiz/unLimitedAttempts')) ? $index+1 : 1, // this permission because if these admin don't count his attempts
+            'attempt_index' => $index+1, // this permission because if these admin don't count his attempts
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
         ]);
@@ -572,9 +572,9 @@ class AttemptsController extends Controller
                 unset($user);
                 continue;
             }
-            if($user->can('site/quiz/unLimitedAttempts')){
+            if($user->can('site/quiz/unLimitedAttempts'))
                 continue;
-            } 
+            
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->first();
             if(!$attems){
                 $notSubmittedUser['username'] = $user->username;
