@@ -84,7 +84,7 @@ class GradeCategoriesController extends Controller
         $courses = $enrolls->get()->pluck('course')->unique(); 
 
         foreach($courses as $course){
-            $course_total_category = GradeCategory::select('id')->whereNull('parent')->where('course_id',$course)->first();
+            $course_total_category = GradeCategory::select('id')->whereNull('parent')->where('type','category')->where('course_id',$course)->first();
             foreach($request->category as $key=>$category){
                 $cat = GradeCategory::create([
                     'course_id'=> $course,
@@ -185,4 +185,38 @@ class GradeCategoriesController extends Controller
         $grade_category->delete();
         return response()->json(['message' => __('messages.grade_category.delete'), 'body' => null], 200);
     }
+
+    public function weight_adjust(Request $request)
+    {
+        $request->validate([
+            'instance' => 'required|array',
+            'instance.*.id' => 'required|exists:grade_categories,id',
+            'instance.*.weight' => 'required',
+            'instance.*.weight_adjust' => 'required|boolean',
+            'instance.*.parent' => 'required|exists:grade_categories,id',
+        ]);
+
+        foreach($request->instance as $instance)
+        {
+            $category = GradeCategory::find($id);
+            $category->update([
+                'name'   =>  isset($instance['name']) ? $instance['name'] : $category->name,
+                'parent' =>  isset($instance['parent']) ? $instance['parent'] : $category->parent,
+                'hidden' => isset($instance['hidden']) ? $instance['hidden'] : $category->hidden,
+                'calculation_type' =>isset($instance['calculation_type']) ? $instance['calculation_type'] : json_encode([$category->calculation_type]),
+                'locked' =>isset($instance['locked']) ? $instance['locked']  : $category->locked,
+                'min' =>isset($instance['min']) ? $instance['min'] : $category->min,
+                'max' =>isset($instance['max']) ? $instance['max'] : $category->max,
+                'weight_adjust' =>isset($instance['weight_adjust']) ? $instance['weight_adjust'] : $category->weight_adjust,
+                'weights' =>isset($instance['weight']) ? $instance['weight'] : $category->weights,
+                'exclude_empty_grades' =>isset($instance['exclude_empty_grades']) ? $instance['exclude_empty_grades'] : $category->exclude_empty_grades,
+            ]);
+
+            if($category->parent != null)
+                event(new GraderSetupEvent($category->Parents));
+        }
+        return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
+    }
+
+
 }

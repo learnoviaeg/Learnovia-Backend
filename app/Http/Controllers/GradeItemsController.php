@@ -69,7 +69,6 @@ class GradeItemsController extends Controller
             $course = $request->course;
             $category = GradeCategory::whereNull('parent')->where('course_id',$request->course)->first();
         }
-
         $item = GradeCategory::create([
             'name' => $request->name,
             'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $category->id,
@@ -78,7 +77,7 @@ class GradeItemsController extends Controller
             'min' =>isset($request->min) ? $request->min : 0,
             'max' =>isset($request->max) ? $request->max : null,
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : 0,
-            'weights' =>isset($request->weight) ? $request->weight : null,
+            'weights' =>isset($request->weight) ? $request->weight : NULL,
             'hidden' =>isset($request->hidden) ? $request->hidden : 0,
             'item_type' => 'Manual',
             'course_id' => $course,
@@ -104,7 +103,7 @@ class GradeItemsController extends Controller
      */
     public function show($id)
     {
-        $grade_item = GradeItems::findOrFail($id);
+        $grade_item = GradeCategory::findOrFail($id);
         return response()->json(['message' => __('messages.grade_items.list'), 'body' => $grade_item ], 200);
     }
 
@@ -128,7 +127,7 @@ class GradeItemsController extends Controller
 
         $grade_items->update([
             'name'   => isset($request->name) ? $request->name : $grade_items['name'],
-            'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $grade_items['grade_category_id'],
+            'parent' => isset($request->parent) ? $request->parent : $grade_items['parent'],
             'hidden' => isset($request->hidden) ? $request->hidden : $grade_items['hidden'],
             'locked' =>isset($request->locked) ? $request->locked  : $grade_items['locked'],
             'min' =>isset($request->min) ? $request->min : $grade_items['min'],

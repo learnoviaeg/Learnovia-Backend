@@ -11,7 +11,7 @@ class GradeCategory extends Model
     'weights' , 'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
     public function Child()
     {
-        return $this->hasMany('App\GradeCategory', 'parent', 'id');
+        return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'category');
     }
     public function Parents()
     {
@@ -28,7 +28,7 @@ class GradeCategory extends Model
     }
     public function Children() 
     { 
-        return $this->Child()->with(['Children']); 
+        return $this->Child()->with(['Children','GradeItems']); 
     } 
     public function total()
     {
