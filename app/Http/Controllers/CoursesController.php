@@ -198,7 +198,8 @@ class CoursesController extends Controller
 
                     $gradeCat = GradeCategory::firstOrCreate([
                         'name' => $course->name . ' Total',
-                        'course_id' => $course->id
+                        'course_id' => $course->id,
+                        'calculation_type' => json_encode(['Natural']),
                     ]);
                 }
             }
