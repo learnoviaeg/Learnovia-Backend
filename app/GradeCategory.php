@@ -8,7 +8,7 @@ use stdClass;
 class GradeCategory extends Model
 {
     protected $fillable = ['name', 'course_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id','weight',
-                           'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
+    'weights' , 'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
     public function Child()
     {
         return $this->hasMany('App\GradeCategory', 'parent', 'id');
@@ -74,14 +74,14 @@ class GradeCategory extends Model
         return $total;
     }
 
-    public function weight()
-    {
-        if ($this->weight != 0)
-            return $this->weight;
-        if (!$this->Parents)
-            return 100;
-        return round(($this->total() / $this->Parents->total()) * 100, 3);
-    }
+    // public function weight()
+    // {
+    //     if ($this->weight != 0)
+    //         return $this->weight;
+    //     if (!$this->Parents)
+    //         return 100;
+    //     return round(($this->total() / $this->Parents->total()) * 100, 3);
+    // }
 
     public function depth()
     {
@@ -144,6 +144,13 @@ class GradeCategory extends Model
     public function getCalculationTypeAttribute($value)
     {
         $content= json_decode($value);
+        return $content;
+    }
+
+    public function getWeightAttribute($value)
+    {
+        if($value != null)
+            $content= round($value , 2) ;
         return $content;
     }
 
