@@ -516,5 +516,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/file/edit', 'title' => 'update file']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/media/edit', 'title' => 'update media']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'media/assign', 'title' => 'assign media']);
+
+        //parent permission
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/parent', 'title' => 'set as parent']);
     }
 }
