@@ -200,7 +200,7 @@ class GradeCategoriesController extends Controller
 
         foreach($request->instance as $instance)
         {
-            $category = GradeCategory::find($id);
+            $category = GradeCategory::find($instance['id']);
             $category->update([
                 'name'   =>  isset($instance['name']) ? $instance['name'] : $category->name,
                 'hidden' => isset($instance['hidden']) ? $instance['hidden'] : $category->hidden,
