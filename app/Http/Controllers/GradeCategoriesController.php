@@ -204,7 +204,7 @@ class GradeCategoriesController extends Controller
             $category->update([
                 'name'   =>  isset($instance['name']) ? $instance['name'] : $category->name,
                 'hidden' => isset($instance['hidden']) ? $instance['hidden'] : $category->hidden,
-                'calculation_type' =>isset($instance['calculation_type']) ? $instance['calculation_type'] : json_encode([$category->calculation_type]),
+                'calculation_type' =>isset($instance['calculation_type']) ? $instance['calculation_type'] : json_encode($category->calculation_type),
                 'locked' =>isset($instance['locked']) ? $instance['locked']  : $category->locked,
                 'min' =>isset($instance['min']) ? $instance['min'] : $category->min,
                 'max' =>isset($instance['max']) ? $instance['max'] : $category->max,
