@@ -196,7 +196,6 @@ class GradeCategoriesController extends Controller
             'instance.*.id' => 'required|exists:grade_categories,id',
             'instance.*.weight' => 'required',
             'instance.*.weight_adjust' => 'required|boolean',
-            'instance.*.parent' => 'required|exists:grade_categories,id',
         ]);
 
         foreach($request->instance as $instance)
@@ -204,7 +203,6 @@ class GradeCategoriesController extends Controller
             $category = GradeCategory::find($id);
             $category->update([
                 'name'   =>  isset($instance['name']) ? $instance['name'] : $category->name,
-                'parent' =>  isset($instance['parent']) ? $instance['parent'] : $category->parent,
                 'hidden' => isset($instance['hidden']) ? $instance['hidden'] : $category->hidden,
                 'calculation_type' =>isset($instance['calculation_type']) ? $instance['calculation_type'] : json_encode([$category->calculation_type]),
                 'locked' =>isset($instance['locked']) ? $instance['locked']  : $category->locked,
