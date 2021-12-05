@@ -510,7 +510,7 @@ class BigbluebuttonController extends Controller
 
         $output = array(
             'name' => $bigbb->name,
-            'meeting_id' => $bigbb->id,
+            'meeting_id' => $bigbb->meeting_id,
             'duration' => $bigbb->duration,
             'link'=> $url,
             'signature' => $signature,
