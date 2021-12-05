@@ -50,14 +50,15 @@ class LastActionMiddleWare
         }
 
         $title = Permission::where('name',$permission_name)->first();
-        $last_action = LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
-                'user_id' => $request->user()->id 
-                ,'name' => isset($title)?$title->title:explode('api/', $request->route()->uri)[1]
-                ,'method'=>$request->route()->methods[0]
-                ,'uri' =>  $request->route()->uri
-                ,'resource' =>  $request->route()->action['controller']
-                ,'date' => Carbon::now()
-        ]);
+        if(!$request->user()->can('site/parent'))
+            $last_action = LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
+                    'user_id' => $request->user()->id 
+                    ,'name' => isset($title)?$title->title:explode('api/', $request->route()->uri)[1]
+                    ,'method'=>$request->route()->methods[0]
+                    ,'uri' =>  $request->route()->uri
+                    ,'resource' =>  $request->route()->action['controller']
+                    ,'date' => Carbon::now()
+            ]);
         
         $route_views = Config::get('routes.view');
 

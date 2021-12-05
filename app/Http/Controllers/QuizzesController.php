@@ -416,7 +416,9 @@ class QuizzesController extends Controller
                 $question->mark += $children_mark;
             }
         }
-        LastAction::lastActionInCourse($quiz->course_id);
+        if(!$request->user()->can('site/parent'))
+            LastAction::lastActionInCourse($quiz->course_id);
+            
         return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
     }
 
