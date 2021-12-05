@@ -75,6 +75,10 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\RefreshGraderSetupListener',
         ],
 
+        'App\Events\UserGradesEditedEvent' => [
+            'App\Listeners\CalculateUserGradesListener',
+        ],
+
     ];
 
     /**

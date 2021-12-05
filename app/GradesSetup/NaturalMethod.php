@@ -2,6 +2,7 @@
 namespace App\GradesSetup;
 use Illuminate\Http\Request;
 use App\GradeCategory;
+use App\userGrader;
 
 class NaturalMethod implements GradeSetupInterface
 {
@@ -40,6 +41,13 @@ class NaturalMethod implements GradeSetupInterface
             }
         }
 
+    }
+
+    public function calculateUserGrade($user, $grade_category)
+    {
+        $user_mark = userGrader::where('user_id', $user->id)->where('item_id',$grade_category->id)->first();
+        $grade = (($user_mark->grade * $grade_category->weights)/ $grade_category->max) *($grade_category->Parents->max/ 100);
+        return $grade;
     }
 
 }

@@ -34,4 +34,9 @@ class SimpleWeightedMethod implements GradeSetupInterface
 
     }
 
+    public function calculateUserGrade($user, $grade_category)
+    {
+        return 'mimi';
+    }
+
 }
