@@ -7,11 +7,11 @@ use stdClass;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name', 'course_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id','weight',
+    protected $fillable = ['name', 'course_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id', 'item_type' , 'type' ,
     'weights' , 'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
     public function Child()
     {
-        return $this->hasMany('App\GradeCategory', 'parent', 'id');
+        return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'category');
     }
     public function Parents()
     {
@@ -23,12 +23,19 @@ class GradeCategory extends Model
     }
     public function GradeItems()
     {
-        return $this->hasMany('App\GradeItems', 'grade_category_id', 'id');
+        return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'item');
+        // return $this->hasMany('App\GradeItems', 'grade_category_id', 'id');
     }
     public function Children() 
     { 
-        return $this->Child()->with(['Children', 'GradeItems']); 
+        return $this->Child()->with(['Children','GradeItems']); 
     } 
+
+    public function categories_items()
+    {
+        return $this->hasMany('App\GradeCategory', 'parent', 'id');
+    }
+
     public function total()
     {
         $result = 0;
@@ -147,10 +154,9 @@ class GradeCategory extends Model
         return $content;
     }
 
-    public function getWeightAttribute($value)
+    public function getWeightsAttribute($value)
     {
-        if($value != null)
-            $content= round($value , 2) ;
+        $content= round($value , 2) ;
         return $content;
     }
 
