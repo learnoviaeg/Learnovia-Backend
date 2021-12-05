@@ -169,13 +169,8 @@ class BigbluebuttonController extends Controller
                 $meeting_id = 'Learnovia'.env('DB_DATABASE').uniqid();
                 foreach($object['class_id'] as $class){
                     $i=0;
-                    // $courseseg = CourseSegment::GetWithClassAndCourse($class,$object['course_id']);
                     LastAction::lastActionInCourse($object['course_id']);
-                    // if(isset($courseseg))
-                    //     $course_segments_ids->push($courseseg->id);
 
-                    // if(count($course_segments_ids) <= 0)
-                    //     return HelperController::api_response_format(404, null ,__('messages.error.no_active_segment'));
                     foreach($request->start_date as $start_date){
                         $last_date = $start_date;
                         if(isset($request->last_day))
@@ -341,10 +336,10 @@ class BigbluebuttonController extends Controller
         curl_close($curl);
 
         $bigbb->join_url=json_decode($response,true)['join_url'];
-        $bigbb->meeting_id=json_decode($response,true)['id'];
-        $bigbb->status = 'current';
-        $bigbb->started = 1;
-        $bigbb->actutal_start_date = Carbon::now();
+        // $bigbb->meeting_id=json_decode($response,true)['id'];
+        // $bigbb->status = 'current';
+        // $bigbb->started = 1;
+        // $bigbb->actutal_start_date = Carbon::now();
         // $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
         // if(Auth::id() == $bigbb->host_id)
         //     $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
@@ -463,8 +458,14 @@ class BigbluebuttonController extends Controller
             return HelperController::api_response_format(200,null ,__('messages.virtual.cannot_join'));
 
         if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0 && $bigbb->type != 'teams'){
-            if($bigbb->type == 'Zoom')
-                $start_meeting = self::start_meeting_zoom($request);
+            if($bigbb->type == 'Zoom'){
+                $response = self::start_meeting_zoom($request);
+
+                $bigbb->meeting_id=json_decode($response,true)['id']."";
+                $bigbb->status = 'current';
+                $bigbb->started = 1;
+                $bigbb->actutal_start_date = Carbon::now();
+            }
 
             if($bigbb->type == 'BBB')
                 $start_meeting = self::start_meeting($request);
