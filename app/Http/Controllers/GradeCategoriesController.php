@@ -80,9 +80,12 @@ class GradeCategoriesController extends Controller
             'category.*.weight_adjust' => 'boolean',
             'category.*.exclude_empty_grades' => 'boolean'
         ]);
-        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', 1);
-        $courses = $enrolls->get()->pluck('course')->unique(); 
-
+        if($request->filled('courses'))
+            $courses = $request->courses;
+        else{
+            $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', 1);
+            $courses = $enrolls->get()->pluck('course')->unique(); 
+        }
         foreach($courses as $course){
             $course_total_category = GradeCategory::select('id')->whereNull('parent')->where('type','category')->where('course_id',$course)->first();
             foreach($request->category as $key=>$category){
