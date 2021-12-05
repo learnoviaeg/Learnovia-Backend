@@ -346,4 +346,7 @@ return [
         'faild' => 'there is no logo',
         'get' => 'logo is'
     ],
+    'user_grade' => [
+        'update' => 'Grade is updated succefully',
+    ],
 ];

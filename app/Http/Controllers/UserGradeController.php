@@ -7,7 +7,7 @@ use App\CourseSegment;
 use App\Enroll;
 use App\User;
 use Illuminate\Http\Request;
-use App\UserGrade;
+use App\UserGrader;
 use stdClass;
 use App\GradeCategory;
 use App\GradeItems;
@@ -19,65 +19,24 @@ class UserGradeController extends Controller
 {
     /**
      * create User grade
-     *
-     * @param  [int] grade_item_id, user_id, raw_grade, raw_grade_max, raw_grade_min, raw_scale_id, final_grade, letter_id
-     * @param  [boolean] hidden, locked
-     * @param  [string] feedback
-     * @return [object] and [string] User Grade Created Successfully
      */
-    public function create(Request $request)
-    {
+    public function store(Request $request) 
+    { 
         $request->validate([
-            'users'                     => 'required|array',
-            'users.*.id'                => 'required|exists:users,id',
-            'users.*.items'             => 'required|array',
-            'users.*.items.*.id'        => 'required|exists:grade_items,id',
-            'users.*.items.*.grade'     => 'required',
-            'users.*.items.*.feedback'  => 'nullable|string',
+            'user_id'   => 'required|exists:users,id',
+            'item_id'   => 'required|exists:grade_categories,id',
+            'grade'     => 'required',
         ]);
-        $message = 'User Grade Added Successfully';
-        foreach ($request->users as $user) {
-            foreach ($user['items'] as $item) {
-                $enroll = Enroll::where('course_segment', GradeItems::find($item['id'])->GradeCategory->course_segment_id)
-                    ->where('user_id', $user['id'])
-                    ->first();
-                if ($enroll == null)
-                    continue;
-                $gradeItem = GradeItems::find($item['id']);
-                if($gradeItem->grademin > $item['grade'] || $gradeItem->grademax < $item['grade']){
-                    $message = 'Some Grades are invalid please check your inputs again';
-                    continue;
-                }
-                $check = UserGrade::where('grade_item_id',$item['id'])
-                ->where('user_id' , $user['id'])
-                ->first();
-                if($check == null){
-                    $temp = UserGrade::create([
-                        'grade_item_id' => $item['id'],
-                        'user_id' => $user['id'],
-                        'raw_grade' => $item['grade'],
-                    ]);
-                    if (isset($item['feedback'])) {
-                        $temp->feedback = $item['feedback'];
-                        $temp->save();
-                    }
-                }
-                else 
-                {
-                    $check->update([
-                        'grade_item_id' => $item['id'],
-                        'user_id' => $user['id'],
-                        'raw_grade' => $item['grade'],
-                    ]);
-                    if (isset($item['feedback'])) {
-                        $check->feedback = $item['feedback'];
-                        $check->save();
-                    }
-                }
-            }
-        }
-        return HelperController::api_response_format(200, null, $message);
-    }
+        $instance = GradeCategory::find($request->item_id);
+        UserGrader::updateOrCreate(
+            ['item_id'=>$request->item_id, 'item_type' => $instance->type, 'user_id' => $request->user_id],
+            ['grade' =>  $request->grade]
+        );
+        return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
+
+        
+        return HelperController::api_response_format(200, null, 'shaimaaaaa');
+    } 
 
     /**
      * update User grade

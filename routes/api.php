@@ -457,7 +457,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::delete('quizzes/{quiz_id}/{questions}', 'QuestionsController@unAssign');//->middleware(['permission:quiz/add' , 'ParentCheck']);
     Route::Resource('quizzes', QuizzesController::class);
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
-    Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@assign')->middleware(['permission:quiz/add']);
+    Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@assign');//->middleware(['permission:quiz/add' , 'ParentCheck']);
     Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
 
     Route::get('close_attempts', 'QuizzesController@closeAttempts');
@@ -539,8 +539,9 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('grader-report', GraderReportController::class);
     Route::get('grader-setup', 'GraderReportController@grade_setup');
     Route::post('grades-weight', 'GradeCategoriesController@weight_adjust');
+    Route::Resource('user-grade', UserGradeController::class);
 
-
+    
     Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
     Route::get('courseProgressReport' , 'ReportsController@courseProgressReport')->middleware('permission:reports/course_progress');
     Route::get('courseProgressCounter' , 'ReportsController@CourseProgressCounters')->middleware('permission:reports/course_progress');
