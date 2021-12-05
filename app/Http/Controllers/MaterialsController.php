@@ -170,17 +170,21 @@ class MaterialsController extends Controller
             if ($material->type == "file") {
 
                 $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
-                strrpos($material->getOriginal()['link'],"/"));
+                strrpos($material->getOriginal()['link'],"/")); 
                 $result = file::find($material->item_id);
                 $extension = $result->type;
             }
             if($material->type == 'page'){
                 $result = page::find($material->item_id);
             }
+
+            if(!file_exists($path))
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+            
          $fileName = $result->name.'.'.$extension;
          $headers = ['Content-Type' => 'application/'.$extension];
     
-    return response()->download($path , $fileName , $headers);
+       return response()->download($path , $fileName , $headers);
 
 
     }
