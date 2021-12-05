@@ -22,5 +22,5 @@ Route::group(['prefix' => 'page', 'middleware' => ['auth:api','LastAction']] , f
     Route::post('delete' , 'PageController@destroy')->name('deletePage')->middleware('permission:page/delete');
     Route::post('toggle' , 'PageController@togglePageVisibity')->name('togglePage')->middleware('permission:page/toggle');
     Route::post('link-lesson' , 'PageController@linkpagelesson')->name('linklessonPage')->middleware('permission:page/link-lesson');
-    Route::get('get' , 'PageController@get')->name('getPage')->middleware(['permission:page/get' , 'ParentCheck']);
+    Route::get('get' , 'PageController@get')->name('getPage')->middleware(['permission:page/get']);
 });
