@@ -80,9 +80,12 @@ class GradeCategoriesController extends Controller
             'category.*.weight_adjust' => 'boolean',
             'category.*.exclude_empty_grades' => 'boolean'
         ]);
-        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', 1);
-        $courses = $enrolls->get()->pluck('course')->unique(); 
-
+        if($request->filled('courses'))
+            $courses = $request->courses;
+        else{
+            $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', 1);
+            $courses = $enrolls->get()->pluck('course')->unique(); 
+        }
         foreach($courses as $course){
             $course_total_category = GradeCategory::select('id')->whereNull('parent')->where('type','category')->where('course_id',$course)->first();
             foreach($request->category as $key=>$category){
@@ -193,17 +196,15 @@ class GradeCategoriesController extends Controller
             'instance.*.id' => 'required|exists:grade_categories,id',
             'instance.*.weight' => 'required',
             'instance.*.weight_adjust' => 'required|boolean',
-            'instance.*.parent' => 'required|exists:grade_categories,id',
         ]);
 
         foreach($request->instance as $instance)
         {
-            $category = GradeCategory::find($id);
+            $category = GradeCategory::find($instance['id']);
             $category->update([
                 'name'   =>  isset($instance['name']) ? $instance['name'] : $category->name,
-                'parent' =>  isset($instance['parent']) ? $instance['parent'] : $category->parent,
                 'hidden' => isset($instance['hidden']) ? $instance['hidden'] : $category->hidden,
-                'calculation_type' =>isset($instance['calculation_type']) ? $instance['calculation_type'] : json_encode([$category->calculation_type]),
+                'calculation_type' =>isset($instance['calculation_type']) ? $instance['calculation_type'] : json_encode($category->calculation_type),
                 'locked' =>isset($instance['locked']) ? $instance['locked']  : $category->locked,
                 'min' =>isset($instance['min']) ? $instance['min'] : $category->min,
                 'max' =>isset($instance['max']) ? $instance['max'] : $category->max,
