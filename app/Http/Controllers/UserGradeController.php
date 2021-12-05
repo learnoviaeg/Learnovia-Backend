@@ -33,9 +33,6 @@ class UserGradeController extends Controller
             ['grade' =>  $request->grade]
         );
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
-
-        
-        return HelperController::api_response_format(200, null, 'shaimaaaaa');
     } 
 
     /**
