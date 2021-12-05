@@ -459,9 +459,9 @@ class BigbluebuttonController extends Controller
 
         if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0 && $bigbb->type != 'teams'){
             if($bigbb->type == 'Zoom'){
-                $response = self::start_meeting_zoom($request);
+                $start_meeting = self::start_meeting_zoom($request);
 
-                $bigbb->meeting_id=json_decode($response,true)['id']."";
+                $bigbb->meeting_id=json_decode($start_meeting,true)['id']."";
                 $bigbb->status = 'current';
                 $bigbb->started = 1;
                 $bigbb->actutal_start_date = Carbon::now();
