@@ -296,7 +296,7 @@ class AttemptsController extends Controller
             'status_id' => 2,
             'feedback' => null,
             'grade' => null,
-            'attempt_index' => $index+1, // this permission because if these admin don't count his attempts
+            'attempt_index' => $index+1,
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
         ]);
