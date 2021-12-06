@@ -148,8 +148,9 @@ class GradeItemsController extends Controller
     public function destroy($id)
     {
         $grade_item = GradeCategory::findOrFail($id);
-        event(new GraderSetupEvent($grade_item->Parents));
+        $parent =  GradeCategory::find($grade_item->Parents->id);
         $grade_item->delete();
+        event(new GraderSetupEvent($parent));        
         $user_graders = UserGrader::where('item_type' , 'Item')->where('item_id' , $grade_item->id)->delete();
         return response()->json(['message' => __('messages.grade_item.delete'), 'body' => null ], 200);
     }
