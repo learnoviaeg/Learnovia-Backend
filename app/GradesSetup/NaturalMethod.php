@@ -45,8 +45,13 @@ class NaturalMethod implements GradeSetupInterface
 
     public function calculateUserGrade($user, $grade_category)
     {
-        $user_mark = userGrader::where('user_id', $user->id)->where('item_id',$grade_category->id)->first();
-        $grade = (($user_mark->grade * $grade_category->weights)/ $grade_category->max) *($grade_category->Parents->max/ 100);
+        $total_marks_in_categories = 0;
+        foreach($grade_category->categories_items as $child){
+            $user_mark = userGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->first();
+            if($user_mark != null)
+                $total_marks_in_categories += $user_mark->grade;
+        }
+        $grade = (($user_mark->grade * $grade_category->weights)/ $total_marks_in_categories) *($grade_category->max/ 100);
         return $grade;
     }
 

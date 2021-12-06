@@ -35,7 +35,7 @@ class UserGradeController extends Controller
             ['grade' =>  $request->grade]
         );
         
-        event(new UserGradesEditedEvent(User::find($request->user_id) , $instance));
+        event(new UserGradesEditedEvent(User::find($request->user_id) , $instance->Parents));
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
     } 
 
