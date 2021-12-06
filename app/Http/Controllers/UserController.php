@@ -128,12 +128,16 @@ class UserController extends Controller
             );    
             $data = json_encode($data);
 
-            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
-                'headers'   => [
-                    'Content-Type' => 'application/json'
-                ], 
-                'body' => $data
-            ]);
+            try{
+                $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                    'headers'   => [
+                        'Content-Type' => 'application/json'
+                    ], 
+                    'body' => $data
+                ]);
+            }
+            catch(\Exception $e){
+            }
             
             $user = User::create([
                 'firstname' => $firstname,
