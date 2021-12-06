@@ -2,6 +2,7 @@
 namespace App\GradesSetup;
 use Illuminate\Http\Request;
 use App\GradeCategory;
+use App\userGrader;
 
 class NaturalMethod implements GradeSetupInterface
 {
@@ -39,7 +40,17 @@ class NaturalMethod implements GradeSetupInterface
                 $cats->save();
             }
         }
-
     }
 
+    public function calculateUserGrade($user, $grade_category)
+    {
+        $total_marks_in_categories = 0;
+        foreach($grade_category->categories_items as $child){
+            $user_mark = userGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->first();
+            if($user_mark != null)
+                $total_marks_in_categories += $user_mark->grade;
+        }
+        $grade = (($user_mark->grade * $grade_category->weights)/ $total_marks_in_categories) *($grade_category->max/ 100);
+        return $grade;
+    }
 }

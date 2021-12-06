@@ -15,6 +15,8 @@ use App\LastAction;
 use App\Grader\gradingMethodsInterface;
 use App\Events\RefreshGradeTreeEvent;
 use Auth;
+use App\Events\UserGradesEditedEvent;
+
 class UserGradeController extends Controller
 {
     /**
@@ -32,6 +34,8 @@ class UserGradeController extends Controller
             ['item_id'=>$request->item_id, 'item_type' => $instance->type, 'user_id' => $request->user_id],
             ['grade' =>  $request->grade]
         );
+        
+        event(new UserGradesEditedEvent(User::find($request->user_id) , $instance->Parents));
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
     } 
 

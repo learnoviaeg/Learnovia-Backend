@@ -175,16 +175,16 @@ class GradeCategoriesController extends Controller
     public function destroy($id)
     {
         $grade_category = GradeCategory::find($id);
+        $top_parent_category = GradeCategory::where('course_id',$grade_category->course_id)->whereNull('parent')->where('type','category')->first();
+        $grade_category->GradeItems()->update(['parent' => $top_parent_category->id]);
+        $grade_category->child()->update(['parent' => $top_parent_category->id]);
+
+        event(new GraderSetupEvent($top_parent_category));
         if($grade_category->parent != null)
             event(new GraderSetupEvent($grade_category->Parents));
 
         if(!isset($grade_category))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 404);
-
-        foreach($grade_category->Child as $child){
-            $child->GradeItems()->delete();
-        }
-        $grade_category->Child()->delete();
         $grade_category->delete();
         return response()->json(['message' => __('messages.grade_category.delete'), 'body' => null], 200);
     }
@@ -194,7 +194,7 @@ class GradeCategoriesController extends Controller
         $request->validate([
             'instance' => 'required|array',
             'instance.*.id' => 'required|exists:grade_categories,id',
-            'instance.*.weight' => 'required',
+            'instance.*.weight' => 'required|between:0,100',
             'instance.*.weight_adjust' => 'required|boolean',
         ]);
 
