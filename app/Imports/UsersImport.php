@@ -73,12 +73,17 @@ class UsersImport implements ToModel, WithHeadingRow
             ),
         ));
         
-        $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
-            'headers'   => [
-                'Content-Type' => 'application/json'
-            ], 
-            'body' => $data
-        ]);
+        try{
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                'headers'   => [
+                    'Content-Type' => 'application/json'
+                ], 
+                'body' => $data
+            ]);
+        }
+        catch(\Exception $e){
+        }
+        
         $user = new User([
             'firstname' => $row['firstname'],
             'lastname' => $row['lastname'],
