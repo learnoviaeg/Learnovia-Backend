@@ -36,6 +36,7 @@ class QuizzesController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:quiz/get'],   ['only' => ['index','show']]);
+        $this->middleware('ParentCheck',   ['only' => ['show']]);
         $this->middleware(['permission:quiz/add'],   ['only' => ['store']]);
         $this->middleware(['permission:quiz/update'],   ['only' => ['update']]);
         $this->middleware(['permission:quiz/delete'],   ['only' => ['destroy']]);
@@ -418,7 +419,7 @@ class QuizzesController extends Controller
         }
         if(!$request->user()->can('site/parent'))
             LastAction::lastActionInCourse($quiz->course_id);
-            
+
         return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
     }
 
