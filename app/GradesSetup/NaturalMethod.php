@@ -40,7 +40,6 @@ class NaturalMethod implements GradeSetupInterface
                 $cats->save();
             }
         }
-
     }
 
     public function calculateUserGrade($user, $grade_category)
@@ -54,5 +53,4 @@ class NaturalMethod implements GradeSetupInterface
         $grade = (($user_mark->grade * $grade_category->weights)/ $total_marks_in_categories) *($grade_category->max/ 100);
         return $grade;
     }
-
 }
