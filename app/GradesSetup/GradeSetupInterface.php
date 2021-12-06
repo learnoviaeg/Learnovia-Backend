@@ -10,4 +10,5 @@ interface GradeSetupInterface
     public function calculateMark(GradeCategory $grade_category);
     public function calculateWeight(GradeCategory $grade_category);
     public function calculateUserGrade(User $user, GradeCategory $grade_category);
+    public function weightAdjustCheck(GradeCategory $grade_category);
 }

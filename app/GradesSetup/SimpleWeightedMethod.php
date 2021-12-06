@@ -37,12 +37,21 @@ class SimpleWeightedMethod implements GradeSetupInterface
     public function calculateUserGrade($user, $grade_category)
     {
         $total_user_mark = 0;
+        $max_total = 0;
         foreach($grade_category->categories_items as $child){
             $user_mark = userGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->where('item_type', $child->type)->first();
-            $grade_per_item = ($user_mark->grade * $child->weights)/ $child->max;
             $total_user_mark += $grade_per_item;
+            $max_total += $child->max;
         }
-        $grade = ($total_user_mark) *($grade_category->max/ 100);
+        $grade = ($total_user_mark/$max_total) *($grade_category->max);
         return $grade;
+    }
+
+    public function weightAdjustCheck($grade_category)
+    {
+        $adjusted_children = $grade_category->categories_items()->where('weight_adjust', 1)->count();
+        $all_children = $grade_category->categories_items()->count();
+        if($adjusted_children == $all_children)
+            $grade_category->categories_items()->update(['weight_adjust' , 0]);
     }
 }

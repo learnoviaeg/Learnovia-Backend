@@ -53,4 +53,12 @@ class NaturalMethod implements GradeSetupInterface
         $grade = (($user_mark->grade * $grade_category->weights)/ $total_marks_in_categories) *($grade_category->max/ 100);
         return $grade;
     }
+    
+    public function weightAdjustCheck($grade_category)
+    {
+        $adjusted_children = $grade_category->categories_items()->where('weight_adjust', 1)->count();
+        $all_children = $grade_category->categories_items()->count();
+        if($adjusted_children == $all_children)
+            $grade_category->GradeItems()->update(['weight_adjust' => 0]);
+    }
 }
