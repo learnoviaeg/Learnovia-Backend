@@ -194,7 +194,7 @@ class GradeCategoriesController extends Controller
         $request->validate([
             'instance' => 'required|array',
             'instance.*.id' => 'required|exists:grade_categories,id',
-            'instance.*.weight' => 'required|between:0,100',
+            'instance.*.weight' => 'between:0,100',
             'instance.*.weight_adjust' => 'required|boolean',
         ]);
 
@@ -213,9 +213,9 @@ class GradeCategoriesController extends Controller
                 'exclude_empty_grades' =>isset($instance['exclude_empty_grades']) ? $instance['exclude_empty_grades'] : $category->exclude_empty_grades,
             ]);
 
-            if($category->parent != null)
-                event(new GraderSetupEvent($category->Parents));
         }
+        if($category->parent != null)
+            event(new GraderSetupEvent($category->Parents));
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
 
