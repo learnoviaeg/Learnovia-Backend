@@ -33,28 +33,28 @@ class QuizNotification extends SendNotification
 
     public function send(){
 
-        // $publish_date = $this->quizLesson->publish_date;
-        // if(Carbon::parse($publish_date)->isPast()){
-        //     $publish_date = Carbon::now();
-        // }
+        $publish_date = $this->quizLesson->publish_date;
+        if(Carbon::parse($publish_date)->isPast()){
+            $publish_date = Carbon::now();
+        }
 
-        // //Start preparing notifications object
-        // $notification = [
-        //     'type' => 'notification',
-        //     'item_id' => $this->quizLesson->quiz_id,
-        //     'item_type' => 'quiz',
-        //     'message' => $this->message,
-        //     'publish_date' => $publish_date,
-        //     'created_by' => $this->quizLesson->quiz->created_by,
-        //     'lesson_id' => $this->lesson->id,
-        //     'course_id' => $this->lesson->course_id,
-        //     'classes' => json_encode($this->lesson->shared_classes->pluck('id')),
-        // ];
+        //Start preparing notifications object
+        $notification = [
+            'type' => 'notification',
+            'item_id' => $this->quizLesson->quiz_id,
+            'item_type' => 'quiz',
+            'message' => $this->message,
+            'publish_date' => $publish_date,
+            'created_by' => $this->quizLesson->quiz->created_by,
+            'lesson_id' => $this->lesson->id,
+            'course_id' => $this->lesson->course_id,
+            'classes' => json_encode($this->lesson->shared_classes->pluck('id')),
+        ];
 
-        // //assign notification to given users
-        // $createdNotification = $this->toDatabase($notification,$this->users);
+        //assign notification to given users
+        $createdNotification = $this->toDatabase($notification,$this->users);
         
-        // //firebase Notifications
-        // $this->toFirebase($createdNotification);
+        //firebase Notifications
+        $this->toFirebase($createdNotification);
     }
 }
