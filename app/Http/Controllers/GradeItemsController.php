@@ -127,7 +127,7 @@ class GradeItemsController extends Controller
 
         $grade_items->update([
             'name'   => isset($request->name) ? $request->name : $grade_items['name'],
-            'parent' => isset($request->parent) ? $request->parent : $grade_items['parent'],
+            'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $grade_items['parent'],
             'hidden' => isset($request->hidden) ? $request->hidden : $grade_items['hidden'],
             'locked' =>isset($request->locked) ? $request->locked  : $grade_items['locked'],
             'min' =>isset($request->min) ? $request->min : $grade_items['min'],
@@ -135,7 +135,7 @@ class GradeItemsController extends Controller
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_items['weight_adjust'],
             'weights' =>isset($request->weight) ? $request->weight : $grade_items['weight'],
         ]);
-        event(new GraderSetupEvent($grade_items->Parents));            
+        event(new GraderSetupEvent(GradeCategory::findOrFail($grade_items->parent)));            
         return response()->json(['message' => __('messages.grade_item.update'), 'body' => null ], 200);
     }
 

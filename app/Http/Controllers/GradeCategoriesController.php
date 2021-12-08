@@ -145,7 +145,7 @@ class GradeCategoriesController extends Controller
             'name' => 'string',
             'parent' => 'exists:grade_categories,id',
             'hidden' => 'boolean',
-            'weight_adjust' => 'required|boolean'
+            'weight_adjust' => 'boolean'
 
         ]);
         $grade_category = GradeCategory::findOrFail($id);
