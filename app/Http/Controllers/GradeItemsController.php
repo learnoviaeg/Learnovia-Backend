@@ -135,7 +135,7 @@ class GradeItemsController extends Controller
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_items['weight_adjust'],
             'weights' =>isset($request->weight) ? $request->weight : $grade_items['weight'],
         ]);
-        event(new GraderSetupEvent($grade_items->Parents));            
+        event(new GraderSetupEvent(GradeCategory::findOrFail($grade_items->parent)));            
         return response()->json(['message' => __('messages.grade_item.update'), 'body' => null ], 200);
     }
 
