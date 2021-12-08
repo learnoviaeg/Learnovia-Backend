@@ -36,7 +36,12 @@ class RefreshGraderSetupListener
                 $calculator->calculateWeight($event->grade_category);
                 if($event->grade_category->parent != null)
                     event(new GraderSetupEvent(GradeCategory::find($event->grade_category->parent)));
-                
+                    
+                if($event->grade_category->parent == null){
+                    $course_total = GradeCategory::find($event->grade_category->parent);
+                    $Grade = $calculator->calculateMark($course_total);
+                    $course_total->update(['max' => $Grade]);
+                }   
             }
         }
     }
