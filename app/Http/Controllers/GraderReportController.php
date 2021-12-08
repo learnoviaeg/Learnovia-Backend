@@ -28,10 +28,10 @@ class GraderReportController extends Controller
             'course_id' => 'required|exists:courses,id',
         ]);
 
-        $main_category = GradeCategory::where('course_id' ,$request->course_id)->whereNull('parent')->with('userGrades.user')->get();
+        $main_category = GradeCategory::where('course_id' ,$request->course_id)->where('type', 'category')->whereNull('parent')->with('userGrades.user')->get();
         $main_category[0]['children'] = [];
-        $cat = GradeCategory::where('parent',$main_category[0]->id)->get();
-        $items = GradeItems::where('grade_category_id',$main_category[0]->id)->get();
+        $cat = GradeCategory::where('parent',$main_category[0]->id)->where('type', 'category')->get();
+        $items = GradeCategory::where('parent',$main_category[0]->id)->where('type', 'item')->get();
             $main_category[0]['has_children'] = false;
             if(count($cat) > 0 || count($items) > 0)
                 $main_category[0]['has_children'] = true;
@@ -57,8 +57,8 @@ class GraderReportController extends Controller
      */
     public function show($id)
     {
-        $categories = GradeCategory::where('parent',$id)->with('userGrades.user')->get();
-        $items = GradeItems::where('grade_category_id' ,$id)->with('userGrades.user')->get();
+        $categories = GradeCategory::where('parent',$id)->where('type', 'category')->with('userGrades.user')->get();
+        $items = GradeCategory::where('parent' ,$id)->where('type', 'ietm')->with('userGrades.user')->get();
         foreach($categories as $key=>$category){
             $category['children'] = [];
             $category['Category_or_Item'] = 'Category';
