@@ -42,19 +42,20 @@ class AnnouncementsController extends Controller
      */
     public function index(Request $request, $created = null)
     {
-
         $request->validate([
             'search' => 'nullable',
             'paginate' => 'integer'
         ]);
 
+        $AllUsers=[Auth::id()];
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray())){
             if(Auth::user()->currentChild != null)
             {
                 $currentChild =User::find(Auth::user()->currentChild->child_id);
-                Auth::setUser($currentChild);
-        }
+                // Auth::setUser($currentChild);
+                $AllUsers[]=$currentChild->id;
+            }
         }
         $paginate = 12;
         if($request->has('paginate')){
@@ -72,7 +73,7 @@ class AnnouncementsController extends Controller
         }
 
         $announcements =  userAnnouncement::with('announcements.chainAnnouncement.level' ,'announcements.chainAnnouncement.course' )
-                                            ->where('user_id', Auth::id())
+                                            ->whereIn('user_id', $AllUsers)
                                             ->get()
                                             ->pluck('announcements')
                                             ->sortByDesc('publish_date')

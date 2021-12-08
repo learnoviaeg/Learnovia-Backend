@@ -42,6 +42,10 @@ class NotificationsController extends Controller
         ]);
 
         //check if the auth user is parent and has current child to get his child notifications
+
+        $user = Auth::user();
+        $notifications = $user->notifications->where('publish_date' ,'<=',Carbon::now());
+
         $roles = Auth::user()->roles->pluck('name');
 
         if(in_array("Parent" , $roles->toArray())){
@@ -50,11 +54,9 @@ class NotificationsController extends Controller
             {
                 $currentChild =User::find(Auth::user()->currentChild->child_id);
                 Auth::setUser($currentChild);
+                $notifications[] = $user->notifications->where('publish_date' ,'<=',Carbon::now());
             }
         }
-
-        $user = Auth::user();
-        $notifications = $user->notifications->where('publish_date' ,'<=',Carbon::now());
       
         // for route api/notifications/{types} 
         if($types=='types'){
