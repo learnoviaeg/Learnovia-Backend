@@ -35,7 +35,7 @@ class GradeItemsController extends Controller
             'grade_category_id' => 'exists:grade_categories,id',
         ]);
 
-        $grade_items = GradeCategory::where('type', 'item');
+        $grade_items = GradeCategory::where('type', 'category');
             if($request->filled('name'))
                 $grade_items->where('name','LIKE' , "%$request->name%");
             if($request->filled('grade_category_id'))
@@ -55,8 +55,8 @@ class GradeItemsController extends Controller
             'course'    => 'required_without:grade_category_id|exists:courses,id',
             'name' => 'required|string',
             'grade_category_id' => 'required_without:course|exists:grade_categories,id',
-            'min'=>'between:0,9999.99',
-            'max'=>'between:0,9999.99',
+            'min'=>'between:0,100',
+            'max'=>'between:0,100',
             'weight_adjust' => 'boolean',
             'locked' => 'boolean',
             'hidden' => 'boolean',
@@ -86,7 +86,7 @@ class GradeItemsController extends Controller
         foreach($enrolled_students as $student){
             UserGrader::create([
                 'user_id'   => $student,
-                'item_type' => 'Item',
+                'item_type' => 'category',
                 'item_id'   => $item->id,
                 'grade'     => null
             ]);
@@ -151,7 +151,7 @@ class GradeItemsController extends Controller
         $parent =  GradeCategory::find($grade_item->Parents->id);
         $grade_item->delete();
         event(new GraderSetupEvent($parent));        
-        $user_graders = UserGrader::where('item_type' , 'Item')->where('item_id' , $grade_item->id)->delete();
+        $user_graders = UserGrader::where('item_type' , 'category')->where('item_id' , $grade_item->id)->delete();
         return response()->json(['message' => __('messages.grade_item.delete'), 'body' => null ], 200);
     }
 }

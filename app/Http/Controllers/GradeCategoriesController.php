@@ -75,8 +75,8 @@ class GradeCategoriesController extends Controller
             'category.*.hidden' => 'boolean',
             'category.*.calculation_type' => 'nullable|in:Natural,Simple_weighted_mean',
             'category.*.locked' => 'boolean',
-            'category.*.min'=>'between:0,99.99',
-            'category.*.max'=>'between:0,99.99',
+            'category.*.min'=>'between:0,100',
+            'category.*.max'=>'between:0,100',
             'category.*.weight_adjust' => 'boolean',
             'category.*.exclude_empty_grades' => 'boolean'
         ]);
@@ -212,10 +212,9 @@ class GradeCategoriesController extends Controller
                 'weights' =>isset($instance['weight']) ? $instance['weight'] : $category->weights,
                 'exclude_empty_grades' =>isset($instance['exclude_empty_grades']) ? $instance['exclude_empty_grades'] : $category->exclude_empty_grades,
             ]);
-
+            if($category->parent != null)
+                event(new GraderSetupEvent($category->Parents));
         }
-        if($category->parent != null)
-            event(new GraderSetupEvent($category->Parents));
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
 
