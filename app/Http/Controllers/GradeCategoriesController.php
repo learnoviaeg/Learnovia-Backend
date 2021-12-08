@@ -75,8 +75,8 @@ class GradeCategoriesController extends Controller
             'category.*.hidden' => 'boolean',
             'category.*.calculation_type' => 'nullable|in:Natural,Simple_weighted_mean',
             'category.*.locked' => 'boolean',
-            'category.*.min'=>'between:0,99.99',
-            'category.*.max'=>'between:0,99.99',
+            'category.*.min'=>'between:0,100',
+            'category.*.max'=>'between:0,100',
             'category.*.weight_adjust' => 'boolean',
             'category.*.exclude_empty_grades' => 'boolean'
         ]);
