@@ -2,10 +2,9 @@
 
 namespace App\Observers;
 
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
-use App\Log;
-use App\User;
+use App\Jobs\createdLogsJob;
+use App\Jobs\updatedLogsJob;
+use App\Jobs\deletedLogsJob;
 
 class LogsObserver
 {
@@ -23,6 +22,9 @@ class LogsObserver
         //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
         //     'data' => serialize($req),
         // ]);
+
+        (new createdLogsJob($req));
+
     }
 
     /**
@@ -42,6 +44,9 @@ class LogsObserver
         //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
         //     'data' => serialize($arr),
         // ]);
+
+        (new updatedLogsJob($req));
+
     }
 
     /**
@@ -51,12 +56,15 @@ class LogsObserver
      */
     public function deleted($req)
     {
-        Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'deleted',
-            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
-            'data' => serialize($req),
-        ]);
+        // Log::create([
+        //     'user' => User::find(Auth::id())->username,
+        //     'action' => 'deleted',
+        //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
+        //     'data' => serialize($req),
+        // ]);
+
+        (new deletedLogsJob($req));
+
     }
 
     /**

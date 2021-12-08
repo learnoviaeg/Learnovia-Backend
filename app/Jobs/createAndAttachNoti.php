@@ -64,6 +64,8 @@ class createAndAttachNoti implements ShouldQueue
     {
         $createdNotification = Notification::create($this->notification);
         $createdNotification->users()->attach($this->users);
+        // dd($createdNotification);
+
         // return $createdNotification;
     }
 }

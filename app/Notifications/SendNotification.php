@@ -28,7 +28,8 @@ class SendNotification
             $notificationDelaySeconds = 0;
         }
 
-        //this job is for sending firebase notifications 
+        //this job is for sending firebase notifications
+        dd($notification);
         $notificationJob = (new SendNotifications($notification))->delay($notificationDelaySeconds);
         dispatch($notificationJob);
     }
@@ -36,11 +37,13 @@ class SendNotification
     //store notifications in database
     public function toDatabase($notification,$users){
 
-        $attachedJob = (new createAndAttachNoti($notification,$users));
-        dispatch($attachedJob);
-        
-        // $createdNotification = Notification::create($notification);
-        // $createdNotification->users()->attach($users);
-        return $notification;
+        // foreach($notification as $notify){
+            $attachedJob = (new createAndAttachNoti($notification,$users));
+            dispatch($attachedJob);
+            // dd($attachedJob);
+            // $createdNotification = Notification::create($notification);
+            // $createdNotification->users()->attach($users);
+            return $notification;
+        // }
     }
 }
