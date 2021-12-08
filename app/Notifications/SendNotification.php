@@ -23,7 +23,7 @@ class SendNotification
     public function toFirebase($notification){
 
         //calculate time the job should fire at
-        $notificationDelaySeconds = Carbon::parse($notification->publish_date)->diffInSeconds(Carbon::now()); 
+        $notificationDelaySeconds = Carbon::parse($notification['publish_date'])->diffInSeconds(Carbon::now()); 
         if($notificationDelaySeconds < 0) {
             $notificationDelaySeconds = 0;
         }
@@ -41,6 +41,6 @@ class SendNotification
         
         // $createdNotification = Notification::create($notification);
         // $createdNotification->users()->attach($users);
-        // return $createdNotification;
+        return $notification;
     }
 }
