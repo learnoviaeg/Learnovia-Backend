@@ -24,12 +24,13 @@ class NaturalMethod implements GradeSetupInterface
 
         foreach($grade_category->categories_items as $cats)
         {
+            if($cats->weights === 0.0)
+                continue;
             if($cats->weight_adjust	 === 1){
                 $total_weight -= $cats->weights;
                 $total_grade -= $cats->max;
             }
         }
-
         foreach($grade_category->categories_items as $cats)
         {
             if($cats->weight_adjust	 != 1){
@@ -40,6 +41,7 @@ class NaturalMethod implements GradeSetupInterface
                 $cats->save();
             }
         }
+        dd($total_weight);
     }
 
     public function calculateUserGrade($user, $grade_category)
