@@ -41,7 +41,6 @@ class NaturalMethod implements GradeSetupInterface
                 $cats->save();
             }
         }
-        dd($total_weight);
     }
 
     public function calculateUserGrade($user, $grade_category)
