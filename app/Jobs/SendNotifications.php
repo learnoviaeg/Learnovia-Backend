@@ -35,6 +35,7 @@ class SendNotifications implements ShouldQueue
      */
     public function handle()
     {
+        // dd($this->notification->users());
         //get list of users that should recieve this notification and has firebase token
         $users = $this->notification->users()->whereNotNull('token')->get();
 
