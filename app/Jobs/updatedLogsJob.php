@@ -7,10 +7,13 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use App\Log;
 
 class updatedLogsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $req;
 
     /**
      * Create a new job instance.
@@ -32,6 +35,8 @@ class updatedLogsJob implements ShouldQueue
         $arr=array();
         $arr['before']=$this->req->getOriginal();
         $arr['after']=$this->req;
+
+        $user = User::find(Auth::id());
 
         Log::create([
             'user' => isset($user) ? $user->username : 'installer',

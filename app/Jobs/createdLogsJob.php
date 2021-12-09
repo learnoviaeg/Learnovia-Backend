@@ -7,11 +7,16 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use App\Log;
+use Illuminate\Http\Request;
+use Auth;
+use App\User;
 
 class createdLogsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $req;
     /**
      * Create a new job instance.
      *

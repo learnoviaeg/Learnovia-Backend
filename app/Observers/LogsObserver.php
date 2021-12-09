@@ -23,8 +23,8 @@ class LogsObserver
         //     'data' => serialize($req),
         // ]);
 
-        (new createdLogsJob($req));
-
+        $dispatch=(new createdLogsJob($req));
+        dispatch($dispatch);
     }
 
     /**
@@ -46,7 +46,7 @@ class LogsObserver
         // ]);
 
         (new updatedLogsJob($req));
-
+        dispatch($dispatch);
     }
 
     /**
@@ -64,7 +64,7 @@ class LogsObserver
         // ]);
 
         (new deletedLogsJob($req));
-
+        dispatch($dispatch);
     }
 
     /**

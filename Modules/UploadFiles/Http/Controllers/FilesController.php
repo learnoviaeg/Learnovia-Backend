@@ -245,30 +245,32 @@ class FilesController extends Controller
         foreach ($request->lesson_id as $lesson) {
             $tempLesson = Lesson::find($lesson);
                 foreach ($request->Imported_file as $singlefile) {
+
                     $extension = $singlefile->getClientOriginalExtension();
                     $fileName = $singlefile->getClientOriginalName();
                     $size = $singlefile->getSize();
                     $name = uniqid() . '.' . $extension;
-                    $file = new file;
-                    $file->type = $extension;
-                    $file->description = $name;
-                    $file->name = ($request->filled('name')) ? $request->name : $fileName;
-                    $file->size = $size;
-                    $file->attachment_name = $fileName;
-                    $file->user_id = Auth::user()->id;
-                    $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-                    $file->url2 = 'files/' . $name;
-                    $check = $file->save();
+
+                    $check=File::firstOrCreate([
+                        'type' => $extension,
+                        'description'   => $name,
+                        'name'    => ($request->filled('name')) ? $request->name : $fileName,
+                        'size'     => $size,
+                        'attachment_name'     => $fileName,
+                        'user_id'     => Auth::id(),
+                        'url2'     => 'files/' . $name,
+                        'url'     => 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name),
+                    ]);
 
                     if ($check) {
-                        $fileLesson = new FileLesson;
-                        $fileLesson->lesson_id = $lesson;
-                        $fileLesson->file_id = $file->id;
-                        $fileLesson->index = FileLesson::getNextIndex($lesson);
-                        $fileLesson->publish_date = $publishdate;
-                        $fileLesson->visible = isset($request->visible)?$request->visible:1;
 
-                        $fileLesson->save();
+                        $fileLesson=FileLesson::firstOrCreate([
+                            'lesson_id' => $lesson,
+                            'file_id'   => $check->id,
+                            'index'    => FileLesson::getNextIndex($lesson),
+                            'publish_date'     => $publishdate,
+                            'visible'     => isset($request->visible)?$request->visible:1,
+                        ]);
 
                         LessonComponent::firstOrCreate([
                             'lesson_id' => $fileLesson->lesson_id,

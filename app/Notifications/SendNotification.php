@@ -20,30 +20,28 @@ class SendNotification
     }
     
     //sending notifications using firebase
-    public function toFirebase($notification){
-
+    public function toFirebase($notification)
+    {
         //calculate time the job should fire at
-        $notificationDelaySeconds = Carbon::parse($notification['publish_date'])->diffInSeconds(Carbon::now()); 
+        $notificationDelaySeconds = Carbon::parse($notification->publish_date)->diffInSeconds(Carbon::now()); 
         if($notificationDelaySeconds < 0) {
             $notificationDelaySeconds = 0;
         }
 
         //this job is for sending firebase notifications
-        dd($notification);
+        // dd($notification);
         $notificationJob = (new SendNotifications($notification))->delay($notificationDelaySeconds);
         dispatch($notificationJob);
     }
 
     //store notifications in database
-    public function toDatabase($notification,$users){
-
-        // foreach($notification as $notify){
-            $attachedJob = (new createAndAttachNoti($notification,$users));
-            dispatch($attachedJob);
-            // dd($attachedJob);
-            // $createdNotification = Notification::create($notification);
-            // $createdNotification->users()->attach($users);
-            return $notification;
-        // }
+    public function toDatabase($notification,$users)
+    {
+        $createdNotification = Notification::create($notification);
+        $attachedJob = (new createAndAttachNoti($createdNotification,$users));
+        dispatch($attachedJob);
+        // $createdNotification->users()->attach($users);
+        return $createdNotification;
+        // return $notification;
     }
 }

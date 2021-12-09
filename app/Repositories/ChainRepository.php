@@ -176,9 +176,6 @@ class ChainRepository implements ChainRepositoryInterface
         if ($request->filled('class'))
             $enrolls=$enrolls->where('group', $request->class);
         if ($request->filled('courses')){
-            foreach($request->courses as $course_id){
-                LastAction::lastActionInCourse($course_id);
-            }
             $enrolls=$enrolls->whereIn('course', $request->courses);
         }
 
