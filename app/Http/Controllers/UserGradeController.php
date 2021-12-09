@@ -31,7 +31,7 @@ class UserGradeController extends Controller
         ]);
         $instance = GradeCategory::find($request->item_id);
         UserGrader::updateOrCreate(
-            ['item_id'=>$request->item_id, 'item_type' => $instance->type, 'user_id' => $request->user_id],
+            ['item_id'=>$request->item_id, 'item_type' => 'category', 'user_id' => $request->user_id],
             ['grade' =>  $request->grade]
         );
         
