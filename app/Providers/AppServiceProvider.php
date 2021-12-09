@@ -129,13 +129,13 @@ class AppServiceProvider extends ServiceProvider
         Enroll::observe(SecodaryChainObserver::class);
 
         // UserGrade::observe(UserGradeObserver::class);
-        GradeItems::observe(GradeItemObserver::class);
-        GradeCategory::observe(LogsObserver::class);
-        UserGrader::observe(LogsObserver::class);
+        // GradeItems::observe(GradeItemObserver::class);
+        // GradeCategory::observe(LogsObserver::class);
+        // UserGrader::observe(LogsObserver::class);
         Announcement::observe(LogsObserver::class);
         Timeline::observe(LogsObserver::class);
         Material::observe(LogsObserver::class);
-        AttendanceSession::observe(LogsObserver::class);
+        // AttendanceSession::observe(LogsObserver::class);
         Announcement::observe(Announcements::class);
         Material::observe(MaterialsObserver::class);
         UserSeen::observe(UserSeenObserver::class);

@@ -8,6 +8,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Log;
+use App\User;
+use Auth;
 
 class updatedLogsJob implements ShouldQueue
 {

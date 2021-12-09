@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\User;
 use App\Enroll;
 use App\Paginate;
-use App\LAstAction;
+use App\LastAction;
 use App\Level;
 use App\Classes;
 use Spatie\Permission\Models\Permission;

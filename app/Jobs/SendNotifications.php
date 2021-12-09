@@ -119,6 +119,7 @@ class SendNotifications implements ShouldQueue
             }
             //end getting notifications URL
 
+            // dd($this->notification);
             //prepare notification request body
             $requestBody = json_encode(
                 array(
@@ -141,6 +142,7 @@ class SendNotifications implements ShouldQueue
                     )
                 )
             );
+            // dd($requestBody);
             //end preparing notifications request body
 
             //start sending realtime notifications
