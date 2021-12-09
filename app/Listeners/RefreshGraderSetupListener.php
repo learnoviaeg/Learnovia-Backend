@@ -37,12 +37,12 @@ class RefreshGraderSetupListener
                 if($event->grade_category->parent != null)
                     event(new GraderSetupEvent(GradeCategory::find($event->grade_category->parent)));
 
-                if($event->grade_category->parent == null){
-                    $course_total = GradeCategory::find($event->grade_category->parent);
-                    $Calculator = resolve($course_total->calculation_type[0]);
-                    $Grade = $Calculator->calculateMark($course_total);
-                    $course_total->update(['max' => $Grade]);
-                }   
+                // if($event->grade_category->parent == null){
+                //     $course_total = GradeCategory::find($event->grade_category->parent);
+                //     $Calculator = resolve($course_total->calculation_type[0]);
+                //     $Grade = $Calculator->calculateMark($course_total);
+                //     $course_total->update(['max' => $Grade]);
+                // }   
             }
         }
     }
