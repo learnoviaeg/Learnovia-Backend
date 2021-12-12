@@ -7,6 +7,7 @@ use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuestionsType;
 use App\Repositories\ChainRepositoryInterface;
+use App\Notifications\QuizNotification;
 use App\Enroll;
 use Validator;
 use App\Paginate;
