@@ -201,6 +201,12 @@ class QuestionsController extends Controller
             event(new UpdatedQuizQuestionsEvent($quiz_id));            
             $quiz->draft=0;
             $quiz->save();
+
+            foreach($quiz->quizLesson as $newQuizLesson){
+                //sending notifications
+                $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
+                $notification->send();
+            }
            
             //calculte time
             $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
