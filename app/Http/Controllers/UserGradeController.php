@@ -25,17 +25,19 @@ class UserGradeController extends Controller
     public function store(Request $request) 
     { 
         $request->validate([
-            'user_id'   => 'required|exists:users,id',
-            'item_id'   => 'required|exists:grade_categories,id',
-            'grade'     => 'required',
+            'user'      =>'required|array',
+            'user.*.id' => 'required|exists:users,id',
+            'user.*.item_id'   => 'required|exists:grade_categories,id',
+            'user.*.grade'     => 'required',
         ]);
-        $instance = GradeCategory::find($request->item_id);
-        UserGrader::updateOrCreate(
-            ['item_id'=>$request->item_id, 'item_type' => 'category', 'user_id' => $request->user_id],
-            ['grade' =>  $request->grade]
-        );
-        
-        event(new UserGradesEditedEvent(User::find($request->user_id) , $instance->Parents));
+        foreach($request->user as $user){
+            $instance = GradeCategory::find($user['item_id']);
+            UserGrader::updateOrCreate(
+                ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['id']],
+                ['grade' =>  $user['grade']]
+            );
+            event(new UserGradesEditedEvent(User::find($user['id']) , $instance->Parents));
+        }
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
     } 
 
