@@ -161,6 +161,10 @@ class GradeCategoriesController extends Controller
             'weights' =>isset($request->weight) ? $request->weight : $grade_category['weights'],
             'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : $grade_category['exclude_empty_grades'],
         ]);
+
+        if($grade_category->parent == null && $grade_category->categories_items()->count() > 0)
+            event(new GraderSetupEvent($grade_category->categories_items[0]));
+
         if($grade_category->parent != null)
             event(new GraderSetupEvent($grade_category->Parents));
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
