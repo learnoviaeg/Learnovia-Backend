@@ -56,7 +56,7 @@ class GradeItemsController extends Controller
             'name' => 'required|string',
             'grade_category_id' => 'required_without:course|exists:grade_categories,id',
             'min'=>'between:0,100',
-            'max'=>'between:0,100',
+            'max'=>'between:0.1,100',
             'weight_adjust' => 'boolean',
             'locked' => 'boolean',
             'hidden' => 'boolean',
