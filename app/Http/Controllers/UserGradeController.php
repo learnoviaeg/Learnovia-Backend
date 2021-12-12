@@ -26,17 +26,17 @@ class UserGradeController extends Controller
     { 
         $request->validate([
             'user'      =>'required|array',
-            'user.*.id' => 'required|exists:users,id',
+            'user.*.user_id' => 'required|exists:users,id',
             'user.*.item_id'   => 'required|exists:grade_categories,id',
             'user.*.grade'     => 'required',
         ]);
         foreach($request->user as $user){
             $instance = GradeCategory::find($user['item_id']);
             UserGrader::updateOrCreate(
-                ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['id']],
+                ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
                 ['grade' =>  $user['grade']]
             );
-            event(new UserGradesEditedEvent(User::find($user['id']) , $instance->Parents));
+            event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
         }
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
     } 
