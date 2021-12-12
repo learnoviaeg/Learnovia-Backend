@@ -194,9 +194,9 @@ class QuizzesController extends Controller
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
                 ]);
 
-                //sending notifications
-                $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
-                $notification->send();         
+                // //sending notifications
+                // $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
+                // $notification->send();
             }
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
