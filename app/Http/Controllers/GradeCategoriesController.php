@@ -153,13 +153,15 @@ class GradeCategoriesController extends Controller
             'name'   => isset($request->name) ? $request->name : $grade_category->name,
             'parent' => isset($request->parent) ? $request->parent : $grade_category->parent,
             'hidden' => isset($request->hidden) ? $request->hidden : $grade_category->hidden,
-            'calculation_type' =>isset($request->calculation_type) ? $request->calculation_type : json_encode($grade_category['calculation_type']),
+            'calculation_type' =>isset($request->calculation_type) ? json_encode([$request->calculation_type]) : json_encode($grade_category['calculation_type']),
             'locked' =>isset($request->locked) ? $request->locked  : $grade_category['locked'],
             'min' =>isset($request->min) ? $request->min : $grade_category['min'],
             'max' =>isset($request->max) ? $request->max : $grade_category['max'],
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_category['weight_adjust'],
             'weights' =>isset($request->weight) ? $request->weight : $grade_category['weights'],
             'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : $grade_category['exclude_empty_grades'],
+            'aggregation' =>isset($request->aggregation) ? $request->aggregation : $grade_category['aggregation'],
+
         ]);
 
         if($grade_category->parent == null && $grade_category->categories_items()->count() > 0)
