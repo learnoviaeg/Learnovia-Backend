@@ -108,7 +108,7 @@ class GradeCategoriesController extends Controller
                 foreach($enrolled_students as $student){
                     UserGrader::create([
                         'user_id'   => $student,
-                        'item_type' => 'Category',
+                        'item_type' => 'category',
                         'item_id'   => $cat->id,
                         'grade'     => null
                     ]);

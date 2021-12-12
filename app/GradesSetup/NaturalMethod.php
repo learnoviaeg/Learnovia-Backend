@@ -10,7 +10,7 @@ class NaturalMethod implements GradeSetupInterface
     {
         $total_category_mark = 0;
         foreach($grade_category->categories_items as $items){
-            if(($items->weights === 0 && $category->weight_adjust === 1 ) || $items->parent != $grade_category->id)
+            if(($items->weights === 0.0 && $items->weight_adjust === 1 ) || $items->parent != $grade_category->id)
                 continue;
             $total_category_mark += $items->max;
         }        
@@ -24,12 +24,13 @@ class NaturalMethod implements GradeSetupInterface
 
         foreach($grade_category->categories_items as $cats)
         {
+            if($cats->weights === 0.0)
+                continue;
             if($cats->weight_adjust	 === 1){
                 $total_weight -= $cats->weights;
                 $total_grade -= $cats->max;
             }
         }
-
         foreach($grade_category->categories_items as $cats)
         {
             if($cats->weight_adjust	 != 1){

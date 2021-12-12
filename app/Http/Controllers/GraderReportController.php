@@ -58,7 +58,7 @@ class GraderReportController extends Controller
     public function show($id)
     {
         $categories = GradeCategory::where('parent',$id)->where('type', 'category')->with('userGrades.user')->get();
-        $items = GradeCategory::where('parent' ,$id)->where('type', 'ietm')->with('userGrades.user')->get();
+        $items = GradeCategory::where('parent' ,$id)->where('type', 'item')->with('userGrades.user')->get();
         foreach($categories as $key=>$category){
             $category['children'] = [];
             $category['Category_or_Item'] = 'Category';
