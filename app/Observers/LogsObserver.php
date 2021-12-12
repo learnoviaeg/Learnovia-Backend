@@ -5,6 +5,9 @@ namespace App\Observers;
 use App\Jobs\createdLogsJob;
 use App\Jobs\updatedLogsJob;
 use App\Jobs\deletedLogsJob;
+use App\Log;
+use App\User;
+use Auth;
 
 class LogsObserver
 {
