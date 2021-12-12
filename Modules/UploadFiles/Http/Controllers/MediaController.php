@@ -15,7 +15,8 @@ use App\Classes;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
-use  App\LastAction;
+use App\LastAction;
+use App\Material;
 use App\Http\Controllers\HelperController;
 use App\LessonComponent;
 use Auth;
@@ -401,6 +402,7 @@ class MediaController extends Controller
         $media = media::whereId($request->mediaId)->first();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
         $media->delete();
+        Material::where('item_id',$request->mediaId)->where('type','media')->delete();
         $lesson = Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->course_id);
 

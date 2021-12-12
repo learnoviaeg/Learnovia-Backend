@@ -481,6 +481,7 @@ class FilesController extends Controller
         LastAction::lastActionInCourse($lesson->course_id);
         $file->delete();
         File::whereId($request->fileID)->delete();
+        Material::where('item_id',$request->fileID)->where('type','file')->delete();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, $message = __('messages.file.delete'));
     }
