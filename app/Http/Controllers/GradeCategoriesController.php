@@ -114,8 +114,17 @@ class GradeCategoriesController extends Controller
                         'grade'     => null
                     ]);
                 }
-                if($cat->parent != null)
+                if($cat->parent != null){
                     event(new GraderSetupEvent($cat->Parents));
+                    $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $cat->Parents));
+                }
+
+                if($cat->parent == null && $cat->categories_items()->count() > 0){
+                    event(new GraderSetupEvent($cat->categories_items[0]));
+                    $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $cat->categories_items[0]));
+                }
+        
+                dispatch($userGradesJob);
                 }
         }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
@@ -164,10 +173,6 @@ class GradeCategoriesController extends Controller
             'aggregation' =>isset($request->aggregation) ? $request->aggregation : $grade_category['aggregation'],
 
         ]);
-        // $req = new Request ([
-        //         'courses' => [$grade_category->course_id],
-        // ]);
-        // $enrolled_students = $this->chain->getEnrollsByChain($req)->where('role_id' , 3)->get('user_id')->pluck('user_id');
         if($grade_category->parent == null && $grade_category->categories_items()->count() > 0){
             event(new GraderSetupEvent($grade_category->categories_items[0]));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category->categories_items[0]));
@@ -228,8 +233,16 @@ class GradeCategoriesController extends Controller
                 'weights' =>isset($instance['weight']) ? $instance['weight'] : $category->weights,
                 'exclude_empty_grades' =>isset($instance['exclude_empty_grades']) ? $instance['exclude_empty_grades'] : $category->exclude_empty_grades,
             ]);
-            if($category->parent != null)
+            if($category->parent != null){
                 event(new GraderSetupEvent($category->Parents));
+                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->Parents));
+            }
+            if($category->parent == null && $category->categories_items()->count() > 0){
+                event(new GraderSetupEvent($category->categories_items[0]));
+                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->categories_items[0]));
+            }
+        
+            dispatch($userGradesJob);
         }
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
