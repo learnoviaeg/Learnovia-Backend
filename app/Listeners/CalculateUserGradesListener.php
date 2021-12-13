@@ -34,6 +34,8 @@ class CalculateUserGradesListener
                 ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
                 ['grade' =>  $grade]
             );
+            if($event->grade_category->parent != null)
+                    event(new UserGradesEditedEvent($event->user ,GradeCategory::find($event->grade_category->parent)));
         }
     }
 }
