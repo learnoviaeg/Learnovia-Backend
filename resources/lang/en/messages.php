@@ -99,7 +99,7 @@ return [
         'NotUpdate' => 'you can\'t update this quiz',
         'delete' => 'Quiz deleted successfully',
         'assign' => 'Questions assigned successfully',
-        'unAssign' => 'Quiz unAssigned successfully',
+        'unAssign' => 'Questions unAssigned successfully',
         'list' => 'Quizzes List',
         'count' => 'Quizzes count',
         'invaled_feedback' => 'Invalid feedback type, feedback can not be After submission',
