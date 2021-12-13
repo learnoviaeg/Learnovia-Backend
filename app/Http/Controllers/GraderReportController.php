@@ -27,11 +27,22 @@ class GraderReportController extends Controller
         $request->validate([
             'course_id' => 'required|exists:courses,id',
         ]);
+        $req = new Request([
+                'courses' => [$request->course_id],
+        ]);
+        $enrolled_students = $this->chain->getEnrollsByChain($req)->where('role_id' , 3)->get('user_id')->pluck('user_id');
+        $main_category = GradeCategory::select('id','name','min','max','parent')->where('course_id' ,$request->course_id)->where('type', 'category')->whereNull('parent')
+                        ->with(['userGrades' => function($q)use ($enrolled_students)
+                        {
+                                $q->whereIn('user_id',$enrolled_students);
+                                $q->with(['user' => function($query) {
+                                    $query->select('id', 'firstname', 'lastname','username');
+                              }]);
+                        }])->get();
 
-        $main_category = GradeCategory::where('course_id' ,$request->course_id)->where('type', 'category')->whereNull('parent')->with('userGrades.user')->get();
         $main_category[0]['children'] = [];
-        $cat = GradeCategory::where('parent',$main_category[0]->id)->where('type', 'category')->get();
-        $items = GradeCategory::where('parent',$main_category[0]->id)->where('type', 'item')->get();
+        $cat = GradeCategory::select('id','name','min','max','parent')->where('parent',$main_category[0]->id)->where('type', 'category')->get();
+        $items = GradeCategory::select('id','name','min','max','parent')->where('parent',$main_category[0]->id)->where('type', 'item')->get();
             $main_category[0]['has_children'] = false;
             if(count($cat) > 0 || count($items) > 0)
                 $main_category[0]['has_children'] = true;
@@ -57,8 +68,25 @@ class GraderReportController extends Controller
      */
     public function show($id)
     {
-        $categories = GradeCategory::where('parent',$id)->where('type', 'category')->with('userGrades.user')->get();
-        $items = GradeCategory::where('parent' ,$id)->where('type', 'item')->with('userGrades.user')->get();
+        $category = GradeCategory::where('parent',$id)->where('type', 'category');
+        $req = new Request([
+            'courses' => [$category->first()->course_id],
+        ]);
+        $enrolled_students = $this->chain->getEnrollsByChain($req)->where('role_id' , 3)->get('user_id')->pluck('user_id');
+        $categories = $category->select('id','name','min','max','parent')->with(['userGrades' => function($q)use ($enrolled_students)
+                        {
+                            $q->whereIn('user_id',$enrolled_students);
+                            $q->with(['user' => function($query) {
+                                $query->select('id', 'firstname', 'lastname','username');
+                            }]);
+                        }])->get();
+        $items = GradeCategory::select('id','name','min','max','parent')->where('parent' ,$id)->where('type', 'item')  ->with(['userGrades' => function($q)use ($enrolled_students)
+                {
+                    $q->whereIn('user_id',$enrolled_students);
+                    $q->with(['user' => function($query) {
+                        $query->select('id', 'firstname', 'lastname','username');
+                    }]);
+                }])->get();
         foreach($categories as $key=>$category){
             $category['children'] = [];
             $category['Category_or_Item'] = 'Category';
