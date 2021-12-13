@@ -2,6 +2,7 @@
 namespace App\GradesSetup;
 use Illuminate\Http\Request;
 use App\GradeCategory;
+use App\userGrader;
 
 class SimpleWeightedMethod implements GradeSetupInterface
 {
