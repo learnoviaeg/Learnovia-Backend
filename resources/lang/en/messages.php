@@ -98,7 +98,7 @@ return [
         'update' => 'Quiz updated successfully',
         'NotUpdate' => 'you can\'t update this quiz',
         'delete' => 'Quiz deleted successfully',
-        'assign' => 'Quiz assigned successfully',
+        'assign' => 'Questions assigned successfully',
         'unAssign' => 'Quiz unAssigned successfully',
         'list' => 'Quizzes List',
         'count' => 'Quizzes count',
