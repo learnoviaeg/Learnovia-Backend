@@ -41,9 +41,13 @@ class SimpleWeightedMethod implements GradeSetupInterface
         $max_total = 0;
         foreach($grade_category->categories_items as $child){
             $user_mark = userGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->where('item_type','category')->first();
+            if(!isset($user_mark)||$user_mark->grade == null)
+                continue;
             $total_user_mark += $user_mark->grade;
             $max_total += $child->max;
         }
+        if($max_total == 0)
+            return 0;
         $grade = ($total_user_mark/$max_total) *($grade_category->max);
         return $grade;
     }
