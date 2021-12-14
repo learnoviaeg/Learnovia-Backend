@@ -47,7 +47,7 @@ class NaturalMethod implements GradeSetupInterface
     {
         $total_marks_in_categories = 0;
         foreach($grade_category->categories_items as $child){
-            $user_mark = userGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->where('item_type','category')->first();
+            $user_mark = UserGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->where('item_type','category')->first();
             if(!isset($user_mark)||$user_mark->grade == null || $child->max == 0)
                 continue;
             if($user_mark->grade != null)
@@ -60,6 +60,8 @@ class NaturalMethod implements GradeSetupInterface
     
     public function weightAdjustCheck($grade_category)
     {
+        if($grade_category->categories_items()->count() == 0)
+            return '';
         $adjusted_children = $grade_category->categories_items()->where('weight_adjust', 1)->count();
         $all_children = $grade_category->categories_items()->count();
         if($adjusted_children == $all_children)

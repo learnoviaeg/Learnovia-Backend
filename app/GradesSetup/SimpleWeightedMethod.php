@@ -2,7 +2,7 @@
 namespace App\GradesSetup;
 use Illuminate\Http\Request;
 use App\GradeCategory;
-use App\userGrader;
+use App\UserGrader;
 
 class SimpleWeightedMethod implements GradeSetupInterface
 {
@@ -40,7 +40,7 @@ class SimpleWeightedMethod implements GradeSetupInterface
         $total_user_mark = 0;
         $max_total = 0;
         foreach($grade_category->categories_items as $child){
-            $user_mark = userGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->where('item_type','category')->first();
+            $user_mark = UserGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->where('item_type','category')->first();
             if(!isset($user_mark)||$user_mark->grade == null)
                 continue;
             $total_user_mark += $user_mark->grade;

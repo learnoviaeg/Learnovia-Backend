@@ -8,6 +8,7 @@ use App\GradeItems;
 use App\UserGrader;
 use App\Enroll;
 use App\Events\GraderSetupEvent;
+use App\Jobs\RefreshUserGrades;
 
 use Illuminate\Http\Request;
 
@@ -92,6 +93,9 @@ class GradeItemsController extends Controller
             ]);
         }
         event(new GraderSetupEvent($item->Parents));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $item->Parents));
+        dispatch($userGradesJob);
+
         return response()->json(['message' => __('messages.grade_item.add'), 'body' => null ], 200);
     }
 
@@ -135,7 +139,13 @@ class GradeItemsController extends Controller
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_items['weight_adjust'],
             'weights' =>isset($request->weight) ? $request->weight : $grade_items['weight'],
         ]);
-        event(new GraderSetupEvent(GradeCategory::findOrFail($grade_items->parent)));            
+
+
+        $category = GradeCategory::findOrFail($grade_items->parent);        
+        event(new GraderSetupEvent($category));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category));
+        dispatch($userGradesJob);
+        
         return response()->json(['message' => __('messages.grade_item.update'), 'body' => null ], 200);
     }
 
@@ -150,7 +160,10 @@ class GradeItemsController extends Controller
         $grade_item = GradeCategory::findOrFail($id);
         $parent =  GradeCategory::find($grade_item->Parents->id);
         $grade_item->delete();
-        event(new GraderSetupEvent($parent));        
+        event(new GraderSetupEvent($parent));  
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
+        dispatch($userGradesJob);
+
         $user_graders = UserGrader::where('item_type' , 'category')->where('item_id' , $grade_item->id)->delete();
         return response()->json(['message' => __('messages.grade_item.delete'), 'body' => null ], 200);
     }
