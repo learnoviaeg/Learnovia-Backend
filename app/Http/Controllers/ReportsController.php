@@ -11,7 +11,7 @@ use App\Course;
 use App\Exports\CourseProgressReport;
 use App\User;
 use App\Paginate;
-use App\LAstAction;
+use App\lastAction;
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
 use App\Log;
