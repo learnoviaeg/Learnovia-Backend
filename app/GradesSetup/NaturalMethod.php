@@ -60,6 +60,8 @@ class NaturalMethod implements GradeSetupInterface
     
     public function weightAdjustCheck($grade_category)
     {
+        if($grade_category->categories_items()->count() == 0)
+            return '';
         $adjusted_children = $grade_category->categories_items()->where('weight_adjust', 1)->count();
         $all_children = $grade_category->categories_items()->count();
         if($adjusted_children == $all_children)

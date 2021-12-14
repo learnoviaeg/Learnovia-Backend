@@ -179,8 +179,8 @@ class GradeCategoriesController extends Controller
         }
 
         if($grade_category->parent != null){
-            event(new GraderSetupEvent($grade_category->Parents));
-            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category->Parents));
+            event(new GraderSetupEvent($grade_category));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category));
         }
 
         dispatch($userGradesJob);
