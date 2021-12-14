@@ -276,6 +276,7 @@ class QuestionsController extends Controller
             'mcq_type' => 'required|in:1,2,3',
             'MCQ_Choices' => 'required|array|min:2',
             'MCQ_Choices.*.is_true' => 'required|boolean',
+            'MCQ_Choices.*.key' => 'required|integer',
             'MCQ_Choices.*.mark' => 'required|between:0,99.99',
         ]);
         if ($validator->fails())
