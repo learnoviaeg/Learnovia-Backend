@@ -548,12 +548,13 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('totalAttemptsReport' , 'ReportsController@totalAttemptsReport')->middleware('permission:reports/total_attempts_report');
     Route::get('userStatus/{option}' , 'ReportsController@usersStatusReport')->middleware('permission:reports/active_users|reports/in_active_users');
 });
-Route::get('materials-details', 'MaterialsController@Material_Details');
+
+    Route::get('materials-details', 'MaterialsController@Material_Details');
+    Route::get('download-assignment', 'MaterialsController@downloadAssignment');
 
 
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('topic', TopicController::class);
-   // Route::get('topic-enrolls/{topic}', 'TopicController@getAllEnrollUsers');
 });
 
 

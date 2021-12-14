@@ -11,6 +11,8 @@ use App\Lesson;
 use App\Level;
 use App\Classes;
 use App\Paginate;
+use App\attachment;
+use Modules\Assigments\Entities\assignment;
 use DB;
 use App\SecondaryChain;
 use Carbon\Carbon;
@@ -210,5 +212,28 @@ class MaterialsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function downloadAssignment(Request $request)
+    {
+
+        $request->validate([
+            'id' => 'required|exists:assignments,id',
+        ]);
+
+        $assigment = Assignment::find($request->id);
+        if(!isset($assigment))
+        {
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        }
+        $attachment = attachment::find($assigment->attachment_id);
+        $path = public_path('/storage/assignment').substr($attachment->getOriginal()['path'],
+        strrpos($attachment->getOriginal()['path'],"/"));
+        $fileName = $attachment->name;
+        $headers = ['Content-Type' => 'application/'.$attachment->extension];
+
+        return response()->download($path , $fileName , $headers);
+
     }
 }
