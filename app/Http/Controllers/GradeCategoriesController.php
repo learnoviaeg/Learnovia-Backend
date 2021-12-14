@@ -115,8 +115,8 @@ class GradeCategoriesController extends Controller
                     ]);
                 }
                 if($cat->parent != null){
-                    event(new GraderSetupEvent($cat->Parents));
-                    $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $cat->Parents));
+                    event(new GraderSetupEvent($cat));
+                    $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $cat));
                 }
 
                 if($cat->parent == null && $cat->categories_items()->count() > 0){
@@ -201,8 +201,19 @@ class GradeCategoriesController extends Controller
         $grade_category->child()->update(['parent' => $top_parent_category->id]);
 
         event(new GraderSetupEvent($top_parent_category));
-        if($grade_category->parent != null)
-            event(new GraderSetupEvent($grade_category->Parents));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $top_parent_category));
+
+            if($grade_category->parent != null){
+                event(new GraderSetupEvent($grade_category->Parents));
+                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category->Parents));
+            }
+            if($grade_category->parent == null && $grade_category->categories_items()->count() > 0){
+                event(new GraderSetupEvent($grade_category->categories_items[0]));
+                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category->categories_items[0]));
+            }
+        
+            dispatch($userGradesJob);
+
 
         if(!isset($grade_category))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 404);
