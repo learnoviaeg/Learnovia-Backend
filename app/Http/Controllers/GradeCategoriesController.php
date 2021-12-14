@@ -173,17 +173,19 @@ class GradeCategoriesController extends Controller
             'aggregation' =>isset($request->aggregation) ? $request->aggregation : $grade_category['aggregation'],
 
         ]);
-        if($grade_category->parent == null && $grade_category->categories_items()->count() > 0){
-            event(new GraderSetupEvent($grade_category->categories_items[0]));
-            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category->categories_items[0]));
-        }
 
-        if($grade_category->parent != null){
+        if($grade_category->parent == null && $grade_category->categories_items()->count() > 0){
             event(new GraderSetupEvent($grade_category));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category));
         }
 
+        if($grade_category->parent != null){
+            event(new GraderSetupEvent($grade_category->Parents));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category));
+        }
+
         dispatch($userGradesJob);
+
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
 
