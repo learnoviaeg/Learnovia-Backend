@@ -47,7 +47,7 @@ class NaturalMethod implements GradeSetupInterface
     {
         $total_marks_in_categories = 0;
         foreach($grade_category->categories_items as $child){
-            $user_mark = userGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->where('item_type','category')->first();
+            $user_mark = UserGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->where('item_type','category')->first();
             if(!isset($user_mark)||$user_mark->grade == null || $child->max == 0)
                 continue;
             if($user_mark->grade != null)

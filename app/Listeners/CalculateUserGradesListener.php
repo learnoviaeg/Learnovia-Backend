@@ -6,7 +6,7 @@ use App\Events\UserGradesEditedEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\GradeCategory;
-use App\userGrader;
+use App\UserGrader;
 
 class CalculateUserGradesListener
 {
