@@ -228,7 +228,7 @@ class GradeCategoriesController extends Controller
         $request->validate([
             'instance' => 'required|array',
             'instance.*.id' => 'required|exists:grade_categories,id',
-            'instance.*.weight' => 'between:0,100',
+            'instance.*.weight' => 'numeric|min:0|max:100',
             'instance.*.weight_adjust' => 'required|boolean',
         ]);
 
