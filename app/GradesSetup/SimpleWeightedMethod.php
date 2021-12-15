@@ -54,9 +54,11 @@ class SimpleWeightedMethod implements GradeSetupInterface
 
     public function weightAdjustCheck($grade_category)
     {
+        if($grade_category->categories_items()->count() == 0)
+            return '';
         $adjusted_children = $grade_category->categories_items()->where('weight_adjust', 1)->count();
         $all_children = $grade_category->categories_items()->count();
         if($adjusted_children == $all_children && $grade_category->categories_items()->sum('weights') != 100)
-            $grade_category->categories_items()->update(['weight_adjust' , 0]);
+            $grade_category->categories_items()->update(['weight_adjust' => 0]);
     }
 }
