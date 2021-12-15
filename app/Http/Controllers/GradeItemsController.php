@@ -128,7 +128,8 @@ class GradeItemsController extends Controller
         
         if($request->filled('grade_category_id'))
             event(new GraderSetupEvent($grade_items->Parents)); 
-
+        
+        $old_parent = GradeCategory::findOrFail($grade_items->parent);
         $grade_items->update([
             'name'   => isset($request->name) ? $request->name : $grade_items['name'],
             'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $grade_items['parent'],
@@ -140,7 +141,8 @@ class GradeItemsController extends Controller
             'weights' =>isset($request->weight) ? $request->weight : $grade_items['weight'],
         ]);
 
-
+        $userGradesJobOld = (new \App\Jobs\RefreshUserGrades($this->chain , $old_parent));
+        dispatch($userGradesJobOld);
         $category = GradeCategory::findOrFail($grade_items->parent);        
         event(new GraderSetupEvent($category));
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category));
