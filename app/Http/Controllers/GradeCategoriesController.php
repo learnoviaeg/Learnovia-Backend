@@ -180,7 +180,7 @@ class GradeCategoriesController extends Controller
         }
 
         if($grade_category->parent != null){
-            event(new GraderSetupEvent($grade_category->Parents));
+            event(new GraderSetupEvent($grade_category));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category));
         }
 
@@ -201,27 +201,15 @@ class GradeCategoriesController extends Controller
         $top_parent_category = GradeCategory::where('course_id',$grade_category->course_id)->whereNull('parent')->where('type','category')->first();
         $grade_category->GradeItems()->update(['parent' => $top_parent_category->id]);
         $grade_category->child()->update(['parent' => $top_parent_category->id]);
-
-        event(new GraderSetupEvent($top_parent_category));
-        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $top_parent_category));
-
-            if($grade_category->parent != null){
-                event(new GraderSetupEvent($grade_category->Parents));
-                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category->Parents));
-            }
-            if($grade_category->parent == null && $grade_category->categories_items()->count() > 0){
-                event(new GraderSetupEvent($grade_category->categories_items[0]));
-                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category->categories_items[0]));
-            }
-        
-            dispatch($userGradesJob);
-
-
-        if(!isset($grade_category))
-            return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 404);
+        $parent_Category = GradeCategory::find($grade_category->parent);
         $grade_category->delete();
+        event(new GraderSetupEvent($parent_Category));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
+        dispatch($userGradesJob);
+
         return response()->json(['message' => __('messages.grade_category.delete'), 'body' => null], 200);
     }
+
 
     public function weight_adjust(Request $request)
     {

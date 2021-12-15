@@ -157,10 +157,12 @@ class GradeItemsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+
     public function destroy($id)
     {
         $grade_item = GradeCategory::findOrFail($id);
-        $parent =  GradeCategory::find($grade_item->Parents->id);
+        $parent =  GradeCategory::find($grade_item->parent);
         $grade_item->delete();
         event(new GraderSetupEvent($parent));  
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
@@ -169,4 +171,5 @@ class GradeItemsController extends Controller
         $user_graders = UserGrader::where('item_type' , 'category')->where('item_id' , $grade_item->id)->delete();
         return response()->json(['message' => __('messages.grade_item.delete'), 'body' => null ], 200);
     }
+
 }
