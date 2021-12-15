@@ -50,13 +50,22 @@ class NaturalMethod implements GradeSetupInterface
             $user_mark = UserGrader::select('grade')->where('user_id', $user->id)->where('item_id',$child->id)->where('item_type','category')->first();
             if(!isset($user_mark)||$user_mark->grade == null || $child->max == 0)
                 continue;
-            if($user_mark->grade != null)
-                $total_marks_in_categories += ($user_mark->grade / $child->max) * $child->weights;
+
+            if($user_mark->grade != null){
+                //non-adjusted natural sums only the grades 
+                if($grade_category->categories_items()->where('weight_adjust' ,0)->count() == $grade_category->categories_items()->count())
+                    $total_marks_in_categories += $user_mark->grade ;
+                 else 
+                    $total_marks_in_categories += ($user_mark->grade / $child->max) * $child->weights;
+            }
         }
-        $grade = ($total_marks_in_categories) *($grade_category->max/ 100);
+        if($grade_category->categories_items()->where('weight_adjust' ,0)->count() == $grade_category->categories_items()->count())
+                return $total_marks_in_categories;
+      $grade = ($total_marks_in_categories) *($grade_category->max/ 100);
         return $grade;
 
-    }
+    }    
+
     
     public function weightAdjustCheck($grade_category)
     {

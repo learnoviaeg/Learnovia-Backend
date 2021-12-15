@@ -28,7 +28,7 @@ class UserGradeController extends Controller
             'user'      =>'required|array',
             'user.*.user_id' => 'required|exists:users,id',
             'user.*.item_id'   => 'required|exists:grade_categories,id',
-            'user.*.grade'     => 'required',
+            'user.*.grade'     => 'nullable',
         ]);
         foreach($request->user as $user){
             $instance = GradeCategory::find($user['item_id']);
