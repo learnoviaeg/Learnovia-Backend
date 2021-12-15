@@ -50,6 +50,11 @@ class MaterialsController extends Controller
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
+        if(isset($request->item_type)){
+            $check = Material::where('type',$request->item_type)->where('item_id',$request->item_id)->first();
+            if(!isset($check))
+                return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        }
 
         $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
         $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();  
