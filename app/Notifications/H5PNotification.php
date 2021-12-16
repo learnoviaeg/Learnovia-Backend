@@ -59,7 +59,5 @@ class H5PNotification extends SendNotification
         
         //firebase Notifications
         $this->toFirebase($createdNotification);
-    }
-
-  
+    }  
 }
