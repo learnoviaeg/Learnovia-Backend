@@ -235,6 +235,10 @@ class MaterialsController extends Controller
         $attachment = attachment::find($assigment->attachment_id);
         $path = public_path('/storage/assignment').substr($attachment->getOriginal()['path'],
         strrpos($attachment->getOriginal()['path'],"/"));
+
+        if(!file_exists($path))
+        return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        
         $fileName = $attachment->name;
         $headers = ['Content-Type' => 'application/'.$attachment->extension];
 
