@@ -26,8 +26,8 @@ class LogsObserver
         //     'data' => serialize($req),
         // ]);
 
-        $dispatch=(new createdLogsJob($req));
-        dispatch($dispatch);
+        // $dispatch=(new createdLogsJob($req));
+        // dispatch($dispatch);
     }
 
     /**
@@ -48,8 +48,8 @@ class LogsObserver
         //     'data' => serialize($arr),
         // ]);
 
-        $dispatch=(new updatedLogsJob($req));
-        dispatch($dispatch);
+        // $dispatch=(new updatedLogsJob($req));
+        // dispatch($dispatch);
     }
 
     /**
@@ -59,12 +59,12 @@ class LogsObserver
      */
     public function deleted($req)
     {
-        Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'deleted',
-            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
-            'data' => serialize($req),
-        ]);
+        // Log::create([
+        //     'user' => User::find(Auth::id())->username,
+        //     'action' => 'deleted',
+        //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
+        //     'data' => serialize($req),
+        // ]);
 
         // $dispatch=(new deletedLogsJob($req));
         // dispatch($dispatch);
