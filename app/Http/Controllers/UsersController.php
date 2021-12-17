@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\User;
 use App\Enroll;
 use App\Paginate;
-use App\LAstAction;
+use App\LastAction;
 use App\Level;
 use App\Classes;
 use Spatie\Permission\Models\Permission;
@@ -50,7 +50,7 @@ class UsersController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:course/teachers|course/participants'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.

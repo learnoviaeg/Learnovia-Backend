@@ -7,6 +7,8 @@ use App\GradeCategory;
 use App\GradeItems;
 use App\UserGrader;
 use App\Enroll;
+use App\Events\GraderSetupEvent;
+use App\Jobs\RefreshUserGrades;
 
 use Illuminate\Http\Request;
 
@@ -34,11 +36,11 @@ class GradeItemsController extends Controller
             'grade_category_id' => 'exists:grade_categories,id',
         ]);
 
-        $grade_items = GradeItems::Query();
+        $grade_items = GradeCategory::where('type', 'category');
             if($request->filled('name'))
                 $grade_items->where('name','LIKE' , "%$request->name%");
             if($request->filled('grade_category_id'))
-                $grade_items->where('grade_category_id' ,$request->grade_category_id);
+                $grade_items->where('parent' ,$request->grade_category_id);
         return response()->json(['message' => __('messages.grade_items.list'), 'body' => $grade_items->get() ], 200);
     }
 
@@ -51,37 +53,49 @@ class GradeItemsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'items' => 'required|array',
-            'items.*.name' => 'required|string',
-            'items.*.grade_category_id' => 'required|exists:grade_categories,id',
-            'items.*.min'=>'between:0,99.99',
-            'items.*.max'=>'between:0,99.99',
-            'items.*.weight_adjust' => 'boolean',
-            'items.*.locked' => 'boolean',
-            'items.*.hidden' => 'boolean',
+            'course'    => 'required_without:grade_category_id|exists:courses,id',
+            'name' => 'required|string',
+            'grade_category_id' => 'required_without:course|exists:grade_categories,id',
+            'min'=>'between:0,100',
+            'max'=>'between:0.1,100',
+            'weight_adjust' => 'boolean',
+            'locked' => 'boolean',
+            'hidden' => 'boolean',
         ]);
 
-        foreach($request->items as $key=>$item){
-            $item = GradeItems::firstOrCreate([
-                'name' => $item['name'],
-                'grade_category_id' => isset($item['grade_category_id']) ? $item['grade_category_id'] : null,
-                'type' => 'Manual',
-                'locked' =>isset($item['locked']) ? $item['locked'] : 0,
-                'min' =>isset($item['min']) ? $item['min'] : 0,
-                'max' =>isset($item['max']) ? $item['max'] : null,
-                'weight_adjust' =>isset($item['weight_adjust']) ? $item['weight_adjust'] : 0,
-                'hidden' =>isset($item['hidden']) ? $item['hidden'] : 0,
-            ]);
-            $enrolled_students = Enroll::where('role_id' , 3)->where('course_segment',GradeCategory::whereId($item['grade_category_id'])->first()->course_segment_id)->pluck('user_id');
-            foreach($enrolled_students as $student){
-                UserGrader::create([
-                    'user_id'   => $student,
-                    'item_type' => 'Item',
-                    'item_id'   => $item->id,
-                    'grade'     => null
-                ]);
-            }
+        if($request->filled('grade_category_id'))
+            $course = GradeCategory::find($request->grade_category_id)->course_id;
+    
+        if($request->filled('course')){
+            $course = $request->course;
+            $category = GradeCategory::whereNull('parent')->where('course_id',$request->course)->first();
         }
+        $item = GradeCategory::create([
+            'name' => $request->name,
+            'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $category->id,
+            'type' => 'item',
+            'locked' =>isset($request->locked) ? $request->locked : 0,
+            'min' =>isset($request->min) ? $request->min : 0,
+            'max' =>isset($request->max) ? $request->max : null,
+            'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : 0,
+            'weights' =>isset($request->weight) ? $request->weight : NULL,
+            'hidden' =>isset($request->hidden) ? $request->hidden : 0,
+            'item_type' => 'Manual',
+            'course_id' => $course,
+        ]);    
+        $enrolled_students = Enroll::select('user_id')->distinct()->where('course',$course)->where('role_id',3)->get()->pluck('user_id');
+        foreach($enrolled_students as $student){
+            UserGrader::create([
+                'user_id'   => $student,
+                'item_type' => 'category',
+                'item_id'   => $item->id,
+                'grade'     => null
+            ]);
+        }
+        event(new GraderSetupEvent($item->Parents));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $item->Parents));
+        dispatch($userGradesJob);
+
         return response()->json(['message' => __('messages.grade_item.add'), 'body' => null ], 200);
     }
 
@@ -93,7 +107,8 @@ class GradeItemsController extends Controller
      */
     public function show($id)
     {
-        //
+        $grade_item = GradeCategory::findOrFail($id);
+        return response()->json(['message' => __('messages.grade_items.list'), 'body' => $grade_item ], 200);
     }
 
     /**
@@ -107,18 +122,32 @@ class GradeItemsController extends Controller
     {
         $request->validate([
             'name' => 'string',
-            'grade_category_id' => 'exists:grade_category_id,id',
+            'grade_category_id' => 'exists:grade_categories,id',
         ]);
-        $grade_items = GradeItems::findOrFail($id);
+        $grade_items = GradeCategory::findOrFail($id);
+        
+        if($request->filled('grade_category_id'))
+            event(new GraderSetupEvent($grade_items->Parents)); 
+        
+        $old_parent = GradeCategory::findOrFail($grade_items->parent);
         $grade_items->update([
-            'name'   => isset($request->name) ? $request->name : $grade_items->name,
-            'grade_category_id' => isset($request->grade_category_id) ? $request->grade_category_id : $grade_items->grade_category_id,
-            'hidden' => isset($request->hidden) ? $request->hidden : $grade_items->hidden,
+            'name'   => isset($request->name) ? $request->name : $grade_items['name'],
+            'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $grade_items['parent'],
+            'hidden' => isset($request->hidden) ? $request->hidden : $grade_items['hidden'],
             'locked' =>isset($request->locked) ? $request->locked  : $grade_items['locked'],
             'min' =>isset($request->min) ? $request->min : $grade_items['min'],
             'max' =>isset($request->max) ? $request->max : $grade_items['max'],
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_items['weight_adjust'],
+            'weights' =>isset($request->weight) ? $request->weight : $grade_items['weight'],
         ]);
+
+        $userGradesJobOld = (new \App\Jobs\RefreshUserGrades($this->chain , $old_parent));
+        dispatch($userGradesJobOld);
+        $category = GradeCategory::findOrFail($grade_items->parent);        
+        event(new GraderSetupEvent($category));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category));
+        dispatch($userGradesJob);
+        
         return response()->json(['message' => __('messages.grade_item.update'), 'body' => null ], 200);
     }
 
@@ -128,8 +157,19 @@ class GradeItemsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+
     public function destroy($id)
     {
-        //
+        $grade_item = GradeCategory::findOrFail($id);
+        $parent =  GradeCategory::find($grade_item->parent);
+        $grade_item->delete();
+        event(new GraderSetupEvent($parent));  
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
+        dispatch($userGradesJob);
+
+        $user_graders = UserGrader::where('item_type' , 'category')->where('item_id' , $grade_item->id)->delete();
+        return response()->json(['message' => __('messages.grade_item.delete'), 'body' => null ], 200);
     }
+
 }

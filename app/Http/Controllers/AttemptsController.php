@@ -41,7 +41,10 @@ class AttemptsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
+        $this->middleware(['permission:site/quiz/store_user_quiz'],   ['only' => ['store']]);
+        $this->middleware(['ParentCheck'],   ['only' => ['index','show']]);
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -56,6 +59,7 @@ class AttemptsController extends Controller
             'filter' => 'in:submitted,not_submitted,notGraded', 
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
+            'search' => 'nullable'
         ]);
 
         $final= collect([]);
@@ -103,6 +107,14 @@ class AttemptsController extends Controller
             if(count ($users) == 0)
                 return HelperController::api_response_format(200, __('messages.error.user_not_assign'));
         }
+
+        if ($request->filled('search')){
+            $users = User::whereIn('id',$users)->where(function ($query) use ($request) {
+                $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")
+                ->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                ->orWhere('username', 'LIKE', "%$request->search%");
+            })->pluck('id');
+        }
         
         $Submitted_users=0;
         $countEss_TF=0;
@@ -114,7 +126,7 @@ class AttemptsController extends Controller
                 unset($user);
                 continue;
             }
-            if(!$user->can('site/quiz/store_user_quiz')) 
+            if($user->can('site/quiz/unLimitedAttempts')) 
                 continue;
             
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
@@ -261,7 +273,18 @@ class AttemptsController extends Controller
             }
 
             if((Auth::user()->can('site/quiz/unLimitedAttempts'))){
-                $empty=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['user_answers' => null]);
+                $empty=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['user_answers' => null,'correction' => null,'force_submit' =>null,'answered' =>null]);
+
+                foreach($quiz_lesson->quiz->Question as $question)
+                {
+                    if($question->question_type_id == 5)
+                    {
+                        foreach($quest as $child)
+                            userQuizAnswer::firstOrCreate(['user_quiz_id'=>$last_attempt->id,'question_id'=>$child]);
+                    }
+                    else // because parent question(comprehension) not have answer
+                        $dd=userQuizAnswer::firstOrCreate(['user_quiz_id'=>$last_attempt->id,'question_id'=>$question->id]);
+                }
                 $last_attempt->UserQuizAnswer;
                 return HelperController::api_response_format(200, $last_attempt);
             }
@@ -273,7 +296,7 @@ class AttemptsController extends Controller
             'status_id' => 2,
             'feedback' => null,
             'grade' => null,
-            'attempt_index' => (Auth::user()->can('site/quiz/store_user_quiz')) ? $index+1 : 1, // this permission because if these admin don't count his attempts
+            'attempt_index' => $index+1,
             'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
             'submit_time'=> null,
         ]);
@@ -543,15 +566,15 @@ class AttemptsController extends Controller
         foreach ($enrolls->pluck('user_id') as $user_id){
             $grade = UserGrader::where('user_id', $user_id)
             ->where('item_id' ,$quiz_lesson->grade_category_id)
-            ->where('item_type' ,'category')->pluck('grade');
+            ->where('item_type' ,'category')->pluck('grade')->first();
             $user = User::find($user_id);
             if($user == null){
                 unset($user);
                 continue;
             }
-            if(!$user->can('site/quiz/store_user_quiz')){
+            if($user->can('site/quiz/unLimitedAttempts'))
                 continue;
-            } 
+            
             $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->first();
             if(!$attems){
                 $notSubmittedUser['username'] = $user->username;

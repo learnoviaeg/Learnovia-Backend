@@ -14,6 +14,8 @@ use App\Grader\TypeGrader;
 use App\Grader\LowestGrade;
 use App\Grader\FirstGrade;
 use App\Grader\LastGrade;
+use App\GradesSetup\NaturalMethod;
+use App\GradesSetup\SimpleWeightedMethod;
 use App\Enroll;
 use App\Observers\EnrollObserver;
 use App\GradeItems;
@@ -46,6 +48,7 @@ use App\Segment;
 use App\Observers\SecodaryChainObserver;
 use App\Timeline;
 use App\Material;
+use DB;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -74,6 +77,12 @@ class AppServiceProvider extends ServiceProvider
         $AverageGrade = new AverageGrade();
         $this->app->instance('Average', $AverageGrade);
 
+        $NaturalMethod = new NaturalMethod();
+        $this->app->instance('Natural', $NaturalMethod);
+
+        $SimpleWeightedMethod = new SimpleWeightedMethod();
+        $this->app->instance('Simple_weighted_mean', $SimpleWeightedMethod);
+        
         $TypeGrader = new TypeGrader();
         $this->app->instance(TypeGrader::class, $TypeGrader);        
     }
@@ -95,6 +104,11 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        DB::connection()
+        ->getDoctrineSchemaManager()
+        ->getDatabasePlatform()
+        ->registerDoctrineTypeMapping('enum', 'string');
+
         h5pLesson::observe(LogsObserver::class);
 
         AcademicType::observe(LogsObserver::class);
@@ -115,13 +129,13 @@ class AppServiceProvider extends ServiceProvider
         Enroll::observe(SecodaryChainObserver::class);
 
         // UserGrade::observe(UserGradeObserver::class);
-        GradeItems::observe(GradeItemObserver::class);
-        GradeCategory::observe(LogsObserver::class);
-        UserGrader::observe(LogsObserver::class);
+        // GradeItems::observe(GradeItemObserver::class);
+        // GradeCategory::observe(LogsObserver::class);
+        // UserGrader::observe(LogsObserver::class);
         Announcement::observe(LogsObserver::class);
         Timeline::observe(LogsObserver::class);
         Material::observe(LogsObserver::class);
-        AttendanceSession::observe(LogsObserver::class);
+        // AttendanceSession::observe(LogsObserver::class);
         Announcement::observe(Announcements::class);
         Material::observe(MaterialsObserver::class);
         UserSeen::observe(UserSeenObserver::class);

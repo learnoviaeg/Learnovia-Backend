@@ -11,12 +11,15 @@ use App\Lesson;
 use App\Level;
 use App\Classes;
 use App\Paginate;
+use App\attachment;
+use Modules\Assigments\Entities\assignment;
 use DB;
 use App\SecondaryChain;
 use Carbon\Carbon;
 use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\page;
+use Illuminate\Support\Facades\Storage;
 
 class MaterialsController extends Controller
 {
@@ -25,7 +28,7 @@ class MaterialsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:material/get'],   ['only' => ['index']]);
     }
 
     /**
@@ -47,6 +50,11 @@ class MaterialsController extends Controller
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
+        if(isset($request->item_id)){
+            $check = Material::where('type',$request->item_type)->where('item_id',$request->item_id)->first();
+            if(!isset($check))
+                return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        }
 
         $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
         $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();  
@@ -158,17 +166,34 @@ class MaterialsController extends Controller
        
         if(!isset($material))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
-
-        if($material->type == 'file')
-            $result = file::find($material->item_id);
-
-        if($material->type == 'media')
-            $result = media::find($material->item_id);
         
-        if($material->type == 'page')
-            $result = page::find($material->item_id);
+            if ($material->type == "media") {
 
-            return response()->json(['message' => __('messages.materials.list'), 'body' => $result], 200);        
+                $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
+                strrpos($material->getOriginal()['link'],"/"));
+                $result = media::find($material->item_id);
+                $extension=substr(strstr($result->type, '/'), 1);
+            }
+            if ($material->type == "file") {
+
+                $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
+                strrpos($material->getOriginal()['link'],"/")); 
+                $result = file::find($material->item_id);
+                $extension = $result->type;
+            }
+            if($material->type == 'page'){
+                $result = page::find($material->item_id);
+            }
+
+            if(!file_exists($path))
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+            
+         $fileName = $result->name.'.'.$extension;
+         $headers = ['Content-Type' => 'application/'.$extension];
+    
+       return response()->download($path , $fileName , $headers);
+
+
     }
 
     /**
@@ -192,5 +217,32 @@ class MaterialsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function downloadAssignment(Request $request)
+    {
+
+        $request->validate([
+            'id' => 'required|exists:assignments,id',
+        ]);
+
+        $assigment = Assignment::find($request->id);
+        if(!isset($assigment))
+        {
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        }
+        $attachment = attachment::find($assigment->attachment_id);
+        $path = public_path('/storage/assignment').substr($attachment->getOriginal()['path'],
+        strrpos($attachment->getOriginal()['path'],"/"));
+
+        if(!file_exists($path))
+        return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        
+        $fileName = $attachment->name;
+        $headers = ['Content-Type' => 'application/'.$attachment->extension];
+
+        return response()->download($path , $fileName , $headers);
+
     }
 }

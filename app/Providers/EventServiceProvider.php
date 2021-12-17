@@ -70,6 +70,15 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\updateTimelineListener',
             'App\Listeners\updateGradeCatListener',
         ],    
+
+        'App\Events\GraderSetupEvent' => [
+            'App\Listeners\RefreshGraderSetupListener',
+        ],
+
+        'App\Events\UserGradesEditedEvent' => [
+            'App\Listeners\CalculateUserGradesListener',
+        ],
+
     ];
 
     /**

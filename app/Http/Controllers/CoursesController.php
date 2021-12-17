@@ -34,7 +34,7 @@ class CoursesController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:course/my-courses' , 'ParentCheck'],   ['only' => ['index']]);
-        $this->middleware(['permission:course/layout' , 'ParentCheck'],   ['only' => ['show']]);
+        $this->middleware(['permission:course/layout'],   ['only' => ['show']]);
     }
 
     /**
@@ -198,7 +198,8 @@ class CoursesController extends Controller
 
                     $gradeCat = GradeCategory::firstOrCreate([
                         'name' => $course->name . ' Total',
-                        'course_id' => $course->id
+                        'course_id' => $course->id,
+                        'calculation_type' => json_encode(['Natural']),
                     ]);
                 }
             }

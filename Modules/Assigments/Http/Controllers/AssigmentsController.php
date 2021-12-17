@@ -1140,7 +1140,9 @@ class AssigmentsController extends Controller
         $classesIDS = SecondaryChain::select('group_id')->distinct()->where('lesson_id',$lesson->id)->pluck('group_id');
         $classes = Classes::whereIn('id',$classesIDS)->get();
 
-        LastAction::lastActionInCourse($Course->id);
+        // if(!$request->user()->can('site/parent'))
+        //     LastAction::lastActionInCourse($Course->id);
+            
         $assignment = array();
         // $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();

@@ -474,7 +474,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
-    Route::get('materials-details', 'MaterialsController@Material_Details');
     Route::get('GradeTree', 'UserGradeController@index');
 
     // Route::get('years/{export}', 'YearsController@index');
@@ -538,6 +537,11 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grade-item', GradeItemsController::class);
     Route::Resource('grader-report', GraderReportController::class);
+    Route::get('grader-setup', 'GraderReportController@grade_setup');
+    Route::post('grades-weight', 'GradeCategoriesController@weight_adjust');
+    Route::Resource('user-grade', UserGradeController::class);
+
+    
     Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
     Route::get('courseProgressReport' , 'ReportsController@courseProgressReport')->middleware('permission:reports/course_progress');
     Route::get('courseProgressCounter' , 'ReportsController@CourseProgressCounters')->middleware('permission:reports/course_progress');
@@ -545,9 +549,12 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('userStatus/{option}' , 'ReportsController@usersStatusReport')->middleware('permission:reports/active_users|reports/in_active_users');
 });
 
+    Route::get('materials-details', 'MaterialsController@Material_Details');
+    Route::get('download-assignment', 'MaterialsController@downloadAssignment');
+
+
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('topic', TopicController::class);
-   // Route::get('topic-enrolls/{topic}', 'TopicController@getAllEnrollUsers');
 });
 
 

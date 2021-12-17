@@ -747,22 +747,19 @@ class UserController extends Controller
                 foreach($students as $student){
 
                     Enroll::firstOrCreate([
-                        'course_segment' => $student->course_segment,
+                        // 'course_segment' => $student->course_segment,
                         'user_id' => $parent,
                         'role_id'=> 7,
                         'year' => $student->year,
                         'type' => $student->type,
                         'level' => $student->level,
-                        'class' => $student->class,
+                        'group' => $student->group,
                         'segment' => $student->segment,
                         'course' => $student->course
                     ]);
                 }
-
             }
         }
-            
-
         return HelperController::api_response_format(201,null,__('messages.users.parent_assign_child'));
     }
 
@@ -1085,30 +1082,23 @@ class UserController extends Controller
 
     public function enroll_parents_script(){
         $students = Enroll::where('role_id',3)->with('user.parents')->get();
-
         foreach($students as $student){
-
             if(isset($student->user)){
-
                 foreach($student->user->parents as $parent){
-
                     Enroll::firstOrCreate([
-                        'course_segment' => $student->course_segment,
+                        // 'course_segment' => $student->course_segment,
                         'user_id' => $parent->id,
                         'role_id'=> 7,
                         'year' => $student->year,
                         'type' => $student->type,
                         'level' => $student->level,
-                        'class' => $student->class,
+                        'group' => $student->group,
                         'segment' => $student->segment,
                         'course' => $student->course
                     ]);
-    
                 }
             }
-        
         }
-
         return 'done';
     }
 }

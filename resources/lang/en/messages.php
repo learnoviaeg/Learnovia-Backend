@@ -96,10 +96,10 @@ return [
     'quiz' => [
         'add' => 'Quiz added successfully',
         'update' => 'Quiz updated successfully',
-        'NotUpdate' => 'you cann\'t update this quiz',
+        'NotUpdate' => 'you can\'t update this quiz',
         'delete' => 'Quiz deleted successfully',
-        'assign' => 'Quiz assigned successfully',
-        'unAssign' => 'Quiz unAssigned successfully',
+        'assign' => 'Questions assigned successfully',
+        'unAssign' => 'Questions unAssigned successfully',
         'list' => 'Quizzes List',
         'count' => 'Quizzes count',
         'invaled_feedback' => 'Invalid feedback type, feedback can not be After submission',
@@ -113,7 +113,7 @@ return [
         'quiz_not_started' => 'This quiz didnt start yet',
         'grade_pass_settings' => 'Grade to pass settings added successfully',
         'grade_pass_settings_list' => 'Grade to pass settings',
-        'wrong_date' => 'You can\'t update with these date please, Revision duration and end_date',
+        'wrong_date' => 'You can\'t update with this date please, Revision duration and end_date',
         'quiz_notify' => 'You have a new quiz :quizName in course :courseName'
     ],
     'permissions' => [
@@ -315,7 +315,7 @@ return [
         'no_courses_belong_to_class' => 'No courses belong to this class',
     ],
     'zoom' => [
-        'zoom_account' => 'user haven\'t account on zoom',
+        'zoom_account' => 'user hasn\'t account on zoom',
         'Invalid' => 'Invalid Access Token',
     ],
     'status' => [
@@ -330,7 +330,8 @@ return [
         'update' => 'Grade category is updated successfully',
         'list' => 'Grade Categories List',
         'delete' => 'Grade category deleted successfully',
-        'not_found' => 'Cann\'t find grade category'
+        'not_found' => 'Can\'t find grade category',
+        'CannotUpdate' => 'you can\'t update this category',
     ],
     'grade_item' => [
         'add'    => 'Grade item added successfully',
@@ -344,5 +345,8 @@ return [
         'update' => 'Updated Successfully',
         'faild' => 'there is no logo',
         'get' => 'logo is'
+    ],
+    'user_grade' => [
+        'update' => 'Grade is updated succefully',
     ],
 ];

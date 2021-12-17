@@ -112,7 +112,7 @@ return [
         'quiz_not_started' => 'هذا الاختبار لم يبدأ بعد',
         'grade_pass_settings' => 'تم اضافه اعدادات درجه النجاح',
         'grade_pass_settings_list' => ' اعدادات درجه النجاح',
-        'wrong_date' => 'من فضلك أهد مراجعة التواريخ ووقت الامتحان',
+        'wrong_date' => 'من فضلك أعد مراجعة التواريخ ووقت الامتحان',
         'quiz_notify' => 'لديك اختبار جديد :quizName في مادة :courseName'
     ],
     'permissions' => [
@@ -330,11 +330,17 @@ return [
         'update' => 'تم تعديل بنجاح',
         'list' => 'القائمة',
         'delete' => 'تم الحذف ',
+        'CannotUpdate' => 'عذرًا ،يمكن التحديث',
+
     ],
     'grade_item' => [
         'add' => 'تم اضافة بنجاح',
         'update' => 'تم تعديل بنجاح',
         'list' => 'القائمة',
         'delete' => 'تم الحذف ',
+    ],
+
+    'user_grade' => [
+        'update' => 'تم تعديل الدرجه بنجاح',
     ],
 ];

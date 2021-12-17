@@ -7,6 +7,7 @@ use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuestionsType;
 use App\Repositories\ChainRepositoryInterface;
+use App\Notifications\QuizNotification;
 use App\Enroll;
 use Validator;
 use App\Paginate;
@@ -201,6 +202,12 @@ class QuestionsController extends Controller
             event(new UpdatedQuizQuestionsEvent($quiz_id));            
             $quiz->draft=0;
             $quiz->save();
+
+            foreach($quiz->quizLesson as $newQuizLesson){
+                //sending notifications
+                $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
+                $notification->send();
+            }
            
             //calculte time
             $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
@@ -269,6 +276,7 @@ class QuestionsController extends Controller
             'mcq_type' => 'required|in:1,2,3',
             'MCQ_Choices' => 'required|array|min:2',
             'MCQ_Choices.*.is_true' => 'required|boolean',
+            'MCQ_Choices.*.key' => 'required|integer',
             'MCQ_Choices.*.mark' => 'required|between:0,99.99',
         ]);
         if ($validator->fails())

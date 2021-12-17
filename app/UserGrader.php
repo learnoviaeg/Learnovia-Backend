@@ -7,12 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class UserGrader extends Model
 {
     protected $fillable = ['user_id', 'item_type', 'item_id','grade'];
-
+    protected $hidden = [
+        'created_at', 'updated_at'
+    ];
     protected $guarded = ['created_at','updated_id'];
     
     public function user()
     {
         return $this->belongsTo('App\User', 'user_id', 'id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo('App\GradeCategory', 'item_id', 'id')->where('item_type', 'category');
+    }
+
+    public function student()
+    {
+        return $this->belongsTo('App\User', 'user_id', 'id')->whereHas('roles', function($q){
+            $q->where('role_id',3);
+        });
     }
 
     public function getGradeAttribute($value)

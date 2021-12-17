@@ -32,7 +32,7 @@ class RefreshGradeTreeListener
         foreach($event->grade_category->calculation_type as $calculation_type){
             $calculator = resolve($calculation_type);
             $grade = ($calculator->calculate($event->user , $event->grade_category));
-            $dd=UserGrader::updateOrCreate(
+            UserGrader::updateOrCreate(
                 ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
                 ['grade' =>  $grade]
             );

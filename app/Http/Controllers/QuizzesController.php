@@ -35,7 +35,8 @@ class QuizzesController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:quiz/get' , 'ParentCheck'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:quiz/get'],   ['only' => ['index','show']]);
+        $this->middleware('ParentCheck',   ['only' => ['show']]);
         $this->middleware(['permission:quiz/add'],   ['only' => ['store']]);
         $this->middleware(['permission:quiz/update'],   ['only' => ['update']]);
         $this->middleware(['permission:quiz/delete'],   ['only' => ['destroy']]);
@@ -193,9 +194,9 @@ class QuizzesController extends Controller
                     'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
                 ]);
 
-                //sending notifications
-                $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
-                $notification->send();         
+                // //sending notifications
+                // $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
+                // $notification->send();
             }
             
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -416,7 +417,9 @@ class QuizzesController extends Controller
                 $question->mark += $children_mark;
             }
         }
-        LastAction::lastActionInCourse($quiz->course_id);
+        if(!$request->user()->can('site/parent'))
+            LastAction::lastActionInCourse($quiz->course_id);
+
         return response()->json(['message' => __('messages.quiz.quiz_object'), 'body' => $quiz ], 200);
     }
 

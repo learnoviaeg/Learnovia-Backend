@@ -23,7 +23,7 @@ class InterActiveController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:h5p/lesson/get-all'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.

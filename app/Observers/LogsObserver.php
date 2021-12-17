@@ -2,10 +2,12 @@
 
 namespace App\Observers;
 
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use App\Jobs\createdLogsJob;
+use App\Jobs\updatedLogsJob;
+use App\Jobs\deletedLogsJob;
 use App\Log;
 use App\User;
+use Auth;
 
 class LogsObserver
 {
@@ -23,6 +25,9 @@ class LogsObserver
         //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
         //     'data' => serialize($req),
         // ]);
+
+        // $dispatch=(new createdLogsJob($req));
+        // dispatch($dispatch);
     }
 
     /**
@@ -42,6 +47,9 @@ class LogsObserver
         //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
         //     'data' => serialize($arr),
         // ]);
+
+        // $dispatch=(new updatedLogsJob($req));
+        // dispatch($dispatch);
     }
 
     /**
@@ -51,12 +59,15 @@ class LogsObserver
      */
     public function deleted($req)
     {
-        Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'deleted',
-            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
-            'data' => serialize($req),
-        ]);
+        // Log::create([
+        //     'user' => User::find(Auth::id())->username,
+        //     'action' => 'deleted',
+        //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
+        //     'data' => serialize($req),
+        // ]);
+
+        // $dispatch=(new deletedLogsJob($req));
+        // dispatch($dispatch);
     }
 
     /**
