@@ -9,6 +9,7 @@ use App\Lesson;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\quiz_questions;
+use App\GradeCategory;
 
 class UpdateQuizGradeListener
 {
@@ -41,7 +42,7 @@ class UpdateQuizGradeListener
         foreach(QuizLesson::where('quiz_id', $event->Quiz)->cursor()  as $quiz_lesson){
             $quiz_lesson->questions_mark =  $marks_of_all_questions ;
                  $quiz_lesson->grade = $marks_of_all_questions;
-                
+            GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $quiz_lesson->lesson_id)->update(['max' => $marks_of_all_questions]);
             if(is_null($quiz_lesson->assign_user_gradepass))
                 $quiz_lesson->grade_pass = $marks_of_all_questions/2;
             
