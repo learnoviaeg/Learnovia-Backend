@@ -318,5 +318,7 @@ class NotificationController extends Controller
             //firebase Notifications
             $t->toFirebase($createdNotification);
         // }
+
+        return 'Done';
     }
 }
