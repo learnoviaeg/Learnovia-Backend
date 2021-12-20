@@ -23,6 +23,7 @@ use Modules\Bigbluebutton\Entities\BigbluebuttonModel;
 use Modules\UploadFiles\Entities\file;
 use Modules\QuestionBank\Entities\Quiz;
 use Modules\UploadFiles\Entities\media;
+use App\Notifications\SendNotification;
 use Modules\UploadFiles\Entities\MediaLesson;
 class NotificationController extends Controller
 {
@@ -292,5 +293,30 @@ class NotificationController extends Controller
         $user->save();
         
         return HelperController::api_response_format(200, 'token added Done');
+    }
+
+    public function testNotification()
+    {
+        // for($i=0;$i<=10000;$i++)
+        // {
+            $notification = [
+                'type' => 'notification',
+                'item_id' => 1,
+                'item_type' => 'quiz',
+                'message' => 'quiz tested performance',
+                'publish_date' => Carbon::now(),
+                'created_by' => 1,
+                'lesson_id' => 1,
+                'course_id' => 1,
+                'classes' => json_encode([1]),
+            ];
+    
+            //assign notification to given users
+            $t=new SendNotification();
+            $createdNotification = $t->toDatabase($notification,User::all()); // User::whereId(1)->get()
+            
+            //firebase Notifications
+            $t->toFirebase($createdNotification);
+        // }
     }
 }

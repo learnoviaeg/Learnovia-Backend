@@ -1,5 +1,6 @@
 <?php
 Route::get('/' , 'AuthController@site');
+Route::get('testNotification' , 'NotificationController@testNotification');
 Route::get('/materials/{id}', 'MaterialsController@show')->middleware(['getauth','LastAction']);
 Route::get('/interactive/{id}', 'InterActiveController@show')->middleware(['getauth','LastAction']);
 
