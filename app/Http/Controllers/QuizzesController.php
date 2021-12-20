@@ -28,6 +28,9 @@ use App\Notification;
 use App\Notifications\QuizNotification;
 use App\Timeline;
 use App\SystemSetting;
+use App\Events\GraderSetupEvent;
+use App\Jobs\RefreshUserGrades;
+
 
 class QuizzesController extends Controller
 {
@@ -300,6 +303,14 @@ class QuizzesController extends Controller
         ]);
         QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->delete();
         Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
+        
+        $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->where('lesson_id', $request->lesson_id)->first();
+        $parent_Category = GradeCategory::find($grade_category->parent);
+        $grade_category->delete();
+        event(new GraderSetupEvent($parent_Category));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
+        dispatch($userGradesJob);
+
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
         if(!isset($quizlesson))
             $quiz=Quiz::where('id',$id)->delete();
