@@ -313,7 +313,7 @@ class NotificationController extends Controller
     
             //assign notification to given users
             $t=new SendNotification();
-            $createdNotification = $t->toDatabase($notification,User::all()); // User::whereId(1)->get()
+            $createdNotification = $t->toDatabase($notification,User::pluck('id')); // User::whereId(1)->get()
             
             //firebase Notifications
             $t->toFirebase($createdNotification);
