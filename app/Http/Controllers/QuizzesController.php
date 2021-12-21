@@ -250,6 +250,7 @@ class QuizzesController extends Controller
 
         $quiz_lesson->update([
             'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
+            'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
             'grade' => isset($request->grade) ? $request->grade : $quiz_lesson->grade,
             'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
             'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
@@ -273,7 +274,6 @@ class QuizzesController extends Controller
             }
     
             $quiz_lesson->update([
-                'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
                 'max_attemp' => isset($request->max_attemp) ? $request->max_attemp : $quiz_lesson->max_attemp,
                 'start_date' => $quiz_lesson->start_date,
                 'publish_date' => $quiz_lesson->publish_date,
