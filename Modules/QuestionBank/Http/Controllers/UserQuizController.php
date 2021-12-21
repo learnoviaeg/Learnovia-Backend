@@ -353,8 +353,6 @@ class UserQuizController extends Controller
                 return response()->json(['message' =>__('messages.error.incomplete_data'), 'body' => null ], 400);
         }
         $attemp=$user_quiz;
-        $user_quiz->update(['status'=>'Graded']);
-        // $user_quiz->save();
 
         foreach ($allData as $data) {
             $userAnswer = userQuizAnswer::where('user_quiz_id', $request->user_quiz_id)
@@ -365,6 +363,19 @@ class UserQuizController extends Controller
                 $userAnswer->correction = $data['correction'];
             $userAnswer->save();
         }
+        $count_q_needGraded=0;
+        $count_q_Graded=0;
+        foreach($user_quiz->UserQuizAnswer as $UA){
+            $qqq=Questions::find($UA->question_id);
+            if(($qqq->question_type_id == 1 && $qqq->correction->and_why) || $qqq->question_type_id == 4){
+                $count_q_needGraded++;
+                if(isset($UA->correction->grade)){
+                    $count_q_Graded++;
+                }
+            }
+        }
+        if($count_q_needGraded == $count_q_Graded)        
+            $user_quiz->update(['status'=>'Graded']);
         event(new GradeAttemptEvent($attemp));
         // event(new ManualCorrectionEvent($attemp));
 
