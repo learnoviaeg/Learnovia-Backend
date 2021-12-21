@@ -29,12 +29,15 @@ class CalculateUserGradesListener
     public function handle(UserGradesEditedEvent $event)
     {
         foreach($event->grade_category->calculation_type as $calculation_type){
-            $calculator = resolve($calculation_type);
-            $grade = $calculator->calculateUserGrade($event->user , $event->grade_category);
-            UserGrader::updateOrCreate(
-                ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
-                ['grade' =>  $grade]
-            );
+            if($event->grade_category->instance_id === null)
+            {
+                $calculator = resolve($calculation_type);
+                $grade = $calculator->calculateUserGrade($event->user , $event->grade_category);
+                UserGrader::updateOrCreate(
+                    ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
+                    ['grade' =>  $grade]
+                );
+            }
             if($event->grade_category->parent != null)
                     event(new UserGradesEditedEvent($event->user ,GradeCategory::find($event->grade_category->parent)));
         }
