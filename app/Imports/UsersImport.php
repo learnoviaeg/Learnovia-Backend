@@ -55,6 +55,7 @@ class UsersImport implements ToModel, WithHeadingRow
                     'username', 'real_password', 'suspend'];
         $enrollOptional = 'optional'; 
         $teacheroptional='course';
+        $extrafields='ex_';
 
         $password = mt_rand(100000, 999999);
 
@@ -95,6 +96,12 @@ class UsersImport implements ToModel, WithHeadingRow
             'chat_token' => json_decode($res->getBody(),true)['custom_token'],
             'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
         ]);
+
+        dd(array_keys($row));
+        foreach(array_keys($row) as $key){
+            if(strpos($key,"extra_") > -1)
+                $user->profile_fields=json_encode([$key => $row[$key]]);
+        }
 
         foreach ($optionals as $optional) {
             if (isset($row[$optional])){
