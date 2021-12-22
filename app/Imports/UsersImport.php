@@ -82,6 +82,7 @@ class UsersImport implements ToModel, WithHeadingRow
             ]);
         }
         catch(\Exception $e){
+            return $e;
         }
         
         $user = new User([
