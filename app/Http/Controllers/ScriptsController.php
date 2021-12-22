@@ -236,6 +236,6 @@ class ScriptsController extends Controller
                 }
             
             }
-
+            return 'done';
         }
 }
