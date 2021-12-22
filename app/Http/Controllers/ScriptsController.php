@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use app\Course;
-use app\GradeCategory;
+use App\Course;
+use App\GradeCategory;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Events\UpdatedAttemptEvent;
