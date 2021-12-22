@@ -137,4 +137,19 @@ class GraderReportController extends Controller
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $categories ], 200);
     }
 
+    public function user_grades(Request $request)
+    {
+        $request->validate([
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
+            ]);           
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
+                    ->with(array('user' => function($query) {
+                        $query->addSelect(array('id', 'firstname', 'lastname'));
+                    }))->get();
+
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $enrolls ], 200);
+    }
 }
