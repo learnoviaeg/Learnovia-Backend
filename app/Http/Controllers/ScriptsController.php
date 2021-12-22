@@ -198,6 +198,12 @@ class ScriptsController extends Controller
             }
             foreach($users_quiz as $user_quiz){
                 $user_quiz->grade=$user_quiz->quiz_lesson->grade;
+                $uu=User::find($user_quiz->user_id);
+                if(isset($uu)){
+                    if(!in_array(3,$uu->roles->pluck('id')->toArray())){
+                        continue;
+                    }
+                }
                 $user_grader=UserGrader::where('item_type','category')->where('item_id',$user_quiz->quiz_lesson->grade_category_id)->
                                     where('user_id',$user_quiz->user_id)->first();
                 $user_grader->update(['grade' => $user_quiz->quiz_lesson->grade]);
