@@ -523,6 +523,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('seen/{my_chain}', 'SeenReportController@index')->middleware('permission:reports/overall_seen_report');
     Route::get('announcement_overall_seen', 'SeenReportController@announcementsSeenReport')->middleware('permission:reports/overall_seen_report');
     Route::get('announcement_overall_seen/{option}', 'SeenReportController@announcementsSeenReport')->middleware('permission:reports/overall_seen_report');
+    Route::Resource('profile-field', UserProfileFieldController::class);
 
     Route::group(['prefix' => 'settings', 'middleware' => ['auth:api']], function () {
         Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');

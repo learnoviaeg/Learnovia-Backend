@@ -46,6 +46,13 @@ return [
         'sort' => 'Lessons sorted successfully',
         'list' => 'Lessons List',
     ],
+    'field' => [
+        'add' => 'field added successfully',
+        'update' => 'field updated successfully',
+        'delete' => 'field deleted successfully',
+        'get' => 'field',
+        'list' => 'fields List',
+    ],
     'assignment' => [
         'add' => 'Assignment added successfully',
         'update' => 'Assignment updated successfully',
