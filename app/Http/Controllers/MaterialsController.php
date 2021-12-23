@@ -167,33 +167,33 @@ class MaterialsController extends Controller
         if(!isset($material))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
         
-            if ($material->type == "media") {
+        if ($material->type == "media") {
 
-                $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
-                strrpos($material->getOriginal()['link'],"/"));
-                $result = media::find($material->item_id);
-                $extension=substr(strstr($result->type, '/'), 1);
-            }
-            if ($material->type == "file") {
+            $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
+            strrpos($material->getOriginal()['link'],"/"));
+            $result = media::find($material->item_id);
+            $extension=substr(strstr($result->type, '/'), 1);
+        }
+        if ($material->type == "file") {
 
-                $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
-                strrpos($material->getOriginal()['link'],"/")); 
-                $result = file::find($material->item_id);
-                $extension = $result->type;
-            }
-            if($material->type == 'page'){
-                $result = page::find($material->item_id);
-            }
+            $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
+            strrpos($material->getOriginal()['link'],"/")); 
+            $result = file::find($material->item_id);
+            $extension = $result->type;
+        }
+        if($material->type == 'page'){
+            $result = page::find($material->item_id);
+        }
 
-            if(!file_exists($path))
+        if(!file_exists($path))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
             
-         $fileName = $result->name.'.'.$extension;
-         $headers = ['Content-Type' => 'application/'.$extension];
+        $fileName = $result->name.'.'.$extension;
+        $fileName=str_replace('/','-',$fileName);
+        $fileName=str_replace('\\','-',$fileName);
+        $headers = ['Content-Type' => 'application/'.$extension];
     
-       return response()->download($path , $fileName , $headers);
-
-
+        return response()->download($path , $fileName , $headers);
     }
 
     /**
