@@ -2,12 +2,14 @@
 
 namespace App\Listeners;
 
+use App\Events\UserGradesEditedEvent;
 use App\Events\RefreshGradeTreeEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\GradeCategory;
 use App\GradeItems;
 use App\UserGrader;
+use App\User;
 use Log;
 
 class RefreshGradeTreeListener
@@ -36,6 +38,7 @@ class RefreshGradeTreeListener
                 ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
                 ['grade' =>  $grade]
             );
+            event(new UserGradesEditedEvent(User::find($event->user->id) ,GradeCategory::find($event->grade_category->parent)));
         }
     }
 }

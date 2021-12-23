@@ -28,6 +28,9 @@ use App\Notification;
 use App\Notifications\QuizNotification;
 use App\Timeline;
 use App\SystemSetting;
+use App\Events\GraderSetupEvent;
+use App\Jobs\RefreshUserGrades;
+
 
 class QuizzesController extends Controller
 {
@@ -247,6 +250,7 @@ class QuizzesController extends Controller
 
         $quiz_lesson->update([
             'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
+            'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
             'grade' => isset($request->grade) ? $request->grade : $quiz_lesson->grade,
             'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
             'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
@@ -270,7 +274,6 @@ class QuizzesController extends Controller
             }
     
             $quiz_lesson->update([
-                'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
                 'max_attemp' => isset($request->max_attemp) ? $request->max_attemp : $quiz_lesson->max_attemp,
                 'start_date' => $quiz_lesson->start_date,
                 'publish_date' => $quiz_lesson->publish_date,
@@ -300,6 +303,14 @@ class QuizzesController extends Controller
         ]);
         QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->delete();
         Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
+        
+        $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->where('lesson_id', $request->lesson_id)->first();
+        $parent_Category = GradeCategory::find($grade_category->parent);
+        $grade_category->delete();
+        event(new GraderSetupEvent($parent_Category));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
+        dispatch($userGradesJob);
+
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
         if(!isset($quizlesson))
             $quiz=Quiz::where('id',$id)->delete();

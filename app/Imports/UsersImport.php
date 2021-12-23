@@ -96,6 +96,14 @@ class UsersImport implements ToModel, WithHeadingRow
             'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
         ]);
 
+        // dd(array_keys($row));
+        $array=[];
+        foreach(array_keys($row) as $key){
+            if(strpos($key,"extra_") > -1)
+                $array[$key]=$row[$key];
+        }
+        $user->profile_fields=json_encode($array);
+
         foreach ($optionals as $optional) {
             if (isset($row[$optional])){
                 if($optional =='birthdate'){

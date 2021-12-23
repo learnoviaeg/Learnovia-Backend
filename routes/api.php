@@ -1,5 +1,6 @@
 <?php
 Route::get('/' , 'AuthController@site');
+Route::get('testNotification' , 'NotificationController@testNotification');
 Route::get('/materials/{id}', 'MaterialsController@show')->middleware(['getauth','LastAction']);
 Route::get('/interactive/{id}', 'InterActiveController@show')->middleware(['getauth','LastAction']);
 
@@ -421,6 +422,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('delete-wrong-attempts', 'ScriptsController@deleteWrongAttempts');
     Route::get('shuffled_quizzes', 'ScriptsController@reassign_shuffled_questions');
     Route::get('full-mark', 'ScriptsController@Full_Mark');
+    Route::post('add_user_grades', 'ScriptsController@user_grades');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -540,6 +542,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('grader-setup', 'GraderReportController@grade_setup');
     Route::post('grades-weight', 'GradeCategoriesController@weight_adjust');
     Route::Resource('user-grade', UserGradeController::class);
+    Route::get('grader-report-users', 'GraderReportController@user_grades');
 
     
     Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
