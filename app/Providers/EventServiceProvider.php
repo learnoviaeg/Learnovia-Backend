@@ -79,6 +79,11 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\CalculateUserGradesListener',
         ],
 
+        'App\Events\AssignmentCreatedEvent' => [
+            'App\Listeners\AssignmentGradeCategoryListener',
+        ],
+
+
     ];
 
     /**
