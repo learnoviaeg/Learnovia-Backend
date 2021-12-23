@@ -55,7 +55,6 @@ class UsersImport implements ToModel, WithHeadingRow
                     'username', 'real_password', 'suspend'];
         $enrollOptional = 'optional'; 
         $teacheroptional='course';
-        $extrafields='ex_';
 
         $password = mt_rand(100000, 999999);
 
