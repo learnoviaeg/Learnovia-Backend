@@ -40,11 +40,12 @@ class EditUserImport implements ToModel, WithHeadingRow
 
         $user=User::find($row['username']);
         
-        $extrafields='ex_';
-        if(isset($row[$extrafields])){
-            $user->profile_fields=json_encode($row[$extrafields]);
+        $array=[];
+        foreach(array_keys($row) as $key){
+            if(strpos($key,"extra_") > -1)
+                $array[$key]=$row[$key];
         }
-        dd($user->profile_fields);
+        $user->profile_fields=json_encode($array);
 
         foreach ($optionals as $optional) {
             if (isset($row[$optional])){
