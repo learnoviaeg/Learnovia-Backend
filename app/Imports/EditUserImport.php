@@ -21,7 +21,7 @@ class EditUserImport implements ToModel, WithHeadingRow
             // 'class_id' => 'exists:classes,id',
             // 'level' => 'exists:levels,id',
             // 'type' => 'exists:academic_types,id',
-            'username' => 'required|unique:users,username,'
+            'username' => 'required'
         ])->validate();
 
         if(isset($row['language']))
@@ -38,7 +38,7 @@ class EditUserImport implements ToModel, WithHeadingRow
                     'language', 'timezone', 'religion', 'second language', 'class_id', 'level', 'type', 'firstname',
                     'lastname', 'username', 'real_password', 'suspend'];
 
-        $user=User::find($row['username']);
+        $user=User::where('username',($row['username']))->first();
         
         $array=[];
         foreach(array_keys($row) as $key){

@@ -171,6 +171,14 @@ class User extends Authenticatable
         return;
     }
 
+    public function getProfileFieldsAttribute()
+    {
+        $content=$this->attributes['profile_fields'];
+        if(isset($content))
+            return json_decode($content);
+        return $content;
+    }
+
     public function notifications()
     {
         return $this->belongsToMany('App\Notification')->with('lesson')->orderByDesc('publish_date')->withPivot('read_at');
