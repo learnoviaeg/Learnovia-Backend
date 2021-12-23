@@ -367,7 +367,7 @@ class UserQuizController extends Controller
         $count_q_Graded=0;
         foreach($user_quiz->UserQuizAnswer as $UA){
             $qqq=Questions::find($UA->question_id);
-            if(($qqq->question_type_id == 1 && $qqq->correction->and_why) || $qqq->question_type_id == 4){
+            if(($qqq->question_type_id == 1 && $qqq->content->and_why) || $qqq->question_type_id == 4){
                 $count_q_needGraded++;
                 if(isset($UA->correction->grade)){
                     $count_q_Graded++;
