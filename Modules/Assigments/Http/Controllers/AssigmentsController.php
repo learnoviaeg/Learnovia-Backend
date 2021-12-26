@@ -51,6 +51,7 @@ use App\Http\Resources\AssignmentSubmissionResource;
 use App\Notification;
 use App\Notifications\AssignmentNotification;
 use App\Events\AssignmentCreatedEvent;
+use App\Events\UserGradesEditedEvent;
 
 class AssigmentsController extends Controller
 {
@@ -573,6 +574,15 @@ class AssigmentsController extends Controller
 
         $userassigment->status_id = 1;
         $userassigment->save();
+
+        //recalculating grades
+        $grade_category = GradeCategory::where('instance_id', $request->assignment_id)->where('item_type', 'Assignment')->where('instance_type', 'Assignment')
+                            ->where('type' , 'item')->where('lesson_id', $request->lesson_id);
+        if($grade_category->count() > 0){
+            event(new UserGradesEditedEvent(User::find($request->user_id) , $grade_category->first()->Parents));
+        }
+
+      
         return HelperController::api_response_format(200, $body = $userassigment, $message = __('messages.grade.graded'));
     }
 
