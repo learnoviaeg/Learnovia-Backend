@@ -671,7 +671,7 @@ class AssigmentsController extends Controller
         ///delete grade category of assignment lesson
         $grade_category = GradeCategory::where('instance_id', $request->assignment_id)->where('item_type', 'Assignment')->where('instance_type', 'Assignment')
                             ->where('type' , 'item')->where('lesson_id', $request->lesson_id);
-                            
+
         if($grade_category->count() > 0)
             $grade_category->delete();
         return HelperController::api_response_format(200, $all, $message = __('messages.assignment.delete'));
@@ -861,6 +861,8 @@ class AssigmentsController extends Controller
                 $assignment_lesson->visible = $request->visible;
             if ($request->filled('grade_category'))   
                 $assignment_lesson->grade_category = $request->grade_category[0];
+            if ($request->filled('is_graded'))   
+                $assignment_lesson->is_graded = $request->is_graded;
 
             $name_assignment = Assignment::find($request->assignment_id)->name;
 
