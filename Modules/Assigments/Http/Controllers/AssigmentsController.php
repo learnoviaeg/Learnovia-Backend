@@ -52,6 +52,7 @@ use App\Notification;
 use App\Notifications\AssignmentNotification;
 use App\Events\AssignmentCreatedEvent;
 use App\Events\UserGradesEditedEvent;
+use App\UserGrader;
 
 class AssigmentsController extends Controller
 {
