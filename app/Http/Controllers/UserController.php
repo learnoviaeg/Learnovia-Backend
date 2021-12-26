@@ -137,7 +137,7 @@ class UserController extends Controller
                 ]);
             }
             catch(\Exception $e){
-                return $e;
+                throw new \Exception($e->getMessage());
             }
             
             $user = User::create([
