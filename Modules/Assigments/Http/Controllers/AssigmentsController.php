@@ -556,6 +556,8 @@ class AssigmentsController extends Controller
                         ['status_id' => 2,
                         'override' => 0, ]);
 
+        
+
         if ($assilesson->mark < $request->grade) {
             return HelperController::api_response_format(400, $body = [], $message = __('messages.error.grade_less_than') . $assilesson->mark);
         }
@@ -579,6 +581,12 @@ class AssigmentsController extends Controller
         $grade_category = GradeCategory::where('instance_id', $request->assignment_id)->where('item_type', 'Assignment')->where('instance_type', 'Assignment')
                             ->where('type' , 'item')->where('lesson_id', $request->lesson_id);
         if($grade_category->count() > 0){
+
+            UserGrader::updateOrCreate(
+                ['item_id'=>$grade_category->id, 'item_type' => 'category', 'user_id' => $request->user_id],
+                ['grade' =>  $userassigment->grade]
+            );
+
             event(new UserGradesEditedEvent(User::find($request->user_id) , $grade_category->first()->Parents));
         }
 
