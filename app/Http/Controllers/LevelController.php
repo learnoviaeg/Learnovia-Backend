@@ -44,16 +44,11 @@ class LevelController extends Controller
         if($request->filled('search'))
             $levels->where('name', 'LIKE' , "%$request->search%");
 
-        if($request->user()->can('site/show-all-courses'))
-        {
-            if(isset($request->types))
-                $levels->whereIn('academic_type_id',$request->types)->with('type');
-
-            return HelperController::api_response_format(201, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
-        }
-
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $enrolls->where('user_id',Auth::id());
+
+        if(!$request->has('user_id'))
+            $enrolls->where('user_id',Auth::id());
+
         $levels->whereIn('id',$enrolls->pluck('level'));
 
         return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
