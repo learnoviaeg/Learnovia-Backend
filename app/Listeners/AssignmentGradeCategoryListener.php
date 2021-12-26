@@ -6,6 +6,7 @@ use App\Events\AssignmentCreatedEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\GradeCategory;
+use App\Events\GraderSetupEvent;
 
 class AssignmentGradeCategoryListener
 {
@@ -29,7 +30,7 @@ class AssignmentGradeCategoryListener
     {
         $top_parent_category = GradeCategory::where('course_id', $event->assignment_lesson->lesson->course_id)
                             ->whereNull('parent')->where('type','category')->first();
-        GradeCategory::updateOrCreate(
+        $assignment = GradeCategory::updateOrCreate(
             [
                 'course_id' => $event->assignment_lesson->lesson->course_id,
                 'instance_id'=> $event->assignment_lesson->assignment[0]->id, 
@@ -47,5 +48,7 @@ class AssignmentGradeCategoryListener
                 'weights' => ((bool) $event->assignment_lesson->is_graded == false) ? 0 : null,
             ]
         );
+
+        event(new GraderSetupEvent($assignment->Parents));
     }
 }
