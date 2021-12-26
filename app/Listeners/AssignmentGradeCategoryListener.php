@@ -22,7 +22,7 @@ class AssignmentGradeCategoryListener
     /**
      * Handle the event.
      *
-     * @param  AssignmentCreatedEvent  $event
+     * @param  AssignmentCreatedEvent  $event 
      * @return void
      */
     public function handle(AssignmentCreatedEvent $event)
@@ -43,7 +43,7 @@ class AssignmentGradeCategoryListener
                 'name'   => $event->assignment_lesson->assignment[0]->name, 
                 'hidden' =>  $event->assignment_lesson->visible ,
                 'max'    => $event->assignment_lesson->mark,
-                'weight_adjust' => ((bool) $event->assignment_lesson->is_graded == false) ? 0 : 1,
+                'weight_adjust' => ((bool) $event->assignment_lesson->is_graded == false) ? 1 : 0,
                 'weights' => ((bool) $event->assignment_lesson->is_graded == false) ? 0 : null,
             ]
         );
