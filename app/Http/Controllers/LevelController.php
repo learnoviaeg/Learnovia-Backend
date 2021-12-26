@@ -46,6 +46,9 @@ class LevelController extends Controller
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
 
+        if(!$request->has('user_id'))
+            $enrolls->where('user_id',Auth::id());
+
         $levels->whereIn('id',$enrolls->pluck('level'));
 
         return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));

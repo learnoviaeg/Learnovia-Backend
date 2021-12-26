@@ -51,6 +51,10 @@ class ClassesController extends Controller
             $classes->where('name', 'LIKE' , "%$request->search%"); 
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
+
+        if(!$request->has('user_id'))
+            $enrolls->where('user_id',Auth::id());
+            
         $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
 
         return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
