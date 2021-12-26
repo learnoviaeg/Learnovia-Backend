@@ -73,6 +73,9 @@ class CoursesController extends Controller
 
         if($request->has('role_id'))
             $enrolls->where('role_id',$request->role_id);
+
+        if(!$request->has('user_id'))
+            $enrolls->where('user_id',Auth::id());
         
         if($request->templates == 1){
             $templates = Course::where('is_template',1)->get()->pluck('id');

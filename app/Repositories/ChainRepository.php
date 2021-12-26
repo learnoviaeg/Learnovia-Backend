@@ -238,11 +238,13 @@ class ChainRepository implements ChainRepositoryInterface
         if($request->filled('courses'))
             $enrolls->whereIn('course', $request->courses);
 
-        $user_id=Auth::id();
-        if(isset($request->user_id))
-            $user_id=$request->user_id;
-        
-        $enrolls->where('user_id',$user_id);
+        if($request->has('user_id'))
+        {
+            // if(!isset($request->user_id))
+            //     $enrolls->where('user_id',Auth::id());
+
+            $enrolls->where('user_id',$request->user_id);
+        }
 
         return $enrolls;    
     }
