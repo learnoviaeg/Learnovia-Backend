@@ -284,10 +284,13 @@ class QuizzesController extends Controller
         $quiz_lesson->save();
         $quiz->quizLesson;
 
+        $gg=GradeCategory::where('course_id', $quiz_lesson->lesson->course_id)
+                            ->whereNull('parent')->where('type','category')->first();
+                            
         $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $quiz_lesson->lesson_id)->update([
             'hidden' => $quiz_lesson->visible,
             'calculation_type' => json_encode($quiz_lesson->grading_method_id),
-            'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $quiz_lesson->grade_category_id
+            'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id
         ]);
 
         // update timeline object and sending notifications
