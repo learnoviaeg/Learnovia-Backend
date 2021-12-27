@@ -584,7 +584,7 @@ class AssigmentsController extends Controller
         if($grade_category->count() > 0){
 
             UserGrader::updateOrCreate(
-                ['item_id'=>$grade_category->id, 'item_type' => 'category', 'user_id' => $request->user_id],
+                ['item_id'=>$grade_category->first()->id, 'item_type' => 'category', 'user_id' => $request->user_id],
                 ['grade' =>  $userassigment->grade]
             );
 
