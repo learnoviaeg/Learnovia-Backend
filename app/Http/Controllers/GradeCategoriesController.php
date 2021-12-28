@@ -12,6 +12,8 @@ use App\Enroll;
 use App\Course;
 use App\Events\GraderSetupEvent;
 use App\Jobs\RefreshUserGrades;
+use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\QuestionBank\Entities\quiz;
 
 class GradeCategoriesController extends Controller
 {
@@ -216,6 +218,21 @@ class GradeCategoriesController extends Controller
                 'weights' =>isset($instance['weight']) ? $instance['weight'] : $category->weights,
                 'exclude_empty_grades' =>isset($instance['exclude_empty_grades']) ? $instance['exclude_empty_grades'] : $category->exclude_empty_grades,
             ]);
+            if($category->instance_type != null){
+                if($category->instance_type == 'Quiz'){
+                    if($category->weights > 0)
+                        Quiz::where('id', $category->instance_id )->update(['is_graded' , 1]);
+                    else
+                        Quiz::where('id', $category->instance_id )->update(['is_graded' , 0]);
+                }
+                   
+                if($category->instance_type == 'Assignment'){
+                    if($category->weights > 0)
+                        AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' , 1]);
+                    else
+                        AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' , 0]);
+                }          
+            }
             event(new GraderSetupEvent($category->Parents));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->Parents));
             dispatch($userGradesJob);
