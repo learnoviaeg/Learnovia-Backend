@@ -221,16 +221,16 @@ class GradeCategoriesController extends Controller
             if($category->instance_type != null){
                 if($category->instance_type == 'Quiz'){
                     if($category->weights > 0)
-                        quiz::where('id', $category->instance_id )->update(['is_graded' , 1]);
+                        quiz::where('id', $category->instance_id )->update(['is_graded' => 1]);
                     else
-                        quiz::where('id', $category->instance_id )->update(['is_graded' , 0]);
+                        quiz::where('id', $category->instance_id )->update(['is_graded' => 0]);
                 }
                    
                 if($category->instance_type == 'Assignment'){
                     if($category->weights > 0)
-                        AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' , 1]);
+                        AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' => 1]);
                     else
-                        AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' , 0]);
+                        AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' => 0]);
                 }          
             }
             event(new GraderSetupEvent($category->Parents));
