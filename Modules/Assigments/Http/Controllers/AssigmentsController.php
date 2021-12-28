@@ -55,6 +55,7 @@ use App\Events\UserGradesEditedEvent;
 use App\UserGrader;
 use App\Jobs\RefreshUserGrades;
 
+    
 class AssigmentsController extends Controller
 {
     protected $setting;
@@ -64,9 +65,11 @@ class AssigmentsController extends Controller
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
+    public function __construct(SettingsReposiotryInterface $setting ,ChainRepositoryInterface $chain)
     {
         $this->setting = $setting;
+        $this->chain = $chain;
+
     }
 
     public function install_Assignment()
