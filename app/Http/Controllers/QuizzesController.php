@@ -30,7 +30,7 @@ use App\Timeline;
 use App\SystemSetting;
 use App\Events\GraderSetupEvent;
 use App\Jobs\RefreshUserGrades;
-
+use App\Events\UpdatedQuizQuestionsEvent;
 
 class QuizzesController extends Controller
 {
@@ -153,7 +153,7 @@ class QuizzesController extends Controller
   
         $course=  Course::where('id',$request->course_id)->first();
         LastAction::lastActionInCourse($request->course_id);
-
+ 
         $newQuestionsIDs=[];
         $oldQuestionsIDs=array();
 
@@ -287,14 +287,20 @@ class QuizzesController extends Controller
         $gg=GradeCategory::where('course_id', $quiz_lesson->lesson->course_id)
                             ->whereNull('parent')->where('type','category')->first();
                             
-        $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $quiz_lesson->lesson_id)->update([
-            'hidden' => $quiz_lesson->visible,
-            'calculation_type' => json_encode($quiz_lesson->grading_method_id),
-            'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id
-        ]);
-
+        $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $quiz_lesson->lesson_id);
+        $gradeCat->update([
+                    'hidden' => $quiz_lesson->visible,
+                    'calculation_type' => json_encode($quiz_lesson->grading_method_id),
+                    'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id
+                ]);
+        
+        
         // update timeline object and sending notifications
         event(new updateQuizAndQuizLessonEvent($quiz_lesson));
+        event(new UpdatedQuizQuestionsEvent($quiz->id));      
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->first()->parent)));
+        dispatch($userGradesJob);
+                            
 
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
