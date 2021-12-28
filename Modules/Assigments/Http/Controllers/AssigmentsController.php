@@ -53,7 +53,9 @@ use App\Notifications\AssignmentNotification;
 use App\Events\AssignmentCreatedEvent;
 use App\Events\UserGradesEditedEvent;
 use App\UserGrader;
+use App\Jobs\RefreshUserGrades;
 
+    
 class AssigmentsController extends Controller
 {
     protected $setting;
@@ -63,9 +65,11 @@ class AssigmentsController extends Controller
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
+    public function __construct(SettingsReposiotryInterface $setting ,ChainRepositoryInterface $chain)
     {
         $this->setting = $setting;
+        $this->chain = $chain;
+
     }
 
     public function install_Assignment()
@@ -371,6 +375,10 @@ class AssigmentsController extends Controller
            
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($AssignmentLesson));
+
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $assignment_category->first()->Parents));
+            dispatch($userGradesJob);
+
         $all = AssignmentLesson::all();
 
         return HelperController::api_response_format(200, $all, $message = __('messages.assignment.update'));
