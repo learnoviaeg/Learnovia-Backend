@@ -27,10 +27,9 @@ class updateGradeCatListener
      */
     public function handle(updateQuizAndQuizLessonEvent $event)
     {
-        $gradeCat=GradeCategory::whereId($event->quizLesson->grade_category_id)->update([
-            'hidden' => $event->quizLesson->visible,
-            'lesson_id' => $event->quizLesson->lesson_id,
-            'calculation_type' => json_encode($event->quizLesson->grading_method_id),
-        ]);
+        // $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$event->quizLesson->quiz_id)->where('lesson_id', $event->quizLesson->lesson_id)->update([
+        //     'hidden' => $event->quizLesson->visible,
+        //     'calculation_type' => json_encode($event->quizLesson->grading_method_id),
+        // ]);
     }
 }

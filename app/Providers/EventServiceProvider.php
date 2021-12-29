@@ -68,7 +68,7 @@ class EventServiceProvider extends ServiceProvider
 
         'App\Events\updateQuizAndQuizLessonEvent' => [
             'App\Listeners\updateTimelineListener',
-            'App\Listeners\updateGradeCatListener',
+            // 'App\Listeners\updateGradeCatListener',
         ],    
 
         'App\Events\GraderSetupEvent' => [
@@ -78,6 +78,11 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\UserGradesEditedEvent' => [
             'App\Listeners\CalculateUserGradesListener',
         ],
+
+        'App\Events\AssignmentCreatedEvent' => [
+            'App\Listeners\AssignmentGradeCategoryListener',
+        ],
+
 
     ];
 

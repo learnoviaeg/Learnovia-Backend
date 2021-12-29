@@ -3,6 +3,8 @@ namespace App\GradesSetup;
 use Illuminate\Http\Request;
 use App\GradeCategory;
 use App\UserGrader;
+use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\QuestionBank\Entities\quiz;
 
 class NaturalMethod implements GradeSetupInterface
 {
@@ -40,6 +42,22 @@ class NaturalMethod implements GradeSetupInterface
                     $cats->weights = ($cats->max / $total_grade) *$total_weight;
                 $cats->save();
             }
+            if($cats->instance_type != null){
+
+                if($cats->instance_type == 'Quiz'){
+                    if($cats->weights > 0)
+                        quiz::where('id', $cats->instance_id )->update(['is_graded' => 1]);
+                    else
+                        quiz::where('id', $cats->instance_id )->update(['is_graded' => 0]);
+                }
+                
+                if($cats->instance_type == 'Assignment'){
+                    if($cats->weights > 0)
+                        AssignmentLesson::where('assignment_id', $cats->instance_id )->update(['is_graded' => 1]);
+                    else
+                        AssignmentLesson::where('assignment_id', $cats->instance_id )->update(['is_graded' => 0]);
+                }  
+            }
         }
     }
 
@@ -74,6 +92,6 @@ class NaturalMethod implements GradeSetupInterface
         $adjusted_children = $grade_category->categories_items()->where('weight_adjust', 1)->count();
         $all_children = $grade_category->categories_items()->count();
         if($adjusted_children == $all_children && $grade_category->categories_items()->sum('weights') != 100)
-            $grade_category->categories_items()->update(['weight_adjust' => 0]);
+            $grade_category->categories_items()->where('instance_type', null)->update(['weight_adjust' => 0]);
     }
 }

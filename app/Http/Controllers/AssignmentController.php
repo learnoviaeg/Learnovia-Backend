@@ -19,6 +19,8 @@ use App\Paginate;
 use App\LastAction;
 use Carbon\Carbon;
 use App\SecondaryChain;
+use App\GradeCategory;
+use App\Events\GraderSetupEvent;
 
 class AssignmentController extends Controller
 {
@@ -175,6 +177,15 @@ class AssignmentController extends Controller
 
         $assign = Assignment::where('id', $id)->first();
         $assign->delete();
+
+        $grade_category = GradeCategory::where('instance_id', $id)->where('item_type', 'Assignment')->where('instance_type', 'Assignment')
+        ->where('type' , 'item')->where('lesson_id', $request->lesson_id);
+
+        if($grade_category->count() > 0){
+            $parent = GradeCategory::find($grade_category->first()->parent);
+            $grade_category->delete();
+            event(new GraderSetupEvent($parent));
+        }
 
         $all = Lesson::find($request->lesson_id)->module('Assigments', 'assignment')->get();
 

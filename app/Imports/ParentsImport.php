@@ -39,13 +39,12 @@ class ParentsImport implements ToModel, WithHeadingRow
             foreach($students as $student){
 
                 Enroll::firstOrCreate([
-                    'course_segment' => $student->course_segment,
                     'user_id' => $parent,
                     'role_id'=> 7,
                     'year' => $student->year,
                     'type' => $student->type,
                     'level' => $student->level,
-                    'class' => $student->class,
+                    'group' => $student->class,
                     'segment' => $student->segment,
                     'course' => $student->course
                 ]);

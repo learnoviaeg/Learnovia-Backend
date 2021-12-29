@@ -150,6 +150,7 @@ class GraderReportController extends Controller
                         $query->addSelect(array('id', 'firstname', 'lastname'));
                     }))->get();
 
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $enrolls ], 200);
+        return response()->json(['message' => __('messages.users.all_list'), 'body' => $enrolls ], 200);
     }
 }
+   
