@@ -3,6 +3,8 @@ namespace App\GradesSetup;
 use Illuminate\Http\Request;
 use App\GradeCategory;
 use App\UserGrader;
+use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\QuestionBank\Entities\quiz;
 
 class NaturalMethod implements GradeSetupInterface
 {
@@ -39,6 +41,22 @@ class NaturalMethod implements GradeSetupInterface
                 else
                     $cats->weights = ($cats->max / $total_grade) *$total_weight;
                 $cats->save();
+            }
+            if($cats->instance_type != null){
+
+                if($cats->instance_type == 'Quiz'){
+                    if($cats->weights > 0)
+                        quiz::where('id', $cats->instance_id )->update(['is_graded' => 1]);
+                    else
+                        quiz::where('id', $cats->instance_id )->update(['is_graded' => 0]);
+                }
+                
+                if($cats->instance_type == 'Assignment'){
+                    if($cats->weights > 0)
+                        AssignmentLesson::where('assignment_id', $cats->instance_id )->update(['is_graded' => 1]);
+                    else
+                        AssignmentLesson::where('assignment_id', $cats->instance_id )->update(['is_graded' => 0]);
+                }  
             }
         }
     }
