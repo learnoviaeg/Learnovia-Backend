@@ -376,7 +376,7 @@ class QuizzesController extends Controller
         
         $grade_Cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz->id)->where('lesson_id', $request->lesson_id)->first();
         if($grade_Cat->parent != null)
-            $quizLesson->grade_category_id = $grade_Cat->Parents->id;
+            $quizLesson->Parent_grade_category = $grade_Cat->Parents->id;
 
         if(!isset($quizLesson))
             return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
