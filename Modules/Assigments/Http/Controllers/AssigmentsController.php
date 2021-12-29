@@ -54,11 +54,12 @@ use App\Events\AssignmentCreatedEvent;
 use App\Events\UserGradesEditedEvent;
 use App\UserGrader;
 use App\Jobs\RefreshUserGrades;
-
+use App\Repositories\ChainRepositoryInterface;
     
 class AssigmentsController extends Controller
 {
     protected $setting;
+    protected $chain;
 
     /**
      *constructor.
