@@ -31,11 +31,16 @@ class CalculateUserGradesListener
         foreach($event->grade_category->calculation_type as $calculation_type){
             if($event->grade_category->instance_id === null)
             {
+                $percentage = 0;
                 $calculator = resolve($calculation_type);
                 $grade = $calculator->calculateUserGrade($event->user , $event->grade_category);
+                
+                if($event->grade_category->max != null && $event->grade_category->max > 0)
+                    $percentage = ($grade / $event->grade_category->max) * 100;
+
                 UserGrader::updateOrCreate(
                     ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
-                    ['grade' =>  $grade]
+                    ['grade' =>  $grade , 'percentage' => $percentage ]
                 );
             }
             if($event->grade_category->parent != null)
