@@ -108,9 +108,14 @@ class GradeAttemptItemlistener
             if($event->attempt->quiz_lesson->questions_mark == 0 ){
                 $actual_mark=0;
             }
+
+            $percentage = 0;
+            if($event->attempt->quiz_lesson->grade != null && $event->attempt->quiz_lesson->grade > 0)
+                $percentage = ($actual_mark / $event->attempt->quiz_lesson->grade) * 100;
+                
             UserGrader::updateOrCreate(
                 ['item_id'=>$gradeitem->id, 'item_type' => 'item', 'user_id' => $event->attempt->user_id],
-                ['grade' =>  $actual_mark]
+                ['grade' =>  $actual_mark , 'percentage' => $percentage]
             );
             
             UserQuiz::whereId($event->attempt->id)->update([
