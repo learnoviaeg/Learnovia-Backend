@@ -204,6 +204,12 @@ return [
         'list' => 'Materials list',
         'count' => 'Materials count',
     ],
+    'attendance' => [
+        'add' => 'Attendance added successfully',
+        'update' => 'Attendance updated successfully',
+        'delete' => 'Attendance deleted successfully',
+        'list' => 'Attendances list',
+    ],
     'attendance_session' => [
         'add' => 'Session added successfully',
         'update' => 'Session updated successfully',
