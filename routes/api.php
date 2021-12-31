@@ -423,6 +423,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('shuffled_quizzes', 'ScriptsController@reassign_shuffled_questions');
     Route::get('full-mark', 'ScriptsController@Full_Mark');
     Route::post('add_user_grades', 'ScriptsController@user_grades');
+    Route::get('updateGradeCatParent', 'ScriptsController@updateGradeCatParent');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {

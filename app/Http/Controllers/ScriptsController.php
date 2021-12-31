@@ -205,6 +205,12 @@ class ScriptsController extends Controller
             }
             foreach($users_quiz as $user_quiz){
                 $user_quiz->grade=$user_quiz->quiz_lesson->grade;
+                $uu=User::find($user_quiz->user_id);
+                if(isset($uu)){
+                    if(!in_array(3,$uu->roles->pluck('id')->toArray())){
+                        continue;
+                    }
+                }
                 $user_grader=UserGrader::where('item_type','category')->where('item_id',$user_quiz->quiz_lesson->grade_category_id)->
                                     where('user_id',$user_quiz->user_id)->first();
                 $user_grader->update(['grade' => $user_quiz->quiz_lesson->grade]);
@@ -215,27 +221,39 @@ class ScriptsController extends Controller
         return 'done';
     }
 
-        public function user_grades(Request $request)
+    public function user_grades(Request $request)
+    {
+        $request->validate([
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+            ]);
+        $courses = Course::whereIn('id', $request->courses)->with('gradeCategory')->get();
+        foreach($courses as $course)
         {
-            $request->validate([
-                'courses'    => 'nullable|array',
-                'courses.*'  => 'nullable|integer|exists:courses,id',
-                ]);
-            $courses = Course::whereIn('id', $request->courses)->with('gradeCategory')->get();
-            foreach($courses as $course)
-            {
-                foreach($course->gradeCategory as $category){
-                    $enrolls = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')->pluck('user_id');
-                    foreach($enrolls as $user){
-                        UserGrader::firstOrCreate(
-                            ['item_id' =>  $category->id , 'item_type' => 'category', 'user_id' => $user],
-                            ['grade' => null]
-                        );
-                    }
-
+            foreach($course->gradeCategory as $category){
+                $enrolls = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')->pluck('user_id');
+                foreach($enrolls as $user){
+                    UserGrader::firstOrCreate(
+                        ['item_id' =>  $category->id , 'item_type' => 'category', 'user_id' => $user],
+                        ['grade' => null]
+                    );
                 }
-            
+
             }
-            return 'done';
+        
         }
+        return 'done';
+    }
+
+    public function updateGradeCatParent()
+    {
+        $parents=GradeCategory::whereNull('parent')->where('type','category')->get();
+        foreach($parents as $parent)
+        {
+            $parent->update([
+                'calculation_type' => json_encode(["Natural"]),
+            ]);
+        }
+        return 'done';
+    }
 }
