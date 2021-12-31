@@ -221,27 +221,39 @@ class ScriptsController extends Controller
         return 'done';
     }
 
-        public function user_grades(Request $request)
+    public function user_grades(Request $request)
+    {
+        $request->validate([
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+            ]);
+        $courses = Course::whereIn('id', $request->courses)->with('gradeCategory')->get();
+        foreach($courses as $course)
         {
-            $request->validate([
-                'courses'    => 'nullable|array',
-                'courses.*'  => 'nullable|integer|exists:courses,id',
-                ]);
-            $courses = Course::whereIn('id', $request->courses)->with('gradeCategory')->get();
-            foreach($courses as $course)
-            {
-                foreach($course->gradeCategory as $category){
-                    $enrolls = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')->pluck('user_id');
-                    foreach($enrolls as $user){
-                        UserGrader::firstOrCreate(
-                            ['item_id' =>  $category->id , 'item_type' => 'category', 'user_id' => $user],
-                            ['grade' => null]
-                        );
-                    }
-
+            foreach($course->gradeCategory as $category){
+                $enrolls = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')->pluck('user_id');
+                foreach($enrolls as $user){
+                    UserGrader::firstOrCreate(
+                        ['item_id' =>  $category->id , 'item_type' => 'category', 'user_id' => $user],
+                        ['grade' => null]
+                    );
                 }
-            
+
             }
-            return 'done';
+        
         }
+        return 'done';
+    }
+
+    public function updateGradeCatParent()
+    {
+        $parents=GradeCategory::whereNull('parent')->where('type','category')->get();
+        foreach($parents as $parent)
+        {
+            $parent->update([
+                'calculation_type' => json_encode(["Natural"]),
+            ]);
+        }
+        return 'done';
+    }
 }
