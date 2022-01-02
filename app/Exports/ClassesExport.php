@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class ClassesExport implements FromCollection, WithHeadings
 {
-    protected $fields = ['id', 'name','year','type','level'];
+    protected $fields = ['id', 'name','type','level_id'];
 
     /**
     * @return \Illuminate\Support\Collection
@@ -26,28 +26,8 @@ class ClassesExport implements FromCollection, WithHeadings
     public function collection()
     {
         $classes =  Classes::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
-        $year_name='';
-        $type_name='';
-        $level_name='';
         foreach ($classes as $class) {
-            $year_level= YearLevel::find($class->classlevel->pluck('year_level_id')->first());
-            
-            if(isset($year_level)){
-                $level= Level::find($year_level->level_id);
-                $level_name= isset($level) ? $level->name : '';
-                $year_type = AcademicYearType::find($year_level->academic_year_type_id);
-            }
-
-            if(isset($year_type)){
-                $year=AcademicYear::find($year_type->academic_year_id);
-                $type= AcademicType::find($year_type->academic_type_id);
-                $year_name= isset($year) ? $year->name : '';
-                $type_name = isset($type) ? $type->name : '';
-            }
-
-            $class['year'] = $year_name;
-            $class['type'] = $type_name;
-            $class['level'] = $level_name;
+            $class['type'] = Level::whereId($class->level_id)->pluck('academic_type_id');
 
             $class->setHidden([])->setVisible($this->fields);
         }

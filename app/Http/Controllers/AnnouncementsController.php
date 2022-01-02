@@ -7,6 +7,8 @@ use App\userAnnouncement;
 use App\AnnouncementsChain;
 use App\Announcement;
 use App\attachment;
+use App\Notification;
+use App\Notifications\AnnouncementNotification;
 use Auth;
 use App\user;
 use Carbon\Carbon;
@@ -40,19 +42,20 @@ class AnnouncementsController extends Controller
      */
     public function index(Request $request, $created = null)
     {
-
         $request->validate([
             'search' => 'nullable',
             'paginate' => 'integer'
         ]);
 
+        $AllUsers=[Auth::id()];
         $roles = Auth::user()->roles->pluck('name');
         if(in_array("Parent" , $roles->toArray())){
             if(Auth::user()->currentChild != null)
             {
                 $currentChild =User::find(Auth::user()->currentChild->child_id);
-                Auth::setUser($currentChild);
-        }
+                // Auth::setUser($currentChild);
+                $AllUsers[]=$currentChild->id;
+            }
         }
         $paginate = 12;
         if($request->has('paginate')){
@@ -61,7 +64,7 @@ class AnnouncementsController extends Controller
 
         if($created == 'created'){
 
-            $announcements = Announcement::where('created_by',Auth::id())->orderBy('publish_date','desc');
+            $announcements = Announcement::with('chainAnnouncement.level' , 'chainAnnouncement.course')->where('created_by',Auth::id())->orderBy('publish_date','desc');
 
             if(isset($request->search))
                 $announcements->where('title', 'LIKE' , "%$request->search%");
@@ -69,8 +72,8 @@ class AnnouncementsController extends Controller
             return response()->json(['message' => __('messages.announcement.created_list'), 'body' => $announcements->get()->paginate($paginate)], 200);
         }
 
-        $announcements =  userAnnouncement::with('announcements')
-                                            ->where('user_id', Auth::id())
+        $announcements =  userAnnouncement::with('announcements.chainAnnouncement.level' ,'announcements.chainAnnouncement.course' )
+                                            ->whereIn('user_id', $AllUsers)
                                             ->get()
                                             ->pluck('announcements')
                                             ->sortByDesc('publish_date')
@@ -78,7 +81,7 @@ class AnnouncementsController extends Controller
 
         if($request->user()->can('site/show-all-courses')){ //admin
 
-            $announcements = Announcement::orderBy('publish_date','desc')->get();
+            $announcements = Announcement::with('chainAnnouncement.level' , 'chainAnnouncement.course')->orderBy('publish_date','desc')->get();
         }
 
         if($request->filled('search')){
@@ -87,7 +90,6 @@ class AnnouncementsController extends Controller
                 return str_contains(strtolower($item->title), strtolower($request->search));
             });
         }
-
         return response()->json(['message' => __('messages.announcement.list'), 'body' => $announcements->filter()->values()->paginate($paginate)], 200);
     }
 
@@ -99,7 +101,6 @@ class AnnouncementsController extends Controller
      */
     public function store(Request $request)
     {
-
         //check if user must filter with the whole chain
         $chain_filter = 0;
         if($request->user()->can('announcements/filter-chain')){
@@ -110,10 +111,11 @@ class AnnouncementsController extends Controller
         $request->validate([
             'title' => 'required',
             'description' => 'required', 
-            'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3',
+            'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3,audio/aac,application/x-abiword,application/x-freearc,video/x-msvideo,application/vnd.amazon.ebook,application/octet-stream,image/bmp,application/x-bzip,application/x-bzip2,application/x-cdf,application/x-csh,text/csv,application/vnd.ms-fontobject,application/gzip,image/gif,image/vnd.microsoft.icon,application/json,application/ld+json,audio/midi,application/vnd.apple.installer+xml,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,application/ogg,audio/opus,font/otf,	application/vnd.ms-powerpoint,application/vnd.rar,application/rtf,application/x-sh,image/svg+xml,application/x-shockwave-flash,application/x-tar,image/tiff,video/mp2t,font/ttf,application/vnd.visio,audio/wav,audio/webm,video/webm,image/webp,font/woff,application/xml,text/xml,application/atom+xml,application/vnd.mozilla.xul+xml,video/3gpp,audio/3gpp,video/3gpp2,audio/3gpp2,application/x-7z-compressed',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
             'publish_date' => 'nullable|date',
+            'topic' => 'nullable | exists:topics,id',
             'chains' => 'required|array',
             'chains.*.roles' => 'array',
             'chains.*.roles.*' => 'exists:roles,id',
@@ -148,10 +150,10 @@ class AnnouncementsController extends Controller
             'attached_file' => isset($file) ? $file->id : null,
             'publish_date' => $publish_date,
             'created_by' => Auth::id(),
+            'topic' => isset($request->topic) ? $request->topic : null,
             'start_date' => isset($request->start_date) ? $request->start_date : null,
             'due_date' => isset($request->due_date) ? $request->due_date : null,
         ]);
-
 
         $users = collect();
         foreach($request->chains as $chain){
@@ -167,13 +169,25 @@ class AnnouncementsController extends Controller
             ]);
 
             //get users that should receive the announcement
-            $enrolls = $this->chain->getCourseSegmentByChain($chain_request)->where('user_id','!=' ,Auth::id());
+            $enrolls = $this->chain->getEnrollsByChain($chain_request);
+            $query=clone $enrolls;
+            
+            $enrolls->where('user_id','!=' ,Auth::id());
 
             if(isset($chain['roles']) && count($chain['roles']) > 0){
                 $enrolls->whereIn('role_id',$chain['roles']);
             }
 
-            $users->push($enrolls->with('user')->get()->pluck('user')->unique()->filter()->values()->pluck('id'));
+            if(!isset($chain['roles'])){
+                $enrolls->where('role_id','!=', 1 );
+            }
+
+            // to get users that on my chain
+            $query_course=$query->where('user_id',Auth::id())->pluck('course');
+            if(isset($query_course))
+                $enrolls->whereIn('course',$query_course);
+
+            $users->push($enrolls->whereHas('user')->select('user_id')->distinct()->pluck('user_id'));
 
             $announcement_chain = AnnouncementsChain::create([
                 'announcement_id' => $announcement->id,
@@ -191,32 +205,17 @@ class AnnouncementsController extends Controller
 
         //check if there's a students to send for them or skip that part
         if(count($users) > 0){
-
-            //add user announcements
-            $users->map(function ($user) use ($announcement) {
-                userAnnouncement::create([
+            foreach($users as $user){
+                $data[] = [
                     'announcement_id' => $announcement->id,
-                    'user_id' => $user
-                ]);
-            });
-
-            //notification object
-            $notify_request = new Request ([
-                'id' => $announcement->id,
-                'type' => 'announcement',
-                'publish_date' => $publish_date,
-                'title' => $request->title,
-                'description' => $request->description,
-                'attached_file' => $file,
-                'start_date' => $announcement->start_date,
-                'due_date' => $announcement->due_date,
-                'message' => $request->title.' announcement is added',
-                'from' => $announcement->created_by,
-                'users' => $users->toArray()
-            ]);
-
-            // use notify store function to notify users with the announcement
-            $notify = (new NotificationsController)->store($notify_request);
+                    'user_id' => $user,
+                ]; 
+            }
+            userAnnouncement::insert($data);
+        
+            //sending Notification
+            $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
+            $notification->send();
         }
 
         return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);
@@ -245,17 +244,15 @@ class AnnouncementsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request , Announcement $announcement)
     {
         $request->validate([
             'id' => 'required|integer|exists:announcements,id',
-            'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3',
             'start_date' => 'before:due_date',
             'due_date' => 'after:' . Carbon::now(),
         ]);
 
         $announcement = Announcement::where('id',$request->id)->with('attachment')->first();
-
         if($request->filled('title'))
             $announcement->title = $request->title;
 
@@ -270,39 +267,16 @@ class AnnouncementsController extends Controller
 
         $file = $announcement->attachment;
         if(Input::hasFile('attached_file')){
+            $request->validate([
+            'attached_file' => 'nullable|file|mimetypes:application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar,text/plain,video/mp4,audio/ogg,audio/mpeg,video/mpeg,video/ogg,jpg,image/jpeg,image/png,mp3,audio/aac,application/x-abiword,application/x-freearc,video/x-msvideo,application/vnd.amazon.ebook,application/octet-stream,image/bmp,application/x-bzip,application/x-bzip2,application/x-cdf,application/x-csh,text/csv,application/vnd.ms-fontobject,application/gzip,image/gif,image/vnd.microsoft.icon,application/json,application/ld+json,audio/midi,application/vnd.apple.installer+xml,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,application/ogg,audio/opus,font/otf,	application/vnd.ms-powerpoint,application/vnd.rar,application/rtf,application/x-sh,image/svg+xml,application/x-shockwave-flash,application/x-tar,image/tiff,video/mp2t,font/ttf,application/vnd.visio,audio/wav,audio/webm,video/webm,image/webp,font/woff,application/xml,text/xml,application/atom+xml,application/vnd.mozilla.xul+xml,video/3gpp,audio/3gpp,video/3gpp2,audio/3gpp2,application/x-7z-compressed',
+            ]);
             $file = attachment::upload_attachment($request->attached_file, 'Announcement');
             $announcement->attached_file = $file->id;
         }
+        if($request->attached_file == 'No_file')
+            $announcement->attached_file = null;
 
         $announcement->save();
-
-        //check if announcement has already been sent to send the update
-        if($announcement->publish_date < Carbon::now()){
-
-            $users = userAnnouncement::where('announcement_id', $announcement->id)->pluck('user_id')->unique('user_id');
-
-            //check if there's a students to send for them or skip that part
-            if(count($users) > 0){
-
-                //notification object
-                $notify_request = new Request ([
-                    'id' => $announcement->id,
-                    'type' => 'announcement',
-                    'publish_date' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'title' => $announcement->title,
-                    'description' => $announcement->description,
-                    'attached_file' => $file,
-                    'start_date' => $announcement->start_date,
-                    'due_date' => $announcement->due_date,
-                    'message' => $announcement->title.' announcement is updated',
-                    'from' => $announcement->created_by,
-                    'users' => $users->toArray()
-                ]);
-
-                // use notify store function to notify users with the announcement
-                $notify = (new NotificationsController)->store($notify_request);
-            }
-        }
 
         return response()->json(['message' => __('messages.announcement.update'), 'body' => $announcement], 200);
     }

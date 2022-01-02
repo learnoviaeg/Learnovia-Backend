@@ -6,7 +6,8 @@ use App\Material;
 use App\Repositories\RepportsRepositoryInterface;
 use App\UserSeen;
 use App\Lesson;
-
+use App\Notifications\MaterialNotification;
+use Illuminate\Support\Facades\Auth;
 class MaterialsObserver
 {
     protected $report;
@@ -23,7 +24,15 @@ class MaterialsObserver
      */
     public function created(Material $material)
     {
+        $notification = new MaterialNotification($material,$material->name.' '.$material->type.' is added.');
+        $notification->send();
+
         $this->report->calculate_course_progress($material->course_id);
+    }
+
+    public function creating(Material $material)
+    {
+        $material->created_by = Auth::id();
     }
 
     /**
@@ -37,10 +46,10 @@ class MaterialsObserver
         if($material->isDirty('lesson_id')){
 
             $lesson = Lesson::find($material->lesson_id);
-            $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            $class_id = $lesson->shared_classes->pluck('id');
 
             $old_lesson = Lesson::find($material->getOriginal('lesson_id'));
-            $old_class_id = $old_lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            $old_class_id = $old_lesson->shared_classes->pluck('id');
             
             if($old_class_id != $class_id)
                 UserSeen::where('lesson_id',$material->getOriginal('lesson_id'))->where('item_id',$material->item_id)->where('type',$material->type)->delete();

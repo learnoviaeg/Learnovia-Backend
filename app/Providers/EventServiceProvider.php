@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Event;
+use App\Providers\DispatcherContract;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -18,17 +19,71 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,    
         ],
-        
-        // 'App\Events\UserGradeEvent' => [
-        //     'App\Listeners\UserGradeListener',
-        // ],
-        // UserGradeEvent::class => [
-        //     UserGradeListener::class,
-        // ],
 
         'App\Events\MassLogsEvent' => [
             'App\Listeners\MassLogsListener',
         ],
+
+        'App\Events\GradeItemEvent' => [
+            'App\Listeners\ItemDetailslistener',
+        ],
+
+        'App\Events\QuizAttemptEvent' => [
+            'App\Listeners\AttemptItemlistener',
+        ],
+
+        'App\Events\RefreshGradeTreeEvent' => [
+            'App\Listeners\RefreshGradeTreeListener',
+        ],
+
+        'App\Events\UpdatedAttemptEvent' => [
+            'App\Listeners\FireAutoCorrectionEventListener',
+        ],
+
+        'App\Events\GradeAttemptEvent' => [
+            'App\Listeners\GradeAttemptItemlistener',
+        ],
+
+        'App\Events\UpdatedQuizQuestionsEvent' => [
+            'App\Listeners\UpdateQuizGradeListener',
+            'App\Listeners\createTimelineListener',
+            'App\Listeners\updateWeightDetailsListener',
+        ],
+
+         'App\Events\UserEnrolledEvent' => [
+            'App\Listeners\AddUserGradersListener',
+        ],
+
+        'App\Events\CourseCreatedEvent' => [
+            'App\Listeners\EnrollAdminListener',
+        ],
+
+        'App\Events\LessonCreatedEvent' => [
+            'App\Listeners\AddSecondChainListener',
+        ],
+        //7esab daragat el2s2la el manual(and_why & essay)
+        'App\Events\ManualCorrectionEvent' => [
+            'App\Listeners\GradeManualListener',
+        ],
+
+        'App\Events\updateQuizAndQuizLessonEvent' => [
+            'App\Listeners\updateTimelineListener',
+            // 'App\Listeners\updateGradeCatListener',
+        ],    
+
+        'App\Events\GraderSetupEvent' => [
+            'App\Listeners\RefreshGraderSetupListener',
+        ],
+
+        'App\Events\UserGradesEditedEvent' => [
+            'App\Listeners\CalculateUserGradesListener',
+        ],
+
+        'App\Events\AssignmentCreatedEvent' => [
+            'App\Listeners\AssignmentGradeCategoryListener',
+        ],
+
+
     ];
 
     /**
@@ -39,7 +94,6 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
-
         //
     }
 }

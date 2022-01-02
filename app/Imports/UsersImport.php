@@ -20,7 +20,6 @@ use App\Enroll;
 use Validator;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Maatwebsite\Excel\Facades\Excel;
-use App\ClassLevel;
 use App\Contract;
 use App\SegmentClass;
 use Carbon\Carbon;
@@ -74,12 +73,18 @@ class UsersImport implements ToModel, WithHeadingRow
             ),
         ));
         
-        $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
-            'headers'   => [
-                'Content-Type' => 'application/json'
-            ], 
-            'body' => $data
-        ]);
+        try{
+            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                'headers'   => [
+                    'Content-Type' => 'application/json'
+                ], 
+                'body' => $data
+            ]);
+        }
+        catch(\Exception $e){
+            throw new \Exception($e->getMessage());
+        }
+        
         $user = new User([
             'firstname' => $row['firstname'],
             'lastname' => $row['lastname'],
@@ -90,6 +95,14 @@ class UsersImport implements ToModel, WithHeadingRow
             'chat_token' => json_decode($res->getBody(),true)['custom_token'],
             'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
         ]);
+
+        // dd(array_keys($row));
+        $array=[];
+        foreach(array_keys($row) as $key){
+            if(strpos($key,"extra_") > -1)
+                $array[$key]=$row[$key];
+        }
+        $user->profile_fields=json_encode($array);
 
         foreach ($optionals as $optional) {
             if (isset($row[$optional])){
@@ -106,37 +119,32 @@ class UsersImport implements ToModel, WithHeadingRow
         $user->save();
         $role = Role::find($row['role_id']);
         $user->assignRole($role);
+        if($row['role_id'] ==1)
+        {
+            $request_user = new Request(['user_id' => $user->id]);
+            EnrollUserToCourseController::EnrollAdmin($request_user);
+        }
 
         if (isset($row['class_id'])){
 
             Validator::make($row,[
                 'class_id' => 'exists:classes,id',
+                'segment_id' => 'required|exists:segments,id',
             ])->validate();
 
+            $level=Classes::find($row['class_id'])->level_id;
+            $segment=Segment::find($row['segment_id']);
+            $segment_id=$segment->id;
+            $type=$segment->academic_type_id;
+            $year=$segment->academic_year_id;
+
             if ($row['role_id'] == 3) {
-
-                $classLevel=ClassLevel::where('class_id',$row['class_id'])->pluck('id')->first();
-                $level=ClassLevel::find($classLevel)->yearLevels[0]->level_id;
-                $type=ClassLevel::find($classLevel)->yearLevels[0]->yearType[0]->academic_type_id;
-                $year=ClassLevel::find($classLevel)->yearLevels[0]->yearType[0]->academic_year_id;
-        
-                //get current segment if there just one in all types of all system 
-                $segment = Segment::where('current',1)->pluck('id')->first();
-                if(isset($row['segment_id']))
-                {
-                    Validator::make($row,[
-                        'segment_id' => 'exists:segments,id',
-                    ])->validate();
-
-                    $segment=$row['segment_id'];
-                }
-                
                 $request = new Request([
                     'year' => $year,
                     'type' => $type,
                     'level' => $level,
                     'class' => $row['class_id'],
-                    'segment' => $segment,
+                    'segment' => $segment_id,
                     'users' => [$user->id]
                 ]);
                 EnrollUserToCourseController::EnrollInAllMandatoryCourses($request);
@@ -145,20 +153,17 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$enrollOptional.$enrollcounter])) {
                     $course_id=Course::where('short_name',$row[$enrollOptional.$enrollcounter])->pluck('id')->first();
                     if(!isset($course_id))
-                        break;
-                    $courseSeg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);
-                    if($courseSeg == null)
-                        break;
+                        // break;
+                        die('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist']);
             
                     Enroll::firstOrCreate([
-                        'course_segment' => $courseSeg->id,
                         'user_id' => $user->id,
                         'role_id'=> 3,
                         'year' => $year,
                         'type' => $type,
                         'level' => $level,
-                        'class' => $row['class_id'],
-                        'segment' => $segment,
+                        'group' => $row['class_id'],
+                        'segment' => $segment_id,
                         'course' => $course_id
                     ]);
         
@@ -170,39 +175,21 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$teacheroptional.$teachercounter])){
                     $course_id=Course::where('short_name',$row[$teacheroptional.$teachercounter])->pluck('id')->first();
                     if(!isset($course_id))
-                        break;
-                    $courseSeg=CourseSegment::getidfromcourse($course_id);
-                    if(isset($row['class_id'])){
-                        $courseSegg=CourseSegment::GetWithClassAndCourse($row['class_id'],$course_id);
-                        if(isset($courseSegg))
-                            $courseSeg=[$courseSegg->id];
-                    }
-                    if($courseSeg == null)
-                        break;
-        
-                    foreach($courseSeg as $course_seg)
-                    {
-                        $cour_seg=CourseSegment::find($course_seg);
-                        $class = $cour_seg->segmentClasses[0]->classLevel[0]->class_id;
-                        $level= $cour_seg->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
-                        $type = $cour_seg->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id;
-                        $year = $cour_seg->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_year_id;
-                        $segment =$cour_seg->segmentClasses[0]->segment_id;
+                        // break;
+                        die('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist']);
         
                         Enroll::firstOrCreate([
-                            'course_segment' => $course_seg,
                             'user_id' => $user->id,
                             'role_id'=> $row['role_id'],
                             'year' => $year,
                             'type' => $type,
                             'level' => $level,
-                            'class' => $class,
-                            'segment' => $segment,
+                            'group' => $row['class_id'],
+                            'segment' => $segment_id,
                             'course' => $course_id
                         ]);
         
                         $teachercounter++;
-                    }
                 }
             }
         }

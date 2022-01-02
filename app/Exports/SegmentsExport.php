@@ -24,10 +24,11 @@ class SegmentsExport implements FromCollection, WithHeadings
         $segments =  Segment::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
         foreach ($segments as $segment) {
             $type = AcademicType::find($segment->academic_type_id);
-            $year = $type !== null && $type->Actypeyear !== null ? AcademicYear::find($type->Actypeyear->academic_year_id) : null;
+            $year = AcademicYear::find($segment->academic_year_id);
+            // $year = $type !== null && $type->Actypeyear !== null ? AcademicYear::find($type->Actypeyear->academic_year_id) : null;
     
-            $segment['year'] = isset($year) ? $year->name : '';
-            $segment['type'] = isset($type) ? $type->name : '';
+            $segment['year'] = $type->name;
+            $segment['type'] = $year->name;
 
             $segment->setHidden([])->setVisible($this->fields);
         }

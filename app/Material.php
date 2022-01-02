@@ -12,7 +12,7 @@ use App\UserSeen;
 class Material extends Model
 {
     protected $fillable = [
-        'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number'
+        'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number','created_by'
     ];
     protected $appends = ['media_type','attachment_name','user_seen_number'];
     protected $hidden = ['mime_type'];
@@ -41,7 +41,7 @@ class Material extends Model
 
     public function getLinkAttribute(){
 
-        $url= config('app.url').'api/materials/'.$this->id.'/?api_token='.Auth::user()->api_token;
+        $url= config('app.url').'api/materials/'.$this->id.'?api_token='.Auth::user()->api_token;
 
         return $url;
     }
@@ -51,5 +51,17 @@ class Material extends Model
     }
     public function lesson(){
         return $this->belongsTo('App\Lesson');
+    }
+    
+    public function user(){
+        return $this->belongsTo('App\User','created_by');
+    }
+
+    public function file(){
+        return $this->belongsTo('Modules\UploadFiles\Entities\File','item_id');
+    }
+
+    public function media(){
+        return $this->belongsTo('Modules\UploadFiles\Entities\Media','item_id')->where('type', 'media');
     }
 }

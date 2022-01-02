@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Announcement;
+use App\AnnouncementsChain;
 use Illuminate\Http\Request;
 use App\Material;
 use App\h5pLesson;
@@ -12,9 +14,13 @@ use DB;
 use App\Paginate;
 use Auth;
 use App\Enroll;
+use App\Course;
 use App\Lesson;
 use App\UserSeen;
 use App\CourseSegment;
+use App\SecondaryChain;
+use App\userAnnouncement;
+use Illuminate\Validation\Rule;
 
 class SeenReportController extends Controller
 {
@@ -60,18 +66,18 @@ class SeenReportController extends Controller
         ]);
 
         
-        $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-
-        if($request->filled('role'))
-            $user_course_segments->whereIn('role_id',$request->role);
-
-        if(!$request->user()->can('site/show-all-courses'))//student
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-
-        $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-
-        $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
+        $enrollss = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
       
+        if($request->filled('role'))
+            $enrollss->whereIn('role_id',$request->role);
+
+        // if(!$request->user()->can('site/show-all-courses'))//student
+            // $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+
+        // $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
+
+        $lessons = SecondaryChain::whereIn('enroll_id', $enrollss->get()->pluck('id'))->pluck('lesson_id');
+       
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
@@ -82,13 +88,14 @@ class SeenReportController extends Controller
         //getting total number of enrolled users for each lesson
         $lessons_enrolls = collect();
 
-        $lessons_object = $user_course_segments->pluck('courseSegment.lessons')->collapse();
+        $lessons_object = Lesson::whereIn('id',$lessons)->get();
         if($request->filled('lesson_id'))
             $lessons_object = collect([Lesson::find($request->lesson_id)]);
 
         $lessons_object->map(function ($lesson) use ($lessons_enrolls) {
-
-            $total = count(Enroll::where('course_segment',$lesson->course_segment_id)->where('role_id',3)->select('user_id')->distinct()->get());
+            
+            $total = SecondaryChain::where('lesson_id', $lesson->id)->where('role_id',3)->count();
+            // $total = count(Enroll::where('course_segment',$lesson->course_segment_id)->where('role_id',3)->select('user_id')->distinct()->get());
 
             $lessons_enrolls->push([
                 'lesson_id' => $lesson->id,
@@ -126,9 +133,9 @@ class SeenReportController extends Controller
                     'seen_number' => $assignment->seen_number,
                     'user_seen_number' => $assignment->user_seen_number,
                     'lesson_id' => $assignment->lesson_id,
-                    'percentage' => isset($total) && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->courseSegment->courses[0],
-                    'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
+                    'percentage' => isset($total) && $total['total_enrolls'] != 0 && $assignment->user_seen_number != 0  ? round(($assignment->user_seen_number/$total['total_enrolls'])*100,2) : 0,
+                    'course' => Course::find($lesson->course_id),
+                    'class' => $lesson->shared_classes
                 ]);
 
                 return $report;
@@ -156,9 +163,9 @@ class SeenReportController extends Controller
                     'seen_number' => $quiz->seen_number,
                     'user_seen_number' => $quiz->user_seen_number,
                     'lesson_id' => $quiz->lesson_id,
-                    'percentage' => isset($total) && $quiz->user_seen_number != 0 ? round(($quiz->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->courseSegment->courses[0],
-                    'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
+                    'percentage' => isset($total) && $total['total_enrolls'] != 0 && $quiz->user_seen_number != 0 ? round(($quiz->user_seen_number/$total['total_enrolls'])*100,2) : 0,
+                    'course' => Course::find($lesson->course_id),
+                    'class' => $lesson->shared_classes
                 ]);
                 return $report;
             });
@@ -184,9 +191,9 @@ class SeenReportController extends Controller
                     'seen_number' => $h5p->seen_number,
                     'user_seen_number' => $h5p->user_seen_number,
                     'lesson_id' => $h5p->lesson_id,
-                    'percentage' => isset($total) && $h5p->user_seen_number != 0 ? round(($h5p->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->courseSegment->courses[0],
-                    'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
+                    'percentage' => isset($total) && $total['total_enrolls'] != 0 && $h5p->user_seen_number != 0 ? round(($h5p->user_seen_number/$total['total_enrolls'])*100,2) : 0,
+                    'course' => Course::find($lesson->course_id),
+                    'class' => $lesson->shared_classes
                 ]);
                 return $report;
             });
@@ -215,9 +222,9 @@ class SeenReportController extends Controller
                     'seen_number' => $material->seen_number,
                     'user_seen_number' => $material->user_seen_number,
                     'lesson_id' => $material->lesson_id,
-                    'percentage' => isset($total) && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total['total_enrolls'])*100,2) : 0,
-                    'course' => $lesson->courseSegment->courses[0],
-                    'class' => $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id
+                    'percentage' => isset($total) && $total['total_enrolls'] != 0 && $material->user_seen_number != 0 ? round(($material->user_seen_number/$total['total_enrolls'])*100,2) : 0,
+                    'course' => Course::find($lesson->course_id),
+                    'class' => $lesson->shared_classes
                 ]);
                 return $report;
             });
@@ -238,7 +245,12 @@ class SeenReportController extends Controller
             
             $total = count($report);
             $sum_percentage = array_sum($report->pluck('percentage')->toArray());
-            $final_percentage = round($sum_percentage/$total,1);
+
+            $final_percentage = 0;
+            
+            if($total > 0){
+                $final_percentage = round($sum_percentage/$total,1);
+            }
 
             return response()->json(['message' => 'Total Percentage', 'body' => $final_percentage], 200);
         }
@@ -252,6 +264,104 @@ class SeenReportController extends Controller
 
 
         return response()->json(['message' => 'Overall seen report', 'body' => $report->paginate(Paginate::GetPaginate($request))], 200);
+    }
+
+
+    public function announcementsSeenReport(Request $request,$option = null){
+
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+            'class' => 'nullable|integer|exists:classes,id',
+            'search' => 'nullable',
+            'paginate' => 'integer',
+            'from' => 'date|required_with:to',
+            'to' => 'date|required_with:from',
+            'id' => [Rule::requiredIf($option === 'users')],
+        ]);
+
+        $chains = AnnouncementsChain::query();
+
+        if($request->has('year')){
+            $chains->where('year',$request->year);
+        }
+
+        if($request->has('type')){
+            $chains->where('type',$request->type);
+        }
+
+        if($request->has('level')){
+            $chains->where('level',$request->level);
+        }
+
+        if($request->has('segment')){
+            $chains->where('segment',$request->segment);
+        }
+
+        if($request->has('class')){
+            $chains->where('class',$request->class);
+        }
+
+        if($request->has('courses')){
+            $chains->whereIn('course',$request->courses);
+        }
+
+
+        $announcements = Announcement::orderBy('publish_date','desc')->whereIn('id',$chains->pluck('announcement_id'));
+
+        if($request->has('search')){
+            $announcements->where('title', 'LIKE' , "%$request->search%");
+        }
+
+        if($request->filled('from') && $request->filled('to')){
+            $announcements->whereDate('created_at','>=',$request->from)->whereDate('created_at','<=',$request->to);
+        }
+        
+        $announcements = $announcements->get();
+
+        //get users who saw announcement
+        if($option == 'users'){
+            $seenUsers = UserSeen::where('type','announcement')->where('item_id',$request->id)->where('lesson_id',null)->with('user')->get();//->pluck('user');
+
+            $seenUsers->map(function ($seenUser){
+
+                $seenUser->user['seen'] = 'yes';
+                $seenUser->user['seen_count'] = $seenUser->count;
+                $seenUser->user['seen_at'] = $seenUser->updated_at;
+                
+                return $seenUser;
+            });
+
+            return response()->json(['message' => 'announcement seen users', 'body' => $seenUsers->pluck('user')], 200);
+        }
+
+        //get user seen number and total, to calculate percentage for each announcement
+        foreach($announcements as $announcement){
+            $total_users = userAnnouncement::where('announcement_id',$announcement->id)->count();
+            $announcement->user_seen_number = UserSeen::where('type','announcement')->where('item_id',$announcement->id)->where('lesson_id',null)->count();
+            $announcement->percentage = $announcement->user_seen_number > 0 ? round(($announcement->user_seen_number/$total_users)*100,2) : 0;
+        }
+
+        //get chart percentage
+        if($option == 'chart'){
+            
+            $total = count($announcements);
+            $sum_percentage = array_sum($announcements->pluck('percentage')->toArray());
+
+            $final_percentage = 0;
+            
+            if($total > 0){
+                $final_percentage = round($sum_percentage/$total,1);
+            }
+
+            return response()->json(['message' => 'Total Percentage', 'body' => $final_percentage], 200);
+        }
+
+        return response()->json(['message' => 'Anouncements overall seen report', 'body' => $announcements->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**

@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Lesson extends Model
 {
-    protected $fillable = ['name','course_segment_id','index' , 'image' , 'description'];
+    protected $fillable = ['name','course_segment_id','index' , 'image' , 'description','shared_lesson','course_id' ,'shared_classes'];
+
+    protected $dispatchesEvents = [
+        'created' => \App\Events\LessonCreatedEvent::class,
+    ];
+
     public function courseSegment(){
         return $this->belongsTo('App\CourseSegment');
     }
@@ -51,5 +56,23 @@ class Lesson extends Model
     public function Quiz()
     {
         return $this->hasMany('Modules\QuestionBank\Entities\Quiz','id');
+    }
+
+    public function SecondaryChain(){
+        return $this->hasMany('App\SecondaryChain','lesson_id' , 'id');
+
+    }
+
+    public function getSharedClassesAttribute($value)
+    {   if($value != null){
+            $content= json_decode($value);
+            return Classes::whereIn('id',$content)->get();
+        }
+        return $value;
+    }
+    
+    public function course()
+    {
+        return $this->belongsTo('App\Course','course_id','id');
     }
 }

@@ -186,7 +186,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/teachers', 'title' => 'view course teachers']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/participants', 'title' => 'view course participants']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'course/progress-bar', 'title' => 'view course progress bar']);
-
+            
             //Enroll Permissions
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/user', 'title' => 'Staff Enrollment' , 'dashboard' => 1, 'icon' => 'Star']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'enroll/un-enroll-single-user', 'title' => 'un-enroll user']);
@@ -335,6 +335,7 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/update', 'title' => 'update user grade']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/delete', 'title' => 'delete user grade']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/user/course-grade', 'title' => 'course\'s user and grades']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'allow-edit-profiles', 'title' => 'allow user to edit any profile']);
 
             //Grades Reports
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'grade/report/grader', 'title' => 'grader report']);
@@ -380,7 +381,10 @@ class SpatieController extends Controller
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/active_users', 'title' => 'Active users report', 'dashboard' => 1, 'icon'=> 'Report']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/in_active_users', 'title' => 'In active users report', 'dashboard' => 1, 'icon'=> 'Report']);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/seen_report', 'title' => 'Seen report']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/course_progress', 'title' => 'view course progress report' , 'dashboard' => 1]);
             \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/overall_seen_report', 'title' => 'Overall seen report','dashboard' => 1, 'icon'=> 'Report']);
+            \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'reports/total_attempts_report', 'title' => 'Total Attempts Report','dashboard' => 1, 'icon'=> 'Report']);
+
 
             //Add Roles
             $super = \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin' , 'description' => 'System manager that can monitor everything.']);
@@ -616,10 +620,13 @@ class SpatieController extends Controller
     public function Get_Role(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:roles,id'
+            'id' => 'exists:roles,id'
         ]);
 
-        $role = Role::find($request->id);
+        if(isset($request->id))
+            $role = Role::find($request->id);
+
+        $role = Role::get();
 
         unset($role->guard_name);
         unset($role->created_at);
@@ -813,7 +820,8 @@ class SpatieController extends Controller
     public function List_Roles_With_Permission(Request $request)
     {
         $request->validate([
-            'search' => 'nullable'
+            'search' => 'nullable',
+            'permission' => 'nullable'
         ]);
 
         if ($request->filled('search')) {
@@ -821,6 +829,13 @@ class SpatieController extends Controller
                 ->paginate(HelperController::GetPaginate($request));
             return HelperController::api_response_format(202, $roles);
         }
+
+        if ($request->filled('permission')) {
+            $roles = Permission::with('roles')->where('name', 'LIKE', "%$request->permission%")->get()
+                  ->paginate(HelperController::GetPaginate($request));
+            return HelperController::api_response_format(202, $roles);
+        }
+
         $roles = Role::all();
         foreach ($roles as $role) {
             $role->count = User::role($role)->count();
@@ -844,7 +859,8 @@ class SpatieController extends Controller
         ]);
 
         $findrole = Role::find($request->roleid);
-        $findrole->permissions;
+        if(Auth::user()->can('site/show-all-courses'))
+            $findrole->permissions;
         return HelperController::api_response_format(200, $findrole);
     }
 
@@ -1098,12 +1114,16 @@ class SpatieController extends Controller
     public function dashboard(Request $request)
     {
         $dashbordPermission = array();
+        $ids = array();
         $user = Auth::user();
         $allRole = $user->roles;
         foreach ($allRole as $role) {
             $pers = $role->getAllPermissions();
             foreach ($pers as $permission) {
                 if ($permission->dashboard) {
+                    if(in_array($permission->id , $ids))
+                        continue;
+                    array_push($ids , $permission->id);
                     $key = explode("/", $permission->name)[0];
                     $dashbordPermission[$key]['icon']= $permission->icon;
                     $dashbordPermission[$key]['routes'][] = ['route' => $permission->name, 'title' => $permission->title];
@@ -1124,8 +1144,8 @@ class SpatieController extends Controller
             $request['ids']= Role::pluck('id');
 
         $filename = uniqid();
-        $file = Excel::store(new ExportRoleWithPermissions($request->ids), 'roles'.$filename.'.xls','public');
-        $file = url(Storage::url('roles'.$filename.'.xls'));
+        $file = Excel::store(new ExportRoleWithPermissions($request->ids), 'roles'.$filename.'.xlsx','public');
+        $file = url(Storage::url('roles'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

@@ -3,29 +3,23 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use  App\Events\UserGradeEvent;
 
 class GradeItems extends Model
 {
     protected $fillable = [
-        'grade_category', 'grademin', 'grademax', 'calculation', 'item_no', 'grade_pass', 'multifactor',
-        'plusfactor', 'aggregationcoef', 'aggregationcoef2', 'item_type', 'name', 'item_Entity', 'hidden','type', 'weight', 'id_number','scale_id'
+        'grade_category_id','item_id', 'name', 'type', 'index', 'max', 'min','weight_adjust', 'hidden' , 'locked' , 'weight'
     ];
-
-    // protected $dispatchesEvents = [
-    //     'created' => UserGradeEvent::class,  
-    // ];
-
-    protected $appends = ['parent_aggregation'];
 
     public function GradeCategory()
     {
-        return $this->belongsTo('App\GradeCategory', 'grade_category', 'id');
+        return $this->belongsTo('App\GradeCategory', 'grade_category_id', 'id');
     }
+
     public function ItemType()
     {
         return $this->belongsTo('App\ItemType', 'item_type', 'id');
     }
+    
     public function scale()
     {
         return $this->belongsTo('App\scale', 'scale_id', 'id');
@@ -43,16 +37,16 @@ class GradeItems extends Model
         return round(($this->grademax * $this->GradeCategory->percentage()) / $this->GradeCategory->total(), 3);
     }
 
-    public function getParentAggregationAttribute()
-    {
-        return $this->GradeCategory->aggregation;
-    }
-    public static function clacWitheval($calculation, $grade)
-    {
-        $str = $calculation . "(" . $grade . ")";
-        $p = eval('return ' . $str . ';');
-        return $p;
-    }
+    // public function getParentAggregationAttribute()
+    // {
+    //     return $this->GradeCategory->aggregation;
+    // }
+    // public static function clacWitheval($calculation, $grade)
+    // {
+    //     $str = $calculation . "(" . $grade . ")";
+    //     $p = eval('return ' . $str . ';');
+    //     return $p;
+    // }
 
     public static function rads()
     {
@@ -123,5 +117,10 @@ class GradeItems extends Model
             $result = self::gcd($arr[$i], $result);
 
         return $result;
+    }
+
+    public function userGrades()
+    {
+        return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','item');
     }
 }

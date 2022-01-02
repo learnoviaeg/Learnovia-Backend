@@ -7,8 +7,10 @@ return [
         'not_found' => 'Item is not found!',
         'parent_cannot_submit' => 'Parents can not submit answers',
         'user_not_assign' => 'This user is not assigned to this item',
-        'cannot_edit' => 'you can\'t adit you submittion',
+        'cannot_edit' => 'you can\'t edit you submission',
         'submit_limit' => 'Sorry, you are not allowed to submit anymore',
+        'quiz_time' => 'Sorry, Quiz isn\'t started yet',
+        'quiz_ended' => 'Sorry, Quiz ended',
         'not_available_now' => 'Sorry, This item is not available for you at this moment',
         'try_again' => 'Something went wrong, please try again',
         'data_invalid' => 'This data is invalid',
@@ -23,9 +25,12 @@ return [
         'already_exist' => 'Item is already exist',
         'no_active_segment' => 'There is no active segment for this item',
         'no_active_year' => 'There is no active year available',
-        'extension_not_supported' => 'This extension is not supported',
+        'extension_not_supported' => 'extension is not valid',
         'no_permission' => 'User does not have the right permissions',
         'role_required' => 'Please, choose role first',
+        'not_allowed' => 'You are not allowed to view this.',
+        'not_allowed_to_edit' => 'You are not allowed to edit this.',
+        'extension_error' => 'This extension is not valid'
     ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
@@ -91,7 +96,10 @@ return [
     'quiz' => [
         'add' => 'Quiz added successfully',
         'update' => 'Quiz updated successfully',
+        'NotUpdate' => 'you can\'t update this quiz',
         'delete' => 'Quiz deleted successfully',
+        'assign' => 'Questions assigned successfully',
+        'unAssign' => 'Questions unAssigned successfully',
         'list' => 'Quizzes List',
         'count' => 'Quizzes count',
         'invaled_feedback' => 'Invalid feedback type, feedback can not be After submission',
@@ -103,6 +111,10 @@ return [
         'quiz_object' => 'Quiz details',
         'quiz_hidden' => 'This quiz is hidden',
         'quiz_not_started' => 'This quiz didnt start yet',
+        'grade_pass_settings' => 'Grade to pass settings added successfully',
+        'grade_pass_settings_list' => 'Grade to pass settings',
+        'wrong_date' => 'You can\'t update with this date please, Revision duration and end_date',
+        'quiz_notify' => 'You have a new quiz :quizName in course :courseName'
     ],
     'permissions' => [
         'no_roles_assigned' => 'There is no roles assigned to this permission',
@@ -116,6 +128,7 @@ return [
         'add' => 'User added successfully',
         'update' => 'User updated successfully',
         'delete' => 'User/s deleted successfully',
+        'cannot_delete' => 'You can\'t delete this user',
         'list' => 'Users list',
         'all_list' => 'All users list',
         'count' => 'Users roles count',
@@ -136,7 +149,13 @@ return [
         'list' => 'Pages List',
         'page_not_belong' => 'This page does not belong to this lesson',
         'page_hidden' => 'This page is hidden'
+    ],
 
+    'topic' => [
+        'add' => 'Topic added successfully',
+        'update' => 'Topic updated successfully',
+        'delete' => 'Topic deleted successfully',
+        'list' => 'Topics List',
     ],
     'file' => [
         'add' => 'File uploaded successfully',
@@ -270,6 +289,8 @@ return [
         'list' => 'Courses List',
         'object' => 'Course details',
         'assign' => 'Course assigned successfully',
+        'template' => 'Templates added successfully',
+        'anotherTemplate'=> 'There is another template in this level. Please change it first.',
     ],
     'announcement' => [
         'add' => 'Announcement sent successfully',
@@ -294,7 +315,7 @@ return [
         'no_courses_belong_to_class' => 'No courses belong to this class',
     ],
     'zoom' => [
-        'zoom_account' => 'user haven\'t account on zoom',
+        'zoom_account' => 'user hasn\'t account on zoom',
         'Invalid' => 'Invalid Access Token',
     ],
     'status' => [
@@ -303,5 +324,29 @@ return [
         'graded' => 'Graded',
         'not_graded' => 'Not graded',
         'no_answers' => 'No answers',
+    ],
+    'grade_category' => [
+        'add'    => 'Grade category added successfully',
+        'update' => 'Grade category is updated successfully',
+        'list' => 'Grade Categories List',
+        'delete' => 'Grade category deleted successfully',
+        'not_found' => 'Can\'t find grade category',
+        'CannotUpdate' => 'you can\'t update this category',
+    ],
+    'grade_item' => [
+        'add'    => 'Grade item added successfully',
+        'update' => 'Grade item is updated successfully',
+        'list' => 'Grade items List',
+        'delete' => 'Grade item deleted successfully',
+    ],
+    'logo' => [
+        'set' => 'logo added successfully',
+        'delete' => 'logo deleted successfully',
+        'update' => 'Updated Successfully',
+        'faild' => 'there is no logo',
+        'get' => 'logo is'
+    ],
+    'user_grade' => [
+        'update' => 'Grade is updated succefully',
     ],
 ];

@@ -7,16 +7,20 @@ use DB;
 
 class Enroll extends Model
 {
-    protected $fillable = ['user_id', 'username', 'course_segment', 'role_id', 'level', 'class' ,'year', 'type', 'segment', 'course'];
+    protected $fillable = ['user_id', 'username', 'course_segment', 'role_id', 'level', 'group' ,'year', 'type', 'segment', 'course'];
+
+    protected $dispatchesEvents = [
+        'created' => \App\Events\UserEnrolledEvent::class,
+    ];
 
     public static function getroleid($user_id, $course_segment)
     {
         return self::where('user_id', $user_id)->where('course_segment', $course_segment)->pluck('role_id')->first();
     }
 
-    public static function IsExist($course_segment_id, $user_id,$role_id)
+    public static function IsExist($course,$class, $user_id,$role_id)
     {
-        $check = self::where('course_segment', $course_segment_id)->where('role_id',$role_id)->where('user_id', $user_id)->pluck('id')->first();
+        $check = self::where('course', $course)->where('group',$class)->where('role_id',$role_id)->where('user_id', $user_id)->pluck('id')->first();
         return $check;
     }
 
@@ -32,10 +36,10 @@ class Enroll extends Model
         return $check;
     }
 
-   public static function GetUsers_id($course_seg_id){
-    $check = self::where('course_segment', $course_seg_id)->where('role_id',3)->pluck('user_id');
-    return $check;
-   }
+    public static function GetUsers_id($course_seg_id){
+        $check = self::where('course_segment', $course_seg_id)->where('role_id',3)->pluck('user_id');
+        return $check;
+    }
 
     protected $hidden = [
         'created_at', 'updated_at'
@@ -76,9 +80,9 @@ class Enroll extends Model
     {
         return $this->belongsTo('App\Course','type','id');
     }
-    public function segment()
+    public function Segment()
     {
-        return $this->belongsTo('App\Level','segment','id');
+        return $this->belongsTo('App\Segment','segment','id');
     }
 
     public function roles()
@@ -89,5 +93,21 @@ class Enroll extends Model
     public function users()
     {
         return $this->hasMany('App\User','id' , 'user_id');
+    }
+
+    public function SecondaryChain()
+    {
+        return $this->hasMany('App\SecondaryChain','enroll_id' , 'id');
+    }
+
+    public function Lessons()
+    {
+        return $this->hasManyThrough(Lesson::class, SecondaryChain::class);
+    }
+
+
+    public function topics()
+    {
+        return $this->belongsToMany('App\Topic' , 'topic_id' , 'id');
     }
 }

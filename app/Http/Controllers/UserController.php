@@ -64,11 +64,11 @@ class UserController extends Controller
             // 'nickname' => 'array',
             // 'nickname.*' => 'string|min:3|max:50',
             'firstname' => 'required|array',
-            'firstname.*' => 'required|string|min:3|max:50',
+            'firstname.*' => 'required|string|min:2|max:50',
             'lastname' => 'required|array',
-            'lastname.*' => 'required|string|min:3|max:50',
+            'lastname.*' => 'required|string|min:2|max:50',
             'password' => 'required|array',
-            'password.*' => 'required|alpha_dash|string|min:6|max:191',
+            'password.*' => 'required|alpha_dash|string|min:3|max:191',
             // 'role' => 'required|array',
             // 'role.*' => 'required|exists:roles,id',
             'role' => 'required|integer|exists:roles,id', /// in all system
@@ -128,12 +128,17 @@ class UserController extends Controller
             );    
             $data = json_encode($data);
 
-            $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
-                'headers'   => [
-                    'Content-Type' => 'application/json'
-                ], 
-                'body' => $data
-            ]);
+            try{
+                $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                    'headers'   => [
+                        'Content-Type' => 'application/json'
+                    ], 
+                    'body' => $data
+                ]);
+            }
+            catch(\Exception $e){
+                throw new \Exception($e->getMessage());
+            }
             
             $user = User::create([
                 'firstname' => $firstname,
@@ -169,42 +174,49 @@ class UserController extends Controller
             }
             $role = Role::find($request->role);
             $user->assignRole($role);
+            if($request->role ==1)
+            {
+                $request_user = new Request(['user_id' => $user->id]);
+                EnrollUserToCourseController::EnrollAdmin($request_user);
+            }
             // $Auth_role = Role::find(8);
             // $user->assignRole($Auth_role);
-            if ($request->role_id == 3) {
-                $option = new Request([
-                    'users' => [$user->id],
-                    'level' => $request->level[$key] ,
-                    'type' => $request->type[$key],
-                    'class' => $request->class_id[$key]
-                ]);
-                EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
+            // if ($request->role_id == 3) {
+            //     $option = new Request([
+            //         'users' => [$user->id],
+            //         'level' => $request->level[$key] ,
+            //         'type' => $request->type[$key],
+            //         'class' => $request->class_id[$key],
+            //         'year' => $request->year[$key],
+            //         'segment' => $request->segment[$key]
+            //     ]);
+            //     EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
 
-                $enrollcounter = 0;
-                while (isset($request->$enrollOptional[$key][$enrollcounter])) {
-                    $option = new Request([
-                        'course' => [$request->$enrollOptional[$key]],
-                        'class' =>$request->class_id[$key],
-                        'users' => array($user->id),
-                        'role_id' => array(3)
-                    ]);
-                    EnrollUserToCourseController::EnrollCourses($option);
-                    $enrollcounter++;
-                }
-            } else {
-                $teachercounter = 0;
+            //     $enrollcounter = 0;
+            //     while (isset($request->$enrollOptional[$key][$enrollcounter])) {
+            //         $option = new Request([
+            //             'course' => [$request->$enrollOptional[$key]],
+            //             'class' =>$request->class_id[$key],
+            //             'users' => array($user->id),
+            //             'role_id' => array(3)
+            //         ]);
+            //         EnrollUserToCourseController::EnrollCourses($option);
+            //         $enrollcounter++;
+            //     }
+            // } else {
+            //     $teachercounter = 0;
 
-                while (isset($request->$teacheroptional[$key][$teachercounter])) {
-                    $option = new Request([
-                        'course' => [$request->$teacheroptional[$key]],
-                        'class' =>$request->class_id[$key],
-                        'users' => array($user->id),
-                        'role_id' => array(4)
-                    ]);
-                    EnrollUserToCourseController::EnrollCourses($option);
-                    $teachercounter++;
-                }
-            }
+            //     while (isset($request->$teacheroptional[$key][$teachercounter])) {
+            //         $option = new Request([
+            //             'course' => [$request->$teacheroptional[$key]],
+            //             'class' =>$request->class_id[$key],
+            //             'users' => array($user->id),
+            //             'role_id' => array(4)
+            //         ]);
+            //         EnrollUserToCourseController::EnrollCourses($option);
+            //         $teachercounter++;
+            //     }
+            // }
             $users_is->push($user);
         }
         return HelperController::api_response_format(201, $users_is, __('messages.users.add'));
@@ -226,11 +238,11 @@ class UserController extends Controller
     {
         $request->validate([
             'nickname'=>'nullable|string|min:3|max:50',
-            'firstname' => 'required|string|min:3|max:50',
-            'lastname' => 'required|string|min:3|max:50',
+            'firstname' => 'required|string|min:2|max:50',
+            'lastname' => 'required|string|min:2|max:50',
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
-            'password' => 'alpha_dash|string|min:6|max:191',
+            'password' => 'alpha_dash|string|min:3|max:191',
             'username' => 'alpha_dash|unique:users,username,'.$request->id,
             'role' => 'exists:roles,id', /// in all system
             'role_id' => 'required_with:level|exists:roles,id', /// chain role
@@ -239,6 +251,8 @@ class UserController extends Controller
             'second language' => 'integer|exists:languages,id',
             'birthdate' => 'nullable|date'
         ]);
+        if(!Auth::user()->can('allow-edit-profiles') && $request->id != Auth::id())
+            return response()->json(['message' => __('messages.error.not_allowed_to_edit'), 'body' => null ], 200);
 
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address','nationality', 'notes', 'email', 'suspend',
@@ -249,35 +263,37 @@ class UserController extends Controller
 
         $user = User::find($request->id);
 
+        if (!Auth::user()->can('user/update-password')) 
+            return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+
+        if (isset($request->password)){
+            $user->real_password=$request->password;
+            $user->password =   bcrypt($request->password);
+
+            $tokens = $user->tokens->where('revoked',false);
+            foreach($tokens as $token)
+                $token->revoke();
+            unset($user->tokens);
+            Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+        }
+
+        if (!Auth::user()->can('user/update-username')) 
+            return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+
+        if (isset($request->username)){
+            $user->username=$request->username;
+
+            $tokens = $user->tokens->where('revoked',false);
+            foreach($tokens as $token)
+                $token->revoke();
+            unset($user->tokens);
+            Parents::where('parent_id',$user->id)->update(['current'=> 0]);
+        }
+
         $check = $user->update([
             'firstname' => $request->firstname,
             'lastname' => $request->lastname,
         ]);
-
-            if (Auth::user()->can('user/update-password')) {
-                if (isset($request->password)){
-                    $user->real_password=$request->password;
-                    $user->password =   bcrypt($request->password);
-
-                    $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token)
-                        $token->revoke();
-                    unset($user->tokens);
-                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
-                }
-            }
-
-            if (Auth::user()->can('user/update-username')) {
-                if (isset($request->username)){
-                    $user->username=$request->username;
-
-                    $tokens = $user->tokens->where('revoked',false);
-                    foreach($tokens as $token)
-                        $token->revoke();
-                    unset($user->tokens);
-                    Parents::where('parent_id',$user->id)->update(['current'=> 0]);
-                }
-            }
 
         if (isset($request->picture))
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
@@ -310,44 +326,49 @@ class UserController extends Controller
         // role is in all system
         $role = Role::find($request->role);
         $user->assignRole($role);
-
-        if ($request->role_id == 3) {
-            $oldChain=Enroll::where('user_id',$user->id)->where('role_id',$request->role_id)->get();
-            foreach($oldChain as $old)
-                $old->delete();
-            $option = new Request([
-                'users' => [$user->id],
-                'level' => $request->level ,
-                'type' => $request->type,
-                'class' => $request->class_id
-            ]);
-            EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
-
-            $enrollcounter = 0;
-            while (isset($request->$enrollOptional[$enrollcounter])) {
-                $option = new Request([
-                    'course' => [$request->$enrollOptional],
-                    'class' =>$request->class_id,
-                    'users' => array($user->id),
-                    'role_id' => array(3)
-                ]);
-                EnrollUserToCourseController::EnrollCourses($option);
-                $enrollcounter++;
-            }
-        } else {
-            $teachercounter = 0;
-
-            while (isset($request->$teacheroptional[$teachercounter])) {
-                $option = new Request([
-                    'course' => [$request->$teacheroptional],
-                    'class' =>$request->class_id,
-                    'users' => array($user->id),
-                    'role_id' => array(4)
-                ]);
-                EnrollUserToCourseController::EnrollCourses($option);
-                $teachercounter++;
-            }
+        if($request->role ==1)
+        {
+            $request_user = new Request(['user_id' => $user->id]);
+            EnrollUserToCourseController::EnrollAdmin($request_user);
         }
+
+        // if ($request->role_id == 3) {
+        //     $oldChain=Enroll::where('user_id',$user->id)->where('role_id',$request->role_id)->get();
+        //     foreach($oldChain as $old)
+        //         $old->delete();
+        //     $option = new Request([
+        //         'users' => [$user->id],
+        //         'level' => $request->level ,
+        //         'type' => $request->type,
+        //         'class' => $request->class_id
+        //     ]);
+        //     EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
+
+        //     $enrollcounter = 0;
+        //     while (isset($request->$enrollOptional[$enrollcounter])) {
+        //         $option = new Request([
+        //             'course' => [$request->$enrollOptional],
+        //             'class' =>$request->class_id,
+        //             'users' => array($user->id),
+        //             'role_id' => array(3)
+        //         ]);
+        //         EnrollUserToCourseController::EnrollCourses($option);
+        //         $enrollcounter++;
+        //     }
+        // } else {
+        //     $teachercounter = 0;
+
+        //     while (isset($request->$teacheroptional[$teachercounter])) {
+        //         $option = new Request([
+        //             'course' => [$request->$teacheroptional],
+        //             'class' =>$request->class_id,
+        //             'users' => array($user->id),
+        //             'role_id' => array(4)
+        //         ]);
+        //         EnrollUserToCourseController::EnrollCourses($option);
+        //         $teachercounter++;
+        //     }
+        // }
         return HelperController::api_response_format(201, $user, __('messages.users.update'));
     }
 
@@ -365,10 +386,21 @@ class UserController extends Controller
             'users_id.*' => 'exists:users,id',
         ]);
 
-        $enrolls=Enroll::whereIn('user_id',$request->users_id)->get();
+        foreach($request->users_id as $user_id)
+        {
+            $user=User::find($user_id);
+
+            // user can't delete himself
+            if(Auth::id() == $user_id)
+                return HelperController::api_response_format(201, $user->username , __('messages.users.cannot_delete'));
+            
+            // user can't delete admin and other super admins except learnovia company
+            if(Auth::id() != 1)
+                if(in_array(1,$user->roles->pluck('id')->toArray()))
+                    return HelperController::api_response_format(201, $user->username , __('messages.users.cannot_delete'));
+        }
         $all=Enroll::whereIn('user_id',$request->users_id)->delete();
-        if($all > 0)
-            event(new MassLogsEvent($enrolls,'deleted'));
+
         $user = User::whereIn('id',$request->users_id)->delete();
 
         return HelperController::api_response_format(201, null, __('messages.users.delete'));
@@ -397,6 +429,7 @@ class UserController extends Controller
             'roles' => 'nullable|array',
             'roles.*' => 'required|integer|exists:roles,id',
             'count' => 'in:1,0',
+            'suspend' => 'in:1,0',
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
         ]);
@@ -416,6 +449,8 @@ class UserController extends Controller
             $users= $users->whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
         });
+        if($request->filled('suspend'))
+            $users = $users->where('suspend',$request->suspend);
         if($request->filled('from') && $request->filled('to')){ //lastaction filter
             $ids = LastAction::whereBetween('date', [$request->from, $request->to])->whereNull('course_id')->pluck('user_id');
             $users = $users->whereIn('id',$ids);
@@ -430,7 +465,7 @@ class UserController extends Controller
             $enrolled_users=$enrolled_users->where('type',$request->type);
             $flag=true;
         }if ($request->filled('class')){ 
-            $enrolled_users=$enrolled_users->where('class',$request->class);
+            $enrolled_users=$enrolled_users->where('group',$request->class);
             $flag=true;
         }if ($request->filled('segment')){            
             $enrolled_users=$enrolled_users->where('segment',$request->segment);
@@ -713,22 +748,19 @@ class UserController extends Controller
                 foreach($students as $student){
 
                     Enroll::firstOrCreate([
-                        'course_segment' => $student->course_segment,
+                        // 'course_segment' => $student->course_segment,
                         'user_id' => $parent,
                         'role_id'=> 7,
                         'year' => $student->year,
                         'type' => $student->type,
                         'level' => $student->level,
-                        'class' => $student->class,
+                        'group' => $student->group,
                         'segment' => $student->segment,
                         'course' => $student->course
                     ]);
                 }
-
             }
         }
-            
-
         return HelperController::api_response_format(201,null,__('messages.users.parent_assign_child'));
     }
 
@@ -939,14 +971,19 @@ class UserController extends Controller
         $fields = ['username_parent', 'username_child'];
 
         $filename = uniqid();
-        $file = Excel::store(new ParentChildExport($fields), 'parent_child'.$filename.'.xls','public');
-        $file = url(Storage::url('parent_child'.$filename.'.xls'));
+        $file = Excel::store(new ParentChildExport($fields), 'parent_child'.$filename.'.xlsx','public');
+        $file = url(Storage::url('parent_child'.$filename.'.xlsx'));
 
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
     public function export(Request $request)
     {
+        $request->validate([
+            'user_ids' => 'array',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
         $fields = ['id', 'firstname', 'lastname'];
 
         if (Auth::user()->can('site/show/username')) {
@@ -964,9 +1001,12 @@ class UserController extends Controller
         'class_id','level', 'type','second language','role','last_action'] );
 
         $userIDs = self::list($request,1);
+        if(isset($request->user_ids))
+            $userIDs=$request->user_ids;
+
         $filename = uniqid();
-        $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xls','public');
-        $file = url(Storage::url('users'.$filename.'.xls'));
+        $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+        $file = url(Storage::url('users'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 
@@ -1043,30 +1083,23 @@ class UserController extends Controller
 
     public function enroll_parents_script(){
         $students = Enroll::where('role_id',3)->with('user.parents')->get();
-
         foreach($students as $student){
-
             if(isset($student->user)){
-
                 foreach($student->user->parents as $parent){
-
                     Enroll::firstOrCreate([
-                        'course_segment' => $student->course_segment,
+                        // 'course_segment' => $student->course_segment,
                         'user_id' => $parent->id,
                         'role_id'=> 7,
                         'year' => $student->year,
                         'type' => $student->type,
                         'level' => $student->level,
-                        'class' => $student->class,
+                        'group' => $student->group,
                         'segment' => $student->segment,
                         'course' => $student->course
                     ]);
-    
                 }
             }
-        
         }
-
         return 'done';
     }
 }

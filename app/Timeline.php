@@ -63,12 +63,14 @@ class Timeline extends Model
 
             if($this->type == 'assignment'){
                 $assigLessonID = AssignmentLesson::where('assignment_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
-                $user_assigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('submit_date')->pluck('grade');
+                $user_assigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('submit_date')->get();
+                if(($user_assigment)->count() != 0){
                 if(count($user_assigment) > 0)
                     $status = __('messages.status.not_graded');//not_graded
 
                 if(count($user_assigment) > 0 && !in_array(NULL,$user_assigment->toArray(),true))
                     $status = __('messages.status.graded');//graded
+                }
             }
 
             if($this->type == 'quiz'){

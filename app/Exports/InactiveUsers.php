@@ -24,10 +24,10 @@ class InactiveUsers implements FromCollection, WithHeadings
         foreach ($this->report as $user) {
             
             $reports->push([
-                'fullname' => $user->fullname,
-                'username' => $user->username,
-                'since' => Carbon::parse($user->lastaction)->diffForHumans(),
-                'status' => $user->status
+                'fullname' => $user['fullname'],
+                'username' => $user['username'],
+                'since' => Carbon::parse($user['lastaction'])->diffForHumans(),
+                'status' => $user['status']
             ]);
         }
 

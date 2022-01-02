@@ -10,6 +10,7 @@ use Modules\QuestionBank\Entities\QuestionsAnswer;
 use Modules\QuestionBank\Entities\QuestionsType;
 use Modules\QuestionBank\Entities\Quiz;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\UserQuiz;
 use App\Observers\LogsObserver;
@@ -34,12 +35,13 @@ class QuestionBankServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        UserQuizAnswer::observe(UserQuizAnswerObserver::class);
+        // UserQuizAnswer::observe(UserQuizAnswerObserver::class);
         Questions::observe(LogsObserver::class);
         QuestionsAnswer::observe(LogsObserver::class);
         QuestionsCategory::observe(LogsObserver::class);
         QuestionsType::observe(LogsObserver::class);
         Quiz::observe(LogsObserver::class);
+        quiz_questions::observe(LogsObserver::class);
         QuizLesson::observe(QuizLessonObserver::class);
         UserQuiz::observe(LogsObserver::class);
         UserQuizAnswer::observe(LogsObserver::class);

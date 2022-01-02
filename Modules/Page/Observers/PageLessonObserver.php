@@ -1,12 +1,12 @@
 <?php
 
 namespace Modules\Page\Observers;
-
 use Modules\Page\Entities\PageLesson;
 use App\Events\MassLogsEvent;
 use Modules\Page\Entities\Page;
 use App\Material;
 use App\Lesson;
+use App\SecondaryChain;
 
 class PageLessonObserver
 {
@@ -18,15 +18,16 @@ class PageLessonObserver
      */
     public function created(PageLesson $pageLesson)
     {
+        $sec_chain = SecondaryChain::where('lesson_id',$pageLesson->lesson_id)->first();
         $page = Page::where('id',$pageLesson->page_id)->first();
         $lesson = Lesson::find($pageLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
+        $course_id = $sec_chain->course_id;
         if(isset($page)){
             Material::firstOrCreate([
                 'item_id' => $pageLesson->page_id,
                 'name' => $page->title,
                 'publish_date' => $pageLesson->publish_date,
-                'course_id' => $course_id,
+                'course_id' =>  $course_id,
                 'lesson_id' => $pageLesson->lesson_id,
                 'type' => 'page',
                 'visible' => $pageLesson->visible,

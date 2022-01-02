@@ -11,10 +11,14 @@ use Modules\QuestionBank\Entities\quiz_questions;
 class userQuiz extends Model
 {
     protected $fillable = [
-        'quiz_lesson_id','user_id','status_id',
+        'quiz_lesson_id','user_id','status_id', 'status',
         'override','feedback','grade','attempt_index',
         'device_data','browser_data','ip',
         'open_time','submit_time'
+    ];
+
+    protected $dispatchesEvents = [
+        'updated' => \App\Events\UpdatedAttemptEvent::class,
     ];
 
     public function quiz_lesson()
@@ -25,6 +29,11 @@ class userQuiz extends Model
     public function UserQuizAnswer()
     {
         return $this->hasMany('Modules\QuestionBank\Entities\userQuizAnswer', 'user_quiz_id', 'id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo('App\User','user_id','id');
     }
 
     public static function calculate_grade_of_attempts_with_method($quiz_lesson){
@@ -102,5 +111,12 @@ class userQuiz extends Model
                 break;
         }
         return $grade;
-    }  
+    }
+    
+    public function getGradeAttribute($value)
+    {
+        if(!is_null($value))
+            return round($value , 2);
+        return $value;
+    }
 }

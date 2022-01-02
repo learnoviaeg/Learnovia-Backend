@@ -1,0 +1,635 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\GradeCategory;
+use App\GradeItems;
+use App\User;
+use App\Course;
+use App\Enroll;
+use App\Grader\TypeGrader;
+use App\Lesson;
+use App\UserGrade;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\UserGrader;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Controller;
+use App\Grader\gradingMethodsInterface;
+use App\Events\RefreshGradeTreeEvent;
+use Auth;
+use App\Exports\AttemptsExport;
+use App\Exports\NewAttemptsExport;
+use Carbon\Carbon;
+use Modules\QuestionBank\Entities\userQuiz;
+use Modules\QuestionBank\Entities\quiz;
+use App\Repositories\ChainRepositoryInterface;
+use App\Grader\QuizGrader;
+use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\QuizOverride;
+use App\Http\Controllers\HelperController;
+use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\quiz_questions;
+use Modules\QuestionBank\Entities\userQuizAnswer;
+use App\Events\QuizAttemptEvent;
+use App\LastAction;
+use Log;
+
+class AttemptsController extends Controller
+{
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+        $this->middleware(['permission:site/quiz/store_user_quiz'],   ['only' => ['store']]);
+        $this->middleware(['ParentCheck'],   ['only' => ['index','show']]);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'user_id' => 'integer|exists:users,id',
+            'filter' => 'in:submitted,not_submitted,notGraded', 
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
+            'search' => 'nullable'
+        ]);
+
+        $final= collect([]);
+        $all_users = array();
+        $user_attempts = array();
+        $quiz=Quiz::find($request->quiz_id);
+        $childs=[];
+        foreach($quiz->Question as $oneQ)
+            if($oneQ->question_type_id == 5)
+                $childs=$oneQ->children->pluck('id')->toArray();
+        $quetions=$quiz->Question->pluck('id');
+        $questions=array_merge($quetions->toArray(),$childs);
+        $essay=0;
+        $t_f_Quest_check=0;
+        $t_f_Quest_count = 0;
+        $essayQues = Questions::whereIn('id',$questions)->where('question_type_id',4)->pluck('id');
+        $t_f_Quest = Questions::whereIn('id',$questions)->where('question_type_id',1);
+        foreach($t_f_Quest->cursor() as $tf_question){
+            if((bool) $tf_question->content->and_why == true)
+                $t_f_Quest_check +=1;
+        }
+        if(count($essayQues) > 0)
+            $essay = 1;
+
+        if($t_f_Quest_check > 0)
+            $t_f_Quest_count = 1;
+        
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        if(!$quiz_lesson)
+            return HelperController::api_response_format(200, null, __('messages.error.not_found'));
+
+        //to close opend attempts
+        QuizzesController::closeAttempts($quiz_lesson);
+        
+        $user_class=Enroll::where('course',$quiz_lesson->lesson->course_id)->where('role_id',3);
+        if($request->filled('classes')){
+            $user_class->whereIn('group',$request->classes);
+        }
+        
+        $users=$user_class->pluck('user_id')->toArray();
+
+        if($request->filled('user_id')){
+            unset($users);
+            $users = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->where('user_id',$request->user_id)->pluck('user_id')->unique();
+            if(count ($users) == 0)
+                return HelperController::api_response_format(200, __('messages.error.user_not_assign'));
+        }
+
+        if ($request->filled('search')){
+            $users = User::whereIn('id',$users)->where(function ($query) use ($request) {
+                $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")
+                ->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
+                ->orWhere('username', 'LIKE', "%$request->search%");
+            })->pluck('id');
+        }
+        
+        $Submitted_users=0;
+        $countEss_TF=0;
+        foreach ($users as $user_id){
+            $i=0;
+            $All_attemp=[];
+            $user = User::find($user_id);
+            if($user == null){
+                unset($user);
+                continue;
+            }
+            if($user->can('site/quiz/unLimitedAttempts')) 
+                continue;
+            
+            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->get();
+
+            $user_grade=null;
+            foreach($attems as $key=>$attem){
+                $user_Attemp["grade"]=null;
+                if($attem->status == 'Graded')
+                {
+                    $user_Attemp["grade"]= $attem->grade;
+                    $usergrader = UserGrader::where('user_id',$user_id)->where('item_type','category')->where('item_id', $quiz_lesson->grade_category_id)->first();
+                    if(isset($usergrader))
+                        $user_grade=$usergrader->grade;
+                }
+
+                if($attem->status != 'Graded')
+                    $countEss_TF++;
+                $user_Attemp['id']= $attem->id;
+
+                $user_Attemp["open_time"]= $attem->open_time;
+                $user_Attemp["submit_time"]= $attem->submit_time;
+                $user_Attemp["taken_duration"]= Carbon::parse($attem->open_time)->diffInSeconds(Carbon::parse($attem->submit_time),false);
+                $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question')->first();
+                foreach($user_Attemp['details']->UserQuizAnswer as $answ)
+                    $answ->Question->grade_details=quiz_questions::where('quiz_id',$request->quiz_id)->where('question_id',$answ->question_id)->pluck('grade_details')->first();
+
+                $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
+                if($useranswerSubmitted < 1){
+                    array_push($All_attemp, $user_Attemp);
+                    $i++;
+                }
+            }
+            if($request->filter == 'submitted'){
+                if(count($All_attemp) == 0 )
+                    continue;
+            } 
+            
+            if($request->filter == 'not_submitted'){
+                if(count($All_attemp) != 0 )
+                    continue;
+            }
+            
+            if($request->filter == 'notGraded'){
+                if($countEss_TF == 0 )
+                    continue;
+            }
+
+            $attemps['id'] = $user->id;
+            $attemps['username'] = $user->username;
+            $attemps['fullname'] =ucfirst($user->firstname) . ' ' . ucfirst($user->lastname);
+            $attemps['grade'] = $user_grade;
+            $attemps['picture'] = $user->attachment;
+            $attemps['override'] = $user->quizOverride()->where('quiz_lesson_id', $quiz_lesson->id)->first();
+            $attemps['Attempts'] = $All_attemp;
+            array_push($user_attempts, $attemps);
+            if($i>0)
+                $Submitted_users++;
+        }
+
+        $all_users['essay']=$essay;
+        $all_users['T_F']=$t_f_Quest_count;
+        $all_users['all']=count($users);
+        $all_users['unsubmitted_users'] = count($users) - $Submitted_users ;
+        $all_users['submitted_users'] = $Submitted_users ;
+        $all_users['notGraded'] = $countEss_TF ;
+        if($request->filter == 'submitted'){
+            $all_users['unsubmitted_users'] = 0 ;
+            $all_users['submitted_users'] = count($user_attempts) ;
+            $all_users['notGraded'] = 0 ;
+        } 
+        
+        if($request->filter == 'not_submitted'){
+            $all_users['unsubmitted_users'] = count($user_attempts);
+            $all_users['submitted_users'] = 0;
+            $all_users['notGraded'] = 0 ;
+        }
+        
+        if($request->filter == 'notGraded'){
+            $all_users['unsubmitted_users'] = 0 ;
+            $all_users['submitted_users'] =0 ;
+            $all_users['notGraded'] = count($user_attempts) ;
+        }
+        $final->put('submittedAndNotSub',$all_users);
+        $final->put('users',$user_attempts);
+        LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
+
+        return HelperController::api_response_format(200, $final, __('messages.quiz.students_attempts_list'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+        ]);
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        if(Carbon::parse($quiz_lesson->start_date) > Carbon::now() && Auth::user()->can('site/course/student'))
+            return HelperController::api_response_format(400, null, __('messages.error.quiz_time'));
+
+        LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
+        $user_quiz = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id);
+        
+        $last_attempt=$user_quiz->latest()->first();
+        $index=0;
+            
+        if(isset($last_attempt))
+        {
+            $index=$last_attempt->attempt_index;
+            $last_attempt->left_time=self::leftTime($last_attempt);
+
+            if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration) > Carbon::now()
+                 && UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->whereNull('force_submit')->count() > 0)
+            {
+                foreach($last_attempt->UserQuizAnswer as $answers)
+                    $answers->Question;
+                return HelperController::api_response_format(200, $last_attempt, __('messages.quiz.continue_quiz'));
+            }
+
+            if(Carbon::parse($last_attempt->open_time)->addSeconds($quiz_lesson->quiz->duration) < Carbon::now())
+            {
+                $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($last_attempt->left_time);
+                dispatch($job);
+            }
+
+            $extra=0;
+            $extra_attempts=Auth::user()->quizOverride()->where('quiz_lesson_id', $quiz_lesson->id)->first();
+            if(isset($extra_attempts))
+                $extra=$extra_attempts->attemps;
+
+            if(Auth::user()->can('site/course/student')){
+                if(($last_attempt->attempt_index) == $quiz_lesson->max_attemp + $extra )
+                {                
+                    $job = (new \App\Jobs\CloseQuizAttempt($last_attempt))->delay($last_attempt->left_time);
+                    dispatch($job);
+
+                    return HelperController::api_response_format(400, null, __('messages.error.submit_limit'));
+                }
+            }
+
+            if((Auth::user()->can('site/quiz/unLimitedAttempts'))){
+                $empty=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['user_answers' => null,'correction' => null,'force_submit' =>null,'answered' =>null]);
+
+                foreach($quiz_lesson->quiz->Question as $question)
+                {
+                    if($question->question_type_id == 5)
+                    {
+                        foreach($quest as $child)
+                            userQuizAnswer::firstOrCreate(['user_quiz_id'=>$last_attempt->id,'question_id'=>$child]);
+                    }
+                    else // because parent question(comprehension) not have answer
+                        $dd=userQuizAnswer::firstOrCreate(['user_quiz_id'=>$last_attempt->id,'question_id'=>$question->id]);
+                }
+                $last_attempt->UserQuizAnswer;
+                return HelperController::api_response_format(200, $last_attempt);
+            }
+        }
+
+        $userQuiz = userQuiz::create([
+            'user_id' => Auth::id(),
+            'quiz_lesson_id' => $quiz_lesson->id,
+            'status_id' => 2,
+            'feedback' => null,
+            'grade' => null,
+            'attempt_index' => $index+1,
+            'open_time' => Carbon::now()->format('Y-m-d H:i:s'),
+            'submit_time'=> null,
+        ]);
+        if(Auth::user()->can('site/course/student'))
+            $q=Quiz::whereId($quiz_lesson->quiz->id)->update(['allow_edit' => 0]);
+
+        $flag=true;
+        foreach($quiz_lesson->quiz->Question as $question)
+        {
+            // for update status of attempt
+            if($question->question_type_id == 4 || ($question->question_type_id == 1 && $question->content->and_why == true)
+                || $userQuiz==null)
+                $flag=false;
+            
+            if($question->question_type_id == 5)
+            {
+                $quest=$question->children->pluck('id');
+                foreach($quest as $child)
+                    userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$child]);
+            }
+            else // because parent question(comprehension) not have answer
+                userQuizAnswer::create(['user_quiz_id'=>$userQuiz->id , 'question_id'=>$question->id]);
+        }
+
+        $userQuiz->left_time=$quiz_lesson->quiz->duration;
+
+        foreach($userQuiz->UserQuizAnswer as $answers)
+            $answers->Question;
+                    
+        event(new QuizAttemptEvent($userQuiz));
+
+        if($flag){
+            $att = UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->update(['status'=>'Graded']);
+        }
+        
+        return HelperController::api_response_format(200, $userQuiz);
+    }
+
+    public static function leftTime($attempt)
+    {
+        $end_date = Carbon::parse($attempt->open_time)->addSeconds($attempt->quiz_lesson->quiz->duration);
+
+        // if attempt opened and quiz ended before attempt closed
+        if($end_date > Carbon::parse($attempt->quiz_lesson->due_date)){
+            $taken_time=Carbon::parse($attempt->open_time)->diffInSeconds(Carbon::now());
+            $allowed=Carbon::parse($attempt->quiz_lesson->due_date)->diffInSeconds(Carbon::parse($attempt->open_time));
+            $seconds=$allowed-$taken_time;
+        }
+        else
+            $seconds = $end_date->diffInSeconds(Carbon::now());
+            
+        if($seconds < 0) 
+            $seconds = 0;
+
+        return $seconds;
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson')->first();
+        // to prevent any user except auth to review this attempt
+
+        if(Auth::user()->can('site/course/student')){
+            if($attempt->user_id != Auth::id())
+                return HelperController::api_response_format(404, __('messages.error.data_invalid'));
+        }
+
+        $due_date=$attempt->quiz_lesson->due_date;
+        $grade_feedback=$attempt->quiz_lesson->quiz->grade_feedback;
+        $correct_feedback=$attempt->quiz_lesson->quiz->correct_feedback;
+        $attempt['grading_method'] = $attempt->quiz_lesson->grading_method_id;
+        $attempt['quiz_mark'] = $attempt->quiz_lesson->grade;
+        foreach($attempt->UserQuizAnswer as $one)
+        {
+            if(!isset($one->correction))
+                continue;
+            $con=($one->correction);
+            $question_type=Questions::whereId($one->question_id)->pluck('question_type_id')->first();
+
+            //correct feedback
+            if(Auth::user()->can('site/course/student')){
+
+                if($grade_feedback == 'After due_date'){
+                    if(Carbon::parse($due_date) > Carbon::now()){
+                        $con->mark=null;
+                        if($question_type == 2)
+                            foreach($con->details as $detail)
+                                $detail->mark=null;
+        
+                        if($question_type == 3)
+                            if(property_exists($con,'stu_ans') && $con->stu_ans!=null)
+                                foreach($con->stu_ans as $ans)
+                                    $ans->grade=null;
+                    }
+                }
+                if($grade_feedback == 'Never'){
+                    $con->mark=null;
+                    if($question_type == 2)
+                        foreach($con->details as $detail)
+                            $detail->mark=null;
+
+                    if($question_type == 3)
+                        if(property_exists($con,'stu_ans') && $con->stu_ans!=null)
+                            foreach($con->stu_ans as $ans)
+                                $ans->grade=null;
+                }
+
+                //correct feedback
+                if($correct_feedback == 'After due_date'){
+                    if(Carbon::parse($due_date) > Carbon::now()){
+                        $con->right=null;
+                        if($question_type == 2)
+                            foreach($con->details as $detail)
+                                $detail->right=null;
+        
+                        if($question_type == 3)
+                            if(property_exists($con,'stu_ans') && $con->stu_ans!=null)
+                                foreach($con->stu_ans as $ans)
+                                    $ans->right=null;
+                    }
+                }
+                if($correct_feedback == 'Never'){
+                    $con->right=null;
+                    if($question_type == 2)
+                        foreach($con->details as $detail)
+                            $detail->right=null;
+
+                    if($question_type == 3)
+                        if(property_exists($con,'stu_ans')&& $con->stu_ans!=null)
+                            foreach($con->stu_ans as $ans)
+                                $ans->right=null;
+                }
+            }
+            $one->correction = json_encode($con);
+        }
+
+        return HelperController::api_response_format(200, $attempt);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id) //it's answer_api because we do make update really ^_^ 
+    {
+        $request->validate([
+            'Questions' => 'array',
+            'Questions.*.id' => 'integer|exists:questions,id',
+            'forced' => 'boolean',
+            'Questions.*.answered' => 'in:0,1,2' 
+            // 0 => question Not answered
+            // 1 => question answered
+            // 2 => question answered partilly
+        ]);
+
+        $user_quiz = userQuiz::find($id);
+        LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
+
+        $allData = collect([]);
+        if(isset($request->Questions))
+            foreach ($request->Questions as $index => $question) {
+                if(isset($question['id'])){
+                    $currentQuestion = Questions::find($question['id']);
+                    $question_type_id = $currentQuestion->question_type->id;
+
+                    $data = [
+                        'user_quiz_id' => $id,
+                        'question_id' => $question['id'],
+                        'answered' => isset($question['answered']) ? $question['answered'] : 0,
+                    ];
+                    switch ($question_type_id) {
+                        case 1: // True_false
+                            # code...
+                            $t_f['is_true'] = isset($question['is_true']) ? $question['is_true']: null;
+                            $t_f['and_why'] = isset($question['and_why']) ? $question['and_why']: null;
+                            $data['user_answers'] = json_encode($t_f);
+                            break;
+            
+                        case 2: // MCQ
+                            $data['user_answers'] = isset($question['MCQ_Choices']) ? json_encode($question['MCQ_Choices']) : null;
+                            break;
+            
+                        case 3: // Match
+                            $data['user_answers']=null;
+                            if(isset($question['match_a']) && $question['match_b']){
+                                foreach($question['match_a'] as $key => $matchA)
+                                    $MATCHS[]=[$matchA => $question['match_b'][$key]];
+                                
+                                $data['user_answers'] = json_encode($MATCHS);
+                                $MATCHS=[]; //if there is more than one match_question >> clear array
+                            }
+                            break;
+            
+                        case 4: // Essay
+                            $data['user_answers'] = isset($question['content']) ? json_encode($question['content']) : null; //essay not have special answer
+                            break;
+                    }
+                    // dd($data);
+                    $allData->push($data);
+                }
+                $answer1= userQuizAnswer::where('user_quiz_id',$id)->where('question_id',$question['id'])->first();
+                if(isset($answer1))
+                    $answer1->update($data);
+            }
+
+        if($request->forced){
+            $answer2=userQuizAnswer::where('user_quiz_id',$id)->update(['force_submit'=>1,'answered' => 1]);
+            $user_quiz->submit_time=Carbon::now()->format('Y-m-d H:i:s');
+            $user_quiz->save();
+        }
+
+        return HelperController::api_response_format(200, userQuizAnswer::where('user_quiz_id',$id)->get(), __('messages.success.submit_success'));
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+
+    public function exportAttempts(Request $request)
+    {
+        $all_attempts=$this->index($request);
+        $body = json_decode(json_encode($all_attempts), true);
+        $quiz = Quiz::find($request->quiz_id);
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        $filename = $quiz->name.' IN '.$quiz_lesson->lesson->course->short_name .' Attempts Details';
+        $file = Excel::store(new AttemptsExport($body['original']['body']['users']), $filename.'.xlsx','public');
+        $file = url(Storage::url($filename.'.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+    }
+
+    public function filterExportAttempts(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'filter' => 'in:submitted,not_submitted,notGraded', 
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
+        ]);
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        $course = Course::where('id' ,$quiz_lesson->lesson->course_id )->first();
+        $level = $course->level;
+        $course = [$quiz_lesson->lesson->course_id];
+        $request->merge(["courses" => $course]);
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls->where('role_id' , 3);
+        $Submitted =array();
+        $notSubmitted = array();
+        $notGraded = array();
+        $allSubmitted = array();
+        foreach ($enrolls->pluck('user_id') as $user_id){
+            $grade = UserGrader::where('user_id', $user_id)
+            ->where('item_id' ,$quiz_lesson->grade_category_id)
+            ->where('item_type' ,'category')->pluck('grade')->first();
+            $user = User::find($user_id);
+            if($user == null){
+                unset($user);
+                continue;
+            }
+            if($user->can('site/quiz/unLimitedAttempts'))
+                continue;
+            
+            $attems=userQuiz::where('user_id', $user_id)->where('quiz_lesson_id', $quiz_lesson->id)->orderBy('submit_time', 'desc')->first();
+            if(!$attems){
+                $notSubmittedUser['username'] = $user->username;
+                $notSubmittedUser['fullname'] = $user->fullname;
+                $notSubmittedUser['level'] = $level->name;
+                $notSubmittedUser["status"] = 'Not Submitted';
+                $notSubmittedUser["grade"] = '-';
+                $notSubmittedUser["attempt_index"] = '-';
+                $notSubmittedUser["last_att_date"] = '-';
+                $notSubmitted[] = $notSubmittedUser;
+                $allSubmitted[] = $notSubmittedUser;
+               continue;
+            }
+            $user_Attemp['username'] = $user->username;
+            $user_Attemp['fullname'] = $user->fullname;
+            $user_Attemp['level'] = $level->name;
+            $user_Attemp["status"] = $attems->status;
+            $user_Attemp["grade"] = $grade;
+            $user_Attemp["attempt_index"] = $attems->attempt_index;
+            $user_Attemp["last_att_date"] = $attems->submit_time;
+            $Submitted[] = $user_Attemp;
+            $allSubmitted[] = $user_Attemp;
+            if($attems->status == 'Not Graded')
+            {
+                $notGraded[] = $user_Attemp;
+            }
+        }
+        if(isset($request->filter)){
+            if($request->filter == 'not_submitted'){
+                return $notSubmitted;
+        }}
+        if(isset($request->filter)){
+            if($request->filter == 'submitted'){
+                return $Submitted;
+        }}
+        if(isset($request->filter)){
+            if($request->filter == 'notGraded'){
+                return $notGraded;
+        }}
+        if(!$request->filter)
+        {
+            return $allSubmitted;
+        }
+    }
+
+    public function newExportAttempts(Request $request)
+    {
+        $allAttempt = $this->filterExportAttempts($request);
+        $quiz_lesson = QuizLesson::where('quiz_id', $request->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+        $course = Course::find($quiz_lesson->lesson->course_id);
+        $quiz = Quiz::find($request->quiz_id);
+        $filename = $quiz->name.'_'.$course->short_name;
+        $body = json_decode(json_encode($allAttempt), true);
+        $file = Excel::store(new NewAttemptsExport($body), $filename.'.xlsx','public');
+        $file = url(Storage::url($filename.'.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+    }
+}

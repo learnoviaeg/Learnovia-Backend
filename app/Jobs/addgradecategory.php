@@ -48,7 +48,7 @@ class addgradecategory implements ShouldQueue
                     'exclude_flag' => (isset($grade_cat['exclude_flag'])) ? $grade_cat['exclude_flag'] : null,
                     'hidden' => (isset($grade_cat['hidden'])) ? $grade_cat['hidden'] : 0,
                     'weight' => (isset($grade_cat['exclude_flag']) && $grade_cat['exclude_flag'] == 1) ? $grade_cat['weight'] : 0,
-                    'id_number' => (isset($course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id)) ? $course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id : null,
+                    // 'id_number' => (isset($course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id)) ? $course->segmentClasses[0]->classLevel[0]->yearLevels[0]->id : null,
                 ]);
             }
         }

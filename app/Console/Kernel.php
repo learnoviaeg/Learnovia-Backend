@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\CreateHook::class,
+        Commands\h5p::class,
+        Commands\annotation::class
     ];
 
     /**

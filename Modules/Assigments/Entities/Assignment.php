@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class assignment extends Model
 {
-    protected $fillable = ['name', 'content', 'attachment_id'];
+    protected $fillable = ['name', 'content', 'attachment_id','created_by'];
     protected $appends = ['url' , 'url2'];
     public function attachment()
     {
@@ -34,8 +34,12 @@ class assignment extends Model
             return $this->attachment->path;
         }
     }
-    public function assignmentLessson()
+    public function assignmentLesson()
     {
         return $this->hasMany('Modules\Assigments\Entities\AssignmentLesson', 'assignment_id', 'id');
+    }
+        
+    public function user(){
+        return $this->belongsTo('App\User','created_by');
     }
 }

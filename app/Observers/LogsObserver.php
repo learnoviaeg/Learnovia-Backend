@@ -2,10 +2,12 @@
 
 namespace App\Observers;
 
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use App\Jobs\createdLogsJob;
+use App\Jobs\updatedLogsJob;
+use App\Jobs\deletedLogsJob;
 use App\Log;
 use App\User;
+use Auth;
 
 class LogsObserver
 {
@@ -16,13 +18,16 @@ class LogsObserver
      */
     public function created($req)
     {
-        $user = User::find(Auth::id());
-        $log=Log::create([
-            'user' => isset($user) ? $user->username : 'UnKnown',
-            'action' => 'created',
-            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
-            'data' => serialize($req),
-        ]);
+        // $user = User::find(Auth::id());
+        // $log=Log::create([
+        //     'user' => isset($user) ? $user->username : 'installer',
+        //     'action' => 'created',
+        //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
+        //     'data' => serialize($req),
+        // ]);
+
+        $dispatch=(new createdLogsJob($req));
+        dispatch($dispatch);
     }
 
     /**
@@ -32,16 +37,21 @@ class LogsObserver
      */
     public function updated($req)
     {
-        $arr=array();
-        $arr['before']=$req->getOriginal();
-        $arr['after']=$req;
+        // $arr=array();
+        // $arr['before']=$req->getOriginal();
+        // $arr['after']=$req;
 
-        Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'updated',
-            'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
-            'data' => serialize($arr),
-        ]);
+        // $user = User::find(Auth::id());
+
+        // Log::create([
+        //     'user' => isset($user) ? $user->username : 'installer',
+        //     'action' => 'updated',
+        //     'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
+        //     'data' => serialize($arr),
+        // ]);
+
+        $dispatch=(new updatedLogsJob($req));
+        dispatch($dispatch);
     }
 
     /**
@@ -51,12 +61,17 @@ class LogsObserver
      */
     public function deleted($req)
     {
+        $user = User::find(Auth::id());
+
         Log::create([
-            'user' => User::find(Auth::id())->username,
+            'user' => isset($user) ? $user->username : 'installer',
             'action' => 'deleted',
             'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
             'data' => serialize($req),
         ]);
+
+        // $dispatch=(new deletedLogsJob($req));
+        // dispatch($dispatch);
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Announcement;
 use App\AnnouncementsChain;
 use App\userAnnouncement;
 use App\Enroll;
+use App\User;
 use DB;
 
 class EnrollmentRepository implements EnrollmentRepositoryInterface
@@ -13,10 +14,12 @@ class EnrollmentRepository implements EnrollmentRepositoryInterface
     public function RemoveAllDataRelatedToRemovedChain($one){
 
         $user_enrolls = Enroll::where('user_id',$one->user_id)->where('id','!=',$one->id)->count();
+        $user = User::find($one->user_id);
 
         if($user_enrolls == 0){
             userAnnouncement::where('user_id',$one->user_id)->delete();
-            DB::table('notifications')->where('notifiable_id', $one->user_id)->delete();    
+            $notificationIDs = $user->notifications()->pluck('notifications.id');
+            $user->notifications()->detach($notificationIDs);
         }
 
         if($user_enrolls != 0){
@@ -43,23 +46,13 @@ class EnrollmentRepository implements EnrollmentRepositoryInterface
             
             userAnnouncement::where('user_id',$one->user_id)->whereIn('announcement_id',$final_old_announcements)->delete();
 
-            $notify = DB::table('notifications')->where('notifiable_id', $one->user_id)->get();
-            $ids=collect();
-            foreach ($notify as $not) {
-                $not->data= json_decode($not->data, true);
+            $announcemnets = $user->notifications()->where('type','announcement')->whereIn('item_id',$final_old_announcements)->pluck('notifications.id');
+            $notifications = $user->notifications()->where('type','notification')->where('course_id',$one->course)->pluck('notifications.id');
+            $notificationIds = $announcemnets->merge($notifications);
+            $user->notifications()->detach($notificationIds);
 
-                if($not->data['type'] == 'announcement' && in_array($not->data['id'],$final_old_announcements)){
-                    $ids->push($not->id);
-                }
-
-                if($not->data['type'] != 'announcement' && $not->data['course_id'] == $one->course){
-                    $ids->push($not->id);
-                }
-            }
-
-            DB::table('notifications')->whereIn('id', $ids)->delete();
         }
-
+        
         return 1;
     }
 }

@@ -2,11 +2,15 @@
 
 namespace Modules\QuestionBank\Entities;
 
+use App\GradeCategory;
+use App\Scopes\OverrideQuizScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Modules\QuestionBank\Entities\QuizOverride;
 use App\UserSeen;
+use App\SystemSetting;
+use App\UserGrader;
 
 class QuizLesson extends Model
 {
@@ -20,21 +24,46 @@ class QuizLesson extends Model
         'grade',
         'grade_category_id',
         'publish_date',
-        'visible','index','seen_number'
+        'visible','index','seen_number', 'grade_pass' , 'questions_mark', 'grade_by_user'
     ];
     protected $table = 'quiz_lessons';
-    protected $appends = ['started','user_seen_number','Status'];
+    protected $appends = ['started','user_seen_number','Status', 'ended'];
+
+    protected $dispatchesEvents = [
+        'updated' => \App\Events\updateQuizAndQuizLessonEvent::class,
+    ];
 
     public function getStartedAttribute(){
+
         $started = true;
-        $override = QuizOverride::where('user_id',Auth::user()->id)->where('quiz_lesson_id',$this->id)->first();
-        if($override != null){
+
+        if(count($this->override) > 0){
+
+            $override = $this->override->first();
             $this->start_date = $override->start_date;
+        }
+
+        if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now())){
+            $started = false;
+        }
+        
+        return $started;  
+    }
+
+    public function getEndedAttribute(){
+
+        $ended = false;
+
+        if(count($this->override) > 0){
+            $override = $this->override->first();
             $this->due_date = $override->due_date;
         }
-        if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now()))
-            $started = false;
-        return $started;  
+        
+        if((Auth::user()->can('site/course/student') && $this->due_date < Carbon::now())){
+            $ended = true;
+        }
+
+        return $ended;  
     }
 
     public function getUserSeenNumberAttribute(){
@@ -90,4 +119,47 @@ class QuizLesson extends Model
     {
         return $this->belongsTo('App\GradingMethod', 'grading_method_id', 'id');
     }
+
+    public function userGrader()
+    {
+        return $this->hasManyThrough(UserGrader::class, GradeCategory::class, 'instance_id','item_id','quiz_id')->where('instance_type','Quiz');
+    }
+
+    public function getGradingMethodIdAttribute($value)
+    {
+        $content= json_decode($value);
+        if(is_null($value))
+            $content = [];
+        return $content;
+    }
+
+    public function getGradePassAttribute()
+    {
+        $content = $this->attributes['grade_pass'];
+        $grade_pass = SystemSetting::where('key','Quiz grade to pass')->first();
+        if(isset($grade_pass)){
+            $percentage = (float)$grade_pass->data / 100;
+            if(isset($this->attributes['questions_mark']) && $this->attributes['questions_mark'] != 0)
+                $content = $this->attributes['questions_mark'] * $percentage;
+        }
+        
+        return (double) $content;
+    }
+
+    public function user_quiz()
+    {
+        return  $this->hasMany('Modules\QuestionBank\Entities\userQuiz','quiz_lesson_id', 'id');
+    }
+
+    public function override()
+    {
+        return  $this->hasMany('Modules\QuestionBank\Entities\QuizOverride','quiz_lesson_id', 'id');
+    }
+    
+    public static function boot() 
+    {
+        parent::boot();
+        static::addGlobalScope(new OverrideQuizScope);
+    }
 }
+

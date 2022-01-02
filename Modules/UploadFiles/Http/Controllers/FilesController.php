@@ -15,7 +15,6 @@ use App\Classes;
 use Illuminate\Support\Facades\Storage;
 use URL;
 use Auth;
-use Log;
 use checkEnroll;
 use Carbon\Carbon;
 use App\CourseSegment;
@@ -28,10 +27,12 @@ use  Modules\Page\Entities\pageLesson;
 use  Modules\Page\Entities\page;
 use App\Material;
 use  App\LastAction;
+use App\SecondaryChain;
 use App\Repositories\SettingsReposiotryInterface;
 
 class FilesController extends Controller
 {
+
     protected $setting;
 
     /**
@@ -215,8 +216,9 @@ class FilesController extends Controller
     public function store(Request $request)
     {
         $settings = $this->setting->get_value('upload_file_extensions');
+        // dd($request->Imported_file[0]->extension());
 
-        $request->validate([
+        $rules = [
             'name' => 'string|min:1',
             'Imported_file' => 'required|array',
             'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
@@ -224,7 +226,13 @@ class FilesController extends Controller
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
             'visible' =>'in:0,1'
-        ]);
+        ];
+
+        $customMessages = [
+            'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
+        ];
+    
+        $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
@@ -236,63 +244,46 @@ class FilesController extends Controller
         }
         foreach ($request->lesson_id as $lesson) {
             $tempLesson = Lesson::find($lesson);
-            foreach ($request->Imported_file as $singlefile) {
-                $extension = $singlefile->getClientOriginalExtension();
-                $fileName = $singlefile->getClientOriginalName();
-                $size = $singlefile->getSize();
-                $name = uniqid() . '.' . $extension;
-                $file = new file;
-                $file->type = $extension;
-                $file->description = $name;
-                $file->name = ($request->filled('name')) ? $request->name : $fileName;
-                $file->size = $size;
-                $file->attachment_name = $fileName;
-                $file->user_id = Auth::user()->id;
-                $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-                $file->url2 = 'files/' . $name;
-                $check = $file->save();
-                // Log::debug('file heeeeeeeeeeeere '. $file);
-                $courseID = CourseSegment::where('id', $tempLesson->courseSegment->id)->pluck('course_id')->first();
-                $class_id=$tempLesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-                $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $tempLesson->courseSegment->id)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
-                LastAction::lastActionInCourse($courseID);
+                foreach ($request->Imported_file as $singlefile) {
+                    $extension = $singlefile->getClientOriginalExtension();
+                    $fileName = $singlefile->getClientOriginalName();
+                    $size = $singlefile->getSize();
+                    $name = uniqid() . '.' . $extension;
+                    $file = new file;
+                    $file->type = $extension;
+                    $file->description = $name;
+                    $file->name = ($request->filled('name')) ? $request->name : $fileName;
+                    $file->size = $size;
+                    $file->attachment_name = $fileName;
+                    $file->user_id = Auth::user()->id;
+                    $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+                    $file->url2 = 'files/' . $name;
+                    $check = $file->save();
 
-                User::notify([
-                    'id' => $file->id,
-                    'message' => $file->name.' file is added',
-                    'from' => Auth::user()->id,
-                    'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
-                    'course_id' => $courseID,
-                    'class_id' => $class_id,
-                    'lesson_id' => $lesson,
-                    'type' => 'file',
-                    'link' => $file->url,
-                    'publish_date' => Carbon::parse($publishdate),
-                ]);
-                if ($check) {
-                    $fileLesson = new FileLesson;
-                    $fileLesson->lesson_id = $lesson;
-                    $fileLesson->file_id = $file->id;
-                    $fileLesson->index = FileLesson::getNextIndex($lesson);
-                    $fileLesson->publish_date = $publishdate;
-                    $fileLesson->visible = isset($request->visible)?$request->visible:1;
+                    if ($check) {
+                        $fileLesson = new FileLesson;
+                        $fileLesson->lesson_id = $lesson;
+                        $fileLesson->file_id = $file->id;
+                        $fileLesson->index = FileLesson::getNextIndex($lesson);
+                        $fileLesson->publish_date = $publishdate;
+                        $fileLesson->visible = isset($request->visible)?$request->visible:1;
 
-                    $fileLesson->save();
-                    LessonComponent::create([
-                        'lesson_id' => $fileLesson->lesson_id,
-                        'comp_id'   => $fileLesson->file_id,
-                        'module'    => 'UploadFiles',
-                        'model'     => 'file',
-                        'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
-                    ]);
-                    Storage::disk('public')->putFileAs(
-                        'files/' . $request->$lesson,
-                        $singlefile,
-                        $name
-                    );
-                    // Log::debug('file daaaaata '. $singlefile,$name);
+                        $fileLesson->save();
 
-                }
+                        LessonComponent::firstOrCreate([
+                            'lesson_id' => $fileLesson->lesson_id,
+                            'comp_id'   => $fileLesson->file_id,
+                            'module'    => 'UploadFiles',
+                            'model'     => 'file',
+                        ], [
+                            'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                            ]);
+                        Storage::disk('public')->putFileAs(
+                            'files/' . $request->$lesson,
+                            $singlefile,
+                            $name
+                        );
+                    }
             }
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
@@ -393,8 +384,9 @@ class FilesController extends Controller
     public function update(Request $request)
     {
         $settings = $this->setting->get_value('upload_file_extensions');
+        // dd($request->Imported_file[0]->extension());
 
-        $request->validate([
+        $rules = [
             'id'            => 'required|exists:files,id',
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
@@ -403,7 +395,18 @@ class FilesController extends Controller
             'publish_date'  => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
             'visible' =>'in:0,1'
-        ]);
+        ];
+        $customMessages = [
+            'Imported_file.mimes' =>__('messages.error.extension_not_supported')
+        ];
+        if(isset($request->Imported_file)){
+            $customMessages = [
+                'Imported_file.mimes' => $request->Imported_file->extension() . ' ' . __('messages.error.extension_not_supported')
+            ];
+        }
+    
+        $this->validate($request, $rules, $customMessages);
+
         $file = file::find($request->id);
 
         if ($request->filled('name'))
@@ -447,36 +450,14 @@ class FilesController extends Controller
         }
         $fileLesson->lesson_id = $request->updated_lesson_id;
         $fileLesson->updated_at = Carbon::now();
-        $fileLesson->save();
         $file->save();
-        $course_seg_drag = Lesson::where('id',$request->lesson_id)->pluck('course_segment_id')->first();
-        $courseID_drag = CourseSegment::where('id', $course_seg_drag)->pluck('course_id')->first();
-        LastAction::lastActionInCourse($courseID_drag);
         $fileLesson->save();
-        $lesson = Lesson::find($request->updated_lesson_id);
-        $course_seg = Lesson::where('id',$request->updated_lesson_id)->pluck('course_segment_id')->first();
-        $courseID = CourseSegment::where('id', $course_seg)->pluck('course_id')->first();
-        $class_id=$lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-        $usersIDs = User::whereIn('id' , Enroll::where('course_segment', $course_seg)->where('user_id','!=',Auth::user()->id)->pluck('user_id')->toArray())->pluck('id');
-        LastAction::lastActionInCourse($courseID);
+        $course_seg_drag = Lesson::where('id',$request->lesson_id)->first();
 
-        $publish_date=$fileLesson->publish_date;
-        if(carbon::parse($publish_date)->isPast())
-            $publish_date=Carbon::now();
+        LastAction::lastActionInCourse($course_seg_drag->course_id);
 
-        User::notify([
-                'id' => $file->id,
-                'message' => $file->name.' file is updated',
-                'from' => Auth::user()->id,
-                'users' => isset($usersIDs) ? $usersIDs->toArray() : [null],
-                'course_id' => $courseID,
-                'class_id' => $class_id,
-                'lesson_id' => $request->updated_lesson_id,
-                'type' => 'file',
-                'link' => $file->url,
-                'publish_date' => carbon::parse($publish_date),
-        ]);
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'file')->get();
+
         return HelperController::api_response_format(200, $tempReturn, __('messages.file.update'));
     }
 
@@ -496,10 +477,11 @@ class FilesController extends Controller
 
         $file = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
         $lesson = Lesson::find($request->lesson_id);
-        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
-        LastAction::lastActionInCourse($courseID);
+        // $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($lesson->course_id);
         $file->delete();
         File::whereId($request->fileID)->delete();
+        Material::where('item_id',$request->fileID)->where('type','file')->delete();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, $message = __('messages.file.delete'));
     }
@@ -522,8 +504,8 @@ class FilesController extends Controller
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
         }
         $lesson = Lesson::find($request->lesson_id);
-        $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
-        LastAction::lastActionInCourse($courseID);
+        // $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
+        LastAction::lastActionInCourse($lesson->course_id);
         $fileLesson->visible = ($fileLesson->visible == 1) ? 0 : 1;
         $fileLesson->save();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
@@ -691,6 +673,45 @@ class FilesController extends Controller
         return response()->json(['message' => 'all materials is assigned', 'body' => $Allmaterials], 200);
 
 
+    }
+
+    public function store_file_chunks(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file',
+            'id' => 'exists:chunks,id',
+        ]);
+        $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension();
+        $name = uniqid() . '.' . $extension;
+        if(!$request->filled('id')){
+            Chunk::firstOrCreate([
+                'name' => $file->getClientOriginalName(),
+                'total_chunks' => $request->total_chunks,
+            ]);
+            Storage::disk('public')->putFileAs(
+                'chunks/',
+                $request->file,
+                $name
+            );
+        }
+        else{
+            $uncomplete_file = File::find($request->id);
+            $path = Storage::disk('public')->path("chunks/{$uncomplete_file->name}");
+            $storage = Storage::disk('public');
+            // File::append($path, $request->file);
+            file_put_contents($storage->path($path), $file->get(), FILE_APPEND);
+            
+            if ($request->has('is_last') && $request->boolean('is_last')) {
+                $name = basename($path, '.part');
+    
+                File::move($path, "public/$uncomplete_file->id/{$uncomplete_file->name}");
+            }
+    
+        }
+
+     
+        return response()->json(['message' => null ,'body' => null], 200);
     }
 
 }

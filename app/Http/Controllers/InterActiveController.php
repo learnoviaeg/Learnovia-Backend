@@ -14,6 +14,7 @@ use App\Level;
 use App\Classes;
 use App\Course;
 use Carbon\Carbon;
+use App\SecondaryChain;
 
 class InterActiveController extends Controller
 {
@@ -22,7 +23,7 @@ class InterActiveController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:h5p/lesson/get-all'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -44,15 +45,13 @@ class InterActiveController extends Controller
         ]);
 
         if($request->user()->can('site/show-all-courses')){//admin
-            $course_segments = collect($this->chain->getAllByChainRelation($request));
-            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+            $enrolls = $this->chain->getEnrollsByChain($request);
+            $lessons = $enrolls->with('SecondaryChain')->where('user_id',Auth::id())->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
         }
-        
-        if(!$request->user()->can('site/show-all-courses')){//enrolled users
 
-            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            $lessons = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+        if(!$request->user()->can('site/show-all-courses')){//enrolled users
+           $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
+           $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
         }
       
         if($request->filled('lesson')){
@@ -62,11 +61,11 @@ class InterActiveController extends Controller
             $lessons  = [$request->lesson];
         }
 
-        $sort_in = 'desc';
-        if($request->has('sort_in'))
-            $sort_in = $request->sort_in;
+        // $sort_in = 'desc';
+        // if($request->has('sort_in'))
+        //     $sort_in = $request->sort_in;
 
-        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons)->orderBy('start_date',$sort_in);
+        $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons);
 
         if($request->user()->can('site/course/student')){
            $h5p_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
@@ -87,6 +86,7 @@ class InterActiveController extends Controller
             $content->original->link = config('app.url').'api/interactive/'.$h5p->content_id.'/?api_token='.Auth::user()->api_token;
             $content->original->item_lesson_id = $h5p->id;
             $content->original->visible = $h5p->visible;
+            $content->original->publish_date = $h5p->publish_date;
             $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit'.'?editting_done=false';
             if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id())
                 $content->original->edit_link = null;
@@ -94,14 +94,16 @@ class InterActiveController extends Controller
             unset($content->original->parameters,$content->original->filtered,$content->original->metadata);
 
             $content->original->lesson = Lesson::find($h5p->lesson_id);
-            $content->original->class = Classes::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
-            $content->original->level = Level::find($content->original->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-            $content->original->course = Course::find($content->original->lesson->courseSegment->course_id);
-            unset($content->original->lesson->courseSegment);
+            $sec_chain = SecondaryChain::where('lesson_id',$h5p->lesson_id)->get();
+            $classess = Classes::whereIn('id', $sec_chain->pluck('group_id'))->get();
+            $content->original->class = $classess;
+            $content->original->level = Level::where('id',Course::find($content->original->lesson->course_id)->get()->pluck('level_id'))->get();
+            $content->original->course = Course::find($content->original->lesson->course_id);
+            // unset($content->original->lesson->courseSegment);
 
             $h5p_contents[]=$content->original;
         }
-        return response()->json(['message' => __('messages.interactive.list'), 'body' => collect($h5p_contents)->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.interactive.list'), 'body' => collect($h5p_contents)->sortByDesc('created_at')->paginate(Paginate::GetPaginate($request))], 200);
     }
 
     /**
@@ -121,9 +123,9 @@ class InterActiveController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request ,$id)
     {
-        return redirect(config('app.url').'/api/h5p/'.$id);
+        return redirect(config('app.url').'api/h5p/'.$id.'&api_token='.$request->api_token);
     }
 
     /**

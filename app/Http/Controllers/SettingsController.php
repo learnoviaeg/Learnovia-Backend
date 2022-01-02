@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\attachment;
 use App\Settings;
+use App\Repositories\SettingsReposiotry;
 
 class SettingsController extends Controller
 {
+    protected $set;
 
-    public function __construct()
+    public function __construct(SettingsReposiotry $set)
     {
+        $this->set = $set;
+
         $this->middleware(['permission:settings/general'],   ['only' => ['index']]);
     }
 
@@ -38,12 +43,13 @@ class SettingsController extends Controller
             if($setting->key == 'create_assignment_extensions'){
 
                 //all the extensions that our system support for the assignment
-                $all_create_extensions = collect(explode(',','txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpeg,png,gif,csv,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls'));
+                $all_create_extensions = collect(explode(',','txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpeg,png,gif,csv,mp3,mpeg,ppt,pptx,rar,rtf,zip,xlsx,xls,docm,dot,dotm,odt,wps,dbf,dif,ods,xlsb,xlsm,xlt,xlw,bmp,odp,pot,potm,potx,ppa,ppam,pps,ppsm,ppsx,pptm,thmx,wmv,emf,dotx'));
                 
                 //the extensions that the admin choose to use
                 $values = explode(',',$setting->value);
 
                 $new_values=collect();
+                $setting['main_index']=true;
 
                 //map every extension to see if it's choosen or not
                 $all_create_extensions->map(function ($value) use ($new_values,$values){
@@ -55,10 +61,16 @@ class SettingsController extends Controller
 
                     $new_values->push([
                         'name' => $value,
-                        'index' => $index
+                        'index' => $index,
+                        'type'=>$this->set->get_type($value)
+
+
                     ]);
 
                 });
+                if(in_array(false,$new_values->pluck('index')->toArray()))
+                    $setting['main_index']=false;
+                $new_values = $new_values->groupBy('type');
 
                 $setting->value = $new_values;
             }
@@ -66,12 +78,13 @@ class SettingsController extends Controller
             if($setting->key == 'submit_assignment_extensions'){
 
                 //all the extensions that our system support for the assignment submission
-                $all_create_extensions = collect(explode(',','pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,mp3,wav,amr'));
+                $all_create_extensions = collect(explode(',','pdf,docs,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,mp4,avi,flv,mpeg,mpga,movie,mov,mp3,wav,amr,docm,dot,dotm,odt,wps,dbf,dif,ods,xlsb,xlsm,xlt,xlw,bmp,odp,pot,potm,potx,ppa,ppam,pps,ppsm,ppsx,pptm,thmx,wmv,emf,dotx'));
 
                 //the extensions that the admin choose to use
                 $values = explode(',',$setting->value);
 
                 $new_values=collect();
+                $setting['main_index']=true;
 
                 //map every extension to see if it's choosen or not
                 $all_create_extensions->map(function ($value) use ($new_values,$values){
@@ -83,23 +96,28 @@ class SettingsController extends Controller
 
                     $new_values->push([
                         'name' => $value,
-                        'index' => $index
+                        'index' => $index,
+                        'type'=>$this->set->get_type($value)
                     ]);
 
                 });
-                
+                if(in_array(false,$new_values->pluck('index')->toArray()))
+                    $setting['main_index']=false;
+                $new_values = $new_values->groupBy('type');
+
                 $setting->value = $new_values;
             }
 
             if($setting->key == 'upload_file_extensions'){
 
                 //all the extensions that our system support for the file upload
-                $all_create_extensions = collect(explode(',','pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss'));
+                $all_create_extensions = collect(explode(',','pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss,docm,dot,dotm,odt,wps,dbf,dif,ods,xlsb,xlsm,xlt,xlw,bmp,odp,pot,potm,potx,ppa,ppam,pps,ppsm,ppsx,pptm,thmx,wmv,emf,dotx'));
                 
                 //the extensions that the admin choose to use
                 $values = explode(',',$setting->value);
 
                 $new_values=collect();
+                $setting['main_index']=true;
 
                 //map every extension to see if it's choosen or not
                 $all_create_extensions->map(function ($value) use ($new_values,$values){
@@ -111,23 +129,32 @@ class SettingsController extends Controller
 
                     $new_values->push([
                         'name' => $value,
-                        'index' => $index
+                        'index' => $index,
+                        'type'=>$this->set->get_type($value)
+
                     ]);
 
                 });
+                if(in_array(false,$new_values->pluck('index')->toArray()))
+                    $setting['main_index']=false;
+                $new_values = $new_values->groupBy('type');
                 
+
                 $setting->value = $new_values;
             }
+            
+
 
             if($setting->key == 'upload_media_extensions'){
 
                 //all the extensions that our system support for the media upload
-                $all_create_extensions = collect(explode(',','mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie,aac,au,flac,m3u,m4a,wma,ai,bmp,gdraw,ico,jpe,pct,pic,pict,svg,svgz,tif,tiff,3gp,dv,dif,f4v,m4v,mpg,rmvb,swf,swfl,webm,wmv,asf'));
+                $all_create_extensions = collect(explode(',','mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,doc,mp3,wav,amr,mid,midi,mp2,aif,aiff,aifc,ram,rm,rpm,ra,rv,mpeg,mpe,qt,mov,movie,aac,au,flac,m3u,m4a,wma,ai,bmp,gdraw,ico,jpe,pct,pic,pict,svg,svgz,tif,tiff,3gp,dv,dif,f4v,m4v,mpg,rmvb,swf,swfl,webm,wmv,asf,docm,dot,dotm,odt,wps,dbf,dif,ods,xlsb,xlsm,xlt,xlw,bmp,odp,pot,potm,potx,ppa,ppam,pps,ppsm,ppsx,pptm,thmx,wmv,emf,dotx'));
                 
                 //the extensions that the admin choose to use
                 $values = explode(',',$setting->value);
 
                 $new_values=collect();
+                $setting['main_index']=true;
 
                 //map every extension to see if it's choosen or not
                 $all_create_extensions->map(function ($value) use ($new_values,$values){
@@ -139,11 +166,16 @@ class SettingsController extends Controller
 
                     $new_values->push([
                         'name' => $value,
-                        'index' => $index
+                        'index' => $index,
+                        'type'=>$this->set->get_type($value)
+
                     ]);
 
                 });
-                
+                if(in_array(false,$new_values->pluck('index')->toArray()))
+                    $setting['main_index']=false;
+                $new_values = $new_values->groupBy('type');
+
                 $setting->value = $new_values;
             }
 
@@ -216,5 +248,66 @@ class SettingsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function setLogo(Request $request)
+    {
+        $request->validate([
+            'school_logo' => 'required|mimes:jpg,jpeg,png',
+            'school_name' => 'required|string',
+        ]);
+        $check=attachment::where('type','Logo')->delete();
+        // if($check)
+        //     $check->delete();
+
+        $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
+
+        // return $attachment;
+        return response()->json(['message' => __('messages.logo.set'), 'body' => $attachment], 200);
+    }
+
+    public function deleteLogo(Request $request)
+    {
+        $request->validate([
+            'attachment_id' => 'required|exists:attachments,id',
+        ]);
+        $check=attachment::whereId($request->attachment_id)->first();
+        if($check)
+            $check->delete();
+
+        return response()->json(['message' => __('messages.logo.delete'), 'body' => null], 200);
+    }
+
+    public function getLogo()
+    {
+        $attachment=attachment::where('type','Logo')->first();
+        if(!$attachment)
+            return response()->json(['message' => __('messages.logo.faild'), 'body' => null], 200);
+
+        return response()->json(['message' => __('messages.logo.get'), 'body' => $attachment], 200);
+    }
+
+    public function updateLogo(Request $request)
+    {
+        $request->validate([
+            'school_logo' => 'mimes:jpg,jpeg,png',
+            'school_name' => 'required|string',
+            'attachment_id' => 'required|exists:attachments,id'
+        ]);
+        $attachment=attachment::find($request->attachment_id);
+        $attachment->description=$request->school_name;
+        $attachment->save();
+
+        if(isset($request->school_logo))
+        {
+            $check=attachment::where('type','Logo')->delete();
+            // if($check)
+            //     $check->delete();
+
+            $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
+        }
+
+        // return $attachment;
+        return response()->json(['message' => __('messages.logo.update'), 'body' => $attachment], 200);
     }
 }

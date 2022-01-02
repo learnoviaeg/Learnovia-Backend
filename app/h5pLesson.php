@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\UserSeen;
-
+use Illuminate\Support\Facades\DB;
 class h5pLesson extends Model
 {
       protected $fillable = ['content_id',
@@ -25,6 +25,19 @@ class h5pLesson extends Model
             $user_seen = UserSeen::where('type','h5p')->where('item_id',$this->content_id)->where('lesson_id',$this->lesson_id)->count();
             
         return $user_seen;  
+    }
+
+    public function user(){
+        return $this->belongsTo('App\User');
+    }
+
+    public function getNameAttribute(){
+        return DB::table('h5p_contents')->whereId($this->content_id)->first()->title;
+    }
+
+    public function lesson()
+    {
+        return $this->belongsTo('App\Lesson', 'lesson_id', 'id');
     }
 
 }

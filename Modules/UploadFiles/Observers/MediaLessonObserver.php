@@ -7,6 +7,7 @@ use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\Media;
 use App\Lesson;
 use App\Material;
+use App\SecondaryChain;
 
 class MediaLessonObserver
 {
@@ -18,9 +19,10 @@ class MediaLessonObserver
      */
     public function created(MediaLesson $mediaLesson)
     {
+        $sec_chain = SecondaryChain::where('lesson_id',$mediaLesson->lesson_id)->first();
         $media = Media::where('id',$mediaLesson->media_id)->first();
         $lesson = Lesson::find($mediaLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
+        $course_id = $sec_chain->course_id;
         if(isset($media)){
             Material::firstOrCreate([
                 'item_id' => $mediaLesson->media_id,

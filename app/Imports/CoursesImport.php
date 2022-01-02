@@ -3,15 +3,19 @@
 namespace App\Imports;
 
 use App\Course;
-use App\AcademicYearType;
+// use App\AcademicYearType;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
-use App\ClassLevel;
-use App\CourseSegment;
+// use App\ClassLevel;
+// use App\CourseSegment;
 use App\Segment;
-use App\Http\Controllers\CourseController;
-use App\SegmentClass;
+use App\Classes;
+use App\SecondaryChain;
+use App\Lesson;
+use App\Enroll;
+use App\Http\Controllers\CoursesController;
+// use App\SegmentClass;
 use Illuminate\Http\Request;
-use App\YearLevel;
+use App\Events\CourseCreatedEvent;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use App\GradeCategory;
@@ -27,77 +31,58 @@ class CoursesImport implements ToModel , WithHeadingRow
     */
     public function model(array $row)
     {
-        $no_of_lessons = 4;
-
         Validator::make($row,[
             'name'=>'required',
             'category'=>'exists:categories,id',
-            'level_id' => 'exists:levels,id',
+            'level_id' => 'required|exists:levels,id',
+            'segment_id' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
-            'start_date' => 'required_with:year',
-            'end_date' =>'required_with:year',
             'mandatory' => 'in:0,1',
-            'short_name' => 'unique:courses'
+            'shared_lesson' => 'required_with:no_of_lessons|in:0,1',
+            'short_name' =>'required'
+            // 'short_name' => 'unique:courses',
         ])->validate();
 
-        $Class='class_id';
-        $classCount=1;
-        $classes_ids=[];
-        $course = Course::firstOrCreate([
-            'name' => $row['name'],
-            'short_name' => $row['short_name'],
-            'category_id' => isset($row['category']) ? $row['category'] : null,
-            'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,
-            'description' => isset($row['description']) ? $row['description'] : null
-        ]);
 
+        $short_names=Course::where('segment_id',$row['segment_id'])->where('short_name',$row['short_name'])->get();
+        if(count($short_names)>0)
+            die('short name must be unique');
+
+        $no_of_lessons = 4;
         if (isset($row['no_of_lessons'])) 
             $no_of_lessons = $row['no_of_lessons'];
 
-        if(isset($row['level_id'])){
-            $yearLevel = YearLevel::where('level_id', $row['level_id'])->first();
-            $classLevel=ClassLevel::where('year_level_id',$yearLevel->id)->pluck('id');
-        }
-        while(isset($row[$Class.$classCount])){
-            $classes_ids[] = ClassLevel::where('class_id', $row[$Class.$classCount])->pluck('id')->first();
-            $classCount++;
-        }
-        if(count($classes_ids) > 0)
-            $classLevel=$classes_ids;
-        
-        //get current segment in case there is one segment active in all types of all system
-        $segment = Segment::where('current',1)->pluck('id')->first();
-        if(isset($row['segment_id']))
-            $segment=$row['segment_id'];
-        $segmentClass = SegmentClass::whereIn('class_level_id',$classLevel)->where('segment_id',$segment)->get();
-        foreach($segmentClass as $one)
-        {
-            $courseSegment = CourseSegment::firstOrCreate([
-                'course_id' => $course->id,
-                'segment_class_id' => $one->id,
-                'is_active' => 1,
-                'start_date' =>  Date::excelToDateTimeObject($row['start_date']),
-                'end_date' =>  Date::excelToDateTimeObject($row['end_date']),
-            ]);
-            $gradeCat = GradeCategory::firstOrCreate([
-                'name' => $course->name . ' Total',
-                'course_segment_id' => $courseSegment->id,
-                'id_number' => isset($row['level_id']) ? $yearLevel->id : null
-            ]);
+        $chains=array();
 
-            //Creating defult question category
-            $quest_cat = QuestionsCategory::firstOrCreate([
-                'name' => $course->name . ' Category',
-                'course_id' => $course->id,
-                'course_segment_id' => $courseSegment->id
-            ]);
+        $chains[0]['segment'][0]=$row['segment_id'];
+        $chains[0]['level'][0]=$row['level_id'];
+        // dd(Classes::where('level_id',$row['level_id'])->pluck('id'));
+        $cl=Classes::where('level_id',$row['level_id'])->pluck('id');
+        if(!isset($cl))
+            die('This Level doesn\'t have any classes');
 
-            for ($i = 1; $i <= $no_of_lessons; $i++) {
-                $courseSegment->lessons()->firstOrCreate([
-                    'name' => 'Lesson ' . $i,
-                    'index' => $i,
-                ]);
-            }
+        $chains[0]['class']=$cl->toArray();
+        if(isset($row['class_id'])){
+            $chains[0]['class']=null;
+            $chains[0]['class'][0]=$row['class_id'];
         }
+        // dd($chains);
+
+        $req=new Request([
+            'name' => $row['name'],
+            'short_name' => $row['short_name'],
+            'chains' => $chains,
+            'chains' => $chains,
+            'category_id' => isset($row['category']) ? $row['category'] : null,
+            'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,
+            'description' => isset($row['description']) ? $row['description'] : null,
+            'shared_lesson' => isset($row['shared_lesson']) ? $row['shared_lesson'] : 0,
+            'no_of_lessons' => isset($row['no_of_lessons']) ? $row['no_of_lessons'] : 4,
+            'is_template' => isset($row['is_template']) ? $row['is_template'] : 0,
+        ]);
+
+        //should to find a way to call this without change it to static
+        // CoursesController::store($req);
+        app('App\Http\Controllers\CoursesController')->store($req);
     }
 }

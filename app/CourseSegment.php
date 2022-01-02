@@ -41,11 +41,6 @@ class CourseSegment extends Model
         return $this->hasMany('App\Course', 'id', 'course_id');
     }
 
-    public function optionalCourses()
-    {
-        return $this->hasMany('App\Course', 'id', 'course_id')->whereMandatory(0);
-    }
-
     public function users()
     {
         return $this->hasMany('App\User');
@@ -64,6 +59,10 @@ class CourseSegment extends Model
     public function Enroll()
     {
         return $this->hasMany('App\Enroll', 'course_segment', 'id');
+    }
+    public function teachersEnroll()
+    {
+        return $this->hasMany('App\Enroll', 'course_segment', 'id')->where('role_id', 4);
     }
 
     public static function checkRelation($segmentClass, $course)

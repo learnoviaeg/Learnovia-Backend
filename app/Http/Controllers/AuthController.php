@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Events\MassLogsEvent;
 use Carbon\Carbon;
 use App\User;
+use App\Classes;
+use App\Level;
 use App\LastAction;
+use App\attachment;
 use App\Language;
 use Spatie\Permission\Models\Permission;
 use Laravel\Passport\Passport;
@@ -67,7 +70,7 @@ class AuthController extends Controller
             'remember_me' => 'boolean'
         ]);
 
-        (new BigbluebuttonController)->clear();
+        // (new BigbluebuttonController)->clear();
         // (new BigbluebuttonController)->create_hook($request);
         $credentials = request(['username', 'password']);
         if (!Auth::attempt($credentials))
@@ -120,8 +123,7 @@ class AuthController extends Controller
             if ($language['default'])
                 $result = $language;
         }
-        $job=(new \App\Jobs\MessageDelivered(Auth::User()->id));
-        dispatch($job);
+        
         $user->last_login = Carbon::now();
         $user->api_token = $tokenResult->accessToken;
         $user->save();
@@ -225,6 +227,11 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = $request->user();
+        if(isset($user->class_id))
+          $user['class_name']=Classes::find($user->class_id)->name;
+        if(isset($user->level))
+          $user['level_name']=Level::find($user->level)->name;
+        
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
         return HelperController::api_response_format(200, $user);
@@ -255,5 +262,38 @@ class AuthController extends Controller
         $array['allow'] = true;
         $array['site'] = env('APP_NAME' , 'Learnovia');
         return HelperController::api_response_format(200,$array);
+    }
+
+    public function config()
+    {
+        // $bool=;
+        $path=null;
+        $name=null;
+        $attachment=attachment::where('type','Logo')->first();
+        if($attachment){
+            $path=$attachment->path;
+            $name =$attachment->description;
+        }
+
+        $firebase=[
+            'apiKey' => 'AIzaSyDNHapmkBjO39XztyBqjb_0syU0pHSXd8k',
+            'authDomain'=> 'learnovia-notifications.firebaseapp.com',
+            'databaseURL'=> 'https://learnovia-notifications.firebaseio.com',
+            'projectId'=> 'learnovia-notifications',
+            'storageBucket'=> 'learnovia-notifications.appspot.com',
+            'messagingSenderId'=> '1056677579116',
+            'appId'=> '1:1056677579116:web:23adce50898d8016ec8b49',
+            'measurementId'=> 'G-BECF0Q93VE'
+        ];
+        $config=[
+            'production'=> env('APP_DEBUG'),
+            'apiUrl'=> env('APP_URL'),
+            'domain'=> str_replace('api.','.',request()->getSchemeAndHttpHost()),
+            'firebase'=> $firebase,
+            'school_logo' => $path,
+            'school_name' => $name
+        ];
+
+        return $config;
     }
 }

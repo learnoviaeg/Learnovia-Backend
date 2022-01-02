@@ -7,28 +7,34 @@ use stdClass;
 
 class GradeCategory extends Model
 {
-    protected $fillable = ['name', 'course_segment_id', 'parent', 'aggregation', 'locked',
-                'aggregatedOnlyGraded', 'hidden', 'id_number' , 'weight','type','grademin','exclude_flag','grademax'];
+    protected $fillable = ['name', 'course_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id', 'item_type' , 'type' ,
+            'aggregation','weights' , 'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
     public function Child()
     {
-        return $this->hasMany('App\GradeCategory', 'parent', 'id');
+        return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'category');
     }
     public function Parents()
     {
         return $this->hasOne('App\GradeCategory', 'id', 'parent');
     }
-    public function CourseSegment()
+    public function course()
     {
-        return $this->belongsTo('App\CourseSegment', 'course_segment_id', 'id');
+        return $this->belongsTo('App\Course', 'course_id', 'id');
     }
     public function GradeItems()
     {
-        return $this->hasMany('App\GradeItems', 'grade_category', 'id');
+        return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'item');
     }
-    public function Children()
+    public function Children() 
+    { 
+        return $this->Child()->with(['Children','GradeItems']); 
+    } 
+
+    public function categories_items()
     {
-        return $this->Child()->with(['Children', 'GradeItems']);
+        return $this->hasMany('App\GradeCategory', 'parent', 'id');
     }
+
     public function total()
     {
         $result = 0;
@@ -74,14 +80,14 @@ class GradeCategory extends Model
         return $total;
     }
 
-    public function weight()
-    {
-        if ($this->weight != 0)
-            return $this->weight;
-        if (!$this->Parents)
-            return 100;
-        return round(($this->total() / $this->Parents->total()) * 100, 3);
-    }
+    // public function weight()
+    // {
+    //     if ($this->weight != 0)
+    //         return $this->weight;
+    //     if (!$this->Parents)
+    //         return 100;
+    //     return round(($this->total() / $this->Parents->total()) * 100, 3);
+    // }
 
     public function depth()
     {
@@ -136,4 +142,21 @@ class GradeCategory extends Model
             $child->getUsergrades($userid);
         }
     }
+
+    public function userGrades()
+    {
+        return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','category');
+    }
+    public function getCalculationTypeAttribute($value)
+    {
+        $content= json_decode($value);
+        return $content;
+    }
+
+    public function getWeightsAttribute($value)
+    {
+        $content= round($value , 2) ;
+        return $content;
+    }
+
 }

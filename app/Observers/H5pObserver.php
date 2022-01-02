@@ -24,7 +24,7 @@ class H5pObserver
     public function created(h5pLesson $h5pLesson)
     {
         $lesson = Lesson::find($h5pLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
+        $course_id = $lesson->course_id;
         $this->report->calculate_course_progress($course_id);
     }
 
@@ -39,11 +39,11 @@ class H5pObserver
         if($h5pLesson->isDirty('lesson_id')){
 
             $lesson = Lesson::find($h5pLesson->lesson_id);
-            $course_id = $lesson->courseSegment->course_id;
-            $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            $course_id = $lesson->course_id;
+            $class_id = $lesson->shared_classes->pluck('id');
 
             $old_lesson = Lesson::find($h5pLesson->getOriginal('lesson_id'));
-            $old_class_id = $old_lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
+            $old_class_id = $old_lesson->shared_classes->pluck('id');
             
             if($old_class_id != $class_id)
                 UserSeen::where('lesson_id',$h5pLesson->getOriginal('lesson_id'))->where('item_id',$h5pLesson->content_id)->where('type','h5p')->delete();
@@ -67,7 +67,7 @@ class H5pObserver
     public function deleted(h5pLesson $h5pLesson)
     {
         $lesson = Lesson::find($h5pLesson->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
+        $course_id = $lesson->course_id;
         UserSeen::where('lesson_id',$h5pLesson->lesson_id)->where('item_id',$h5pLesson->content_id)->where('type','h5p')->delete();
         $this->report->calculate_course_progress($course_id);
     }

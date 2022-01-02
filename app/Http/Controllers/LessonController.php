@@ -7,6 +7,8 @@ use App\Lesson;
 use App\CourseSegment;
 use App\attachment;
 use App\LastAction;
+use App\SecondaryChain;
+use App\Events\LessonCreatedEvent;
 
 class LessonController extends Controller
 {
@@ -22,39 +24,35 @@ class LessonController extends Controller
     public function AddLesson(Request $request)
     {
         $request->validate([
-            'name' => 'required|array',
-            'name.*' => 'required|string',
-            'image' => 'array',
-            'image.*' => 'mimes:jpeg,jpg,png,gif|max:10000',
-            'description' => 'array',
-            'description.*' => 'string',
+            'name' => 'required|string',
+            // 'image' => 'array',
+            'image' => 'mimes:jpeg,jpg,png,gif|max:10000',
+            // 'description' => 'array',
+            'description' => 'string',
             'course' => 'required|exists:courses,id',
-            'class' => 'required|exists:classes,id'
+            'classes' => 'required|array',
+            'classes.*' => 'exists:classes,id',
+            'shared_lesson' => 'required|in:0,1'
         ]);
-        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class , $request->course);
-        if (!isset($courseSegment))
-            return HelperController::api_response_format(200, null,'no courses');
         LastAction::lastActionInCourse($request->course);
-        foreach ($request->name as $key => $name) {
-            $check = Lesson::where('course_segment_id', $courseSegment->id)->where('name',$name)->first();
-            if(!isset($check)){
-                $lessons_in_CourseSegment = Lesson::where('course_segment_id', $courseSegment->id)->max('index');
-                $Next_index = $lessons_in_CourseSegment + 1;
-                $lesson = Lesson::create([
-                    'name' => $name,
-                    'course_segment_id' => $courseSegment->id,
-                    'index' => $Next_index
-                ]);
-                if (isset($request->image[$key])) {
-                    $lesson->image = attachment::upload_attachment($request->image[$key], 'lesson', '')->path;
-                }
-                if (isset($request->description[$key])) {
-                    $lesson->description = $request->description[$key];
-                }
-                $lesson->save();
-            }
-        }
-        return HelperController::api_response_format(200, $courseSegment->lessons,__('messages.lesson.add'));
+        $lessons_in_Course = Lesson::where('course_id', $request->course)->max('index');
+        // return $lessons_in_Course;
+        $Next_index = $lessons_in_Course + 1;
+        $lesson= Lesson::create([
+            'name' => $request->name,
+            'course_id' => $request->course,
+            'shared_lesson' => $request->shared_lesson,
+            'index' => $Next_index,
+            'shared_classes' => json_encode($request->classes),
+        ]);
+        if (isset($request->image))
+            $lesson->image = attachment::upload_attachment($request->image[$key], 'lesson', '')->path;
+        
+        if (isset($request->description))
+            $lesson->description = $request->description;
+        
+        $lesson->save();
+        return HelperController::api_response_format(200, Lesson::where('course_id',$request->course)->get(),__('messages.lesson.add'));
     }
 
     /**
@@ -86,10 +84,10 @@ class LessonController extends Controller
 
         ]);
         $lesson = Lesson::find($request->id);
-        LastAction::lastActionInCourse($lesson->courseSegment->courses[0]->id);
+        LastAction::lastActionInCourse($lesson->course_id);
         $lesson->delete();
-        $lessons = Lesson::whereCourse_segment_id($lesson->course_segment_id)->where('index', '>', $lesson->index)->get();
-
+        SecondaryChain::where('lesson_id',$request->id)->delete();
+        $lessons = Lesson::where('course_id',$lesson->course_id)->where('index', '>', $lesson->index)->get();
         foreach ($lessons as $temp) {
             $temp->index = $temp->index - 1;
             $temp->save();
@@ -108,13 +106,16 @@ class LessonController extends Controller
     public function updateLesson(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'nullable',
             'id'  => 'required|exists:lessons,id',
             'image' => 'mimes:jpeg,jpg,png,gif|max:10000',
-            'description' => 'string'
+            'description' => 'string',
+            'classes' => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'shared_lesson' => 'in:0,1'
         ]);
         $lesson = Lesson::find($request->id);
-        LastAction::lastActionInCourse($lesson->courseSegment->courses[0]->id);
+        LastAction::lastActionInCourse($lesson->course_id);
         $lesson->name = $request->name;
         if ($request->hasFile('image')) {
             $lesson->image = attachment::upload_attachment($request->image, 'lesson', '')->path;
@@ -123,8 +124,18 @@ class LessonController extends Controller
         if ($request->filled('description')) {
             $lesson->description = $request->description;
         }
-        $lesson->save();
+        if ($request->filled('shared_lesson'))
+            $lesson->shared_lesson = $request->shared_lesson;
 
+        if ($request->filled('classes')){
+            foreach($lesson->shared_classes->pluck('id') as $class){
+                $secondary_chain = SecondaryChain::where('group_id', $class)->whereNotIn('group_id',$request->classes)->where('lesson_id',$request->id)->delete();
+            }
+        }
+        if ($request->filled('classes'))
+            $lesson->shared_classes = json_encode($request->classes);
+        $lesson->save();
+        event(new LessonCreatedEvent($lesson));
         return HelperController::api_response_format(200, $lesson, __('messages.lesson.update'));
     }
 

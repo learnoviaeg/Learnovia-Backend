@@ -11,8 +11,15 @@ use App\Lesson;
 use App\Level;
 use App\Classes;
 use App\Paginate;
+use App\attachment;
+use Modules\Assigments\Entities\assignment;
 use DB;
+use App\SecondaryChain;
 use Carbon\Carbon;
+use Modules\UploadFiles\Entities\file;
+use Modules\UploadFiles\Entities\media;
+use Modules\UploadFiles\Entities\page;
+use Illuminate\Support\Facades\Storage;
 
 class MaterialsController extends Controller
 {
@@ -21,7 +28,7 @@ class MaterialsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:material/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:material/get'],   ['only' => ['index']]);
     }
 
     /**
@@ -31,7 +38,6 @@ class MaterialsController extends Controller
      */
     public function index(Request $request,$count = null)
     {
-    
         $request->validate([
             'year' => 'exists:academic_years,id',
             'type' => 'exists:academic_types,id',
@@ -44,58 +50,70 @@ class MaterialsController extends Controller
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id' 
         ]);
-
-        if($request->user()->can('site/show-all-courses')){//admin
-            $course_segments = collect($this->chain->getAllByChainRelation($request));
-            $lessons = Lesson::whereIn('course_segment_id',$course_segments->pluck('id'))->pluck('id');
+        if(isset($request->item_id)){
+            $check = Material::where('type',$request->item_type)->where('item_id',$request->item_id)->first();
+            if(!isset($check))
+                return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
         }
 
-        if(!$request->user()->can('site/show-all-courses')){//enrolled users
+        $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
+        $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();  
 
-            $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-            $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-            $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-            $lessons = $user_course_segments->pluck('courseSegment.lessons')->collapse()->pluck('id');
-        }
-      
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
 
             $lessons = [$request->lesson];
         }
-            
-        $material = Material::with(['lesson','course'])->whereIn('lesson_id',$lessons);
 
-        if($request->user()->can('site/course/student')){
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $materials_query =  Material::orderBy('created_at','desc');
+
+
+        $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
+        if($request->user()->can('site/course/student'))
             $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
-        }
 
-        if($request->has('sort_in'))
-            $material->orderBy("publish_date",$request->sort_in);
 
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
 
         if($count == 'count'){
-
-            $counts = $material->select(DB::raw
+             //copy this counts to count it before filteration
+            $query=clone $materials_query;
+            $all=$query->select(DB::raw
+                            (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
+                                COUNT(case `type` when 'media' then 1 else null end) as media ,
+                                COUNT(case `type` when 'page' then 1 else null end) as page" 
+                            ))->first()->only(['file','media','page']);
+            $cc['all']=$all['file']+$all['media']+$all['page'];
+        
+            $counts = $materials_query->select(DB::raw
                 (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
                     COUNT(case `type` when 'media' then 1 else null end) as media ,
                     COUNT(case `type` when 'page' then 1 else null end) as page" 
                 ))->first()->only(['file','media','page']);
+            $counts['all']=$cc['all'];
 
             return response()->json(['message' => __('messages.materials.count'), 'body' => $counts], 200);
         }
+        $result['last_page'] = Paginate::allPages($material->count(),$paginate);
+        $result['total']= $material->count();
 
-        $AllMat=$material->get();
+        $AllMat=$material->skip(($page)*$paginate)->take($paginate)->with(['lesson.SecondaryChain.Class'])->get();
+        
         foreach($AllMat as $one){
-            $one->class = Classes::find($one->lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
-            $one->level = Level::find($one->lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id);
-            unset($one->lesson->courseSegment);
+            $one->class = $one->lesson->SecondaryChain->pluck('class')->unique();
+            $one->level = Level::whereIn('id',$one->class->pluck('level_id'))->first();
+            unset($one->lesson->SecondaryChain);
         }
+        $result['data'] =  $AllMat;
+        $result['current_page']= $page + 1;
+        $result['per_page']= count($result['data']);
 
-        return response()->json(['message' => __('messages.materials.list'), 'body' => $AllMat->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.materials.list'), 'body' =>$result], 200);
     }
 
     /**
@@ -128,7 +146,6 @@ class MaterialsController extends Controller
         if(isset($material->getOriginal()['link'])){
 
             $url = $material->getOriginal()['link'];
-
             if(str_contains($material->getOriginal()['link'],'youtube') && $material->media_type != 'Link'){
                 if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i',$material->getOriginal()['link'], $match)){
                     $url = 'https://www.youtube.com/embed/'.$match[1];
@@ -137,6 +154,46 @@ class MaterialsController extends Controller
             return redirect($url);
         }
         
+    }
+
+    public function Material_Details(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:materials,id',
+        ]);
+
+        $material = Material::find($request->id);
+       
+        if(!isset($material))
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        
+        if ($material->type == "media") {
+
+            $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
+            strrpos($material->getOriginal()['link'],"/"));
+            $result = media::find($material->item_id);
+            $extension=substr(strstr($result->type, '/'), 1);
+        }
+        if ($material->type == "file") {
+
+            $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
+            strrpos($material->getOriginal()['link'],"/")); 
+            $result = file::find($material->item_id);
+            $extension = $result->type;
+        }
+        if($material->type == 'page'){
+            $result = page::find($material->item_id);
+        }
+
+        if(!file_exists($path))
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+            
+        $fileName = $result->name.'.'.$extension;
+        $fileName=str_replace('/','-',$fileName);
+        $fileName=str_replace('\\','-',$fileName);
+        $headers = ['Content-Type' => 'application/'.$extension];
+    
+        return response()->download($path , $fileName , $headers);
     }
 
     /**
@@ -160,5 +217,32 @@ class MaterialsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function downloadAssignment(Request $request)
+    {
+
+        $request->validate([
+            'id' => 'required|exists:assignments,id',
+        ]);
+
+        $assigment = Assignment::find($request->id);
+        if(!isset($assigment))
+        {
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        }
+        $attachment = attachment::find($assigment->attachment_id);
+        $path = public_path('/storage/assignment').substr($attachment->getOriginal()['path'],
+        strrpos($attachment->getOriginal()['path'],"/"));
+
+        if(!file_exists($path))
+        return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        
+        $fileName = $attachment->name;
+        $headers = ['Content-Type' => 'application/'.$attachment->extension];
+
+        return response()->download($path , $fileName , $headers);
+
     }
 }

@@ -6,10 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Questions extends Model
 {
-    protected $fillable = ['text','mark','parent','And_why','And_why_mark','category_id','survey','question_type_id','question_category_id','course_id'];
-    protected $hidden = [
-        'created_at', 'updated_at','course_segment_id','category_id','question_type_id','question_category_id'
-    ];
+    protected $fillable = ['text','mark','parent','content','category_id','survey','question_type_id','question_category_id','course_id' , 'mcq_type'];
+
+    //count of all quizzes
+    protected $appends = ['count_quizzes'];
+
+
+    public function getCountQuizzesAttribute()
+    {
+        $count_quest = 0;
+        $count_quest = quiz_questions::where('question_id',$this->id)->count();
+        return $count_quest;  
+    }
 
     public function question_type()
     {
@@ -31,12 +39,12 @@ class Questions extends Model
         return $this->belongsTo('App\Course', 'course_id', 'id');
     }
 
-    public function question_answer()
-    {
-        return $this->hasMany('Modules\QuestionBank\Entities\QuestionsAnswer', 'question_id', 'id');
-    }
+    // public function question_answer()
+    // {
+    //     return $this->hasMany('Modules\QuestionBank\Entities\QuestionsAnswer', 'question_id', 'id');
+    // }
 
-    public function childeren()
+    public function children()
     {
         return $this->hasMany('Modules\QuestionBank\Entities\Questions', 'parent', 'id');
     }
@@ -45,22 +53,38 @@ class Questions extends Model
     {
         return $this->belongsTo('App\Course', 'course_id', 'id');
     }
-
-    public static function CheckAndWhy($squestion){
-        if(isset($squestion->And_why))
-        {
-            if($squestion->And_why == 1){
-                return $squestion->And_why_mark;
-            }
-        }
-        return null ;
-    }
-
+    
     public function userAnswer($id)
     {
         return $this->hasOne('Modules\QuestionBank\Entities\userQuizAnswer', 'question_id', 'id')
             ->where('user_quiz_id',$id)->first();
     }
 
-
+    public function getContentAttribute()
+    {
+        $content= json_decode($this->attributes['content']);
+        
+        if($this->attributes['question_type_id'] == 3){
+            $content= json_decode($this->attributes['content'],true);
+        }
+        
+        if($this->attributes['question_type_id'] == 2){
+            foreach($content as $key => $con)
+            {
+                if(isset($con->is_true)){
+                    if($con->is_true == 1){
+                        $con->is_true=True;
+                        if(!isset($con->mark))
+                            $con->mark = null;
+                        continue;
+                    }
+                    $con->is_true=False;
+                    if(!isset($con->mark))
+                        $con->mark = null;
+                }
+            }
+        }
+        return $content;
+    }
 }
+

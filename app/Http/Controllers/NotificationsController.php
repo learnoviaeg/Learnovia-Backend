@@ -4,14 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Notifications\NewMessage;
-use Illuminate\Support\Facades\Notification;
 use App\User;
 use Carbon\Carbon;
-use Auth;
 use DB;
 use App\LastAction;
 use App\Course;
+use App\Notification;
+use App\Notifications\QuizNotification;
+use App\Notifications\SendNotification;
 use App\Paginate;
+use Illuminate\Support\Facades\Auth;
+use Modules\QuestionBank\Entities\QuizLesson;
 
 class NotificationsController extends Controller
 {
@@ -30,83 +33,73 @@ class NotificationsController extends Controller
     public function index(Request $request,$types=null)
     {
         $request->validate([
-            'read' => 'in:unread,read',
+            'read' => 'in:1,0',
             'type'=>'string|in:announcement,notification',  
             'course_id' => 'integer|exists:courses,id',
             'component_type' => 'string|in:file,media,Page,quiz,assignment,h5p,meeting',
             'sort_in' => 'in:asc,desc', 
             'search' => 'string'
         ]);
+
+        //check if the auth user is parent and has current child to get his child notifications
+
+        $user = Auth::user();
+        $notifications = $user->notifications->where('publish_date' ,'<=',Carbon::now());
+
         $roles = Auth::user()->roles->pluck('name');
+
         if(in_array("Parent" , $roles->toArray())){
+
             if(Auth::user()->currentChild != null)
             {
                 $currentChild =User::find(Auth::user()->currentChild->child_id);
                 Auth::setUser($currentChild);
+                $notifications[] = $user->notifications->where('publish_date' ,'<=',Carbon::now());
             }
         }
-
-        $notify = DB::table('notifications')->select('data','read_at','id')
-            ->where('notifiable_id', $request->user()->id)->orderBy('created_at','desc')->get();
-                                            
-        $notifications = collect();
-        $notifications_types =collect();
-        if(isset($decoded_data['course_id']))
-            LastAction::lastActionInCourse(isset($decoded_data['course_id']));
-
-        foreach($notify as $notify_object) {
-            $decoded_data= json_decode($notify_object->data, true);
-            $notifications->push([
-                'id' => $decoded_data['id'],
-                'read_at' => $notify_object->read_at,
-                'notification_id' => $notify_object->id,
-                'message' => $decoded_data['message'],
-                'publish_date' => Carbon::parse($decoded_data['publish_date'])->format('Y-m-d H:i:s'),
-                'type' => $decoded_data['type'],
-                'course_id' => isset($decoded_data['course_id']) ? $decoded_data['course_id'] : null ,
-                'class_id' => isset($decoded_data['class_id']) ? $decoded_data['class_id'] : null,
-                'lesson_id'  => isset($decoded_data['lesson_id']) ? $decoded_data['lesson_id'] : null,
-                'link' => isset($decoded_data['link'])?$decoded_data['link']:null,
-                'course_name' => isset($decoded_data['course_name'])?$decoded_data['course_name']:null,
-            ]);
-            if($decoded_data['type']=='Page') 
-                $notifications_types->push('page');
-            else
-                $notifications_types->push($decoded_data['type']);
-
-        }
-
+      
         // for route api/notifications/{types} 
-        if($types=='types')
+        if($types=='types'){
+
+            $notifications_types = $notifications->where('item_type','!=','announcement')->pluck('item_type')->unique();
+
             return response()->json(['message' => 'notification types list.','body' => $notifications_types->unique()->values()], 200);
-
-        $notifications = $notifications->where('publish_date', '<=', Carbon::now())->sortByDesc('publish_date');
-        if($request->has('sort_in') && $request->sort_in == 'asc')
-            $notifications = $notifications->where('publish_date', '<=', Carbon::now())->sortBy('publish_date');
-
-        if($request->has('read') && $request->read == 'unread')//get unread
-            $notifications = $notifications->where('read_at',null);
-
-        if($request->has('read') && $request->read == 'read')//get read
-            $notifications = $notifications->where('read_at','!=',null);
-
-        if($request->type == 'announcement')
-            $notifications = $notifications->where('type','announcement');
-        
-        if($request->type == 'notification'){
-            $notifications = $notifications->where('type','!=','announcement');
-            if($request->filled('component_type'))
-                $notifications = $notifications->where('type',$request->component_type);
         }
-        if($request->filled('course_id'))
+
+        if($request->has('sort_in') && $request->sort_in == 'asc'){
+            $notifications = $notifications->reverse()->values();
+        }
+
+        //read
+        if($request->has('read') && $request->read){
+            $notifications = $notifications->where('pivot.read_at','!=',null);
+        }
+
+        //unread
+        if($request->has('read') && !$request->read){
+            $notifications = $notifications->where('pivot.read_at',null);
+        }
+
+        if($request->type){
+            $notifications = $notifications->where('type',$request->type);
+        }
+        
+        if($request->filled('component_type')){
+            $notifications = $notifications->where('item_type',$request->component_type);
+        }
+
+        if($request->filled('course_id')){
             $notifications = $notifications->where('course_id',$request->course_id);
+        }
 
         if($request->filled('search')){
+
             $notifications = $notifications->filter(function ($item) use ($request) {
-                if(  (($item['message']!=null) && str_contains(strtolower($item['message']), strtolower($request->search)))) 
+                if($item->message != null && str_contains(strtolower($item->message), strtolower($request->search))) 
                     return $item; 
             });
         }
+
         return response()->json(['message' => 'User notification list.','body' => $notifications->values()->paginate(Paginate::GetPaginate($request))], 200);
     }
 
@@ -120,59 +113,78 @@ class NotificationsController extends Controller
     {
         $request->validate([
             'id' => 'required',
-            'users'=>'required|array',
-            'users.*' => 'required|integer|exists:users,id',
+            'users'=>'array',
+            'users.*' => 'integer|exists:users,id',
             'type' => 'required|string',
-            'message' => 'required',
-            'course_id' => 'integer|exists:courses,id',
+            'message' => 'string|required_if:message_type,==,customized',
+            'course_id' => 'integer|exists:courses,id|required_if:message_type,==,quiz_notify',
             'class_id'=>'integer|exists:classes,id',
-            'lesson_id'=>'integer|exists:lessons,id',
+            'lesson_id'=>'integer|exists:lessons,id|required_if:message_type,==,quiz_notify',
             'link' => 'string',
             'publish_date' => 'date',
             'from' => 'integer|exists:users,id',
+            'message_type' => 'required|in:customized,quiz_notify'
         ]);
 
-        if(!isset($request->lesson_id))
-            $request['lesson_id'] = null;
+        //sending static notification when teacher click notify students button
+        if($request->has('message_type') && $request->message_type == 'quiz_notify'){
 
-        if(!isset($request->course_id))
-            $request['course_id'] = null;   
-
-        if(isset($request->course_id))
-            LastAction::lastActionInCourse($request->course_id);
+            $quizLesson = QuizLesson::where('quiz_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
         
-        if(!isset($request->class_id))
-            $request['class_id'] = null;
-        
-        if(!isset($request->link))
-            $request['link'] = null;
+            $message = __('messages.quiz.quiz_notify', ['quizName' => $quizLesson->quiz->name, 'courseName' => $quizLesson->lesson->course->name]);
 
-        if(!isset($request->publish_date))
-            $request['publish_date'] = Carbon::now()->format('Y-m-d H:i:s');
+            //sending notifications     
+            $notification = new QuizNotification($quizLesson,$message);
 
-        if(!isset($request->from))
-            $request['from'] = Auth::id();
+            if($request->filled('users')){
+                $notification->setUsers($request->users);
+            }
 
-        $request['course_name'] = null;
-        if(isset($request->course_id))
-            $request['course_name'] = Course::whereId($request->course_id)->pluck('name')->first();
+            $notification->send();
 
-        $users = User::whereIn('id',$request->users)->whereNull('deleted_at')->get();
-
-        $date = Carbon::parse($request->publish_date);
-
-        $seconds = $date->diffInSeconds(Carbon::now()); //calculate time the job should fire at
-        if($seconds < 0) {
-            $seconds = 0;
+            return response()->json(['message' => 'Notification sent.','body' => null], 200);           
         }
-        
-        //user firebase realtime notifications 
-        $job = ( new \App\Jobs\Sendnotify($request->toArray()))->delay($seconds);
 
-        dispatch($job);
+        $notification = [
+            'item_id' => $request->id,
+            'item_type' => $request->type,
+            'message' => $request->message,
+            'type' => 'notification'
+        ];
 
-        //store notifications in DB
-        Notification::send($users, new NewMessage($request));
+        if($request->class_id){
+            $notification['classes'] = json_encode([$request->class_id]);
+        }
+
+        if($request->course_id){
+            $notification['course_id'] = $request->course_id;
+        }
+
+        if($request->lesson_id){
+            $notification['lesson_id'] = $request->lesson_id;
+        }
+
+        if($request->link){
+            $notification['link'] = $request->link;
+        }
+
+        $from = Auth::id();
+        if($request->from){
+            $from = $request->from;
+        }
+        $notification['created_by'] = $from;
+
+        $publish_date = Carbon::now();
+        if($request->publish_date){
+            $publish_date = $request->publish_date;
+        }
+        $notification['publish_date'] = $publish_date;
+
+        //assign notification to given users
+        $createdNotification = (new SendNotification)->toDatabase($notification,$request->users);
+            
+        //firebase Notifications
+        (new SendNotification)->toFirebase($createdNotification);
 
         return response()->json(['message' => 'Notification sent.','body' => null], 200);
     }
@@ -197,29 +209,35 @@ class NotificationsController extends Controller
      */
     public function update(Request $request,$id)
     {
-        $notify = DB::table('notifications')->where('id', $id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-        if($notify == 0 )
-            return response()->json(['message' => 'This notification not found','body' => null], 404);
-        return response()->json(['message' => 'Notification was read','body' => $notify], 200); 
+        $notificaton = Notification::findOrFail($id);
+
+        $user_notification = $notificaton->users->where('pivot.user_id',Auth::id())->first();
+        
+        if($user_notification){
+
+            $user_notification->pivot->read_at = Carbon::now()->toDateTimeString();
+            $user_notification->pivot->save();
+        }
+       
+        return response()->json(['message' => 'Notification was read','body' => $notificaton], 200); 
     }
 
     public function read(Request $request,$read=null)
     {
-        $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
-        foreach ($noti as $not) {
-            $not->data= json_decode($not->data, true);
-            if($read == 'notify')
-                if($not->data['type'] != 'announcement')
-                    $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-            
-            if($read == 'announce')
-                if($not->data['type'] == 'announcement')
-                    $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-        }
-        if(!isset($noti))
-            return response()->json(['message' => 'You don\'t have any','body' => null], 200);        
+        $user = User::findOrFail(Auth::id());
 
-        return response()->json(['message' => $read .' was read','body' => $check], 200);        
+        $type = 'notification';
+        if($read && $read == 'announce'){
+            $type = 'announcement';
+        }
+
+        $userNotifications = $user->notifications->where('pivot.read_at',null)->where('type',$type);
+    
+        foreach($userNotifications as $notificaton){
+            $user->notifications()->updateExistingPivot($notificaton->id,['read_at' => Carbon::now()]);
+        }
+            
+        return response()->json(['message' => $read .' was read','body' => null], 200);        
     }
 
     /**

@@ -22,9 +22,11 @@ class UserSeenObserver
      */
     public function created(UserSeen $userSeen)
     {
-        $lesson = Lesson::find($userSeen->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
-        $this->report->calculate_course_progress($course_id);
+        if($userSeen->lesson_id){
+            $lesson = Lesson::find($userSeen->lesson_id);
+            // $course_id = $lesson->courseSegment->course_id;
+            $this->report->calculate_course_progress($lesson->course_id);
+        }
     }
 
     /**
@@ -46,9 +48,10 @@ class UserSeenObserver
      */
     public function deleted(UserSeen $userSeen)
     {
-        $lesson = Lesson::find($userSeen->lesson_id);
-        $course_id = $lesson->courseSegment->course_id;
-        $this->report->calculate_course_progress($course_id);
+        if($userSeen->lesson_id){
+            $lesson = Lesson::find($userSeen->lesson_id);
+            $this->report->calculate_course_progress($lesson->course_id);
+        }
     }
 
     /**
