@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class AttendanceSession extends Model
 {
@@ -21,5 +22,15 @@ class AttendanceSession extends Model
     public function user()
     {
         return $this->belongsTo('App\User', 'created_by', 'id');
+    }
+
+    public function getFromAttribute()
+    {
+        return Carbon::parse($this->attributes['from'])->translatedFormat('l j F Y H:i:s');
+    }
+
+    public function getToAttribute()
+    {
+        return Carbon::parse($this->attributes['to'])->translatedFormat('l j F Y H:i:s');
     }
 }

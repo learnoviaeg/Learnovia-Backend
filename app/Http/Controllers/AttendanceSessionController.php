@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\AttendanceSession;
+use Carbon\Carbon;
+use Auth;
 
 class AttendanceSessionController extends Controller
 {
@@ -49,26 +52,47 @@ class AttendanceSessionController extends Controller
             'attendance_id' => 'required|exists:attendances,id',
             'class_id' => 'required|exists:classes,id',
             'repeated' => 'required|in:0,1',
-            'sessions' => 'array',
+            'sessions' => 'required|array',
             'sessions.*.from' => 'required|date',
             'sessions.*.to' => 'required|date|after:from',
-            'sessions.*.day' => 'required|in:saterday, sunday, monday, tuesday, thuresday, friday', //|required_if:repeated,==,1
-            'repeat_until' => 'required_if:repeated,==,1|date'
+            // 'sessions.*.day' => 'in:saterday, sunday, monday, tuesday, thuresday, friday|required_if:repeated,==,1',
+            'repeated_until' => 'required_if:repeated,==,1|date'
         ]);
 
         foreach($request->sessions as $session)
         {
+            if(isset($request->repeated_until))
+            {
+                $start=Carbon::parse($session['from']);
+                $end=Carbon::parse($session['from'])->diffInSeconds($session['to']);
+                while(Carbon::parse($session['from']) <= Carbon::parse($request->repeated_until)){
+                    // dd(Carbon::parse($session['from'])->addSeconds($end));
                     $attendance=AttendanceSession::firstOrCreate([
                         'name' => $request->name,
                         'attendance_id' => $request->attendance_id,
                         'class_id' => $request->class_id,
-                        'from' => 'required|date',
-                        'to' => 'required|date|after:start_date',
+                        'from' => Carbon::parse($session['from']),
+                        'to' => Carbon::parse($session['from'])->addSeconds($end),
                         'created_by' => Auth::id()
                     ]);
+                    $session['from']=Carbon::parse($session['from'])->addDays(7);
+                    // $start=$session['from']->addDays(7);
+                }
+            }      
+            else
+            {
+                $attendance=AttendanceSession::firstOrCreate([
+                    'name' => $request->name,
+                    'attendance_id' => $request->attendance_id,
+                    'class_id' => $request->class_id,
+                    'from' => $session['from'],
+                    'to' => $session['to'],
+                    'created_by' => Auth::id()
+                ]);
+            }      
         }
 
-        return HelperController::api_response_format(200 , null , __('messages.attendance.add'));
+        return HelperController::api_response_format(200 , null , __('messages.attendance_session.add'));
     }
 
     /**
@@ -79,7 +103,8 @@ class AttendanceSessionController extends Controller
      */
     public function show($id)
     {
-        //
+        $attendanceSession=AttendanceSession::find($id);
+        return HelperController::api_response_format(200 , $attendanceSession , null);
     }
 
     /**
@@ -91,7 +116,26 @@ class AttendanceSessionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'string',
+            'attendance_id' => 'exists:attendances,id',
+            'class_id' => 'exists:classes,id',
+            'from' => 'date',
+            'to' => 'date|after:from',
+        ]);
+
+        $attendanceSession=AttendanceSession::find($id);
+        // dd($attendance->attendance_type);
+
+        $attendanceSession->update([
+            'name' => ($request->name) ? $request->name : $attendanceSession->name,
+            'attendance_id' => ($request->attendance_id) ? $request->attendance_id : $attendanceSession->attendance_id,
+            'class_id' => ($request->class_id) ? $request->class_id : $attendanceSession->class_id,
+            'from' => ($request->from) ? $request->from : $attendanceSession->from,
+            'to' => ($request->to) ? $request->to : $attendanceSession->to,
+        ]);
+
+        return HelperController::api_response_format(200 , null , __('messages.attendance.update'));
     }
 
     /**
@@ -102,6 +146,9 @@ class AttendanceSessionController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $attendanceSession=AttendanceSession::find($id);
+        $attendanceSession->delete();
+
+        return HelperController::api_response_format(200 , null , __('messages.attendance_session.delete'));
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAttendanceSessionsTable extends Migration
+class DropAttendanceSessions extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,11 @@ class CreateAttendanceSessionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('attendance_session', function (Blueprint $table) {
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('attendance_sessions');
+        Schema::enableForeignKeyConstraints();
+
+        Schema::create('attendance_sessions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->longText('name');
 
@@ -39,6 +43,8 @@ class CreateAttendanceSessionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('attendance_sessions');
+        Schema::table('attendance_sessions', function (Blueprint $table) {
+            //
+        });
     }
 }
