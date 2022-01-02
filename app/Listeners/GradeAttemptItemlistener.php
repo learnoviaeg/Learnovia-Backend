@@ -66,6 +66,8 @@ class GradeAttemptItemlistener
                                 $grade->grade = $gradeOld->grade;
                                 $grade->feedback = $gradeOld->feedback;
                                 $grade->and_why_mark = $gradeOld->and_why_mark;
+                                if(($grade->and_why_right == 1 && $gradeOld->mark < 1) || ($grade->and_why_right == 0 && $gradeOld->mark >= 1))
+                                    $grade->right=2;
                             }
                         }
 

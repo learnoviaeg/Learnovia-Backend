@@ -73,7 +73,7 @@ class GradeManualListener
                             $tes->right=2;
                             // $tes->user_quest_grade=$TF->correction->and_why_mark + $TF->correction->mark; // daraget el taleb fel so2al koloh
                             // $tes->user_quest_grade=$TF->correction->grade; // daraget el taleb fel so2al koloh
-                            $TF->update(['correction'=>json_encode($tes)]); //because it doesn't read update
+                            $TF->correction=json_encode($tes); //because it doesn't read update
                         }
                     }
                 }
