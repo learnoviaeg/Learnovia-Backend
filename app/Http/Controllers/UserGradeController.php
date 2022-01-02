@@ -22,7 +22,7 @@ class UserGradeController extends Controller
     /**
      * create User grade
      */
-    public function store(Request $request) 
+    public function store(Request $request)   
     { 
         $request->validate([
             'user'      =>'required|array',
@@ -31,10 +31,15 @@ class UserGradeController extends Controller
             'user.*.grade'     => 'nullable',
         ]);
         foreach($request->user as $user){
+            $percentage = 0;
             $instance = GradeCategory::find($user['item_id']);
+
+            if($instance->max != null && $instance->max > 0)
+                    $percentage = ($user['grade'] / $instance->max) * 100;
+
             UserGrader::updateOrCreate(
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
-                ['grade' =>  $user['grade']]
+                ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
             );
             event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
         }

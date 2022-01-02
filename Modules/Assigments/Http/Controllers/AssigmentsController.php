@@ -590,14 +590,20 @@ class AssigmentsController extends Controller
         //recalculating grades
         $grade_category = GradeCategory::where('instance_id', $request->assignment_id)->where('item_type', 'Assignment')->where('instance_type', 'Assignment')
                             ->where('type' , 'item')->where('lesson_id', $request->lesson_id);
+                            
         if($grade_category->count() > 0){
+            $percentage = 0;
+            $assignment_category = $grade_category->first();
+
+            if($assignment_category->max != null && $assignment_category->max > 0)
+                $percentage = ($grade / $assignment_category->max) * 100;
 
             UserGrader::updateOrCreate(
                 ['item_id'=>$grade_category->first()->id, 'item_type' => 'category', 'user_id' => $request->user_id],
-                ['grade' =>  $userassigment->grade]
+                ['grade' =>  $userassigment->grade , 'percentage' => $percentage]
             );
 
-            event(new UserGradesEditedEvent(User::find($request->user_id) , $grade_category->first()->Parents));
+            event(new UserGradesEditedEvent(User::find($request->user_id) , $assignment_category->Parents));
         }
 
       
