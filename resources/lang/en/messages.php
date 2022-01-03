@@ -176,27 +176,27 @@ return [
         'media_hidden' => 'This media is hidden',
 
         'image' => [
-            'add' => 'Image uploaded successfully',
+            'add' => 'media uploaded successfully',
             'update' => 'Image updated successfully',
             'delete' => 'Image deleted successfully',
         ],
         'video' => [
-            'add' => 'Video uploaded successfully',
+            'add' => 'media uploaded successfully',
             'update' => 'Video updated successfully',
             'delete' => 'Video deleted successfully',
         ],
         'audio' => [
-            'add' => 'Audio uploaded successfully',
+            'add' => 'media uploaded successfully',
             'update' => 'Audio updated successfully',
             'delete' => 'Audio deleted successfully',
         ],
         'link' => [
-            'add' => 'Link uploaded successfully',
+            'add' => 'media uploaded successfully',
             'update' => 'Link updated successfully',
             'delete' => 'Link deleted successfully',
         ],
         'url' => [
-            'add' => 'URL uploaded successfully',
+            'add' => 'media uploaded successfully',
             'update' => 'URL updated successfully',
             'delete' => 'URL deleted successfully',
         ],
