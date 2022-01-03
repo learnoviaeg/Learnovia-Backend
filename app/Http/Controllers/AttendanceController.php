@@ -9,6 +9,14 @@ use App\GradeCategory;
 
 class AttendanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
+        $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
+        $this->middleware(['permission:attendance/get'],   ['only' => ['update']]);
+        $this->middleware(['permission:attendance/edit'],   ['only' => ['index','show']]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -104,13 +112,26 @@ class AttendanceController extends Controller
                         'level_id' => $attend['level_id'], //$level
                         'course_id' => $attend['course_id'], //$course
                         'is_graded' => $request->is_graded,
-                        'grade_cat_id' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category,
+                        'grade_cat_id' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
                         'start_date' =>  $request->start_date,
                         'end_date' => $request->end_date,
                         'min_grade' =>  $request->min_grade,
                         'gradeToPass' => $request->gradeToPass,
                         'max_grade' => $request->max_grade,
                         'created_by' => Auth::id()
+                    ]);
+
+                    $gradeCat = GradeCategory::firstOrCreate([
+                        'name' => $request->name,
+                        'course_id' => $attend['course_id'],
+                        'instance_id' =>$attendance->id,
+                        'instance_type' => 'Attendance',
+                        'item_type' => 'Attendance',
+                        'type' => 'item',
+                        'parent' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
+                        'max'    => $request->max_grade,
+                        'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
+                        'weights' => ((bool) $request->is_graded == false) ? 0 : null,
                     ]);
                 // }
             // }

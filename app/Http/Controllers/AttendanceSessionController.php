@@ -9,6 +9,14 @@ use Auth;
 
 class AttendanceSessionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
+        $this->middleware(['permission:attendance/get-session'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
+        $this->middleware(['permission:attendance/edit-session'],   ['only' => ['update']]);
+    }
+
     /**
      * Display a listing of the resource.
      *
