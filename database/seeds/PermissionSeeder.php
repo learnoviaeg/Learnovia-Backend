@@ -392,7 +392,6 @@ class PermissionSeeder extends Seeder
         
 
         //Assignments permessions
-
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/add', 'title' => 'add assignment']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/update', 'title' => 'update assignment']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/update-assignemnt-lesson', 'title' => 'update assignemnt lesson']);
@@ -413,18 +412,23 @@ class PermissionSeeder extends Seeder
 
 
         //Attendance permessions
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'Add Sessions']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'Add Session']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/delete-session', 'title' => 'Delete Session']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/edit-session', 'title' => 'Edit Session']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-session', 'title' => 'Get Sessions']);
+
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add', 'title' => 'Create Attendnace']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/delete', 'title' => 'Delete Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/edit', 'title' => 'Edit Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get', 'title' => 'Get Attendances']);
+
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'Take attendnace']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-attendance', 'title' => 'All Sessions','dashboard' => 1,'icon'=> 'Attendance']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-daily', 'title' => 'Daily','dashboard' => 1,'icon'=> 'Attendance']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/report-attendance', 'title' => 'Attendance Report','dashboard' => 1,'icon'=> 'Attendance']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/delete-attendance', 'title' => 'Delete Session']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/edit-attendance', 'title' => 'Edit Session']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'Get students in session']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/export', 'title' => 'Export attendnace']);
 
         //Bigbluebutton permessions
-
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/create','title' => 'create meeting']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/join','title' => 'join meeting']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/get','title' => 'get meeting']);
@@ -438,7 +442,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/session-moderator','title' => 'Bigbluebutton session moderator']);
 
         //Page permessions
-
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/add', 'title' => 'add page']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/update', 'title' => 'update page']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/delete', 'title' => 'delete page']);
