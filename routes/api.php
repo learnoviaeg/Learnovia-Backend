@@ -545,6 +545,10 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('user-grade', UserGradeController::class);
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
+    Route::Resource('attendance', AttendanceController::class);
+    Route::Resource('session', AttendanceSessionController::class);
+
+    Route::Resource('topic', TopicController::class);
     
     Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
     Route::get('courseProgressReport' , 'ReportsController@courseProgressReport')->middleware('permission:reports/course_progress');
@@ -553,15 +557,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('userStatus/{option}' , 'ReportsController@usersStatusReport')->middleware('permission:reports/active_users|reports/in_active_users');
 });
 
-    Route::get('materials-details', 'MaterialsController@Material_Details');
-    Route::get('download-assignment', 'MaterialsController@downloadAssignment');
-
-
-Route::group(['middleware' => ['auth:api','LastAction']], function () {
-    Route::Resource('topic', TopicController::class);
-});
-
-
+Route::get('materials-details', 'MaterialsController@Material_Details');
+Route::get('download-assignment', 'MaterialsController@downloadAssignment');
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
