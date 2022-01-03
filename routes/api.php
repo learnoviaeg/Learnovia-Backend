@@ -397,14 +397,14 @@ Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], f
     Route::get('get-with-course', 'ScaleController@GetScaleWithCourse')->name('getscale')->middleware('permission:scale/get-with-course');
 });
 
-Route::group(['prefix' => 'letter', 'middleware' => ['auth:api','LastAction']], function () {
-    Route::post('add', 'LetterController@add')->name('addletter')->middleware('permission:letter/add');
-    Route::post('update', 'LetterController@update')->name('updateletter')->middleware('permission:letter/update');
-    Route::post('delete', 'LetterController@delete')->name('deleteletter')->middleware('permission:letter/delete');
-    Route::get('get', 'LetterController@get')->name('getletter')->middleware('permission:letter/get');
-    Route::post('assign', 'LetterController@assignLetterToCourse')->name('assignletter')->middleware('permission:letter/assign');
-    Route::get('get-with-course', 'LetterController@GetLettersWithCourse')->name('getwithcourse')->middleware('permission:letter/get-with-course');
-});
+// Route::group(['prefix' => 'letter', 'middleware' => ['auth:api','LastAction']], function () {
+//     Route::post('add', 'LetterController@add')->name('addletter')->middleware('permission:letter/add');
+//     Route::post('update', 'LetterController@update')->name('updateletter')->middleware('permission:letter/update');
+//     Route::post('delete', 'LetterController@delete')->name('deleteletter')->middleware('permission:letter/delete');
+//     Route::get('get', 'LetterController@get')->name('getletter')->middleware('permission:letter/get');
+//     Route::post('assign', 'LetterController@assignLetterToCourse')->name('assignletter')->middleware('permission:letter/assign');
+//     Route::get('get-with-course', 'LetterController@GetLettersWithCourse')->name('getwithcourse')->middleware('permission:letter/get-with-course');
+// });
 
 Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], function () {
     Route::post('add', 'EventController@create')->name('addevent')->middleware('permission:event/add');
@@ -534,6 +534,9 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::post('grade-pass', 'QuizzesController@Grade_pass_settings')->middleware('permission:settings/grade_pass');
         Route::get('grade-pass', 'QuizzesController@Get_grade_pass_settings')->middleware('permission:settings/grade_pass');
     });
+
+    Route::Resource('letter', LetterController::class);
+
     Route::Resource('settings', SettingsController::class);
 
     Route::Resource('grade-category', GradeCategoriesController::class);
