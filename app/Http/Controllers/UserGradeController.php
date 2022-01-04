@@ -16,6 +16,7 @@ use App\Grader\gradingMethodsInterface;
 use App\Events\RefreshGradeTreeEvent;
 use Auth;
 use App\Events\UserGradesEditedEvent;
+use App\Events\GradeCalculatedEvent;
 
 class UserGradeController extends Controller
 {
@@ -37,11 +38,12 @@ class UserGradeController extends Controller
             if($instance->max != null && $instance->max > 0)
                     $percentage = ($user['grade'] / $instance->max) * 100;
 
-            UserGrader::updateOrCreate(
+            $grader = UserGrader::updateOrCreate(
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
                 ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
             );
             event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
+            event(new GradeCalculatedEvent($grader));
         }
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
     } 
@@ -315,4 +317,28 @@ class UserGradeController extends Controller
         }
         return HelperController::api_response_format(200, array_values($cour));
     }
+
+
+    public function fglReport(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        
+        $result = User::whereId($request->user_id)->with(['enroll' => function($query)use ($request){
+                    $query->where("role_id", 3);
+                    }, 'enroll.courses.gradeCategory'=> function($query)use ($request){
+                        $query->where("name", 'First Term');
+                        $query->with(['userGrades' => function ($q) use ($request) {
+                            $q->where('user_id', $request->user_id);
+                    }]);
+                    }])->first();
+
+        return response()->json(['message' => null, 'body' => $result ], 200);
+
+
+    }
 }
+
+
