@@ -16,6 +16,7 @@ use App\Grader\gradingMethodsInterface;
 use App\Events\RefreshGradeTreeEvent;
 use Auth;
 use App\Events\UserGradesEditedEvent;
+use App\Events\GradeCalculatedEvent;
 
 class UserGradeController extends Controller
 {
@@ -37,11 +38,12 @@ class UserGradeController extends Controller
             if($instance->max != null && $instance->max > 0)
                     $percentage = ($user['grade'] / $instance->max) * 100;
 
-            UserGrader::updateOrCreate(
+            $grader = UserGrader::updateOrCreate(
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
                 ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
             );
             event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
+            event(new GradeCalculatedEvent($grader));
         }
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
     } 
