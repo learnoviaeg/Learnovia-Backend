@@ -286,19 +286,19 @@ class QuizzesController extends Controller
 
         $gg=GradeCategory::where('course_id', $quiz_lesson->lesson->course_id)
                             ->whereNull('parent')->where('type','category')->first();
-                            
-        $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $quiz_lesson->lesson_id);
+        
+        $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         $gradeCat->update([
                     'hidden' => $quiz_lesson->visible,
                     'calculation_type' => json_encode($quiz_lesson->grading_method_id),
-                    'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id
-                ]);
-        
+                    'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id,
+                    'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $gg->lesson_id
+                ]);        
         
         // update timeline object and sending notifications
         event(new updateQuizAndQuizLessonEvent($quiz_lesson));
         event(new UpdatedQuizQuestionsEvent($quiz->id));      
-        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->first()->parent)));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
         dispatch($userGradesJob);
                             
 
