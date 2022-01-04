@@ -317,4 +317,28 @@ class UserGradeController extends Controller
         }
         return HelperController::api_response_format(200, array_values($cour));
     }
+
+
+    public function fglReport(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        
+        $result = User::whereId($request->user_id)->with(['enroll' => function($query)use ($request){
+                    $query->where("role_id", 3);
+                    }, 'enroll.courses.gradeCategory'=> function($query)use ($request){
+                        $query->where("name", 'First Term');
+                        $query->with(['userGrades' => function ($q) use ($request) {
+                            $q->where('user_id', $request->user_id);
+                    }]);
+                    }])->first();
+
+        return response()->json(['message' => null, 'body' => $result ], 200);
+
+
+    }
 }
+
+
