@@ -17,6 +17,7 @@ use App\Events\RefreshGradeTreeEvent;
 use Auth;
 use App\Events\UserGradesEditedEvent;
 use App\Events\GradeCalculatedEvent;
+use Spatie\Permission\Models\Permission;
 
 class UserGradeController extends Controller
 {
@@ -336,6 +337,12 @@ class UserGradeController extends Controller
         // };
         // $result = User::whereId($request->user_id)->whereHas('enroll.courses.gradeCategory' , $callback)
         //                 ->with(['enroll.courses.gradeCategory' => $callback])->first();
+        $allowed_levels=Permission::where('name','report_card/fgl')->pluck('allowed_levels')->first();
+        $allowed_levels=json_decode($allowed_levels);
+        $check=(array_intersect($allowed_levels,Enroll::where('user_id',Auth::id())->pluck('level')->toArray()));
+
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
         $result = User::whereId($request->user_id)->with(['enroll' => function($query) use ($request){
             $query->where("role_id", 3);
