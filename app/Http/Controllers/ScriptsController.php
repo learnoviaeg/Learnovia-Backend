@@ -256,4 +256,13 @@ class ScriptsController extends Controller
         }
         return 'done';
     }
+
+    public function update_letter_percentage(Request $request)
+    {
+        foreach(Course::whereNotNull('letter_id')->cursor() as $course){
+            $userGradesJob = (new \App\Jobs\PercentageAndLetterCalculation($course));
+            dispatch($userGradesJob);
+        }
+        return 'done';
+    }
 }
