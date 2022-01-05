@@ -5,10 +5,8 @@ namespace App\Listeners;
 use App\Events\GradeCalculatedEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
-// use App\GradeCategory;
 use App\LetterDetails;
 use App\UserGrader;
-// use App\User;
 
 class LetterPercentageListener
 {
@@ -34,7 +32,7 @@ class LetterPercentageListener
             $letter = $event->userGrade->category->course->letter;
             $details = LetterDetails::select('evaluation')->where('letter_id', $letter->id)->where('lower_boundary', '<=', $event->userGrade->percentage)
                       ->where('higher_boundary', '>', $event->userGrade->percentage)->first();
-                      
+
             if($event->userGrade->percentage == 100)
                 $details = LetterDetails::select('evaluation')->where('letter_id', $letter->id)->where('lower_boundary', '<=', $event->userGrade->percentage)
                 ->where('higher_boundary', '>=', $event->userGrade->percentage)->first();
@@ -42,6 +40,11 @@ class LetterPercentageListener
             $event->userGrade->update([
                 'letter' => isset($details->evaluation) ? $details->evaluation : null,
             ]);
+
+            if($event->userGrade->category->parent != null){
+                $grade = UserGrader::where('user_id',$event->userGrade->user_id)->where('item_type','category')->where('item_id' , $event->userGrade->category->parent)->whereNotNull('grade')->first();
+                event(new GradeCalculatedEvent($grade));
+            }
         }
     }
 }
