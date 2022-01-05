@@ -245,8 +245,10 @@ class QuizzesController extends Controller
             'shuffle' => isset($request->shuffle)?$request->shuffle:$quiz->shuffle,
         ]);
 
-        if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
-            return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
+        if(isset($request->closing_time)){
+            if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
+                return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
+        }
 
         $quiz_lesson->update([
             'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
