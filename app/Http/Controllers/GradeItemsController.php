@@ -125,6 +125,8 @@ class GradeItemsController extends Controller
             'grade_category_id' => 'exists:grade_categories,id',
         ]);
         $grade_items = GradeCategory::findOrFail($id);
+        if($grade_items->item_type == 'Attendance')
+            return response()->json(['message' => __('messages.error.not_allowed_to_delete'), 'body' => null ], 404);
         
         if($request->filled('grade_category_id'))
             event(new GraderSetupEvent($grade_items->Parents)); 

@@ -245,8 +245,10 @@ class QuizzesController extends Controller
             'shuffle' => isset($request->shuffle)?$request->shuffle:$quiz->shuffle,
         ]);
 
-        if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
-            return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
+        if(isset($request->closing_time)){
+            if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
+                return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
+        }
 
         $quiz_lesson->update([
             'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
@@ -286,19 +288,19 @@ class QuizzesController extends Controller
 
         $gg=GradeCategory::where('course_id', $quiz_lesson->lesson->course_id)
                             ->whereNull('parent')->where('type','category')->first();
-                            
-        $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $quiz_lesson->lesson_id);
+        
+        $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->lesson_id)->first();
         $gradeCat->update([
                     'hidden' => $quiz_lesson->visible,
                     'calculation_type' => json_encode($quiz_lesson->grading_method_id),
-                    'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id
-                ]);
-        
+                    'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id,
+                    'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $gradeCat->lesson_id
+                ]);        
         
         // update timeline object and sending notifications
         event(new updateQuizAndQuizLessonEvent($quiz_lesson));
         event(new UpdatedQuizQuestionsEvent($quiz->id));      
-        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->first()->parent)));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
         dispatch($userGradesJob);
                             
 
@@ -316,16 +318,15 @@ class QuizzesController extends Controller
         $request->validate([
             'lesson_id' => 'required|exists:lessons,id',
         ]);
-        QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->delete();
         Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
         
-        $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->where('lesson_id', $request->lesson_id)->first();
+        $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->first();
         $parent_Category = GradeCategory::find($grade_category->parent);
         $grade_category->delete();
         event(new GraderSetupEvent($parent_Category));
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
         dispatch($userGradesJob);
-
+        QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->delete();
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
         if(!isset($quizlesson))
             $quiz=Quiz::where('id',$id)->delete();

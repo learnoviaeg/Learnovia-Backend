@@ -30,6 +30,7 @@ return [
         'role_required' => 'Please, choose role first',
         'not_allowed' => 'You are not allowed to view this.',
         'not_allowed_to_edit' => 'You are not allowed to edit this.',
+        'not_allowed_to_delete' => 'You are not allowed to delete this.',
         'extension_error' => 'This extension is not valid'
     ],
     'success' => [
@@ -176,33 +177,39 @@ return [
 
         'image' => [
             'add' => 'Image uploaded successfully',
-            'update' => 'Image updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'Image deleted successfully',
         ],
         'video' => [
             'add' => 'Video uploaded successfully',
-            'update' => 'Video updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'Video deleted successfully',
         ],
         'audio' => [
             'add' => 'Audio uploaded successfully',
-            'update' => 'Audio updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'Audio deleted successfully',
         ],
         'link' => [
             'add' => 'Link uploaded successfully',
-            'update' => 'Link updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'Link deleted successfully',
         ],
         'url' => [
             'add' => 'URL uploaded successfully',
-            'update' => 'URL updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'URL deleted successfully',
         ],
     ],
     'materials' => [
         'list' => 'Materials list',
         'count' => 'Materials count',
+    ],
+    'attendance' => [
+        'add' => 'Attendance added successfully',
+        'update' => 'Attendance updated successfully',
+        'delete' => 'Attendance deleted successfully',
+        'list' => 'Attendances list',
     ],
     'attendance_session' => [
         'add' => 'Session added successfully',

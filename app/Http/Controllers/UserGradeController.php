@@ -16,13 +16,15 @@ use App\Grader\gradingMethodsInterface;
 use App\Events\RefreshGradeTreeEvent;
 use Auth;
 use App\Events\UserGradesEditedEvent;
+use App\Events\GradeCalculatedEvent;
+use Spatie\Permission\Models\Permission;
 
 class UserGradeController extends Controller
 {
     /**
      * create User grade
      */
-    public function store(Request $request) 
+    public function store(Request $request)   
     { 
         $request->validate([
             'user'      =>'required|array',
@@ -31,12 +33,18 @@ class UserGradeController extends Controller
             'user.*.grade'     => 'nullable',
         ]);
         foreach($request->user as $user){
+            $percentage = 0;
             $instance = GradeCategory::find($user['item_id']);
-            UserGrader::updateOrCreate(
+
+            if($instance->max != null && $instance->max > 0)
+                    $percentage = ($user['grade'] / $instance->max) * 100;
+
+            $grader = UserGrader::updateOrCreate(
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
-                ['grade' =>  $user['grade']]
+                ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
             );
             event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
+            event(new GradeCalculatedEvent($grader));
         }
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
     } 
@@ -310,4 +318,49 @@ class UserGradeController extends Controller
         }
         return HelperController::api_response_format(200, array_values($cour));
     }
+
+
+    public function fglReport(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        // $callbacks = function ($qu) use ($request) {
+        //     $qu->where('user_id', $request->user_id);
+        // };
+
+        // $callback = function ($query) use ($callbacks) {
+        //     $query->where('name', 'First Term');
+        //     $query->whereHas('userGrades' , $callbacks)
+        //           ->with(['userGrades' => $callbacks]);
+        // };
+        // $result = User::whereId($request->user_id)->whereHas('enroll.courses.gradeCategory' , $callback)
+        //                 ->with(['enroll.courses.gradeCategory' => $callback])->first();
+        $allowed_levels=Permission::where('name','report_card/fgl')->pluck('allowed_levels')->first();
+        $allowed_levels=json_decode($allowed_levels);
+        $check=(array_intersect($allowed_levels,Enroll::where('user_id',Auth::id())->pluck('level')->toArray()));
+
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+
+        $result = User::whereId($request->user_id)->with(['enroll' => function($query) use ($request){
+            $query->where("role_id", 3);
+            }, 'enroll.courses.gradeCategory'=> function($query) use ($request){
+                $query->where("name", 'First Term');
+                $query->with(['userGrades' => function ($q) use ($request) {
+                    $q->where('user_id', $request->user_id);
+                }]);
+            }])->first();
+
+        foreach($result->enroll as $key => $course){
+            if(count($course->courses->gradeCategory) == 0)
+                unset($result->enroll[$key]);
+
+        }
+
+        return response()->json(['message' => null, 'body' => $result ], 200);
+    }
 }
+
+

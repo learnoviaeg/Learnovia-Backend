@@ -397,14 +397,14 @@ Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], f
     Route::get('get-with-course', 'ScaleController@GetScaleWithCourse')->name('getscale')->middleware('permission:scale/get-with-course');
 });
 
-Route::group(['prefix' => 'letter', 'middleware' => ['auth:api','LastAction']], function () {
-    Route::post('add', 'LetterController@add')->name('addletter')->middleware('permission:letter/add');
-    Route::post('update', 'LetterController@update')->name('updateletter')->middleware('permission:letter/update');
-    Route::post('delete', 'LetterController@delete')->name('deleteletter')->middleware('permission:letter/delete');
-    Route::get('get', 'LetterController@get')->name('getletter')->middleware('permission:letter/get');
-    Route::post('assign', 'LetterController@assignLetterToCourse')->name('assignletter')->middleware('permission:letter/assign');
-    Route::get('get-with-course', 'LetterController@GetLettersWithCourse')->name('getwithcourse')->middleware('permission:letter/get-with-course');
-});
+// Route::group(['prefix' => 'letter', 'middleware' => ['auth:api','LastAction']], function () {
+//     Route::post('add', 'LetterController@add')->name('addletter')->middleware('permission:letter/add');
+//     Route::post('update', 'LetterController@update')->name('updateletter')->middleware('permission:letter/update');
+//     Route::post('delete', 'LetterController@delete')->name('deleteletter')->middleware('permission:letter/delete');
+//     Route::get('get', 'LetterController@get')->name('getletter')->middleware('permission:letter/get');
+//     Route::post('assign', 'LetterController@assignLetterToCourse')->name('assignletter')->middleware('permission:letter/assign');
+//     Route::get('get-with-course', 'LetterController@GetLettersWithCourse')->name('getwithcourse')->middleware('permission:letter/get-with-course');
+// });
 
 Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], function () {
     Route::post('add', 'EventController@create')->name('addevent')->middleware('permission:event/add');
@@ -424,6 +424,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('full-mark', 'ScriptsController@Full_Mark');
     Route::post('add_user_grades', 'ScriptsController@user_grades');
     Route::get('updateGradeCatParent', 'ScriptsController@updateGradeCatParent');
+    Route::get('percentage_letter', 'ScriptsController@update_letter_percentage');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -530,11 +531,15 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
         Route::post('logo-update', 'SettingsController@updateLogo')->middleware('permission:settings/logo');
         Route::get('logo-get', 'SettingsController@getLogo');
+        Route::post('permission-level', 'SettingsController@setPermissionLevel');
         Route::get('logo-delete', 'SettingsController@deleteLogo')->middleware('permission:settings/logo');
         Route::post('update', 'SettingsController@update')->middleware('permission:settings/extensions|settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
         Route::post('grade-pass', 'QuizzesController@Grade_pass_settings')->middleware('permission:settings/grade_pass');
         Route::get('grade-pass', 'QuizzesController@Get_grade_pass_settings')->middleware('permission:settings/grade_pass');
     });
+
+    Route::Resource('letter', LetterController::class);
+
     Route::Resource('settings', SettingsController::class);
 
     Route::Resource('grade-category', GradeCategoriesController::class);
@@ -545,6 +550,10 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('user-grade', UserGradeController::class);
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
+    Route::Resource('attendance', AttendanceController::class);
+    Route::Resource('session', AttendanceSessionController::class);
+
+    Route::Resource('topic', TopicController::class);
     
     Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
     Route::get('courseProgressReport' , 'ReportsController@courseProgressReport')->middleware('permission:reports/course_progress');
@@ -553,18 +562,19 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('userStatus/{option}' , 'ReportsController@usersStatusReport')->middleware('permission:reports/active_users|reports/in_active_users');
 });
 
-    Route::get('materials-details', 'MaterialsController@Material_Details');
-    Route::get('download-assignment', 'MaterialsController@downloadAssignment');
-
-
-Route::group(['middleware' => ['auth:api','LastAction']], function () {
-    Route::Resource('topic', TopicController::class);
-});
-
-
+Route::get('materials-details', 'MaterialsController@Material_Details');
+Route::get('download-assignment', 'MaterialsController@downloadAssignment');
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);
 });
+
+
+Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
+    Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgl');
+});
+
+
+
 

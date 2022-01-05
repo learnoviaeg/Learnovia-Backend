@@ -6,12 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserGrader extends Model
 {
-    protected $fillable = ['user_id', 'item_type', 'item_id','grade'];
+    protected $fillable = ['user_id', 'item_type', 'item_id','grade' , 'percentage', 'letter'];
     protected $hidden = [
         'created_at', 'updated_at'
     ];
     protected $guarded = ['created_at','updated_id'];
     
+    // protected $dispatchesEvents = [
+    //     'created' => \App\Events\GradeCalculatedEvent::class,
+    //     'updated' => \App\Events\GradeCalculatedEvent::class,
+    // ];
+
     public function user()
     {
         return $this->belongsTo('App\User', 'user_id', 'id');
@@ -19,7 +24,7 @@ class UserGrader extends Model
 
     public function category()
     {
-        return $this->belongsTo('App\GradeCategory', 'item_id', 'id')->where('item_type', 'category');
+        return $this->belongsTo('App\GradeCategory', 'item_id', 'id');//->where('item_type', 'category');
     }
 
     public function student()
