@@ -32,8 +32,8 @@ class LetterPercentageListener
     {
         if(isset($event->userGrade->category->course->letter)){
             $letter = $event->userGrade->category->course->letter;
-            $details = LetterDetails::select('evaluation')->where('letter_id', $letter->id)->where('lower_boundary', '<=', $event->userGrade->grade)
-                      ->where('higher_boundary', '>', $event->userGrade->grade)->first();
+            $details = LetterDetails::select('evaluation')->where('letter_id', $letter->id)->where('lower_boundary', '<=', $event->userGrade->percentage)
+                      ->where('higher_boundary', '>', $event->userGrade->percentage)->first();
             $event->userGrade->update([
                 'letter' => isset($details->evaluation) ? $details->evaluation : null,
             ]);

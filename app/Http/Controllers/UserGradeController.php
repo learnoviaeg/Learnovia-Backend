@@ -324,20 +324,15 @@ class UserGradeController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
-
-        
-        $result = User::whereId($request->user_id)->with(['enroll' => function($query)use ($request){
+        $result = User::whereId($request->user_id)->with(['enroll' => function($query) use ($request){
                     $query->where("role_id", 3);
-                    }, 'enroll.courses.gradeCategory'=> function($query)use ($request){
+                    }, 'enroll.courses.gradeCategory'=> function($query) use ($request){
                         $query->where("name", 'First Term');
                         $query->with(['userGrades' => function ($q) use ($request) {
                             $q->where('user_id', $request->user_id);
-                    }]);
+                        }]);
                     }])->first();
-
         return response()->json(['message' => null, 'body' => $result ], 200);
-
-
     }
 }
 
