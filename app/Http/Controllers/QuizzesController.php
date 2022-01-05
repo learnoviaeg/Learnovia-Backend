@@ -318,7 +318,6 @@ class QuizzesController extends Controller
         $request->validate([
             'lesson_id' => 'required|exists:lessons,id',
         ]);
-        QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->delete();
         Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
         
         $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->where('lesson_id', $request->lesson_id)->first();
@@ -327,7 +326,7 @@ class QuizzesController extends Controller
         event(new GraderSetupEvent($parent_Category));
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
         dispatch($userGradesJob);
-
+        QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->delete();
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
         if(!isset($quizlesson))
             $quiz=Quiz::where('id',$id)->delete();
