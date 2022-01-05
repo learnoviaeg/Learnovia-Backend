@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\attachment;
 use App\Settings;
+use Spatie\Permission\Models\Permission;
 use App\Repositories\SettingsReposiotry;
 
 class SettingsController extends Controller
@@ -309,5 +310,20 @@ class SettingsController extends Controller
 
         // return $attachment;
         return response()->json(['message' => __('messages.logo.update'), 'body' => $attachment], 200);
+    }
+
+    public function setPermissionLevel(Request $request)
+    {
+        $request->validate([
+            'permission_id' => 'exists:permissions,id',
+            'levels' => 'array',
+            'levels.*' => 'nullable|exists:levels,id'
+        ]);
+
+        $permission=Permission::whereId($request->permission_id)->update([
+            'allowed_levels' => json_encode($request->levels)
+        ]);
+
+        return response()->json(['message' => 'done', null], 200);
     }
 }
