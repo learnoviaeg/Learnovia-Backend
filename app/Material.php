@@ -48,7 +48,7 @@ class Material extends Model
     }
 
     public function getMainLinkAttribute(){
-        return $this->getOriginale()['link'];
+        return $this->getOriginal()['link'];
     }
 
     public function course(){
