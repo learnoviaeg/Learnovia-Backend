@@ -310,4 +310,9 @@ class SettingsController extends Controller
         // return $attachment;
         return response()->json(['message' => __('messages.logo.update'), 'body' => $attachment], 200);
     }
+
+    public function editor()
+    {
+        return view('editor');
+    }
 }
