@@ -576,7 +576,6 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
 
 //script for front-end editor
 Route::get('editor' , 'SettingsController@editor');
-// Route::get('editorjs' , 'SettingsController@editorjs');
 
 
 
