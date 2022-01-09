@@ -312,6 +312,11 @@ class SettingsController extends Controller
         return response()->json(['message' => __('messages.logo.update'), 'body' => $attachment], 200);
     }
 
+    public function editor()
+    {
+        return view('editor');
+    }
+    
     public function setPermissionLevel(Request $request)
     {
         $request->validate([

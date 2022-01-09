@@ -575,6 +575,8 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgl');
 });
 
+//script for front-end editor
+Route::get('editor' , 'SettingsController@editor');
 
 
 
