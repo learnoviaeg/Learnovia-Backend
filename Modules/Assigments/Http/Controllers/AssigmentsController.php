@@ -596,7 +596,7 @@ class AssigmentsController extends Controller
             $assignment_category = $grade_category->first();
 
             if($assignment_category->max != null && $assignment_category->max > 0)
-                $percentage = ($grade / $assignment_category->max) * 100;
+                $percentage = ($userassigment->grade / $assignment_category->max) * 100;
 
             UserGrader::updateOrCreate(
                 ['item_id'=>$grade_category->first()->id, 'item_type' => 'category', 'user_id' => $request->user_id],
