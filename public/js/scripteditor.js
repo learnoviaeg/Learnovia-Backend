@@ -56,3 +56,10 @@ var useDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
     //   });
     // }
 //  });
+
+// @if({{$key}} === 'external_plugins')
+//       @foreach($objEditor as $key => $val)
+//       {{$key}}:"{{$val}}",
+//       @endforeach
+//       @endif
+//       @else
