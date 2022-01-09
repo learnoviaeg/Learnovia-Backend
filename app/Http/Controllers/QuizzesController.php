@@ -294,7 +294,7 @@ class QuizzesController extends Controller
                     'hidden' => $quiz_lesson->visible,
                     'calculation_type' => json_encode($quiz_lesson->grading_method_id),
                     'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id,
-                    'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $gg->lesson_id
+                    'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $gradeCat->lesson_id
                 ]);        
         
         // update timeline object and sending notifications
@@ -320,7 +320,7 @@ class QuizzesController extends Controller
         ]);
         Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
         
-        $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->where('lesson_id', $request->lesson_id)->first();
+        $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->first();
         $parent_Category = GradeCategory::find($grade_category->parent);
         $grade_category->delete();
         event(new GraderSetupEvent($parent_Category));
