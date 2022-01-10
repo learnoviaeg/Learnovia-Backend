@@ -16,7 +16,8 @@ class RouteallAttendance extends Migration
     {
         Permission::where('title', 'Get Attendances')->update([
             'name' => 'attendance/viewAllAttendance',
-            'dashboard' => 1
+            'dashboard' => 1,
+            'icon' => 'Attendance'            
         ]);
     }
 
