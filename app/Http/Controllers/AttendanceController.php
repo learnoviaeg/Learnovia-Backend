@@ -13,8 +13,8 @@ class AttendanceController extends Controller
     {
         $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
         $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
-        $this->middleware(['permission:attendance/get'],   ['only' => ['update']]);
-        $this->middleware(['permission:attendance/edit'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
+        $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
     }
 
     /**
