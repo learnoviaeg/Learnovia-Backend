@@ -9,6 +9,9 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use App\GradeCategory;
 use App\User;
 use Validator;
+use Maatwebsite\Excel\Imports\HeadingRowFormatter;
+HeadingRowFormatter::default('none');
+
 
 class GradesImport implements  ToModel, WithHeadingRow
 {
@@ -18,21 +21,28 @@ class GradesImport implements  ToModel, WithHeadingRow
     public function model(array $row)
     {
         Validator::make($row,[
-            'item_name' => 'required|exists:grade_categories,name',
             'username' => 'required|exists:users,username',
-            'grade' => 'required',
             'course' => 'required|exists:courses,id',
         ])->validate();
 
-        $instance = GradeCategory::select('id')->where('course_id',$row['course'])->where('name', $row['item_name'])->first();
-        $user = User::select('id')->where('username' , $row['username'])->first();
-        $array[0]['item_id'] = $instance->id;
-        $array[0]['grade'] = $row['grade'];
-        $array[0]['user_id'] = $user->id;
+        $array=[];
+        foreach(array_keys($row) as $key){
+            if(strpos($key,"item_") > -1)
+                $array[$key]=$row[$key];
+        }
+        foreach($array as $key => $item){
 
-        $request = new Request([
-            'user' => $array,
-        ]);
-        app('App\Http\Controllers\UserGradeController')->store($request);
+            $instance = GradeCategory::select('id')->where('course_id',$row['course'])->where('name', (str_replace('item_', '', $key)) )->first();
+            $user = User::select('id')->where('username' , $row['username'])->first();
+            $req[0]['item_id'] = $instance->id;
+            $req[0]['grade'] = $item;
+            $req[0]['user_id'] = $user->id;
+            $request = new Request([
+                'user' => $req,
+            ]);
+            app('App\Http\Controllers\UserGradeController')->store($request);
+        }
+        
+
     }
 }
