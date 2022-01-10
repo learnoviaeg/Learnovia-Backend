@@ -326,12 +326,13 @@ class SettingsController extends Controller
             'autosave_restore_when_empty' => false,
             'autosave_retention' => '2m',
             'image_advtab' => true,
-            // 'external_plugins' => [
-            //   'tiny_mce_wiris' => 'https://www.wiris.net/demo/plugins/tiny_mce/plugin.js'
-            // ],
+            'external_plugins' => [
+              'tiny_mce_wiris' => 'https://www.wiris.net/demo/plugins/tiny_mce/plugin.js'
+            ],
             'importcss_append' => true,
             'content_style' => 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px;height:100% }'
         ];
+        // return $objEditor['external_plugins'];
         return view('editor', compact('objEditor'));
     }
 
