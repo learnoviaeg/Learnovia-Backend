@@ -32,8 +32,8 @@ class AttendanceController extends Controller
             'level_id' => 'exists:levels,id',
             'course_id' => 'exists:courses,id',
             'grade_cat_id' => 'exists:grade_categories,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'start_date' => 'date',
+            'end_date' => 'date|after:start_date',
         ]);
         $attendance=Attendance::where('id', '!=', null);
 
