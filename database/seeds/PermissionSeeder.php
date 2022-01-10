@@ -421,7 +421,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add', 'title' => 'Create Attendnace']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/delete', 'title' => 'Delete Attendance']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/edit', 'title' => 'Edit Attendance']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get', 'title' => 'Get Attendances']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/viewAllAttendance', 'title' => 'Get Attendances']);
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'Take attendnace']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-daily', 'title' => 'Daily','dashboard' => 1,'icon'=> 'Attendance']);
