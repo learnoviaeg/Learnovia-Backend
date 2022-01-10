@@ -1,8 +1,8 @@
 
 
 var useDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-// tinymce.init({
-//   selector: 'textarea#open-source-plugins',
+tinymce.init({
+  // selector: 'textarea#open-source-plugins',
 //   plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
 //   // imagetools_cors_hosts: ['picsum.photos'],
 //   menubar: 'file edit view insert format tools table help',
@@ -38,28 +38,26 @@ var useDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 //
 //
     // F:\learnovia\Learanovia-new\new-front\node_modules
+    // selector: 'textarea#open-source-plugins',
     // external_plugins: {
     //   'tiny_mce_wiris': 'https://www.wiris.net/demo/plugins/tiny_mce/plugin.js',
     // },
-    // // plugins: [
-    // //   'preview',
-    // //   'autoresize',
-    // // ],
+    // plugins: [
+    //   'preview',
+    //   'autoresize',
+    // ],
     // content_style: "body { margin: 0px;} p { margin: 0;direction: ltr;unicode-bidi: plaintext;  } img{max-width:400px;max-height:250px;}",
     // toolbar: false,
     // menubar:false,
     // statusbar: false,
+
+    // menubar: 'view',
+    // toolbar: 'preview',
+
     // strict_loading_mode: true,
     // setup: (editor)=> {
     //   editor.on('init', (e)=> {
     //     this.quizService.editorView.next(e);
     //   });
     // }
-//  });
-
-// @if({{$key}} === 'external_plugins')
-//       @foreach($objEditor as $key => $val)
-//       {{$key}}:"{{$val}}",
-//       @endforeach
-//       @endif
-//       @else
+ });

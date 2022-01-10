@@ -11,22 +11,25 @@
      </textarea>
   </body>
   <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-  <!-- <script src="{{ asset('js/scripteditor.js') }}"> -->
-    
-  </script>
-     <script > tinymce.init({
-       @foreach($objEditor as $key => $val)
-        @if(($key == 'external_plugins'))
-          @foreach($objEditor['external_plugins'] as $key2 => $value)
-          {{$key}} : { "{{$key2}}":"{{$value}}"},
-            @continue;
-          @endforeach
-        @else
-          {{$key}}:"{{$val}}",
-        @endif
-       @endforeach
-     })
-    </script>
+  <!-- <script src="{{ asset('js/scripteditor.js') }}"></script> -->
+  <script > tinymce.init({
+    @foreach($result as $key => $val)
+    @if(($key == 'external_plugins'))
+      @foreach($result['external_plugins'] as $key2 => $value)
+      {{$key}} : { "{{$key2}}":"{{$value}}"},
+        @continue;
+      @endforeach
+    @elseif(($key == 'plugins'))
+      @foreach($result['plugins'] as $values)
+        {{$key}} : ["{{$values}}"],
+          @continue;
+        @endforeach
+    @else
+      {{$key}}:"{{$val}}",
+    @endif
+    @endforeach
+  })
+</script>
 </html>
 
 
