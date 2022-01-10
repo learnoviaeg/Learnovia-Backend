@@ -344,6 +344,10 @@ class SettingsController extends Controller
                 'external_plugins' => [
                     'tiny_mce_wiris' => 'https://www.wiris.net/demo/plugins/tiny_mce/plugin.js',
                 ],
+                'toolbar' => false,
+                'menubar' => false,
+                'statusbar' => false,
+                'readonly' => 1,
                 'plugins' => [
                     'preview',
                     'autoresize',
