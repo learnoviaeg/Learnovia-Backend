@@ -43,7 +43,8 @@ class UserGradeController extends Controller
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
                 ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
             );
-            event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
+            if($instance->parent != null)
+                event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
             event(new GradeCalculatedEvent($grader));
         }
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
