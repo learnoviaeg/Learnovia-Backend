@@ -92,7 +92,7 @@ class AttendanceController extends Controller
             'end_date' => 'required|date|after:start_date',
             'min_grade' => 'nullable',
             'gradeToPass' => 'nullable',
-            'max_grade' => 'required',
+            'max_grade' => 'required_if:is_graded,==,1',
         ]);
 
 
