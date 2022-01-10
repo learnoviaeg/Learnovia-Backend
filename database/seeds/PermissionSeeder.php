@@ -311,6 +311,12 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/over-all', 'title' => 'get all users grades in courses']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgl', 'title' => 'First term report card', 'icon' => 'Report-Card','dashboard'=>1]);
 
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/show', 'title' => 'Show letter', 'icon' => 'grade','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/add', 'title' => 'Add letter', 'icon' => 'grade']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/edit', 'title' => 'Edit letter', 'icon' => 'grade']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/delete', 'title' => 'Delete letter', 'icon' => 'grade']);
+
+
         //dashboard
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'dashboard/toggle', 'title' => 'toggle dashboard']);
         // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'dashboard/dashboard', 'title' => 'show dashboard']);

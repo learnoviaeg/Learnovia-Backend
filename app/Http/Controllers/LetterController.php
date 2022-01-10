@@ -13,7 +13,13 @@ class LetterController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
+        $this->middleware('auth');
+        $this->middleware(['permission:grade/letter/show'],  ['only' => ['index','show']]);
+        $this->middleware(['permission:grade/letter/add'],   ['only' => ['store']]);
+        $this->middleware(['permission:grade/letter/update'],   ['only' => ['update']]);
+        $this->middleware(['permission:grade/letter/delete'],   ['only' => ['destroy']]);
     }
+
     public function index(Request $request)
     {
         $letter = Letter::with(['details', 'course'])->get();
