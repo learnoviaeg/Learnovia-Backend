@@ -363,7 +363,7 @@ class UserGradeController extends Controller
                     $q->where('user_id', $request->user_id);
                 }]);
             }])->first();
-
+ 
         foreach($result->enroll as $key => $course){
             if(count($course->courses->gradeCategory) == 0)
                 unset($result->enroll[$key]);
@@ -375,17 +375,24 @@ class UserGradeController extends Controller
 
     public function export(Request $request)
     {
-        $grade_categories = GradeCategory::where('course_id', $request->course_id)->get()->pluck('name')->toArray();
+        $request->validate([
+            'courses'    => 'required|array',
+            'courses.*'  => 'required|integer|exists:courses,id',
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
+            ]);     
 
+        $grade_categories = GradeCategory::whereIn('course_id', $request->courses)->get()->pluck('name')->toArray();
         array_walk($grade_categories, function(&$value, $key) { $value = 'item_'.$value; } );
         $headers =array_merge(array('username' , 'course'), $grade_categories);
-        
+
         $students = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
         ->with(array('user' => function($query) {
             $query->addSelect(array('id' , 'username'));
         }))->get();
+        
         $filename = uniqid();
-        $file = Excel::store(new GradesExport($headers , $students , $request->course_id), 'Grades'.$filename.'.xlsx','public');
+        $file = Excel::store(new GradesExport($headers , $students , $request->courses[0]), 'Grades'.$filename.'.xlsx','public');
         $file = url(Storage::url('Type'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
