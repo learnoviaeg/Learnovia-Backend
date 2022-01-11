@@ -539,7 +539,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('grader-setup', 'GraderReportController@grade_setup');
     Route::post('grades-weight', 'GradeCategoriesController@weight_adjust');
     Route::Resource('user-grade', UserGradeController::class);
-    Route::post('grade/export', 'UserGradeController@export')->name('exportGrade');//->middleware('permission:grade/export');
+    Route::post('grade/export', 'UserGradeController@export')->name('exportGrade')->middleware('permission:grade/export');
 
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 

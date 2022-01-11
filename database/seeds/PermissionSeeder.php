@@ -307,7 +307,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/grader', 'title' => 'grader report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/overview', 'title' => 'overview report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/user', 'title' => 'get user grades']);
-        //Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/user/getallusersgrades', 'title' => 'get all users grades']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/over-all', 'title' => 'get all users grades in courses']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgl', 'title' => 'First term report card', 'icon' => 'Report-Card','dashboard'=>1]);
 
@@ -315,11 +314,10 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/add', 'title' => 'Add letter', 'icon' => 'grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/edit', 'title' => 'Edit letter', 'icon' => 'grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/delete', 'title' => 'Delete letter', 'icon' => 'grade']);
-
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/export', 'title' => 'Export Users with grade categories', 'icon' => 'grade']);
 
         //dashboard
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'dashboard/toggle', 'title' => 'toggle dashboard']);
-        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'dashboard/dashboard', 'title' => 'show dashboard']);
 
         //scale
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/add', 'title' => 'Add Scale']);
@@ -328,13 +326,13 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/get', 'title' => 'Get Scale']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/get-with-course', 'title' => 'Get Scale with course']);
 
-        //scale
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/add', 'title' => 'Add Letter']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/update', 'title' => 'Update Letter']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/delete', 'title' => 'Delete Letter']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/get', 'title' => 'Get Letter']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/assign', 'title' => 'assign Letter']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/get-with-course', 'title' => 'get letter with course']);
+        // //scale
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/add', 'title' => 'Add Letter']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/update', 'title' => 'Update Letter']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/delete', 'title' => 'Delete Letter']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/get', 'title' => 'Get Letter']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/assign', 'title' => 'assign Letter']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/get-with-course', 'title' => 'get letter with course']);
 
 
         //contract
