@@ -6,15 +6,17 @@ use Illuminate\Http\Request;
 use App\Attendance;
 use Auth;
 use App\GradeCategory;
+use App\AttendanceLevel;
+use App\AttendanceCourse;
 
 class AttendanceController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
-        $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
-        $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
-        $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
+        // $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
+        // $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
+        // $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
+        // $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
     }
 
     /**
@@ -109,16 +111,23 @@ class AttendanceController extends Controller
                         'year_id' => $request->year_id,
                         'type_id' => $request->type_id,
                         'segment_id' => $request->segment_id,
-                        'level_id' => $attend['level_id'], //$level
-                        'course_id' => $attend['course_id'], //$course
                         'is_graded' => $request->is_graded,
-                        'grade_cat_id' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
                         'start_date' =>  $request->start_date,
                         'end_date' => $request->end_date,
                         'min_grade' =>  $request->min_grade,
                         'gradeToPass' => $request->gradeToPass,
                         'max_grade' => $request->max_grade,
                         'created_by' => Auth::id()
+                    ]);
+                    AttendanceLevel::firstOrCreate([
+                        'level_id' => $attend['level_id'],
+                        'attendance_id' => $attendance->id
+                    ]);
+
+                    AttendanceCourse::firstOrCreate([
+                        'course_id' => $attend['course_id'],
+                        'grade_cat_id' => ($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
+                        'attendance_id' => $attendance->id
                     ]);
 
                     $gradeCat = GradeCategory::firstOrCreate([
@@ -133,6 +142,8 @@ class AttendanceController extends Controller
                         'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
                         'weights' => ((bool) $request->is_graded == false) ? 0 : null,
                     ]);
+
+
                 // }
             // }
         }
