@@ -393,7 +393,7 @@ class UserGradeController extends Controller
         
         $filename = uniqid();
         $file = Excel::store(new GradesExport($headers , $students , $request->courses[0]), 'Grades'.$filename.'.xlsx','public');
-        $file = url(Storage::url('Type'.$filename.'.xlsx'));
+        $file = url(Storage::url('Grades'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }
