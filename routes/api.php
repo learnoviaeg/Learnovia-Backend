@@ -397,15 +397,6 @@ Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], f
     Route::get('get-with-course', 'ScaleController@GetScaleWithCourse')->name('getscale')->middleware('permission:scale/get-with-course');
 });
 
-// Route::group(['prefix' => 'letter', 'middleware' => ['auth:api','LastAction']], function () {
-//     Route::post('add', 'LetterController@add')->name('addletter')->middleware('permission:letter/add');
-//     Route::post('update', 'LetterController@update')->name('updateletter')->middleware('permission:letter/update');
-//     Route::post('delete', 'LetterController@delete')->name('deleteletter')->middleware('permission:letter/delete');
-//     Route::get('get', 'LetterController@get')->name('getletter')->middleware('permission:letter/get');
-//     Route::post('assign', 'LetterController@assignLetterToCourse')->name('assignletter')->middleware('permission:letter/assign');
-//     Route::get('get-with-course', 'LetterController@GetLettersWithCourse')->name('getwithcourse')->middleware('permission:letter/get-with-course');
-// });
-
 Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], function () {
     Route::post('add', 'EventController@create')->name('addevent')->middleware('permission:event/add');
     Route::post('delete', 'EventController@delete')->name('deleteevent')->middleware('permission:event/delete');
@@ -548,6 +539,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('grader-setup', 'GraderReportController@grade_setup');
     Route::post('grades-weight', 'GradeCategoriesController@weight_adjust');
     Route::Resource('user-grade', UserGradeController::class);
+    Route::post('grade/export', 'UserGradeController@export')->name('exportGrade');//->middleware('permission:grade/export');
+
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
     Route::Resource('attendance', AttendanceController::class);
