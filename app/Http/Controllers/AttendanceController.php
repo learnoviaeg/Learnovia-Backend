@@ -66,7 +66,7 @@ class AttendanceController extends Controller
         if(isset($request->end_date))
             $attendance->where('end_date','<', $request->end_date);
 
-        $all=$attendance->with(['levels.courses'])->get();
+        $all=$attendance->with(['levels.courses','gradeCategory'])->get();
         foreach($all as $attendeence){
             foreach($attendeence['levels'] as $attend){
                 foreach($attend->courses as $key => $attendCourse)
@@ -177,7 +177,7 @@ class AttendanceController extends Controller
         // function($query) use($attend){
         //         return $query->whereIn('id',$attend->courses->pluck('id')->toArray());
         // })->get();
-        $attendance=Attendance::whereId($id)->with('levels.courses')->first();
+        $attendance=Attendance::whereId($id)->with(['levels.courses','gradeCategory'])->first();
         foreach($attendance['levels'] as $attend)
         {
             foreach($attend['courses']as $key => $attendCourse)
