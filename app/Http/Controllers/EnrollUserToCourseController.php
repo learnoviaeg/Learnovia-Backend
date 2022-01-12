@@ -702,15 +702,15 @@ class EnrollUserToCourseController extends Controller
 
     public function exportcourseswithteachers(Request $request)
     {
-        $request->validate([
-            'search' => 'required|string',
-        ]);
+        // $request->validate([
+        //     'search' => 'required|string',
+        // ]);
 
-        $courses = Course::where('short_name', 'LIKE' ,"%$request->search%")->pluck('id');
-        if(isset($courses))
-            $course_segments = CourseSegment::whereIn('course_id',$courses)->pluck('id');
-        if(isset($course_segments))
-            $enrolls = Enroll::whereIn('course_segment',$course_segments)->where('role_id',4)->with(['user','courseSegment','classes','courses'])->get();
+        // $courses = Course::where('short_name', 'LIKE' ,"%$request->search%")->pluck('id');
+        // if(isset($courses))
+        //     $course_segments = CourseSegment::whereIn('course_id',$courses)->pluck('id');
+        // if(isset($course_segments))
+            $enrolls = Enroll::where('role_id',4)->with(['user','classes','courses'])->get();
 
             // return $enrolls;
         $filename = uniqid();

@@ -16,7 +16,7 @@ class LetterController extends Controller
         $this->middleware('auth');
         $this->middleware(['permission:grade/letter/show'],  ['only' => ['index','show']]);
         $this->middleware(['permission:grade/letter/add'],   ['only' => ['store']]);
-        $this->middleware(['permission:grade/letter/update'],   ['only' => ['update']]);
+        $this->middleware(['permission:grade/letter/edit'],   ['only' => ['update']]);
         $this->middleware(['permission:grade/letter/delete'],   ['only' => ['destroy']]);
     }
 

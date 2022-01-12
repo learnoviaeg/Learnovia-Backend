@@ -18,9 +18,19 @@ use Auth;
 use App\Events\UserGradesEditedEvent;
 use App\Events\GradeCalculatedEvent;
 use Spatie\Permission\Models\Permission;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\GradesExport;
+use App\Repositories\ChainRepositoryInterface;
+use Illuminate\Support\Facades\Storage;
 
 class UserGradeController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+        $this->middleware('auth');
+    }
+
     /**
      * create User grade
      */
@@ -43,7 +53,8 @@ class UserGradeController extends Controller
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
                 ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
             );
-            event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
+            if($instance->parent != null)
+                event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
             event(new GradeCalculatedEvent($grader));
         }
         return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
@@ -352,7 +363,7 @@ class UserGradeController extends Controller
                     $q->where('user_id', $request->user_id);
                 }]);
             }])->first();
-
+ 
         foreach($result->enroll as $key => $course){
             if(count($course->courses->gradeCategory) == 0)
                 unset($result->enroll[$key]);
@@ -360,6 +371,30 @@ class UserGradeController extends Controller
         }
 
         return response()->json(['message' => null, 'body' => $result ], 200);
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'courses'    => 'required|array',
+            'courses.*'  => 'required|integer|exists:courses,id',
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
+            ]);     
+
+        $grade_categories = GradeCategory::whereIn('course_id', $request->courses)->get()->pluck('name')->toArray();
+        array_walk($grade_categories, function(&$value, $key) { $value = 'item_'.$value; } );
+        $headers =array_merge(array('username' , 'course'), $grade_categories);
+
+        $students = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
+        ->with(array('user' => function($query) {
+            $query->addSelect(array('id' , 'username'));
+        }))->get();
+        
+        $filename = uniqid();
+        $file = Excel::store(new GradesExport($headers , $students , $request->courses[0]), 'Grades'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Grades'.$filename.'.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }
 
