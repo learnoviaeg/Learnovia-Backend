@@ -99,13 +99,13 @@ class AttendanceController extends Controller
             // 'attendance.*.level_id.*' => 'exists:levels,id', //will be array
             'attendance.*.course_id' => 'required|exists:courses,id',
             // 'attendance.*.course_id.*' => 'exists:courses,id', //will be array
-            'attendance.*.grade_cat_id' => 'required_if:is_graded,==,1|exists:grade_categories,id',
+            // 'attendance.*.grade_cat_id' => 'required_if:is_graded,==,1|exists:grade_categories,id',
             'is_graded' => 'required|in:0,1',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'min_grade' => 'nullable',
             'gradeToPass' => 'nullable',
-            'max_grade' => 'required_if:is_graded,==,1',
+            // 'max_grade' => 'required_if:is_graded,==,1',
         ]);
 
 
@@ -125,9 +125,9 @@ class AttendanceController extends Controller
                         'is_graded' => $request->is_graded,
                         'start_date' =>  $request->start_date,
                         'end_date' => $request->end_date,
-                        'min_grade' =>  $request->min_grade,
-                        'gradeToPass' => $request->gradeToPass,
-                        'max_grade' => $request->max_grade,
+                        'min_grade' =>  ($request->is_grade==1) ? $request->min_grade : null,
+                        'gradeToPass' => ($request->is_grade==1) ? $request->gradeToPass : null,
+                        'max_grade' => ($request->is_grade==1) ? $request->max_grade : null ,
                         'created_by' => Auth::id()
                     ]);
 
@@ -152,7 +152,7 @@ class AttendanceController extends Controller
                         'instance_type' => 'Attendance',
                         'item_type' => 'Attendance',
                         'type' => 'item',
-                        'parent' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
+                        'parent' => ($request->is_graded ==1) ? $attend['grade_cat_id']: $top_parent_category->id,
                         'max'    => $request->max_grade,
                         'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
                         'weights' => ((bool) $request->is_graded == false) ? 0 : null,
