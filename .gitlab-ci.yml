@@ -94,11 +94,11 @@ Rollback_to_Latest_Version-dev:
 build-code-job-staging:
      stage: build
      tags:
-       - staging
+       - preprod
        - learnovia
        - backend
      only:
-       - staging
+       - preprod
      script:
        - echo "$CI_JOB_STAGE"
        - echo "checking service status"
@@ -116,17 +116,17 @@ build-code-job-staging:
 Pulling_Latest_Version-staging:
      stage: deploy
      tags:
-       - staging
+       - preprod
        - learnovia
        - backend
      only:
-       - staging
+       - preprod
      script:
        - cd /var/www/html/learnovia-backend
        - git reset HEAD^ --hard
        - git stash
-       - git checkout staging
-       - git pull origin staging
+       - git checkout preprod
+       - git pull origin preprod
        - echo "Starting Composer using Gitlab CI"
        - cd /var/www/html/learnovia-backend
        - composer install --ignore-platform-reqs
@@ -147,15 +147,14 @@ Pulling_Latest_Version-staging:
 Rollback_to_Latest_Version-staging:
      stage: rollback
      tags:
-     tags:
-       - staging
+       - preprod
        - learnovia
        - backend
      only:
-       - staging
+       - preprod
      script:
        - cd /var/www/html/learnovia-backend
-       - git revert staging -n
+       - git revert preprod -n
        - echo "Starting Composer using Gitlab CI"
        - cd /var/www/html/learnovia-backend
        - composer install --ignore-platform-reqs
