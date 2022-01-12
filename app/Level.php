@@ -47,4 +47,12 @@ class Level extends Model
     {
         return $this->hasMany('App\Timeline','level_id','id');
     }
+
+    public function courses()
+    {
+        //         $query->whereHas('courses'function($query2){
+        //     $query->whereIn($query->courses->pluck('id'))
+        // })
+        return $this->hasMany('App\Course', 'level_id', 'id');
+    }
 }

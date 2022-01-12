@@ -17,6 +17,9 @@ class Course extends Model
 
     public function level()
     {
+        // $query->whereHas('courses'function($query2){
+        //     $query->whereIn($query->courses->pluck('id'))
+        // })
         return $this->belongsTo('App\Level','level_id','id');
     }
 

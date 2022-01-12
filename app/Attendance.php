@@ -25,14 +25,14 @@ class Attendance extends Model
         return $this->belongsTo('App\AcademicType', 'segment_id', 'id');
     }
 
-    public function level()
+    public function levels()
     {
-        return $this->belongsTo('App\AcademicType', 'level_id', 'id');
+        return $this->belongsToMany('App\Level', 'attendance_levels','attendance_id','level_id')->withTimestamps();
     }
 
-    public function course()
+    public function courses()
     {
-        return $this->belongsTo('App\AcademicType', 'course_id', 'id');
+        return $this->belongsToMany('App\Course', 'attendance_courses', 'attendance_id', 'course_id');
     }
 
     public function attendanceType()
