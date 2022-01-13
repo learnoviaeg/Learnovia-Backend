@@ -340,7 +340,10 @@ class UserGradeController extends Controller
 
         $allowed_levels=Permission::where('name','report_card/fgl')->pluck('allowed_levels')->first();
         $allowed_levels=json_decode($allowed_levels);
-        $check=(array_intersect($allowed_levels,Enroll::where('user_id',$request->user_id)->pluck('level')->toArray()));
+        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        $check=(array_intersect($allowed_levels, $student_levels));
+
+        $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $student_levels));
 
         if(count($check) == 0)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
@@ -388,6 +391,10 @@ class UserGradeController extends Controller
         $result->total = $total;
         $result->student_total_mark = $student_mark;
         $result->evaluation = $evaluation->evaluation;
+        $result->add_total = true;
+
+        if(count($total_check) == 0)
+            $result->add_total = false;
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
