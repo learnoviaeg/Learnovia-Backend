@@ -148,24 +148,8 @@ class CoursesController extends Controller
                         'classes' => json_encode($chain['class']),
                     ]);
 
-                    // $level_id=$course->level_id;
-                    // $segment=Segment::find($course->segment_id);
-                    // $segment_id=$segment->id;
-                    // $year_id=$segment->academic_year_id;
-                    // $type_id=$segment->academic_type_id;
-                    // $classes=Classes::where('level_id',$course->level_id)->get();
-                    // dd($classes);
                     if ($request->filled('no_of_lessons'))
                         $no_of_lessons = $request->no_of_lessons;
-
-                    // for ($i = 1; $i <= $no_of_lessons; $i++) {
-                    //     $lesson=lesson::firstOrCreate([
-                    //         'name' => 'Lesson ' . $i,
-                    //         'index' => $i,
-                    //         'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
-                    //         'course_id' => $course->id
-                    //     ]);
-                    // }
 
                     foreach ($chain['class'] as $class) {
 
