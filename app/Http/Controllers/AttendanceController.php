@@ -66,7 +66,7 @@ class AttendanceController extends Controller
         if(isset($request->end_date))
             $attendance->where('end_date','<', $request->end_date);
 
-        $all=$attendance->with(['levels.courses'])->get();
+        $all=$attendance->with(['levels.courses','gradeCategory'])->get();
         foreach($all as $attendeence){
             foreach($attendeence['levels'] as $attend){
                 foreach($attend->courses as $key => $attendCourse)
@@ -125,9 +125,9 @@ class AttendanceController extends Controller
                         'is_graded' => $request->is_graded,
                         'start_date' =>  $request->start_date,
                         'end_date' => $request->end_date,
-                        'min_grade' =>  $request->min_grade,
-                        'gradeToPass' => $request->gradeToPass,
-                        'max_grade' => $request->max_grade,
+                        'min_grade' =>  ($request->is_graded==1) ? $request->min_grade : null,
+                        'gradeToPass' => ($request->is_graded==1) ? $request->gradeToPass : null,
+                        'max_grade' => ($request->is_graded==1) ? $request->max_grade : null ,
                         'created_by' => Auth::id()
                     ]);
 
@@ -141,7 +141,7 @@ class AttendanceController extends Controller
 
                     AttendanceCourse::firstOrCreate([
                         'course_id' => $attend['course_id'],
-                        'grade_cat_id' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
+                        'grade_cat_id' => ($request->is_graded == 1) ? $attend['grade_cat_id']: $top_parent_category->id,
                         'attendance_id' => $attendance->id
                     ]);
 
@@ -152,7 +152,7 @@ class AttendanceController extends Controller
                         'instance_type' => 'Attendance',
                         'item_type' => 'Attendance',
                         'type' => 'item',
-                        'parent' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
+                        'parent' => ($request->is_graded ==1) ? $attend['grade_cat_id']: $top_parent_category->id,
                         'max'    => $request->max_grade,
                         'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
                         'weights' => ((bool) $request->is_graded == false) ? 0 : null,
@@ -177,7 +177,7 @@ class AttendanceController extends Controller
         // function($query) use($attend){
         //         return $query->whereIn('id',$attend->courses->pluck('id')->toArray());
         // })->get();
-        $attendance=Attendance::whereId($id)->with('levels.courses')->first();
+        $attendance=Attendance::whereId($id)->with(['levels.courses','gradeCategory'])->first();
         foreach($attendance['levels'] as $attend)
         {
             foreach($attend['courses']as $key => $attendCourse)

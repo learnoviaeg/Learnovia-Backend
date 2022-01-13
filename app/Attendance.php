@@ -35,14 +35,14 @@ class Attendance extends Model
         return $this->belongsToMany('App\Course', 'attendance_courses', 'attendance_id', 'course_id');
     }
 
+    public function gradeCategory()
+    {
+        return $this->belongsToMany('App\GradeCategory', 'attendance_courses', 'attendance_id', 'grade_cat_id');
+    }
+
     public function attendanceType()
     {
         return $this->belongsTo('App\AttendanceType', 'attendance_type_id', 'id');
-    }
-
-    public function gradeCategory()
-    {
-        return $this->belongsTo('App\GradeCategory', 'grade_cat_id', 'id');
     }
 
     public function user()
