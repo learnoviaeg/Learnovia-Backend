@@ -338,12 +338,12 @@ class UserGradeController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        // $allowed_levels=Permission::where('name','report_card/fgl')->pluck('allowed_levels')->first();
-        // $allowed_levels=json_decode($allowed_levels);
-        // $check=(array_intersect($allowed_levels,Enroll::where('user_id',$request->user_id)->pluck('level')->toArray()));
+        $allowed_levels=Permission::where('name','report_card/fgl')->pluck('allowed_levels')->first();
+        $allowed_levels=json_decode($allowed_levels);
+        $check=(array_intersect($allowed_levels,Enroll::where('user_id',$request->user_id)->pluck('level')->toArray()));
 
-        // if(count($check) == 0)
-        //     return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
         $total = 0;
         $student_mark = 0;
         $grade_category_callback = function ($qu) use ($request ) {
