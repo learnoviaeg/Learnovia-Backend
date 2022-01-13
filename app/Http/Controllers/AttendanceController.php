@@ -66,18 +66,15 @@ class AttendanceController extends Controller
         if(isset($request->end_date))
             $attendance->where('end_date','<', $request->end_date);
 
-        $all=$attendance->with(['levels.courses','gradeCategory'])->get();
-        foreach($all as $attendeence){
-            foreach($attendeence['levels'] as $attend){
-                foreach($attend->courses as $key => $attendCourse)
-                {
-                    if(!in_array($attendCourse->id, $attendeence->courses->pluck('id')->toArray()))
-                        unset($attend->courses[$key]);
-                }
-            }
+        foreach($attendance->cursor() as $attendeence){
+            $callback = function ($qu) use ($attendeence) {
+                $qu->whereIn('id',$attendeence->courses->pluck('id')->toArray());
+            };
+
+            $all[]=Attendance::whereId($attendeence->id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback])->first();
         }
 
-        return HelperController::api_response_format(200 , $all->paginate(HelperController::GetPaginate($request)) , __('messages.attendance.list'));
+        return HelperController::api_response_format(200 , collect($all)->paginate(HelperController::GetPaginate($request)) , __('messages.attendance.list'));
     }
 
     /**
@@ -153,7 +150,7 @@ class AttendanceController extends Controller
                         'item_type' => 'Attendance',
                         'type' => 'item',
                         'parent' => ($request->is_graded ==1) ? $attend['grade_cat_id']: $top_parent_category->id,
-                        'max'    => $request->max_grade,
+                        'max'    => ($request->is_graded ==1) ? $request->max_grade :null,
                         'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
                         'weights' => ((bool) $request->is_graded == false) ? 0 : null,
                     ]);
@@ -173,19 +170,13 @@ class AttendanceController extends Controller
     public function show($id)
     {
         $attend=Attendance::find($id);
-        // $attendance=Attendance::whereId($id)->with('levels.courses')->whereHas('levels.courses',
-        // function($query) use($attend){
-        //         return $query->whereIn('id',$attend->courses->pluck('id')->toArray());
-        // })->get();
-        $attendance=Attendance::whereId($id)->with(['levels.courses','gradeCategory'])->first();
-        foreach($attendance['levels'] as $attend)
-        {
-            foreach($attend['courses']as $key => $attendCourse)
-            {
-                if(!in_array($attendCourse->id, $attendance->courses->pluck('id')->toArray()))
-                    unset($attend['courses'][$key]);
-            }
-        }
+
+        $callback = function ($qu) use ($attend) {
+            $qu->whereIn('id',$attend->courses->pluck('id')->toArray());
+        };
+
+        $attendance=Attendance::whereId($id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback])->first();
+
         return HelperController::api_response_format(200 , $attendance , null);
     }
 
