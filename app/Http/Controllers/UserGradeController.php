@@ -343,7 +343,8 @@ class UserGradeController extends Controller
 
         if(count($check) == 0)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
-
+        $total = 0;
+        $student_mark = 0;
         $grade_category_callback = function ($qu) use ($request ) {
             $qu->where('name', 'First Term');
             $qu->with(['userGrades' => function($query) use ($request){
@@ -352,6 +353,7 @@ class UserGradeController extends Controller
         };
 
         $callback = function ($qu) use ($request , $grade_category_callback) {
+            $qu->orderBy('course', 'Asc');
             $qu->where('role_id', 3);
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]);
@@ -359,6 +361,19 @@ class UserGradeController extends Controller
 
         $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
                         ->with(['enroll' => $callback])->first();
+
+        foreach($result->enroll as $enroll){
+            if($enroll->courses->name == 'Science')
+                break;
+            
+            if($enroll->courses->gradeCategory != null)
+                $total += $enroll->courses->gradeCategory[0]->max;
+
+            if($enroll->courses->gradeCategory[0]->userGrades != null)
+                $student_mark += $enroll->courses->gradeCategory[0]->userGrades[0]->grade;
+        }
+         $result->total = $total;
+         $result->student_total_mark = $student_mark;
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
