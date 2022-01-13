@@ -351,14 +351,14 @@ class UserGradeController extends Controller
             }]);     
         };
 
-        $callbacks = function ($qu) use ($request , $grade_category_callback) {
+        $callback = function ($qu) use ($request , $grade_category_callback) {
             $qu->where('role_id', 3);
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]);
         };
 
-        $result = User::whereId($request->user_id)->whereHas('enroll' , $callbacks)
-                        ->with(['enroll' => $callbacks])->first();
+        $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
+                        ->with(['enroll' => $callback])->first();
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
