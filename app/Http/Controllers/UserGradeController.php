@@ -370,7 +370,7 @@ class UserGradeController extends Controller
             if($enroll->courses->gradeCategory[0]->userGrades != null)
                 $student_mark += $enroll->courses->gradeCategory[0]->userGrades[0]->grade;
             
-            if(!str_contains($enroll->courses->name, 'O.L'))
+            if(str_contains($enroll->courses->name, 'O.L'))
                 break;
         }
 
