@@ -337,41 +337,32 @@ class UserGradeController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        // $callbacks = function ($qu) use ($request) {
-        //     $qu->where('user_id', $request->user_id);
-        // };
-
-        // $callback = function ($query) use ($callbacks) {
-        //     $query->where('name', 'First Term');
-        //     $query->whereHas('userGrades' , $callbacks)
-        //           ->with(['userGrades' => $callbacks]);
-        // };
-        // $result = User::whereId($request->user_id)->whereHas('enroll.courses.gradeCategory' , $callback)
-        //                 ->with(['enroll.courses.gradeCategory' => $callback])->first();
         $allowed_levels=Permission::where('name','report_card/fgl')->pluck('allowed_levels')->first();
         $allowed_levels=json_decode($allowed_levels);
-        $check=(array_intersect($allowed_levels,Enroll::where('user_id',Auth::id())->pluck('level')->toArray()));
+        $check=(array_intersect($allowed_levels,Enroll::where('user_id',$request->user_id)->pluck('level')->toArray()));
 
         if(count($check) == 0)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
-        $result = User::whereId($request->user_id)->with(['enroll' => function($query) use ($request){
-            $query->where("role_id", 3);
-            }, 'enroll.courses.gradeCategory'=> function($query) use ($request){
-                $query->where("name", 'First Term');
-                $query->with(['userGrades' => function ($q) use ($request) {
-                    $q->where('user_id', $request->user_id);
-                }]);
-            }])->first();
- 
-        foreach($result->enroll as $key => $course){
-            if(count($course->courses->gradeCategory) == 0)
-                unset($result->enroll[$key]);
+        $grade_category_callback = function ($qu) use ($request ) {
+            $qu->where('name', 'First Term');
+            $qu->with(['userGrades' => function($query) use ($request){
+                $query->where("user_id", $request->user_id);
+            }]);     
+        };
 
-        }
+        $callback = function ($qu) use ($request , $grade_category_callback) {
+            $qu->where('role_id', 3);
+            $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
+                ->with(['courses.gradeCategory' => $grade_category_callback]);
+        };
+
+        $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
+                        ->with(['enroll' => $callback])->first();
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
+
 
     public function export(Request $request)
     {
