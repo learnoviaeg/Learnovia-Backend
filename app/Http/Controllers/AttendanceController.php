@@ -48,17 +48,8 @@ class AttendanceController extends Controller
         if(isset($request->type_id))
             $attendance->where('type_id',$request->type_id);
 
-        // if(isset($request->level_id))
-        //     $attendance->where('level_id',$request->level_id);
-
         if(isset($request->segment_id))
             $attendance->where('segment_id',$request->segment_id);
-
-        // if(isset($request->course_id))
-        //     $attendance->where('course_id',$request->course_id);
-
-        // if(isset($request->grade_cat_id))
-        //     $attendance->where('grade_cat_id',$request->grade_cat_id);
 
         if(isset($request->start_date))
             $attendance->where('start_date','>=', $request->start_date);
@@ -67,11 +58,15 @@ class AttendanceController extends Controller
             $attendance->where('end_date','<', $request->end_date);
 
         foreach($attendance->cursor() as $attendeence){
-            $callback = function ($qu) use ($attendeence) {
+            $callback = function ($qu) use ($request,$attendeence) {
                 $qu->whereIn('id',$attendeence->courses->pluck('id')->toArray());
+                if(isset($request->course_id))
+                    $qu->where('id',$request->course_id);
             };
 
-            $all[]=Attendance::whereId($attendeence->id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback])->first();
+            $check=Attendance::whereId($attendeence->id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback])->first();
+            if(isset($check))
+                $all[]=$check;
         }
 
         return HelperController::api_response_format(200 , collect($all)->paginate(HelperController::GetPaginate($request)) , __('messages.attendance.list'));
@@ -129,12 +124,6 @@ class AttendanceController extends Controller
                     ]);
 
                     $attendance->levels()->sync($attend['level_id'],false); //b t3mel duplicate
-                    // dd($attend['level_id']);
-                    // $dd=AttendanceLevel::firstOrCreate([
-                    //     'attendance_id' => $attendance->id,
-                    //     'level_id' => $attend['level_id'],
-                    // ]);
-                    // dd($dd);
 
                     AttendanceCourse::firstOrCreate([
                         'course_id' => $attend['course_id'],
@@ -195,10 +184,10 @@ class AttendanceController extends Controller
             'year_id' => 'exists:academic_years,id',
             'type_id' => 'exists:academic_types,id',
             'segment_id' => 'exists:segments,id',
-            'attendance' => 'array|required',
-            'attendance.*.level_id' => 'required|exists:levels,id',
+            'attendance' => 'array',
+            'attendance.*.level_id' => 'exists:levels,id',
             // 'attendance.*.level_id.*' => 'exists:levels,id', //will be array
-            'attendance.*.course_id' => 'required|exists:courses,id',
+            'attendance.*.course_id' => 'exists:courses,id',
             // 'attendance.*.course_id.*' => 'exists:courses,id', //will be array
             'attendance.*.grade_cat_id' => 'required_if:is_graded,==,1|exists:grade_categories,id',
             'is_graded' => 'in:0,1',
@@ -210,53 +199,29 @@ class AttendanceController extends Controller
         ]);
 
         $attendance=Attendance::find($id);
-        // dd($attendance->attendance_type);
 
-        foreach($request->attendance as $attend)
-        {
-            // foreach($attend['level_id'] as $level)
-            // {
-                // foreach($attend['course_id'] as $course)
-                // {
-                    $top_parent_category = GradeCategory::where('course_id',$attend['course_id'])->whereNull('parent')->where('type','category')->first();
-                    $attendance->updateOrCreate([
-                        'name' => isset($request->name) ? $request->name : $attendance->name,
-                        'attendance_type' => isset($request->attendance_type) ? $request->attendance_type : $attendance->attendance_type,
-                        'year_id' => isset($request->year_id) ? $request->year_id :  $attendance->year_id,
-                        'type_id' => isset($request->type_id) ? $request->type_id : $attendance->type_id,
-                        'segment_id' => isset($request->segment_id)? $request->segment_id : $attendance->segment_id
-                    ],[
-                        'is_graded' => isset($request->is_graded) ? $request->is_graded : $attendance->is_graded,
-                        'start_date' =>  isset($request->start_date) ? $request->start_date : $attendance->start_date,
-                        'end_date' => isset($request->end_date) ? $request->end_date : $attendance->end_date,
-                        'min_grade' =>  isset($request->min_grade) ? $request->min_grade : $attendance->min_grade,
-                        'gradeToPass' => isset($request->gradeToPass) ? $request->gradeToPass: $attendance->gradeToPass,
-                        'max_grade' => isset($request->max_grade) ? $request->max_grade : $attendance->max_grade,
-                        'created_by' => $attendance->created_by 
-                    ]);
+        $attendance->update([
+            'name' => isset($request->name) ? $request->name : $attendance->name,
+            'attendance_type' => isset($request->attendance_type) ? $request->attendance_type : $attendance->attendance_type,
+            'year_id' => isset($request->year_id) ? $request->year_id :  $attendance->year_id,
+            'type_id' => isset($request->type_id) ? $request->type_id : $attendance->type_id,
+            'segment_id' => isset($request->segment_id)? $request->segment_id : $attendance->segment_id,
+            'is_graded' => isset($request->is_graded) ? $request->is_graded : $attendance->is_graded,
+            'start_date' =>  isset($request->start_date) ? $request->start_date : $attendance->start_date,
+            'end_date' => isset($request->end_date) ? $request->end_date : $attendance->end_date,
+            'min_grade' =>  isset($request->min_grade) ? $request->min_grade : $attendance->min_grade,
+            'gradeToPass' => isset($request->gradeToPass) ? $request->gradeToPass: $attendance->gradeToPass,
+            'max_grade' => isset($request->max_grade) ? $request->max_grade : $attendance->max_grade,
+            'created_by' => $attendance->created_by 
+        ]);
 
-                    // $attendance->levels()->attach($attend['level_id']); //b t3mel duplicate
-                    // AttendanceLevel::updateOrCreate([
-                    //     'level_id' => $attend['level_id'],
-                    //     'attendance_id' => $attendance->id
-                    // ]);
-
-                    // AttendanceCourse::updateOrCreate([
-                    //     'course_id' => $attend['course_id'],
-                    //     'grade_cat_id' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
-                    //     'attendance_id' => $attendance->id
-                    // ]);
-
-                    $gradeCat = GradeCategory::where('instance_type','Attendance') -> where('type','item')
-                                    ->where('instance_id',$attendance->id)->update([
-                        'name' => isset($request->name) ? $request->name : $attendance->name,
-                        'max' => isset($request->max_grade) ? $request->max_grade : $attendance->max_grade,
-                        'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
-                        'weights' => ((bool) $request->is_graded == false) ? 0 : null,
-                    ]);
-                // }
-            // }
-        }
+        $gradeCat = GradeCategory::where('instance_type','Attendance') -> where('type','item')
+                        ->where('instance_id',$attendance->id)->update([
+            'name' => isset($request->name) ? $request->name : $attendance->name,
+            'max' => isset($request->max_grade) ? $request->max_grade : $attendance->max_grade,
+            'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
+            'weights' => ((bool) $request->is_graded == false) ? 0 : null,
+        ]);
 
         return HelperController::api_response_format(200 , null , __('messages.attendance.update'));
     }
