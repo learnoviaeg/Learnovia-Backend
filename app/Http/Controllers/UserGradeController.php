@@ -426,6 +426,26 @@ class UserGradeController extends Controller
         $file = url(Storage::url('Grades'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
+
+    public function user_report_in_course(Request $request)
+    {
+        $request->validate([
+            'course_id'  => 'required|integer|exists:courses,id',
+            'user_id' => 'required|exists:users,id',
+            ]); 
+
+        $grade_categories = GradeCategory::where('course_id', $request->course_id)->whereNull('parent')
+                            ->with(['Children.userGrades' => function($query) use ($request){
+                                $query->where("user_id", $request->user_id);
+                            },'GradeItems.userGrades' => function($query) use ($request){
+                                $query->where("user_id", $request->user_id);
+                            },'userGrades' => function($query) use ($request){
+                                $query->where("user_id", $request->user_id);
+                            }])->get();
+
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
+
+    }
 }
 
 
