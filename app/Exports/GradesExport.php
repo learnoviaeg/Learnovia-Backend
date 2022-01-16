@@ -26,6 +26,7 @@ class GradesExport implements FromCollection, WithHeadings
         {                    
             $forExport['username']= $userr->user->username;
             $forExport['course'] =  $this->course_id;
+            $forExport['fullname']= $userr->user->fullname;
             $forSetExport->push($forExport);
         }
         return $forSetExport;
