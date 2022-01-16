@@ -94,7 +94,10 @@ class NaturalMethod implements GradeSetupInterface
             return '';
         $adjusted_children = $grade_category->categories_items()->where('weight_adjust', 1)->count();
         $all_children = $grade_category->categories_items()->count();
-        if($adjusted_children == $all_children && $grade_category->categories_items()->sum('weights') != 100)
+
+        if(($adjusted_children == $all_children && $grade_category->categories_items()->sum('weights') != 100) || 
+        $grade_category->categories_items()->where('weights' , 100)->where('weight_adjust', 1)->count() > 1 )
+        
             $grade_category->categories_items()->where('instance_type', null)->update(['weight_adjust' => 0]);
     }
 }
