@@ -38,7 +38,7 @@ class EnrollObserver
         // }
 
         $log=Log::create([
-            'user' => User::find(Auth::id())->username,
+            'user' => (Auth::id()) ? User::find(Auth::id())->username : 'migrated',
             'action' => 'created',
             'model' => 'Enroll',
             'data' => serialize($enroll),
