@@ -317,39 +317,7 @@ class ScriptsController extends Controller
                 'calculation_type' => json_encode(['Natural']),
             ]);
 
-            // $enrolls=Enroll::where('course',$course->id)->where('segment',$oldSegment)->where('type',$type)->get();
-            // foreach($enrolls as $enroll)
-            // {
-            //     $f=Enroll::firstOrCreate([
-            //         'user_id' => $enroll->user_id,
-            //         'role_id'=> $enroll->role_id,
-            //         'year' => $enroll->year,
-            //         'type' => $type,
-            //         'level' => $enroll->level,
-            //         'group' => $enroll->group,
-            //         'segment' => $newSegment->id,
-            //         'course' => $coco->id
-            //     ]);
-            // }
-        }
-
-        return 'Done';
-    }
-
-    public function MigrateEnroll(Request $request){
-        $request->validate([
-            'segment_id'  => 'required|exists:segments,id',
-        ]);
-
-        $newSegment=Segment::find($request->segment_id);
-        $type=$newSegment->academic_type_id;
-        $oldSegment=Segment::Get_current_by_one_type($type);
-        $courses=Course::where('segment_id',$newSegment->id)->get();
-
-        $enrolls=Enroll::where('role_id',4)->whereIn('course',Course::where('segment_id',$oldSegment)->pluck('id'))->where('segment',$oldSegment)->where('type',$type)->get();
-
-        foreach($courses as $course)
-        {
+            $enrolls=Enroll::where('course',$course->id)->where('segment',$oldSegment)->where('type',$type)->get();
             foreach($enrolls as $enroll)
             {
                 $f=Enroll::firstOrCreate([
@@ -360,7 +328,7 @@ class ScriptsController extends Controller
                     'level' => $enroll->level,
                     'group' => $enroll->group,
                     'segment' => $newSegment->id,
-                    'course' => $course->id
+                    'course' => $coco->id
                 ]);
             }
         }
