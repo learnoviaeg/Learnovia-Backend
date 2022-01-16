@@ -62,7 +62,7 @@ class CoursesController extends Controller
             'search' => 'nullable',
             'user_id'=>'exists:users,id',
             'period' => 'in:past,future,no_segment'
-        ]);
+        ]); 
 
         $paginate = 12;
        
