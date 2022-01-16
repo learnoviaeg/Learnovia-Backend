@@ -11,6 +11,9 @@ class NaturalMethod implements GradeSetupInterface
     public function calculateMark($grade_category)
     {
         $total_category_mark = 0;
+        if($grade_category->categories_items()->where('weights' , 100)->where('weight_adjust', 1)->count() > 0)
+            return $grade_category->categories_items()->where('weights' , 100)->where('weight_adjust', 1)->first()->max;
+        
         foreach($grade_category->categories_items as $items){
             if(($items->weights === 0.0 && $items->weight_adjust === 1 ) || $items->parent != $grade_category->id)
                 continue;
