@@ -410,17 +410,19 @@ class UserGradeController extends Controller
             ]);     
 
         $grade_categories = GradeCategory::whereIn('course_id', $request->courses);
+        $cat_ids =  $grade_categories->get()->pluck('id')->toArray();
+
         $grade_Categroies_ids = $grade_categories->get()->pluck('name')->toArray();
         array_walk($grade_Categroies_ids, function(&$value, $key) { $value = 'item_'.$value; } );
-        $headers =array_merge(array('username' , 'course' , 'fullname'), $grade_Categroies_ids);
+        $headers =array_merge(array('fullname','username' , 'course'), $grade_Categroies_ids);
 
         $students = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
         ->with(array('user' => function($query) {
             $query->addSelect(array('id' , 'username' , 'firstname' , 'lastname'));
         }))->get();
         $course_shortname = $grade_categories->first()->course->short_name;
-        $filename = $course_shortname.uniqid();
-        $file = Excel::store(new GradesExport($headers , $students , $request->courses[0]), 'Grades'.$filename.'.xlsx','public');
+        $filename = $course_shortname;
+        $file = Excel::store(new GradesExport($headers , $students , $request->courses[0] , $cat_ids), 'Grades'.$filename.'.xlsx','public');
         $file = url(Storage::url('Grades'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
