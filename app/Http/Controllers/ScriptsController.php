@@ -292,7 +292,7 @@ class ScriptsController extends Controller
                 
             $coco=Course::firstOrCreate([
                 'name' => $course->name. "_" .$newSegment->name,
-                'short_name' => $course->short_name . "_" .$newSegment->name,
+                'short_name' => $course->short_name . "_" .$newSegment->name],[
                 'image' => $course->image,
                 'category_id' => $course->category,
                 'description' => $course->description,
@@ -340,6 +340,21 @@ class ScriptsController extends Controller
                     'course' => $coco->id
                 ]);
             }
+        }
+
+        return 'Done';
+    }
+
+    public function delete_duplicated(Request $request)
+    {
+        $request->validate([
+            'segment_id'  => 'required|exists:segments,id',
+        ]);
+        
+        foreach(Course::where('segment_id',$request->segment_id)->cursor() as $course)
+        {
+            if(count(Course::where('short_name',$course->short_name)->get()) > 1)
+                Course::where('short_name',$course->short_name)->first()->delete();
         }
 
         return 'Done';

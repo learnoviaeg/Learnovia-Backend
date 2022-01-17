@@ -417,6 +417,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('updateGradeCatParent', 'ScriptsController@updateGradeCatParent');
     Route::get('percentage_letter', 'ScriptsController@update_letter_percentage');
     Route::get('MigrateChain', 'ScriptsController@MigrateChainWithEnrollment');
+    Route::get('delete_duplicated', 'ScriptsController@delete_duplicated');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
