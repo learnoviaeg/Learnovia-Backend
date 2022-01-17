@@ -44,21 +44,22 @@ class migrateChainAmdEnrollment implements ShouldQueue
 
         foreach($courses as $course)
         {
-            if(count(Course::where('short_name',$course->short_name . "_" .$newSegment->name)->first()) > 0)
-            continue;
-                $coco=Course::firstOrCreate([
-                    'name' => $course->name. "_" .$newSegment->name,
-                    'short_name' => $course->short_name . "_" .$newSegment->name,
-                    'image' => $course->image,
-                    'category_id' => $course->category,
-                    'description' => $course->description,
-                    'mandatory' => $course->mandatory,
-                    'level_id' => $course->level_id,
-                    'is_template' => $course->is_template,
-                    'classes' => json_encode($course->classes),
-                    'segment_id' => $newSegment->id,
-                    'letter_id' => $course->letter_id
-                ]);
+            if(count(Course::where('segment_id',$newSegment->id)->where('short_name',$course->short_name . "_" .$newSegment->name)->first()) > 0)
+                continue;
+                
+            $coco=Course::firstOrCreate([
+                'name' => $course->name. "_" .$newSegment->name,
+                'short_name' => $course->short_name . "_" .$newSegment->name,
+                'image' => $course->image,
+                'category_id' => $course->category,
+                'description' => $course->description,
+                'mandatory' => $course->mandatory,
+                'level_id' => $course->level_id,
+                'is_template' => $course->is_template,
+                'classes' => json_encode($course->classes),
+                'segment_id' => $newSegment->id,
+                'letter_id' => $course->letter_id
+            ]);
 
             for ($i = 1; $i <= 4; $i++) {
                 $lesson=lesson::firstOrCreate([
