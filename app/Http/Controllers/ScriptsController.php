@@ -276,68 +276,86 @@ class ScriptsController extends Controller
             'segment_id'  => 'required|exists:segments,id',
         ]);
 
-        // dd($request->segment_id);
-        $migrated = (new \App\Jobs\migrateChainAmdEnrollment($request->segment_id));
-        dispatch($migrated);
+        // $migrated = (new \App\Jobs\migrateChainAmdEnrollment($request->segment_id));
+        // dispatch($migrated);
         // dd($migrated);
-        // $newSegment=Segment::find($request->segment_id);
-        // $type=$newSegment->academic_type_id;
-        // $oldSegment=Segment::Get_current_by_one_type($type);
-        // $courses=Course::where('segment_id',$oldSegment)->get();
 
-        // foreach($courses as $course)
-        // {
-        //     $coco=Course::firstOrCreate([
-        //         'name' => $course->name. "_" .$newSegment->name,
-        //         'short_name' => $course->short_name . "_" .$newSegment->name,
-        //         'image' => $course->image,
-        //         'category_id' => $course->category,
-        //         'description' => $course->description,
-        //         'mandatory' => $course->mandatory,
-        //         'level_id' => $course->level_id,
-        //         'is_template' => $course->is_template,
-        //         'classes' => json_encode($course->classes),
-        //         'segment_id' => $newSegment->id,
-        //         'letter_id' => $course->letter_id
-        //     ]);
+        $newSegment=Segment::find($request->segment_id);
+        $type=$newSegment->academic_type_id;
+        $oldSegment=Segment::Get_current_by_one_type($type);
+        $courses=Course::where('segment_id',$oldSegment)->get();
 
-        //     for ($i = 1; $i <= 4; $i++) {
-        //         $lesson=lesson::firstOrCreate([
-        //             'name' => 'Lesson ' . $i,
-        //             'index' => $i,
-        //             'shared_lesson' => 1,
-        //             'course_id' => $coco->id,
-        //             'shared_classes' => json_encode($course->classes),
-        //         ]);
-        //     }
+        foreach($courses as $course)
+        {
+            if(count(Course::where('segment_id',$newSegment->id)->where('short_name',$course->short_name . "_" .$newSegment->name)->first()) > 0)
+                continue;
+                
+            $coco=Course::firstOrCreate([
+                'name' => $course->name. "_" .$newSegment->name,
+                'short_name' => $course->short_name . "_" .$newSegment->name],[
+                'image' => $course->image,
+                'category_id' => $course->category,
+                'description' => $course->description,
+                'mandatory' => $course->mandatory,
+                'level_id' => $course->level_id,
+                'is_template' => $course->is_template,
+                'classes' => json_encode($course->classes),
+                'segment_id' => $newSegment->id,
+                'letter_id' => $course->letter_id
+            ]);
 
-        //     //Creating defult question category
-        //     $quest_cat = QuestionsCategory::firstOrCreate([
-        //         'name' => $coco->name . ' Category',
-        //         'course_id' => $coco->id,
-        //     ]);
+            for ($i = 1; $i <= 4; $i++) {
+                $lesson=lesson::firstOrCreate([
+                    'name' => 'Lesson ' . $i,
+                    'index' => $i,
+                    'shared_lesson' => 1,
+                    'course_id' => $coco->id,
+                    'shared_classes' => json_encode($course->classes),
+                ]);
+            }
 
-        //     $gradeCat = GradeCategory::firstOrCreate([
-        //         'name' => $coco->name . ' Total',
-        //         'course_id' => $coco->id,
-        //         'calculation_type' => json_encode(['Natural']),
-        //     ]);
+            //Creating defult question category
+            $quest_cat = QuestionsCategory::firstOrCreate([
+                'name' => $coco->name . ' Category',
+                'course_id' => $coco->id,
+            ]);
 
-        //     $enrolls=Enroll::where('course',$course->id)->whereIn('segment',$oldSegment->toArray())->where('type',$type)->get()->unique();
-        //     foreach($enrolls as $enroll)
-        //     {
-        //         $f=Enroll::firstOrCreate([
-        //             'user_id' => $enroll->user_id,
-        //             'role_id'=> $enroll->role_id,
-        //             'year' => $enroll->year,
-        //             'type' => $type,
-        //             'level' => $enroll->level,
-        //             'group' => $enroll->group,
-        //             'segment' => $newSegment->id,
-        //             'course' => $coco->id
-        //         ]);
-        //     }
-        // }
+            $gradeCat = GradeCategory::firstOrCreate([
+                'name' => $coco->name . ' Total',
+                'course_id' => $coco->id,
+                'calculation_type' => json_encode(['Natural']),
+            ]);
+
+            $enrolls=Enroll::where('course',$course->id)->whereIn('segment',$oldSegment->toArray())->where('type',$type)->get()->unique();
+            foreach($enrolls as $enroll)
+            {
+                $f=Enroll::firstOrCreate([
+                    'user_id' => $enroll->user_id,
+                    'role_id'=> $enroll->role_id,
+                    'year' => $enroll->year,
+                    'type' => $type,
+                    'level' => $enroll->level,
+                    'group' => $enroll->group,
+                    'segment' => $newSegment->id,
+                    'course' => $coco->id
+                ]);
+            }
+        }
+
+        return 'Done';
+    }
+
+    public function delete_duplicated(Request $request)
+    {
+        $request->validate([
+            'segment_id'  => 'required|exists:segments,id',
+        ]);
+        
+        foreach(Course::where('segment_id',$request->segment_id)->cursor() as $course)
+        {
+            if(count(Course::where('short_name',$course->short_name)->get()) > 1)
+                Course::where('short_name',$course->short_name)->first()->delete();
+        }
 
         return 'Done';
     }

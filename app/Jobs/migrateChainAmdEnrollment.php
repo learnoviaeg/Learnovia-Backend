@@ -44,6 +44,9 @@ class migrateChainAmdEnrollment implements ShouldQueue
 
         foreach($courses as $course)
         {
+            if(count(Course::where('segment_id',$newSegment->id)->where('short_name',$course->short_name . "_" .$newSegment->name)->first()) > 0)
+                continue;
+                
             $coco=Course::firstOrCreate([
                 'name' => $course->name. "_" .$newSegment->name,
                 'short_name' => $course->short_name . "_" .$newSegment->name,
