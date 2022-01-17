@@ -61,30 +61,41 @@ class AttendanceSessionController extends Controller
             'class_id' => 'required|exists:classes,id',
             'repeated' => 'required|in:0,1',
             'sessions' => 'required|array',
-            'sessions.*.from' => 'required|date',
-            'sessions.*.to' => 'required|date|after:from',
-            // 'sessions.*.day' => 'in:saterday, sunday, monday, tuesday, thuresday, friday|required_if:repeated,==,1',
+            'start_date' => 'required|date',
+            // in:sunday,monday,tuesday,wednesday,thursday
+            'sessions.*.day' => 'in:SA,SU,MO,TU,TH,friday|required_if:repeated,==,1',
+            'sessions.*.from' => 'required|date_format:H:i',
+            'sessions.*.to' => 'required|date_format:H:i|after:sessions.*.from',
             'repeated_until' => 'required_if:repeated,==,1|date'
         ]);
-
+        $weekMap = ['SU','MO','TU','WE','TH','FR','SA'];
         foreach($request->sessions as $session)
         {
             if(isset($request->repeated_until))
             {
-                $start=Carbon::parse($session['from']);
-                $end=Carbon::parse($session['from'])->diffInSeconds($session['to']);
-                while(Carbon::parse($session['from']) <= Carbon::parse($request->repeated_until)){
+                // $start=$request->start_date;
+                // dd(array_search($session['day'],$weekMap) - carbon::parse($request->start_date)->dayOfWeek);
+                if(array_search($session['day'],$weekMap) > carbon::parse($request->start_date)->dayOfWeek )
+                    $attendancestart=(carbon::parse($request->start_date)->addDays(
+                        array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
+                        // dd(Carbon::parse($attendancestart)->addHours($session['to']));
+                // $from_date=Carbon::parse();
+                // dd(Carbon::createFromTimestampUTC($session['to'])->secondsSinceMidnight());
+                // dd($attendancestart->addHours($session['to'])) -> format('Y-m-d H:i:s');
+
+                $end=$attendancestart->diffInSeconds($session['to']);
+                while($attendancestart <= Carbon::parse($request->repeated_until)){
                     // dd(Carbon::parse($session['from'])->addSeconds($end));
                     $attendance=AttendanceSession::firstOrCreate([
                         'name' => $request->name,
                         'attendance_id' => $request->attendance_id,
                         'class_id' => $request->class_id,
-                        'from' => Carbon::parse($session['from']),
-                        'to' => Carbon::parse($session['from'])->addSeconds($end),
+                        'start_date' => $attendancestart,
+                        'from' => $session['from'],
+                        'to' => $session['to'],
                         'created_by' => Auth::id()
                     ]);
-                    $session['from']=Carbon::parse($session['from'])->addDays(7);
-                    // $start=$session['from']->addDays(7);
+                    $attendancestart=$attendancestart->addDays(7);
                 }
             }      
             else
@@ -93,8 +104,8 @@ class AttendanceSessionController extends Controller
                     'name' => $request->name,
                     'attendance_id' => $request->attendance_id,
                     'class_id' => $request->class_id,
-                    'from' => $session['from'],
-                    'to' => $session['to'],
+                    'from' => $request->start_date,
+                    'to' => null,
                     'created_by' => Auth::id()
                 ]);
             }      

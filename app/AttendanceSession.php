@@ -7,7 +7,7 @@ use Carbon\Carbon;
 
 class AttendanceSession extends Model
 {
-    protected $fillable = ['name', 'attendance_id', 'class_id', 'from', 'to', 'created_by'];
+    protected $fillable = ['name', 'attendance_id', 'class_id', 'from', 'to', 'created_by', 'start_date'];
 
     public function class()
     {
