@@ -2,168 +2,139 @@
 
 namespace App\Http\Controllers;
 
-use App\CourseSegment;
+use App\ScaleDetails;
 use Illuminate\Http\Request;
 use App\scale;
 use stdClass;
-use App\GradeItems;
-use App\LastAction;
+use App\course_scales;
+use App\GradeCategory;
+use App\Course;
+use App\Repositories\ChainRepositoryInterface;
 
 class ScaleController extends Controller
 {
-     /**
-     *
-     * @Description :creates new scale.
-     * @param : name and format of scale.
-     * @return : return scale.
-     */
-    public function AddScale(Request $request)
+
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+        $this->middleware('auth');
+        $this->middleware(['permission:scale/get'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:scale/add'],   ['only' => ['store']]);
+        $this->middleware(['permission:scale/update'],   ['only' => ['update']]);
+        $this->middleware(['permission:scale/course'],   ['only' => ['scales_per_course']]);
+        // $this->middleware(['permission:quiz/delete'],   ['only' => ['destroy']]);
+    }
+
+
+    public function index(Request $request)
+    {
+        $scale = scale::with(['details'])->get();
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $scale], 200);
+    }
+   
+    public function store(Request $request)
     {
         $request->validate([
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+            'levels'    => 'nullable|array',
+            'levels.*'  => 'nullable|integer|exists:levels,id',
+            'years' => 'array',
+            'years.*' => 'exists:academic_years,id',
+            'types' => 'array',
+            'types.*' => 'exists:academic_types,id',
             'name' => 'required',
-            'formate' => 'required|array',
-            'formate.*' => 'required',
-            'formate.*.name' => 'required|string',
-            'course' => 'integer|exists:courses,id',
-            'class' => 'integer|exists:classes,id' 
+            'scale' => 'required|array',
+            'scale.*evaluation'=> 'required|string',
         ]);
-
-        $course_segment=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
-        if(isset($course_segment))
-            $course_segment=$course_segment->id;
-        $withgrade = collect();
-        foreach ($request->formate as $index => $scale) {
-            $temp = new stdClass();
-            $temp->name = $scale['name'];
-            $temp->grade = $index;
-            $withgrade->push($temp);
+        
+        $courses = $this->chain->getEnrollsByManyChain($request)->where('role_id',1)->distinct('course')->select('course')->pluck('course');
+        $scale = scale::firstOrCreate([
+                    'name' => $request->name,
+                    'chain' => json_encode($request->except(['name', 'scale'])),
+                ]);
+        
+        foreach($request->scale as $key => $scale_details)
+        {
+            $scale->details()->create([
+                'evaluation' => $scale_details['evaluation'],
+                'grade' => $key+1,        
+            ]);
         }
-        $scaleFormates=serialize($withgrade);
-        $newScale = scale::firstOrCreate([
-            'name' => $request->name,
-            'formate' => $scaleFormates,
-            'course_segment' => (isset($course_segment)) ? $course_segment : null
-        ]);
-        $newScale->formate = unserialize($newScale->formate);
+        foreach($courses as $course)
+        {
+            course_scales::firstOrCreate([
+                'course_id' => $course,
+                'scale_id' => $scale->id,
+            ]);
+        }
 
-        return HelperController::api_response_format(200,$newScale, 'Scale Created Successfully' );
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $scale], 200);
     }
-     /**
-     *
-     * @Description :update a scale.
-     * @param : id of scale is a required parameter
-     *          name and format of scale are optional parameters.
-     * @return : return scale.
-     */
-    public function UpdateScale(Request $request)
+
+    public function update(Request $request , $id)
     {
         $request->validate([
-            'id' => 'required|exists:scales,id',
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+            'levels'    => 'nullable|array',
+            'levels.*'  => 'nullable|integer|exists:levels,id',
+            'years' => 'array',
+            'years.*' => 'exists:academic_years,id',
+            'types' => 'array',
+            'types.*' => 'exists:academic_types,id',
             'name' => 'nullable',
-            'formate' => 'nullable|array'
-        ]);
+            'scale' => 'required|array',
+            'scale.*evaluation'=> 'required|string',
+            ]);
 
-        $check = GradeItems::where('scale_id',$request->id)->first();
-        $scale_id=scale::find($request->id);
+        $scale=scale::find($id);
+        if($request->filled('name'))
+            $scale->update(['name' => $request->name]);
+        
 
-        if(!isset($check))
+        $check = GradeCategory::where('scale_id',$id)->count();
+
+        if($check > 0)
+            return response()->json(['message' => 'Only name can be edited because the scale is assigned to grade category ', 'body' => $scale], 200);
+ 
+        $scale->details()->delete();
+        course_scales::where('scale_id' , $id)->delete();
+
+        foreach($request->scale as $key => $scale_details)
         {
-            if ($request->filled('name')) {
-                $scale_id->name = $request->name;
-            }
-            if ($request->filled('formate')) {
-                $scaleFormates=serialize($request->formate);
-                $scale_id->formate = $scaleFormates;
-            }
-            $scale_id->save();
-
-            $scale_id->formate = unserialize($scale_id->formate);
-
-            return HelperController::api_response_format(200,$scale_id, 'Scale Updated Succefully' );
+            $scale->details()->create([
+                'evaluation' => $scale_details['evaluation'],
+                'grade' => $key+1,        
+            ]);
         }
-        else
-            return HelperController::api_response_format(200,$scale_id, 'This Scale Used Before ' );
+
+        $courses = $this->chain->getEnrollsByManyChain($request)->where('role_id',1)->distinct('course')->select('course')->pluck('course');
+        $scale->update(['chain' => json_encode($request->except(['name', 'scale']))]);
+
+        foreach($courses as $course)
+        {
+            course_scales::firstOrCreate([
+                'course_id' => $course,
+                'scale_id' => $scale->id,
+            ]);
+        }
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => null], 200);
     }
-     /**
-     *
-     * @Description :delete a scale.
-     * @param : id of scale.
-     * @return : return scale and a string message which indicates whether the scale is deleted or not.
-     */
-    public function DeleteScale(Request $request)
+    
+    public function show($id)
+    {
+        $scale = scale::where('id',$id)->with(['details'])->first();
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $scale], 200);
+    }
+
+    public function scales_per_course(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:scales,id'
+            'course_id' => 'required|integer|exists:courses,id',
         ]);
-
-        $check = GradeItems::where('scale_id',$request->id)->first();
-        $scale_id=scale::find($request->id);
-
-        if(!isset($check))
-        {
-            $scale_id->delete();
-            return HelperController::api_response_format(200,$scale_id, 'Scale Deleted Successfully' );
-        }
-        else
-            return HelperController::api_response_format(200,$scale_id, 'This Scale Used Before ' );
-    }
-     /**
-     *
-     * @Description :list all scales or select a scale by id.
-     * @param : id is an aoptional parameter.
-     * @return : return scale.
-     */
-    public function GetScale(Request $request)
-    {
-        $request->validate([
-            'id' => 'nullable|exists:scales,id'
-        ]);
-
-        if(isset($request->id))
-        {
-            $scale_id=scale::find($request->id);
-            $scale_id->formate = unserialize($scale_id->formate);
-            return HelperController::api_response_format(200,$scale_id );
-        }
-        $scales=scale::get();
-        foreach($scales as $scale)
-            $scale->formate = unserialize($scale->formate);
-            // $scale['formate'] = unserialize($scale['formate']);
-
-        return HelperController::api_response_format(200,$scales);
+        $scales = Course::whereId($request->course_id)->with(['Scale.Scale'])->first();
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $scales], 200);
     }
 
-    public function GetScaleWithCourse(Request $request)
-    {
-        $request->validate([
-            'id' => 'nullable|exists:scales,id',
-            'course' => 'integer|exists:courses,id',
-            'class' => 'integer|exists:classes,id'
-        ]);
-
-        $course_segment=CourseSegment::GetWithClassAndCourse($request->class,$request->course);
-        LastAction::lastActionInCourse($request->course);
-        if(isset($request->id))
-        {
-            $scale_id=scale::find($request->id);
-            $scale_id->formate = @unserialize($scale_id->formate);
-            return HelperController::api_response_format(200,$scale_id );
-        }
-        $scales1[]=scale::whereNUll('course_segment')->get();
-        $scales2=[];
-        if(isset($course_segment))
-            $scales2[]=scale::where('course_segment',$course_segment->id)->get();
-
-        $scales=array_merge($scales1,$scales2);
-        foreach($scales as $key=>$ss)
-        {
-            if(count($ss) > 0)
-                {foreach($ss as $scale)
-                   { 
-                        $scale['formate'] = @unserialize($scale['formate']);}}
-            else
-                unset($scales[$key]);
-        }
-        return HelperController::api_response_format(200,array_values($scales));
-    }
 }

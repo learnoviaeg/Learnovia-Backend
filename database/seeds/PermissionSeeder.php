@@ -324,8 +324,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/update', 'title' => 'Update Scale']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/delete', 'title' => 'Delete Scale']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/get', 'title' => 'Get Scale']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/get-with-course', 'title' => 'Get Scale with course']);
-
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/course', 'title' => 'Get Scale of course']);
+        
         // //scale
         // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/add', 'title' => 'Add Letter']);
         // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/update', 'title' => 'Update Letter']);

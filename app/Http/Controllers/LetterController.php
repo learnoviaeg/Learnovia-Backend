@@ -47,7 +47,7 @@ class LetterController extends Controller
        $letter = Letter::firstOrCreate([
         'name' => $request->name,
         'chain' => json_encode($request->except(['name', 'letter'])),
-        ]);
+        ]); 
         $letters = array_values(collect($request->letter)->sortBy('lower_boundary')->reverse()->toArray());
 
         foreach($letters as $key => $letter_detail)

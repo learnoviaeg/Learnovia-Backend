@@ -98,4 +98,9 @@ class Course extends Model
     {
         return $this->belongsTo('App\Letter', 'letter_id', 'id');
     }
+
+    public function Scale()
+    {
+        return $this->hasMany('App\course_scales','course_id','id');
+    }
 }

@@ -389,13 +389,6 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api','LastAction']], f
     });
 });
 
-Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], function () {
-    Route::post('add', 'ScaleController@AddScale')->name('addscale')->middleware('permission:scale/add');
-    Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
-    Route::post('delete', 'ScaleController@DeleteScale')->name('deletescale')->middleware('permission:scale/delete');
-    Route::get('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
-    Route::get('get-with-course', 'ScaleController@GetScaleWithCourse')->name('getscale')->middleware('permission:scale/get-with-course');
-});
 
 Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], function () {
     Route::post('add', 'EventController@create')->name('addevent')->middleware('permission:event/add');
@@ -519,6 +512,18 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('seen/{my_chain}', 'SeenReportController@index')->middleware('permission:reports/overall_seen_report');
     Route::get('announcement_overall_seen', 'SeenReportController@announcementsSeenReport')->middleware('permission:reports/overall_seen_report');
     Route::get('announcement_overall_seen/{option}', 'SeenReportController@announcementsSeenReport')->middleware('permission:reports/overall_seen_report');
+
+    Route::Resource('scale', ScaleController::class);
+    Route::get('course_scale', 'ScaleController@scales_per_course');//->name('getscale')->middleware('permission:scale/get-with-course');
+
+    
+Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], function () {
+    // Route::post('add', 'ScaleController@AddScale')->name('addscale')->middleware('permission:scale/add');
+    // Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
+    // Route::post('delete', 'ScaleController@DeleteScale')->name('deletescale')->middleware('permission:scale/delete');
+    // Route::get('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
+    // Route::get('get-with-course', 'ScaleController@GetScaleWithCourse')->name('getscale')->middleware('permission:scale/get-with-course');
+});
 
     Route::group(['prefix' => 'settings', 'middleware' => ['auth:api']], function () {
         Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
