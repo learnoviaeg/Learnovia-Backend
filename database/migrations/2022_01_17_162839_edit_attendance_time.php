@@ -14,7 +14,7 @@ class EditAttendanceTime extends Migration
     public function up()
     {
         Schema::table('attendance_sessions', function (Blueprint $table) {
-            $table->dateTime('start_date')->after('created_by');
+            $table->dateTime('start_date')->after('class_id');
             $table->time('from')->nullable()->change();
             $table->time('to')->nullable()->change();
         });

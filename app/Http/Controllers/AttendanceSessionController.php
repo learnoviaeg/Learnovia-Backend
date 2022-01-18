@@ -27,8 +27,9 @@ class AttendanceSessionController extends Controller
         $request->validate([
             'attendance_id' => 'exists:attendances,id',
             'class_id' => 'exists:classes,id',
-            'from' => 'date',
-            'to' => 'date|after:start_date',
+            'start_date' => 'date',
+            'from' => 'date_format:H:i',
+            'to' => 'date_format:H:i|after:from',
         ]);
         $attendanceSession=AttendanceSession::where('id', '!=', null);
 
@@ -37,6 +38,9 @@ class AttendanceSessionController extends Controller
 
         if(isset($request->class_id))
             $attendanceSession->where('class_id',$request->class_id);
+
+        if(isset($request->start_date))
+            $attendanceSession->where('start_date','>=', $request->start_date);
 
         if(isset($request->from))
             $attendanceSession->where('from','>=', $request->from);
@@ -62,7 +66,6 @@ class AttendanceSessionController extends Controller
             'repeated' => 'required|in:0,1',
             'sessions' => 'required|array',
             'start_date' => 'required|date',
-            // in:sunday,monday,tuesday,wednesday,thursday
             'sessions.*.day' => 'in:SA,SU,MO,TU,TH,friday|required_if:repeated,==,1',
             'sessions.*.from' => 'required|date_format:H:i',
             'sessions.*.to' => 'required|date_format:H:i|after:sessions.*.from',
@@ -73,19 +76,16 @@ class AttendanceSessionController extends Controller
         {
             if(isset($request->repeated_until))
             {
-                // $start=$request->start_date;
-                // dd(array_search($session['day'],$weekMap) - carbon::parse($request->start_date)->dayOfWeek);
-                if(array_search($session['day'],$weekMap) > carbon::parse($request->start_date)->dayOfWeek )
-                    $attendancestart=(carbon::parse($request->start_date)->addDays(
-                        array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
-                        // dd(Carbon::parse($attendancestart)->addHours($session['to']));
-                // $from_date=Carbon::parse();
-                // dd(Carbon::createFromTimestampUTC($session['to'])->secondsSinceMidnight());
-                // dd($attendancestart->addHours($session['to'])) -> format('Y-m-d H:i:s');
+                if(array_search($session['day'],$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
+                    $attendancestart=(carbon::parse($request->start_date)->subDay(
+                        Carbon::parse($request->start_date)->dayOfWeek - array_search($session['day'],$weekMap))->addDays(7));
+
+                if(array_search($session['day'],$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
+                $attendancestart=(carbon::parse($request->start_date)->addDays(
+                    array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
 
                 $end=$attendancestart->diffInSeconds($session['to']);
                 while($attendancestart <= Carbon::parse($request->repeated_until)){
-                    // dd(Carbon::parse($session['from'])->addSeconds($end));
                     $attendance=AttendanceSession::firstOrCreate([
                         'name' => $request->name,
                         'attendance_id' => $request->attendance_id,
@@ -104,7 +104,8 @@ class AttendanceSessionController extends Controller
                     'name' => $request->name,
                     'attendance_id' => $request->attendance_id,
                     'class_id' => $request->class_id,
-                    'from' => $request->start_date,
+                    'start_date' => $request->start_date,
+                    'from' => null,
                     'to' => null,
                     'created_by' => Auth::id()
                 ]);
@@ -144,12 +145,12 @@ class AttendanceSessionController extends Controller
         ]);
 
         $attendanceSession=AttendanceSession::find($id);
-        // dd($attendance->attendance_type);
 
         $attendanceSession->update([
             'name' => ($request->name) ? $request->name : $attendanceSession->name,
             'attendance_id' => ($request->attendance_id) ? $request->attendance_id : $attendanceSession->attendance_id,
             'class_id' => ($request->class_id) ? $request->class_id : $attendanceSession->class_id,
+            'start_date' => ($request->start_date) ? $request->start_date : $attendanceSession->start_date,
             'from' => ($request->from) ? $request->from : $attendanceSession->from,
             'to' => ($request->to) ? $request->to : $attendanceSession->to,
         ]);
