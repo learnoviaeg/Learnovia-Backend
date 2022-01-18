@@ -49,7 +49,7 @@ class AttendanceSessionController extends Controller
         if(isset($request->to))
             $attendanceSession->where('to','<', $request->to);
 
-        return HelperController::api_response_format(200 , $attendanceSession->get()->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
+        return HelperController::api_response_format(200 , $attendanceSession->with('class','attendance.course')->get()->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
     }
 
     /**
