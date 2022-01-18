@@ -12,10 +12,10 @@ class AttendanceSessionController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
-        // $this->middleware(['permission:attendance/get-session'],   ['only' => ['index','show']]);
-        // $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
-        // $this->middleware(['permission:attendance/edit-session'],   ['only' => ['update']]);
+        $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
+        $this->middleware(['permission:attendance/get-session'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
+        $this->middleware(['permission:attendance/edit-session'],   ['only' => ['update']]);
     }
 
     /**
@@ -49,7 +49,7 @@ class AttendanceSessionController extends Controller
         if(isset($request->to))
             $attendanceSession->where('to','<', $request->to);
 
-        return HelperController::api_response_format(200 , $attendanceSession->get()->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
+        return HelperController::api_response_format(200 , $attendanceSession->with('class','attendance.course')->get()->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
     }
 
     /**
@@ -65,7 +65,7 @@ class AttendanceSessionController extends Controller
             'attendance_id' => 'required|exists:attendances,id',
             'class_id' => 'required|exists:classes,id',
             'repeated' => 'required|in:0,1',
-            'sessions' => 'required|array',
+            'sessions' => 'required_if:repeated,==,1|array',
             'start_date' => 'required|date',
             'sessions.*.day' => 'in:SA,SU,MO,TU,TH,friday|required_if:repeated,==,1',
             'sessions.*.from' => 'required|date',
@@ -80,7 +80,7 @@ class AttendanceSessionController extends Controller
         if(!isset($attendance))
             return HelperController::api_response_format(200 , null , __('messages.attendance_session.cannot_add'));
 
-        if(isset($request->repeated_until))
+        if($request->repeated == 1)
         {
             foreach($request->sessions as $session)
             {
@@ -91,6 +91,9 @@ class AttendanceSessionController extends Controller
                 if(array_search($session['day'],$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
                 $attendancestart=(carbon::parse($request->start_date)->addDays(
                     array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
+
+                if($attendancestart > Carbon::parse($request->repeated_until) )
+                    return HelperController::api_response_format(200 , null , __('messages.attendance_session.wrong_day'));
 
                 while($attendancestart <= Carbon::parse($request->repeated_until)){
                     $attendance=AttendanceSession::firstOrCreate([

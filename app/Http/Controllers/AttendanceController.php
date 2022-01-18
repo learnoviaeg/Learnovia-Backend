@@ -57,13 +57,13 @@ class AttendanceController extends Controller
         if(isset($request->end_date))
             $attendance->where('end_date','<', $request->end_date);
 
+        $all=[];
         foreach($attendance->cursor() as $attendeence){
             $callback = function ($qu) use ($request,$attendeence) {
                 $qu->whereIn('id',$attendeence->courses->pluck('id')->toArray());
                 if(isset($request->course_id))
                     $qu->where('id',$request->course_id);
             };
-
             $check=Attendance::whereId($attendeence->id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback])->first();
             if(isset($check))
                 $all[]=$check;
