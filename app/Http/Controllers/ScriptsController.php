@@ -293,7 +293,7 @@ class ScriptsController extends Controller
             $coco=Course::firstOrCreate([
                 'name' => $course->name. "_" .$newSegment->name,
                 'short_name' => $course->short_name . "_" .$newSegment->name],[
-                // 'image' => $course->image,
+                'image' => $course->getOriginal()['image'],
                 'category_id' => $course->category,
                 'description' => $course->description,
                 'mandatory' => $course->mandatory,
