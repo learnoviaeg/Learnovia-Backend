@@ -91,6 +91,7 @@ class GradeItemsController extends Controller
             'weights' =>isset($request->weight) ? $request->weight : NULL,
             'hidden' =>isset($request->hidden) ? $request->hidden : 0,
             'item_type' => 'Manual',
+            'aggregation' =>isset($request->aggregation) ? $request->aggregation : 'Value',
             'course_id' => $course,
         ]);    
         $enrolled_students = Enroll::select('user_id')->distinct()->where('course',$course)->where('role_id',3)->get()->pluck('user_id');
@@ -163,6 +164,8 @@ class GradeItemsController extends Controller
             'max' =>isset($max_grade) ? $max_grade : $grade_items['max'],
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_items['weight_adjust'],
             'weights' =>isset($request->weight) ? $request->weight : $grade_items['weight'],
+            'aggregation' =>isset($request->aggregation) ? $request->aggregation : $grade_items['aggregation'],
+
         ]);
 
         $userGradesJobOld = (new \App\Jobs\RefreshUserGrades($this->chain , $old_parent));
