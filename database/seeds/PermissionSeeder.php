@@ -320,11 +320,11 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'dashboard/toggle', 'title' => 'toggle dashboard']);
 
         //scale
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/add', 'title' => 'Add Scale']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/update', 'title' => 'Update Scale']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/delete', 'title' => 'Delete Scale']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/get', 'title' => 'Get Scale']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'scale/course', 'title' => 'Get Scale of course']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/scale/add', 'title' => 'Add Scale' , 'icon' => 'grade']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/scale/update', 'title' => 'Update Scale', 'icon' => 'grade']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/scale/delete', 'title' => 'Delete Scale', 'icon' => 'grade']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/scale/get', 'title' => 'Get Scale', 'icon' => 'grade','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/scale/course', 'title' => 'Get Scale of course', 'icon' => 'grade']);
         
         // //scale
         // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'letter/add', 'title' => 'Add Letter']);

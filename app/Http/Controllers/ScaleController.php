@@ -18,10 +18,10 @@ class ScaleController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:scale/get'],   ['only' => ['index','show']]);
-        $this->middleware(['permission:scale/add'],   ['only' => ['store']]);
-        $this->middleware(['permission:scale/update'],   ['only' => ['update']]);
-        $this->middleware(['permission:scale/course'],   ['only' => ['scales_per_course']]);
+        $this->middleware(['permission:grade/scale/get'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:grade/scale/add'],   ['only' => ['store']]);
+        $this->middleware(['permission:grade/scale/update'],   ['only' => ['update']]);
+        $this->middleware(['permission:grade/scale/course'],   ['only' => ['scales_per_course']]);
         // $this->middleware(['permission:quiz/delete'],   ['only' => ['destroy']]);
     }
 
