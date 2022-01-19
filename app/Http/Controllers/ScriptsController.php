@@ -287,7 +287,7 @@ class ScriptsController extends Controller
 
         foreach($courses as $course)
         {
-            if(count(Course::where('segment_id',$newSegment->id)->where('short_name',$course->short_name . "_" .$newSegment->name)->get()) > 0)
+            if(Course::where('segment_id',$newSegment->id)->where('short_name',$course->short_name . "_" .$newSegment->name)->count() > 0)
                 continue;
                 
             $coco=Course::firstOrCreate([
