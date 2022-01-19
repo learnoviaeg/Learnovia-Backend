@@ -12,10 +12,10 @@ class AttendanceSessionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
-        $this->middleware(['permission:attendance/get-session'],   ['only' => ['index','show']]);
-        $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
-        $this->middleware(['permission:attendance/edit-session'],   ['only' => ['update']]);
+        // $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
+        // $this->middleware(['permission:attendance/get-session'],   ['only' => ['index','show']]);
+        // $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
+        // $this->middleware(['permission:attendance/edit-session'],   ['only' => ['update']]);
     }
 
     /**
@@ -31,6 +31,8 @@ class AttendanceSessionController extends Controller
             'start_date' => 'date',
             'from' => 'date_format:H:i',
             'to' => 'date_format:H:i|after:from',
+            'current' => 'in:month,week,day', //current
+            'filter' => 'integer|between:1,12'
         ]);
         $attendanceSession=AttendanceSession::where('id', '!=', null);
 
@@ -43,13 +45,31 @@ class AttendanceSessionController extends Controller
         if(isset($request->start_date))
             $attendanceSession->where('start_date','>=', $request->start_date);
 
+        if(isset($request->filter))
+            $attendanceSession->whereMonth('start_date', $request->filter);
+
+        // dd(Carbon::now()->format('m'));
+        if(isset($request->current))
+        {
+            if($request->current == 'day')
+                $attendanceSession->whereDay('start_date', Carbon::now()->format('j'));
+
+            if($request->current == 'week')
+                // from saterday to friday
+                $attendanceSession->where('start_date', '>=', Carbon::now()->startOfWeek()->subDay(2))
+                ->where('start_date', '<=', Carbon::now()->endOfWeek()->subDay(2));
+
+            if($request->current == 'month')
+                $attendanceSession->whereMonth('start_date', Carbon::now()->format('m'));
+        }
+
         if(isset($request->from))
             $attendanceSession->where('from','>=', $request->from);
 
         if(isset($request->to))
             $attendanceSession->where('to','<', $request->to);
 
-        return HelperController::api_response_format(200 , $attendanceSession->with('class','attendance.course')->get()->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
+        return HelperController::api_response_format(200 , $attendanceSession->with('class','attendance.courses')->get()->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
     }
 
     /**
