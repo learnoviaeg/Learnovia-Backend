@@ -7,6 +7,7 @@ use stdClass;
 
 class GradeCategory extends Model
 {
+
     protected $fillable = ['name', 'course_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id', 'item_type' , 'type' ,
             'aggregation','weights' , 'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
     public function Child()
@@ -145,7 +146,7 @@ class GradeCategory extends Model
 
     public function userGrades()
     {
-        return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','category');
+        return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('type','category');
     }
     public function getCalculationTypeAttribute($value)
     {
