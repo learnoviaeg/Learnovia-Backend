@@ -287,13 +287,13 @@ class ScriptsController extends Controller
 
         foreach($courses as $course)
         {
-            if(count(Course::where('segment_id',$newSegment->id)->where('short_name',$course->short_name . "_" .$newSegment->name)->first()) > 0)
+            if(Course::where('segment_id',$newSegment->id)->where('short_name',$course->short_name . "_" .$newSegment->name)->count() > 0)
                 continue;
                 
             $coco=Course::firstOrCreate([
                 'name' => $course->name. "_" .$newSegment->name,
                 'short_name' => $course->short_name . "_" .$newSegment->name],[
-                'image' => $course->image,
+                'image' => $course->getOriginal()['image'],
                 'category_id' => $course->category,
                 'description' => $course->description,
                 'mandatory' => $course->mandatory,
