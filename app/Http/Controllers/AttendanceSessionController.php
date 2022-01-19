@@ -185,7 +185,7 @@ class AttendanceSessionController extends Controller
             'to' => ($request->to) ? $request->to : $attendanceSession->to,
         ]);
 
-        return HelperController::api_response_format(200 , null , __('messages.attendance.update'));
+        return HelperController::api_response_format(200 , null , __('messages.attendance_session.update'));
     }
 
     /**
