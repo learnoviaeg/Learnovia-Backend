@@ -19,6 +19,10 @@ class EditAttendanceLevCours extends Migration
             $table->dropForeign(['level_id']);
             $table->dropForeign(['course_id']);
             $table->dropForeign(['grade_cat_id']);
+
+            $table->dropColumn(['level_id']);
+            $table->dropColumn(['course_id']);
+            $table->dropColumn(['grade_cat_id']);
         });
 
         Schema::enableForeignKeyConstraints();
