@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\AttendanceSession;
 use App\Attendance;
+use App\GradeCategory;
 use Carbon\Carbon;
+use App\UserGrader;
+use App\SessionLog;
+use App\Events\TakeAttendanceEvent;
 use Auth;
 
 class AttendanceSessionController extends Controller
@@ -121,14 +125,14 @@ class AttendanceSessionController extends Controller
                         'name' => $request->name,
                         'attendance_id' => $request->attendance_id,
                         'class_id' => $request->class_id,
-                        'class_id' => $request->course_id,
+                        'course_id' => $request->course_id,
                         'start_date' => $attendancestart,
                         'from' => Carbon::parse($session['from'])->format('H:i'),
                         'to' => Carbon::parse($session['to'])->format('H:i'),
                         'created_by' => Auth::id()
                     ]);
-                    $attendancestart=$attendancestart->addDays(7);
-                }     
+                    $attendancestart=$attendancestart->addDays(7);                   
+                }   
             }
         }      
         else
@@ -202,5 +206,44 @@ class AttendanceSessionController extends Controller
         $attendanceSession->delete();
 
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.delete'));
+    }
+
+    public function takeAttendance(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|exists:attendance_sessions,id',
+            'user_id' => 'required|array',
+            'user_id.*.status' => 'required|string',
+            'user_id.*.id' => 'required|exists:users,id',
+        ]);
+
+        $session=AttendanceSession::find($request->session_id);
+        $gradeCat=GradeCategory::where('instance_type','Attendance')->where('instance_id',$session->attendance_id)
+                    ->where('type','item')->first();
+
+        foreach($request->user_id as $user)
+        {
+            SessionLog::updateOrCreate([
+                'session_id' => $request->session_id,
+                'user_id' => $user['id'],
+                'taken_by' => Auth::id()
+            ],[
+                'status' => $user['status'],
+            ]);
+
+            $allSessionsOfUser=AttendanceSession::where('attendance_id',$session->attendance_id)->pluck('id');
+            $sessionsPresent= SessionLog::whereIn('session_id',$allSessionsOfUser)->where('status','Present')->count();
+            $sessionsLateExcuse= SessionLog::whereIn('session_id',$allSessionsOfUser)->whereIn('status',['Excuse','Late'])->count();
+
+            // dd($allSessionsOfUser);
+            $gardeOfSessions=$sessionsPresent+($sessionsLateExcuse *2);
+            $grader = UserGrader::updateOrCreate(
+                ['item_id'=>$gradeCat->id, 'item_type' => 'item', 'user_id' => $user['id']],
+                ['grade' =>  ($gardeOfSessions * $gradeCat->max)/100 , 'percentage' => ((($gardeOfSessions * $gradeCat->max)/100)*100)/20 ]
+            );
+            // event(new TakeAttendanceEvent($user['id']));
+        }
+
+        return HelperController::api_response_format(200 , null , __('messages.attendance_session.taken'));
     }
 }

@@ -389,7 +389,6 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api','LastAction']], f
     });
 });
 
-
 Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], function () {
     Route::post('add', 'EventController@create')->name('addevent')->middleware('permission:event/add');
     Route::post('delete', 'EventController@delete')->name('deleteevent')->middleware('permission:event/delete');
@@ -437,6 +436,7 @@ Route::group(['prefix' => 'h5p', 'middleware' => ['auth:api','LastAction']], fun
 
     });
 });
+
 Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], function () {
     Route::post('add-room', 'ChatController@chat_room')->name('addroom')->middleware('permission:chat/add-room');
     Route::post('refresh-token', 'ChatController@refresh_token')->name('refreshtoken')->middleware('permission:chat/add-room');
@@ -551,6 +551,7 @@ Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], f
     
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
+    Route::post('session/take_attendance', 'AttendanceSessionController@takeAttendance');
     Route::Resource('attendance/status', AttendanceStatusController::class);
     Route::Resource('attendance', AttendanceController::class);
     Route::Resource('session', AttendanceSessionController::class);

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Attendance;
 use Auth;
+use App\Enroll;
+use App\UserGrader;
 use App\GradeCategory;
 use App\AttendanceLevel;
 use App\AttendanceCourse;
@@ -143,6 +145,19 @@ class AttendanceController extends Controller
                         'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
                         'weights' => ((bool) $request->is_graded == false) ? 0 : null,
                     ]);
+
+                    $users = Enroll::where('course',$attend['course_id'])->pluck('user_id');
+                    foreach($users as $user_id)
+                    {
+                        UserGrader::firstOrCreate([
+                            'user_id'   => $user_id,
+                            'item_type' => 'Item',
+                            'item_id'   => $gradeCat->id
+                        ],
+                        [
+                            'grade'     => null
+                        ]);
+                    } 
                 // }
             // }
         }
