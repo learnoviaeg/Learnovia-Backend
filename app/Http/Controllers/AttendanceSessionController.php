@@ -12,10 +12,10 @@ class AttendanceSessionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
-        $this->middleware(['permission:attendance/get-session'],   ['only' => ['index','show']]);
-        $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
-        $this->middleware(['permission:attendance/edit-session'],   ['only' => ['update']]);
+        // $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
+        // $this->middleware(['permission:attendance/get-sessions'],   ['only' => ['index','show']]);
+        // $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
+        // $this->middleware(['permission:attendance/edit-session'],   ['only' => ['update']]);
     }
 
     /**
@@ -84,6 +84,7 @@ class AttendanceSessionController extends Controller
             'name' => 'required|string',
             'attendance_id' => 'required|exists:attendances,id',
             'class_id' => 'required|exists:classes,id',
+            'course_id' => 'required|exists:courses,id',
             'repeated' => 'required|in:0,1',
             'sessions' => 'required_if:repeated,==,1|array',
             'start_date' => 'required|date',
@@ -120,6 +121,7 @@ class AttendanceSessionController extends Controller
                         'name' => $request->name,
                         'attendance_id' => $request->attendance_id,
                         'class_id' => $request->class_id,
+                        'class_id' => $request->course_id,
                         'start_date' => $attendancestart,
                         'from' => Carbon::parse($session['from'])->format('H:i'),
                         'to' => Carbon::parse($session['to'])->format('H:i'),

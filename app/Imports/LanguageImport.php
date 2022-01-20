@@ -20,7 +20,7 @@ class LanguageImport implements ToModel , WithHeadingRow
             'language' => 'exists:languages,id'
         ])->validate();
 
-        return  new Dictionary([
+        Dictionary::firstOrCreate([
             'language' => $row['language'],
             'key' => $row['key'],
             'value' => $row['value'],

@@ -13,10 +13,10 @@ class AttendanceController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
-        $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
-        $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
-        $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
+        // $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
+        // $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
+        // $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
+        // $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
     }
 
     /**
@@ -64,7 +64,7 @@ class AttendanceController extends Controller
                 if(isset($request->course_id))
                     $qu->where('id',$request->course_id);
             };
-            $check=Attendance::whereId($attendeence->id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback])->first();
+            $check=Attendance::whereId($attendeence->id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback , 'attendanceStatus'])->first();
             if(isset($check))
                 $all[]=$check;
         }
@@ -100,7 +100,6 @@ class AttendanceController extends Controller
             'max_grade' => 'required_if:is_graded,==,1',
         ]);
 
-
         foreach($request->attendance as $attend)
         {
             // foreach($attend['level_id'] as $level)
@@ -120,7 +119,8 @@ class AttendanceController extends Controller
                         'min_grade' =>  ($request->is_graded==1) ? $request->min_grade : null,
                         'gradeToPass' => ($request->is_graded==1) ? $request->gradeToPass : null,
                         'max_grade' => ($request->is_graded==1) ? $request->max_grade : null ,
-                        'created_by' => Auth::id()
+                        'created_by' => Auth::id(),
+                        'attendance_status' => 1
                     ]);
 
                     $attendance->levels()->sync($attend['level_id'],false); //b t3mel duplicate
@@ -164,7 +164,7 @@ class AttendanceController extends Controller
             $qu->whereIn('id',$attend->courses->pluck('id')->toArray());
         };
 
-        $attendance=Attendance::whereId($id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback])->first();
+        $attendance=Attendance::whereId($id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback, 'attendanceStatus'])->first();
 
         return HelperController::api_response_format(200 , $attendance , null);
     }

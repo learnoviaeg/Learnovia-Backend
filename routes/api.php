@@ -551,6 +551,7 @@ Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], f
     
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
+    Route::Resource('attendance/status', AttendanceStatusController::class);
     Route::Resource('attendance', AttendanceController::class);
     Route::Resource('session', AttendanceSessionController::class);
 

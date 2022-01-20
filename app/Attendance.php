@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Attendance extends Model
 {
     protected $fillable = ['name','attendance_type','year_id', 'type_id', 'segment_id', 'level_id', 'course_id',
-        'is_graded','grade_cat_id','start_date','end_date','min_grade','gradeToPass','max_grade', 'created_by'
+        'is_graded','grade_cat_id','start_date','end_date','min_grade','gradeToPass','max_grade', 'created_by', 'attendance_status'
     ];
     
     public function year()
@@ -48,5 +48,10 @@ class Attendance extends Model
     public function user()
     {
         return $this->belongsTo('App\User', 'created_by', 'id');
+    }
+
+    public function attendanceStatus()
+    {
+        return $this->belongsTo('App\AttendanceStatus', 'attendance_status', 'id');
     }
 }
