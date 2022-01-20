@@ -487,7 +487,7 @@ class PermissionSeeder extends Seeder
         //Survey permessions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/add','title' => 'add survey']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/submit','title' => 'submit']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/my-surveys','title' => 'get my surveys', 'dashboard' => 1, 'icon' => 'statistics']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/my-surveys','title' => 'get my surveys', 'dashboard' => 1, 'icon' => 'statistics']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/view-all-submissions','title' => 'view all submissions']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'template/get','title' => 'get template']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'survey/assigned-surveys','title' => 'get assigned surveys']);
