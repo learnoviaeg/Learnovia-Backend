@@ -14,6 +14,7 @@ class RemoveCourseSegmentFromScale extends Migration
     public function up()
     {
         Schema::table('scales', function (Blueprint $table) {
+            $table->dropForeign(['course_segment']);
             $table->dropColumn(['course_segment']);
         });
     }
