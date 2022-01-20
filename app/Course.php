@@ -17,6 +17,9 @@ class Course extends Model
 
     public function level()
     {
+        // $query->whereHas('courses'function($query2){
+        //     $query->whereIn($query->courses->pluck('id'))
+        // })
         return $this->belongsTo('App\Level','level_id','id');
     }
 
@@ -94,5 +97,10 @@ class Course extends Model
     public function letter()
     {
         return $this->belongsTo('App\Letter', 'letter_id', 'id');
+    }
+
+    public function Scale()
+    {
+        return $this->hasMany('App\course_scales','course_id','id');
     }
 }

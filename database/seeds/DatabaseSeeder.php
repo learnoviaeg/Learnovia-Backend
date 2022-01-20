@@ -31,8 +31,8 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(LanguageSeeder::class);
         $this->call(ItemTypeSeeder::class);
-        $this->call(LetterSeeder::class);
-        $this->call(ScaleSeeder::class);
+        // $this->call(LetterSeeder::class);
+        // $this->call(ScaleSeeder::class);
         $this->call(SettingsSeeder::class);
         //$this->call(SeedLearnoviaDB::class);
         eval('$importer = new App\Imports\\LanguageImport();');

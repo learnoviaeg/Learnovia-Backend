@@ -13,7 +13,13 @@ class LetterController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
+        $this->middleware('auth');
+        $this->middleware(['permission:grade/letter/show'],  ['only' => ['index','show']]);
+        $this->middleware(['permission:grade/letter/add'],   ['only' => ['store']]);
+        $this->middleware(['permission:grade/letter/edit'],   ['only' => ['update']]);
+        $this->middleware(['permission:grade/letter/delete'],   ['only' => ['destroy']]);
     }
+
     public function index(Request $request)
     {
         $letter = Letter::with(['details', 'course'])->get();
@@ -41,7 +47,7 @@ class LetterController extends Controller
        $letter = Letter::firstOrCreate([
         'name' => $request->name,
         'chain' => json_encode($request->except(['name', 'letter'])),
-        ]);
+        ]); 
         $letters = array_values(collect($request->letter)->sortBy('lower_boundary')->reverse()->toArray());
 
         foreach($letters as $key => $letter_detail)

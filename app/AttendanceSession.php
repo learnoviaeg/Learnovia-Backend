@@ -7,7 +7,11 @@ use Carbon\Carbon;
 
 class AttendanceSession extends Model
 {
-    protected $fillable = ['name', 'attendance_id', 'class_id', 'from', 'to', 'created_by'];
+    protected $fillable = ['name', 'attendance_id', 'class_id','course_id', 'from', 'to', 'created_by', 'start_date'];
+
+    protected $dispatchesEvents = [
+        'created' => \App\Events\SessionCreatedEvent::class,
+    ];
 
     public function class()
     {
@@ -24,13 +28,8 @@ class AttendanceSession extends Model
         return $this->belongsTo('App\User', 'created_by', 'id');
     }
 
-    public function getFromAttribute()
+    public function getStartDateAttribute()
     {
-        return Carbon::parse($this->attributes['from'])->translatedFormat('l j F Y H:i:s');
-    }
-
-    public function getToAttribute()
-    {
-        return Carbon::parse($this->attributes['to'])->translatedFormat('l j F Y H:i:s');
+        return Carbon::parse($this->attributes['start_date'])->translatedFormat('l j F Y H:i:s');
     }
 }
