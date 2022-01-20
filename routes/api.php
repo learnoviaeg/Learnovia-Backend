@@ -514,7 +514,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('announcement_overall_seen/{option}', 'SeenReportController@announcementsSeenReport')->middleware('permission:reports/overall_seen_report');
 
     Route::Resource('scale', ScaleController::class);
-    Route::get('course_scale', 'ScaleController@scales_per_course')->name('getscale')->middleware('permission:scale/get-with-course');
+    Route::get('course_scale', 'ScaleController@scales_per_course')->name('getscale')->middleware('permission:grade/scale/course');
 
 
 
