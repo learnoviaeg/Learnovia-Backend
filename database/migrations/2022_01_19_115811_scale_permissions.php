@@ -27,6 +27,9 @@ class ScalePermissions extends Migration
         Permission::where('name','scale/get')->delete();
         Permission::where('name','scale/get-with-course')->delete();
 
+        Permission::where('name','attendance/get-session')->where('title', 'Get Sessions')->delete();
+        Permission::where('name','attendance/get-daily')->where('title', 'Daily')->delete();
+
         Artisan::call('db:seed', [
             '--class' => 'PermissionSeeder',
             '--force' => true 
