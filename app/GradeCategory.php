@@ -146,7 +146,7 @@ class GradeCategory extends Model
 
     public function userGrades()
     {
-        return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('type','category');
+        return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','category');
     }
     public function getCalculationTypeAttribute($value)
     {
