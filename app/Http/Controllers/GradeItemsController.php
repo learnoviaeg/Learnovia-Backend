@@ -93,6 +93,7 @@ class GradeItemsController extends Controller
             'item_type' => 'Manual',
             'aggregation' =>isset($request->aggregation) ? $request->aggregation : 'Value',
             'course_id' => $course,
+            'scale_id' => isset($request->scale_id) ? $request->scale_id : NULL,
         ]);    
         $enrolled_students = Enroll::select('user_id')->distinct()->where('course',$course)->where('role_id',3)->get()->pluck('user_id');
         foreach($enrolled_students as $student){
@@ -165,6 +166,7 @@ class GradeItemsController extends Controller
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_items['weight_adjust'],
             'weights' =>isset($request->weight) ? $request->weight : $grade_items['weight'],
             'aggregation' =>isset($request->aggregation) ? $request->aggregation : $grade_items['aggregation'],
+            'scale_id' => isset($request->scale_id) ? $request->scale_id : $grade_items['scale_id'],
 
         ]);
 
