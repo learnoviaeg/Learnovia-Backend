@@ -7,7 +7,11 @@ use Carbon\Carbon;
 
 class AttendanceSession extends Model
 {
-    protected $fillable = ['name', 'attendance_id', 'class_id', 'from', 'to', 'created_by', 'start_date'];
+    protected $fillable = ['name', 'attendance_id', 'class_id','course_id', 'from', 'to', 'created_by', 'start_date'];
+
+    protected $dispatchesEvents = [
+        'created' => \App\Events\SessionCreatedEvent::class,
+    ];
 
     public function class()
     {
