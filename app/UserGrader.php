@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserGrader extends Model
 {
-    protected $fillable = ['user_id', 'item_type', 'item_id','grade' , 'percentage', 'letter'];
+    protected $fillable = ['user_id', 'item_type', 'item_id','grade' , 'percentage', 'letter' , 'scale' , 'scale_id'];
     protected $hidden = [
         'created_at', 'updated_at'
     ];

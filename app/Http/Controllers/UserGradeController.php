@@ -23,6 +23,7 @@ use App\Exports\GradesExport;
 use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use App\LetterDetails;
+use App\ScaleDetails;
 
 class UserGradeController extends Controller
 {
@@ -42,14 +43,28 @@ class UserGradeController extends Controller
             'user.*.user_id' => 'required|exists:users,id',
             'user.*.item_id'   => 'required|exists:grade_categories,id',
             'user.*.grade'     => 'nullable',
+            'user.*.scale_id'     => 'nullable|exists:scale_details,id',
         ]);
         foreach($request->user as $user){
             $percentage = 0;
             $instance = GradeCategory::find($user['item_id']);
 
-            if($instance->max != null && $instance->max > 0)
-                    $percentage = ($user['grade'] / $instance->max) * 100;
+            if($instance->max != null && $instance->max > 0){
 
+                $percentage = ($user['grade'] / $instance->max) * 100;
+
+                if($instance->aggregation == 'Scale'){
+                    $scale = ScaleDetails::find( $user['scale_id']);
+                    $user['grade'] = $scale->grade;
+                    $percentage = ($scale->grade / $instance->max) * 100;
+
+                    UserGrader::updateOrCreate(
+                        ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
+                        ['scale' =>  $scale->evaluation , 'scale_id' => $scale->id ]
+                    );
+
+                }
+            }            
             $grader = UserGrader::updateOrCreate(
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
                 ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
