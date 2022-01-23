@@ -42,7 +42,7 @@ class CreateAttendancesTable extends Migration
             $table->dateTime('end_date');
             $table->double('min_grade')->nullable();
             $table->double('gradeToPass')->nullable();
-            $table->double('max_grade')->nullable();
+            $table->double('max_grade');
 
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
