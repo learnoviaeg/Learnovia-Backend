@@ -146,7 +146,7 @@ class AttendanceController extends Controller
                         'weights' => ((bool) $request->is_graded == false) ? 0 : null,
                     ]);
 
-                    $users = Enroll::where('course',$attend['course_id'])->pluck('user_id');
+                    $users = Enroll::where('role_id',3)->where('course',$attend['course_id'])->pluck('user_id');
                     foreach($users as $user_id)
                     {
                         UserGrader::firstOrCreate([
