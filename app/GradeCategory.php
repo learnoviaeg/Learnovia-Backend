@@ -162,7 +162,6 @@ class GradeCategory extends Model
 
     public function scale()
     {
-        // return $this->hasOne('App\scale', 'id', 'scale_id');
         return $this->belongsTo('App\scale', 'scale_id', 'id');
     }
 
