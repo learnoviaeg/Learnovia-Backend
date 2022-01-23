@@ -160,4 +160,9 @@ class GradeCategory extends Model
         return $content;
     }
 
+    public function scale()
+    {
+        return $this->belongsTo('App\scale', 'scale_id', 'id');
+    }
+
 }
