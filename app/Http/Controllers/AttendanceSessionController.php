@@ -213,7 +213,7 @@ class AttendanceSessionController extends Controller
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
             'user_id' => 'required|array',
-            'user_id.*.status' => 'required|string',
+            'user_id.*.status' => 'required|string|in:Present,Late,Excuse,Absent',
             'user_id.*.id' => 'required|exists:users,id',
         ]);
 
@@ -249,7 +249,10 @@ class AttendanceSessionController extends Controller
 
     public function LogsAttendance(Request $request)
     {
-        $all=SessionLog::with('user')->get();
+        $request->validate([
+            'session_id' => 'required|exists:attendance_sessions,id'
+        ]);
+        $all=SessionLog::where('session_id',$request->session_id)->with('user')->get();
         return HelperController::api_response_format(200 , $all,null);
     }
 }

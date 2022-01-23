@@ -30,7 +30,7 @@ class LogsCreatedListener
      */
     public function handle(SessionCreatedEvent $event)
     {
-        $users = Enroll::where('group',$event->session->class_id)->where('course',$event->session->course_id)->pluck('user_id');
+        $users = Enroll::where('role_id',3)->where('group',$event->session->class_id)->where('course',$event->session->course_id)->pluck('user_id');
         // dd($event->session->class_id);
         foreach($users as $user_id)
         {
