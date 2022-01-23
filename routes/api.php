@@ -545,6 +545,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
     Route::post('session/take_attendance', 'AttendanceSessionController@takeAttendance');
+    Route::get('session/logs', 'AttendanceSessionController@LogsAttendance');
     Route::Resource('attendance/status', AttendanceStatusController::class);
     Route::Resource('attendance', AttendanceController::class);
     Route::Resource('session', AttendanceSessionController::class);
