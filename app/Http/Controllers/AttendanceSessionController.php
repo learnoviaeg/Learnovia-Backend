@@ -246,4 +246,10 @@ class AttendanceSessionController extends Controller
 
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.taken'));
     }
+
+    public function LogsAttendance(Request $request)
+    {
+        $all=SessionLog::with('user')->get();
+        return HelperController::api_response_format(200 , $all,null);
+    }
 }
