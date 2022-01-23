@@ -7,6 +7,7 @@ use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use App\GradeCategory;
 use App\GradeItems;
+use App\scale;
 
 class GraderReportController extends Controller
 {
@@ -81,13 +82,13 @@ class GraderReportController extends Controller
                                 $query->select('id', 'firstname', 'lastname','username');
                             }]);
                         }])->get();
-        $items = GradeCategory::select('id','name','min','max','parent')->where('parent' ,$id)->where('type', 'item')  ->with(['userGrades' => function($q)use ($enrolled_students)
+        $items = GradeCategory::where('parent' ,$id)->where('type', 'item')  ->with(['userGrades' => function($q)use ($enrolled_students)
                 {
                     $q->whereIn('user_id',$enrolled_students);
                     $q->with(['user' => function($query) {
                         $query->select('id', 'firstname', 'lastname','username');
                     }]);
-                }])->get();
+                }])->with('scale.details')->get();
         foreach($categories as $key=>$category){
             $category['children'] = [];
             $category['Category_or_Item'] = 'Category';
