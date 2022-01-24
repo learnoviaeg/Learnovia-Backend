@@ -360,8 +360,8 @@ class UserGradeController extends Controller
 
         $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $student_levels));
 
-        // if(count($check) == 0)
-        //     return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
         $total = 0;
         $student_mark = 0;
         $grade_category_callback = function ($qu) use ($request ) {
