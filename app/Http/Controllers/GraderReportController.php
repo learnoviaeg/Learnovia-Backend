@@ -146,7 +146,10 @@ class GraderReportController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
-            ]);           
+            ]);  
+        if(Auth::user()->can('site/course/student'))
+            $request->request->add(['user_id' => Auth::id()]);
+
         $enrolls = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
                     ->with(array('user' => function($query) {
                         $query->addSelect(array('id', 'firstname', 'lastname'));
