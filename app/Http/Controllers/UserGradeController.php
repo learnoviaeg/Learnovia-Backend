@@ -452,6 +452,7 @@ class UserGradeController extends Controller
             'user_id' => 'required|exists:users,id',
             ]); 
 
+        $GLOBALS['user_id'] = $request->user_id;
         $grade_categories = GradeCategory::where('course_id', $request->course_id)->whereNull('parent')
                             ->with(['Children.userGrades' => function($query) use ($request){
                                 $query->where("user_id", $request->user_id);
