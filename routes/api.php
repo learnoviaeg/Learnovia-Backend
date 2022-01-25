@@ -570,7 +570,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
     Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgl');
-    Route::get('haramain', 'ReportCardsController@haramainReport');//->middleware('permission:report_card/fgl');
+    Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/fgl');
 });
 
 //script for front-end editor
