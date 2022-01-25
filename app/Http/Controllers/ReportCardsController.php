@@ -5,6 +5,7 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use App\User;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
 
 class ReportCardsController extends Controller
 {
