@@ -40,8 +40,8 @@ class ReportCardsController extends Controller
 
         $course_callback = function ($qu) use ($request ) {
             $qu->Where(function ($query) {
-                $query->where('name', 'Grades')
-                      ->orWhere('name', 'درجات');
+                $query->where('name', 'LIKE' , "%Grades%")
+                      ->orWhere('name', "%درجات%");
             });     
         };
 
