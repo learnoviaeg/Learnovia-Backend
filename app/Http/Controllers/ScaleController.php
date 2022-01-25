@@ -69,7 +69,7 @@ class ScaleController extends Controller
             ]);
         }
 
-        return response()->json(['message' => __('messages.scale.list'), 'body' => $scale], 200);
+        return response()->json(['message' => __('messages.scale.add'), 'body' => $scale], 200);
     }
 
     public function update(Request $request , $id)
