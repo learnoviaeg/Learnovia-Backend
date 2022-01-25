@@ -45,7 +45,7 @@ class Enroll extends Model
     }
     public function type()
     {
-        return $this->belongsTo('App\Course','type','id');
+        return $this->belongsTo('App\AcademicType','type','id');
     }
     public function Segment()
     {
