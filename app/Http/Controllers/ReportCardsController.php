@@ -54,7 +54,7 @@ class ReportCardsController extends Controller
         };
 
         $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
-                        ->with(['enroll' => $callback])->first();
+                        ->with(['enroll' => $callback , 'enroll.levels' , 'enroll.type'])->first();
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
