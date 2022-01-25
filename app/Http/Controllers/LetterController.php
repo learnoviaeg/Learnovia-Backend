@@ -23,7 +23,7 @@ class LetterController extends Controller
     public function index(Request $request)
     {
         $letter = Letter::with(['details', 'course'])->get();
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $letter], 200);
+        return response()->json(['message' => __('messages.letter.list'), 'body' => $letter], 200);
     }
 
     public function store(Request $request)
@@ -75,7 +75,7 @@ class LetterController extends Controller
         {
             Course::find($course)->update(['letter_id' => $letter->id]);
         }
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $letter], 200);
+        return response()->json(['message' => __('messages.letter.list'), 'body' => $letter], 200);
     }
 
 
@@ -117,13 +117,13 @@ class LetterController extends Controller
             }
         }
             
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $letter], 200);
+        return response()->json(['message' => __('messages.letter.update'), 'body' => $letter], 200);
     }
 
     public function show($id)
     {
         $letter = Letter::where('id',$id)->with(['details', 'course'])->first();
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $letter], 200);
+        return response()->json(['message' => __('messages.letter.list'), 'body' => $letter], 200);
     }
     
 }
