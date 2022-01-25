@@ -22,14 +22,14 @@ class ScaleController extends Controller
         $this->middleware(['permission:grade/scale/add'],   ['only' => ['store']]);
         $this->middleware(['permission:grade/scale/update'],   ['only' => ['update']]);
         $this->middleware(['permission:grade/scale/course'],   ['only' => ['scales_per_course']]);
-        // $this->middleware(['permission:quiz/delete'],   ['only' => ['destroy']]);
+        $this->middleware(['permission:grade/scale/delete'],   ['only' => ['destroy']]);
     }
 
 
     public function index(Request $request)
     {
         $scale = scale::with(['details'])->get();
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $scale], 200);
+        return response()->json(['message' => __('messages.scale.list'), 'body' => $scale], 200);
     }
    
     public function store(Request $request)
@@ -69,7 +69,7 @@ class ScaleController extends Controller
             ]);
         }
 
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $scale], 200);
+        return response()->json(['message' => __('messages.scale.list'), 'body' => $scale], 200);
     }
 
     public function update(Request $request , $id)
@@ -96,7 +96,7 @@ class ScaleController extends Controller
         $check = GradeCategory::where('scale_id',$id)->count();
 
         if($check > 0)
-            return response()->json(['message' => 'Only name can be edited because the scale is assigned to grade category ', 'body' => $scale], 200);
+            return response()->json(['message' => __('messages.scale.cannot_update'), 'body' => null], 200);
  
         $scale->details()->delete();
         course_scales::where('scale_id' , $id)->delete();
@@ -119,13 +119,13 @@ class ScaleController extends Controller
                 'scale_id' => $scale->id,
             ]);
         }
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => null], 200);
+        return response()->json(['message' => __('messages.scale.update'), 'body' => null], 200);
     }
     
     public function show($id)
     {
         $scale = scale::where('id',$id)->with(['details'])->first();
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $scale], 200);
+        return response()->json(['message' => __('messages.scale.list'), 'body' => $scale], 200);
     }
 
     public function scales_per_course(Request $request)
@@ -134,7 +134,20 @@ class ScaleController extends Controller
             'course_id' => 'required|integer|exists:courses,id',
         ]);
         $scales = Course::whereId($request->course_id)->with(['Scale.Scale'])->first();
-        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $scales], 200);
+        return response()->json(['message' => __('messages.scale.course'), 'body' => $scales], 200);
+    }
+
+    public function destroy($id)
+    {
+        $scale = scale::find($id);
+        $check = GradeCategory::where('scale_id',$id)->count();
+
+        if($check > 0)
+            return response()->json(['message' => 'messages.scale.cannot_delete ', 'body' => null], 200);   
+
+        $scale->course_scale()->delete();
+        $scale->delete();
+        return response()->json(['message' => __('messages.scale.delete'), 'body' => null], 200);
     }
 
 }

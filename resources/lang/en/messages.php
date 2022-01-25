@@ -237,7 +237,7 @@ return [
 
         'record' => [
             'list' => 'Virtual classrooms records list',
-            'no_records' => 'No records found',
+            'no_records' => 'No records found', 
         ],
 
         'attendnace' => [
@@ -357,5 +357,20 @@ return [
     ],
     'user_grade' => [
         'update' => 'Grade is updated succefully',
+    ],
+    'letter' => [
+        'add' => 'Letter added successfully',
+        'delete' => 'Letter deleted successfully',
+        'update' => 'Letter updated Successfully',
+        'list' => 'Letter'
+    ],
+    'scale' => [
+        'add' => 'Scale added successfully',
+        'delete' => 'Scale deleted successfully',
+        'update' => 'Scale updated Successfully',
+        'list' => 'Scale',
+        'course' => 'Scales of a course',
+        'cannot_update' => 'Only name can be edited because the scale is assigned to grade category ',
+        'cannot_delete' => 'Cannot be deleted because the scale is assigned to grade category',
     ],
 ];
