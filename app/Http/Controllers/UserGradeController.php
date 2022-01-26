@@ -372,16 +372,18 @@ class UserGradeController extends Controller
         };
 
         $callback = function ($qu) use ($request , $grade_category_callback) {
-            $qu->orderBy('course', 'Asc');
+            // $qu->orderBy('course', 'Asc');
             $qu->where('role_id', 3);
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
-                ->with(['courses.gradeCategory' => $grade_category_callback]);
+                ->with(['courses.gradeCategory' => $grade_category_callback]); 
+
         };
 
         $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
                         ->with(['enroll' => $callback])->first();
+        $result->enrolls =  collect($result->enroll)->sortBy('courses.created_at')->values();
 
-        foreach($result->enroll as $enroll){ 
+        foreach($result->enrolls as $enroll){ 
             if($enroll->courses->gradeCategory != null)
                 $total += $enroll->courses->gradeCategory[0]->max;
 
@@ -390,6 +392,7 @@ class UserGradeController extends Controller
             
             if(str_contains($enroll->courses->name, 'O.L'))
                 break;
+
         }
 
          $percentage = 0;
@@ -407,7 +410,7 @@ class UserGradeController extends Controller
         $result->student_total_mark = $student_mark;
         $result->evaluation = $evaluation->evaluation;
         $result->add_total = true;
-
+        unset($result->enroll);
         if(count($total_check) == 0)
             $result->add_total = false;
 
@@ -449,6 +452,7 @@ class UserGradeController extends Controller
             'user_id' => 'required|exists:users,id',
             ]); 
 
+        $GLOBALS['user_id'] = $request->user_id;
         $grade_categories = GradeCategory::where('course_id', $request->course_id)->whereNull('parent')
                             ->with(['Children.userGrades' => function($query) use ($request){
                                 $query->where("user_id", $request->user_id);

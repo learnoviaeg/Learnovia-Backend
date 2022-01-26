@@ -212,16 +212,16 @@ class AttendanceSessionController extends Controller
     {
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id',
-            'user_id' => 'required|array',
-            'user_id.*.status' => 'required|string',
-            'user_id.*.id' => 'required|exists:users,id',
+            'users' => 'required|array',
+            'users.*.status' => 'required|string|in:Present,Late,Excuse,Absent',
+            'users.*.id' => 'required|exists:users,id',
         ]);
 
         $session=AttendanceSession::find($request->session_id);
         $gradeCat=GradeCategory::where('instance_type','Attendance')->where('instance_id',$session->attendance_id)
                     ->where('type','item')->first();
 
-        foreach($request->user_id as $user)
+        foreach($request->users as $user)
         {
             SessionLog::updateOrCreate([
                 'session_id' => $request->session_id,
@@ -245,5 +245,14 @@ class AttendanceSessionController extends Controller
         }
 
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.taken'));
+    }
+
+    public function LogsAttendance(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|exists:attendance_sessions,id'
+        ]);
+        $all=SessionLog::where('session_id',$request->session_id)->with('user')->get();
+        return HelperController::api_response_format(200 , $all,null);
     }
 }

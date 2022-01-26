@@ -545,6 +545,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
     Route::post('session/take_attendance', 'AttendanceSessionController@takeAttendance');
+    Route::get('session/logs', 'AttendanceSessionController@LogsAttendance');
     Route::Resource('attendance/status', AttendanceStatusController::class);
     Route::Resource('attendance', AttendanceController::class);
     Route::Resource('session', AttendanceSessionController::class);
@@ -569,6 +570,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
     Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgl');
+    Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/fgl');
 });
 
 //script for front-end editor
