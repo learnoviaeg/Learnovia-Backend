@@ -7,6 +7,7 @@ use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use App\GradeCategory;
 use App\GradeItems;
+use App\scale;
 
 class GraderReportController extends Controller
 {
@@ -81,13 +82,13 @@ class GraderReportController extends Controller
                                 $query->select('id', 'firstname', 'lastname','username');
                             }]);
                         }])->get();
-        $items = GradeCategory::select('id','name','min','max','parent')->where('parent' ,$id)->where('type', 'item')  ->with(['userGrades' => function($q)use ($enrolled_students)
+        $items = GradeCategory::where('parent' ,$id)->where('type', 'item')  ->with(['userGrades' => function($q)use ($enrolled_students)
                 {
                     $q->whereIn('user_id',$enrolled_students);
                     $q->with(['user' => function($query) {
                         $query->select('id', 'firstname', 'lastname','username');
                     }]);
-                }])->get();
+                }])->with('scale.details')->get();
         foreach($categories as $key=>$category){
             $category['children'] = [];
             $category['Category_or_Item'] = 'Category';
@@ -145,7 +146,10 @@ class GraderReportController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
-            ]);           
+            ]);  
+        if(Auth::user()->can('site/course/student'))
+            $request->request->add(['user_id' => Auth::id()]);
+
         $enrolls = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
                     ->with(array('user' => function($query) {
                         $query->addSelect(array('id', 'firstname', 'lastname'));

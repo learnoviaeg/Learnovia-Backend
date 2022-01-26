@@ -37,5 +37,8 @@ class scale extends Model
         return $this->hasMany('App\ScaleDetails', 'scale_id' , 'id');
     }
 
-
+    public function course_scale()
+    {
+        return $this->hasMany('App\course_scales', 'scale_id' , 'id');
+    }
 }
