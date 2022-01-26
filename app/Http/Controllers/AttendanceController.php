@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Helpers\LogsHelper;
 use App\Attendance;
 use Auth;
 use App\Enroll;
@@ -15,10 +16,10 @@ class AttendanceController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
-        $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
-        $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
-        $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
+        // $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
+        // $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
+        // $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
+        // $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
     }
 
     /**
@@ -158,6 +159,15 @@ class AttendanceController extends Controller
                             'grade'     => null
                         ]);
                     } 
+                    $logsHelper = new LogsHelper();
+                    $req=new Request([
+                        'username' => Auth::user()->username,
+                        'action' => 'Created Attendance',
+                        'model' => 'Attendance',
+                        'data' => json_encode($attendance),
+                    ]);
+
+                    $logsHelper->logs($req,$users);
                 // }
             // }
         }
