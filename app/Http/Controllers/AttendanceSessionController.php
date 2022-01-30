@@ -235,6 +235,9 @@ class AttendanceSessionController extends Controller
                 'status' => $user['status'],
             ]);
 
+            $session->taken=1;
+            $session->save();
+
             $allSessionsOfUser=AttendanceSession::where('attendance_id',$session->attendance_id)->pluck('id');
             $sessionsPresent= SessionLog::whereIn('session_id',$allSessionsOfUser)->where('status','Present')->count();
             $sessionsLateExcuse= SessionLog::whereIn('session_id',$allSessionsOfUser)->whereIn('status',['Excuse','Late'])->count();
