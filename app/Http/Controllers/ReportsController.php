@@ -614,8 +614,10 @@ class ReportsController extends Controller
             'type' => 'exists:academic_types,id',
             'level' => 'exists:levels,id',
             'segment' => 'exists:segments,id',
+            'roles' => 'array',
             'courses' => 'array',
             'courses.*' => 'exists:courses,id',
+            'roles.*' => 'exists:roles,id',
             'class' => 'exists:classes,id',
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
@@ -624,7 +626,7 @@ class ReportsController extends Controller
             'report_month' => 'integer|required_with:report_day',
             'report_day' => 'integer',
             'never' => 'in:1',
-            'since' => 'in:1,5,10',
+            // 'since' => 'in:1,5,10',
             'export' => 'in:1'
         ]);
 
@@ -633,7 +635,10 @@ class ReportsController extends Controller
             $since = $request->since;
         }
 
-        $enrolledUsers = $this->chain->getEnrollsByChain($request)->select('user_id')->distinct()->with('user')->get()->pluck('user');
+        $enrolledUsers = $this->chain->getEnrollsByChain($request)->select('user_id')->distinct()->whereHas('user.roles', function($query) use ($request){
+            if(isset($request->roles))
+                $query->whereIn('id',$request->roles);
+        })->with('user.roles')->get()->pluck('user');
 
         //users who doesnt have any logs in system
         if($request->filled('never')){
