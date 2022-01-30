@@ -235,7 +235,7 @@ class AttendanceSessionController extends Controller
                 'status' => $user['status'],
             ]);
 
-            $session->taken=True;
+            $session->taken=1;
             $session->save();
 
             $allSessionsOfUser=AttendanceSession::where('attendance_id',$session->attendance_id)->pluck('id');
