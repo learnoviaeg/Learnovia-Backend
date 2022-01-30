@@ -14,7 +14,7 @@ class TakenSession extends Migration
     public function up()
     {
         Schema::table('attendance_sessions', function (Blueprint $table) {
-            $table->integer('taken')->default(0)->nullable();
+            $table->integer('taken')->default(0);
         });
     }
 
