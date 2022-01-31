@@ -9,7 +9,7 @@ use Modules\Attendance\Entities\AttendanceSession;
 class Course extends Model
 {
     protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id',
-    'is_template','classes', 'letter_id'];
+    'is_template','classes', 'letter_id','shared_lesson'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\CourseCreatedEvent::class,
@@ -17,9 +17,6 @@ class Course extends Model
 
     public function level()
     {
-        // $query->whereHas('courses'function($query2){
-        //     $query->whereIn($query->courses->pluck('id'))
-        // })
         return $this->belongsTo('App\Level','level_id','id');
     }
 
@@ -41,6 +38,7 @@ class Course extends Model
     protected $hidden = [
         'created_at', 'updated_at',
     ];
+    
     public function category(){
         return $this->belongsTo('App\Category');
     }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class TakenSession extends Migration
+class AddSharedCourse extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class TakenSession extends Migration
      */
     public function up()
     {
-        Schema::table('attendance_sessions', function (Blueprint $table) {
-            $table->integer('taken')->default(0);
+        Schema::table('courses', function (Blueprint $table) {
+            $table->integer('shared_lesson')->nullable();
         });
     }
 
@@ -25,7 +25,7 @@ class TakenSession extends Migration
      */
     public function down()
     {
-        Schema::table('attendance_sessions', function (Blueprint $table) {
+        Schema::table('courses', function (Blueprint $table) {
             //
         });
     }
