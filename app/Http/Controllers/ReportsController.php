@@ -718,7 +718,6 @@ class ReportsController extends Controller
                                 });
 
         if($request->filled('export')){
-
             $file = $this->exportUserStatusReport($userStatus);                
             return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
         }
