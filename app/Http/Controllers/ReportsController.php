@@ -627,7 +627,8 @@ class ReportsController extends Controller
             'report_day' => 'integer',
             'never' => 'in:1',
             // 'since' => 'in:1,5,10',
-            'export' => 'in:1'
+            'export' => 'in:1',
+            'count' => 'in:1'
         ]);
 
         $since = 10;
@@ -720,6 +721,10 @@ class ReportsController extends Controller
 
             $file = $this->exportUserStatusReport($userStatus);                
             return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
+        }
+
+        if($request->count == 1){
+            $userStatus=$userStatus->count();
         }
 
         return response()->json(['message' => 'User status report', 'body' =>  $userStatus], 200);
