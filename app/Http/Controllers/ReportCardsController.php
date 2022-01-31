@@ -66,14 +66,14 @@ class ReportCardsController extends Controller
         ]);
         $GLOBALS['user_id'] = $request->user_id;
 
-        // $allowed_levels=Permission::where('name','report_card/haramain')->pluck('allowed_levels')->first();
-        // $allowed_levels=json_decode($allowed_levels);
+        $allowed_levels=Permission::where('name','report_card/forsan')->pluck('allowed_levels')->first();
+        $allowed_levels=json_decode($allowed_levels);
 
-        // $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
-        // $check=(array_intersect($allowed_levels, $student_levels));
+        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        $check=(array_intersect($allowed_levels, $student_levels));
 
-        // if(count($check) == 0)
-        //     return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
         $grade_category_callback = function ($qu) use ($request ) {
             $qu->whereNull('parent')
@@ -83,11 +83,7 @@ class ReportCardsController extends Controller
                 $query->where("user_id", $request->user_id);
             },'userGrades' => function($query) use ($request){
                 $query->where("user_id", $request->user_id);
-            }]);
-
-            // $qu->with(['userGrades' => function($query) use ($request){
-            //     $query->where("user_id", $request->user_id);
-            // }]);     
+            }]); 
         };
 
         $course_callback = function ($qu) use ($request ) {
