@@ -309,8 +309,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgl', 'title' => 'First term report card', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain', 'title' => 'First term report card (haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan', 'title' => 'First term report card (Forsan)', 'icon' => 'Report-Card','dashboard'=>1]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfisb', 'title' => 'First term report card (mfisb)', 'icon' => 'Report-Card','dashboard'=>1]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfisg', 'title' => 'First term report card (mfisg)', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/boys', 'title' => 'First term report card (mfisb)', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/girls', 'title' => 'First term report card (mfisg)', 'icon' => 'Report-Card','dashboard'=>1]);
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/show', 'title' => 'Show letter', 'icon' => 'grade','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/add', 'title' => 'Add letter', 'icon' => 'grade']);
