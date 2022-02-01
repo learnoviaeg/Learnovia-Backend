@@ -535,6 +535,7 @@ class QuestionsController extends Controller
     public function show($id)
     {
         $question=Questions::find($id);
+        $questtion->children;
         return HelperController::api_response_format(200, $question,null);
     }
 

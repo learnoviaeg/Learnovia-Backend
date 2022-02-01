@@ -30,7 +30,7 @@ class ReportsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware('auth');
+        // $this->middleware('auth');
         $this->middleware(['permission:course/teachers|course/participants' , 'ParentCheck'],   ['only' => ['index']]);
     }
 
@@ -734,5 +734,13 @@ class ReportsController extends Controller
         $file = Excel::store(new InactiveUsers($report), 'reports'.$filename.'.xlsx','public');
         $file = url(Storage::url('reports'.$filename.'.xlsx'));
         return $file;
+    }
+
+    public function haramienReport(Request $request)
+    {
+        $obj=new ReportCardsController($this->chain);
+        $result=$obj->haramainReport($request);
+        // return $result;
+        return view('reports.haramienReport',compact('result'));
     }
 }

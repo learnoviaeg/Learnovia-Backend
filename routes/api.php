@@ -516,8 +516,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('scale', ScaleController::class);
     Route::get('course_scale', 'ScaleController@scales_per_course')->name('getscale')->middleware('permission:grade/scale/course');
 
-
-
     Route::group(['prefix' => 'settings', 'middleware' => ['auth:api']], function () {
         Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
         Route::post('logo-update', 'SettingsController@updateLogo')->middleware('permission:settings/logo');
@@ -567,7 +565,6 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('logs', LogsController::class);
 });
 
-
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
     Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgl');
     Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/haramain');
@@ -575,6 +572,4 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
 
 //script for front-end editor
 Route::get('editor' , 'SettingsController@editor');
-
-
-
+Route::get('haramienReport' , 'ReportsController@haramienReport');
