@@ -13,7 +13,7 @@ class ReportCardsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:report_card/mfisg|report_card/mfisb'],   ['only' => ['manaraReport']]);
+        $this->middleware(['permission:report_card/mfis/girls|report_card/mfis/boys'],   ['only' => ['manaraReport']]);
     }
 
     public function haramainReport(Request $request)
@@ -115,11 +115,11 @@ class ReportCardsController extends Controller
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
 
-        if($user->can('report_card/mfisg'))
-            $allowed_levels=Permission::where('name','report_card/mfisg')->pluck('allowed_levels')->first();
+        if($user->can('report_card/mfis/girls'))
+            $allowed_levels=Permission::where('name','report_card/mfis/girls')->pluck('allowed_levels')->first();
         
-        if($user->can('report_card/mfisb'))
-            $allowed_levels=Permission::where('name','report_card/mfisb')->pluck('allowed_levels')->first();
+        if($user->can('report_card/mfis/boys'))
+            $allowed_levels=Permission::where('name','report_card/mfis/boys')->pluck('allowed_levels')->first();
 
         $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
