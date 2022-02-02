@@ -209,8 +209,8 @@ class ReportCardsController extends Controller
             };
             $result = User::select('id','username','lastname', 'firstname')->whereId($user_id)->whereHas('enroll' , $callback)
                             ->with(['enroll' => $callback , 'enroll.levels' , 'enroll.type' , 'enroll.classes'])->first();
-
-            $result_collection->push($result);
+            if($result != null)
+                $result_collection->push($result);
         }
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
