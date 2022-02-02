@@ -753,7 +753,7 @@ class ReportsController extends Controller
         $pdf_of_content->save($path);
         // dd($pdf_of_content);
         $pdf_of_content = new Pdf($path);
-        return $pdf_of_content;
+        // return $pdf_of_content;
         // return view('reports.haramienReport',compact('result'));
     }
 }
