@@ -10,7 +10,6 @@
   <style>
       .img{
         background-image: url("{{ asset('sora.jpeg')}}");
-        background-color: #cccccc;
         background-position: center;
         background-repeat: no-repeat;
         background-size: cover;
@@ -113,14 +112,9 @@
   </style>
   <body class='img'>
     <?php 
-        // foreach($result as $value)
         $result=json_decode(json_encode($result), true);
-        $imgSrc = "./sora.jpeg";
-        // dd($result->header('Authorization'));
-        // dd($result['original']['body']['enroll']);
     ?>
     <div class="report-card-haramain" style="direction: ltr;">
-    <!-- <img src="{{ asset('sora.jpeg')}}" alt="ahmed"> -->
         <div class="container report-haramin-body">
             <div class="report-card-haramain" style="direction: ltr;">
                 <div class="container report-haramin-body">
@@ -233,8 +227,4 @@
                 </div>
             </div>
         </div>
-    </div>
-  </body>
-  <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-  <script></script>
-</html>
+    </div></body></html>

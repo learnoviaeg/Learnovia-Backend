@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use App\Level;
 use App\Classes;
 use App\Course;
+use Spatie\PdfToImage\Pdf;
 use App\Exports\CourseProgressReport;
+use Illuminate\Support\Facades\App;
 use App\User;
 use App\Paginate;
 use App\LastAction;
@@ -740,7 +742,18 @@ class ReportsController extends Controller
     {
         $obj=new ReportCardsController($this->chain);
         $result=$obj->haramainReport($request);
+        $html=view('reports.haramienReport',compact('result'));
         // return $result;
-        return view('reports.haramienReport',compact('result'));
+        $pdf_of_content = App::make('dompdf.wrapper');
+        $pdf_of_content->loadHTML($html);
+        // dd($pdf_of_content);
+        // dd($path);
+        $fileName =  time().'_reportHaramien.'. 'pdf' ; // <--giving the random filename,
+        $path = public_path($fileName); // <--- folder to store the pdf documents into the server;
+        $pdf_of_content->save($path);
+        // dd($pdf_of_content);
+        $pdf_of_content = new Pdf($path);
+        return $pdf_of_content;
+        // return view('reports.haramienReport',compact('result'));
     }
 }
