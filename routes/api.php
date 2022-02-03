@@ -407,7 +407,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('full-mark', 'ScriptsController@Full_Mark');
     Route::post('add_user_grades', 'ScriptsController@user_grades');
     Route::get('updateGradeCatParent', 'ScriptsController@updateGradeCatParent');
-    Route::get('percentage_letter', 'ScriptsController@update_letter_percentage');
+    Route::get('percentage_letter', 'ScriptsController@update_letter_percentage')->middleware('permission:grade/recalculate-grades');
     Route::get('MigrateChain', 'ScriptsController@MigrateChainWithEnrollment');
     Route::get('delete_duplicated', 'ScriptsController@delete_duplicated');
 });
