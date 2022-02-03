@@ -745,13 +745,13 @@ class ReportsController extends Controller
         $html=view('reports.haramienReport',compact('result'));
         // return $result;
         $pdf_of_content = App::make('dompdf.wrapper');
-        $pdf_of_content->loadHTML($html);
+        $pdf_of_content->loadView('reports.haramienReport',compact('result'))->setPaper('letter', 'landscape');
         $fileName =  time().'_reportHaramien.'. 'pdf' ; // <--giving the random filename,
         $path = public_path($fileName); // <--- folder to store the pdf documents into the server;
+        // return $pdf_of_content->stream("invoice.pdf",array("Attachment" => false));
         $pdf_of_content->save($path);
         $pdf_of_content = new Pdf($path);
         // return $pdf_of_content;
         return $html;
-        // return view('reports.haramienReport',compact('result'));
     }
 }
