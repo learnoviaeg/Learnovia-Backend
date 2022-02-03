@@ -746,14 +746,12 @@ class ReportsController extends Controller
         // return $result;
         $pdf_of_content = App::make('dompdf.wrapper');
         $pdf_of_content->loadHTML($html);
-        // dd($pdf_of_content);
-        // dd($path);
         $fileName =  time().'_reportHaramien.'. 'pdf' ; // <--giving the random filename,
         $path = public_path($fileName); // <--- folder to store the pdf documents into the server;
         $pdf_of_content->save($path);
-        // dd($pdf_of_content);
         $pdf_of_content = new Pdf($path);
         // return $pdf_of_content;
+        return $html;
         // return view('reports.haramienReport',compact('result'));
     }
 }
