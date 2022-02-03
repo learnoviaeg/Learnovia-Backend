@@ -42,4 +42,12 @@ class UserGrader extends Model
         return $content;
     }
 
+    public function getPercentageAttribute($value)
+    {
+        $content= json_decode($value);
+        if(!is_null($value))
+            $content = round($value , 2);
+        return $content;
+    }
+
 }

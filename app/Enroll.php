@@ -41,7 +41,7 @@ class Enroll extends Model
     }
     public function year()
     {
-        return $this->belongsTo('App\Classes','year','id');
+        return $this->belongsTo('App\AcademicYear','year','id');
     }
     public function type()
     {
