@@ -1,5 +1,5 @@
 <?php
-
+ 
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
@@ -21,7 +21,17 @@ class PercentageAndLetterCalculation implements ShouldQueue
      */
     public function __construct(Course $course)
     {
-        foreach($course->gradeCategory as $cat)
+        $this->course = $course;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        foreach($this->course->gradeCategory as $cat)
         {
             foreach($cat->userGrades as $user_grader){
                 if($cat->max != null && $cat->max > 0){
@@ -34,16 +44,6 @@ class PercentageAndLetterCalculation implements ShouldQueue
 
                 }           
             }
-        }   
-    }
-
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
-    public function handle()
-    {
-        //
+        }  
     }
 }
