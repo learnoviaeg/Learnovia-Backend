@@ -43,6 +43,7 @@ class LetterPercentageListener
 
             if($event->userGrade->category->parent != null){
                 $grade = UserGrader::where('user_id',$event->userGrade->user_id)->where('item_type','category')->where('item_id' , $event->userGrade->category->parent)->whereNotNull('grade')->first();
+                if($grade != null)
                 event(new GradeCalculatedEvent($grade));
             }
         }
