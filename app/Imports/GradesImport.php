@@ -31,10 +31,9 @@ class GradesImport implements  ToModel, WithHeadingRow
                 $array[$key]=$row[$key];
         }
         foreach($array as $key => $item){
-
-            $instance = GradeCategory::select('id')->where('course_id',$row['course'])->where('name', (str_replace('item_', '', $key)) )->first();
+            $item_id = substr($key,strrpos($key,"_")+1);
             $user = User::select('id')->where('username' , $row['username'])->first();
-            $req[0]['item_id'] = $instance->id;
+            $req[0]['item_id'] = $item_id;
             $req[0]['grade'] = $item;
             $req[0]['user_id'] = $user->id;
             $request = new Request([
