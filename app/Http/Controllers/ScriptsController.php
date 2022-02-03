@@ -266,7 +266,7 @@ class ScriptsController extends Controller
         $request->validate([
             'course'  => 'required|integer|exists:courses,id',
         ]);
-        $userGradesJob = (new \App\Jobs\PercentageAndLetterCalculation(Course::where('id' , $request->course_id)->first()));
+        $userGradesJob = (new \App\Jobs\PercentageAndLetterCalculation(Course::where('id' , $request->course)->first()));
         dispatch($userGradesJob);
         return 'done';
     }
