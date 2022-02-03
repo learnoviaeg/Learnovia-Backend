@@ -263,10 +263,11 @@ class ScriptsController extends Controller
 
     public function update_letter_percentage(Request $request)
     {
-        foreach(Course::whereNotNull('letter_id')->cursor() as $course){
-            $userGradesJob = (new \App\Jobs\PercentageAndLetterCalculation($course));
-            dispatch($userGradesJob);
-        }
+        $request->validate([
+            'course'  => 'required|integer|exists:courses,id',
+        ]);
+        $userGradesJob = (new \App\Jobs\PercentageAndLetterCalculation(Course::where('id' , $request->course_id)->first()));
+        dispatch($userGradesJob);
         return 'done';
     }
 
