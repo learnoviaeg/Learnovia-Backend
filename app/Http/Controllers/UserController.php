@@ -95,7 +95,6 @@ class UserController extends Controller
             'username.*' => 'alpha_dash|unique:users,username'
         ]);
 
-        // return User::max('id');
         $users_is = collect([]);
         $optionals = ['arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'email', 'suspend',
             'language', 'timezone', 'religion', 'second language', 'level', 'type', 'class_id', 'username','nickname'
@@ -104,13 +103,6 @@ class UserController extends Controller
         $teacheroptional = 'course';
         $i=0;
         $count=0;
-        $max_allowed_users = Contract::whereNotNull('id')->pluck('numbers_of_users')->first();
-        $users=Enroll::where('role_id',3)->get();
-        if($request->role == 3)
-            $count+=1;
-
-        if((count($users) + $count) > $max_allowed_users)
-            return HelperController::api_response_format(404 ,$max_allowed_users, __('messages.users.exeed_max_users'));
 
         foreach ($request->firstname as $key => $firstname) {
             $username=User::where('username',$request->username[$key])->pluck('username')->count();
@@ -179,44 +171,6 @@ class UserController extends Controller
                 $request_user = new Request(['user_id' => $user->id]);
                 EnrollUserToCourseController::EnrollAdmin($request_user);
             }
-            // $Auth_role = Role::find(8);
-            // $user->assignRole($Auth_role);
-            // if ($request->role_id == 3) {
-            //     $option = new Request([
-            //         'users' => [$user->id],
-            //         'level' => $request->level[$key] ,
-            //         'type' => $request->type[$key],
-            //         'class' => $request->class_id[$key],
-            //         'year' => $request->year[$key],
-            //         'segment' => $request->segment[$key]
-            //     ]);
-            //     EnrollUserToCourseController::EnrollInAllMandatoryCourses($option);
-
-            //     $enrollcounter = 0;
-            //     while (isset($request->$enrollOptional[$key][$enrollcounter])) {
-            //         $option = new Request([
-            //             'course' => [$request->$enrollOptional[$key]],
-            //             'class' =>$request->class_id[$key],
-            //             'users' => array($user->id),
-            //             'role_id' => array(3)
-            //         ]);
-            //         EnrollUserToCourseController::EnrollCourses($option);
-            //         $enrollcounter++;
-            //     }
-            // } else {
-            //     $teachercounter = 0;
-
-            //     while (isset($request->$teacheroptional[$key][$teachercounter])) {
-            //         $option = new Request([
-            //             'course' => [$request->$teacheroptional[$key]],
-            //             'class' =>$request->class_id[$key],
-            //             'users' => array($user->id),
-            //             'role_id' => array(4)
-            //         ]);
-            //         EnrollUserToCourseController::EnrollCourses($option);
-            //         $teachercounter++;
-            //     }
-            // }
             $users_is->push($user);
         }
         return HelperController::api_response_format(201, $users_is, __('messages.users.add'));
