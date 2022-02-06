@@ -9,6 +9,7 @@ use App\GradeCategory;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Events\UpdatedAttemptEvent;
+use App\LetterDetails;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\userQuiz;
 use App\GradeItems;
@@ -358,6 +359,13 @@ class ScriptsController extends Controller
                 Course::where('short_name',$course->short_name)->first()->delete();
         }
 
+        return 'Done';
+    }
+
+    public function changeLetterName(Request $request)
+    {
+        LetterDetails::where('evaluation','Passed')->update(['evaluation' => 'Fair']);
+        UserGrader::where('letter', 'Passed')->update(['letter' => 'Fair']);
         return 'Done';
     }
 }
