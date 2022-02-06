@@ -261,7 +261,7 @@ class ReportCardsController extends Controller
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
 
-            $result = User::whereId($user_id)->whereHas('enroll' , $callback)
+            $result = User::select('id','username','lastname', 'firstname')->whereId($user_id)->whereHas('enroll' , $callback)
                             ->with(['enroll' => $callback , 'enroll.levels' , 'enroll.type'])->first();
 
             if($result != null)
@@ -319,7 +319,7 @@ class ReportCardsController extends Controller
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
     
-            $result = User::whereId($user_id)->whereHas('enroll' , $callback)
+            $result = User::select('id','username','lastname', 'firstname')->whereId($user_id)->whereHas('enroll' , $callback)
                             ->with(['enroll' => $callback , 'enroll.levels' , 'enroll.type'])->first();
             if($result != null)
                 $result_collection->push($result);
