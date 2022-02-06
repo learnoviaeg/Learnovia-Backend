@@ -10,7 +10,6 @@ use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Events\UpdatedAttemptEvent;
 use App\LetterDetails;
-use App\UserGrader;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\userQuiz;
 use App\GradeItems;
