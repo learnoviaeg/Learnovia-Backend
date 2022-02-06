@@ -360,4 +360,11 @@ class ScriptsController extends Controller
 
         return 'Done';
     }
+
+    public function changeLetterName(Request $request)
+    {
+        LetterDetails::where('evaluation','Passed')->update(['evaluation' => 'Fair']);
+        UserGrader::where('letter', 'Passed')->update(['letter' => 'Fair']);
+        return 'Done';
+    }
 }

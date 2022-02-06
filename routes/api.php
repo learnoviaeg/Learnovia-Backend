@@ -410,6 +410,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('percentage_letter', 'ScriptsController@update_letter_percentage')->middleware('permission:grade/recalculate-grades');
     Route::get('MigrateChain', 'ScriptsController@MigrateChainWithEnrollment');
     Route::get('delete_duplicated', 'ScriptsController@delete_duplicated');
+    Route::get('changeLetterName', 'ScriptsController@changeLetterName');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
