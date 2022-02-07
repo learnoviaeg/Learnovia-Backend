@@ -575,6 +575,8 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::get('forsan', 'ReportCardsController@forsanReport')->middleware('permission:report_card/forsan');
     Route::get('manara', 'ReportCardsController@manaraReport');
     Route::post('manara-all', 'ReportCardsController@manaraReportAll');
+    Route::post('haramain-all', 'ReportCardsController@haramaninReportAll');
+    Route::post('forsan-all', 'ReportCardsController@forsanReportAll');
 });
 
 //script for front-end editor
