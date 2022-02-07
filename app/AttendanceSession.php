@@ -32,4 +32,11 @@ class AttendanceSession extends Model
     {
         return Carbon::parse($this->attributes['start_date'])->translatedFormat('l j F Y H:i:s');
     }
+
+    public function getTakenAttribute()
+    {
+        if($this->attributes['taken'])
+            return True;
+        return False;
+    }
 }

@@ -102,7 +102,7 @@ class CoursesController extends Controller
             // 'level_id' => 'required|exists:levels,id',
             // 'segment_id' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
-            // 'shared_lesson' => 'required_with:no_of_lessons|in:0,1',
+            'shared_lesson' => 'required|in:0,1',
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
             // 'description' => 'string',
             'mandatory' => 'nullable',
@@ -146,6 +146,7 @@ class CoursesController extends Controller
                         'level_id' => $level,
                         'is_template' => isset($request->is_template) ? $request->is_template : 0,
                         'classes' => json_encode($chain['class']),
+                        'shared_lesson' => $request->shared_lesson
                     ]);
 
                     if ($request->filled('no_of_lessons'))
@@ -239,18 +240,19 @@ class CoursesController extends Controller
             'mandatory' => 'nullable|in:0,1',
             'short_name' => 'unique:courses,short_name,'.$id,
             'course_template' => 'nullable|exists:courses,id',
+            'shared_lesson' => 'in:1,0',
             'is_template' => 'nullable|boolean|required_with:course_template',
             'old_lessons' => 'nullable|boolean|required_with:course_template',
         ]);
 
-        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template'];
+        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template','shared_lesson'];
         $course = Course::find($id);
         // if course has an image
-        if ($request->hasFile('image')) 
+        if($request->hasFile('image')) 
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
         
-        foreach ($editable as $key) 
-            if ($request->filled($key)) 
+        foreach($editable as $key) 
+            if($request->filled($key)) 
                 $course->$key = $request->$key;
 
         if($request->filled('course_template')){

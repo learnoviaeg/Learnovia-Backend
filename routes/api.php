@@ -407,9 +407,10 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('full-mark', 'ScriptsController@Full_Mark');
     Route::post('add_user_grades', 'ScriptsController@user_grades');
     Route::get('updateGradeCatParent', 'ScriptsController@updateGradeCatParent');
-    Route::get('percentage_letter', 'ScriptsController@update_letter_percentage');
+    Route::get('percentage_letter', 'ScriptsController@update_letter_percentage')->middleware('permission:grade/recalculate-grades');
     Route::get('MigrateChain', 'ScriptsController@MigrateChainWithEnrollment');
     Route::get('delete_duplicated', 'ScriptsController@delete_duplicated');
+    Route::get('changeLetterName', 'ScriptsController@changeLetterName');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -570,11 +571,14 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
     Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgl');
-    Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/fgl');
+    Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/haramain');
+    Route::get('forsan', 'ReportCardsController@forsanReport')->middleware('permission:report_card/forsan');
+    Route::get('manara', 'ReportCardsController@manaraReport');
+    Route::post('manara-all', 'ReportCardsController@manaraReportAll');
+    Route::post('haramain-all', 'ReportCardsController@haramaninReportAll');
+    Route::post('forsan-all', 'ReportCardsController@forsanReportAll');
+    Route::post('fgl-all', 'ReportCardsController@fglsReportAll');
 });
 
 //script for front-end editor
 Route::get('editor' , 'SettingsController@editor');
-
-
-

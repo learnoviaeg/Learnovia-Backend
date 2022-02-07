@@ -92,7 +92,7 @@ class AttendanceSessionController extends Controller
             'repeated' => 'required|in:0,1',
             'sessions' => 'required_if:repeated,==,1|array',
             'start_date' => 'required|date',
-            'sessions.*.day' => 'in:SA,SU,MO,TU,TH,friday|required_if:repeated,==,1',
+            'sessions.*.day' => 'in:SA,SU,MO,TU,TH,FR|required_if:repeated,==,1',
             'sessions.*.from' => 'required|date',
             'sessions.*.to' => 'required|date|after:sessions.*.from',
             'repeated_until' => 'required_if:repeated,==,1|date'
@@ -104,6 +104,10 @@ class AttendanceSessionController extends Controller
                 ->first();
         if(!isset($attendance))
             return HelperController::api_response_format(200 , null , __('messages.attendance_session.cannot_add'));
+
+        $repeated_until=$request->repeated_until;
+        if(Carbon::parse($request->repeated_until) > Carbon::parse($attendance->start_date))
+            $repeated_until=$attendance->end_date;
 
         if($request->repeated == 1)
         {
@@ -117,10 +121,10 @@ class AttendanceSessionController extends Controller
                 $attendancestart=(carbon::parse($request->start_date)->addDays(
                     array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
 
-                if($attendancestart > Carbon::parse($request->repeated_until) )
+                if($attendancestart > Carbon::parse($repeated_until) )
                     return HelperController::api_response_format(200 , null , __('messages.attendance_session.wrong_day'));
 
-                while($attendancestart <= Carbon::parse($request->repeated_until)){
+                while($attendancestart <= Carbon::parse($repeated_until)){
                     $attendance=AttendanceSession::firstOrCreate([
                         'name' => $request->name,
                         'attendance_id' => $request->attendance_id,
@@ -230,6 +234,9 @@ class AttendanceSessionController extends Controller
             ],[
                 'status' => $user['status'],
             ]);
+
+            $session->taken=1;
+            $session->save();
 
             $allSessionsOfUser=AttendanceSession::where('attendance_id',$session->attendance_id)->pluck('id');
             $sessionsPresent= SessionLog::whereIn('session_id',$allSessionsOfUser)->where('status','Present')->count();
