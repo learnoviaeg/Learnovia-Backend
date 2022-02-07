@@ -576,6 +576,7 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::post('manara-all', 'ReportCardsController@manaraReportAll');
     Route::post('haramain-all', 'ReportCardsController@haramaninReportAll');
     Route::post('forsan-all', 'ReportCardsController@forsanReportAll');
+    Route::post('fgl-all', 'ReportCardsController@fglsReportAll');
 });
 
 //script for front-end editor
