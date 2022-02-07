@@ -19,8 +19,8 @@ class PercentageAndLetterCalculation implements ShouldQueue
      *
      * @return void  
      */
-    public $course;
-    
+    public $course; 
+
     public function __construct(Course $course)
     {
         $this->course = $course;
