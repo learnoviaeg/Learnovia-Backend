@@ -315,6 +315,9 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-girls/printAll', 'title' => 'print all girls','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain/all', 'title' => 'print all haramain','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan/all', 'title' => 'print all forsan','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgl/all', 'title' => 'print all fgl','icon' => 'Report-Card','dashboard'=>1]);
+
+        
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/show', 'title' => 'Show letter', 'icon' => 'grade','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/add', 'title' => 'Add letter', 'icon' => 'grade']);
