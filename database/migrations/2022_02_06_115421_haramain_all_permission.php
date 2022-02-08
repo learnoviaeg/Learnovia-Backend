@@ -3,9 +3,8 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-use App\Dictionary;
 
-class ChangeDictionariesValues extends Migration
+class HaramainAllPermission extends Migration
 {
     /**
      * Run the migrations.
@@ -14,10 +13,10 @@ class ChangeDictionariesValues extends Migration
      */
     public function up()
     {
-        Dictionary::where('value','=TRUE()')->update(['value' => 'True']);
-        Dictionary::where('value','=TRUE()')->update(['value' => 'True']);
-        Dictionary::where('key','=FALSE()')->update(['key' => 'False']);
-        Dictionary::where('key','=FALSE()')->update(['key' => 'False']);
+        Artisan::call('db:seed', [
+            '--class' => 'PermissionSeeder',
+            '--force' => true 
+        ]);
     }
 
     /**
