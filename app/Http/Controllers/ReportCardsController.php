@@ -38,10 +38,14 @@ class ReportCardsController extends Controller
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
         $grade_category_callback = function ($qu) use ($request ) {
-            $qu->where('type', 'item');
-            $qu->with(['userGrades' => function($query) use ($request){
+            $qu->whereNull('parent')
+            ->with(['Children.userGrades' => function($query) use ($request){
                 $query->where("user_id", $request->user_id);
-            }]);     
+            },'GradeItems.userGrades' => function($query) use ($request){
+                $query->where("user_id", $request->user_id);
+            },'userGrades' => function($query) use ($request){
+                $query->where("user_id", $request->user_id);
+            }]); 
         };
 
         $course_callback = function ($qu) use ($request ) {
