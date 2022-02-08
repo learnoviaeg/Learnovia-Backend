@@ -36,7 +36,8 @@ class ReportCardsController extends Controller
 
         if(count($check) == 0)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
-
+        
+        $GLOBALS['user_id'] = $request->user_id;
         $grade_category_callback = function ($qu) use ($request ) {
             $qu->whereNull('parent')
             ->with(['Children.userGrades' => function($query) use ($request){
