@@ -247,12 +247,18 @@ class ReportCardsController extends Controller
 
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
-            $grade_category_callback = function ($qu) use ($request , $user_id) {
-                $qu->where('type', 'item');
-                $qu->with(['userGrades' => function($query) use ($request , $user_id){
+
+            $grade_category_callback = function ($qu) use ($request , $user_id ) {
+                $qu->whereNull('parent')
+                ->with(['Children.userGrades' => function($query) use ($request , $user_id){
                     $query->where("user_id", $user_id);
-                }]);     
+                },'GradeItems.userGrades' => function($query) use ($request , $user_id){
+                    $query->where("user_id", $user_id);
+                },'userGrades' => function($query) use ($request ,$user_id){
+                    $query->where("user_id", $user_id);
+                }]); 
             };
+
 
             $course_callback = function ($qu) use ($request ) {
                 $qu->Where(function ($query) {
