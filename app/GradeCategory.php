@@ -8,7 +8,7 @@ use stdClass;
 class GradeCategory extends Model
 {
 
-    protected $fillable = ['name', 'course_id', 'parent', 'hidden' ,'instance_type' ,'instance_id','lesson_id', 'item_type' , 'type' ,'scale_id',
+    protected $fillable = ['name', 'course_id', 'parent','index', 'hidden' ,'instance_type' ,'instance_id','lesson_id', 'item_type' , 'type' ,'scale_id',
             'aggregation','weights' , 'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
     public function Child()
     {

@@ -411,6 +411,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('MigrateChain', 'ScriptsController@MigrateChainWithEnrollment');
     Route::get('delete_duplicated', 'ScriptsController@delete_duplicated');
     Route::get('changeLetterName', 'ScriptsController@changeLetterName');
+    Route::get('index_categories', 'ScriptsController@indexCatItem');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {

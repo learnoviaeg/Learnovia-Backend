@@ -368,4 +368,42 @@ class ScriptsController extends Controller
         UserGrader::where('letter', 'Passed')->update(['letter' => 'Fair']);
         return 'Done';
     }
+
+    public function indexCatItem(Request $request)
+    {
+        $request->validate([
+            'courses'    => 'required|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+        ]);
+
+        foreach($request->courses as $course)
+        {
+            $gradeCategoryParent=GradeCategory::where('course_id',$course)->whereNull('parent')->first();
+            $grades=GradeCategory::where('id',2939)->with('categories_items')->get();
+            // return $grades; 
+            // dd($grades);
+            foreach($grades as $gradeCat)
+            {
+                // foreach($gradeCat->categories_items as $one){
+                    self::index($gradeCat,1);
+                // }
+            }
+        }
+
+        return 'Done';
+    }
+
+    public function index($gradeCat,$index=1)
+    {
+        // dd($gradeCat->Children);
+        if(!isset($gradeCat->categories_items))
+            return $gradeCat->index=$index;
+
+        foreach($gradeCat->categories_items as $child)
+        {
+            // dd($child);
+            self::index($child,1);
+            $index++;
+        }
+    }
 }
