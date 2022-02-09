@@ -52,8 +52,6 @@ class UserGradeController extends Controller
 
             if($instance->max != null && $instance->max > 0){
 
-                $percentage = ($user['grade'] / $instance->max) * 100;
-
                 if($instance->aggregation == 'Scale'){
                     $scale = ScaleDetails::find( $user['scale_id']);
                     $user['grade'] = $scale->grade;
@@ -65,6 +63,7 @@ class UserGradeController extends Controller
                     );
 
                 }
+                $percentage = ($user['grade'] / $instance->max) * 100;
             }            
             $grader = UserGrader::updateOrCreate(
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
