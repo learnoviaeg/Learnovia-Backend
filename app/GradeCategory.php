@@ -34,10 +34,16 @@ class GradeCategory extends Model
         }]);
         return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'item');
     }
+
     public function Children() 
     { 
         return $this->Child()->with(['Children','GradeItems']); 
-    } 
+    }
+
+    public function childrens()
+    {
+        return $this->Child()->with(['categories_items']); 
+    }
 
     public function categories_items()
     {

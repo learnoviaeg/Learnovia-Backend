@@ -379,30 +379,23 @@ class ScriptsController extends Controller
         foreach($request->courses as $course)
         {
             $gradeCategoryParent=GradeCategory::where('course_id',$course)->whereNull('parent')->first();
-            $grades=GradeCategory::where('id',2939)->with('categories_items')->get();
-            // return $grades; 
-            // dd($grades);
-            foreach($grades as $gradeCat)
-            {
-                // foreach($gradeCat->categories_items as $one){
-                    self::index($gradeCat,1);
-                // }
-            }
+            $grades=GradeCategory::where('id',$gradeCategoryParent->id)->with('categories_items')->get();
+            self::index($grades);
         }
 
         return 'Done';
     }
 
-    public function index($gradeCat,$index=1)
+    public function index($gradeCat)
     {
-        // dd($gradeCat->Children);
-        if(!isset($gradeCat->categories_items))
-            return $gradeCat->index=$index;
-
-        foreach($gradeCat->categories_items as $child)
+        $index=1;
+        foreach($gradeCat as $grade)
         {
-            // dd($child);
-            self::index($child,1);
+            $grade->index=$index;
+            $grade->save();
+            if(count($grade->categories_items) >= 1)
+                self::index($grade->categories_items);
+
             $index++;
         }
     }
