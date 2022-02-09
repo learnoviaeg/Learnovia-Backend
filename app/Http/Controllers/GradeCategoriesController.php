@@ -240,5 +240,54 @@ class GradeCategoriesController extends Controller
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
 
+    public function reArrange(Request $request)
+    {
+        $request->validate([
+            'grade_cat_id' => 'required|exists:grade_categories,id',
+            'index' => 'integer',
+            'parent' => 'exists:grade_categories,id'
+        ]);
 
+        $category = GradeCategory::find($request->grade_cat_id);
+        $oldIndex=$category->index;
+        if(isset($request->index))
+        {
+            $cat=GradeCategory::where('parent',$category->parent)->where('course_id',$category->course_id);
+            if($request->index < $oldIndex)
+            {
+                foreach($cat->where('index','>=',$request->index)->where('index','<',$oldIndex)->get() as $updateIndex)
+                {
+                    $updateIndex->index+=1;
+                    $updateIndex->save();
+                }
+            }
+            elseif($request->index > $oldIndex)
+            {
+                foreach($cat->where('index','<=',$request->index)->where('index','>',$oldIndex)->get() as $updateIndex)
+                {
+                    $updateIndex->index-=1;
+                    $updateIndex->save();
+                }
+            }
+            $category->index=$request->index;
+        }
+
+        if(isset($request->parent))
+        {
+            $all=GradeCategory::where('parent',$category->parent)->where('course_id',$category->course_id);
+            foreach($all->where('index','>',$oldIndex)->get() as $gradeinx)
+            {
+                $gradeinx->index-=1;
+                $gradeinx->save();
+            }
+
+            $maxIndex=GradeCategory::where('parent',$request->parent)->max('index');
+            $category->index=$maxIndex+1;
+            $category->parent=$request->parent;
+        }
+
+        $category->save();
+
+        return 'Done';
+    }
 }

@@ -391,12 +391,15 @@ class ScriptsController extends Controller
         $index=1;
         foreach($gradeCat as $grade)
         {
-            $grade->index=$index;
-            $grade->save();
-            if(count($grade->categories_items) >= 1)
-                self::index($grade->categories_items);
-
-            $index++;
+            if($grade->index == null)
+            {
+                $grade->index=$index;
+                $grade->save();
+                if(count($grade->categories_items) >= 1)
+                    self::index($grade->categories_items);
+    
+                $index++;
+            }
         }
     }
 }

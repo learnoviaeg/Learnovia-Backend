@@ -355,6 +355,7 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api','LastAction']], f
         Route::get('bulk-all-get', 'GradeCategoryController@GetGradeCategoryTree')->middleware('permission:grade/category/bulk-all-get');
         Route::get('get-gradecategories', 'GradeCategoryController@getgradecat')->name('singlegradecatgories')->middleware('permission:grade/category/get-gradecategories');
         Route::post('chain-categories', 'GradeCategoryController@getgradecatArray')->name('chaingradecategories')->middleware('permission:grade/category/chain-categories');
+        Route::get('reArrange', 'GradeCategoriesController@reArrange');
     });
 
     Route::group(['prefix' => 'item', 'middleware' => ['auth:api']], function () {
