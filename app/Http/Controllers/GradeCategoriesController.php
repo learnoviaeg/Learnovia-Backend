@@ -274,6 +274,7 @@ class GradeCategoriesController extends Controller
 
         if(isset($request->parent))
         {
+            $parent = GradeCategory::find($request->parent);
             $all=GradeCategory::where('parent',$category->parent)->where('course_id',$category->course_id);
             foreach($all->where('index','>',$oldIndex)->get() as $gradeinx)
             {
@@ -284,7 +285,15 @@ class GradeCategoriesController extends Controller
             $maxIndex=GradeCategory::where('parent',$request->parent)->max('index');
             $category->index=$maxIndex+1;
             $category->parent=$request->parent;
+
+            event(new GraderSetupEvent($parent));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
+            dispatch($userGradesJob);
         }
+
+        event(new GraderSetupEvent($category));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category));
+        dispatch($userGradesJob);
 
         $category->save();
 
