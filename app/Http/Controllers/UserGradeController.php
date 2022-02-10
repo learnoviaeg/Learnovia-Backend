@@ -24,6 +24,7 @@ use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use App\LetterDetails;
 use App\ScaleDetails;
+use DB;
 
 class UserGradeController extends Controller
 {
@@ -51,8 +52,6 @@ class UserGradeController extends Controller
 
             if($instance->max != null && $instance->max > 0){
 
-                $percentage = ($user['grade'] / $instance->max) * 100;
-
                 if($instance->aggregation == 'Scale'){
                     $scale = ScaleDetails::find( $user['scale_id']);
                     $user['grade'] = $scale->grade;
@@ -64,6 +63,7 @@ class UserGradeController extends Controller
                     );
 
                 }
+                $percentage = ($user['grade'] / $instance->max) * 100;
             }            
             $grader = UserGrader::updateOrCreate(
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
@@ -422,7 +422,7 @@ class UserGradeController extends Controller
     {
         $request->validate([
             'courses'    => 'required|array',
-            'courses.*'  => 'required|integer|exists:courses,id',
+            'courses.*'  => 'required|integer|exists:courses,id', 
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
             ]);     
@@ -430,15 +430,17 @@ class UserGradeController extends Controller
         $grade_categories = GradeCategory::whereIn('course_id', $request->courses);
         $cat_ids =  $grade_categories->get()->pluck('id')->toArray();
 
-        $grade_Categroies_ids = $grade_categories->get()->pluck('name')->toArray();
-        array_walk($grade_Categroies_ids, function(&$value, $key) { $value = 'item_'.$value; } );
+        $grade_Categroies_ids = $grade_categories
+        ->select( DB::raw('CONCAT("item_",name, "_", id) AS name'))
+        ->pluck('name')->toArray();
+        
         $headers =array_merge(array('fullname','username' , 'course'), $grade_Categroies_ids);
 
         $students = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
         ->with(array('user' => function($query) {
             $query->addSelect(array('id' , 'username' , 'firstname' , 'lastname'));
         }))->get();
-        $course_shortname = $grade_categories->first()->course->short_name;
+        $course_shortname = GradeCategory::whereIn('course_id', $request->courses)->first()->course->short_name;
         $filename = $course_shortname;
         $file = Excel::store(new GradesExport($headers , $students , $request->courses[0] , $cat_ids), 'Grades'.$filename.'.xlsx','public');
         $file = url(Storage::url('Grades'.$filename.'.xlsx'));
