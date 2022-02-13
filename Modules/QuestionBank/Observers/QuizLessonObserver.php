@@ -49,7 +49,7 @@ class QuizLessonObserver
                 'name' => $quiz->name,
                 'hidden' => $quizLesson->visible,
                 'calculation_type' => json_encode($quizLesson->grading_method_id),
-                'instance_type' => 'Quiz',
+                'instance_type' => 'Quiz'],[
                 'instance_id' => $quiz->id,
                 'lesson_id' => $lesson->id,
             ]);
