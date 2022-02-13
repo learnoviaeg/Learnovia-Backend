@@ -70,5 +70,4 @@ class GradeCategory extends Model
     {
         return $this->belongsTo('App\scale', 'scale_id', 'id');
     }
-
 }
