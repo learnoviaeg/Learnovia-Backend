@@ -359,7 +359,7 @@ class ReportCardsController extends Controller
         ]);
     
         $result_collection = collect([]);
-        $user_ids = $this->chain->getEnrollsByManyChain($request)->distinct('user_id')->pluck('user_id');
+        $user_ids = $this->chain->getEnrollsByManyChain($request)->distinct('user_id')->where('role_id',3)->pluck('user_id');
 
         $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $request->levels));
         foreach($user_ids as $user_id){
