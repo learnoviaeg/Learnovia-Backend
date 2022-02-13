@@ -72,6 +72,7 @@ class GradeCategoriesController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'levels'    => 'nullable|array|required_without:courses',
             'levels.*'  => 'nullable|integer|exists:levels,id',
+            'category' => 'required|array',
             'category.*.name' => 'required|string',
             'category.*.parent' => 'exists:grade_categories,id',
             'category.*.aggregation' => 'in:Value,Scale',
@@ -106,6 +107,8 @@ class GradeCategoriesController extends Controller
                     'weights' =>isset($category['weight']) ? $category['weight'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                 ]);
+                $cat->index=GradeCategory::where('parent',$cat->parent)->max('index')+1;
+                $cat->save();
 
                 $enrolled_students = Enroll::where('course',$course)->where('role_id',3)->get()->pluck('user_id')->unique();
                 foreach($enrolled_students as $student){
@@ -150,9 +153,20 @@ class GradeCategoriesController extends Controller
             'parent' => 'exists:grade_categories,id',
             'hidden' => 'boolean',
             'weight_adjust' => 'boolean'
-
         ]);
         $grade_category = GradeCategory::findOrFail($id);
+
+        if(isset($request->parent))
+        {
+            if($grade_category->parent != $request->parent){
+                $re=new Request([
+                    'grade_cat_id' => $id,
+                    'parent' => $request->parent
+                ]);
+                self::reArrange($re);
+            }
+        }
+
         $grade_category->update([
             'name'   => isset($request->name) ? $request->name : $grade_category->name,
             'parent' => isset($request->parent) ? $request->parent : $grade_category->parent,
@@ -166,6 +180,7 @@ class GradeCategoriesController extends Controller
             'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : $grade_category['exclude_empty_grades'],
             'aggregation' =>isset($request->aggregation) ? $request->aggregation : $grade_category['aggregation'],
         ]);
+
         event(new GraderSetupEvent($grade_category));
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category));
         dispatch($userGradesJob);
@@ -250,6 +265,7 @@ class GradeCategoriesController extends Controller
 
         $category = GradeCategory::find($request->grade_cat_id);
         $oldIndex=$category->index;
+        // dd($oldIndex);
         if(isset($request->index))
         {
             $cat=GradeCategory::where('parent',$category->parent)->where('course_id',$category->course_id);
