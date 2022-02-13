@@ -367,7 +367,7 @@ class ReportCardsController extends Controller
             ////////////////////////////////
             $total = 0;
             $student_mark = 0;
-            $grade_category_callback = function ($qu) use ($request ) {
+            $grade_category_callback = function ($qu) use ($request, $user_id ) {
                 $qu->where('name', 'First Term');
                 $qu->with(['userGrades' => function($query) use ($request , $user_id){
                     $query->where("user_id", $user_id);
