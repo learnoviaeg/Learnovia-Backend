@@ -74,7 +74,7 @@ class CoursesController extends Controller
         if($request->has('role_id'))
             $enrolls->where('role_id',$request->role_id);
 
-        if(!$request->has('user_id'))
+        if(!$request->has('user_id')) 
             $enrolls->where('user_id',Auth::id());
         
         if($request->templates == 1){
@@ -84,7 +84,11 @@ class CoursesController extends Controller
         $results = $enrolls->whereHas('courses' , function($query)use ($request ) {
             if($request->filled('search'))
                 $query->where('name', 'LIKE' , "%$request->search%");
-        })->groupBy(['course','level'])->get();
+        })
+        ->join('courses', 'enrolls.course', '=', 'courses.id')
+        ->orderBy('courses.index', 'ASC')
+        ->groupBy(['course','level'])->get();
+
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
     }
 
@@ -350,6 +354,31 @@ class CoursesController extends Controller
             }
         }
         return HelperController::api_response_format(200, null, __('messages.course.template'));
+    }
+
+    public function sort(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+            'index' => 'required|integer',
+        ]);
+        $given_course = Course::whereId($request->course_id)->first();
+        
+        //////sort down
+        if($request->index > $given_course->index ){
+            $courses = Course::where('level_id', $given_course->level_id)->where('index', '>=', $given_course->index)->Where('index','<=', $request->index);
+            foreach($courses->cursor() as $course){
+                $course->decrement('index');
+            }
+        }
+        //////sort up
+        if($request->index < $given_course->index ){
+            $courses = Course::where('level_id', $given_course->level_id)->where('index', '<=', $given_course->index)->Where('index','>=', $request->index);
+            foreach($courses->cursor() as $course){
+                $course->increment('index');
+            }
+        }
+        $given_course->update(['index' => $request->index]);
     }
 
 }
