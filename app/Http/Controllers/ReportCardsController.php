@@ -15,7 +15,7 @@ class ReportCardsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:report_card/mfis/girls|report_card/mfis/boys'],   ['only' => ['manaraReport']]);
+        $this->middleware(['permission:report_card/mfis/girls|report_card/mfis/mfisb'],   ['only' => ['manaraReport']]);
         $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll'],   ['only' => ['manaraReportAll']]);
         $this->middleware(['permission:report_card/haramain/all'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
@@ -126,11 +126,11 @@ class ReportCardsController extends Controller
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
 
-        if($user->can('report_card/mfis/girls'))
-            $allowed_levels=Permission::where('name','report_card/mfis/girls')->pluck('allowed_levels')->first();
+        if($user->can('report_card/mfis/mfisg'))
+            $allowed_levels=Permission::where('name','report_card/mfis/mfisg')->pluck('allowed_levels')->first();
         
-        if($user->can('report_card/mfis/boys'))
-            $allowed_levels=Permission::where('name','report_card/mfis/boys')->pluck('allowed_levels')->first();
+        if($user->can('report_card/mfis/mfisb'))
+            $allowed_levels=Permission::where('name','report_card/mfis/mfisb')->pluck('allowed_levels')->first();
 
         $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
@@ -359,15 +359,16 @@ class ReportCardsController extends Controller
         ]);
     
         $result_collection = collect([]);
-        $user_ids = $this->chain->getEnrollsByManyChain($request)->distinct('user_id')->pluck('user_id');
+        $user_ids = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->distinct('user_id')->pluck('user_id');
 
+        $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $request->levels));
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
             
             ////////////////////////////////
             $total = 0;
             $student_mark = 0;
-            $grade_category_callback = function ($qu) use ($request ) {
+            $grade_category_callback = function ($qu) use ($request, $user_id ) {
                 $qu->where('name', 'First Term');
                 $qu->with(['userGrades' => function($query) use ($request , $user_id){
                     $query->where("user_id", $user_id);

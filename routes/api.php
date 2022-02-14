@@ -523,7 +523,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
         Route::post('logo-update', 'SettingsController@updateLogo')->middleware('permission:settings/logo');
         Route::get('logo-get', 'SettingsController@getLogo');
-        Route::post('permission-level', 'SettingsController@setPermissionLevel');
+        Route::post('permission-level', 'SettingsController@setPermissionLevel');//->middleware('permission:report_card/allow_levels');
         Route::get('logo-delete', 'SettingsController@deleteLogo')->middleware('permission:settings/logo');
         Route::post('update', 'SettingsController@update')->middleware('permission:settings/extensions|settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
         Route::post('grade-pass', 'QuizzesController@Grade_pass_settings')->middleware('permission:settings/grade_pass');
@@ -570,7 +570,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
-    Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgl');
+    Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgls');
     Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/haramain');
     Route::get('forsan', 'ReportCardsController@forsanReport')->middleware('permission:report_card/forsan');
     Route::get('manara', 'ReportCardsController@manaraReport');
