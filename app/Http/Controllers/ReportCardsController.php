@@ -15,7 +15,7 @@ class ReportCardsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:report_card/mfis/girls|report_card/mfis/mfisb'],   ['only' => ['manaraReport']]);
+        $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb'],   ['only' => ['manaraReport']]);
         $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll'],   ['only' => ['manaraReportAll']]);
         $this->middleware(['permission:report_card/haramain/all'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
